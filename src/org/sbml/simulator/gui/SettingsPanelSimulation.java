@@ -35,8 +35,14 @@ import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 
+import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
+import org.sbml.squeezer.CfgKeys;
+import org.sbml.squeezer.gui.SettingsPanel;
+
+import de.zbit.gui.GUITools;
+import de.zbit.gui.LayoutHelper;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -177,7 +183,7 @@ public class SettingsPanelSimulation extends SettingsPanel implements
 	private JPanel computingPanel() throws IllegalArgumentException,
 			SecurityException, InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException {
-		Class<AbstractDESSolver> availableSolvers[] = SBMLsqueezer
+		Class<AbstractDESSolver> availableSolvers[] = SBMLsimulator
 				.getAvailableSolvers();
 		String solvers[] = new String[availableSolvers.length];
 		int i = 0;
@@ -188,7 +194,7 @@ public class SettingsPanelSimulation extends SettingsPanel implements
 		cmbBxSolver.setEnabled(solvers.length > 1);
 		cmbBxSolver.addItemListener(this);
 
-		Class<Distance> availableDistances[] = SBMLsqueezer
+		Class<Distance> availableDistances[] = SBMLsimulator
 				.getAvailableDistances();
 		String[] distances = new String[availableDistances.length];
 		i = 0;
@@ -320,6 +326,11 @@ public class SettingsPanelSimulation extends SettingsPanel implements
 		return ((Number) spinModParameterStepSize.getValue()).doubleValue();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.sbml.simulator.gui.SettingsPanel#getProperties()
+	 */
 	public Properties getProperties() {
 		Properties settings = new Properties();
 		/*
@@ -367,7 +378,7 @@ public class SettingsPanelSimulation extends SettingsPanel implements
 	 * @return
 	 */
 	public String getSolverFunction() {
-		return SBMLsqueezer.getAvailableSolvers()[cmbBxSolver
+		return SBMLsimulator.getAvailableSolvers()[cmbBxSolver
 				.getSelectedIndex()].getName();
 	}
 
@@ -376,7 +387,7 @@ public class SettingsPanelSimulation extends SettingsPanel implements
 	 * @return
 	 */
 	public String getDistanceFunction() {
-		return SBMLsqueezer.getAvailableDistances()[cmbBxDistance
+		return SBMLsimulator.getAvailableDistances()[cmbBxDistance
 				.getSelectedIndex()].getName();
 	}
 
@@ -461,12 +472,12 @@ public class SettingsPanelSimulation extends SettingsPanel implements
 	private JPanel parsingPanel() {
 		LayoutHelper lh = createTitledPanel("Parsing");
 		JButton button = GUITools
-				.createButton(GUITools.ICON_OPEN, this, Command.OPEN_DIR,
+				.createButton(GUITools.getIconOpen(), this, Command.OPEN_DIR,
 						"Select the default open directory for experimental data files.");
 		lh.add("Open directory", tfOpenDir, button);
 		lh.add(new JPanel(), 0, lh.getRow(), 1, 1);
 		button = GUITools
-				.createButton(GUITools.ICON_SAVE, this, Command.SAVE_DIR,
+				.createButton(GUITools.getIconSave(), this, Command.SAVE_DIR,
 						"Select the default save directory for simulation data result files.");
 		lh.add("Save directory", tfSaveDir, button);
 		lh.add(new JPanel(), 0, lh.getRow(), 1, 1);
@@ -663,13 +674,14 @@ public class SettingsPanelSimulation extends SettingsPanel implements
 		 * Computing
 		 */
 		int solv = 0, dist = 0;
-		Class<AbstractDESSolver> solvers[] = SBMLsqueezer.getAvailableSolvers();
+		Class<AbstractDESSolver> solvers[] = SBMLsimulator
+				.getAvailableSolvers();
 		String name = settings.get(CfgKeys.SIM_ODE_SOLVER).toString();
 		while (solv < cmbBxSolver.getItemCount()
 				&& !solvers[solv].getName().equals(name))
 			solv++;
 		setSolver(solv);
-		Class<Distance> dists[] = SBMLsqueezer.getAvailableDistances();
+		Class<Distance> dists[] = SBMLsimulator.getAvailableDistances();
 		name = settings.get(CfgKeys.SIM_DISTANCE_FUNCTION).toString();
 		while (dist < cmbBxDistance.getItemCount()
 				&& !dists[dist].getName().equals(name))

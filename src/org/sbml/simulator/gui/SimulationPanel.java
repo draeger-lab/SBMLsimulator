@@ -33,7 +33,6 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -93,11 +92,19 @@ import org.sbml.jsbml.Species;
 import org.sbml.jsbml.Symbol;
 import org.sbml.jsbml.UnitDefinition;
 import org.sbml.jsbml.Variable;
+import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.SBMLinterpreter;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.math.odes.MultiBlockTable;
+import org.sbml.squeezer.CfgKeys;
+import org.sbml.squeezer.gui.SettingsDialog;
+import org.sbml.squeezer.io.SBFileFilter;
+import org.sbml.squeezer.util.HTMLFormula;
 
+import de.zbit.gui.GUITools;
+import de.zbit.gui.LayoutHelper;
+import de.zbit.io.CSVReader;
 import eva2.gui.FunctionArea;
 
 /**
@@ -427,7 +434,7 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	 */
 	public SimulationPanel(Model model) {
 		super();
-		if (SBMLsqueezer.getAvailableSolvers().length == 0) {
+		if (SBMLsimulator.getAvailableSolvers().length == 0) {
 			String msg = "Could not find any solvers for differential equation systems. A simulation is therefore not possible.";
 			JOptionPane.showMessageDialog(this, GUITools.toHTML(msg),
 					"No ODE solver available", JOptionPane.WARNING_MESSAGE);
@@ -670,7 +677,7 @@ public class SimulationPanel extends JPanel implements ActionListener,
 
 		JPanel dPanel = new JPanel();
 		LayoutHelper dSet = new LayoutHelper(dPanel);
-		Class<Distance>[] distFunctions = SBMLsqueezer.getAvailableDistances();
+		Class<Distance>[] distFunctions = SBMLsimulator.getAvailableDistances();
 		String distances[] = new String[distFunctions.length];
 		for (int i = 0; i < distFunctions.length; i++) {
 			Distance dist = distFunctions[i].getConstructor().newInstance();
@@ -723,12 +730,12 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	 */
 	private JToolBar createToolBar() {
 		JToolBar toolbar = new JToolBar("Tools");
-		if (GUITools.ICON_OPEN != null)
-			toolbar.add(GUITools.createButton(GUITools.ICON_OPEN, this,
+		if (GUITools.getIconOpen() != null)
+			toolbar.add(GUITools.createButton(GUITools.getIconOpen(), this,
 					Command.OPEN_DATA, "Load  experimental data from file."));
-		if (GUITools.ICON_SAVE != null)
+		if (GUITools.getIconSave() != null)
 			toolbar.add(GUITools
-					.createButton(GUITools.ICON_SAVE, this,
+					.createButton(GUITools.getIconSave(), this,
 							Command.SAVE_SIMULATION,
 							"Save simulation results to file."));
 		if (GUITools.ICON_PICTURE_TINY != null)
@@ -759,9 +766,9 @@ public class SimulationPanel extends JPanel implements ActionListener,
 		p.put(CfgKeys.SIM_MAX_SPECIES_VALUE, maxVal);
 		p.put(CfgKeys.SIM_MAX_PARAMETER_VALUE, maxVal);
 		p.put(CfgKeys.SIM_MAX_STEPS_PER_UNIT_TIME, Integer.valueOf(500));
-		p.put(CfgKeys.SIM_DISTANCE_FUNCTION, SBMLsqueezer
+		p.put(CfgKeys.SIM_DISTANCE_FUNCTION, SBMLsimulator
 				.getAvailableDistances()[0].getName());
-		p.put(CfgKeys.SIM_ODE_SOLVER, SBMLsqueezer.getAvailableSolvers()[0]
+		p.put(CfgKeys.SIM_ODE_SOLVER, SBMLsimulator.getAvailableSolvers()[0]
 				.getName());
 		p.put(CfgKeys.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE, Double.valueOf(1d));
 		p.put(CfgKeys.OPT_DEFAULT_SPECIES_INITIAL_VALUE, Double.valueOf(1d));
@@ -816,7 +823,7 @@ public class SimulationPanel extends JPanel implements ActionListener,
 				.valueOf(maxStepsPerUnit));
 		p.put(CfgKeys.SIM_DISTANCE_FUNCTION, distance.getClass().getName());
 		p.put(CfgKeys.SIM_ODE_SOLVER,
-				SBMLsqueezer.getAvailableSolvers()[solvers.getSelectedIndex()]
+				SBMLsimulator.getAvailableSolvers()[solvers.getSelectedIndex()]
 						.getName());
 
 		/*
@@ -1071,7 +1078,7 @@ public class SimulationPanel extends JPanel implements ActionListener,
 			if (comBox.getName().equals("distfun")) {
 				try {
 					distanceFunc = comBox.getSelectedIndex();
-					distance = SBMLsqueezer.getAvailableDistances()[distanceFunc]
+					distance = SBMLsimulator.getAvailableDistances()[distanceFunc]
 							.getConstructor().newInstance();
 					if (expTable.getRowCount() > 0) {
 						distField.setText(Double.toString(computeDistance(
@@ -1083,7 +1090,7 @@ public class SimulationPanel extends JPanel implements ActionListener,
 					GUITools.showErrorMessage(this, exc);
 				}
 			} else if (comBox.getName().equals("solvers")) {
-				Class<AbstractDESSolver>[] solFun = SBMLsqueezer
+				Class<AbstractDESSolver>[] solFun = SBMLsimulator
 						.getAvailableSolvers();
 				for (int i = 0; i < solFun.length; i++) {
 					try {
@@ -1128,16 +1135,18 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	 *            If true, all points will be connected, singular points are
 	 *            plotted for false.
 	 */
-	private void plot(MultiBlockTable solution, boolean connected, boolean showLegend) {
-//		System.out.println("----------- " + solution.getNumBlocks());
-//		for (int j = 0; j < solution.getColumnCount() - 1; j++) {
-//			boolean selected = (legend.getRowCount() == 0
-//					|| ((Boolean) legend.getValueAt(j, 0))
-//							.booleanValue());
-//				System.out.println( legend.getValueAt(j, 2)
-//						.toString() + " ("+  legend.getValueAt(j, 1) + ", selected: " + selected);
-//		}
-		
+	private void plot(MultiBlockTable solution, boolean connected,
+			boolean showLegend) {
+		// System.out.println("----------- " + solution.getNumBlocks());
+		// for (int j = 0; j < solution.getColumnCount() - 1; j++) {
+		// boolean selected = (legend.getRowCount() == 0
+		// || ((Boolean) legend.getValueAt(j, 0))
+		// .booleanValue());
+		// System.out.println( legend.getValueAt(j, 2)
+		// .toString() + " ("+ legend.getValueAt(j, 1) + ", selected: " +
+		// selected);
+		// }
+
 		for (int i = 0; i < solution.getRowCount(); i++) {
 			for (int j = 0; j < solution.getColumnCount() - 1; j++) {
 				if (connected) {
@@ -1203,8 +1212,8 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	 */
 	@SuppressWarnings("unchecked")
 	private MultiBlockTable readCSVFile(File file) throws IOException {
-		CSVReader csvreader = new CSVReader(new FileReader(file),
-				separatorChar, quoteChar, 0);
+		CSVReader csvreader = new CSVReader(file.getAbsolutePath());
+		csvreader.read();
 		List<String[]> input = csvreader.readAll();
 		csvreader.close();
 		if (input.size() > 0) {
@@ -1321,7 +1330,8 @@ public class SimulationPanel extends JPanel implements ActionListener,
 							.doubleValue();
 				}
 			}
-			MultiBlockTable tabModel = new MultiBlockTable(timePoints, data, columnNames);
+			MultiBlockTable tabModel = new MultiBlockTable(timePoints, data,
+					columnNames);
 			this.expTable.setModel(tabModel);
 			return tabModel;
 		}
@@ -1384,8 +1394,8 @@ public class SimulationPanel extends JPanel implements ActionListener,
 							buffer.append(separatorChar);
 					}
 					buffer.newLine();
-					for (double[] row : ((TableModelDoubleMatrix) simTable
-							.getModel()).getData()) {
+					for (double[] row : ((MultiBlockTable) simTable.getModel())
+							.getData()) {
 						i = 0;
 						for (double value : row) {
 							buffer.append(Double.toString(value));
@@ -1475,8 +1485,8 @@ public class SimulationPanel extends JPanel implements ActionListener,
 		/*
 		 * Solver and distance.
 		 */
-		Class<Distance>[] distFun = SBMLsqueezer.getAvailableDistances();
-		Class<AbstractDESSolver>[] solFun = SBMLsqueezer.getAvailableSolvers();
+		Class<Distance>[] distFun = SBMLsimulator.getAvailableDistances();
+		Class<AbstractDESSolver>[] solFun = SBMLsimulator.getAvailableSolvers();
 		distanceFunc = 0;
 		while (distanceFunc < distFun.length
 				&& !distFun[distanceFunc].getName().equals(
@@ -1535,7 +1545,8 @@ public class SimulationPanel extends JPanel implements ActionListener,
 		plot.clearAll();
 		plot(data, true, showLegend.isSelected());
 		if (expTable.getColumnCount() > 0) {
-			plot((MultiBlockTable) expTable.getModel(), false, showLegend.isSelected());
+			plot((MultiBlockTable) expTable.getModel(), false, showLegend
+					.isSelected());
 			distField
 					.setText(Double.toString(computeDistance(model, stepSize)));
 			distField.setEditable(false);
@@ -1582,8 +1593,9 @@ public class SimulationPanel extends JPanel implements ActionListener,
 		if (tidx < 0) {
 			tidx = 0;
 		}
-		MultiBlockTable simData = solveAtTimePoints(model, ((MultiBlockTable) expTable.getModel())
-				.getTimePoints(), stepSize);
+		MultiBlockTable simData = solveAtTimePoints(model,
+				((MultiBlockTable) expTable.getModel()).getTimePoints(),
+				stepSize);
 		MultiBlockTable expData = (MultiBlockTable) expTable.getModel();
 		// double simulation[][] = new
 		// double[expData.length][expData[0].length];
@@ -1609,8 +1621,8 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	 * @return
 	 * @throws Exception
 	 */
-	private MultiBlockTable solveAtTimePoints(Model model, double times[], double stepSize)
-			throws Exception {
+	private MultiBlockTable solveAtTimePoints(Model model, double times[],
+			double stepSize) throws Exception {
 		SBMLinterpreter interpreter = new SBMLinterpreter(model);
 		solver.setStepSize(stepSize);
 		solver.setIncludeIntermediates(false);
@@ -1657,10 +1669,11 @@ public class SimulationPanel extends JPanel implements ActionListener,
 			if (e.getColumn() <= 1 && 0 < simTable.getRowCount()
 					&& e.getType() == TableModelEvent.UPDATE) {
 				plot.clearAll();
-				plot((MultiBlockTable) simTable.getModel(), true, showLegend.isSelected());
+				plot((MultiBlockTable) simTable.getModel(), true, showLegend
+						.isSelected());
 				if (expTable.getRowCount() > 0)
-					plot((MultiBlockTable) expTable.getModel(), false, showLegend
-							.isSelected());
+					plot((MultiBlockTable) expTable.getModel(), false,
+							showLegend.isSelected());
 				if (showLegend.isSelected())
 					plot.updateLegend();
 			}
