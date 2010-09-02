@@ -25,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -36,8 +37,10 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 
 import org.sbml.simulator.SBMLsimulator;
+import org.sbml.simulator.gui.SimulationPanel.Command;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
+import org.sbml.simulator.resources.Resource;
 import org.sbml.squeezer.CfgKeys;
 import org.sbml.squeezer.gui.SettingsPanel;
 
@@ -471,13 +474,14 @@ public class SettingsPanelSimulation extends SettingsPanel implements
 	 */
 	private JPanel parsingPanel() {
 		LayoutHelper lh = createTitledPanel("Parsing");
+		
 		JButton button = GUITools
-				.createButton(GUITools.getIconOpen(), this, Command.OPEN_DIR,
+				.createButton(new ImageIcon(Resource.class.getResource("img/folder_16.png")), this, Command.OPEN_DIR,
 						"Select the default open directory for experimental data files.");
 		lh.add("Open directory", tfOpenDir, button);
 		lh.add(new JPanel(), 0, lh.getRow(), 1, 1);
 		button = GUITools
-				.createButton(GUITools.getIconSave(), this, Command.SAVE_DIR,
+				.createButton(new ImageIcon(Resource.class.getResource("img/save_16.png")), this, Command.SAVE_DIR,
 						"Select the default save directory for simulation data result files.");
 		lh.add("Save directory", tfSaveDir, button);
 		lh.add(new JPanel(), 0, lh.getRow(), 1, 1);

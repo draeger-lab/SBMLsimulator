@@ -31,16 +31,15 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -53,6 +52,7 @@ import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultCellEditor;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
@@ -97,14 +97,18 @@ import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.SBMLinterpreter;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.math.odes.MultiBlockTable;
+import org.sbml.simulator.resources.Resource;
 import org.sbml.squeezer.CfgKeys;
 import org.sbml.squeezer.gui.SettingsDialog;
 import org.sbml.squeezer.io.SBFileFilter;
 import org.sbml.squeezer.util.HTMLFormula;
 
+import de.zbit.gui.CSVReaderColumnChooser;
+import de.zbit.gui.CSVReaderOptionPanel;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;
 import de.zbit.io.CSVReader;
+import de.zbit.io.CSVWriter;
 import eva2.gui.FunctionArea;
 
 /**
@@ -444,8 +448,9 @@ public class SimulationPanel extends JPanel implements ActionListener,
 				colNames = createColNames(this.model);
 				colNames2data = new Hashtable<String, Indices>();
 				colNames2data.put(colNames[0], new Indices(-1));
-				for (int i = 1; i < colNames.length; i++)
+				for (int i = 1; i < colNames.length; i++) {
 					colNames2data.put(colNames[i], new Indices(i - 1));
+				}
 				experiment2ElementIndex = new Hashtable<Integer, String>();
 				setProperties(getDefaultProperties());
 			} catch (Exception exc) {
@@ -710,8 +715,9 @@ public class SimulationPanel extends JPanel implements ActionListener,
 		aSet.add(sPanel, dPanel, pPanel);
 
 		// Actions
-		JButton start = GUITools.createButton("Run", GUITools.ICON_GEAR_TINY,
-				this, Command.SIMULATION_START,
+		JButton start = GUITools.createButton("Run", new ImageIcon(
+				Resource.class.getResource("img/gear_16.png")), this,
+				Command.SIMULATION_START,
 				"Perform a simulation run with the current settings.");
 
 		JPanel aPanel = new JPanel();
@@ -730,20 +736,24 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	 */
 	private JToolBar createToolBar() {
 		JToolBar toolbar = new JToolBar("Tools");
-		if (GUITools.getIconOpen() != null)
-			toolbar.add(GUITools.createButton(GUITools.getIconOpen(), this,
-					Command.OPEN_DATA, "Load  experimental data from file."));
-		if (GUITools.getIconSave() != null)
+		ImageIcon icon = new ImageIcon(Resource.class.getResource("img/folder_16.png"));
+		if (icon != null)
+			toolbar.add(GUITools.createButton(icon, this, Command.OPEN_DATA,
+					"Load  experimental data from file."));
+		icon = new ImageIcon(Resource.class.getResource("img/save_16.png"));
+		if (icon != null)
 			toolbar.add(GUITools
-					.createButton(GUITools.getIconSave(), this,
-							Command.SAVE_SIMULATION,
+					.createButton(icon, this, Command.SAVE_SIMULATION,
 							"Save simulation results to file."));
-		if (GUITools.ICON_PICTURE_TINY != null)
-			toolbar.add(GUITools.createButton(GUITools.ICON_PICTURE_TINY, this,
+		icon = new ImageIcon(Resource.class.getResource("img/camera_16.png"));
+		if (icon != null) {
+			toolbar.add(GUITools.createButton(icon, this,
 					Command.SAVE_PLOT_IMAGE, "Save plot in an image."));
-		if (GUITools.ICON_SETTINGS_TINY != null)
-			toolbar.add(GUITools.createButton(GUITools.ICON_SETTINGS_TINY,
-					this, Command.SETTINGS, "Adjust your preferences"));
+		}
+		icon = new ImageIcon(Resource.class.getResource("img/settings_16.png"));
+		if (icon != null)
+			toolbar.add(GUITools.createButton(icon, this, Command.SETTINGS,
+					"Adjust your preferences"));
 		GUITools.setEnabled(false, toolbar, Command.SAVE_PLOT_IMAGE,
 				Command.SAVE_SIMULATION);
 		return toolbar;
@@ -1212,16 +1222,17 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	 */
 	@SuppressWarnings("unchecked")
 	private MultiBlockTable readCSVFile(File file) throws IOException {
-		CSVReader csvreader = new CSVReader(file.getAbsolutePath());
-		csvreader.read();
-		List<String[]> input = csvreader.readAll();
-		csvreader.close();
-		if (input.size() > 0) {
+
+		CSVReader csvreader = CSVReaderOptionPanel.showDialog(this,
+				new CSVReader(file.getAbsolutePath()), "Data import");
+
+		if (csvreader.getContainsHeaders()) {
+
 			int i, j;
 			// Counts the number of numeric values in the first line.
 			short numNumbers = 0;
 			// first line is supposed to be the list of identifiers.
-			String names[] = input.get(0);
+			String names[] = csvreader.getHeader();
 			for (i = 0; i < names.length; i++) {
 				try {
 					numNumbers++;
@@ -1270,25 +1281,60 @@ public class SimulationPanel extends JPanel implements ActionListener,
 					Arrays.sort(avail);
 					Arrays.sort(probs);
 					i = 0;
-					String propNames[][] = new String[problems.size()][2];
+					// String propNames[][] = new String[problems.size()][2];
+					// for (String prob : probs) {
+					// propNames[i][0] = avail[i];
+					// propNames[i][1] = prob;
+					// }
+					// MyDefaultTableModel tabModel = new MyDefaultTableModel(
+					// propNames, new String[] { "ID in SBML model",
+					// "ID in data file" });
+
+					/*
+					 * hier!
+					 */
+
+					CSVReaderColumnChooser c = new CSVReaderColumnChooser(
+							csvreader);
 					for (String prob : probs) {
-						propNames[i][0] = avail[i];
-						propNames[i][1] = prob;
+						c.addColumnChooser(prob, true, true);
+						// c.getSelectedValue("");
 					}
-					MyDefaultTableModel tabModel = new MyDefaultTableModel(
-							propNames, new String[] { "ID in SBML model",
-									"ID in data file" });
-					JTable table = new JTable(tabModel);
-					tabModel.setColumnEditable(1, true);
-					table.setEnabled(true);
-					TableColumn select = table.getColumnModel().getColumn(1);
-					select.setCellEditor(new DefaultCellEditor(new JComboBox(
-							avail)));
+					// 
+					//
+					// if (JOptionPane.showConfirmDialog(this, c,
+					// "Select gedöns",
+					// JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
+					// // tue
+					// }
+					//		
+					// // Locale locale = Locale.GERMANY;
+					// // ResourceBundle captions=
+					// ResourceBundle.getBundle("Messages",locale);
+					// // ResourceBundle.
+					// //
+					// // yesCaption =captions.getString("yesMessage");
+					//
+					//		 
+					//
+					// String[][] data = csvreader.readUsingArrayList();
+					//
+					// csvreader.getHeader();
+					// csvreader.getPreamble();
+					// csvreader.getData();
+
+					// JTable table = new JTable(tabModel);
+					// tabModel.setColumnEditable(1, true);
+					// table.setEnabled(true);
+					// TableColumn select = table.getColumnModel().getColumn(1);
+					// select.setCellEditor(new DefaultCellEditor(new JComboBox(
+					// avail)));
+
 					JPanel panel = new JPanel(new BorderLayout());
 					String message = "Some data could not be assigned to model values. Please assign experiment names to model components.";
 					panel.add(new JLabel(GUITools.toHTML(message, 40)),
 							BorderLayout.NORTH);
-					JScrollPane scroll = new JScrollPane(table,
+					JScrollPane scroll = new JScrollPane(c,
 							JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 							JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 					scroll.setPreferredSize(new Dimension(250, Math.min(
@@ -1297,8 +1343,11 @@ public class SimulationPanel extends JPanel implements ActionListener,
 					JOptionPane.showMessageDialog(this, panel,
 							"Manual name assignment",
 							JOptionPane.QUESTION_MESSAGE);
+
 					for (i = 0; i < probs.length; i++) {
-						String newName = table.getValueAt(i, 1).toString();
+						String newName = c.getColumnChooser(probs[i])
+								.getSelectedItem().toString();
+						// table.getValueAt(i, 1).toString();
 						int origIndex = problems.get(probs[i]).intValue();
 						names[origIndex] = newName;
 						Indices index = colNames2data.get(newName);
@@ -1316,24 +1365,35 @@ public class SimulationPanel extends JPanel implements ActionListener,
 						.toHTML(message, 40), "Some elements are ignored",
 						JOptionPane.INFORMATION_MESSAGE);
 			}
-			String columnNames[] = null;
-			if (numNumbers == 0) {
-				columnNames = input.remove(0);
-				// tabModel.swapColumns(colNames);
-			}
-			double data[][] = new double[input.size()][input.get(0).length - 1];
-			double timePoints[] = new double[input.size()];
+
+			String columnNames[] = csvreader.getHeader();
+			String content[][] = csvreader.getData();
+
+			double timePoints[] = new double[csvreader.getNumberOfDataLines()];
+			double data[][] = new double[timePoints.length][columnNames.length - 1];
+
 			for (i = 0; i < data.length; i++) {
-				timePoints[i] = Double.valueOf(input.get(i)[0]).doubleValue();
-				for (j = 0; j < data[i].length; j++) {
-					data[i][j] = Double.valueOf(input.get(i)[j + 1])
-							.doubleValue();
+				int timeIdx = colNames2data.get(colNames[0])
+						.getColumnExperimentTable();
+				timePoints[i] = Double.parseDouble(content[i][timeIdx]);
+				int dataJ = 0;
+				for (j = 0; j < content[i].length; j++) {
+					if (j != timeIdx) {
+						data[i][dataJ++] = Double.parseDouble(content[i][j]);
+					}
 				}
 			}
 			MultiBlockTable tabModel = new MultiBlockTable(timePoints, data,
 					columnNames);
 			this.expTable.setModel(tabModel);
 			return tabModel;
+		} else {
+			JOptionPane
+					.showMessageDialog(
+							this,
+							GUITools
+									.toHTML("Cannot read this format, because no column identifiers are provided."),
+							"Unreadable file", JOptionPane.WARNING_MESSAGE);
 		}
 		return new MultiBlockTable();
 	}
@@ -1385,27 +1445,8 @@ public class SimulationPanel extends JPanel implements ActionListener,
 				File out = fc.getSelectedFile();
 				this.saveDir = out.getParent();
 				if (!out.exists() || GUITools.overwriteExistingFile(this, out)) {
-					BufferedWriter buffer = new BufferedWriter(new FileWriter(
-							out));
-					int i;
-					for (i = 0; i < simTable.getColumnCount(); i++) {
-						buffer.append(simTable.getColumnName(i));
-						if (i < simTable.getColumnCount() - 1)
-							buffer.append(separatorChar);
-					}
-					buffer.newLine();
-					for (double[] row : ((MultiBlockTable) simTable.getModel())
-							.getData()) {
-						i = 0;
-						for (double value : row) {
-							buffer.append(Double.toString(value));
-							if (i < simTable.getColumnCount() - 1)
-								buffer.append(separatorChar);
-							i++;
-						}
-						buffer.newLine();
-					}
-					buffer.close();
+					CSVWriter writer = new CSVWriter();
+					writer.write(simTable.getModel(), separatorChar, out);
 				}
 			}
 		} else {

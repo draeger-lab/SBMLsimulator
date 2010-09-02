@@ -55,9 +55,29 @@ public class SimulationDialog extends JDialog implements ActionListener {
 	 * @param settings
 	 */
 	public SimulationDialog(Frame owner, Model model, Properties settings) {
+		this(owner, model, new SimulationPanel(model, settings));
+	}
+
+	/**
+	 * 
+	 * @param owner
+	 * @param model
+	 */
+	public SimulationDialog(Frame owner, Model model) {
+		this(owner, model, new SimulationPanel(model));
+	}
+
+	/**
+	 * 
+	 * @param owner
+	 * @param model
+	 * @param simulationPanel
+	 */
+	public SimulationDialog(Frame owner, Model model,
+			SimulationPanel simulationPanel) {
 		super(owner, "Simulation of model " + model.toString());
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		simPanel = new SimulationPanel(model, settings);
+		simPanel = simulationPanel;
 		getContentPane().add(simPanel);
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		pack();
