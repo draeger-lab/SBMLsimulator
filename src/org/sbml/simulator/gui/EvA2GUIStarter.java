@@ -15,15 +15,21 @@ import eva2.server.stat.InterfaceStatisticsListener;
 public class EvA2GUIStarter implements InterfaceStatisticsListener {
 	EvAClient evaClient = null;
 
+	/**
+	 * Example for accessing the EvA2 GUI through the API.
+	 * 
+	 */
 	public static void main(String[] args) {
 		EvA2GUIStarter evaBP = new EvA2GUIStarter();
-		GOParameters goParams = new GOParameters();
+		GOParameters goParams = new GOParameters(); // Instance for the general Genetic Optimization parameterization
+		
 		goParams.setOptimizer(new ParticleSwarmOptimization(50, 2.05, 2.05, PSOTopologyEnum.grid, 2));
+		goParams.setTerminator(new EvaluationTerminator(3000));
 		
 		// set the initial EvA problem here
 		goParams.setProblem(new F2Problem(15));
-		 
-		goParams.setTerminator(new EvaluationTerminator(300));
+
+		// hide some properties which should not be shown
 		GenericObjectEditor.setHideProperty(goParams.getClass(), "problem", true);
 		GenericObjectEditor.setHideProperty(goParams.getClass(), "postProcessParams", true);
 
@@ -33,7 +39,9 @@ public class EvA2GUIStarter implements InterfaceStatisticsListener {
 		
 		// modify initial settings:
 		evaBP.evaClient.getStatistics().getStatisticsParameter().setOutputAllFieldsAsText(true); // activate output of all data fields
-		evaBP.evaClient.refreshMainPanels();
+
+		evaBP.evaClient.refreshMainPanels(); // GUI update due to the changes made through the API
+		
 		evaBP.evaClient.getStatistics().addDataListener(evaBP); // add a data listener instance
 	}
 
