@@ -189,14 +189,14 @@ public class EstimationProblem extends AbstractProblemDouble implements Interfac
 	}
 
 	@Override
-	public String[] getAdditionalFileStringHeader(PopulationInterface pop) {
-		String[] superHead = super.getAdditionalFileStringHeader(pop);
+	public String[] getAdditionalFileStringHeader() {
+		String[] superHead = super.getAdditionalFileStringHeader();
 		return ToolBox.appendArrays(superHead, "simulationData");
 	}
 
 	@Override
-	public String[] getAdditionalFileStringInfo(PopulationInterface pop) {
-		String[] superInfo = super.getAdditionalFileStringInfo(pop);
+	public String[] getAdditionalFileStringInfo() {
+		String[] superInfo = super.getAdditionalFileStringInfo();
 		return ToolBox.appendArrays(superInfo, "Result of the best per generation model simulation");
 	}
 
