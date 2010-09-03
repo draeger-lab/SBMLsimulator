@@ -77,7 +77,7 @@ public class MultiBlockTable extends AbstractTableModel implements
 			 * @return The {@link String} that identifies this {@link Column}.
 			 */
 			public String getId() {
-				return identifiers[columnIndex];
+				return   identifiers[columnIndex];
 			}
 
 			/**
@@ -86,7 +86,8 @@ public class MultiBlockTable extends AbstractTableModel implements
 			 * @return
 			 */
 			public int getRowCount() {
-				return data.length;
+				return 
+						 data.length;
 			}
 
 			/**
@@ -96,7 +97,7 @@ public class MultiBlockTable extends AbstractTableModel implements
 			 * @return
 			 */
 			public double getValue(int rowIndex) {
-				return data[rowIndex][columnIndex];
+				return  data[rowIndex][columnIndex];
 			}
 
 			/*
@@ -154,7 +155,7 @@ public class MultiBlockTable extends AbstractTableModel implements
 			 */
 			public void setValue(double doubleValue, int rowIndex) {
 				data[rowIndex][columnIndex] = ((Double) doubleValue)
-						.doubleValue();
+							.doubleValue();
 			}
 
 			/*
@@ -302,6 +303,7 @@ public class MultiBlockTable extends AbstractTableModel implements
 
 		/*
 		 * (non-Javadoc)
+		 * 
 		 * @see javax.swing.table.TableModel#getValueAt(int, int)
 		 */
 		public Double getValueAt(int rowIndex, int columnIndex) {
@@ -481,7 +483,8 @@ public class MultiBlockTable extends AbstractTableModel implements
 	 *            The first column in identifiers may be the name for the time
 	 *            column.
 	 */
-	public MultiBlockTable(double timePoints[], double data[][], String identifiers[]) {
+	public MultiBlockTable(double timePoints[], double data[][],
+			String identifiers[]) {
 		this();
 		setTimePoints(timePoints);
 		String ids[];
@@ -496,9 +499,9 @@ public class MultiBlockTable extends AbstractTableModel implements
 	}
 
 	/**
-	 * Creates a new {@link MultiBlockTable.Block} and adds it to this object. The number
-	 * of rows will be equal to the number of time points of the overall data
-	 * structure.
+	 * Creates a new {@link MultiBlockTable.Block} and adds it to this object.
+	 * The number of rows will be equal to the number of time points of the
+	 * overall data structure.
 	 * 
 	 * @param identifiers
 	 *            The column identifiers of the new block.
@@ -537,6 +540,9 @@ public class MultiBlockTable extends AbstractTableModel implements
 	public Column getColumn(int column) {
 		if (column > getColumnCount()) {
 			throw new IndexOutOfBoundsException(Integer.toString(column));
+		}
+		if (column == 0) {
+			throw new IllegalArgumentException("no column 0: use getTimePoints()");
 		}
 		int index = column - 1;
 		int bidx = 0;
@@ -640,8 +646,8 @@ public class MultiBlockTable extends AbstractTableModel implements
 	 * @see javax.swing.table.TableModel#getValueAt(int, int)
 	 */
 	public Double getValueAt(int rowIndex, int columnIndex) {
-		return columnIndex == 0 ? Double.valueOf(timePoints[rowIndex])
-				: getColumn(columnIndex).getValue(rowIndex);
+		return Double.valueOf(columnIndex == 0 ? timePoints[rowIndex]
+				: getColumn(columnIndex).getValue(rowIndex));
 	}
 
 	/*

@@ -22,14 +22,16 @@ import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.io.IOException;
 import java.util.Properties;
 
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.KeyStroke;
+import javax.swing.UIManager;
 
 import org.sbml.jsbml.Model;
+
+import de.zbit.gui.GUITools;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -38,6 +40,15 @@ import org.sbml.jsbml.Model;
  * 
  */
 public class SimulationDialog extends JDialog implements ActionListener {
+
+	static {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception exc) {
+			exc.printStackTrace();
+			GUITools.showErrorMessage(null, exc);
+		}
+	}
 
 	/**
 	 * Generated serial version identifier
@@ -107,9 +118,9 @@ public class SimulationDialog extends JDialog implements ActionListener {
 	/**
 	 * 
 	 * @param path
-	 * @throws IOException
+	 * @throws Exception
 	 */
-	public void openExperimentalData(String path) throws IOException {
+	public void openExperimentalData(String path) throws Exception {
 		this.simPanel.openExperimentalData(path);
 	}
 
@@ -122,7 +133,7 @@ public class SimulationDialog extends JDialog implements ActionListener {
 	}
 
 	/**
-	 * @throws Exception 
+	 * @throws Exception
 	 * 
 	 */
 	public void simulate() throws Exception {
