@@ -37,7 +37,6 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 
 import org.sbml.simulator.SBMLsimulator;
-import org.sbml.simulator.gui.SimulationPanel.Command;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.resources.Resource;

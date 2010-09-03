@@ -22,7 +22,6 @@ import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.event.ActionEvent;
@@ -37,9 +36,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.LinkedList;
-import java.util.Locale;
+import java.util.NoSuchElementException;
 import java.util.Properties;
-import java.util.ResourceBundle;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -51,7 +49,6 @@ import javax.imageio.stream.FileImageOutputStream;
 import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.DefaultCellEditor;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -78,12 +75,12 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 import javax.swing.text.NumberFormatter;
 
 import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.Model;
+import org.sbml.jsbml.NamedSBase;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.QuantityWithDefinedUnit;
 import org.sbml.jsbml.Reaction;
@@ -92,24 +89,174 @@ import org.sbml.jsbml.Species;
 import org.sbml.jsbml.Symbol;
 import org.sbml.jsbml.UnitDefinition;
 import org.sbml.jsbml.Variable;
+import org.sbml.jsbml.util.ValuePair;
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.SBMLinterpreter;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.math.odes.MultiBlockTable;
+import org.sbml.simulator.math.odes.MultiBlockTable.Block.Column;
 import org.sbml.simulator.resources.Resource;
 import org.sbml.squeezer.CfgKeys;
 import org.sbml.squeezer.gui.SettingsDialog;
 import org.sbml.squeezer.io.SBFileFilter;
 import org.sbml.squeezer.util.HTMLFormula;
 
-import de.zbit.gui.CSVReaderColumnChooser;
-import de.zbit.gui.CSVReaderOptionPanel;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;
-import de.zbit.io.CSVReader;
 import de.zbit.io.CSVWriter;
 import eva2.gui.FunctionArea;
+
+/**
+ * @author Andreas Dr&auml;ger
+ * @since 1.4
+ * 
+ */
+class ColorEditor extends AbstractCellEditor implements TableCellEditor,
+		ActionListener {
+	/**
+	 * 
+	 */
+	public static final String EDIT = "edit";
+	/**
+	 * Generated serial version identifier.
+	 */
+	private static final long serialVersionUID = -3645125690115981580L;
+	/**
+	 * 
+	 */
+	private JButton button;
+	/**
+	 * 
+	 */
+	private JColorChooser colorChooser;
+	/**
+	 * 
+	 */
+	private Color currentColor;
+	/**
+	 * 
+	 */
+	private JDialog dialog;
+
+	/**
+	 * 
+	 */
+	public ColorEditor() {
+		button = new JButton();
+		button.setActionCommand(EDIT);
+		button.addActionListener(this);
+		button.setBorderPainted(false);
+
+		// Set up the dialog that the button brings up.
+		colorChooser = new JColorChooser();
+		dialog = JColorChooser.createDialog(button, "Pick a Color", true,
+				colorChooser, this, null);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
+	public void actionPerformed(ActionEvent e) {
+		if (EDIT.equals(e.getActionCommand())) {
+			// The user has clicked the cell, so
+			// bring up the dialog.
+			button.setBackground(currentColor);
+			colorChooser.setColor(currentColor);
+			dialog.setVisible(true);
+
+			fireEditingStopped(); // Make the renderer reappear.
+
+		} else { // User pressed dialog's "OK" button.
+			currentColor = colorChooser.getColor();
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.swing.CellEditor#getCellEditorValue()
+	 */
+	public Object getCellEditorValue() {
+		return currentColor;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * javax.swing.table.TableCellEditor#getTableCellEditorComponent(javax.swing
+	 * .JTable, java.lang.Object, boolean, int, int)
+	 */
+	public Component getTableCellEditorComponent(JTable table, Object value,
+			boolean isSelected, int row, int column) {
+		currentColor = (Color) value;
+		return button;
+	}
+}
+
+/**
+ * A table model that allows easy manipulation of the underlying data.
+ * 
+ * @author Andreas Dr&auml;ger
+ * @date 2010-04-08
+ * @since 1.4
+ */
+class MyDefaultTableModel extends DefaultTableModel {
+
+	/**
+	 * Generated serial version identifier
+	 */
+	private static final long serialVersionUID = 6339470859385085061L;
+	/**
+	 * Field to indicate columns that are editable.
+	 */
+	private boolean[] colEditable;
+
+	/**
+	 * 
+	 * @param data
+	 * @param columnNames
+	 */
+	public MyDefaultTableModel(Object[][] data, String[] columnNames) {
+		super(data, columnNames);
+		colEditable = new boolean[columnNames.length];
+		Arrays.fill(colEditable, false);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.swing.table.AbstractTableModel#getColumnClass(int)
+	 */
+	@Override
+	public Class<?> getColumnClass(int c) {
+		return getValueAt(0, c).getClass();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.swing.table.DefaultTableModel#isCellEditable(int, int)
+	 */
+	@Override
+	public boolean isCellEditable(int row, int column) {
+		return colEditable[column];
+	}
+
+	/**
+	 * Decide whether or not the column at the given index should be editable.
+	 * 
+	 * @param column
+	 * @param editable
+	 */
+	public void setColumnEditable(int column, boolean editable) {
+		colEditable[column] = editable;
+	}
+}
 
 /**
  * @author Andreas Dr&auml;ger
@@ -186,15 +333,10 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	}
 
 	/**
-	 * The names in all tables for the columns (time, compartment, species,
-	 * parameters).
-	 */
-	private String colNames[];
-
-	/**
 	 * Compression factor for JPEG output
 	 */
 	private float compression;
+
 	/**
 	 * Table for experimental data.
 	 */
@@ -204,11 +346,11 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	 * Table that contains the legend of this plot.
 	 */
 	private JTable legend;
-
 	/**
 	 * Whether or not to plot in a logarithmic scale.
 	 */
 	private JCheckBox logScale;
+
 	/**
 	 * 
 	 */
@@ -298,7 +440,6 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	 * The index of the class name of the solver to be used
 	 */
 	private JComboBox solvers;
-
 	/**
 	 * 
 	 */
@@ -307,6 +448,7 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	 * The spinner to change the number of integration steps.
 	 */
 	private SpinnerNumberModel stepsModel;
+
 	/**
 	 * Simulation start time
 	 */
@@ -317,17 +459,6 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	 */
 	private SpinnerNumberModel t2;
 
-	/**
-	 * This connects the identifiers of elements that can be drawn in the plot
-	 * with the indices in the legend table and in experimental data files.
-	 */
-	private Hashtable<String, Indices> colNames2data;
-
-	/**
-	 * This maps the index in an experimental data file to the name of a
-	 * component in the legend table.
-	 */
-	private Hashtable<Integer, String> experiment2ElementIndex;
 	/**
 	 * Default value to be used for simulation
 	 */
@@ -361,6 +492,7 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	 * Contains all available distance functions.
 	 */
 	private JComboBox distFun;
+
 	/**
 	 * Necessary to remember the originally set distance function.
 	 */
@@ -370,67 +502,6 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	 * Switches inclusion of reactions in the plot on or off.
 	 */
 	private boolean includeReactions = true;
-
-	/**
-	 * This class stores the row of an element in the Legend table and the
-	 * column of the same element in the experimental data table.
-	 * 
-	 * @author Andreas Dr&auml;ger
-	 * @since 1.4
-	 * 
-	 */
-	private class Indices {
-		/**
-		 * The row in the legend table
-		 */
-		private int rowLegendTable;
-		/**
-		 * The column in the experiment table
-		 */
-		private int columnExperimentTable;
-
-		/**
-		 * @return the rowLegendTable
-		 */
-		public int getRowLegendTable() {
-			return rowLegendTable;
-		}
-
-		/**
-		 * @return the columnExperimentTable
-		 */
-		public int getColumnExperimentTable() {
-			return columnExperimentTable;
-		}
-
-		/**
-		 * @param columnExperimentTable
-		 *            the columnExperimentTable to set
-		 */
-		public void setColumnExperimentTable(int columnExperimentTable) {
-			this.columnExperimentTable = columnExperimentTable;
-		}
-
-		/**
-		 * 
-		 * @param rowLegendTable
-		 */
-		public Indices(int rowLegendTable) {
-			this.rowLegendTable = rowLegendTable;
-			this.columnExperimentTable = -1;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return String.format("[row legend = %d, column experiment = %d]",
-					this.rowLegendTable, this.columnExperimentTable);
-		}
-	}
 
 	/**
 	 * 
@@ -445,13 +516,6 @@ public class SimulationPanel extends JPanel implements ActionListener,
 		} else
 			try {
 				this.model = model;
-				colNames = createColNames(this.model);
-				colNames2data = new Hashtable<String, Indices>();
-				colNames2data.put(colNames[0], new Indices(-1));
-				for (int i = 1; i < colNames.length; i++) {
-					colNames2data.put(colNames[i], new Indices(i - 1));
-				}
-				experiment2ElementIndex = new Hashtable<Integer, String>();
 				setProperties(getDefaultProperties());
 			} catch (Exception exc) {
 				GUITools.showErrorMessage(this, exc);
@@ -522,77 +586,6 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	}
 
 	/**
-	 * Conducts the simulation.
-	 * 
-	 * @throws Exception
-	 */
-	public void simulate() throws Exception {
-		double t1val = ((Double) t1.getValue()).doubleValue();
-		double t2val = ((Double) t2.getValue()).doubleValue();
-		double stepSize = (t2val - t1val)
-				/ stepsModel.getNumber().doubleValue();
-		simulate(model, t1val, t2val, stepSize);
-		tabbedPane.setEnabledAt(1, true);
-		GUITools.setEnabled(true, toolbar, Command.SAVE_SIMULATION,
-				Command.SAVE_PLOT_IMAGE);
-	}
-
-	/**
-	 * @throws SBMLException
-	 * 
-	 */
-	private void openExperimentalData() throws SBMLException {
-		JFileChooser chooser = GUITools.createJFileChooser(openDir, false,
-				false, JFileChooser.FILES_ONLY, SBFileFilter.CSV_FILE_FILTER);
-		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
-			try {
-				openExperimentalData(chooser.getSelectedFile());
-				openDir = chooser.getSelectedFile().getParent();
-				plot(readCSVFile(chooser.getSelectedFile()), false, showLegend
-						.isSelected());
-				tabbedPane.setEnabledAt(2, true);
-				GUITools.setEnabled(false, toolbar, Command.OPEN_DATA);
-				distField.setText(Double.toString(computeDistance(model, solver
-						.getStepSize())));
-				distField.setEditable(false);
-				distField.setEnabled(true);
-			} catch (Exception exc) {
-				exc.printStackTrace();
-				GUITools.showErrorMessage(this, exc);
-			}
-	}
-
-	/**
-	 * 
-	 * @param path
-	 * @throws IOException
-	 */
-	public void openExperimentalData(String path) throws IOException {
-		openExperimentalData(new File(path));
-	}
-
-	/**
-	 * 
-	 * @param file
-	 * @throws IOException
-	 */
-	public void openExperimentalData(File file) throws IOException {
-		openDir = file.getParent();
-		plot(readCSVFile(file), false, showLegend.isSelected());
-		tabbedPane.setEnabledAt(2, true);
-		GUITools.setEnabled(false, toolbar, Command.OPEN_DATA);
-		try {
-			distField.setText(Double.toString(computeDistance(model, solver
-					.getStepSize())));
-		} catch (Exception exc) {
-			exc.printStackTrace();
-			GUITools.showErrorMessage(this, exc);
-		}
-		distField.setEditable(false);
-		distField.setEnabled(true);
-	}
-
-	/**
 	 * 
 	 */
 	private void adjustPreferences() {
@@ -614,29 +607,17 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	/**
 	 * 
 	 * @param model
+	 * @param stepSize
 	 * @return
+	 * @throws Exception
 	 */
-	private String[] createColNames(Model model) {
-		String colNames[] = new String[1 + model.getNumCompartments()
-				+ model.getNumSpecies() + model.getNumParameters()];
-		colNames[0] = "Time";
-		int i;
-		for (i = 1; i <= model.getNumCompartments(); i++) {
-			Compartment c = model.getCompartment(i - 1);
-			colNames[i] = c.isSetName() ? c.getName() : c.getId();
-		}
-		for (i = model.getNumCompartments() + 1; i <= model
-				.getNumCompartments()
-				+ model.getNumSpecies(); i++) {
-			Species s = model.getSpecies(i - model.getNumCompartments() - 1);
-			colNames[i] = s.isSetName() ? s.getName() : s.getId();
-		}
-		for (i = model.getNumCompartments() + model.getNumSpecies() + 1; i < colNames.length; i++) {
-			Parameter p = model.getParameter(i - model.getNumCompartments()
-					- model.getNumSpecies() - 1);
-			colNames[i] = p.isSetName() ? p.getName() : p.getId();
-		}
-		return colNames;
+	private double computeDistance(Model model, double stepSize)
+			throws Exception {
+		MultiBlockTable simData = solveAtTimePoints(model,
+				((MultiBlockTable) expTable.getModel()).getTimePoints(),
+				stepSize);
+		MultiBlockTable expData = (MultiBlockTable) expTable.getModel();
+		return distance.distance(simData.getBlock(0), expData.getBlock(0));
 	}
 
 	/**
@@ -736,7 +717,8 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	 */
 	private JToolBar createToolBar() {
 		JToolBar toolbar = new JToolBar("Tools");
-		ImageIcon icon = new ImageIcon(Resource.class.getResource("img/folder_16.png"));
+		ImageIcon icon = new ImageIcon(Resource.class
+				.getResource("img/folder_16.png"));
 		if (icon != null)
 			toolbar.add(GUITools.createButton(icon, this, Command.OPEN_DATA,
 					"Load  experimental data from file."));
@@ -886,8 +868,9 @@ public class SimulationPanel extends JPanel implements ActionListener,
 			plot.setShowLegend(showLegend.isSelected());
 			// get rid of this pop-up menu.
 			MouseListener listeners[] = plot.getMouseListeners();
-			for (int i = listeners.length - 1; i >= 0; i--)
+			for (int i = listeners.length - 1; i >= 0; i--) {
 				plot.removeMouseListener(listeners[i]);
+			}
 
 			JPanel simPanel = new JPanel(new BorderLayout());
 			simTable = new JTable();
@@ -1135,6 +1118,51 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	}
 
 	/**
+	 * @throws SBMLException
+	 * 
+	 */
+	private void openExperimentalData() throws SBMLException {
+		JFileChooser chooser = GUITools.createJFileChooser(openDir, false,
+				false, JFileChooser.FILES_ONLY, SBFileFilter.CSV_FILE_FILTER);
+		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+			try {
+				openExperimentalData(chooser.getSelectedFile());
+			} catch (Exception exc) {
+				exc.printStackTrace();
+				GUITools.showErrorMessage(this, exc);
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @param file
+	 * @throws Exception
+	 */
+	public void openExperimentalData(File file) throws Exception {
+		openDir = file.getParent();
+		CSVDataImporter importer = new CSVDataImporter();
+		MultiBlockTable data = importer.convert(model, file.getAbsolutePath());
+		expTable.setModel(data);
+		plot(data, false, showLegend.isSelected());
+		tabbedPane.setEnabledAt(2, true);
+		GUITools.setEnabled(false, toolbar, Command.OPEN_DATA);
+		distField.setText(Double.toString(computeDistance(model, solver
+				.getStepSize())));
+		distField.setEditable(false);
+		distField.setEnabled(true);
+	}
+
+	/**
+	 * 
+	 * @param path
+	 * @throws Exception
+	 */
+	public void openExperimentalData(String path) throws Exception {
+		openExperimentalData(new File(path));
+	}
+
+	/**
 	 * Plots a matrix either by displaying unconnected or connected points
 	 * depending on the connected parameter.
 	 * 
@@ -1147,255 +1175,30 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	 */
 	private void plot(MultiBlockTable solution, boolean connected,
 			boolean showLegend) {
-		// System.out.println("----------- " + solution.getNumBlocks());
-		// for (int j = 0; j < solution.getColumnCount() - 1; j++) {
-		// boolean selected = (legend.getRowCount() == 0
-		// || ((Boolean) legend.getValueAt(j, 0))
-		// .booleanValue());
-		// System.out.println( legend.getValueAt(j, 2)
-		// .toString() + " ("+ legend.getValueAt(j, 1) + ", selected: " +
-		// selected);
-		// }
-
-		for (int i = 0; i < solution.getRowCount(); i++) {
-			for (int j = 0; j < solution.getColumnCount() - 1; j++) {
-				if (connected) {
-					if (legend.getRowCount() == 0
-							|| ((Boolean) legend.getValueAt(j, 0))
-									.booleanValue()) {
-						plot.setGraphColor(j, (Color) legend.getValueAt(j, 1));
-						plot.setInfoString(j, legend.getValueAt(j, 2)
-								.toString(), 2);
-						plot.setConnectedPoint(solution.getValueAt(i, 0),
-								solution.getValueAt(i, j + 1), j);
-					}
-				} else {
-					String name = experiment2ElementIndex.get(Integer
-							.valueOf(j + 1));
-					// Plot only data whose corresponding elements could be
-					// identified.
-					if (name != null) {
-						Indices index = colNames2data.get(name);
-						if (index != null
-								&& index.getRowLegendTable() >= 0
-								&& index.getRowLegendTable() < legend
-										.getRowCount()) {
-							if (legend.getRowCount() == 0
-									|| ((Boolean) legend.getValueAt(index
-											.getRowLegendTable(), 0))
-											.booleanValue()) {
-								plot.setGraphColor(colNames.length - 1 + j,
-										(Color) legend.getValueAt(index
-												.getRowLegendTable(), 1));
-								Indices time = colNames2data.get(colNames[0]);
-								int tidx = time == null ? 0 : time
-										.getColumnExperimentTable();
-								if (tidx < 0)
-									tidx = 0;
-								plot.setUnconnectedPoint(solution.getValueAt(i,
-										tidx), solution.getValueAt(i, index
-										.getRowLegendTable()), colNames.length
-										- 1 + j);
-								plot.setInfoString(colNames.length - 1 + j,
-										legend.getValueAt(
-												index.getRowLegendTable(), 2)
-												.toString(), 2);
-							}
-						}
+		TableModelLedgend tabMod = (TableModelLedgend) legend.getModel();
+		int i, j, graphLabel;
+		for (i = 1; i < solution.getColumnCount(); i++) {
+			Column column = solution.getColumn(i);
+			if (tabMod.isSelected(column.getId())) {
+				graphLabel = connected ? i : i + solution.getColumnCount();
+				// plot.clearGraph(graphLabel);
+				plot.setGraphColor(graphLabel, tabMod.getColorFor(column
+						.getId()));
+				plot.setInfoString(graphLabel, tabMod
+						.getNameFor(column.getId()), 1);
+				for (j = 0; j < column.getRowCount(); j++) {
+					if (connected) {
+						plot.setConnectedPoint(solution.getTimePoint(j), column
+								.getValue(j), graphLabel);
+					} else {
+						plot.setUnconnectedPoint(solution.getTimePoint(j),
+								column.getValue(j), graphLabel);
 					}
 				}
 			}
 		}
+		plot.setGridVisible(showGrid.isSelected());
 		plot.setShowLegend(showLegend);
-	}
-
-	/**
-	 * Parses the given file and returns its content as a double matrix.
-	 * 
-	 * @param file
-	 *            The file of comma separated values from the time series data
-	 *            set
-	 * @return A double matrix of the time series values, times in the rows,
-	 *         values in the columns. The first column should contain the time
-	 *         points.
-	 * @throws IOException
-	 */
-	@SuppressWarnings("unchecked")
-	private MultiBlockTable readCSVFile(File file) throws IOException {
-
-		CSVReader csvreader = CSVReaderOptionPanel.showDialog(this,
-				new CSVReader(file.getAbsolutePath()), "Data import");
-
-		if (csvreader.getContainsHeaders()) {
-
-			int i, j;
-			// Counts the number of numeric values in the first line.
-			short numNumbers = 0;
-			// first line is supposed to be the list of identifiers.
-			String names[] = csvreader.getHeader();
-			for (i = 0; i < names.length; i++) {
-				try {
-					numNumbers++;
-					Double.parseDouble(names[i]);
-				} catch (NumberFormatException exc) {
-					numNumbers--;
-				}
-			}
-			Hashtable<String, Integer> problems = new Hashtable<String, Integer>();
-			for (i = 0; i < names.length; i++) {
-				Indices index = colNames2data.get(names[i]);
-				if (index == null) {
-					for (String key : colNames2data.keySet()) {
-						if (key.equalsIgnoreCase(names[i])
-								|| (names[i].startsWith(key) || names[i]
-										.endsWith(key))) {
-							index = colNames2data.get(key);
-							experiment2ElementIndex.put(Integer.valueOf(index
-									.getRowLegendTable()), key);
-							index.setColumnExperimentTable(i);
-							names[i] = key;
-							break;
-						}
-					}
-				} else {
-					experiment2ElementIndex.put(Integer.valueOf(index
-							.getRowLegendTable()), names[i]);
-					index.setColumnExperimentTable(i);
-				}
-				if (index == null) {
-					problems.put(names[i], Integer.valueOf(i));
-				}
-			}
-
-			if (problems.keySet().size() > 0) {
-				// Show dialog to let the user select what is meant.
-				LinkedList<String> availableEntries = new LinkedList<String>();
-				for (String colName : colNames2data.keySet()) {
-					Indices idx = colNames2data.get(colName);
-					if (idx.getColumnExperimentTable() < 0)
-						availableEntries.add(colName);
-				}
-				String[] avail = availableEntries.toArray(new String[0]);
-				if (avail.length > 0) {
-					String[] probs = problems.keySet().toArray(new String[0]);
-					Arrays.sort(avail);
-					Arrays.sort(probs);
-					i = 0;
-					// String propNames[][] = new String[problems.size()][2];
-					// for (String prob : probs) {
-					// propNames[i][0] = avail[i];
-					// propNames[i][1] = prob;
-					// }
-					// MyDefaultTableModel tabModel = new MyDefaultTableModel(
-					// propNames, new String[] { "ID in SBML model",
-					// "ID in data file" });
-
-					/*
-					 * hier!
-					 */
-
-					CSVReaderColumnChooser c = new CSVReaderColumnChooser(
-							csvreader);
-					for (String prob : probs) {
-						c.addColumnChooser(prob, true, true);
-						// c.getSelectedValue("");
-					}
-					// 
-					//
-					// if (JOptionPane.showConfirmDialog(this, c,
-					// "Select gedöns",
-					// JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
-					// // tue
-					// }
-					//		
-					// // Locale locale = Locale.GERMANY;
-					// // ResourceBundle captions=
-					// ResourceBundle.getBundle("Messages",locale);
-					// // ResourceBundle.
-					// //
-					// // yesCaption =captions.getString("yesMessage");
-					//
-					//		 
-					//
-					// String[][] data = csvreader.readUsingArrayList();
-					//
-					// csvreader.getHeader();
-					// csvreader.getPreamble();
-					// csvreader.getData();
-
-					// JTable table = new JTable(tabModel);
-					// tabModel.setColumnEditable(1, true);
-					// table.setEnabled(true);
-					// TableColumn select = table.getColumnModel().getColumn(1);
-					// select.setCellEditor(new DefaultCellEditor(new JComboBox(
-					// avail)));
-
-					JPanel panel = new JPanel(new BorderLayout());
-					String message = "Some data could not be assigned to model values. Please assign experiment names to model components.";
-					panel.add(new JLabel(GUITools.toHTML(message, 40)),
-							BorderLayout.NORTH);
-					JScrollPane scroll = new JScrollPane(c,
-							JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-							JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-					scroll.setPreferredSize(new Dimension(250, Math.min(
-							35 * problems.keySet().size() + 20, 400)));
-					panel.add(scroll, BorderLayout.CENTER);
-					JOptionPane.showMessageDialog(this, panel,
-							"Manual name assignment",
-							JOptionPane.QUESTION_MESSAGE);
-
-					for (i = 0; i < probs.length; i++) {
-						String newName = c.getColumnChooser(probs[i])
-								.getSelectedItem().toString();
-						// table.getValueAt(i, 1).toString();
-						int origIndex = problems.get(probs[i]).intValue();
-						names[origIndex] = newName;
-						Indices index = colNames2data.get(newName);
-						if (index != null) {
-							index.setColumnExperimentTable(origIndex);
-							experiment2ElementIndex.put(Integer.valueOf(index
-									.getRowLegendTable()), newName);
-						}
-					}
-				}
-			}
-			if (names.length > colNames.length) {
-				String message = "The data file contains some elements that do not have a counterpart in the given model. These elements will not occur in the plot and are ignored in the analysis.";
-				JOptionPane.showMessageDialog(this, GUITools
-						.toHTML(message, 40), "Some elements are ignored",
-						JOptionPane.INFORMATION_MESSAGE);
-			}
-
-			String columnNames[] = csvreader.getHeader();
-			String content[][] = csvreader.getData();
-
-			double timePoints[] = new double[csvreader.getNumberOfDataLines()];
-			double data[][] = new double[timePoints.length][columnNames.length - 1];
-
-			for (i = 0; i < data.length; i++) {
-				int timeIdx = colNames2data.get(colNames[0])
-						.getColumnExperimentTable();
-				timePoints[i] = Double.parseDouble(content[i][timeIdx]);
-				int dataJ = 0;
-				for (j = 0; j < content[i].length; j++) {
-					if (j != timeIdx) {
-						data[i][dataJ++] = Double.parseDouble(content[i][j]);
-					}
-				}
-			}
-			MultiBlockTable tabModel = new MultiBlockTable(timePoints, data,
-					columnNames);
-			this.expTable.setModel(tabModel);
-			return tabModel;
-		} else {
-			JOptionPane
-					.showMessageDialog(
-							this,
-							GUITools
-									.toHTML("Cannot read this format, because no column identifiers are provided."),
-							"Unreadable file", JOptionPane.WARNING_MESSAGE);
-		}
-		return new MultiBlockTable();
 	}
 
 	/**
@@ -1558,17 +1361,39 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	}
 
 	/**
-	 * Swaps a and b if a is greater then b.
+	 * Runs over the legend and sets all variables corresponding to the given
+	 * identifiers as selected. All others will be unselected.
 	 * 
-	 * @param a
-	 * @param b
+	 * @param identifiers
+	 *            The identifiers of the variables to be selected and to occur
+	 *            in the plot.
 	 */
-	private void swap(double a, double b) {
-		if (a > b) {
-			double swap = b;
-			b = a;
-			a = swap;
+	public void setVariables(String[] identifiers) {
+		for (int i = 0; i < legend.getRowCount(); i++) {
+			legend.setValueAt(Boolean.valueOf(false), i, 0);
+			for (String id : identifiers) {
+				if (legend.getValueAt(i, 2).toString().trim().equals(id.trim())) {
+					legend.setValueAt(Boolean.valueOf(true), i, 0);
+					break;
+				}
+			}
 		}
+	}
+
+	/**
+	 * Conducts the simulation.
+	 * 
+	 * @throws Exception
+	 */
+	public void simulate() throws Exception {
+		double t1val = ((Double) t1.getValue()).doubleValue();
+		double t2val = ((Double) t2.getValue()).doubleValue();
+		double stepSize = (t2val - t1val)
+				/ stepsModel.getNumber().doubleValue();
+		simulate(model, t1val, t2val, stepSize);
+		tabbedPane.setEnabledAt(1, true);
+		GUITools.setEnabled(true, toolbar, Command.SAVE_SIMULATION,
+				Command.SAVE_PLOT_IMAGE);
 	}
 
 	/**
@@ -1598,6 +1423,28 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	/**
 	 * 
 	 * @param model
+	 * @param timePoints
+	 * @param stepSize
+	 * @return
+	 * @throws Exception
+	 */
+	private MultiBlockTable solveAtTimePoints(Model model, double times[],
+			double stepSize) throws Exception {
+		SBMLinterpreter interpreter = new SBMLinterpreter(model);
+		solver.setStepSize(stepSize);
+		solver.setIncludeIntermediates(false);
+		MultiBlockTable solution = solver.solve(interpreter, interpreter
+				.getInitialValues(), times);
+		if (solver.isUnstable()) {
+			JOptionPane.showMessageDialog(this, "Unstable!",
+					"Simulation not possible", JOptionPane.WARNING_MESSAGE);
+		}
+		return solution;
+	}
+
+	/**
+	 * 
+	 * @param model
 	 * @param t1
 	 *            Time begin
 	 * @param t2
@@ -1613,62 +1460,6 @@ public class SimulationPanel extends JPanel implements ActionListener,
 		solver.setIncludeIntermediates(includeReactions);
 		MultiBlockTable solution = solver.solve(interpreter, interpreter
 				.getInitialValues(), t1, t2);
-		if (solver.isUnstable()) {
-			JOptionPane.showMessageDialog(this, "Unstable!",
-					"Simulation not possible", JOptionPane.WARNING_MESSAGE);
-		}
-		return solution;
-	}
-
-	/**
-	 * 
-	 * @param model
-	 * @param stepSize
-	 * @return
-	 * @throws Exception
-	 */
-	private double computeDistance(Model model, double stepSize)
-			throws Exception {
-		Indices time = colNames2data.get(colNames[0]);
-		int tidx = time == null ? 0 : time.getColumnExperimentTable();
-		if (tidx < 0) {
-			tidx = 0;
-		}
-		MultiBlockTable simData = solveAtTimePoints(model,
-				((MultiBlockTable) expTable.getModel()).getTimePoints(),
-				stepSize);
-		MultiBlockTable expData = (MultiBlockTable) expTable.getModel();
-		// double simulation[][] = new
-		// double[expData.length][expData[0].length];
-		// for (int i = 0; i < simulation.length; i++) {
-		// simulation[i][0] = expData[i][0];
-		// for (int j = 1; j < simulation[i].length; j++) {
-		// simulation[i][j] = simData[i][colNames2data.get(expTable
-		// .getColumnName(j)).columnExperimentTable];
-		// }
-		// }
-		// TEST! Plots the solution at the given time points...
-		// plot.clearAll();
-		// plot(simulation, true, showLegend.isSelected());
-		// TEST!
-		return distance.distance(simData.getBlock(0), expData.getBlock(0));
-	}
-
-	/**
-	 * 
-	 * @param model
-	 * @param timePoints
-	 * @param stepSize
-	 * @return
-	 * @throws Exception
-	 */
-	private MultiBlockTable solveAtTimePoints(Model model, double times[],
-			double stepSize) throws Exception {
-		SBMLinterpreter interpreter = new SBMLinterpreter(model);
-		solver.setStepSize(stepSize);
-		solver.setIncludeIntermediates(false);
-		MultiBlockTable solution = solver.solve(interpreter, interpreter
-				.getInitialValues(), times);
 		if (solver.isUnstable()) {
 			JOptionPane.showMessageDialog(this, "Unstable!",
 					"Simulation not possible", JOptionPane.WARNING_MESSAGE);
@@ -1699,6 +1490,20 @@ public class SimulationPanel extends JPanel implements ActionListener,
 		}
 	}
 
+	/**
+	 * Swaps a and b if a is greater then b.
+	 * 
+	 * @param a
+	 * @param b
+	 */
+	private void swap(double a, double b) {
+		if (a > b) {
+			double swap = b;
+			b = a;
+			a = swap;
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1707,35 +1512,19 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	 */
 	public void tableChanged(TableModelEvent e) {
 		if (e.getSource() instanceof TableModelLedgend) {
-			if (e.getColumn() <= 1 && 0 < simTable.getRowCount()
-					&& e.getType() == TableModelEvent.UPDATE) {
+			if ((e.getColumn() == TableModelLedgend.getBooleanColumn())
+					&& (e.getType() == TableModelEvent.UPDATE)) {
 				plot.clearAll();
-				plot((MultiBlockTable) simTable.getModel(), true, showLegend
-						.isSelected());
-				if (expTable.getRowCount() > 0)
+				if (simTable.getRowCount() > 0) {
+					plot((MultiBlockTable) simTable.getModel(), true,
+							showLegend.isSelected());
+				}
+				if (expTable.getRowCount() > 0) {
 					plot((MultiBlockTable) expTable.getModel(), false,
 							showLegend.isSelected());
-				if (showLegend.isSelected())
+				}
+				if (showLegend.isSelected()) {
 					plot.updateLegend();
-			}
-		}
-	}
-
-	/**
-	 * Runs over the legend and sets all variables corresponding to the given
-	 * identifiers as selected. All others will be unselected.
-	 * 
-	 * @param identifiers
-	 *            The identifiers of the variables to be selected and to occur
-	 *            in the plot.
-	 */
-	public void setVariables(String[] identifiers) {
-		for (int i = 0; i < legend.getRowCount(); i++) {
-			legend.setValueAt(Boolean.valueOf(false), i, 0);
-			for (String id : identifiers) {
-				if (legend.getValueAt(i, 2).toString().trim().equals(id.trim())) {
-					legend.setValueAt(Boolean.valueOf(true), i, 0);
-					break;
 				}
 			}
 		}
@@ -1799,6 +1588,40 @@ class TableCellRendererObjects extends JLabel implements TableCellRenderer {
 class TableModelLedgend extends AbstractTableModel {
 
 	/**
+	 * Column indices for the content
+	 */
+	private static final int boolCol = 0, colorCol = 1, nsbCol = 2;
+
+	/**
+	 * 
+	 * @return
+	 */
+	public static int getBooleanColumn() {
+		return boolCol;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public static int getColorColumn() {
+		return colorCol;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public static int getNamedSBaseColumn() {
+		return nsbCol;
+	}
+
+	/**
+	 * So save run time memorize the last queried key of the hash.
+	 */
+	private ValuePair<String, Integer> lastQueried;
+
+	/**
 	 * Generated serial version identifier.
 	 */
 	private static final long serialVersionUID = 7360401460080111135L;
@@ -1808,11 +1631,42 @@ class TableModelLedgend extends AbstractTableModel {
 	private Object[][] data;
 
 	/**
+	 * A mapping between the ids in the table and the corresponding row.
+	 */
+	private Hashtable<String, Integer> id2Row;
+
+	/**
 	 * 
 	 * @param model
 	 */
 	public TableModelLedgend(Model model) {
 		this(model, false);
+	}
+
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public String getNameFor(String id) {
+		int index = getRowFor(id);
+		if (index >= 0) {
+			return getValueAt(index, nsbCol).toString();
+		}
+		throw new NoSuchElementException(id);
+	}
+
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public Color getColorFor(String id) {
+		int index = getRowFor(id);
+		if (index >= 0) {
+			return (Color) getValueAt(index, colorCol);
+		}
+		throw new NoSuchElementException(id);
 	}
 
 	/**
@@ -1826,31 +1680,42 @@ class TableModelLedgend extends AbstractTableModel {
 		if (includeReactions) {
 			dim += model.getNumReactions();
 		}
+		id2Row = new Hashtable<String, Integer>();
+		lastQueried = null;
 		data = new Object[dim][3];
+		NamedSBase sb;
 		int i, j;
 		for (i = 0; i < model.getNumCompartments(); i++) {
-			data[i][0] = Boolean.TRUE;
-			data[i][1] = SimulationPanel.indexToColor(i);
-			data[i][2] = model.getCompartment(i);
+			sb = model.getCompartment(i);
+			data[i][boolCol] = Boolean.TRUE;
+			data[i][colorCol] = SimulationPanel.indexToColor(i);
+			data[i][nsbCol] = sb;
+			id2Row.put(sb.getId(), Integer.valueOf(i));
 		}
 		j = model.getNumCompartments();
 		for (i = 0; i < model.getNumSpecies(); i++) {
-			data[i + j][0] = Boolean.TRUE;
-			data[i + j][1] = SimulationPanel.indexToColor(i + j);
-			data[i + j][2] = model.getSpecies(i);
+			sb = model.getSpecies(i);
+			data[i + j][boolCol] = Boolean.TRUE;
+			data[i + j][colorCol] = SimulationPanel.indexToColor(i + j);
+			data[i + j][nsbCol] = sb;
+			id2Row.put(sb.getId(), Integer.valueOf(i + j));
 		}
 		j = model.getNumCompartments() + model.getNumSpecies();
 		for (i = 0; i < model.getNumParameters(); i++) {
-			data[i + j][0] = Boolean.TRUE;
-			data[i + j][1] = SimulationPanel.indexToColor(i + j);
-			data[i + j][2] = model.getParameter(i);
+			sb = model.getParameter(i);
+			data[i + j][boolCol] = Boolean.TRUE;
+			data[i + j][colorCol] = SimulationPanel.indexToColor(i + j);
+			data[i + j][nsbCol] = sb;
+			id2Row.put(sb.getId(), Integer.valueOf(i + j));
 		}
 		if (includeReactions) {
 			j = model.getNumSymbols();
 			for (i = 0; i < model.getNumReactions(); i++) {
-				data[i + j][0] = Boolean.TRUE;
-				data[i + j][1] = SimulationPanel.indexToColor(i + j);
-				data[i + j][2] = model.getReaction(i);
+				sb = model.getReaction(i);
+				data[i + j][boolCol] = Boolean.TRUE;
+				data[i + j][colorCol] = SimulationPanel.indexToColor(i + j);
+				data[i + j][nsbCol] = sb;
+				id2Row.put(sb.getId(), Integer.valueOf(i + j));
 			}
 		}
 	}
@@ -1881,11 +1746,11 @@ class TableModelLedgend extends AbstractTableModel {
 	 */
 	@Override
 	public String getColumnName(int column) {
-		if (column == 0)
+		if (column == boolCol)
 			return "Plot";
-		if (column == 1)
+		if (column == colorCol)
 			return "Color";
-		if (column == 2)
+		if (column == nsbCol)
 			return "Symbol";
 		throw new IndexOutOfBoundsException("Only " + getColumnCount()
 				+ " columns, no column " + column);
@@ -1900,12 +1765,37 @@ class TableModelLedgend extends AbstractTableModel {
 		return data.length;
 	}
 
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public int getRowFor(String id) {
+		int index = -1;
+		if (lastQueried == null) {
+			lastQueried = new ValuePair<String, Integer>(id, Integer
+					.valueOf(index));
+		} else if (id.equals(lastQueried.getA())) {
+			return lastQueried.getB().intValue();
+		}
+		if (id2Row.containsKey(id)) {
+			index = id2Row.get(id).intValue();
+			lastQueried.setA(id);
+			lastQueried.setB(Integer.valueOf(index));
+		}
+		return index;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see javax.swing.table.TableModel#getValueAt(int, int)
 	 */
 	public Object getValueAt(int rowIndex, int columnIndex) {
+		if (columnIndex == nsbCol) {
+			NamedSBase nsb = (NamedSBase) data[rowIndex][columnIndex];
+			return nsb.isSetName() ? nsb.getName() : nsb.getId();
+		}
 		return data[rowIndex][columnIndex];
 	}
 
@@ -1916,168 +1806,34 @@ class TableModelLedgend extends AbstractTableModel {
 	 */
 	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		if (columnIndex < 2 && rowIndex < getRowCount())
+		if ((columnIndex < getColumnCount()) && (rowIndex < getRowCount())) {
 			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public boolean isSelected(String id) {
+		int index = getRowFor(id);
+		if (index >= 0) {
+			return ((Boolean) getValueAt(index, boolCol)).booleanValue();
+		}
 		return false;
 	}
 
 	/*
+	 * (non-Javadoc)
 	 * 
+	 * @see javax.swing.table.AbstractTableModel#setValueAt(java.lang.Object,
+	 * int, int)
 	 */
 	@Override
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 		data[rowIndex][columnIndex] = aValue;
 		fireTableCellUpdated(rowIndex, columnIndex);
-	}
-}
-
-/**
- * @author Andreas Dr&auml;ger
- * @since 1.4
- * 
- */
-class ColorEditor extends AbstractCellEditor implements TableCellEditor,
-		ActionListener {
-	/**
-	 * 
-	 */
-	public static final String EDIT = "edit";
-	/**
-	 * Generated serial version identifier.
-	 */
-	private static final long serialVersionUID = -3645125690115981580L;
-	/**
-	 * 
-	 */
-	private JButton button;
-	/**
-	 * 
-	 */
-	private JColorChooser colorChooser;
-	/**
-	 * 
-	 */
-	private Color currentColor;
-	/**
-	 * 
-	 */
-	private JDialog dialog;
-
-	/**
-	 * 
-	 */
-	public ColorEditor() {
-		button = new JButton();
-		button.setActionCommand(EDIT);
-		button.addActionListener(this);
-		button.setBorderPainted(false);
-
-		// Set up the dialog that the button brings up.
-		colorChooser = new JColorChooser();
-		dialog = JColorChooser.createDialog(button, "Pick a Color", true,
-				colorChooser, this, null);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	public void actionPerformed(ActionEvent e) {
-		if (EDIT.equals(e.getActionCommand())) {
-			// The user has clicked the cell, so
-			// bring up the dialog.
-			button.setBackground(currentColor);
-			colorChooser.setColor(currentColor);
-			dialog.setVisible(true);
-
-			fireEditingStopped(); // Make the renderer reappear.
-
-		} else { // User pressed dialog's "OK" button.
-			currentColor = colorChooser.getColor();
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.CellEditor#getCellEditorValue()
-	 */
-	public Object getCellEditorValue() {
-		return currentColor;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * javax.swing.table.TableCellEditor#getTableCellEditorComponent(javax.swing
-	 * .JTable, java.lang.Object, boolean, int, int)
-	 */
-	public Component getTableCellEditorComponent(JTable table, Object value,
-			boolean isSelected, int row, int column) {
-		currentColor = (Color) value;
-		return button;
-	}
-}
-
-/**
- * A table model that allows easy manipulation of the underlying data.
- * 
- * @author Andreas Dr&auml;ger
- * @date 2010-04-08
- * @since 1.4
- */
-class MyDefaultTableModel extends DefaultTableModel {
-
-	/**
-	 * Generated serial version identifier
-	 */
-	private static final long serialVersionUID = 6339470859385085061L;
-	/**
-	 * Field to indicate columns that are editable.
-	 */
-	private boolean[] colEditable;
-
-	/**
-	 * 
-	 * @param data
-	 * @param columnNames
-	 */
-	public MyDefaultTableModel(Object[][] data, String[] columnNames) {
-		super(data, columnNames);
-		colEditable = new boolean[columnNames.length];
-		Arrays.fill(colEditable, false);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.table.AbstractTableModel#getColumnClass(int)
-	 */
-	@Override
-	public Class<?> getColumnClass(int c) {
-		return getValueAt(0, c).getClass();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.table.DefaultTableModel#isCellEditable(int, int)
-	 */
-	@Override
-	public boolean isCellEditable(int row, int column) {
-		return colEditable[column];
-	}
-
-	/**
-	 * Decide whether or not the column at the given index should be editable.
-	 * 
-	 * @param column
-	 * @param editable
-	 */
-	public void setColumnEditable(int column, boolean editable) {
-		colEditable[column] = editable;
 	}
 }

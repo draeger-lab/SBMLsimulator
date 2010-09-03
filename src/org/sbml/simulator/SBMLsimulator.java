@@ -111,7 +111,8 @@ public class SBMLsimulator {
 			try {
 				SBMLDocument doc = SBMLReader.readSBML(chooser.getSelectedFile());
 				if ((doc != null) && (doc.isSetModel())) {
-					new SimulationDialog(null, doc.getModel());
+					SimulationDialog d = new SimulationDialog(null, doc.getModel());
+					d.setVisible(true);
 				}
 			} catch (FileNotFoundException exc) {
 				GUITools.showErrorMessage(null, exc);
