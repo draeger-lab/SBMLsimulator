@@ -17,10 +17,10 @@ import org.sbml.jsbml.util.ValuePair;
  * @author Andreas Dr&auml;ger
  * @since 1.4
  * @date 2010-04-07
- *
+ * 
  */
 public class LegendTableModel extends AbstractTableModel {
-	
+
 	/**
 	 * Column indices for the content
 	 */
@@ -48,6 +48,37 @@ public class LegendTableModel extends AbstractTableModel {
 	 */
 	public static int getNamedSBaseColumn() {
 		return nsbCol;
+	}
+
+	/**
+	 * 
+	 * @param index
+	 * @return
+	 */
+	public static Color indexToColor(int index) {
+		switch (index % 10) {
+		case 0:
+			return Color.black;
+		case 1:
+			return Color.red;
+		case 2:
+			return Color.blue;
+		case 3:
+			return Color.pink;
+		case 4:
+			return Color.green;
+		case 5:
+			return Color.gray;
+		case 6:
+			return Color.magenta;
+		case 7:
+			return Color.cyan;
+		case 8:
+			return Color.orange;
+		case 9:
+			return Color.darkGray;
+		}
+		return Color.black;
 	}
 
 	/**
@@ -103,7 +134,7 @@ public class LegendTableModel extends AbstractTableModel {
 		for (i = 0; i < model.getNumCompartments(); i++) {
 			sb = model.getCompartment(i);
 			data[i][boolCol] = Boolean.TRUE;
-			data[i][colorCol] = SimulationPanel.indexToColor(i);
+			data[i][colorCol] = indexToColor(i);
 			data[i][nsbCol] = sb;
 			id2Row.put(sb.getId(), Integer.valueOf(i));
 		}
@@ -111,7 +142,7 @@ public class LegendTableModel extends AbstractTableModel {
 		for (i = 0; i < model.getNumSpecies(); i++) {
 			sb = model.getSpecies(i);
 			data[i + j][boolCol] = Boolean.TRUE;
-			data[i + j][colorCol] = SimulationPanel.indexToColor(i + j);
+			data[i + j][colorCol] = indexToColor(i + j);
 			data[i + j][nsbCol] = sb;
 			id2Row.put(sb.getId(), Integer.valueOf(i + j));
 		}
@@ -119,7 +150,7 @@ public class LegendTableModel extends AbstractTableModel {
 		for (i = 0; i < model.getNumParameters(); i++) {
 			sb = model.getParameter(i);
 			data[i + j][boolCol] = Boolean.TRUE;
-			data[i + j][colorCol] = SimulationPanel.indexToColor(i + j);
+			data[i + j][colorCol] = indexToColor(i + j);
 			data[i + j][nsbCol] = sb;
 			id2Row.put(sb.getId(), Integer.valueOf(i + j));
 		}
@@ -128,7 +159,7 @@ public class LegendTableModel extends AbstractTableModel {
 			for (i = 0; i < model.getNumReactions(); i++) {
 				sb = model.getReaction(i);
 				data[i + j][boolCol] = Boolean.TRUE;
-				data[i + j][colorCol] = SimulationPanel.indexToColor(i + j);
+				data[i + j][colorCol] = indexToColor(i + j);
 				data[i + j][nsbCol] = sb;
 				id2Row.put(sb.getId(), Integer.valueOf(i + j));
 			}
