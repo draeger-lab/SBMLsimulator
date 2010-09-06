@@ -127,8 +127,10 @@ public class SBMLsimulator {
 			SimulationFrame d = new SimulationFrame(doc.getModel());
 			d.setVisible(true);
 		} else {
-			JOptionPane.showMessageDialog(null,
-					"Could not find a valid model in the given document.");
+			String msg = GUITools
+					.toHTML("Could not find a valid model in the given document.");
+			JOptionPane.showMessageDialog(null, msg, "No model found",
+					JOptionPane.WARNING_MESSAGE);
 		}
 	}
 }

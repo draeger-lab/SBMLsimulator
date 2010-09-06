@@ -18,38 +18,20 @@
  */
 package org.sbml.simulator.gui;
 
-import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Rectangle;
-import java.awt.Robot;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedList;
 import java.util.Properties;
 
-import javax.imageio.IIOImage;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
-import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
-import javax.imageio.stream.FileImageOutputStream;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -59,7 +41,6 @@ import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
-import javax.swing.JToolBar;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -79,21 +60,19 @@ import org.sbml.jsbml.Species;
 import org.sbml.jsbml.Symbol;
 import org.sbml.jsbml.UnitDefinition;
 import org.sbml.jsbml.Variable;
+import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.SBMLinterpreter;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
+import org.sbml.simulator.math.odes.IntegrationException;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 import org.sbml.simulator.math.odes.MultiBlockTable.Block.Column;
-import org.sbml.simulator.resources.Resource;
 import org.sbml.squeezer.CfgKeys;
-import org.sbml.squeezer.gui.SettingsDialog;
-import org.sbml.squeezer.io.SBFileFilter;
 import org.sbml.squeezer.util.HTMLFormula;
 
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;
-import de.zbit.io.CSVWriter;
 import eva2.gui.FunctionArea;
 
 /**
@@ -102,78 +81,13 @@ import eva2.gui.FunctionArea;
  * @date 2010-04-06
  * 
  */
-public class SimulationPanel extends JPanel implements ActionListener,
-		ChangeListener, ItemListener, TableModelListener {
-
-	/**
-	 * Commands that can be understood by this dialog.
-	 * 
-	 * @author Andreas Dr&auml;ger
-	 * 
-	 */
-	public static enum Command {
-		/**
-		 * Open file with experimental data.
-		 */
-		OPEN_DATA,
-		/**
-		 * Save the plot as an image.
-		 */
-		SAVE_PLOT_IMAGE,
-		/**
-		 * Save the results of the simulation to a CSV file.
-		 */
-		SAVE_SIMULATION,
-		/**
-		 * Adjust user's preferences
-		 */
-		SETTINGS,
-		/**
-		 * Start a new simulation with the current settings.
-		 */
-		SIMULATION_START
-	}
+public class SimulationPanel extends JPanel implements ChangeListener,
+		ItemListener, TableModelListener {
 
 	/**
 	 * Generated serial version identifier
 	 */
 	private static final long serialVersionUID = -7278034514446047207L;
-
-	/**
-	 * 
-	 * @param index
-	 * @return
-	 */
-	public static Color indexToColor(int index) {
-		switch (index % 10) {
-		case 0:
-			return Color.black;
-		case 1:
-			return Color.red;
-		case 2:
-			return Color.blue;
-		case 3:
-			return Color.pink;
-		case 4:
-			return Color.green;
-		case 5:
-			return Color.gray;
-		case 6:
-			return Color.magenta;
-		case 7:
-			return Color.cyan;
-		case 8:
-			return Color.orange;
-		case 9:
-			return Color.darkGray;
-		}
-		return Color.black;
-	}
-
-	/**
-	 * Compression factor for JPEG output
-	 */
-	private float compression;
 
 	/**
 	 * Table for experimental data.
@@ -225,11 +139,6 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	private Model model;
 
 	/**
-	 * Standard directory to open data files.
-	 */
-	private String openDir;
-
-	/**
 	 * The step size for the spinner in the interactive parameter scan.
 	 */
 	private double paramStepSize;
@@ -238,22 +147,6 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	 * Plot area
 	 */
 	private FunctionArea plot;
-
-	/**
-	 * This is the quote character in CSV files
-	 */
-	private char quoteChar;
-
-	/**
-	 * 
-	 */
-	private String saveDir;
-
-	/**
-	 * This is the separator char in CSV files
-	 */
-	private char separatorChar;
-
 	/**
 	 * Decides whether or not a grid should be displayed in the plot.
 	 */
@@ -314,10 +207,6 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	 */
 	private JTabbedPane tabbedPane;
 	/**
-	 * The toolbar of this element.
-	 */
-	private JToolBar toolbar;
-	/**
 	 * Text field to display the quality of a simulation with respect to a given
 	 * data set.
 	 */
@@ -369,74 +258,6 @@ public class SimulationPanel extends JPanel implements ActionListener,
 		this(model);
 		try {
 			setProperties((Properties) settings.clone());
-		} catch (Exception exc) {
-			GUITools.showErrorMessage(this, exc);
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	public void actionPerformed(ActionEvent e) {
-		switch (Command.valueOf(e.getActionCommand())) {
-		case SIMULATION_START:
-			try {
-				simulate();
-			} catch (Exception exc) {
-				exc.printStackTrace();
-				GUITools.showErrorMessage(this, exc);
-			}
-			break;
-		case OPEN_DATA:
-			try {
-				openExperimentalData();
-			} catch (SBMLException exc) {
-				exc.printStackTrace();
-				GUITools.showErrorMessage(this, exc);
-			}
-			break;
-		case SAVE_PLOT_IMAGE:
-			try {
-				savePlotImage();
-			} catch (Exception exc) {
-				GUITools.showErrorMessage(this, exc);
-			}
-			break;
-		case SAVE_SIMULATION:
-			try {
-				saveSimulationResults();
-			} catch (IOException exc) {
-				GUITools.showErrorMessage(this, exc);
-			}
-			break;
-		case SETTINGS:
-			adjustPreferences();
-			break;
-		default:
-			JOptionPane.showMessageDialog(this, "Invalid option "
-					+ e.getActionCommand(), "Warning",
-					JOptionPane.WARNING_MESSAGE);
-			break;
-		}
-	}
-
-	/**
-	 * 
-	 */
-	private void adjustPreferences() {
-		try {
-			SettingsPanelSimulation ps = new SettingsPanelSimulation();
-			ps.setProperties(getProperties());
-			SettingsDialog dialog = new SettingsDialog("Simulatin Preferences");
-			Properties p = new Properties();
-			if (dialog.showSettingsDialog(getProperties(), ps) == SettingsDialog.APPROVE_OPTION) {
-				for (Object key : dialog.getSettings().keySet())
-					p.put(key, dialog.getSettings().get(key));
-				setProperties(p);
-			}
 		} catch (Exception exc) {
 			GUITools.showErrorMessage(this, exc);
 		}
@@ -533,50 +354,11 @@ public class SimulationPanel extends JPanel implements ActionListener,
 		LayoutHelper aSet = new LayoutHelper(new JPanel());
 		aSet.add(sPanel, dPanel, pPanel);
 
-		// Actions
-		JButton start = GUITools.createButton("Run", new ImageIcon(
-				Resource.class.getResource("img/gear_16.png")), this,
-				Command.SIMULATION_START,
-				"Perform a simulation run with the current settings.");
-
-		JPanel aPanel = new JPanel();
-		aPanel.add(start);
-
 		// Main
 		JPanel mPanel = new JPanel(new BorderLayout());
 		mPanel.add(aSet.getContainer(), BorderLayout.CENTER);
-		mPanel.add(aPanel, BorderLayout.SOUTH);
-		return mPanel;
-	}
 
-	/**
-	 * 
-	 * @return
-	 */
-	private JToolBar createToolBar() {
-		JToolBar toolbar = new JToolBar("Tools");
-		ImageIcon icon = new ImageIcon(Resource.class
-				.getResource("img/folder_16.png"));
-		if (icon != null)
-			toolbar.add(GUITools.createButton(icon, this, Command.OPEN_DATA,
-					"Load  experimental data from file."));
-		icon = new ImageIcon(Resource.class.getResource("img/save_16.png"));
-		if (icon != null)
-			toolbar.add(GUITools
-					.createButton(icon, this, Command.SAVE_SIMULATION,
-							"Save simulation results to file."));
-		icon = new ImageIcon(Resource.class.getResource("img/camera_16.png"));
-		if (icon != null) {
-			toolbar.add(GUITools.createButton(icon, this,
-					Command.SAVE_PLOT_IMAGE, "Save plot in an image."));
-		}
-		icon = new ImageIcon(Resource.class.getResource("img/settings_16.png"));
-		if (icon != null)
-			toolbar.add(GUITools.createButton(icon, this, Command.SETTINGS,
-					"Adjust your preferences"));
-		GUITools.setEnabled(false, toolbar, Command.SAVE_PLOT_IMAGE,
-				Command.SAVE_SIMULATION);
-		return toolbar;
+		return mPanel;
 	}
 
 	/**
@@ -665,19 +447,9 @@ public class SimulationPanel extends JPanel implements ActionListener,
 		p.put(CfgKeys.PLOT_LOG_SCALE, Boolean.valueOf(logScale.isSelected()));
 
 		/*
-		 * CSV file parsing
-		 */
-		p.put(CfgKeys.CSV_FILES_OPEN_DIR, openDir);
-		p.put(CfgKeys.CSV_FILES_SAVE_DIR, saveDir);
-		p.put(CfgKeys.CSV_FILES_SEPARATOR_CHAR, Character
-				.valueOf(separatorChar));
-		p.put(CfgKeys.CSV_FILES_QUOTE_CHAR, Character.valueOf(quoteChar));
-
-		/*
 		 * General settings
 		 */
 		p.put(CfgKeys.SPINNER_STEP_SIZE, Double.valueOf(paramStepSize));
-		p.put(CfgKeys.JPEG_COMPRESSION_FACTOR, Float.valueOf(compression));
 		p.put(CfgKeys.SPINNER_MAX_VALUE, Double.valueOf(maxSpinVal));
 
 		p.put(CfgKeys.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE, Double
@@ -748,8 +520,6 @@ public class SimulationPanel extends JPanel implements ActionListener,
 			tabbedPane.setEnabledAt(2, false);
 
 			setLayout(new BorderLayout());
-			toolbar = createToolBar();
-			add(toolbar, BorderLayout.NORTH);
 			add(tabbedPane, BorderLayout.CENTER);
 			add(createFootPanel(), BorderLayout.SOUTH);
 		} catch (Exception exc) {
@@ -957,51 +727,6 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	}
 
 	/**
-	 * @throws SBMLException
-	 * 
-	 */
-	private void openExperimentalData() throws SBMLException {
-		JFileChooser chooser = GUITools.createJFileChooser(openDir, false,
-				false, JFileChooser.FILES_ONLY, SBFileFilter.CSV_FILE_FILTER);
-		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-			try {
-				openExperimentalData(chooser.getSelectedFile());
-			} catch (Exception exc) {
-				exc.printStackTrace();
-				GUITools.showErrorMessage(this, exc);
-			}
-		}
-	}
-
-	/**
-	 * 
-	 * @param file
-	 * @throws Exception
-	 */
-	public void openExperimentalData(File file) throws Exception {
-		openDir = file.getParent();
-		CSVDataImporter importer = new CSVDataImporter();
-		MultiBlockTable data = importer.convert(model, file.getAbsolutePath());
-		expTable.setModel(data);
-		plot(data, false, showLegend.isSelected());
-		tabbedPane.setEnabledAt(2, true);
-		GUITools.setEnabled(false, toolbar, Command.OPEN_DATA);
-		distField.setText(Double.toString(computeDistance(model, solver
-				.getStepSize())));
-		distField.setEditable(false);
-		distField.setEnabled(true);
-	}
-
-	/**
-	 * 
-	 * @param path
-	 * @throws Exception
-	 */
-	public void openExperimentalData(String path) throws Exception {
-		openExperimentalData(new File(path));
-	}
-
-	/**
 	 * Plots a matrix either by displaying unconnected or connected points
 	 * depending on the connected parameter.
 	 * 
@@ -1041,60 +766,18 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	}
 
 	/**
-	 * @throws AWTException
-	 * @throws IOException
 	 * 
+	 * @param data
+	 * @throws Exception
 	 */
-	private void savePlotImage() throws AWTException, IOException {
-		Rectangle area = plot.getBounds();
-		area.setLocation(plot.getLocationOnScreen());
-		BufferedImage bufferedImage = (new Robot()).createScreenCapture(area);
-		JFileChooser fc = GUITools.createJFileChooser(saveDir, false, false,
-				JFileChooser.FILES_ONLY, SBFileFilter.PNG_FILE_FILTER,
-				SBFileFilter.JPEG_FILE_FILTER);
-		if (fc.showSaveDialog(plot) == JFileChooser.APPROVE_OPTION
-				&& !fc.getSelectedFile().exists()
-				|| (GUITools.overwriteExistingFile(this, fc.getSelectedFile()))) {
-			this.saveDir = fc.getSelectedFile().getParent();
-			File file = fc.getSelectedFile();
-			if (SBFileFilter.isPNGFile(file))
-				ImageIO.write(bufferedImage, "png", file);
-			else if (SBFileFilter.isJPEGFile(file)) {
-				FileImageOutputStream out = new FileImageOutputStream(file);
-				ImageWriter encoder = (ImageWriter) ImageIO
-						.getImageWritersByFormatName("JPEG").next();
-				JPEGImageWriteParam param = new JPEGImageWriteParam(null);
-				param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-				param.setCompressionQuality(compression);
-				encoder.setOutput(out);
-				encoder.write((IIOMetadata) null, new IIOImage(bufferedImage,
-						null, null), param);
-				out.close();
-			}
-		}
-	}
-
-	/**
-	 * @throws IOException
-	 * 
-	 */
-	private void saveSimulationResults() throws IOException {
-		if (simTable.getRowCount() > 0) {
-			JFileChooser fc = GUITools.createJFileChooser(saveDir, false,
-					false, JFileChooser.FILES_ONLY,
-					SBFileFilter.CSV_FILE_FILTER);
-			if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-				File out = fc.getSelectedFile();
-				this.saveDir = out.getParent();
-				if (!out.exists() || GUITools.overwriteExistingFile(this, out)) {
-					CSVWriter writer = new CSVWriter();
-					writer.write(simTable.getModel(), separatorChar, out);
-				}
-			}
-		} else {
-			String msg = "No simulation has been performed yet. Please run the simulation first.";
-			JOptionPane.showMessageDialog(this, GUITools.toHTML(msg, 40));
-		}
+	public void setExperimentalData(MultiBlockTable data) throws Exception {
+		expTable.setModel(data);
+		plot(data, false, showLegend.isSelected());
+		tabbedPane.setEnabledAt(2, true);
+		distField.setText(Double.toString(computeDistance(model, solver
+				.getStepSize())));
+		distField.setEditable(false);
+		distField.setEnabled(true);
 	}
 
 	/**
@@ -1151,20 +834,12 @@ public class SimulationPanel extends JPanel implements ActionListener,
 				"Add or remove a legend in the plot.");
 		maxStepsPerUnit = ((Integer) settings
 				.get(CfgKeys.SIM_MAX_STEPS_PER_UNIT_TIME)).intValue();
-		openDir = settings.get(CfgKeys.CSV_FILES_OPEN_DIR).toString();
-		separatorChar = ((Character) settings
-				.get(CfgKeys.CSV_FILES_SEPARATOR_CHAR)).charValue();
-		quoteChar = ((Character) settings.get(CfgKeys.CSV_FILES_QUOTE_CHAR))
-				.charValue();
 		maxCompartmentValue = ((Number) settings
 				.get(CfgKeys.SIM_MAX_COMPARTMENT_SIZE)).doubleValue();
 		maxSpeciesValue = ((Number) settings.get(CfgKeys.SIM_MAX_SPECIES_VALUE))
 				.doubleValue();
 		maxParameterValue = ((Number) settings
 				.get(CfgKeys.SIM_MAX_PARAMETER_VALUE)).doubleValue();
-		saveDir = settings.get(CfgKeys.CSV_FILES_SAVE_DIR).toString();
-		compression = Float.parseFloat(settings.get(
-				CfgKeys.JPEG_COMPRESSION_FACTOR).toString());
 		/*
 		 * Solver and distance.
 		 */
@@ -1231,8 +906,6 @@ public class SimulationPanel extends JPanel implements ActionListener,
 				/ stepsModel.getNumber().doubleValue();
 		simulate(model, t1val, t2val, stepSize);
 		tabbedPane.setEnabledAt(1, true);
-		GUITools.setEnabled(true, toolbar, Command.SAVE_SIMULATION,
-				Command.SAVE_PLOT_IMAGE);
 	}
 
 	/**
@@ -1265,10 +938,13 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	 * @param timePoints
 	 * @param stepSize
 	 * @return
-	 * @throws Exception
+	 * @throws SBMLException
+	 * @throws IntegrationException
+	 * @throws ModelOverdeterminedException
 	 */
 	private MultiBlockTable solveAtTimePoints(Model model, double times[],
-			double stepSize) throws Exception {
+			double stepSize) throws SBMLException, IntegrationException,
+			ModelOverdeterminedException {
 		SBMLinterpreter interpreter = new SBMLinterpreter(model);
 		solver.setStepSize(stepSize);
 		solver.setIncludeIntermediates(false);
@@ -1367,5 +1043,21 @@ public class SimulationPanel extends JPanel implements ActionListener,
 				}
 			}
 		}
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public JTable getSimulationResultsTable() {
+		return simTable;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public FunctionArea getFunctionArea() {
+		return plot;
 	}
 }
