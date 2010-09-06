@@ -18,14 +18,13 @@
  */
 package org.sbml.simulator.gui;
 
-import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.Properties;
 
 import javax.swing.JComponent;
-import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 
@@ -39,7 +38,7 @@ import de.zbit.gui.GUITools;
  * @date 2010-04-15
  * 
  */
-public class SimulationDialog extends JDialog implements ActionListener {
+public class SimulationFrame extends JFrame implements ActionListener {
 
 	static {
 		try {
@@ -65,8 +64,8 @@ public class SimulationDialog extends JDialog implements ActionListener {
 	 * @param model
 	 * @param settings
 	 */
-	public SimulationDialog(Frame owner, Model model, Properties settings) {
-		this(owner, model, new SimulationPanel(model, settings));
+	public SimulationFrame(Model model, Properties settings) {
+		this(model, new SimulationPanel(model, settings));
 	}
 
 	/**
@@ -74,8 +73,8 @@ public class SimulationDialog extends JDialog implements ActionListener {
 	 * @param owner
 	 * @param model
 	 */
-	public SimulationDialog(Frame owner, Model model) {
-		this(owner, model, new SimulationPanel(model));
+	public SimulationFrame(Model model) {
+		this(model, new SimulationPanel(model));
 	}
 
 	/**
@@ -84,13 +83,12 @@ public class SimulationDialog extends JDialog implements ActionListener {
 	 * @param model
 	 * @param simulationPanel
 	 */
-	public SimulationDialog(Frame owner, Model model,
+	public SimulationFrame(Model model,
 			SimulationPanel simulationPanel) {
-		super(owner, "Simulation of model " + model.toString());
-		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		super("Simulation of model " + model.toString());
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		simPanel = simulationPanel;
 		getContentPane().add(simPanel);
-		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		pack();
 		int maxSize = 700;
 		if (getWidth() > 1.5 * maxSize) {
@@ -99,7 +97,7 @@ public class SimulationDialog extends JDialog implements ActionListener {
 		if (getHeight() > maxSize) {
 			this.setSize(getWidth(), maxSize);
 		}
-		setLocationRelativeTo(owner);
+		setLocationRelativeTo(null);
 
 		final KeyStroke keyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,
 				0, true);
