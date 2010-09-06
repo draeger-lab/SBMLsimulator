@@ -7,11 +7,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.xml.stream.XMLStreamException;
 
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.xml.stax.SBMLReader;
-import org.sbml.simulator.gui.SimulationDialog;
+import org.sbml.simulator.gui.SimulationFrame;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.squeezer.io.SBFileFilter;
@@ -97,10 +98,7 @@ public class SBMLsimulator {
 		System.out.println("reading model");
 		SBMLDocument doc = SBMLReader.readSBML(pathname);
 		System.out.println("starting simulator");
-		if ((doc != null) && (doc.isSetModel())) {
-			SimulationDialog d = new SimulationDialog(null, doc.getModel());
-			d.setVisible(true);
-		}
+		showGUI(doc);
 	}
 
 	public SBMLsimulator() {
@@ -109,11 +107,7 @@ public class SBMLsimulator {
 				JFileChooser.FILES_ONLY, SBFileFilter.SBML_FILE_FILTER);
 		if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
 			try {
-				SBMLDocument doc = SBMLReader.readSBML(chooser.getSelectedFile());
-				if ((doc != null) && (doc.isSetModel())) {
-					SimulationDialog d = new SimulationDialog(null, doc.getModel());
-					d.setVisible(true);
-				}
+				showGUI(SBMLReader.readSBML(chooser.getSelectedFile()));
 			} catch (FileNotFoundException exc) {
 				GUITools.showErrorMessage(null, exc);
 				exc.printStackTrace();
@@ -124,4 +118,17 @@ public class SBMLsimulator {
 		}
 	}
 
+	/**
+	 * 
+	 * @param doc
+	 */
+	private void showGUI(SBMLDocument doc) {
+		if ((doc != null) && (doc.isSetModel())) {
+			SimulationFrame d = new SimulationFrame(doc.getModel());
+			d.setVisible(true);
+		} else {
+			JOptionPane.showMessageDialog(null,
+					"Could not find a valid model in the given document.");
+		}
+	}
 }

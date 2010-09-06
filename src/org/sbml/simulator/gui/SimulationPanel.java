@@ -33,10 +33,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.Hashtable;
 import java.util.LinkedList;
-import java.util.NoSuchElementException;
 import java.util.Properties;
 
 import javax.imageio.IIOImage;
@@ -46,15 +43,12 @@ import javax.imageio.ImageWriter;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
 import javax.imageio.stream.FileImageOutputStream;
-import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
@@ -71,10 +65,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.text.NumberFormatter;
 
 import org.sbml.jsbml.Compartment;
@@ -89,7 +79,6 @@ import org.sbml.jsbml.Species;
 import org.sbml.jsbml.Symbol;
 import org.sbml.jsbml.UnitDefinition;
 import org.sbml.jsbml.Variable;
-import org.sbml.jsbml.util.ValuePair;
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.SBMLinterpreter;
@@ -106,157 +95,6 @@ import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;
 import de.zbit.io.CSVWriter;
 import eva2.gui.FunctionArea;
-
-/**
- * @author Andreas Dr&auml;ger
- * @since 1.4
- * 
- */
-class ColorEditor extends AbstractCellEditor implements TableCellEditor,
-		ActionListener {
-	/**
-	 * 
-	 */
-	public static final String EDIT = "edit";
-	/**
-	 * Generated serial version identifier.
-	 */
-	private static final long serialVersionUID = -3645125690115981580L;
-	/**
-	 * 
-	 */
-	private JButton button;
-	/**
-	 * 
-	 */
-	private JColorChooser colorChooser;
-	/**
-	 * 
-	 */
-	private Color currentColor;
-	/**
-	 * 
-	 */
-	private JDialog dialog;
-
-	/**
-	 * 
-	 */
-	public ColorEditor() {
-		button = new JButton();
-		button.setActionCommand(EDIT);
-		button.addActionListener(this);
-		button.setBorderPainted(false);
-
-		// Set up the dialog that the button brings up.
-		colorChooser = new JColorChooser();
-		dialog = JColorChooser.createDialog(button, "Pick a Color", true,
-				colorChooser, this, null);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	public void actionPerformed(ActionEvent e) {
-		if (EDIT.equals(e.getActionCommand())) {
-			// The user has clicked the cell, so
-			// bring up the dialog.
-			button.setBackground(currentColor);
-			colorChooser.setColor(currentColor);
-			dialog.setVisible(true);
-
-			fireEditingStopped(); // Make the renderer reappear.
-
-		} else { // User pressed dialog's "OK" button.
-			currentColor = colorChooser.getColor();
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.CellEditor#getCellEditorValue()
-	 */
-	public Object getCellEditorValue() {
-		return currentColor;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * javax.swing.table.TableCellEditor#getTableCellEditorComponent(javax.swing
-	 * .JTable, java.lang.Object, boolean, int, int)
-	 */
-	public Component getTableCellEditorComponent(JTable table, Object value,
-			boolean isSelected, int row, int column) {
-		currentColor = (Color) value;
-		return button;
-	}
-}
-
-/**
- * A table model that allows easy manipulation of the underlying data.
- * 
- * @author Andreas Dr&auml;ger
- * @date 2010-04-08
- * @since 1.4
- */
-class MyDefaultTableModel extends DefaultTableModel {
-
-	/**
-	 * Generated serial version identifier
-	 */
-	private static final long serialVersionUID = 6339470859385085061L;
-	/**
-	 * Field to indicate columns that are editable.
-	 */
-	private boolean[] colEditable;
-
-	/**
-	 * 
-	 * @param data
-	 * @param columnNames
-	 */
-	public MyDefaultTableModel(Object[][] data, String[] columnNames) {
-		super(data, columnNames);
-		colEditable = new boolean[columnNames.length];
-		Arrays.fill(colEditable, false);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.table.AbstractTableModel#getColumnClass(int)
-	 */
-	@Override
-	public Class<?> getColumnClass(int c) {
-		return getValueAt(0, c).getClass();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.table.DefaultTableModel#isCellEditable(int, int)
-	 */
-	@Override
-	public boolean isCellEditable(int row, int column) {
-		return colEditable[column];
-	}
-
-	/**
-	 * Decide whether or not the column at the given index should be editable.
-	 * 
-	 * @param column
-	 * @param editable
-	 */
-	public void setColumnEditable(int column, boolean editable) {
-		colEditable[column] = editable;
-	}
-}
 
 /**
  * @author Andreas Dr&auml;ger
@@ -1109,10 +947,11 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	private JTable legendTable(Model model) {
 		JTable tab = new JTable();
 		tab.setName("legend");
-		tab.setModel(new TableModelLedgend(model, includeReactions));
+		tab.setModel(new LegendTableModel(model, includeReactions));
 		tab.setDefaultEditor(Color.class, new ColorEditor());
-		tab.setDefaultRenderer(Color.class, new TableCellRendererObjects());
-		tab.setDefaultRenderer(Symbol.class, new TableCellRendererObjects());
+		LegendTableCellRenderer renderer = new LegendTableCellRenderer();
+		tab.setDefaultRenderer(Color.class, renderer);
+		tab.setDefaultRenderer(NamedSBase.class, renderer);
 		tab.getModel().addTableModelListener(this);
 		return tab;
 	}
@@ -1175,7 +1014,7 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	 */
 	private void plot(MultiBlockTable solution, boolean connected,
 			boolean showLegend) {
-		TableModelLedgend tabMod = (TableModelLedgend) legend.getModel();
+		LegendTableModel tabMod = (LegendTableModel) legend.getModel();
 		int i, j, graphLabel;
 		for (i = 1; i < solution.getColumnCount(); i++) {
 			Column column = solution.getColumn(i);
@@ -1511,8 +1350,8 @@ public class SimulationPanel extends JPanel implements ActionListener,
 	 * TableModelEvent)
 	 */
 	public void tableChanged(TableModelEvent e) {
-		if (e.getSource() instanceof TableModelLedgend) {
-			if ((e.getColumn() == TableModelLedgend.getBooleanColumn())
+		if (e.getSource() instanceof LegendTableModel) {
+			if ((e.getColumn() == LegendTableModel.getBooleanColumn())
 					&& (e.getType() == TableModelEvent.UPDATE)) {
 				plot.clearAll();
 				if (simTable.getRowCount() > 0) {
@@ -1528,312 +1367,5 @@ public class SimulationPanel extends JPanel implements ActionListener,
 				}
 			}
 		}
-	}
-}
-
-/**
- * 
- * @author Andreas Dr&auml;ger
- * @since 1.4
- * @date 2010-04-07
- */
-class TableCellRendererObjects extends JLabel implements TableCellRenderer {
-
-	/**
-	 * Generated serial version identifier
-	 */
-	private static final long serialVersionUID = 5233542392522297524L;
-
-	/**
-	 * 
-	 */
-	public TableCellRendererObjects() {
-		super();
-		setOpaque(true);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * javax.swing.table.TableCellRenderer#getTableCellRendererComponent(javax
-	 * .swing.JTable, java.lang.Object, boolean, boolean, int, int)
-	 */
-	public Component getTableCellRendererComponent(JTable table, Object value,
-			boolean isSelected, boolean hasFocus, int row, int column) {
-		setBackground(Color.WHITE);
-		if (value instanceof Color) {
-			Color newColor = (Color) value;
-			setToolTipText("RGB value: " + newColor.getRed() + ", "
-					+ newColor.getGreen() + ", " + newColor.getBlue());
-			setBackground(newColor);
-		} else if (value instanceof Symbol) {
-			Symbol s = (Symbol) value;
-			setText(s.isSetName() ? s.getName() : s.getId());
-			setBackground(Color.WHITE);
-		} else
-			setText(value.toString());
-		return this;
-	}
-
-}
-
-/**
- * 
- * @author Andreas Dr&auml;ger
- * @since 1.4
- * @date 2010-04-07
- * 
- */
-class TableModelLedgend extends AbstractTableModel {
-
-	/**
-	 * Column indices for the content
-	 */
-	private static final int boolCol = 0, colorCol = 1, nsbCol = 2;
-
-	/**
-	 * 
-	 * @return
-	 */
-	public static int getBooleanColumn() {
-		return boolCol;
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public static int getColorColumn() {
-		return colorCol;
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public static int getNamedSBaseColumn() {
-		return nsbCol;
-	}
-
-	/**
-	 * So save run time memorize the last queried key of the hash.
-	 */
-	private ValuePair<String, Integer> lastQueried;
-
-	/**
-	 * Generated serial version identifier.
-	 */
-	private static final long serialVersionUID = 7360401460080111135L;
-	/**
-	 * A colored button for each model component and
-	 */
-	private Object[][] data;
-
-	/**
-	 * A mapping between the ids in the table and the corresponding row.
-	 */
-	private Hashtable<String, Integer> id2Row;
-
-	/**
-	 * 
-	 * @param model
-	 */
-	public TableModelLedgend(Model model) {
-		this(model, false);
-	}
-
-	/**
-	 * 
-	 * @param id
-	 * @return
-	 */
-	public String getNameFor(String id) {
-		int index = getRowFor(id);
-		if (index >= 0) {
-			return getValueAt(index, nsbCol).toString();
-		}
-		throw new NoSuchElementException(id);
-	}
-
-	/**
-	 * 
-	 * @param id
-	 * @return
-	 */
-	public Color getColorFor(String id) {
-		int index = getRowFor(id);
-		if (index >= 0) {
-			return (Color) getValueAt(index, colorCol);
-		}
-		throw new NoSuchElementException(id);
-	}
-
-	/**
-	 * 
-	 * @param model
-	 * @param includeReactions
-	 */
-	public TableModelLedgend(Model model, boolean includeReactions) {
-		int dim = model.getNumCompartments() + model.getNumSpecies()
-				+ model.getNumParameters();
-		if (includeReactions) {
-			dim += model.getNumReactions();
-		}
-		id2Row = new Hashtable<String, Integer>();
-		lastQueried = null;
-		data = new Object[dim][3];
-		NamedSBase sb;
-		int i, j;
-		for (i = 0; i < model.getNumCompartments(); i++) {
-			sb = model.getCompartment(i);
-			data[i][boolCol] = Boolean.TRUE;
-			data[i][colorCol] = SimulationPanel.indexToColor(i);
-			data[i][nsbCol] = sb;
-			id2Row.put(sb.getId(), Integer.valueOf(i));
-		}
-		j = model.getNumCompartments();
-		for (i = 0; i < model.getNumSpecies(); i++) {
-			sb = model.getSpecies(i);
-			data[i + j][boolCol] = Boolean.TRUE;
-			data[i + j][colorCol] = SimulationPanel.indexToColor(i + j);
-			data[i + j][nsbCol] = sb;
-			id2Row.put(sb.getId(), Integer.valueOf(i + j));
-		}
-		j = model.getNumCompartments() + model.getNumSpecies();
-		for (i = 0; i < model.getNumParameters(); i++) {
-			sb = model.getParameter(i);
-			data[i + j][boolCol] = Boolean.TRUE;
-			data[i + j][colorCol] = SimulationPanel.indexToColor(i + j);
-			data[i + j][nsbCol] = sb;
-			id2Row.put(sb.getId(), Integer.valueOf(i + j));
-		}
-		if (includeReactions) {
-			j = model.getNumSymbols();
-			for (i = 0; i < model.getNumReactions(); i++) {
-				sb = model.getReaction(i);
-				data[i + j][boolCol] = Boolean.TRUE;
-				data[i + j][colorCol] = SimulationPanel.indexToColor(i + j);
-				data[i + j][nsbCol] = sb;
-				id2Row.put(sb.getId(), Integer.valueOf(i + j));
-			}
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.table.AbstractTableModel#getColumnClass(int)
-	 */
-	@Override
-	public Class<?> getColumnClass(int c) {
-		return getValueAt(0, c).getClass();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.table.TableModel#getColumnCount()
-	 */
-	public int getColumnCount() {
-		return data.length > 0 ? data[0].length : 0;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.table.AbstractTableModel#getColumnName(int)
-	 */
-	@Override
-	public String getColumnName(int column) {
-		if (column == boolCol)
-			return "Plot";
-		if (column == colorCol)
-			return "Color";
-		if (column == nsbCol)
-			return "Symbol";
-		throw new IndexOutOfBoundsException("Only " + getColumnCount()
-				+ " columns, no column " + column);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.table.TableModel#getRowCount()
-	 */
-	public int getRowCount() {
-		return data.length;
-	}
-
-	/**
-	 * 
-	 * @param id
-	 * @return
-	 */
-	public int getRowFor(String id) {
-		int index = -1;
-		if (lastQueried == null) {
-			lastQueried = new ValuePair<String, Integer>(id, Integer
-					.valueOf(index));
-		} else if (id.equals(lastQueried.getA())) {
-			return lastQueried.getB().intValue();
-		}
-		if (id2Row.containsKey(id)) {
-			index = id2Row.get(id).intValue();
-			lastQueried.setA(id);
-			lastQueried.setB(Integer.valueOf(index));
-		}
-		return index;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.table.TableModel#getValueAt(int, int)
-	 */
-	public Object getValueAt(int rowIndex, int columnIndex) {
-		if (columnIndex == nsbCol) {
-			NamedSBase nsb = (NamedSBase) data[rowIndex][columnIndex];
-			return nsb.isSetName() ? nsb.getName() : nsb.getId();
-		}
-		return data[rowIndex][columnIndex];
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.table.AbstractTableModel#isCellEditable(int, int)
-	 */
-	@Override
-	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		if ((columnIndex < getColumnCount()) && (rowIndex < getRowCount())) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * 
-	 * @param id
-	 * @return
-	 */
-	public boolean isSelected(String id) {
-		int index = getRowFor(id);
-		if (index >= 0) {
-			return ((Boolean) getValueAt(index, boolCol)).booleanValue();
-		}
-		return false;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.table.AbstractTableModel#setValueAt(java.lang.Object,
-	 * int, int)
-	 */
-	@Override
-	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-		data[rowIndex][columnIndex] = aValue;
-		fireTableCellUpdated(rowIndex, columnIndex);
 	}
 }
