@@ -24,6 +24,7 @@ import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -37,10 +38,14 @@ import javax.imageio.ImageWriter;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
 import javax.imageio.stream.FileImageOutputStream;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
@@ -49,14 +54,15 @@ import javax.swing.table.TableModel;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLException;
+import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 import org.sbml.simulator.resources.Resource;
 import org.sbml.squeezer.CfgKeys;
 import org.sbml.squeezer.gui.SettingsDialog;
-import org.sbml.squeezer.io.SBFileFilter;
 
 import de.zbit.gui.GUITools;
 import de.zbit.io.CSVWriter;
+import de.zbit.io.SBFileFilter;
 import eva2.gui.FunctionArea;
 
 /**
@@ -65,7 +71,7 @@ import eva2.gui.FunctionArea;
  * @date 2010-04-15
  * 
  */
-public class SimulationFrame extends JFrame implements ActionListener {
+public class SimulationUI extends JFrame implements ActionListener {
 
 	/**
 	 * Commands that can be understood by this dialog.
@@ -93,7 +99,24 @@ public class SimulationFrame extends JFrame implements ActionListener {
 		/**
 		 * Start a new simulation with the current settings.
 		 */
-		SIMULATION_START
+		SIMULATION_START,
+		/**
+		 * To exit this program.
+		 */
+		EXIT,
+		/**
+		 * Show about message, i.e., information about the authors of this
+		 * program.
+		 */
+		HELP_ABOUT,
+		/**
+		 * Starts the help web page.
+		 */
+		HELP_ONLINE,
+		/**
+		 * Displays the software license.
+		 */
+		HELP_LICENSE
 	}
 
 	static {
@@ -140,7 +163,7 @@ public class SimulationFrame extends JFrame implements ActionListener {
 	 * This is the separator char in CSV files
 	 */
 	private char separatorChar;
-	
+
 	/**
 	 * Standard directory to open data files.
 	 */
@@ -151,7 +174,7 @@ public class SimulationFrame extends JFrame implements ActionListener {
 	 * @param owner
 	 * @param model
 	 */
-	public SimulationFrame(Model model) {
+	public SimulationUI(Model model) {
 		this(model, new SimulationPanel(model));
 	}
 
@@ -161,7 +184,7 @@ public class SimulationFrame extends JFrame implements ActionListener {
 	 * @param model
 	 * @param settings
 	 */
-	public SimulationFrame(Model model, Properties settings) {
+	public SimulationUI(Model model, Properties settings) {
 		this(model, new SimulationPanel(model, settings));
 	}
 
@@ -171,9 +194,19 @@ public class SimulationFrame extends JFrame implements ActionListener {
 	 * @param model
 	 * @param simulationPanel
 	 */
-	public SimulationFrame(Model model, SimulationPanel simulationPanel) {
+	public SimulationUI(Model model, SimulationPanel simulationPanel) {
 		super("Simulation of model " + model.toString());
+
+		// init properties
+		this.openDir = System.getProperty("user.home");
+		this.saveDir = System.getProperty("user.home");
+		this.compression = 0.9f;
+		this.quoteChar = '#';
+		this.separatorChar = ',';
+		setProperties(simulationPanel.getProperties());
+
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setJMenuBar(createJMenuBar());
 		toolbar = createToolBar();
 		add(toolbar, BorderLayout.NORTH);
 		simPanel = simulationPanel;
@@ -203,12 +236,15 @@ public class SimulationFrame extends JFrame implements ActionListener {
 	 * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
 	public void actionPerformed(ActionEvent e) {
+		if (e.getActionCommand() == null) {
+			return;
+		}
 		switch (Command.valueOf(e.getActionCommand())) {
 		case SIMULATION_START:
 			try {
 				simulate();
-				GUITools.setEnabled(true, toolbar, Command.SAVE_SIMULATION,
-						Command.SAVE_PLOT_IMAGE);
+				GUITools.setEnabled(true, getJMenuBar(), toolbar,
+						Command.SAVE_SIMULATION, Command.SAVE_PLOT_IMAGE);
 			} catch (Exception exc) {
 				exc.printStackTrace();
 				GUITools.showErrorMessage(this, exc);
@@ -238,6 +274,27 @@ public class SimulationFrame extends JFrame implements ActionListener {
 			break;
 		case SETTINGS:
 			adjustPreferences();
+			break;
+		case EXIT:
+			// TODO: try to save the settings
+			System.exit(0);
+		case HELP_ONLINE:
+			GUITools.showMessage(Resource.class
+					.getResource("html/online-help.html"), "SBMLsimulator "
+					+ SBMLsimulator.getVersionNumber() + " online help", this,
+					getIconHelp48());
+			break;
+		case HELP_ABOUT:
+			GUITools.showMessage(Resource.class.getResource("html/about.html"),
+					"About SBMLsimulator " + SBMLsimulator.getVersionNumber(),
+					this);
+			break;
+		case HELP_LICENSE:
+			GUITools.showMessage(Resource.class
+					.getResource("html/License.html"),
+					"License of SBMLsimulator "
+							+ SBMLsimulator.getVersionNumber(), this,
+					getIconLicense48());
 			break;
 		default:
 			JOptionPane.showMessageDialog(this, "Invalid option "
@@ -271,32 +328,93 @@ public class SimulationFrame extends JFrame implements ActionListener {
 	 * 
 	 * @return
 	 */
+	private JMenuBar createJMenuBar() {
+		JMenuBar menuBar = new JMenuBar();
+
+		/*
+		 * File
+		 */
+		JMenuItem openItem = GUITools.createJMenuItem("Open", this,
+				Command.OPEN_DATA, getIconFolder(), KeyStroke.getKeyStroke('O',
+						InputEvent.CTRL_DOWN_MASK));
+		JMenuItem saveSimItem = GUITools.createJMenuItem("Save simulation",
+				this, Command.SAVE_SIMULATION, getIconSave(), KeyStroke
+						.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK));
+		JMenuItem savePlotItem = GUITools.createJMenuItem("Save plot", this,
+				Command.SAVE_PLOT_IMAGE, getIconCamera());
+		JMenuItem exitItem = GUITools.createJMenuItem("Exit", this,
+				Command.EXIT, KeyStroke.getKeyStroke(KeyEvent.VK_F4,
+						InputEvent.ALT_DOWN_MASK));
+
+		JMenu fileMenu = GUITools.createJMenu("File", openItem, saveSimItem,
+				savePlotItem, exitItem);
+
+		/*
+		 * Edit
+		 */
+		JMenuItem settings = GUITools.createJMenuItem("Settings", this,
+				Command.SETTINGS, getIconSettings(), KeyStroke.getKeyStroke(
+						'P', InputEvent.ALT_DOWN_MASK));
+		JMenuItem simulation = GUITools.createJMenuItem("Start simulation",
+				this, Command.SIMULATION_START, getIconGear(), 'S');
+		JMenu editMenu = GUITools.createJMenu("Edit", simulation);
+		editMenu.addSeparator();
+		editMenu.add(settings);
+
+		/*
+		 * Help
+		 */
+		JMenuItem help = GUITools.createJMenuItem("Online help", this,
+				Command.HELP_ONLINE, getIconHelp(), KeyStroke.getKeyStroke(
+						KeyEvent.VK_F1, 0));
+		JMenuItem about = GUITools.createJMenuItem("About", this,
+				Command.HELP_ABOUT, getIconInfo(), KeyStroke.getKeyStroke(
+						KeyEvent.VK_F2, 0));
+		JMenuItem license = GUITools.createJMenuItem("License", this,
+				Command.HELP_LICENSE, getIconLicense(), 'L');
+		JMenu helpMenu = GUITools.createJMenu("Help", help, about, license);
+
+		menuBar.add(fileMenu);
+		menuBar.add(editMenu);
+
+		try {
+			menuBar.setHelpMenu(helpMenu);
+		} catch (Error err) {
+			menuBar.add(helpMenu);
+		}
+
+		return menuBar;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
 	private JToolBar createToolBar() {
 		JToolBar toolbar = new JToolBar("Tools");
-		ImageIcon icon = new ImageIcon(Resource.class
-				.getResource("img/folder_16.png"));
+		ImageIcon icon = getIconFolder();
 		if (icon != null)
 			toolbar.add(GUITools.createButton(icon, this, Command.OPEN_DATA,
 					"Load  experimental data from file."));
-		icon = new ImageIcon(Resource.class.getResource("img/save_16.png"));
+		icon = getIconSave();
 		if (icon != null)
 			toolbar.add(GUITools
 					.createButton(icon, this, Command.SAVE_SIMULATION,
 							"Save simulation results to file."));
-		icon = new ImageIcon(Resource.class.getResource("img/camera_16.png"));
+		icon = getIconCamera();
 		if (icon != null) {
 			toolbar.add(GUITools.createButton(icon, this,
 					Command.SAVE_PLOT_IMAGE, "Save plot in an image."));
 		}
-		icon = new ImageIcon(Resource.class.getResource("img/settings_16.png"));
+		icon = getIconSettings();
 		if (icon != null) {
 			toolbar.add(GUITools.createButton(icon, this, Command.SETTINGS,
 					"Adjust your preferences"));
 		}
-		GUITools.setEnabled(false, toolbar, Command.SAVE_PLOT_IMAGE,
-				Command.SAVE_SIMULATION);
+		GUITools.setEnabled(false, getJMenuBar(), toolbar,
+				Command.SAVE_PLOT_IMAGE, Command.SAVE_SIMULATION);
 
-		icon = new ImageIcon(Resource.class.getResource("img/gear_16.png"));
+		icon = getIconGear();
 		if (icon != null) {
 			toolbar.add(GUITools.createButton(icon, this,
 					Command.SIMULATION_START,
@@ -310,10 +428,90 @@ public class SimulationFrame extends JFrame implements ActionListener {
 	 * 
 	 * @return
 	 */
+	private ImageIcon getIconCamera() {
+		return new ImageIcon(Resource.class.getResource("img/camera_16.png"));
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	private ImageIcon getIconFolder() {
+		return new ImageIcon(Resource.class.getResource("img/folder_16.png"));
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	private ImageIcon getIconGear() {
+		return new ImageIcon(Resource.class.getResource("img/gear_16.png"));
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	private Icon getIconHelp() {
+		return new ImageIcon(Resource.class.getResource("img/help_16.png"));
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	private Icon getIconHelp48() {
+		return new ImageIcon(Resource.class.getResource("img/help_48.png"));
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	private Icon getIconInfo() {
+		return new ImageIcon(Resource.class.getResource("img/info_16.png"));
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	private Icon getIconLicense() {
+		return new ImageIcon(Resource.class.getResource("img/licence_16.png"));
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	private Icon getIconLicense48() {
+		return new ImageIcon(Resource.class.getResource("img/licence_48.png"));
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	private ImageIcon getIconSave() {
+		return new ImageIcon(Resource.class.getResource("img/save_16.png"));
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	private ImageIcon getIconSettings() {
+		return new ImageIcon(Resource.class.getResource("img/settings_16.png"));
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
 	public Properties getProperties() {
 
 		Properties p = simPanel.getProperties();
-		
+
 		/*
 		 * General
 		 */
@@ -357,7 +555,7 @@ public class SimulationFrame extends JFrame implements ActionListener {
 		openDir = file.getParent();
 		CSVDataImporter importer = new CSVDataImporter();
 		MultiBlockTable data = importer.convert(model, file.getAbsolutePath());
-		GUITools.setEnabled(false, toolbar, Command.OPEN_DATA);
+		GUITools.setEnabled(false, getJMenuBar(), toolbar, Command.OPEN_DATA);
 		simPanel.setExperimentalData(data);
 	}
 
@@ -438,18 +636,28 @@ public class SimulationFrame extends JFrame implements ActionListener {
 		/*
 		 * CSV file parsing
 		 */
-		openDir = p.get(CfgKeys.CSV_FILES_OPEN_DIR).toString();
-		separatorChar = ((Character) p.get(CfgKeys.CSV_FILES_SEPARATOR_CHAR))
-				.charValue();
-		quoteChar = ((Character) p.get(CfgKeys.CSV_FILES_QUOTE_CHAR))
-				.charValue();
-		saveDir = p.get(CfgKeys.CSV_FILES_SAVE_DIR).toString();
-		
+		if (p.containsKey(CfgKeys.CSV_FILES_OPEN_DIR)) {
+			openDir = p.get(CfgKeys.CSV_FILES_OPEN_DIR).toString();
+		}
+		if (p.containsKey(CfgKeys.CSV_FILES_SEPARATOR_CHAR)) {
+			separatorChar = ((Character) p
+					.get(CfgKeys.CSV_FILES_SEPARATOR_CHAR)).charValue();
+		}
+		if (p.containsKey(CfgKeys.CSV_FILES_QUOTE_CHAR)) {
+			quoteChar = ((Character) p.get(CfgKeys.CSV_FILES_QUOTE_CHAR))
+					.charValue();
+		}
+		if (p.containsKey(CfgKeys.CSV_FILES_SAVE_DIR)) {
+			saveDir = p.get(CfgKeys.CSV_FILES_SAVE_DIR).toString();
+		}
+
 		/*
 		 * General
 		 */
-		compression = Float.parseFloat(p.get(
-				CfgKeys.JPEG_COMPRESSION_FACTOR).toString());
+		if (p.containsKey(CfgKeys.JPEG_COMPRESSION_FACTOR)) {
+			compression = Float.parseFloat(p.get(
+					CfgKeys.JPEG_COMPRESSION_FACTOR).toString());
+		}
 	}
 
 	/**

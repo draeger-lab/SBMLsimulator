@@ -21,15 +21,15 @@ public class SimulationTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		try {
-			System.loadLibrary("sbmlj");
-			// Extra check to be sure we have access to libSBML:
-			Class.forName("org.sbml.libsbml.libsbml");
-		} catch (Exception e) {
-			System.err.println("Error: could not load the libSBML library");
-			e.printStackTrace();
-			System.exit(1);
-		}
+//		try {
+//			System.loadLibrary("sbmlj");
+//			// Extra check to be sure we have access to libSBML:
+//			Class.forName("org.sbml.libsbml.libsbml");
+//		} catch (Exception e) {
+//			System.err.println("Error: could not load the libSBML library");
+//			e.printStackTrace();
+//			System.exit(1);
+//		}
 		// path =
 		// "C:/Dokumente und Einstellungen/radbarbeit11/Desktop/tst suite/sbml-test-cases-2009-09-05/cases/semantic/";
 		// path += "00204/00204-sbml-l2v4.xml";

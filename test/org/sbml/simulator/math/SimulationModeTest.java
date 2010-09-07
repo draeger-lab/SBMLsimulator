@@ -8,7 +8,7 @@ import javax.swing.JOptionPane;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.resources.Resource;
 import org.sbml.jsbml.xml.stax.SBMLReader;
-import org.sbml.simulator.gui.SimulationFrame;
+import org.sbml.simulator.gui.SimulationUI;
 import org.sbml.squeezer.CfgKeys;
 
 /**
@@ -21,15 +21,15 @@ public class SimulationModeTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		try {
-			System.loadLibrary("sbmlj");
-			// Extra check to be sure we have access to libSBML:
-			Class.forName("org.sbml.libsbml.libsbml");
-		} catch (Exception e) {
-			System.err.println("Error: could not load the libSBML library");
-			e.printStackTrace();
-			System.exit(1);
-		}
+//		try {
+//			System.loadLibrary("sbmlj");
+//			// Extra check to be sure we have access to libSBML:
+//			Class.forName("org.sbml.libsbml.libsbml");
+//		} catch (Exception e) {
+//			System.err.println("Error: could not load the libSBML library");
+//			e.printStackTrace();
+//			System.exit(1);
+//		}
 		new SimulationModeTest(args[0]);
 	}
 
@@ -82,7 +82,7 @@ public class SimulationModeTest {
 
 				Model model = SBMLReader.readSBML(sbmlfile).getModel();
 				if (model != null) {
-					SimulationFrame d = new SimulationFrame(model, settings);
+					SimulationUI d = new SimulationUI(model, settings);
 					d.setVariables(cfg.get("variables").toString().trim()
 							.split(", "));
 					if (csvfile != null)
