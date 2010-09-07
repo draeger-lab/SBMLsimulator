@@ -12,12 +12,12 @@ import javax.xml.stream.XMLStreamException;
 
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.xml.stax.SBMLReader;
-import org.sbml.simulator.gui.SimulationFrame;
+import org.sbml.simulator.gui.SimulationUI;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
-import org.sbml.squeezer.io.SBFileFilter;
 
 import de.zbit.gui.GUITools;
+import de.zbit.io.SBFileFilter;
 import de.zbit.util.Reflect;
 
 /**
@@ -55,6 +55,11 @@ public class SBMLsimulator {
 	private static final Class<Distance> AVAILABLE_DISTANCES[] = Reflect
 			.getAllClassesInPackage(MATH_PACKAGE, true, true, Distance.class,
 					JAR_LOCATION, true);
+
+	/**
+	 * The version number of this program.
+	 */
+	private static final String VERSION_NUMBER = "0.5";
 
 	/**
 	 * 
@@ -124,7 +129,7 @@ public class SBMLsimulator {
 	 */
 	private void showGUI(SBMLDocument doc) {
 		if ((doc != null) && (doc.isSetModel())) {
-			SimulationFrame d = new SimulationFrame(doc.getModel());
+			SimulationUI d = new SimulationUI(doc.getModel());
 			d.setVisible(true);
 		} else {
 			String msg = GUITools
@@ -132,5 +137,14 @@ public class SBMLsimulator {
 			JOptionPane.showMessageDialog(null, msg, "No model found",
 					JOptionPane.WARNING_MESSAGE);
 		}
+	}
+
+	/**
+	 * Returns the version number of this program.
+	 * 
+	 * @return
+	 */
+	public static String getVersionNumber() {
+		return VERSION_NUMBER;
 	}
 }
