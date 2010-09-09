@@ -82,6 +82,12 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	}
 
 	/**
+	 * Template {@link String} to be displayed as explanation for the minimum
+	 * and maximum {@link JSpinner}s.
+	 */
+	private static final String minMaxSpinnerToolTip = "Select the %s allowable value for this %s.";
+
+	/**
 	 * A data structure that contains all necessary information for one
 	 * {@link Quantity}: a {@link JCheckBox} to select or de-select it and the
 	 * values for the optimization. Furthermore, this data structure takes care
@@ -123,6 +129,10 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 			maxSpinner = max;
 			enableSpinners(checkbox.isSelected());
 			checkbox.addItemListener(this);
+			minSpinner.setToolTipText(String.format(minMaxSpinnerToolTip,
+					"minimum", q.getClass().getSimpleName()));
+			maxSpinner.setToolTipText(String.format(minMaxSpinnerToolTip,
+					"maximum", q.getClass().getSimpleName()));
 		}
 
 		/**
@@ -203,7 +213,6 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 			sb.append(min());
 			sb.append(", ");
 			sb.append(max());
-			sb.append(", ");
 			sb.append(']');
 			return sb.toString();
 		}
@@ -291,12 +300,13 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		tabs = new JTabbedPane();
 		int curr = 0;
 		tabs.add(COMPARTMENTS, createQuantityPanel(model
-				.getListOfCompartments(), curr));
+				.getListOfCompartments(), curr, 0));
 		curr += model.getNumCompartments();
-		tabs.add(SPECIES, createQuantityPanel(model.getListOfSpecies(), curr));
+		tabs.add(SPECIES,
+				createQuantityPanel(model.getListOfSpecies(), curr, 1));
 		curr += model.getNumSpecies();
 		tabs.add(GLOBAL_PARAMETERS, createQuantityPanel(model
-				.getListOfParameters(), curr));
+				.getListOfParameters(), curr, 2));
 		curr += model.getNumParameters();
 		tabs.add(LOCAL_PARAMETERS, createLocalParameterTab(model));
 		tabs.setEnabledAt(3, model.getNumLocalParameters() > 0);
@@ -308,6 +318,36 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 			i--;
 		}
 		tabs.setSelectedIndex(i);
+
+		/*
+		 * Ensure same size of all tabs.
+		 */
+		double maxHeight = 0, maxWidth = 0, height, width;
+		Dimension dim;
+		for (i = 0; i < tabs.getTabCount(); i++) {
+			dim = tabs.getComponentAt(i).getPreferredSize();
+			height = dim.getHeight();
+			width = dim.getWidth();
+			if (height > maxHeight) {
+				maxHeight = height;
+			}
+			if (width > maxWidth) {
+				maxWidth = width;
+			}
+		}
+		for (i = 0; i < tabs.getTabCount(); i++) {
+			dim = tabs.getComponentAt(i).getPreferredSize();
+			height = dim.getHeight();
+			width = dim.getWidth();
+			if (height < maxHeight) {
+				dim = new Dimension((int) width, (int) maxHeight);
+				tabs.getComponentAt(i).setPreferredSize(dim);
+			}
+			if (width < maxWidth) {
+				dim = new Dimension((int) maxWidth, (int) maxHeight);
+				tabs.getComponentAt(i).setPreferredSize(dim);
+			}
+		}
 
 		LayoutHelper lh = new LayoutHelper(this);
 		lh.add(new JLabel(GUITools.toHTML(explanation, 60)));
@@ -375,7 +415,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	private Container createLocalParameterTab(Model model) {
 		LayoutHelper lh = new LayoutHelper(new JPanel());
 		JPanel p;
-		int curr = 0;
+		int curr = model.getNumSymbols();
 		for (Reaction r : model.getListOfReactions()) {
 			if (r.isSetKineticLaw()
 					&& (r.getKineticLaw().getNumParameters() > 0)) {
@@ -384,7 +424,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 						" Reaction %s ", r.isSetName() ? r.getName() : r
 								.getId())));
 				p.add(createQuantityPanel(r.getKineticLaw()
-						.getListOfParameters(), curr));
+						.getListOfParameters(), curr, 3));
 				curr += r.getKineticLaw().getNumParameters();
 				lh.add(p);
 			}
@@ -396,10 +436,11 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	 * 
 	 * @param listOfQuantities
 	 * @param curr
+	 * @param tabIndex
 	 * @return
 	 */
 	private Container createQuantityPanel(
-			ListOf<? extends Quantity> listOfQuantities, int curr) {
+			ListOf<? extends Quantity> listOfQuantities, int curr, int tabIndex) {
 		LayoutHelper lh = new LayoutHelper(new JPanel());
 		boolean isLocalParameter = false;
 		boolean select = true;
@@ -416,17 +457,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 			lh.add(chck, min, max);
 		}
 		if (!isLocalParameter) {
-			int buttonIndex = 0;
-			if (curr >= model.getNumCompartments()) {
-				buttonIndex++;
-			}
-			if (curr >= model.getNumCompartments() + model.getNumSpecies()) {
-				buttonIndex++;
-			}
-			if (curr >= model.getNumSymbols()) {
-				buttonIndex++;
-			}
-			return finishContainer(lh, buttonIndex, select, listOfQuantities
+			return finishContainer(lh, tabIndex, select, listOfQuantities
 					.size());
 		}
 		return lh.getContainer();
@@ -447,8 +478,12 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		JScrollPane scroll = new JScrollPane(container,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		int height = 10 + 25 * numElements;
+		if (buttonIndex == 3) {
+			height += model.getNumReactions() * 5;
+		}
 		container.setPreferredSize(new Dimension(450, (int) Math.min(250,
-				10 + 25 * numElements)));
+				height)));
 		lh = new LayoutHelper(new JPanel());
 		lh.add(scroll);
 		lh.add(new JSeparator(), 0, lh.getRow() + 1, 5, 1);
