@@ -22,6 +22,7 @@ import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
+import org.sbml.optimization.QuantityRange;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.SBMLinterpreter;
 import org.sbml.simulator.math.odes.DESSolver;
@@ -37,10 +38,18 @@ import eva2.tools.ToolBox;
  * @author Andreas Dr&auml;ger
  * @date 2010-08-24
  */
-public class EstimationProblem extends AbstractProblemDouble implements InterfaceAdditionalPopulationInformer {
+public class EstimationProblem extends AbstractProblemDouble implements
+		InterfaceAdditionalPopulationInformer {
+
+	/**
+	 * 
+	 */
 	private MultiBlockTable bestPerGeneration = null;
+	/**
+	 * 
+	 */
 	private double bestPerGenerationDist = Double.POSITIVE_INFINITY;
-	
+
 	/**
 	 * Generated version identifier.
 	 */
@@ -97,18 +106,22 @@ public class EstimationProblem extends AbstractProblemDouble implements Interfac
 	 * @param distance
 	 * @param model
 	 * @param referenceData
-	 * @param quantities
+	 * @param quantityRanges
 	 * @throws ModelOverdeterminedException
 	 * @throws SBMLException
 	 */
 	public EstimationProblem(DESSolver solver, Distance distance, Model model,
-			MultiBlockTable referenceData, Quantity... quantities)
+			MultiBlockTable referenceData, QuantityRange... quantityRanges)
 			throws ModelOverdeterminedException, SBMLException {
 		super();
 		setSolver(solver);
 		setDistance(distance);
 		setModel(model);
 		setReferenceData(referenceData);
+		Quantity quantities[] = new Quantity[quantityRanges.length];
+		for (int i = 0; i < quantities.length; i++) {
+			quantities[i] = quantityRanges[i].getQuantity();
+		}
 		setQuantities(quantities);
 	}
 
@@ -169,7 +182,8 @@ public class EstimationProblem extends AbstractProblemDouble implements Interfac
 					.getInitialValues(), referenceData.getTimePoints());
 			fitness[0] = distance.distance(solution.getBlock(0), referenceData
 					.getBlock(0));
-			if (bestPerGeneration == null || (fitness[0]<bestPerGenerationDist)) {
+			if (bestPerGeneration == null
+					|| (fitness[0] < bestPerGenerationDist)) {
 				bestPerGenerationDist = fitness[0];
 				bestPerGeneration = solution;
 			}
@@ -180,7 +194,7 @@ public class EstimationProblem extends AbstractProblemDouble implements Interfac
 		}
 		return fitness;
 	}
-	
+
 	@Override
 	public void evaluatePopulationStart(Population population) {
 		super.evaluatePopulationStart(population);
@@ -197,7 +211,8 @@ public class EstimationProblem extends AbstractProblemDouble implements Interfac
 	@Override
 	public String[] getAdditionalFileStringInfo() {
 		String[] superInfo = super.getAdditionalFileStringInfo();
-		return ToolBox.appendArrays(superInfo, "Result of the best per generation model simulation");
+		return ToolBox.appendArrays(superInfo,
+				"Result of the best per generation model simulation");
 	}
 
 	@Override
@@ -308,7 +323,7 @@ public class EstimationProblem extends AbstractProblemDouble implements Interfac
 	 */
 	private void setModel(Model model) throws ModelOverdeterminedException,
 			SBMLException {
-
+		interpreter = new SBMLinterpreter(model);
 	}
 
 	/**

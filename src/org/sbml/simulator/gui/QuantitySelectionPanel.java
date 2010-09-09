@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.LinkedList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -28,6 +29,8 @@ import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.Reaction;
+import org.sbml.jsbml.util.ValuePair;
+import org.sbml.optimization.QuantityRange;
 
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;
@@ -82,12 +85,6 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	}
 
 	/**
-	 * Template {@link String} to be displayed as explanation for the minimum
-	 * and maximum {@link JSpinner}s.
-	 */
-	private static final String minMaxSpinnerToolTip = "Select the %s allowable value for this %s.";
-
-	/**
 	 * A data structure that contains all necessary information for one
 	 * {@link Quantity}: a {@link JCheckBox} to select or de-select it and the
 	 * values for the optimization. Furthermore, this data structure takes care
@@ -99,7 +96,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	 * @date 2010-09-09
 	 * 
 	 */
-	private class QuantityBlock implements ItemListener {
+	private class QuantityBlock implements QuantityRange, ItemListener {
 		/**
 		 * 
 		 */
@@ -112,36 +109,96 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		/**
 		 * 
 		 */
-		private JSpinner minSpinner, maxSpinner;
+		private JSpinner minSpinner, maxSpinner, minInitSpinner,
+				maxInitSpinner;
 
 		/**
 		 * 
 		 * @param q
 		 * @param check
+		 * @param initMin
+		 * @param initMax
 		 * @param min
 		 * @param max
 		 */
-		public QuantityBlock(Quantity q, JCheckBox check, JSpinner min,
-				JSpinner max) {
+		public QuantityBlock(Quantity q, JCheckBox check, JSpinner initMin,
+				JSpinner initMax, JSpinner min, JSpinner max) {
 			quantity = q;
 			checkbox = check;
+			minInitSpinner = initMin;
+			maxInitSpinner = initMax;
 			minSpinner = min;
 			maxSpinner = max;
 			enableSpinners(checkbox.isSelected());
 			checkbox.addItemListener(this);
-			minSpinner.setToolTipText(String.format(minMaxSpinnerToolTip,
-					"minimum", q.getClass().getSimpleName()));
-			maxSpinner.setToolTipText(String.format(minMaxSpinnerToolTip,
-					"maximum", q.getClass().getSimpleName()));
+			String className = q.getClass().getSimpleName();
+			String name = q.isSetName() ? q.getName() : q.getId();
+			checkbox.setToolTipText(GUITools.toHTML(String.format(
+					checkBoxToolTip, className, name), 40));
+			minInitSpinner.setToolTipText(GUITools.toHTML(String.format(
+					initMinMaxSpinnerToolTip, "minimum", className, name), 40));
+			maxInitSpinner.setToolTipText(GUITools.toHTML(String.format(
+					initMinMaxSpinnerToolTip, "maximum", className, name), 40));
+			minSpinner.setToolTipText(GUITools.toHTML(String.format(
+					minMaxSpinnerToolTip, "minimum", className, name), 40));
+			maxSpinner.setToolTipText(GUITools.toHTML(String.format(
+					minMaxSpinnerToolTip, "maximum", className, name), 40));
 		}
 
 		/**
 		 * 
-		 * @param enable
+		 * @param enabled
 		 */
-		private void enableSpinners(boolean enable) {
-			minSpinner.setEnabled(enable);
-			maxSpinner.setEnabled(enable);
+		private void enableSpinners(boolean enabled) {
+			minInitSpinner.setEnabled(enabled);
+			maxInitSpinner.setEnabled(enabled);
+			minSpinner.setEnabled(enabled);
+			maxSpinner.setEnabled(enabled);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.sbml.optimization.QuantityRange#getInitialMaximum()
+		 */
+		public double getInitialMaximum() {
+			return ((Double) maxInitSpinner.getValue()).doubleValue();
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.sbml.optimization.QuantityRange#getInitialMinimum()
+		 */
+		public double getInitialMinimum() {
+			return ((Double) minInitSpinner.getValue()).doubleValue();
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.sbml.optimization.QuantityRange#getInitialRange()
+		 */
+		public ValuePair<Double, Double> getInitialRange() {
+			return new ValuePair<Double, Double>(Double
+					.valueOf(getInitialMinimum()), Double
+					.valueOf(getInitialMaximum()));
+		}
+
+		/**
+		 * 
+		 * @return
+		 */
+		public double getMaximum() {
+			return ((Double) maxSpinner.getValue()).doubleValue();
+		}
+
+		/**
+		 * 
+		 * @return
+		 */
+		public double getMinimum() {
+			return ((Double) minSpinner.getValue()).doubleValue();
 		}
 
 		/**
@@ -150,6 +207,16 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		 */
 		public Quantity getQuantity() {
 			return quantity;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.sbml.optimization.QuantityRange#getRange()
+		 */
+		public ValuePair<Double, Double> getRange() {
+			return new ValuePair<Double, Double>(Double.valueOf(getMinimum()),
+					Double.valueOf(getMaximum()));
 		}
 
 		/**
@@ -175,22 +242,6 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 
 		/**
 		 * 
-		 * @return
-		 */
-		public double max() {
-			return ((Double) maxSpinner.getValue()).doubleValue();
-		}
-
-		/**
-		 * 
-		 * @return
-		 */
-		public double min() {
-			return ((Double) minSpinner.getValue()).doubleValue();
-		}
-
-		/**
-		 * 
 		 * @param select
 		 */
 		public void setSelected(boolean select) {
@@ -210,13 +261,29 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 			sb.append(", ");
 			sb.append(isSelected());
 			sb.append(", ");
-			sb.append(min());
+			sb.append(getMinimum());
 			sb.append(", ");
-			sb.append(max());
+			sb.append(getMaximum());
 			sb.append(']');
 			return sb.toString();
 		}
 	}
+
+	/**
+	 * Template {@link String} to be displayed as explanation for the minimum
+	 * and maximum {@link JSpinner}s.
+	 */
+	private static final String minMaxSpinnerToolTip = "Select the absolute %s allowable value for this %s named %s.";
+	/**
+	 * Template tool tip for the the initialization {@link JSpinner}s.
+	 */
+	private static final String initMinMaxSpinnerToolTip = "Select the %s allowable value for this %s named %s in the initialization.";
+
+	/**
+	 * Template tool tip for the {@link JCheckBox}es to switch the values on or
+	 * off depending on whether these are to be optimized or not.
+	 */
+	private static final String checkBoxToolTip = "Check this box to include %s %s in the optimization";
 
 	/**
 	 * 
@@ -255,6 +322,11 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	private double minValue = 0d, maxValue = 14000d, stepSize = 0.01d;
 
 	/**
+	 * Values for {@link JSpinner}s for the initialization.
+	 */
+	private double minInitValue = 0d, maxInitValue = 2000d;
+
+	/**
 	 * A pointer to the model for which this panel is being created.
 	 */
 	private Model model;
@@ -280,6 +352,11 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	 * Text to explain what the user is supposed to do here.
 	 */
 	private static final String explanation = "Please select the model components, whose values are to be optimized. You can also change the allowable ranges for each element.";
+
+	/**
+	 * Tool tip that explains the purpose of each tab.
+	 */
+	private static final String tabToolTip = "In this tab you can select the %s in the model whose values are to be optimized.";
 
 	/**
 	 * This pane displays all selections for each group of different
@@ -309,10 +386,22 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 				.getListOfParameters(), curr, 2));
 		curr += model.getNumParameters();
 		tabs.add(LOCAL_PARAMETERS, createLocalParameterTab(model));
+
+		/*
+		 * Enable tabs with selectable elements and disable all others.
+		 */
 		tabs.setEnabledAt(3, model.getNumLocalParameters() > 0);
+		tabs.setToolTipTextAt(3, GUITools.toHTML(String.format(tabToolTip,
+				"local parameters"), 40));
 		tabs.setEnabledAt(2, model.getNumParameters() > 0);
-		tabs.setEnabledAt(1, model.getNumCompartments() > 0);
-		tabs.setEnabledAt(0, model.getNumSpecies() > 0);
+		tabs.setToolTipTextAt(2, GUITools.toHTML(String.format(tabToolTip,
+				"global parameters"), 40));
+		tabs.setEnabledAt(1, model.getNumSpecies() > 0);
+		tabs.setToolTipTextAt(1, GUITools.toHTML(String.format(tabToolTip,
+				"species"), 40));
+		tabs.setEnabledAt(0, model.getNumCompartments() > 0);
+		tabs.setToolTipTextAt(0, GUITools.toHTML(String.format(tabToolTip,
+				"compartments"), 40));
 		int i = 3;
 		while ((i < tabs.getTabCount()) && (!tabs.isEnabledAt(i))) {
 			i--;
@@ -408,6 +497,33 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	}
 
 	/**
+	 * Creates a panel with select and de-select buttons
+	 * 
+	 * @param buttonIndex
+	 * @param select
+	 * @return
+	 */
+	private Component createButtonPanel(int buttonIndex, boolean select) {
+		JButton selectAllButton = GUITools.createButton(Command.SELECT_ALL
+				.getText(), null, this, Command.SELECT_ALL, Command.SELECT_ALL
+				.getToolTip());
+		JButton deselectAllButton = GUITools.createButton(Command.SELECT_NONE
+				.getText(), null, this, Command.SELECT_NONE,
+				Command.SELECT_NONE.getToolTip());
+		selectAllButton.setEnabled(!select);
+		deselectAllButton.setEnabled(select);
+		selectAllButton.setPreferredSize(deselectAllButton.getPreferredSize());
+
+		selectAllButtons[buttonIndex] = selectAllButton;
+		deselectAllButtons[buttonIndex] = deselectAllButton;
+
+		JPanel panel = new JPanel();
+		panel.add(selectAllButton);
+		panel.add(deselectAllButton);
+		return panel;
+	}
+
+	/**
 	 * 
 	 * @param model
 	 * @return
@@ -444,17 +560,33 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		LayoutHelper lh = new LayoutHelper(new JPanel());
 		boolean isLocalParameter = false;
 		boolean select = true;
+		lh.add(new JLabel(), new JLabel("<html>initial<br/>minimum</html>"),
+				new JLabel("<html>initial<br/>maximum</html>"), new JSeparator(
+						JSeparator.VERTICAL), new JLabel(
+						"<html>absolute<br/>minimum</html>"), new JLabel(
+						"<html>absolute<br/>maximum</html>"));
 		for (Quantity q : listOfQuantities) {
 			isLocalParameter |= q instanceof LocalParameter;
 			select = isLocalParameter || (q instanceof Parameter);
 			JCheckBox chck = new JCheckBox(q.isSetName() ? q.getName() : q
 					.getId(), select);
+
+			// Initialization
+			JSpinner minInit = new JSpinner(new SpinnerNumberModel(
+					minInitValue, minInitValue, maxInitValue, stepSize));
+			JSpinner maxInit = new JSpinner(new SpinnerNumberModel(
+					maxInitValue, minInitValue, maxInitValue, stepSize));
+
+			// Optimization
 			JSpinner min = new JSpinner(new SpinnerNumberModel(minValue,
 					minValue, maxValue, stepSize));
 			JSpinner max = new JSpinner(new SpinnerNumberModel(maxValue,
 					minValue, maxValue, stepSize));
-			quantityBlocks[curr++] = new QuantityBlock(q, chck, min, max);
-			lh.add(chck, min, max);
+
+			quantityBlocks[curr++] = new QuantityBlock(q, chck, minInit,
+					maxInit, min, max);
+			lh.add(chck, minInit, maxInit, new JSeparator(JSeparator.VERTICAL),
+					min, max);
 		}
 		if (!isLocalParameter) {
 			return finishContainer(lh, tabIndex, select, listOfQuantities
@@ -482,7 +614,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		if (buttonIndex == 3) {
 			height += model.getNumReactions() * 5;
 		}
-		container.setPreferredSize(new Dimension(450, (int) Math.min(250,
+		container.setPreferredSize(new Dimension(550, (int) Math.min(250,
 				height)));
 		lh = new LayoutHelper(new JPanel());
 		lh.add(scroll);
@@ -492,33 +624,6 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 						lh.getRow() + 2, 5, 1);
 
 		return lh.getContainer();
-	}
-
-	/**
-	 * Creates a panel with select and de-select buttons
-	 * 
-	 * @param buttonIndex
-	 * @param select
-	 * @return
-	 */
-	private Component createButtonPanel(int buttonIndex, boolean select) {
-		JButton selectAllButton = GUITools.createButton(Command.SELECT_ALL
-				.getText(), null, this, Command.SELECT_ALL, Command.SELECT_ALL
-				.getToolTip());
-		JButton deselectAllButton = GUITools.createButton(Command.SELECT_NONE
-				.getText(), null, this, Command.SELECT_NONE,
-				Command.SELECT_NONE.getToolTip());
-		selectAllButton.setEnabled(!select);
-		deselectAllButton.setEnabled(select);
-		selectAllButton.setPreferredSize(deselectAllButton.getPreferredSize());
-
-		selectAllButtons[buttonIndex] = selectAllButton;
-		deselectAllButtons[buttonIndex] = deselectAllButton;
-
-		JPanel panel = new JPanel();
-		panel.add(selectAllButton);
-		panel.add(deselectAllButton);
-		return panel;
 	}
 
 	/**
@@ -554,8 +659,27 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	 * @return
 	 */
 	public Quantity[] getSelectedQuantities() {
-		// TODO
-		return null;
+		LinkedList<Quantity> quantityList = new LinkedList<Quantity>();
+		for (int i = 0; i < quantityBlocks.length; i++) {
+			if (quantityBlocks[i].isSelected()) {
+				quantityList.add(quantityBlocks[i].getQuantity());
+			}
+		}
+		return quantityList.toArray(new Quantity[0]);
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public QuantityRange[] getSelectedQuantityRanges() {
+		LinkedList<QuantityRange> quantityList = new LinkedList<QuantityRange>();
+		for (int i = 0; i < quantityBlocks.length; i++) {
+			if (quantityBlocks[i].isSelected()) {
+				quantityList.add(quantityBlocks[i]);
+			}
+		}
+		return quantityList.toArray(new QuantityRange[0]);
 	}
 
 	/**
