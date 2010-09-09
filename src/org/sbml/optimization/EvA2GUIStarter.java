@@ -12,8 +12,17 @@ import eva2.server.go.strategies.ParticleSwarmOptimization;
 import eva2.server.modules.GOParameters;
 import eva2.server.stat.InterfaceStatisticsListener;
 
+/**
+ * 
+ * @author Marcel Kronfeld
+ * @date 2010-09-01
+ */
 public class EvA2GUIStarter implements InterfaceStatisticsListener {
-	EvAClient evaClient = null;
+	
+	/**
+	 * 
+	 */
+	private EvAClient evaClient = null;
 
 
 	/**

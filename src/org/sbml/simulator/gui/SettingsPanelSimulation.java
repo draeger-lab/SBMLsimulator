@@ -67,7 +67,7 @@ public class SettingsPanelSimulation extends SettingsPanel implements
 		 */
 		OPEN_DIR,
 		/**
-		 * Comand to open a directory for saving files.
+		 * Command to open a directory for saving files.
 		 */
 		SAVE_DIR
 	}
