@@ -67,13 +67,11 @@ import org.sbml.simulator.math.SBMLinterpreter;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.math.odes.IntegrationException;
 import org.sbml.simulator.math.odes.MultiBlockTable;
-import org.sbml.simulator.math.odes.MultiBlockTable.Block.Column;
 import org.sbml.squeezer.CfgKeys;
 import org.sbml.squeezer.util.HTMLFormula;
 
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;
-import eva2.gui.FunctionArea;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -90,14 +88,56 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	private static final long serialVersionUID = -7278034514446047207L;
 
 	/**
+	 * Default value to be used for simulation
+	 */
+	private double defaultCompartmentValue;
+
+	/**
+	 * Default value to be used for simulation
+	 */
+	private double defaultParameterValue;
+
+	/**
+	 * Default value to be used for simulation
+	 */
+	private double defaultSpeciesValue;
+
+	/**
+	 * The currently used distance function.
+	 */
+	private Distance distance;
+
+	/**
+	 * Necessary to remember the originally set distance function.
+	 */
+	private int distanceFunc;
+
+	/**
+	 * Text field to display the quality of a simulation with respect to a given
+	 * data set.
+	 */
+	private JFormattedTextField distField;
+
+	/**
+	 * Contains all available distance functions.
+	 */
+	private JComboBox distFun;
+
+	/**
 	 * Table for experimental data.
 	 */
 	private JTable expTable;
 
 	/**
+	 * Switches inclusion of reactions in the plot on or off.
+	 */
+	private boolean includeReactions = true;
+
+	/**
 	 * Table that contains the legend of this plot.
 	 */
 	private JTable legend;
+
 	/**
 	 * Whether or not to plot in a logarithmic scale.
 	 */
@@ -127,7 +167,6 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 * Maximal allowable number of integration steps per time unit
 	 */
 	private int maxStepsPerUnit;
-
 	/**
 	 * The maximal allowable simulation time
 	 */
@@ -146,17 +185,16 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	/**
 	 * Plot area
 	 */
-	private FunctionArea plot;
+	private Plot plot;
+
 	/**
 	 * Decides whether or not a grid should be displayed in the plot.
 	 */
 	private JCheckBox showGrid;
-
 	/**
 	 * Decides whether or not to add a legend to the plot.
 	 */
 	private JCheckBox showLegend;
-
 	/**
 	 * Table for the simulation data.
 	 */
@@ -171,6 +209,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 * The index of the class name of the solver to be used
 	 */
 	private JComboBox solvers;
+
 	/**
 	 * 
 	 */
@@ -179,56 +218,25 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 * The spinner to change the number of integration steps.
 	 */
 	private SpinnerNumberModel stepsModel;
-
 	/**
 	 * Simulation start time
 	 */
 	private SpinnerNumberModel t1;
-
 	/**
 	 * Simulation end time
 	 */
 	private SpinnerNumberModel t2;
-
-	/**
-	 * Default value to be used for simulation
-	 */
-	private double defaultCompartmentValue;
-	/**
-	 * Default value to be used for simulation
-	 */
-	private double defaultSpeciesValue;
-	/**
-	 * Default value to be used for simulation
-	 */
-	private double defaultParameterValue;
 	/**
 	 * The main tabbed pane showing plot, simulatin and experimental data.
 	 */
 	private JTabbedPane tabbedPane;
-	/**
-	 * Text field to display the quality of a simulation with respect to a given
-	 * data set.
-	 */
-	private JFormattedTextField distField;
-	/**
-	 * The currently used distance function.
-	 */
-	private Distance distance;
-	/**
-	 * Contains all available distance functions.
-	 */
-	private JComboBox distFun;
 
 	/**
-	 * Necessary to remember the originally set distance function.
+	 * Switch to decide whether or not to draw the foot panel.
 	 */
-	private int distanceFunc;
+	private boolean showSettingsPanel;
 
-	/**
-	 * Switches inclusion of reactions in the plot on or off.
-	 */
-	private boolean includeReactions = true;
+	private Component footPanel;
 
 	/**
 	 * 
@@ -236,6 +244,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 */
 	public SimulationPanel(Model model) {
 		super();
+		showSettingsPanel = true;
 		if (SBMLsimulator.getAvailableSolvers().length == 0) {
 			String msg = "Could not find any solvers for differential equation systems. A simulation is therefore not possible.";
 			JOptionPane.showMessageDialog(this, GUITools.toHTML(msg),
@@ -416,6 +425,38 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 
 	/**
 	 * 
+	 * @return
+	 */
+	public Distance getDistance() {
+		return distance;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public MultiBlockTable getExperimentalData() {
+		return (MultiBlockTable) expTable.getModel();
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public Model getModel() {
+		return model;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public Plot getPlot() {
+		return plot;
+	}
+
+	/**
+	 * 
 	 */
 	public Properties getProperties() {
 		Properties p = new Properties();
@@ -462,6 +503,22 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		return p;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
+	public JTable getSimulationResultsTable() {
+		return simTable;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public AbstractDESSolver getSolver() {
+		return solver;
+	}
+
 	/***
 	 * Initializes the graphics components of this panel.
 	 * 
@@ -473,7 +530,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 			String xLab = "Time";
 			if (timeUnits != null)
 				xLab += " in " + UnitDefinition.printUnits(timeUnits, true);
-			plot = new FunctionArea(xLab, "Value");
+			plot = new Plot(xLab, "Value");
 			plot.setGridVisible(showGrid.isSelected());
 			plot.setShowLegend(showLegend.isSelected());
 			// get rid of this pop-up menu.
@@ -521,7 +578,10 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 
 			setLayout(new BorderLayout());
 			add(tabbedPane, BorderLayout.CENTER);
-			add(createFootPanel(), BorderLayout.SOUTH);
+			footPanel = createFootPanel();
+			if (showSettingsPanel) {
+				add(footPanel, BorderLayout.SOUTH);
+			}
 		} catch (Exception exc) {
 			GUITools.showErrorMessage(this, exc);
 		}
@@ -650,6 +710,13 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		return panel;
 	}
 
+	/**
+	 * @return the showSettingsPanel
+	 */
+	public boolean isShowSettingsPanel() {
+		return showSettingsPanel;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -727,42 +794,27 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	}
 
 	/**
-	 * Plots a matrix either by displaying unconnected or connected points
-	 * depending on the connected parameter.
+	 * Plots the given data set with respect to the selected columns in the
+	 * legend.
 	 * 
-	 * @param solution
-	 *            The solution of a simulation, where the first column is
-	 *            assumed to contain the simulation time.
+	 * @param data
 	 * @param connected
-	 *            If true, all points will be connected, singular points are
-	 *            plotted for false.
+	 * @param showLegend
 	 */
-	private void plot(MultiBlockTable solution, boolean connected,
-			boolean showLegend) {
-		LegendTableModel tabMod = (LegendTableModel) legend.getModel();
-		int i, j, graphLabel;
-		for (i = 1; i < solution.getColumnCount(); i++) {
-			Column column = solution.getColumn(i);
-			if (tabMod.isSelected(column.getId())) {
-				graphLabel = connected ? i : i + solution.getColumnCount();
-				// plot.clearGraph(graphLabel);
-				plot.setGraphColor(graphLabel, tabMod.getColorFor(column
-						.getId()));
-				plot.setInfoString(graphLabel, tabMod
-						.getNameFor(column.getId()), 1);
-				for (j = 0; j < column.getRowCount(); j++) {
-					if (connected) {
-						plot.setConnectedPoint(solution.getTimePoint(j), column
-								.getValue(j), graphLabel);
-					} else {
-						plot.setUnconnectedPoint(solution.getTimePoint(j),
-								column.getValue(j), graphLabel);
-					}
-				}
-			}
+	public void plot(MultiBlockTable data, boolean connected, boolean showLegend) {
+		LegendTableModel legend = (LegendTableModel) this.legend.getModel();
+		String name;
+		boolean plotColumns[] = new boolean[data.getColumnCount() - 1];
+		Color plotColors[] = new Color[data.getColumnCount() - 1];
+		String infos[] = new String[data.getColumnCount() - 1];
+		for (int i = 0; i < data.getColumnCount() - 1; i++) {
+			name = data.getColumnName(i+1);
+			plotColumns[i] = legend.isSelected(name);
+			plotColors[i] = legend.getColorFor(name);
+			infos[i] = legend.getNameFor(name);
 		}
-		plot.setGridVisible(showGrid.isSelected());
-		plot.setShowLegend(showLegend);
+		plot.plot(data, connected, showLegend, showGrid.isSelected(),
+				plotColumns, plotColors, infos);
 	}
 
 	/**
@@ -778,6 +830,14 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 				.getStepSize())));
 		distField.setEditable(false);
 		distField.setEnabled(true);
+	}
+
+	/**
+	 * 
+	 * @param includeReactions
+	 */
+	public void setIncludeReactions(boolean includeReactions) {
+		this.includeReactions = includeReactions;
 	}
 
 	/**
@@ -872,6 +932,22 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		solvers.addItemListener(this);
 		removeAll();
 		init();
+	}
+
+	/**
+	 * @param showSettingsPanel
+	 *            the showSettingsPanel to set
+	 */
+	public void setShowSettingsPanel(boolean showSettingsPanel) {
+		if (this.showSettingsPanel != showSettingsPanel) {
+			this.showSettingsPanel = showSettingsPanel;
+			if (!showSettingsPanel) {
+				remove(footPanel);
+			} else {
+				add(footPanel, BorderLayout.SOUTH);
+			}
+			validate();
+		}
 	}
 
 	/**
@@ -1043,21 +1119,5 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 				}
 			}
 		}
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public JTable getSimulationResultsTable() {
-		return simTable;
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public FunctionArea getFunctionArea() {
-		return plot;
 	}
 }

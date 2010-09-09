@@ -11,7 +11,11 @@ import javax.swing.table.AbstractTableModel;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.NamedSBase;
+import org.sbml.jsbml.NamedSBaseWithDerivedUnit;
 import org.sbml.jsbml.util.ValuePair;
+import org.sbml.squeezer.util.HTMLFormula;
+
+import de.zbit.gui.GUITools;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -24,7 +28,13 @@ public class LegendTableModel extends AbstractTableModel {
 	/**
 	 * Column indices for the content
 	 */
-	private static final int boolCol = 0, colorCol = 1, nsbCol = 2;
+	private static final int boolCol = 0, colorCol = 1, nsbCol = 2,
+			unitCol = 3;
+
+	/**
+	 * Generated serial version identifier.
+	 */
+	private static final long serialVersionUID = 7360401460080111135L;
 
 	/**
 	 * 
@@ -48,6 +58,14 @@ public class LegendTableModel extends AbstractTableModel {
 	 */
 	public static int getNamedSBaseColumn() {
 		return nsbCol;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public static int getUnitColumn() {
+		return unitCol;
 	}
 
 	/**
@@ -82,29 +100,33 @@ public class LegendTableModel extends AbstractTableModel {
 	}
 
 	/**
-	 * So save run time memorize the last queried key of the hash.
-	 */
-	private ValuePair<String, Integer> lastQueried;
-
-	/**
-	 * Generated serial version identifier.
-	 */
-	private static final long serialVersionUID = 7360401460080111135L;
-	/**
 	 * A colored button for each model component and
 	 */
 	private Object[][] data;
-
 	/**
 	 * A mapping between the ids in the table and the corresponding row.
 	 */
 	private Hashtable<String, Integer> id2Row;
 
 	/**
+	 * Switch of whether or not to include reactions in the legend.
+	 */
+	private boolean includeReactions;
+
+	/**
+	 * So save run time memorize the last queried key of the hash.
+	 */
+	private ValuePair<String, Integer> lastQueried;
+
+	/**
+	 * Pointer to the model
+	 */
+	private Model model;
+
+	/**
 	 * 
 	 */
 	public LegendTableModel() {
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -112,7 +134,8 @@ public class LegendTableModel extends AbstractTableModel {
 	 * @param model
 	 */
 	public LegendTableModel(Model model) {
-		this(model, false);
+		this();
+		setModel(model);
 	}
 
 	/**
@@ -121,49 +144,22 @@ public class LegendTableModel extends AbstractTableModel {
 	 * @param includeReactions
 	 */
 	public LegendTableModel(Model model, boolean includeReactions) {
-		int dim = model.getNumCompartments() + model.getNumSpecies()
-				+ model.getNumParameters();
-		if (includeReactions) {
-			dim += model.getNumReactions();
-		}
-		id2Row = new Hashtable<String, Integer>();
-		lastQueried = null;
-		data = new Object[dim][3];
-		NamedSBase sb;
-		int i, j;
-		for (i = 0; i < model.getNumCompartments(); i++) {
-			sb = model.getCompartment(i);
-			data[i][boolCol] = Boolean.TRUE;
-			data[i][colorCol] = indexToColor(i);
-			data[i][nsbCol] = sb;
-			id2Row.put(sb.getId(), Integer.valueOf(i));
-		}
-		j = model.getNumCompartments();
-		for (i = 0; i < model.getNumSpecies(); i++) {
-			sb = model.getSpecies(i);
-			data[i + j][boolCol] = Boolean.TRUE;
-			data[i + j][colorCol] = indexToColor(i + j);
-			data[i + j][nsbCol] = sb;
-			id2Row.put(sb.getId(), Integer.valueOf(i + j));
-		}
-		j = model.getNumCompartments() + model.getNumSpecies();
-		for (i = 0; i < model.getNumParameters(); i++) {
-			sb = model.getParameter(i);
-			data[i + j][boolCol] = Boolean.TRUE;
-			data[i + j][colorCol] = indexToColor(i + j);
-			data[i + j][nsbCol] = sb;
-			id2Row.put(sb.getId(), Integer.valueOf(i + j));
-		}
-		if (includeReactions) {
-			j = model.getNumSymbols();
-			for (i = 0; i < model.getNumReactions(); i++) {
-				sb = model.getReaction(i);
-				data[i + j][boolCol] = Boolean.TRUE;
-				data[i + j][colorCol] = indexToColor(i + j);
-				data[i + j][nsbCol] = sb;
-				id2Row.put(sb.getId(), Integer.valueOf(i + j));
-			}
-		}
+		this();
+		setModel(model, includeReactions);
+	}
+
+	/**
+	 * 
+	 * @param nsb
+	 * @param rowIndex
+	 */
+	private void fillData(NamedSBaseWithDerivedUnit nsb, int rowIndex) {
+		data[rowIndex][boolCol] = Boolean.TRUE;
+		data[rowIndex][colorCol] = indexToColor(rowIndex);
+		data[rowIndex][nsbCol] = nsb;
+		data[rowIndex][unitCol] = GUITools.toHTML(HTMLFormula.toHTML(nsb
+				.getDerivedUnitDefinition()));
+		id2Row.put(nsb.getId(), Integer.valueOf(rowIndex));
 	}
 
 	/**
@@ -205,12 +201,18 @@ public class LegendTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public String getColumnName(int column) {
-		if (column == boolCol)
+		switch (column) {
+		case boolCol:
 			return "Plot";
-		if (column == colorCol)
+		case colorCol:
 			return "Color";
-		if (column == nsbCol)
-			return "Symbol";
+		case nsbCol:
+			return "Component";
+		case unitCol:
+			return "Unit";
+		default:
+			break;
+		}
 		throw new IndexOutOfBoundsException("Only " + getColumnCount()
 				+ " columns, no column " + column);
 	}
@@ -271,6 +273,38 @@ public class LegendTableModel extends AbstractTableModel {
 		return data[rowIndex][columnIndex];
 	}
 
+	/**
+	 * 
+	 */
+	private void init() {
+		int dim = model.getNumCompartments() + model.getNumSpecies()
+				+ model.getNumParameters();
+		if (includeReactions) {
+			dim += model.getNumReactions();
+		}
+		id2Row = new Hashtable<String, Integer>();
+		lastQueried = null;
+		data = new Object[dim][4];
+		int i, j;
+		for (i = 0; i < model.getNumCompartments(); i++) {
+			fillData(model.getCompartment(i), i);
+		}
+		j = model.getNumCompartments();
+		for (i = 0; i < model.getNumSpecies(); i++) {
+			fillData(model.getSpecies(i), i + j);
+		}
+		j = model.getNumCompartments() + model.getNumSpecies();
+		for (i = 0; i < model.getNumParameters(); i++) {
+			fillData(model.getParameter(i), i + j);
+		}
+		if (includeReactions) {
+			j = model.getNumSymbols();
+			for (i = 0; i < model.getNumReactions(); i++) {
+				fillData(model.getReaction(i), i + j);
+			}
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -295,6 +329,25 @@ public class LegendTableModel extends AbstractTableModel {
 			return ((Boolean) getValueAt(index, boolCol)).booleanValue();
 		}
 		return false;
+	}
+
+	/**
+	 * 
+	 * @param model
+	 */
+	public void setModel(Model model) {
+		setModel(model, false);
+	}
+
+	/**
+	 * 
+	 * @param model
+	 * @param includeReactions
+	 */
+	public void setModel(Model model, boolean includeReactions) {
+		this.includeReactions = includeReactions;
+		this.model = model;
+		init();
 	}
 
 	/*

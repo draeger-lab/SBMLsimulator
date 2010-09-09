@@ -1,4 +1,4 @@
-package org.sbml.simulator.gui;
+package org.sbml.optimization;
 
 import java.util.List;
 
@@ -7,7 +7,7 @@ import eva2.gui.BeanInspector;
 import eva2.gui.GenericObjectEditor;
 import eva2.server.go.enums.PSOTopologyEnum;
 import eva2.server.go.operators.terminators.EvaluationTerminator;
-import eva2.server.go.problems.F2Problem;
+import eva2.server.go.problems.InterfaceOptimizationProblem;
 import eva2.server.go.strategies.ParticleSwarmOptimization;
 import eva2.server.modules.GOParameters;
 import eva2.server.stat.InterfaceStatisticsListener;
@@ -15,11 +15,12 @@ import eva2.server.stat.InterfaceStatisticsListener;
 public class EvA2GUIStarter implements InterfaceStatisticsListener {
 	EvAClient evaClient = null;
 
+
 	/**
-	 * Example for accessing the EvA2 GUI through the API.
 	 * 
+	 * @param problem
 	 */
-	public static void main(String[] args) {
+	public static void init(InterfaceOptimizationProblem problem) {
 		EvA2GUIStarter evaBP = new EvA2GUIStarter();
 		GOParameters goParams = new GOParameters(); // Instance for the general Genetic Optimization parameterization
 		
@@ -27,7 +28,7 @@ public class EvA2GUIStarter implements InterfaceStatisticsListener {
 		goParams.setTerminator(new EvaluationTerminator(3000));
 		
 		// set the initial EvA problem here
-		goParams.setProblem(new F2Problem(15));
+		goParams.setProblem(problem);
 
 		// hide some properties which should not be shown
 		GenericObjectEditor.setHideProperty(goParams.getClass(), "problem", true);
@@ -44,24 +45,40 @@ public class EvA2GUIStarter implements InterfaceStatisticsListener {
 		
 		evaBP.evaClient.getStatistics().addDataListener(evaBP); // add a data listener instance
 	}
-
+	
+	/*
+	 * (non-Javadoc)
+	 * @see eva2.server.stat.InterfaceStatisticsListener#finalMultiRunResults(java.lang.String[], java.util.List)
+	 */
 	public void finalMultiRunResults(String[] header,
 			List<Object[]> multiRunFinalObjectData) {
 		System.out.println("Last data line of multi runs: " + BeanInspector.toString(multiRunFinalObjectData));
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyGenerationPerformed(java.lang.String[], java.lang.Object[], java.lang.Double[])
+	 */
 	public void notifyGenerationPerformed(String[] header,
 			Object[] statObjects, Double[] statDoubles) {
 		// statDoubles only contains double representations of statObject where possible (so its redundant)
 		System.out.println("Received data " + BeanInspector.toString(statObjects));
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStarted(int, int, java.lang.String[], java.lang.String[])
+	 */
 	public void notifyRunStarted(int runNumber, int plannedMultiRuns, String[] header, String[] metaInfo) {
 		System.out.println("notifyRunStarted, " + runNumber + " of "  + plannedMultiRuns);
 		System.out.println("Headers: " + BeanInspector.toString(header));
 		System.out.println("Meta-info: " + BeanInspector.toString(metaInfo));
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStopped(int, boolean)
+	 */
 	public void notifyRunStopped(int runsPerformed, boolean completedLastRun) {
 		System.out.println("notifyRunStopped, " + runsPerformed + ", last finished normally: "  + completedLastRun);
 	}
