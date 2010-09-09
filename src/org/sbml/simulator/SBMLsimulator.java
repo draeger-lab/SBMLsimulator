@@ -106,21 +106,12 @@ public class SBMLsimulator {
 		showGUI(doc);
 	}
 
+	/**
+	 * 
+	 */
 	public SBMLsimulator() {
-		JFileChooser chooser = GUITools.createJFileChooser(System
-				.getProperty("user.home"), false, false,
-				JFileChooser.FILES_ONLY, SBFileFilter.SBML_FILE_FILTER);
-		if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-			try {
-				showGUI(SBMLReader.readSBML(chooser.getSelectedFile()));
-			} catch (FileNotFoundException exc) {
-				GUITools.showErrorMessage(null, exc);
-				exc.printStackTrace();
-			} catch (XMLStreamException exc) {
-				GUITools.showErrorMessage(null, exc);
-				exc.printStackTrace();
-			}
-		}
+		SimulationUI d = new SimulationUI();
+		d.setVisible(true);
 	}
 
 	/**
