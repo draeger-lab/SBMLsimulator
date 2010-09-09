@@ -21,6 +21,7 @@ package org.sbml.simulator.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseListener;
@@ -32,6 +33,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JEditorPane;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -41,6 +43,7 @@ import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -703,8 +706,20 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 							nans.size() > 1 ? "s" : "", name, l.substring(0, l
 									.length() - 1), nans.size() > 1 ? "ve"
 									: "s", val);
-			JOptionPane.showMessageDialog(this, new JLabel(GUITools.toHTML(msg,
-					60)), "Replacing undefined values",
+			JEditorPane label = new JEditorPane("text/html", GUITools.toHTML(
+					msg, 80));
+			label.setEditable(false);
+			Component component;
+			if (nans.size() > 20) {
+				component = new JScrollPane(label,
+						JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+				label.setPreferredSize(new Dimension(450, 450));
+			} else {
+				component = label;
+			}
+			JOptionPane.showMessageDialog(this, component,
+					"Replacing undefined values",
 					JOptionPane.INFORMATION_MESSAGE);
 		}
 		return panel;
@@ -808,7 +823,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		Color plotColors[] = new Color[data.getColumnCount() - 1];
 		String infos[] = new String[data.getColumnCount() - 1];
 		for (int i = 0; i < data.getColumnCount() - 1; i++) {
-			name = data.getColumnName(i+1);
+			name = data.getColumnName(i + 1);
 			plotColumns[i] = legend.isSelected(name);
 			plotColors[i] = legend.getColorFor(name);
 			infos[i] = legend.getNameFor(name);
@@ -1119,5 +1134,24 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 				}
 			}
 		}
+	}
+
+	/**
+	 * 
+	 */
+	public void closeExperimentalData() {
+		expTable = new JTable();
+		tabbedPane.setEnabledAt(2, false);
+		if (tabbedPane.getSelectedIndex() == 2) {
+			tabbedPane.setSelectedIndex(0);
+		}
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean isSetExperimentalData() {
+		return expTable.getRowCount() > 0;
 	}
 }
