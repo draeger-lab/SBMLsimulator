@@ -18,29 +18,21 @@
  */
 package org.sbml.simulator.gui;
 
-import java.awt.AWTException;
 import java.awt.BorderLayout;
-import java.awt.Rectangle;
-import java.awt.Robot;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
-import javax.imageio.IIOImage;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
-import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
-import javax.imageio.stream.FileImageOutputStream;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JComponent;
+import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -53,7 +45,8 @@ import javax.swing.UIManager;
 import javax.swing.table.TableModel;
 
 import org.sbml.jsbml.Model;
-import org.sbml.jsbml.SBMLException;
+import org.sbml.optimization.EvA2GUIStarter;
+import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 import org.sbml.simulator.resources.Resource;
@@ -63,7 +56,6 @@ import org.sbml.squeezer.gui.SettingsDialog;
 import de.zbit.gui.GUITools;
 import de.zbit.io.CSVWriter;
 import de.zbit.io.SBFileFilter;
-import eva2.gui.FunctionArea;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -71,7 +63,8 @@ import eva2.gui.FunctionArea;
  * @date 2010-04-15
  * 
  */
-public class SimulationUI extends JFrame implements ActionListener {
+public class SimulationUI extends JFrame implements ActionListener,
+		ItemListener {
 
 	/**
 	 * Commands that can be understood by this dialog.
@@ -81,9 +74,30 @@ public class SimulationUI extends JFrame implements ActionListener {
 	 */
 	public static enum Command {
 		/**
+		 * To exit this program.
+		 */
+		EXIT,
+		/**
+		 * Show about message, i.e., information about the authors of this
+		 * program.
+		 */
+		HELP_ABOUT,
+		/**
+		 * Displays the software license.
+		 */
+		HELP_LICENSE,
+		/**
+		 * Starts the help web page.
+		 */
+		HELP_ONLINE,
+		/**
 		 * Open file with experimental data.
 		 */
 		OPEN_DATA,
+		/**
+		 * Starts the optimization of the model with respect to given data.
+		 */
+		OPTIMIZATION,
 		/**
 		 * Save the plot as an image.
 		 */
@@ -99,25 +113,13 @@ public class SimulationUI extends JFrame implements ActionListener {
 		/**
 		 * Start a new simulation with the current settings.
 		 */
-		SIMULATION_START,
-		/**
-		 * To exit this program.
-		 */
-		EXIT,
-		/**
-		 * Show about message, i.e., information about the authors of this
-		 * program.
-		 */
-		HELP_ABOUT,
-		/**
-		 * Starts the help web page.
-		 */
-		HELP_ONLINE,
-		/**
-		 * Displays the software license.
-		 */
-		HELP_LICENSE
+		SIMULATION_START
 	}
+
+	/**
+	 * Generated serial version identifier
+	 */
+	private static final long serialVersionUID = -5289766427756813972L;
 
 	static {
 		try {
@@ -127,27 +129,21 @@ public class SimulationUI extends JFrame implements ActionListener {
 			GUITools.showErrorMessage(null, exc);
 		}
 	}
-	/**
-	 * Generated serial version identifier
-	 */
-	private static final long serialVersionUID = -5289766427756813972L;
-
-	/**
-	 * GUI element that lets the user run the simulation.
-	 */
-	private SimulationPanel simPanel;
-
-	/**
-	 * The toolbar of this element.
-	 */
-	private JToolBar toolbar;
-
-	private Model model;
 
 	/**
 	 * Compression factor for JPEG output
 	 */
 	private float compression;
+
+	/**
+	 * Pointer to the model
+	 */
+	private Model model;
+
+	/**
+	 * Standard directory to open data files.
+	 */
+	private String openDir;
 
 	/**
 	 * This is the quote character in CSV files
@@ -165,9 +161,14 @@ public class SimulationUI extends JFrame implements ActionListener {
 	private char separatorChar;
 
 	/**
-	 * Standard directory to open data files.
+	 * GUI element that lets the user run the simulation.
 	 */
-	private String openDir;
+	private SimulationPanel simPanel;
+
+	/**
+	 * The toolbar of this element.
+	 */
+	private JToolBar toolbar;
 
 	/**
 	 * 
@@ -205,14 +206,22 @@ public class SimulationUI extends JFrame implements ActionListener {
 		this.separatorChar = ',';
 		setProperties(simulationPanel.getProperties());
 
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		setJMenuBar(createJMenuBar());
-		toolbar = createToolBar();
-		add(toolbar, BorderLayout.NORTH);
 		simPanel = simulationPanel;
 		this.model = model;
 
-		getContentPane().add(simPanel);
+		/*
+		 * Add menubar and toolbar
+		 */
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setJMenuBar(createJMenuBar());
+		toolbar = createToolBar();
+
+		/*
+		 * Init layout
+		 */
+		getContentPane().add(toolbar, BorderLayout.NORTH);
+		getContentPane().add(simPanel, BorderLayout.CENTER);
+		// getContentPane().add(new StatusBar(), BorderLayout.SOUTH);
 		pack();
 		int maxSize = 700;
 		if (getWidth() > 1.5 * maxSize) {
@@ -222,11 +231,6 @@ public class SimulationUI extends JFrame implements ActionListener {
 			this.setSize(getWidth(), maxSize);
 		}
 		setLocationRelativeTo(null);
-
-		final KeyStroke keyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,
-				0, true);
-		getRootPane().registerKeyboardAction(this, keyStroke,
-				JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 	}
 
 	/*
@@ -241,36 +245,16 @@ public class SimulationUI extends JFrame implements ActionListener {
 		}
 		switch (Command.valueOf(e.getActionCommand())) {
 		case SIMULATION_START:
-			try {
-				simulate();
-				GUITools.setEnabled(true, getJMenuBar(), toolbar,
-						Command.SAVE_SIMULATION, Command.SAVE_PLOT_IMAGE);
-			} catch (Exception exc) {
-				exc.printStackTrace();
-				GUITools.showErrorMessage(this, exc);
-			}
+			simulate();
 			break;
 		case OPEN_DATA:
-			try {
-				openExperimentalData();
-			} catch (SBMLException exc) {
-				exc.printStackTrace();
-				GUITools.showErrorMessage(this, exc);
-			}
+			openExperimentalData();
 			break;
 		case SAVE_PLOT_IMAGE:
-			try {
-				savePlotImage();
-			} catch (Exception exc) {
-				GUITools.showErrorMessage(this, exc);
-			}
+			savePlotImage();
 			break;
 		case SAVE_SIMULATION:
-			try {
-				saveSimulationResults();
-			} catch (IOException exc) {
-				GUITools.showErrorMessage(this, exc);
-			}
+			saveSimulationResults();
 			break;
 		case SETTINGS:
 			adjustPreferences();
@@ -295,6 +279,9 @@ public class SimulationUI extends JFrame implements ActionListener {
 					"License of SBMLsimulator "
 							+ SBMLsimulator.getVersionNumber(), this,
 					getIconLicense48());
+			break;
+		case OPTIMIZATION:
+			startOptimization();
 			break;
 		default:
 			JOptionPane.showMessageDialog(this, "Invalid option "
@@ -341,7 +328,8 @@ public class SimulationUI extends JFrame implements ActionListener {
 				this, Command.SAVE_SIMULATION, getIconSave(), KeyStroke
 						.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK));
 		JMenuItem savePlotItem = GUITools.createJMenuItem("Save plot", this,
-				Command.SAVE_PLOT_IMAGE, getIconCamera());
+				Command.SAVE_PLOT_IMAGE, getIconCamera(), KeyStroke
+						.getKeyStroke('S', KeyEvent.ALT_DOWN_MASK));
 		JMenuItem exitItem = GUITools.createJMenuItem("Exit", this,
 				Command.EXIT, KeyStroke.getKeyStroke(KeyEvent.VK_F4,
 						InputEvent.ALT_DOWN_MASK));
@@ -352,13 +340,23 @@ public class SimulationUI extends JFrame implements ActionListener {
 		/*
 		 * Edit
 		 */
+		JMenuItem simulation = GUITools.createJMenuItem("Start simulation",
+				this, Command.SIMULATION_START, getIconGear(), 'S');
+		JMenuItem optimization = GUITools.createJMenuItem("Optimization", this,
+				Command.OPTIMIZATION, getIconEvA2(), 'O');
+		optimization.setEnabled(false);
+		JMenu editMenu = GUITools.createJMenu("Edit", simulation, optimization);
+		editMenu.addSeparator();
+
+		JCheckBoxMenuItem item = new JCheckBoxMenuItem("Show options",
+				simPanel != null ? simPanel.isShowSettingsPanel() : true);
+		item.setName("OPTIONS");
+		item.addItemListener(this);
+		editMenu.add(item);
+
 		JMenuItem settings = GUITools.createJMenuItem("Settings", this,
 				Command.SETTINGS, getIconSettings(), KeyStroke.getKeyStroke(
 						'P', InputEvent.ALT_DOWN_MASK));
-		JMenuItem simulation = GUITools.createJMenuItem("Start simulation",
-				this, Command.SIMULATION_START, getIconGear(), 'S');
-		JMenu editMenu = GUITools.createJMenu("Edit", simulation);
-		editMenu.addSeparator();
 		editMenu.add(settings);
 
 		/*
@@ -371,7 +369,8 @@ public class SimulationUI extends JFrame implements ActionListener {
 				Command.HELP_ABOUT, getIconInfo(), KeyStroke.getKeyStroke(
 						KeyEvent.VK_F2, 0));
 		JMenuItem license = GUITools.createJMenuItem("License", this,
-				Command.HELP_LICENSE, getIconLicense(), 'L');
+				Command.HELP_LICENSE, getIconLicense(), KeyStroke.getKeyStroke(
+						'L', InputEvent.CTRL_DOWN_MASK), 'L');
 		JMenu helpMenu = GUITools.createJMenu("Help", help, about, license);
 
 		menuBar.add(fileMenu);
@@ -421,6 +420,15 @@ public class SimulationUI extends JFrame implements ActionListener {
 					"Perform a simulation run with the current settings."));
 		}
 
+		icon = getIconEvA2();
+		if (icon != null) {
+			JButton optimization = GUITools
+					.createButton(icon, this, Command.OPTIMIZATION,
+							"Starts the optimization of the model with respect to given experimental data.");
+			optimization.setEnabled(false);
+			toolbar.add(optimization);
+		}
+
 		return toolbar;
 	}
 
@@ -430,6 +438,14 @@ public class SimulationUI extends JFrame implements ActionListener {
 	 */
 	private ImageIcon getIconCamera() {
 		return new ImageIcon(Resource.class.getResource("img/camera_16.png"));
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	private ImageIcon getIconEvA2() {
+		return new ImageIcon(Resource.class.getResource("/images/icon1.gif"));
 	}
 
 	/**
@@ -529,11 +545,25 @@ public class SimulationUI extends JFrame implements ActionListener {
 		return p;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
+	 */
+	public void itemStateChanged(ItemEvent e) {
+		if (e.getSource() instanceof JCheckBoxMenuItem) {
+			JCheckBoxMenuItem item = (JCheckBoxMenuItem) e.getSource();
+			if ((item.getName() != null) && (item.getName().equals("OPTIONS"))) {
+				simPanel.setShowSettingsPanel(item.isSelected());
+			}
+		}
+	}
+
 	/**
-	 * @throws SBMLException
 	 * 
 	 */
-	private void openExperimentalData() throws SBMLException {
+	public void openExperimentalData() {
 		JFileChooser chooser = GUITools.createJFileChooser(openDir, false,
 				false, JFileChooser.FILES_ONLY, SBFileFilter.CSV_FILE_FILTER);
 		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
@@ -555,8 +585,12 @@ public class SimulationUI extends JFrame implements ActionListener {
 		openDir = file.getParent();
 		CSVDataImporter importer = new CSVDataImporter();
 		MultiBlockTable data = importer.convert(model, file.getAbsolutePath());
-		GUITools.setEnabled(false, getJMenuBar(), toolbar, Command.OPEN_DATA);
 		simPanel.setExperimentalData(data);
+		GUITools.setEnabled(false, getJMenuBar(), toolbar, Command.OPEN_DATA);
+		// Optimization should not be available if there is nothing to optimize.
+		GUITools.setEnabled(model.getNumQuantities()
+				- model.getNumSpeciesReferences() > 0, getJMenuBar(), toolbar,
+				Command.OPTIMIZATION);
 	}
 
 	/**
@@ -568,63 +602,41 @@ public class SimulationUI extends JFrame implements ActionListener {
 		openExperimentalData(new File(path));
 	}
 
-	/**
-	 * @throws AWTException
-	 * @throws IOException
-	 * 
-	 */
-	private void savePlotImage() throws AWTException, IOException {
-		FunctionArea plot = simPanel.getFunctionArea();
-		Rectangle area = plot.getBounds();
-		area.setLocation(plot.getLocationOnScreen());
-		BufferedImage bufferedImage = (new Robot()).createScreenCapture(area);
-		JFileChooser fc = GUITools.createJFileChooser(saveDir, false, false,
-				JFileChooser.FILES_ONLY, SBFileFilter.PNG_FILE_FILTER,
-				SBFileFilter.JPEG_FILE_FILTER);
-		if (fc.showSaveDialog(plot) == JFileChooser.APPROVE_OPTION
-				&& !fc.getSelectedFile().exists()
-				|| (GUITools.overwriteExistingFile(this, fc.getSelectedFile()))) {
-			this.saveDir = fc.getSelectedFile().getParent();
-			File file = fc.getSelectedFile();
-			if (SBFileFilter.isPNGFile(file)) {
-				ImageIO.write(bufferedImage, "png", file);
-			} else if (SBFileFilter.isJPEGFile(file)) {
-				FileImageOutputStream out = new FileImageOutputStream(file);
-				ImageWriter encoder = (ImageWriter) ImageIO
-						.getImageWritersByFormatName("JPEG").next();
-				JPEGImageWriteParam param = new JPEGImageWriteParam(null);
-				param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-				param.setCompressionQuality(compression);
-				encoder.setOutput(out);
-				encoder.write((IIOMetadata) null, new IIOImage(bufferedImage,
-						null, null), param);
-				out.close();
-			}
+	private void savePlotImage() {
+		try {
+			this.saveDir = simPanel.getPlot().savePlotImage(saveDir,
+					compression);
+		} catch (Exception exc) {
+			GUITools.showErrorMessage(this, exc);
 		}
 	}
 
 	/**
-	 * @throws IOException
 	 * 
 	 */
-	private void saveSimulationResults() throws IOException {
-		TableModel simTabModel = simPanel.getSimulationResultsTable()
-				.getModel();
-		if (simTabModel.getRowCount() > 0) {
-			JFileChooser fc = GUITools.createJFileChooser(saveDir, false,
-					false, JFileChooser.FILES_ONLY,
-					SBFileFilter.CSV_FILE_FILTER);
-			if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-				File out = fc.getSelectedFile();
-				this.saveDir = out.getParent();
-				if (!out.exists() || GUITools.overwriteExistingFile(this, out)) {
-					CSVWriter writer = new CSVWriter();
-					writer.write(simTabModel, separatorChar, out);
+	private void saveSimulationResults() {
+		try {
+			TableModel simTabModel = simPanel.getSimulationResultsTable()
+					.getModel();
+			if (simTabModel.getRowCount() > 0) {
+				JFileChooser fc = GUITools.createJFileChooser(saveDir, false,
+						false, JFileChooser.FILES_ONLY,
+						SBFileFilter.CSV_FILE_FILTER);
+				if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+					File out = fc.getSelectedFile();
+					this.saveDir = out.getParent();
+					if (!out.exists()
+							|| GUITools.overwriteExistingFile(this, out)) {
+						CSVWriter writer = new CSVWriter();
+						writer.write(simTabModel, separatorChar, out);
+					}
 				}
+			} else {
+				String msg = "No simulation has been performed yet. Please run the simulation first.";
+				JOptionPane.showMessageDialog(this, GUITools.toHTML(msg, 40));
 			}
-		} else {
-			String msg = "No simulation has been performed yet. Please run the simulation first.";
-			JOptionPane.showMessageDialog(this, GUITools.toHTML(msg, 40));
+		} catch (IOException exc) {
+			GUITools.showErrorMessage(this, exc);
 		}
 	}
 
@@ -669,10 +681,36 @@ public class SimulationUI extends JFrame implements ActionListener {
 	}
 
 	/**
-	 * @throws Exception
 	 * 
 	 */
-	public void simulate() throws Exception {
-		simPanel.simulate();
+	public void simulate() {
+		try {
+			simPanel.simulate();
+			GUITools.setEnabled(true, getJMenuBar(), toolbar,
+					Command.SAVE_SIMULATION, Command.SAVE_PLOT_IMAGE);
+		} catch (Exception exc) {
+			exc.printStackTrace();
+			GUITools.showErrorMessage(this, exc);
+		}
+	}
+
+	/**
+	 * 
+	 */
+	public void startOptimization() {
+		QuantitySelectionPanel panel = new QuantitySelectionPanel(model);
+		if (JOptionPane.showConfirmDialog(this, panel,
+				"Select quantities for optimization",
+				JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
+			try {
+				EvA2GUIStarter.init(new EstimationProblem(simPanel.getSolver(),
+						simPanel.getDistance(), model, simPanel
+								.getExperimentalData(), panel
+								.getSelectedQuantities()));
+			} catch (Exception exc) {
+				exc.printStackTrace();
+				GUITools.showErrorMessage(this, exc);
+			}
+		}
 	}
 }
