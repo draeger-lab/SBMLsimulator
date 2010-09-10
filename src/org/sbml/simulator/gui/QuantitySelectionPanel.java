@@ -322,11 +322,6 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	private double minValue = 0d, maxValue = 14000d, stepSize = 0.01d;
 
 	/**
-	 * Values for {@link JSpinner}s for the initialization.
-	 */
-	private double minInitValue = 0d, maxInitValue = 2000d;
-
-	/**
 	 * A pointer to the model for which this panel is being created.
 	 */
 	private Model model;
@@ -573,9 +568,9 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 
 			// Initialization
 			JSpinner minInit = new JSpinner(new SpinnerNumberModel(
-					minInitValue, minInitValue, maxInitValue, stepSize));
+					initMinValue, initMinValue, initMaxValue, stepSize));
 			JSpinner maxInit = new JSpinner(new SpinnerNumberModel(
-					maxInitValue, minInitValue, maxInitValue, stepSize));
+					initMaxValue, initMinValue, initMaxValue, stepSize));
 
 			// Optimization
 			JSpinner min = new JSpinner(new SpinnerNumberModel(minValue,

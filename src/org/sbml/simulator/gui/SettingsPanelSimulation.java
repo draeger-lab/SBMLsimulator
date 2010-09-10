@@ -473,14 +473,18 @@ public class SettingsPanelSimulation extends SettingsPanel implements
 	 */
 	private JPanel parsingPanel() {
 		LayoutHelper lh = createTitledPanel("Parsing");
-		
+
 		JButton button = GUITools
-				.createButton(new ImageIcon(Resource.class.getResource("img/folder_16.png")), this, Command.OPEN_DIR,
+				.createButton(new ImageIcon(Resource.class
+						.getResource("img/folder_16.png")), this,
+						Command.OPEN_DIR,
 						"Select the default open directory for experimental data files.");
 		lh.add("Open directory", tfOpenDir, button);
 		lh.add(new JPanel(), 0, lh.getRow(), 1, 1);
 		button = GUITools
-				.createButton(new ImageIcon(Resource.class.getResource("img/save_16.png")), this, Command.SAVE_DIR,
+				.createButton(new ImageIcon(Resource.class
+						.getResource("img/save_16.png")), this,
+						Command.SAVE_DIR,
 						"Select the default save directory for simulation data result files.");
 		lh.add("Save directory", tfSaveDir, button);
 		lh.add(new JPanel(), 0, lh.getRow(), 1, 1);
@@ -656,61 +660,105 @@ public class SettingsPanelSimulation extends SettingsPanel implements
 		/*
 		 * Plot
 		 */
-		setLogScale(((Boolean) settings.get(CfgKeys.PLOT_LOG_SCALE))
-				.booleanValue());
-		setShowGrid(((Boolean) settings.get(CfgKeys.PLOT_SHOW_GRID))
-				.booleanValue());
-		setShowLegend(((Boolean) settings.get(CfgKeys.PLOT_SHOW_LEGEND))
-				.booleanValue());
+		if (settings.containsKey(CfgKeys.PLOT_LOG_SCALE)) {
+			setLogScale(((Boolean) settings.get(CfgKeys.PLOT_LOG_SCALE))
+					.booleanValue());
+		}
+		if (settings.containsKey(CfgKeys.PLOT_SHOW_GRID)) {
+			setShowGrid(((Boolean) settings.get(CfgKeys.PLOT_SHOW_GRID))
+					.booleanValue());
+		}
+		if (settings.containsKey(CfgKeys.PLOT_SHOW_LEGEND)) {
+			setShowLegend(((Boolean) settings.get(CfgKeys.PLOT_SHOW_LEGEND))
+					.booleanValue());
+		}
 		/*
 		 * Scan
 		 */
-		setMaxCompartmentValue(((Number) settings
-				.get(CfgKeys.SIM_MAX_COMPARTMENT_SIZE)).doubleValue());
-		setMaxSpeciesValue(((Number) settings
-				.get(CfgKeys.SIM_MAX_SPECIES_VALUE)).doubleValue());
-		setMaxParameterValue(((Number) settings
-				.get(CfgKeys.SIM_MAX_PARAMETER_VALUE)).doubleValue());
-		setParameterStepSize(((Number) settings.get(CfgKeys.SPINNER_STEP_SIZE))
-				.doubleValue());
+		if (settings.containsKey(CfgKeys.SIM_MAX_COMPARTMENT_SIZE)) {
+			setMaxCompartmentValue(((Number) settings
+					.get(CfgKeys.SIM_MAX_COMPARTMENT_SIZE)).doubleValue());
+		}
+		if (settings.containsKey(CfgKeys.SIM_MAX_SPECIES_VALUE)) {
+			setMaxSpeciesValue(((Number) settings
+					.get(CfgKeys.SIM_MAX_SPECIES_VALUE)).doubleValue());
+		}
+		if (settings.containsKey(CfgKeys.SIM_MAX_PARAMETER_VALUE)) {
+			setMaxParameterValue(((Number) settings
+					.get(CfgKeys.SIM_MAX_PARAMETER_VALUE)).doubleValue());
+		}
+		if (settings.containsKey(CfgKeys.SPINNER_STEP_SIZE)) {
+			setParameterStepSize(((Number) settings
+					.get(CfgKeys.SPINNER_STEP_SIZE)).doubleValue());
+		}
 		/*
 		 * Computing
 		 */
+		String name;
 		int solv = 0, dist = 0;
-		Class<AbstractDESSolver> solvers[] = SBMLsimulator
-				.getAvailableSolvers();
-		String name = settings.get(CfgKeys.SIM_ODE_SOLVER).toString();
-		while (solv < cmbBxSolver.getItemCount()
-				&& !solvers[solv].getName().equals(name))
-			solv++;
-		setSolver(solv);
-		Class<Distance> dists[] = SBMLsimulator.getAvailableDistances();
-		name = settings.get(CfgKeys.SIM_DISTANCE_FUNCTION).toString();
-		while (dist < cmbBxDistance.getItemCount()
-				&& !dists[dist].getName().equals(name))
-			dist++;
-		setDistance(dist);
-		setMaxTime(((Number) settings.get(CfgKeys.SIM_MAX_TIME)).doubleValue());
-		double t1 = ((Number) settings.get(CfgKeys.SIM_START_TIME))
-				.doubleValue();
-		double t2 = ((Number) settings.get(CfgKeys.SIM_END_TIME)).doubleValue();
-		setSimulationStartTime(t1);
-		setSimulationEndTime(t2);
-		setSpinnerMaxValue(((Number) settings.get(CfgKeys.SPINNER_MAX_VALUE))
-				.doubleValue());
-		setStepsPerUnitTime(((Integer) settings
-				.get(CfgKeys.SIM_MAX_STEPS_PER_UNIT_TIME)).intValue());
-		setNumIntegrationSteps((int) Math.round((t2 - t1)
-				/ ((Number) settings.get(CfgKeys.SIM_STEP_SIZE)).doubleValue()));
+		if (settings.containsKey(CfgKeys.SIM_ODE_SOLVER)) {
+			Class<AbstractDESSolver> solvers[] = SBMLsimulator
+					.getAvailableSolvers();
+
+			name = settings.get(CfgKeys.SIM_ODE_SOLVER).toString();
+			while (solv < cmbBxSolver.getItemCount()
+					&& !solvers[solv].getName().equals(name)) {
+				solv++;
+			}
+			setSolver(solv);
+		}
+		if (settings.containsKey(CfgKeys.SIM_DISTANCE_FUNCTION)) {
+			Class<Distance> dists[] = SBMLsimulator.getAvailableDistances();
+			name = settings.get(CfgKeys.SIM_DISTANCE_FUNCTION).toString();
+			while (dist < cmbBxDistance.getItemCount()
+					&& !dists[dist].getName().equals(name)) {
+				dist++;
+			}
+			setDistance(dist);
+		}
+		if (settings.containsKey(CfgKeys.SIM_MAX_TIME)) {
+			setMaxTime(((Number) settings.get(CfgKeys.SIM_MAX_TIME))
+					.doubleValue());
+		}
+		if (settings.containsKey(CfgKeys.SIM_START_TIME)) {
+			setSimulationStartTime(((Number) settings
+					.get(CfgKeys.SIM_START_TIME)).doubleValue());
+		}
+		if (settings.containsKey(CfgKeys.SIM_END_TIME)) {
+			setSimulationEndTime(((Number) settings.get(CfgKeys.SIM_END_TIME))
+					.doubleValue());
+		}
+		if (settings.containsKey(CfgKeys.SPINNER_MAX_VALUE)) {
+			setSpinnerMaxValue(((Number) settings
+					.get(CfgKeys.SPINNER_MAX_VALUE)).doubleValue());
+		}
+		if (settings.containsKey(CfgKeys.SIM_MAX_STEPS_PER_UNIT_TIME)) {
+			setStepsPerUnitTime(((Integer) settings
+					.get(CfgKeys.SIM_MAX_STEPS_PER_UNIT_TIME)).intValue());
+		}
+		if (settings.containsKey(CfgKeys.SIM_STEP_SIZE)) {
+			setNumIntegrationSteps((int) Math
+					.round((getSimulationEndTime() - getSimulationStartTime())
+							/ ((Number) settings.get(CfgKeys.SIM_STEP_SIZE))
+									.doubleValue()));
+		}
 		/*
 		 * Parsing
 		 */
-		setOpenDir(settings.get(CfgKeys.CSV_FILES_OPEN_DIR).toString());
-		setSaveDir(settings.get(CfgKeys.CSV_FILES_SAVE_DIR).toString());
-		setQuoteChar(settings.get(CfgKeys.CSV_FILES_QUOTE_CHAR).toString()
-				.charAt(0));
-		setSeparatorChar(settings.get(CfgKeys.CSV_FILES_SEPARATOR_CHAR)
-				.toString().charAt(0));
+		if (settings.containsKey(CfgKeys.CSV_FILES_OPEN_DIR)) {
+			setOpenDir(settings.get(CfgKeys.CSV_FILES_OPEN_DIR).toString());
+		}
+		if (settings.containsKey(CfgKeys.CSV_FILES_SAVE_DIR)) {
+			setSaveDir(settings.get(CfgKeys.CSV_FILES_SAVE_DIR).toString());
+		}
+		if (settings.containsKey(CfgKeys.CSV_FILES_QUOTE_CHAR)) {
+			setQuoteChar(settings.get(CfgKeys.CSV_FILES_QUOTE_CHAR).toString()
+					.charAt(0));
+		}
+		if (settings.containsKey(CfgKeys.CSV_FILES_SEPARATOR_CHAR)) {
+			setSeparatorChar(settings.get(CfgKeys.CSV_FILES_SEPARATOR_CHAR)
+					.toString().charAt(0));
+		}
 	}
 
 	/**

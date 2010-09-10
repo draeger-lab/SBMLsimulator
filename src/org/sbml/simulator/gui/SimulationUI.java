@@ -177,6 +177,8 @@ public class SimulationUI extends JFrame implements ActionListener,
 	 */
 	private JToolBar toolbar;
 
+	private static final String configFile = "org/sbml/simulator/resources/cfg/Configuration.xml";
+
 	/**
 	 * 
 	 */
@@ -311,7 +313,11 @@ public class SimulationUI extends JFrame implements ActionListener,
 		try {
 			SettingsPanelSimulation ps = new SettingsPanelSimulation();
 			ps.setProperties(getProperties());
-			SettingsDialog dialog = new SettingsDialog("Simulatin Preferences");
+			Properties defaultProperties = new Properties();
+			defaultProperties.loadFromXML(Resource.getInstance()
+					.getStreamFromResourceLocation(configFile ));
+			SettingsDialog dialog = new SettingsDialog(
+					"Simulation Preferences", defaultProperties);
 			Properties p = new Properties();
 			if (dialog.showSettingsDialog(getProperties(), ps) == SettingsDialog.APPROVE_OPTION) {
 				for (Object key : dialog.getSettings().keySet()) {
@@ -613,7 +619,8 @@ public class SimulationUI extends JFrame implements ActionListener,
 	 */
 	public Properties getProperties() {
 
-		Properties p = simPanel.getProperties();
+		Properties p = simPanel != null ? simPanel.getProperties()
+				: new Properties();
 
 		/*
 		 * General

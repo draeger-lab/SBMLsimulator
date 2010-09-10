@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+  <comment>This file captures the default configuration of SBMLsimulator</comment>
+  
+  <!-- General -->
+  <entry key="SPINNER_MAX_VALUE">100000.0</entry>
+  <entry key="SPINNER_STEP_SIZE">0.01</entry>
+  
+  <!-- Plot settings -->
+  <entry key="PLOT_LOG_SCALE">false</entry>
+  <entry key="PLOT_SHOW_GRID">true</entry>
+  <entry key="PLOT_SHOW_LEGEND">true</entry>
+  <entry key="PLOT_SHOW_TOOLTIPS">false</entry>
+  
+  <!-- Simulation settings -->
+  <entry key="SIM_MAX_COMPARTMENT_SIZE">100000.0</entry>
+  <entry key="SIM_MAX_SPECIES_VALUE">100000.0</entry>
+  <entry key="SIM_MAX_PARAMETER_VALUE">100000.0</entry>
+ 
+  <!-- Computing -->
+  <entry key="SIM_ODE_SOLVER">org.sbml.simulator.math.odes.RKEventSolver</entry>
+  <entry key="SIM_DISTANCE_FUNCTION">org.sbml.simulator.math.RSE</entry>
+  <entry key="SIM_MAX_TIME">100000.0</entry>
+  <entry key="SIM_START_TIME">0.0</entry>
+  <entry key="SIM_END_TIME">5.0</entry>
+  <entry key="SIM_MAX_STEPS_PER_UNIT_TIME">500</entry>
+  <entry key="SIM_STEP_SIZE">0.01</entry>
+  
+  <!-- Parsing -->
+  <entry key="CSV_FILES_OPEN_DIR">user.home</entry>
+  <entry key="CSV_FILES_SAVE_DIR">user.home</entry>
+  <entry key="CSV_FILES_QUOTE_CHAR">'</entry>
+  <entry key="CSV_FILES_SEPARATOR_CHAR">,</entry>
+  
+</properties>
