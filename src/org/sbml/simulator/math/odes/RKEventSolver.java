@@ -78,7 +78,7 @@ public class RKEventSolver extends AbstractDESSolver {
 	 */
 	@Override
 	public String getName() {
-		return "Simple RK event solver";
+		return "4th order Runge-Kutta event solver";
 	}
 
 }

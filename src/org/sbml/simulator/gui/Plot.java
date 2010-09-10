@@ -43,6 +43,7 @@ public class Plot extends FunctionArea {
 	 */
 	public Plot() {
 		super();
+		setAppendIndexInLegend(false);
 	}
 
 	/**
@@ -51,6 +52,7 @@ public class Plot extends FunctionArea {
 	 */
 	public Plot(String xname, String yname) {
 		super(xname, yname);
+		setAppendIndexInLegend(false);
 	}
 
 	/**
@@ -84,11 +86,11 @@ public class Plot extends FunctionArea {
 		int i, j, graphLabel;
 		for (i = 1; i < plotData.getColumnCount(); i++) {
 			Column column = plotData.getColumn(i);
-			if (plotColumns[i-1]) {
+			if (plotColumns[i - 1]) {
 				graphLabel = connected ? i : i + plotData.getColumnCount();
 				// plot.clearGraph(graphLabel);
-				setGraphColor(graphLabel, plotColors[i-1]);
-				setInfoString(graphLabel, infos[i-1], 1);
+				setGraphColor(graphLabel, plotColors[i - 1]);
+				setInfoString(graphLabel, infos[i - 1], 1);
 				for (j = 0; j < column.getRowCount(); j++) {
 					if (connected) {
 						setConnectedPoint(plotData.getTimePoint(j), column
