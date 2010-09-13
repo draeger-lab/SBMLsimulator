@@ -5,8 +5,10 @@ package org.sbml.simulator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.InvalidPropertiesFormatException;
+import java.util.Properties;
 
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.xml.stream.XMLStreamException;
 
@@ -15,9 +17,9 @@ import org.sbml.jsbml.xml.stax.SBMLReader;
 import org.sbml.simulator.gui.SimulationUI;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
+import org.sbml.simulator.resources.Resource;
 
 import de.zbit.gui.GUITools;
-import de.zbit.io.SBFileFilter;
 import de.zbit.util.Reflect;
 
 /**
@@ -30,6 +32,11 @@ public class SBMLsimulator {
 	 * mode.
 	 */
 	public static final String JAR_LOCATION = "plugin" + File.separatorChar;
+
+	/**
+	 * 
+	 */
+	private static final String configFile = "org/sbml/simulator/resources/cfg/Configuration.xml";
 
 	/**
 	 * The package where all ODE solvers are assumed to be located.
@@ -137,5 +144,29 @@ public class SBMLsimulator {
 	 */
 	public static String getVersionNumber() {
 		return VERSION_NUMBER;
+	}
+
+	/**
+	 * @return
+	 * @throws IOException
+	 * @throws InvalidPropertiesFormatException
+	 */
+	public static Properties getDefaultProperties()
+			throws InvalidPropertiesFormatException, IOException {
+		Properties defaultProperties = new Properties();
+		defaultProperties.loadFromXML(Resource.getInstance()
+				.getStreamFromResourceLocation(configFile));
+		return defaultProperties;
+	}
+
+	/**
+	 * @return
+	 * @throws IOException
+	 * @throws InvalidPropertiesFormatException
+	 */
+	public static Properties getUserProperties()
+			throws InvalidPropertiesFormatException, IOException {
+		// TODO Auto-generated method stub
+		return getDefaultProperties();
 	}
 }

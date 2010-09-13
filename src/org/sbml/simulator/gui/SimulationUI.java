@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -54,9 +53,9 @@ import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 import org.sbml.simulator.resources.Resource;
 import org.sbml.squeezer.CfgKeys;
-import org.sbml.squeezer.gui.SettingsDialog;
 
-import de.zbit.gui.GUITools;
+import de.zbit.gui.cfg.SettingsDialog;
+import de.zbit.gui.cfg.SettingsPanelSimulation;
 import de.zbit.io.CSVWriter;
 import de.zbit.io.SBFileFilter;
 
@@ -177,8 +176,6 @@ public class SimulationUI extends JFrame implements ActionListener,
 	 */
 	private JToolBar toolbar;
 
-	private static final String configFile = "org/sbml/simulator/resources/cfg/Configuration.xml";
-
 	/**
 	 * 
 	 */
@@ -281,7 +278,7 @@ public class SimulationUI extends JFrame implements ActionListener,
 			GUITools.showMessage(Resource.class
 					.getResource("html/online-help.html"), "SBMLsimulator "
 					+ SBMLsimulator.getVersionNumber() + " online help", this,
-					getIconHelp48());
+					GUITools.getIconHelp48());
 			break;
 		case HELP_ABOUT:
 			GUITools.showMessage(Resource.class.getResource("html/about.html"),
@@ -292,8 +289,8 @@ public class SimulationUI extends JFrame implements ActionListener,
 			GUITools.showMessage(Resource.class
 					.getResource("html/License.html"),
 					"License of SBMLsimulator "
-							+ SBMLsimulator.getVersionNumber(), this,
-					getIconLicense48());
+							+ SBMLsimulator.getVersionNumber(), this, GUITools
+							.getIconLicense48());
 			break;
 		case OPTIMIZATION:
 			startOptimization();
@@ -311,17 +308,16 @@ public class SimulationUI extends JFrame implements ActionListener,
 	 */
 	private void adjustPreferences() {
 		try {
-			SettingsPanelSimulation ps = new SettingsPanelSimulation();
+			Properties defaults = SBMLsimulator.getDefaultProperties();
+			SettingsPanelSimulation ps = new SettingsPanelSimulation(
+					SBMLsimulator.getUserProperties(), defaults);
 			ps.setProperties(getProperties());
-			Properties defaultProperties = new Properties();
-			defaultProperties.loadFromXML(Resource.getInstance()
-					.getStreamFromResourceLocation(configFile ));
 			SettingsDialog dialog = new SettingsDialog(
-					"Simulation Preferences", defaultProperties);
+					"Simulation Preferences", defaults);
 			Properties p = new Properties();
-			if (dialog.showSettingsDialog(getProperties(), ps) == SettingsDialog.APPROVE_OPTION) {
-				for (Object key : dialog.getSettings().keySet()) {
-					p.put(key, dialog.getSettings().get(key));
+			if (dialog.showSettingsDialog(ps) == SettingsDialog.APPROVE_OPTION) {
+				for (Object key : dialog.getProperties().keySet()) {
+					p.put(key, dialog.getProperties().get(key));
 				}
 				simPanel.setProperties(p);
 			}
@@ -368,16 +364,16 @@ public class SimulationUI extends JFrame implements ActionListener,
 		 * File
 		 */
 		JMenuItem openItem = GUITools.createJMenuItem("Open", this,
-				Command.OPEN_DATA, getIconFolder(), KeyStroke.getKeyStroke('O',
-						InputEvent.CTRL_DOWN_MASK));
+				Command.OPEN_DATA, GUITools.getIconFolder(), KeyStroke
+						.getKeyStroke('O', InputEvent.CTRL_DOWN_MASK));
 		JMenuItem closeItem = GUITools.createJMenuItem("Close", this,
-				Command.CLOSE_DATA, getIconTrash(), KeyStroke.getKeyStroke('W',
-						KeyEvent.CTRL_DOWN_MASK));
+				Command.CLOSE_DATA, GUITools.getIconTrash(), KeyStroke
+						.getKeyStroke('W', KeyEvent.CTRL_DOWN_MASK));
 		JMenuItem saveSimItem = GUITools.createJMenuItem("Save simulation",
-				this, Command.SAVE_SIMULATION, getIconSave(), KeyStroke
-						.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK));
+				this, Command.SAVE_SIMULATION, GUITools.getIconSave(),
+				KeyStroke.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK));
 		JMenuItem savePlotItem = GUITools.createJMenuItem("Save plot", this,
-				Command.SAVE_PLOT_IMAGE, getIconCamera(), KeyStroke
+				Command.SAVE_PLOT_IMAGE, GUITools.getIconCamera(), KeyStroke
 						.getKeyStroke('S', KeyEvent.ALT_DOWN_MASK));
 		JMenuItem exitItem = GUITools.createJMenuItem("Exit", this,
 				Command.EXIT, KeyStroke.getKeyStroke(KeyEvent.VK_F4,
@@ -390,9 +386,9 @@ public class SimulationUI extends JFrame implements ActionListener,
 		 * Edit
 		 */
 		JMenuItem simulation = GUITools.createJMenuItem("Start simulation",
-				this, Command.SIMULATION_START, getIconGear(), 'S');
+				this, Command.SIMULATION_START, GUITools.getIconGear(), 'S');
 		JMenuItem optimization = GUITools.createJMenuItem("Optimization", this,
-				Command.OPTIMIZATION, getIconEvA2(), 'O');
+				Command.OPTIMIZATION, GUITools.getIconEvA2(), 'O');
 		optimization.setEnabled(false);
 		JMenu editMenu = GUITools.createJMenu("Edit", simulation, optimization);
 		editMenu.addSeparator();
@@ -404,22 +400,22 @@ public class SimulationUI extends JFrame implements ActionListener,
 		editMenu.add(item);
 
 		JMenuItem settings = GUITools.createJMenuItem("Settings", this,
-				Command.SETTINGS, getIconSettings(), KeyStroke.getKeyStroke(
-						'P', InputEvent.ALT_DOWN_MASK));
+				Command.SETTINGS, GUITools.getIconSettings(), KeyStroke
+						.getKeyStroke('P', InputEvent.ALT_DOWN_MASK));
 		editMenu.add(settings);
 
 		/*
 		 * Help
 		 */
 		JMenuItem help = GUITools.createJMenuItem("Online help", this,
-				Command.HELP_ONLINE, getIconHelp(), KeyStroke.getKeyStroke(
-						KeyEvent.VK_F1, 0));
+				Command.HELP_ONLINE, GUITools.getIconHelp(), KeyStroke
+						.getKeyStroke(KeyEvent.VK_F1, 0));
 		JMenuItem about = GUITools.createJMenuItem("About", this,
-				Command.HELP_ABOUT, getIconInfo(), KeyStroke.getKeyStroke(
-						KeyEvent.VK_F2, 0));
+				Command.HELP_ABOUT, GUITools.getIconInfo(), KeyStroke
+						.getKeyStroke(KeyEvent.VK_F2, 0));
 		JMenuItem license = GUITools.createJMenuItem("License", this,
-				Command.HELP_LICENSE, getIconLicense(), KeyStroke.getKeyStroke(
-						'L', InputEvent.CTRL_DOWN_MASK), 'L');
+				Command.HELP_LICENSE, GUITools.getIconLicense(), KeyStroke
+						.getKeyStroke('L', InputEvent.CTRL_DOWN_MASK), 'L');
 		JMenu helpMenu = GUITools.createJMenu("Help", help, about, license);
 
 		menuBar.add(fileMenu);
@@ -444,21 +440,21 @@ public class SimulationUI extends JFrame implements ActionListener,
 		/*
 		 * File tools
 		 */
-		ImageIcon icon = getIconFolder();
+		ImageIcon icon = GUITools.getIconFolder();
 		if (icon != null)
 			toolbar.add(GUITools.createButton(icon, this, Command.OPEN_DATA,
 					"Load  experimental data from file."));
-		icon = getIconTrash();
+		icon = GUITools.getIconTrash();
 		if (icon != null) {
 			toolbar.add(GUITools.createButton(icon, this, Command.CLOSE_DATA,
 					"Close the current model or the experimental data."));
 		}
-		icon = getIconSave();
+		icon = GUITools.getIconSave();
 		if (icon != null)
 			toolbar.add(GUITools
 					.createButton(icon, this, Command.SAVE_SIMULATION,
 							"Save simulation results to file."));
-		icon = getIconCamera();
+		icon = GUITools.getIconCamera();
 		if (icon != null) {
 			toolbar.add(GUITools.createButton(icon, this,
 					Command.SAVE_PLOT_IMAGE, "Save plot in an image."));
@@ -468,13 +464,13 @@ public class SimulationUI extends JFrame implements ActionListener,
 		/*
 		 * Edit tools
 		 */
-		icon = getIconGear();
+		icon = GUITools.getIconGear();
 		if (icon != null) {
 			toolbar.add(GUITools.createButton(icon, this,
 					Command.SIMULATION_START,
 					"Perform a simulation run with the current settings."));
 		}
-		icon = getIconEvA2();
+		icon = GUITools.getIconEvA2();
 		if (icon != null) {
 			JButton optimization = GUITools
 					.createButton(icon, this, Command.OPTIMIZATION,
@@ -482,7 +478,7 @@ public class SimulationUI extends JFrame implements ActionListener,
 			optimization.setEnabled(false);
 			toolbar.add(optimization);
 		}
-		icon = getIconSettings();
+		icon = GUITools.getIconSettings();
 		if (icon != null) {
 			toolbar.add(GUITools.createButton(icon, this, Command.SETTINGS,
 					"Adjust your preferences"));
@@ -492,17 +488,17 @@ public class SimulationUI extends JFrame implements ActionListener,
 		/*
 		 * Help tools
 		 */
-		icon = getIconHelp();
+		icon = GUITools.getIconHelp();
 		if (icon != null) {
 			toolbar.add(GUITools.createButton(icon, this, Command.HELP_ONLINE,
 					"Opens the online help."));
 		}
-		icon = getIconInfo();
+		icon = GUITools.getIconInfo();
 		if (icon != null) {
 			toolbar.add(GUITools.createButton(icon, this, Command.HELP_ABOUT,
 					"Displays information about the authors of this program."));
 		}
-		icon = getIconLicense();
+		icon = GUITools.getIconLicense();
 		if (icon != null) {
 			toolbar.add(GUITools.createButton(icon, this, Command.HELP_LICENSE,
 					"Shows the software license of this product."));
@@ -515,102 +511,6 @@ public class SimulationUI extends JFrame implements ActionListener,
 				Command.SAVE_SIMULATION);
 
 		return toolbar;
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	private ImageIcon getIconCamera() {
-		return new ImageIcon(Resource.class.getResource("img/camera_16.png"));
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	private ImageIcon getIconEvA2() {
-		return new ImageIcon(Resource.class.getResource("/images/icon1.gif"));
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	private ImageIcon getIconFolder() {
-		return new ImageIcon(Resource.class.getResource("img/folder_16.png"));
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	private ImageIcon getIconGear() {
-		return new ImageIcon(Resource.class.getResource("img/gear_16.png"));
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	private ImageIcon getIconHelp() {
-		return new ImageIcon(Resource.class.getResource("img/help_16.png"));
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	private Icon getIconHelp48() {
-		return new ImageIcon(Resource.class.getResource("img/help_48.png"));
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	private ImageIcon getIconInfo() {
-		return new ImageIcon(Resource.class.getResource("img/info_16.png"));
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	private ImageIcon getIconLicense() {
-		return new ImageIcon(Resource.class.getResource("img/licence_16.png"));
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	private Icon getIconLicense48() {
-		return new ImageIcon(Resource.class.getResource("img/licence_48.png"));
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	private ImageIcon getIconSave() {
-		return new ImageIcon(Resource.class.getResource("img/save_16.png"));
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	private ImageIcon getIconSettings() {
-		return new ImageIcon(Resource.class.getResource("img/settings_16.png"));
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	private ImageIcon getIconTrash() {
-		return new ImageIcon(Resource.class.getResource("img/trash_16.png"));
 	}
 
 	/**
