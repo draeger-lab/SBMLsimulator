@@ -16,12 +16,11 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.sbml.simulator.gui;
+package de.zbit.gui.cfg;
 
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 
 import javax.swing.BorderFactory;
@@ -41,7 +40,6 @@ import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.resources.Resource;
 import org.sbml.squeezer.CfgKeys;
-import org.sbml.squeezer.gui.SettingsPanel;
 
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;
@@ -111,48 +109,12 @@ public class SettingsPanelSimulation extends SettingsPanel implements
 	private char separatorChar = ',';
 
 	/**
-	 * @throws NoSuchMethodException
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws InstantiationException
-	 * @throws SecurityException
-	 * @throws IllegalArgumentException
 	 * 
+	 * @param properties
+	 * @param defaults
 	 */
-	public SettingsPanelSimulation() throws IllegalArgumentException,
-			SecurityException, InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException {
-		super();
-		setLayout(new GridBagLayout());
-		tfOpenDir = new JTextField(System.getProperty("user.home"));
-		tfSaveDir = new JTextField(System.getProperty("user.home"));
-		tfOpenDir.addKeyListener(this);
-		tfSaveDir.addKeyListener(this);
-		LayoutHelper lh = new LayoutHelper(this);
-		lh.add(computingPanel(), 0, 0, 1, 1, 0, 0);
-		lh.add(new JPanel(), 0, 1, 1, 1, 0, 0);
-		lh.add(parsingPanel(), 0, 2, 1, 1, 0, 0);
-		lh.add(new JPanel(), 1, 0, 1, 1, 0, 0);
-		lh.add(scanPanel(), 2, 0, 1, 1, 0, 0);
-		lh.add(plotPanel(), 2, 2, 1, 1, 0, 0);
-	}
-
-	/**
-	 * 
-	 * @param settings
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws NoSuchMethodException
-	 */
-	public SettingsPanelSimulation(Properties settings)
-			throws IllegalArgumentException, SecurityException,
-			InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException {
-		this();
-		setProperties(settings);
+	public SettingsPanelSimulation(Properties properties, Properties defaults) {
+		super(properties, defaults);
 	}
 
 	/*
@@ -175,81 +137,80 @@ public class SettingsPanelSimulation extends SettingsPanel implements
 	/**
 	 * 
 	 * @return
-	 * @throws NoSuchMethodException
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws InstantiationException
-	 * @throws SecurityException
-	 * @throws IllegalArgumentException
 	 */
-	private JPanel computingPanel() throws IllegalArgumentException,
-			SecurityException, InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException {
-		Class<AbstractDESSolver> availableSolvers[] = SBMLsimulator
-				.getAvailableSolvers();
-		String solvers[] = new String[availableSolvers.length];
-		int i = 0;
-		for (Class<AbstractDESSolver> solver : availableSolvers) {
-			solvers[i++] = solver.getConstructor().newInstance().getName();
+	private JPanel computingPanel() {
+		try {
+			Class<AbstractDESSolver> availableSolvers[] = SBMLsimulator
+					.getAvailableSolvers();
+			String solvers[] = new String[availableSolvers.length];
+			int i = 0;
+			for (Class<AbstractDESSolver> solver : availableSolvers) {
+				solvers[i++] = solver.getConstructor().newInstance().getName();
+			}
+			cmbBxSolver = new JComboBox(solvers);
+			cmbBxSolver.setEnabled(solvers.length > 1);
+			cmbBxSolver.addItemListener(this);
+
+			Class<Distance> availableDistances[] = SBMLsimulator
+					.getAvailableDistances();
+			String[] distances = new String[availableDistances.length];
+			i = 0;
+			for (Class<Distance> distance : availableDistances)
+				distances[i++] = distance.getConstructor().newInstance()
+						.getName();
+			cmbBxDistance = new JComboBox(distances);
+			cmbBxDistance.addItemListener(this);
+
+			int maxTime = 100;
+			spinModStepsPerUnitTime = new SpinnerNumberModel(5, 1,
+					(int) spinnerMaxVal, 1);
+			spinModT1 = new SpinnerNumberModel(0d, 0d, maxTime,
+					((Integer) spinModStepsPerUnitTime.getValue()).intValue());
+			JSpinner startTime = new JSpinner(spinModT1);
+			startTime.addChangeListener(this);
+			startTime.setEnabled(false);
+			JSpinner maxStepsPerUnitTime = new JSpinner(new SpinnerNumberModel(
+					((Integer) spinModStepsPerUnitTime.getValue()).intValue(),
+					1, Integer.MAX_VALUE, 1));
+			maxStepsPerUnitTime.addChangeListener(this);
+			double endT = 5;
+			spinModNumSteps = new SpinnerNumberModel(
+					(int) (((Integer) spinModStepsPerUnitTime.getValue())
+							.intValue()
+							* endT - 1) / 2, 1,
+					(int) (((Integer) spinModStepsPerUnitTime.getValue())
+							.intValue() * endT), 1);
+			spinModT2 = new SpinnerNumberModel(endT, ((Number) spinModT1
+					.getValue()).doubleValue(), maxTime,
+					((Integer) spinModNumSteps.getValue()).intValue()
+							* (endT - ((Number) spinModT1.getValue())
+									.doubleValue()));
+			JSpinner numberOfSteps = new JSpinner(spinModNumSteps);
+			numberOfSteps.addChangeListener(this);
+			SpinnerNumberModel spinnerModel = new SpinnerNumberModel(maxTime,
+					0, 1000, 1d); // Double.MAX_VALUE
+			JSpinner maximalEndTime = new JSpinner(spinnerModel);
+			maximalEndTime.addChangeListener(this);
+
+			JSpinner endTime = new JSpinner(spinModT2);
+			endTime.addChangeListener(this);
+			LayoutHelper lh = createTitledPanel("Computing");
+			lh.add("ODE Solver", cmbBxSolver, true);
+			lh.add("Distance", cmbBxDistance, true);
+			lh.add("Start time", startTime, true);
+			lh.add("End time", endTime, true);
+			lh.add("Maximal end time", maximalEndTime, true);
+			lh
+					.add(GUITools.toHTML(
+							"Maximal number of steps per unit time", 20),
+							maxStepsPerUnitTime, true);
+			lh.add("Number of steps", numberOfSteps, true);
+
+			return (JPanel) lh.getContainer();
+		} catch (Exception exc) {
+			GUITools.showErrorMessage(this, exc);
+			return null;
 		}
-		cmbBxSolver = new JComboBox(solvers);
-		cmbBxSolver.setEnabled(solvers.length > 1);
-		cmbBxSolver.addItemListener(this);
-
-		Class<Distance> availableDistances[] = SBMLsimulator
-				.getAvailableDistances();
-		String[] distances = new String[availableDistances.length];
-		i = 0;
-		for (Class<Distance> distance : availableDistances)
-			distances[i++] = distance.getConstructor().newInstance().getName();
-		cmbBxDistance = new JComboBox(distances);
-		cmbBxDistance.addItemListener(this);
-
-		int maxTime = 100;
-		spinModStepsPerUnitTime = new SpinnerNumberModel(5, 1,
-				(int) spinnerMaxVal, 1);
-		spinModT1 = new SpinnerNumberModel(0d, 0d, maxTime,
-				((Integer) spinModStepsPerUnitTime.getValue()).intValue());
-		JSpinner startTime = new JSpinner(spinModT1);
-		startTime.addChangeListener(this);
-		startTime.setEnabled(false);
-		JSpinner maxStepsPerUnitTime = new JSpinner(new SpinnerNumberModel(
-				((Integer) spinModStepsPerUnitTime.getValue()).intValue(), 1,
-				Integer.MAX_VALUE, 1));
-		maxStepsPerUnitTime.addChangeListener(this);
-		double endT = 5;
-		spinModNumSteps = new SpinnerNumberModel(
-				(int) (((Integer) spinModStepsPerUnitTime.getValue())
-						.intValue()
-						* endT - 1) / 2, 1,
-				(int) (((Integer) spinModStepsPerUnitTime.getValue())
-						.intValue() * endT), 1);
-		spinModT2 = new SpinnerNumberModel(
-				endT,
-				((Number) spinModT1.getValue()).doubleValue(),
-				maxTime,
-				((Integer) spinModNumSteps.getValue()).intValue()
-						* (endT - ((Number) spinModT1.getValue()).doubleValue()));
-		JSpinner numberOfSteps = new JSpinner(spinModNumSteps);
-		numberOfSteps.addChangeListener(this);
-		SpinnerNumberModel spinnerModel = new SpinnerNumberModel(maxTime, 0,
-				1000, 1d); // Double.MAX_VALUE
-		JSpinner maximalEndTime = new JSpinner(spinnerModel);
-		maximalEndTime.addChangeListener(this);
-
-		JSpinner endTime = new JSpinner(spinModT2);
-		endTime.addChangeListener(this);
-		LayoutHelper lh = createTitledPanel("Computing");
-		lh.add("ODE Solver", cmbBxSolver, true);
-		lh.add("Distance", cmbBxDistance, true);
-		lh.add("Start time", startTime, true);
-		lh.add("End time", endTime, true);
-		lh.add("Maximal end time", maximalEndTime, true);
-		lh.add(GUITools.toHTML("Maximal number of steps per unit time", 20),
-				maxStepsPerUnitTime, true);
-		lh.add("Number of steps", numberOfSteps, true);
-
-		return (JPanel) lh.getContainer();
 	}
 
 	/**
@@ -847,5 +808,37 @@ public class SettingsPanelSimulation extends SettingsPanel implements
 	 */
 	public void setStepsPerUnitTime(int stepsPerUnitTime) {
 		this.spinModStepsPerUnitTime.setValue(stepsPerUnitTime);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.zbit.gui.cfg.SettingsPanel#getTitle()
+	 */
+	@Override
+	public String getTitle() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.zbit.gui.cfg.SettingsPanel#init()
+	 */
+	@Override
+	public void init() {
+		setLayout(new GridBagLayout());
+		tfOpenDir = new JTextField(System.getProperty("user.home"));
+		tfSaveDir = new JTextField(System.getProperty("user.home"));
+		tfOpenDir.addKeyListener(this);
+		tfSaveDir.addKeyListener(this);
+		LayoutHelper lh = new LayoutHelper(this);
+		lh.add(computingPanel(), 0, 0, 1, 1, 0, 0);
+		lh.add(new JPanel(), 0, 1, 1, 1, 0, 0);
+		lh.add(parsingPanel(), 0, 2, 1, 1, 0, 0);
+		lh.add(new JPanel(), 1, 0, 1, 1, 0, 0);
+		lh.add(scanPanel(), 2, 0, 1, 1, 0, 0);
+		lh.add(plotPanel(), 2, 2, 1, 1, 0, 0);
 	}
 }
