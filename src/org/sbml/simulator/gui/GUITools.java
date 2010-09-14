@@ -5,6 +5,7 @@ package org.sbml.simulator.gui;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.UIManager;
 
 import org.sbml.simulator.resources.Resource;
 
@@ -14,6 +15,11 @@ import org.sbml.simulator.resources.Resource;
  */
 public class GUITools extends de.zbit.gui.GUITools {
 
+	static {
+		UIManager.put("ICON_SAVE", getIconSave());
+		UIManager.put("ICON_OPEN", getIconFolder());
+	}
+	
 	/**
 	 * 
 	 * @return

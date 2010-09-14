@@ -94,7 +94,7 @@ public class SettingsPanelSimulation extends SettingsPanel implements
 	private JComboBox cmbBxSolver;
 	private SpinnerNumberModel spinModT1;
 	private SpinnerNumberModel spinModT2;
-	private double spinnerMaxVal = 10000;
+	private double spinnerMaxVal;
 	private SpinnerNumberModel spinModStepsPerUnitTime;
 	private SpinnerNumberModel spinModNumSteps;
 	/*
@@ -155,9 +155,10 @@ public class SettingsPanelSimulation extends SettingsPanel implements
 					.getAvailableDistances();
 			String[] distances = new String[availableDistances.length];
 			i = 0;
-			for (Class<Distance> distance : availableDistances)
+			for (Class<Distance> distance : availableDistances) {
 				distances[i++] = distance.getConstructor().newInstance()
 						.getName();
+			}
 			cmbBxDistance = new JComboBox(distances);
 			cmbBxDistance.addItemListener(this);
 
@@ -616,11 +617,22 @@ public class SettingsPanelSimulation extends SettingsPanel implements
 	 * 
 	 * @param settings
 	 */
-	public void setProperties(Properties settings) {
-		this.settings = settings;
+	public void setProperties(Properties properties) {
+		removeAll();
+		this.settings = new Properties();
 		/*
 		 * Plot
 		 */
+		String k;
+		for (Object key : properties.keySet()) {
+			k = key.toString();
+			if (k.startsWith("PLOT_") || k.startsWith("SIM_")
+					|| k.startsWith("CSV_")) {
+				settings.put(key, properties.get(key));
+			}
+		}
+		init();
+
 		if (settings.containsKey(CfgKeys.PLOT_LOG_SCALE)) {
 			setLogScale(((Boolean) settings.get(CfgKeys.PLOT_LOG_SCALE))
 					.booleanValue());
@@ -817,8 +829,7 @@ public class SettingsPanelSimulation extends SettingsPanel implements
 	 */
 	@Override
 	public String getTitle() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Simulation settings";
 	}
 
 	/*
@@ -828,6 +839,9 @@ public class SettingsPanelSimulation extends SettingsPanel implements
 	 */
 	@Override
 	public void init() {
+		spinnerMaxVal = settings.contains(CfgKeys.SPINNER_MAX_VALUE) ? ((Double) settings
+				.get(CfgKeys.SPINNER_MAX_VALUE)).doubleValue()
+				: 10000;
 		setLayout(new GridBagLayout());
 		tfOpenDir = new JTextField(System.getProperty("user.home"));
 		tfSaveDir = new JTextField(System.getProperty("user.home"));

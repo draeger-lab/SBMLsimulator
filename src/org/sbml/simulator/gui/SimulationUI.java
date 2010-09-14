@@ -55,7 +55,6 @@ import org.sbml.simulator.resources.Resource;
 import org.sbml.squeezer.CfgKeys;
 
 import de.zbit.gui.cfg.SettingsDialog;
-import de.zbit.gui.cfg.SettingsPanelSimulation;
 import de.zbit.io.CSVWriter;
 import de.zbit.io.SBFileFilter;
 
@@ -308,14 +307,14 @@ public class SimulationUI extends JFrame implements ActionListener,
 	 */
 	private void adjustPreferences() {
 		try {
-			Properties defaults = SBMLsimulator.getDefaultProperties();
-			SettingsPanelSimulation ps = new SettingsPanelSimulation(
-					SBMLsimulator.getUserProperties(), defaults);
-			ps.setProperties(getProperties());
-			SettingsDialog dialog = new SettingsDialog(
-					"Simulation Preferences", defaults);
+			Properties defaults = CfgKeys.getDefaultProperties();
+			// SettingsPanelSimulation ps = new SettingsPanelSimulation(
+			// SBMLsimulator.getUserProperties(), defaults);
+			// ps.setProperties(getProperties());
+			SettingsDialog dialog = new SettingsDialog(this, defaults);
+			// "Simulation Preferences", defaults);
 			Properties p = new Properties();
-			if (dialog.showSettingsDialog(ps) == SettingsDialog.APPROVE_OPTION) {
+			if (dialog.showSettingsDialog(CfgKeys.getProperties()) == SettingsDialog.APPROVE_OPTION) {
 				for (Object key : dialog.getProperties().keySet()) {
 					p.put(key, dialog.getProperties().get(key));
 				}

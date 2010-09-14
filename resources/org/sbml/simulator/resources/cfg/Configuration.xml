@@ -4,14 +4,18 @@
   <comment>This file captures the default configuration of SBMLsimulator</comment>
   
   <!-- General -->
+  <entry key="OPEN_DIR">user.home</entry>
+  <entry key="SAVE_DIR">user.home</entry>
   <entry key="SPINNER_MAX_VALUE">100000.0</entry>
   <entry key="SPINNER_STEP_SIZE">0.01</entry>
   
   <!-- Plot settings -->
+  <entry key="PLOT_SAVE_DIR">user.home</entry>
   <entry key="PLOT_LOG_SCALE">false</entry>
   <entry key="PLOT_SHOW_GRID">true</entry>
   <entry key="PLOT_SHOW_LEGEND">true</entry>
   <entry key="PLOT_SHOW_TOOLTIPS">false</entry>
+  <entry key="JPEG_COMPRESSION_FACTOR">0.8f</entry>
   
   <!-- Simulation settings -->
   <entry key="SIM_MAX_COMPARTMENT_SIZE">100000.0</entry>
