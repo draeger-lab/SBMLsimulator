@@ -76,7 +76,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	/**
 	 * 
 	 */
-	private Quantity[] quantities = null;
+	private transient Quantity[] quantities = null;
 
 	/**
 	 * Memorizes the original values of all given {@link Quantity}s to restore
@@ -87,12 +87,12 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	/**
 	 * 
 	 */
-	private SBMLinterpreter interpreter = null;
+	private transient SBMLinterpreter interpreter = null;
 
 	/**
 	 * Reference data used to judge the quality of a simulation result.
 	 */
-	private MultiBlockTable referenceData = null;
+	private transient MultiBlockTable referenceData = null;
 
 	/**
 	 * An array to store the fitness of a parameter set to avoid multiple

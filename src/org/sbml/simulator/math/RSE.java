@@ -31,6 +31,11 @@ package org.sbml.simulator.math;
 public class RSE extends Distance {
 
 	/**
+	 * Generated serial identifier.
+	 */
+	private static final long serialVersionUID = 1643317436479699973L;
+
+	/**
 	 * Constructs a new RelativeSquaredError with a default root of 10,000. Here
 	 * the root is the default value to be returned by the distance function.
 	 */

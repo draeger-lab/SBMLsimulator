@@ -3,6 +3,8 @@
  */
 package org.sbml.optimization;
 
+import java.io.Serializable;
+
 import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.util.ValuePair;
 
@@ -19,7 +21,7 @@ import org.sbml.jsbml.util.ValuePair;
  * @author Andreas Dr&auml;ger
  * @date 2010-09-09
  */
-public interface QuantityRange {
+public interface QuantityRange extends Serializable {
 
 	/**
 	 * Delivers the maximal allowable value that can be assigned to the

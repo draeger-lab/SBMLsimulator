@@ -18,6 +18,7 @@
  */
 package org.sbml.simulator.math;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import org.sbml.simulator.math.odes.MultiBlockTable;
@@ -30,7 +31,12 @@ import org.sbml.simulator.util.ArrayIterator;
  * @author Andreas Dr&auml;ger
  * @date 17.04.2007
  */
-public abstract class Distance {
+public abstract class Distance implements Serializable {
+
+	/**
+	 * Generated serial identifier.
+	 */
+	private static final long serialVersionUID = -1923357284664688319L;
 
 	/**
 	 * The return value of the distance function in cases where the distance
