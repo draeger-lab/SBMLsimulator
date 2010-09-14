@@ -3,11 +3,16 @@
  */
 package org.sbml.simulator.gui;
 
+import java.awt.Toolkit;
+
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.UIManager;
 
 import org.sbml.simulator.resources.Resource;
+
+import eva2.EvAInfo;
+import eva2.tools.BasicResourceLoader;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -33,7 +38,10 @@ public class GUITools extends de.zbit.gui.GUITools {
 	 * @return
 	 */
 	public static ImageIcon getIconEvA2() {
-		return new ImageIcon(Resource.class.getResource("/images/icon1.gif"));
+		BasicResourceLoader rl = BasicResourceLoader.instance();
+		byte[] bytes = rl.getBytesFromResourceLocation(EvAInfo.iconLocation, true);
+		return new ImageIcon(Toolkit.getDefaultToolkit().createImage(bytes));
+//		return new ImageIcon(Resource.class.getResource("/images/icon1.gif"));
 	}
 
 	/**

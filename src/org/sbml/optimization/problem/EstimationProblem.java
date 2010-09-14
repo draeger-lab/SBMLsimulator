@@ -349,10 +349,10 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 */
 	public void setReferenceData(MultiBlockTable referenceData) {
 		if ((referenceData != null)
-				&& (referenceData.getColumnCount() != 1 /* time column */+ getModel()
-						.getNumSymbols())) {
+				&& (referenceData.getColumnCount() <= 1)) { 
+			// time column */+ getModel().getNumSymbols())) {
 			throw new IllegalArgumentException(
-					"unequal number of reference data and symbols in the model");
+					"At least for one symbol reference data are required.");
 		}
 		this.referenceData = referenceData;
 	}

@@ -28,6 +28,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.prefs.BackingStoreException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -271,7 +272,12 @@ public class SimulationUI extends JFrame implements ActionListener,
 			adjustPreferences();
 			break;
 		case EXIT:
-			// TODO: try to save the settings
+			try { // TODO
+				CfgKeys.saveProperties(CfgKeys.getProperties());
+			} catch (BackingStoreException exc) {
+				exc.printStackTrace();
+				GUITools.showErrorMessage(this, exc);
+			}
 			System.exit(0);
 		case HELP_ONLINE:
 			GUITools.showMessage(Resource.class
