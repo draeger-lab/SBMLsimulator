@@ -5,9 +5,7 @@ package org.sbml.simulator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.InvalidPropertiesFormatException;
-import java.util.Properties;
+import java.util.prefs.BackingStoreException;
 
 import javax.swing.JOptionPane;
 import javax.xml.stream.XMLStreamException;
@@ -17,7 +15,7 @@ import org.sbml.jsbml.xml.stax.SBMLReader;
 import org.sbml.simulator.gui.SimulationUI;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
-import org.sbml.simulator.resources.Resource;
+import org.sbml.squeezer.CfgKeys;
 
 import de.zbit.gui.GUITools;
 import de.zbit.util.Reflect;
@@ -32,12 +30,6 @@ public class SBMLsimulator {
 	 * mode.
 	 */
 	public static final String JAR_LOCATION = "plugin" + File.separatorChar;
-
-	/**
-	 * 
-	 */
-	private static final String configFile = "org/sbml/simulator/resources/cfg/Configuration.xml";
-
 	/**
 	 * The package where all ODE solvers are assumed to be located.
 	 */
@@ -67,6 +59,20 @@ public class SBMLsimulator {
 	 * The version number of this program.
 	 */
 	private static final String VERSION_NUMBER = "0.5";
+
+	static {
+		CfgKeys.setCommentCfgFile(String.format(
+				"SBMLsimulator %s configuration. Do not change manually.",
+				VERSION_NUMBER));
+		CfgKeys
+				.setDefaultsCfgFile("/org/sbml/simulator/resources/cfg/Configuration.xml");
+		CfgKeys.setUserPrefNode("/org/sbml/simulator");
+		try {
+			CfgKeys.initProperties();
+		} catch (BackingStoreException e) {
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * 
@@ -144,29 +150,5 @@ public class SBMLsimulator {
 	 */
 	public static String getVersionNumber() {
 		return VERSION_NUMBER;
-	}
-
-	/**
-	 * @return
-	 * @throws IOException
-	 * @throws InvalidPropertiesFormatException
-	 */
-	public static Properties getDefaultProperties()
-			throws InvalidPropertiesFormatException, IOException {
-		Properties defaultProperties = new Properties();
-		defaultProperties.loadFromXML(Resource.getInstance()
-				.getStreamFromResourceLocation(configFile));
-		return defaultProperties;
-	}
-
-	/**
-	 * @return
-	 * @throws IOException
-	 * @throws InvalidPropertiesFormatException
-	 */
-	public static Properties getUserProperties()
-			throws InvalidPropertiesFormatException, IOException {
-		// TODO Auto-generated method stub
-		return getDefaultProperties();
 	}
 }
