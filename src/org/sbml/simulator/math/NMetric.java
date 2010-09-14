@@ -31,6 +31,11 @@ package org.sbml.simulator.math;
 public class NMetric extends Distance {
 
 	/**
+	 * Generated serial identifier.
+	 */
+	private static final long serialVersionUID = -216525074796086162L;
+
+	/**
 	 * Constructs a new NMetric with a default root of two. This will result in
 	 * the Euclidean distance. Other metrics can be used by either setting the
 	 * root to another value or explicitly using the distance function where the

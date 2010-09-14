@@ -298,7 +298,11 @@ public class SimulationUI extends JFrame implements ActionListener,
 							.getIconLicense48());
 			break;
 		case OPTIMIZATION:
-			startOptimization();
+			new Thread(new Runnable() {
+				public void run() {
+					startOptimization();
+				}
+			}).start();
 			break;
 		default:
 			JOptionPane.showMessageDialog(this, "Invalid option "
@@ -767,7 +771,7 @@ public class SimulationUI extends JFrame implements ActionListener,
 				EvA2GUIStarter.init(new EstimationProblem(simPanel.getSolver(),
 						simPanel.getDistance(), model, simPanel
 								.getExperimentalData(), panel
-								.getSelectedQuantityRanges()));
+								.getSelectedQuantityRanges()), this);
 			} catch (Exception exc) {
 				exc.printStackTrace();
 				GUITools.showErrorMessage(this, exc);

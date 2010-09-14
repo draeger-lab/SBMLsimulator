@@ -1,10 +1,12 @@
 package org.sbml.optimization;
 
+import java.awt.Window;
 import java.util.List;
 
 import eva2.client.EvAClient;
 import eva2.gui.BeanInspector;
 import eva2.gui.GenericObjectEditor;
+import eva2.server.go.InterfaceGOParameters;
 import eva2.server.go.enums.PSOTopologyEnum;
 import eva2.server.go.operators.terminators.EvaluationTerminator;
 import eva2.server.go.problems.AbstractOptimizationProblem;
@@ -31,7 +33,7 @@ public class EvA2GUIStarter implements InterfaceStatisticsListener {
 	 * 
 	 * @param problem
 	 */
-	public static void init(InterfaceOptimizationProblem problem) {
+	public static void init(InterfaceOptimizationProblem problem, final Window parentWindow) {
 		EvA2GUIStarter evaBP = new EvA2GUIStarter();
 		GOParameters goParams = new GOParameters(); // Instance for the general Genetic Optimization parameterization
 		
@@ -44,8 +46,8 @@ public class EvA2GUIStarter implements InterfaceStatisticsListener {
 		// hide some properties which should not be shown
 		GenericObjectEditor.setHideProperty(goParams.getClass(), "problem", true);
 		GenericObjectEditor.setHideProperty(goParams.getClass(), "postProcessParams", true);
-
-		evaBP.evaClient = new EvAClient(null, goParams, false, true, false); // initializes GUI in the background
+// public EvAClient(final String hostName, final Window parent, final String paramsFile, final InterfaceGOParameters goParams, final boolean autorun, final boolean noSplash, final boolean noGui) {
+		evaBP.evaClient = new EvAClient(null, parentWindow, null, goParams, false, true, false); // initializes GUI in the background
 		// important: wait for GUI initialization before accessing any internal settings:
 		evaBP.evaClient.awaitGuiInitialized(); // this returns as soon as the GUI is ready
 		
