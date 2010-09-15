@@ -172,7 +172,7 @@ public class SimulationUI extends JFrame implements ActionListener,
 	private SimulationPanel simPanel;
 
 	/**
-	 * The toolbar of this element.
+	 * The tool bar of this element.
 	 */
 	private JToolBar toolbar;
 
@@ -323,12 +323,12 @@ public class SimulationUI extends JFrame implements ActionListener,
 			// ps.setProperties(getProperties());
 			SettingsDialog dialog = new SettingsDialog(this, defaults);
 			// "Simulation Preferences", defaults);
-			Properties p = new Properties();
 			if (dialog.showSettingsDialog(CfgKeys.getProperties()) == SettingsDialog.APPROVE_OPTION) {
-				for (Object key : dialog.getProperties().keySet()) {
-					p.put(key, dialog.getProperties().get(key));
+				Properties p = dialog.getProperties();
+				CfgKeys.saveProperties(p);
+				if (simPanel != null) {
+					simPanel.setProperties(p);
 				}
-				simPanel.setProperties(p);
 			}
 		} catch (Exception exc) {
 			GUITools.showErrorMessage(this, exc);
@@ -588,13 +588,18 @@ public class SimulationUI extends JFrame implements ActionListener,
 		openDir = file.getParent();
 		CSVDataImporter importer = new CSVDataImporter();
 		MultiBlockTable data = importer.convert(model, file.getAbsolutePath());
-		simPanel.setExperimentalData(data);
-		GUITools.setEnabled(false, getJMenuBar(), toolbar, Command.OPEN_DATA);
-		GUITools.setEnabled(true, getJMenuBar(), toolbar, Command.CLOSE_DATA);
-		// Optimization should not be available if there is nothing to optimize.
-		GUITools.setEnabled(model.getNumQuantities()
-				- model.getNumSpeciesReferences() > 0, getJMenuBar(), toolbar,
-				Command.OPTIMIZATION);
+		if (data != null) {
+			simPanel.setExperimentalData(data);
+			GUITools.setEnabled(false, getJMenuBar(), toolbar,
+					Command.OPEN_DATA);
+			GUITools.setEnabled(true, getJMenuBar(), toolbar,
+					Command.CLOSE_DATA);
+			// Optimization should not be available if there is nothing to
+			// optimize.
+			GUITools.setEnabled(model.getNumQuantities()
+					- model.getNumSpeciesReferences() > 0, getJMenuBar(),
+					toolbar, Command.OPTIMIZATION);
+		}
 	}
 
 	/**
@@ -771,7 +776,7 @@ public class SimulationUI extends JFrame implements ActionListener,
 				EvA2GUIStarter.init(new EstimationProblem(simPanel.getSolver(),
 						simPanel.getDistance(), model, simPanel
 								.getExperimentalData(), panel
-								.getSelectedQuantityRanges()), this);
+								.getSelectedQuantityRanges()), this, simPanel);
 			} catch (Exception exc) {
 				exc.printStackTrace();
 				GUITools.showErrorMessage(this, exc);

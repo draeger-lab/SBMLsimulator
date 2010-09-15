@@ -6,7 +6,6 @@ import java.util.List;
 import eva2.client.EvAClient;
 import eva2.gui.BeanInspector;
 import eva2.gui.GenericObjectEditor;
-import eva2.server.go.InterfaceGOParameters;
 import eva2.server.go.enums.PSOTopologyEnum;
 import eva2.server.go.operators.terminators.EvaluationTerminator;
 import eva2.server.go.problems.AbstractOptimizationProblem;
@@ -21,7 +20,7 @@ import eva2.server.stat.InterfaceStatisticsListener;
  * @author Marcel Kronfeld
  * @date 2010-09-01
  */
-public class EvA2GUIStarter implements InterfaceStatisticsListener {
+public class EvA2GUIStarter {
 	
 	/**
 	 * 
@@ -32,8 +31,10 @@ public class EvA2GUIStarter implements InterfaceStatisticsListener {
 	/**
 	 * 
 	 * @param problem
+	 * @param parentWindow
+	 * @param listener
 	 */
-	public static void init(InterfaceOptimizationProblem problem, final Window parentWindow) {
+	public static void init(InterfaceOptimizationProblem problem, final Window parentWindow, InterfaceStatisticsListener listener) {
 		EvA2GUIStarter evaBP = new EvA2GUIStarter();
 		GOParameters goParams = new GOParameters(); // Instance for the general Genetic Optimization parameterization
 		
@@ -56,40 +57,40 @@ public class EvA2GUIStarter implements InterfaceStatisticsListener {
 
 		evaBP.evaClient.refreshMainPanels(); // GUI update due to the changes made through the API
 		
-		evaBP.evaClient.getStatistics().addDataListener(evaBP); // add a data listener instance
+		evaBP.evaClient.getStatistics().addDataListener(listener); // add a data listener instance
 	}
 	
-	/**
-	 * 
-	 * @param problem
-	 */
-	public static void main(String[] args) {
-	// TODO remove after testing
-		AbstractOptimizationProblem problem = new F1Problem(); 
-		EvA2GUIStarter evaBP = new EvA2GUIStarter();
-		GOParameters goParams = new GOParameters(); // Instance for the general Genetic Optimization parameterization
-		
-		goParams.setOptimizer(new ParticleSwarmOptimization(50, 2.05, 2.05, PSOTopologyEnum.grid, 2));
-		goParams.setTerminator(new EvaluationTerminator(3000));
-		
-		// set the initial EvA problem here
-		goParams.setProblem(problem);
-
-		// hide some properties which should not be shown
-		GenericObjectEditor.setHideProperty(goParams.getClass(), "problem", true);
-		GenericObjectEditor.setHideProperty(goParams.getClass(), "postProcessParams", true);
-
-		evaBP.evaClient = new EvAClient(null, goParams, false, true, false); // initializes GUI in the background
-		// important: wait for GUI initialization before accessing any internal settings:
-		evaBP.evaClient.awaitGuiInitialized(); // this returns as soon as the GUI is ready
-		
-		// modify initial settings:
-		evaBP.evaClient.getStatistics().getStatisticsParameter().setOutputAllFieldsAsText(true); // activate output of all data fields
-
-		evaBP.evaClient.refreshMainPanels(); // GUI update due to the changes made through the API
-		
-		evaBP.evaClient.getStatistics().addDataListener(evaBP); // add a data listener instance
-	}
+//	/**
+//	 * 
+//	 * @param problem
+//	 */
+//	public static void main(String[] args) {
+//	// TODO remove after testing
+//		AbstractOptimizationProblem problem = new F1Problem(); 
+//		EvA2GUIStarter evaBP = new EvA2GUIStarter();
+//		GOParameters goParams = new GOParameters(); // Instance for the general Genetic Optimization parameterization
+//		
+//		goParams.setOptimizer(new ParticleSwarmOptimization(50, 2.05, 2.05, PSOTopologyEnum.grid, 2));
+//		goParams.setTerminator(new EvaluationTerminator(3000));
+//		
+//		// set the initial EvA problem here
+//		goParams.setProblem(problem);
+//
+//		// hide some properties which should not be shown
+//		GenericObjectEditor.setHideProperty(goParams.getClass(), "problem", true);
+//		GenericObjectEditor.setHideProperty(goParams.getClass(), "postProcessParams", true);
+//
+//		evaBP.evaClient = new EvAClient(null, goParams, false, true, false); // initializes GUI in the background
+//		// important: wait for GUI initialization before accessing any internal settings:
+//		evaBP.evaClient.awaitGuiInitialized(); // this returns as soon as the GUI is ready
+//		
+//		// modify initial settings:
+//		evaBP.evaClient.getStatistics().getStatisticsParameter().setOutputAllFieldsAsText(true); // activate output of all data fields
+//
+//		evaBP.evaClient.refreshMainPanels(); // GUI update due to the changes made through the API
+//		
+//		evaBP.evaClient.getStatistics().addDataListener(evaBP); // add a data listener instance
+//	}
 	
 	/*
 	 * (non-Javadoc)

@@ -6,8 +6,15 @@
   <!-- General -->
   <entry key="OPEN_DIR">user.home</entry>
   <entry key="SAVE_DIR">user.home</entry>
-  <entry key="SPINNER_MAX_VALUE">100000.0</entry>
+  <entry key="SPINNER_MIN_VALUE">-1E5d</entry>
+  <entry key="SPINNER_MAX_VALUE">1E5d</entry>
   <entry key="SPINNER_STEP_SIZE">0.01</entry>
+  
+  <!-- Parsing -->
+  <entry key="CSV_FILES_OPEN_DIR">user.home</entry>
+  <entry key="CSV_FILES_SAVE_DIR">user.home</entry>
+  <entry key="CSV_FILES_QUOTE_CHAR">'</entry>
+  <entry key="CSV_FILES_SEPARATOR_CHAR">,</entry>
   
   <!-- Plot settings -->
   <entry key="PLOT_SAVE_DIR">user.home</entry>
@@ -25,16 +32,23 @@
   <!-- Computing -->
   <entry key="SIM_ODE_SOLVER">org.sbml.simulator.math.odes.RKEventSolver</entry>
   <entry key="SIM_DISTANCE_FUNCTION">org.sbml.simulator.math.RSE</entry>
+  <entry key="SIM_DISTANCE_DEFAULT_VALUE">10000d</entry>
+  <entry key="SIM_DISTANCE_ROOT">2d</entry>
   <entry key="SIM_MAX_TIME">100000.0</entry>
   <entry key="SIM_START_TIME">0.0</entry>
   <entry key="SIM_END_TIME">5.0</entry>
   <entry key="SIM_MAX_STEPS_PER_UNIT_TIME">500</entry>
   <entry key="SIM_STEP_SIZE">0.01</entry>
   
-  <!-- Parsing -->
-  <entry key="CSV_FILES_OPEN_DIR">user.home</entry>
-  <entry key="CSV_FILES_SAVE_DIR">user.home</entry>
-  <entry key="CSV_FILES_QUOTE_CHAR">'</entry>
-  <entry key="CSV_FILES_SEPARATOR_CHAR">,</entry>
+  <!-- Optimization, i.e., estimation -->
+  <entry key="EST_INIT_MIN_VALUE">0d</entry>
+  <entry key="EST_INIT_MAX_VALUE">14000d</entry>
+  <entry key="EST_MIN_VALUE">0</entry>
+  <entry key="EST_MAX_VALUE">14000d</entry>
+  <entry key="EST_ALL_LOCAL_PARAMETERS">true</entry>
+  <entry key="EST_ALL_GLOBAL_PARAMETERS">false</entry>
+  <entry key="EST_ALL_COMPARTMENTS">false</entry>
+  <entry key="EST_ALL_SPECIES">false</entry>
+  <entry key="EST_MULTI_SHOOT">true</entry>
   
 </properties>

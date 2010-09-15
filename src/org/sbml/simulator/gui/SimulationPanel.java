@@ -27,6 +27,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseListener;
 import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
 import javax.swing.BorderFactory;
@@ -74,6 +75,7 @@ import org.sbml.squeezer.util.HTMLFormula;
 
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;
+import eva2.server.stat.InterfaceStatisticsListener;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -82,7 +84,7 @@ import de.zbit.gui.LayoutHelper;
  * 
  */
 public class SimulationPanel extends JPanel implements ChangeListener,
-		ItemListener, TableModelListener {
+		ItemListener, TableModelListener, InterfaceStatisticsListener {
 
 	/**
 	 * Generated serial version identifier
@@ -524,7 +526,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	/***
 	 * Initializes the graphics components of this panel.
 	 * 
-	 * @param settings
+	 * @param properties
 	 */
 	private void init() {
 		try {
@@ -1152,5 +1154,47 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 */
 	public boolean isSetExperimentalData() {
 		return expTable.getRowCount() > 0;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see eva2.server.stat.InterfaceStatisticsListener#finalMultiRunResults(java.lang.String[], java.util.List)
+	 */
+	public void finalMultiRunResults(String[] header,
+			List<Object[]> multiRunFinalObjectData) {
+		// TODO Auto-generated method stub	
+		System.out.println("finalMultiRunResults");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyGenerationPerformed(java.lang.String[], java.lang.Object[], java.lang.Double[])
+	 */
+	public void notifyGenerationPerformed(String[] header,
+			Object[] statObjects, Double[] statDoubles) {
+		// TODO Auto-generated method stub
+		for (int i=0; i<statObjects.length;i++) {
+		  System.out.printf("%s\t%s\n",i,statObjects[i].getClass().getName());
+		}
+		System.out.println("notifyGenerationPerformed");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStarted(int, int, java.lang.String[], java.lang.String[])
+	 */
+	public void notifyRunStarted(int runNumber, int plannedMultiRuns,
+			String[] header, String[] metaInfo) {
+		// TODO Auto-generated method stub
+		System.out.println("notifyRunStarted");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStopped(int, boolean)
+	 */
+	public void notifyRunStopped(int runsPerformed, boolean completedLastRun) {
+		// TODO Auto-generated method stub
+		System.out.println("notifyRunStopped");
 	}
 }

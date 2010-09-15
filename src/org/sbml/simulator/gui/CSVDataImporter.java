@@ -150,7 +150,7 @@ public class CSVDataImporter {
 				}
 			}
 			return data;
-		} else {
+		} else  if (!converter.isCanceled()){
 			JOptionPane.showMessageDialog(parent, GUITools
 					.toHTML(FILE_NOT_CORRECTLY_FORMATTED), "Unreadable file",
 					JOptionPane.WARNING_MESSAGE);
