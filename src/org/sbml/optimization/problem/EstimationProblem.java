@@ -32,6 +32,7 @@ import eva2.server.go.PopulationInterface;
 import eva2.server.go.populations.Population;
 import eva2.server.go.problems.AbstractProblemDouble;
 import eva2.server.go.problems.InterfaceAdditionalPopulationInformer;
+import eva2.server.go.problems.InterfaceHasInitRange;
 import eva2.tools.ToolBox;
 
 /**
@@ -39,7 +40,7 @@ import eva2.tools.ToolBox;
  * @date 2010-08-24
  */
 public class EstimationProblem extends AbstractProblemDouble implements
-		InterfaceAdditionalPopulationInformer {
+		InterfaceAdditionalPopulationInformer, InterfaceHasInitRange {
 
 	/**
 	 * 
@@ -357,9 +358,9 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * 
 	 * @param quantityRanges
 	 */
-	public void setQuantityRanges(QuantityRange... quantityRange) {
-		if (check(quantityRanges)) {
-			this.quantityRanges = quantityRange;
+	public void setQuantityRanges(QuantityRange... quantRange) {
+		if (check(quantRange)) {
+			this.quantityRanges = quantRange;
 			this.originalValues = new double[quantityRanges.length];
 			for (int i = 0; i < originalValues.length; i++) {
 				originalValues[i] = quantityRanges[i].getQuantity().getValue();
@@ -404,6 +405,16 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 */
 	public void unsetReferenceData() {
 		referenceData = null;
+	}
+
+	@Override
+	public Object getInitRange() {
+		double[][] initR = new double[getProblemDimension()][2];
+		for (int i=0; i<getProblemDimension(); i++) {
+			initR[i][0]=quantityRanges[i].getInitialMinimum();
+			initR[i][1]=quantityRanges[i].getInitialMaximum();
+		}
+		return initR;
 	}
 
 }
