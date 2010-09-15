@@ -139,6 +139,18 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		}
 		setQuantities(problem.getQuantities());
 	}
+	
+	@Override
+	public double getRangeLowerBound(int dim) {
+		// TODO return lower bound for dim 
+		return 0.;
+	}
+
+	@Override
+	public double getRangeUpperBound(int dim) {
+		// TODO return upper bound for dim
+		return 0.;
+	}
 
 	/**
 	 * Checks whether or not the given model contains all of the given
