@@ -76,7 +76,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	/**
 	 * 
 	 */
-	private transient Quantity[] quantities = null;
+	private transient QuantityRange[] quantityRanges = null;
 
 	/**
 	 * Memorizes the original values of all given {@link Quantity}s to restore
@@ -118,11 +118,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		setDistance(distance);
 		setModel(model);
 		setReferenceData(referenceData);
-		Quantity quantities[] = new Quantity[quantityRanges.length];
-		for (int i = 0; i < quantities.length; i++) {
-			quantities[i] = quantityRanges[i].getQuantity();
-		}
-		setQuantities(quantities);
+		setQuantityRanges(quantityRanges);
 	}
 
 	/**
@@ -137,19 +133,33 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		} catch (Exception e) {
 			// can never happen.
 		}
-		setQuantities(problem.getQuantities());
-	}
-	
-	@Override
-	public double getRangeLowerBound(int dim) {
-		// TODO return lower bound for dim 
-		return 0.;
+		setQuantityRanges(problem.getQuantityRanges());
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
+	public QuantityRange[] getQuantityRanges() {
+		return quantityRanges;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see eva2.server.go.problems.AbstractProblemDouble#getRangeLowerBound(int)
+	 */
+	@Override
+	public double getRangeLowerBound(int dim) {
+		return quantityRanges[dim].getMinimum();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see eva2.server.go.problems.AbstractProblemDouble#getRangeUpperBound(int)
+	 */
 	@Override
 	public double getRangeUpperBound(int dim) {
-		// TODO return upper bound for dim
-		return 0.;
+		return quantityRanges[dim].getMaximum();
 	}
 
 	/**
@@ -159,9 +169,10 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * @param quantities
 	 * @return
 	 */
-	private boolean check(Quantity... quantities) {
-		for (Quantity q : quantities) {
-			if (!interpreter.getModel().containsQuantity(q)) {
+	private boolean check(QuantityRange... quantityRange) {
+		for (int i = 0; i < quantityRange.length; i++) {
+			if (!interpreter.getModel().containsQuantity(
+					quantityRange[i].getQuantity())) {
 				return false;
 			}
 		}
@@ -186,7 +197,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	@Override
 	public double[] eval(double[] x) {
 		for (int i = 0; i < x.length; i++) {
-			quantities[i].setValue(x[i]);
+			quantityRanges[i].getQuantity().setValue(x[i]);
 		}
 		try {
 			interpreter.init();
@@ -264,7 +275,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 */
 	@Override
 	public int getProblemDimension() {
-		return isSetQuantities() ? quantities.length : 0;
+		return isSetQuantities() ? quantityRanges.length : 0;
 	}
 
 	/**
@@ -272,7 +283,11 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * @return
 	 */
 	public Quantity[] getQuantities() {
-		return quantities;
+		Quantity q[] = new Quantity[quantityRanges.length];
+		for (int i = 0; i < quantityRanges.length; i++) {
+			q[i] = quantityRanges[i].getQuantity();
+		}
+		return q;
 	}
 
 	/**
@@ -298,7 +313,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * @return
 	 */
 	public boolean isSetQuantities() {
-		return quantities != null;
+		return quantityRanges != null;
 	}
 
 	/**
@@ -314,8 +329,8 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * modified during the optimization.
 	 */
 	public void restore() {
-		for (int i = 0; i < quantities.length; i++) {
-			quantities[i].setValue(originalValues[i]);
+		for (int i = 0; i < quantityRanges.length; i++) {
+			quantityRanges[i].getQuantity().setValue(originalValues[i]);
 		}
 	}
 
@@ -340,14 +355,14 @@ public class EstimationProblem extends AbstractProblemDouble implements
 
 	/**
 	 * 
-	 * @param quantities
+	 * @param quantityRanges
 	 */
-	public void setQuantities(Quantity... quantities) {
-		if (check(quantities)) {
-			this.quantities = quantities;
-			this.originalValues = new double[quantities.length];
+	public void setQuantityRanges(QuantityRange... quantityRange) {
+		if (check(quantityRanges)) {
+			this.quantityRanges = quantityRange;
+			this.originalValues = new double[quantityRanges.length];
 			for (int i = 0; i < originalValues.length; i++) {
-				originalValues[i] = quantities[i].getValue();
+				originalValues[i] = quantityRanges[i].getQuantity().getValue();
 			}
 		} else {
 			throw new IllegalArgumentException(
@@ -360,8 +375,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * @param referenceData
 	 */
 	public void setReferenceData(MultiBlockTable referenceData) {
-		if ((referenceData != null)
-				&& (referenceData.getColumnCount() <= 1)) { 
+		if ((referenceData != null) && (referenceData.getColumnCount() <= 1)) {
 			// time column */+ getModel().getNumSymbols())) {
 			throw new IllegalArgumentException(
 					"At least for one symbol reference data are required.");
@@ -381,7 +395,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * 
 	 */
 	public void unsetQuantities() {
-		quantities = null;
+		quantityRanges = null;
 		originalValues = null;
 	}
 
