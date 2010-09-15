@@ -100,6 +100,12 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * allocations
 	 */
 	private transient double[] fitness = new double[1];
+	/**
+	 * To save computation time during the initialization, the initial ranges
+	 * are stored in this 2-dimensional double array when setting the
+	 * {@link QuantityRange} field.
+	 */
+	private double[][] initRanges;
 
 	/**
 	 * 
@@ -135,32 +141,6 @@ public class EstimationProblem extends AbstractProblemDouble implements
 			// can never happen.
 		}
 		setQuantityRanges(problem.getQuantityRanges());
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public QuantityRange[] getQuantityRanges() {
-		return quantityRanges;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see eva2.server.go.problems.AbstractProblemDouble#getRangeLowerBound(int)
-	 */
-	@Override
-	public double getRangeLowerBound(int dim) {
-		return quantityRanges[dim].getMinimum();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see eva2.server.go.problems.AbstractProblemDouble#getRangeUpperBound(int)
-	 */
-	@Override
-	public double getRangeUpperBound(int dim) {
-		return quantityRanges[dim].getMaximum();
 	}
 
 	/**
@@ -253,6 +233,15 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		return distance;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see eva2.server.go.problems.InterfaceHasInitRange#getInitRange()
+	 */
+	public double[][] getInitRange() {
+		return initRanges;
+	}
+
 	/**
 	 * 
 	 * @return
@@ -289,6 +278,36 @@ public class EstimationProblem extends AbstractProblemDouble implements
 			q[i] = quantityRanges[i].getQuantity();
 		}
 		return q;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public QuantityRange[] getQuantityRanges() {
+		return quantityRanges;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * eva2.server.go.problems.AbstractProblemDouble#getRangeLowerBound(int)
+	 */
+	@Override
+	public double getRangeLowerBound(int dim) {
+		return quantityRanges[dim].getMinimum();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * eva2.server.go.problems.AbstractProblemDouble#getRangeUpperBound(int)
+	 */
+	@Override
+	public double getRangeUpperBound(int dim) {
+		return quantityRanges[dim].getMaximum();
 	}
 
 	/**
@@ -362,8 +381,11 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		if (check(quantRange)) {
 			this.quantityRanges = quantRange;
 			this.originalValues = new double[quantityRanges.length];
+			initRanges = new double[quantityRanges.length][2];
 			for (int i = 0; i < originalValues.length; i++) {
 				originalValues[i] = quantityRanges[i].getQuantity().getValue();
+				initRanges[i][0]=quantityRanges[i].getInitialMinimum();
+				initRanges[i][1]=quantityRanges[i].getInitialMaximum();
 			}
 		} else {
 			throw new IllegalArgumentException(
@@ -405,16 +427,6 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 */
 	public void unsetReferenceData() {
 		referenceData = null;
-	}
-
-	@Override
-	public Object getInitRange() {
-		double[][] initR = new double[getProblemDimension()][2];
-		for (int i=0; i<getProblemDimension(); i++) {
-			initR[i][0]=quantityRanges[i].getInitialMinimum();
-			initR[i][1]=quantityRanges[i].getInitialMaximum();
-		}
-		return initR;
 	}
 
 }
