@@ -98,6 +98,10 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	 */
 	private class QuantityBlock implements QuantityRange, ItemListener {
 		/**
+		 * Generated serial version identifier.
+		 */
+		private static final long serialVersionUID = -1190252378673523294L;
+		/**
 		 * 
 		 */
 		private Quantity quantity;
@@ -662,7 +666,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		}
 		return quantityList.toArray(new Quantity[0]);
 	}
-	
+
 	/**
 	 * 
 	 * @return

@@ -50,14 +50,25 @@ public class SettingsPanelPlot extends SettingsPanel {
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see de.zbit.gui.cfg.SettingsPanel#accepts(java.lang.Object)
+	 */
+	@Override
+	public boolean accepts(Object key) {
+		String k = key.toString();
+		return k.startsWith("PLOT_") || k.equals("JPEG_COMPRESSION_FACTOR");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see de.zbit.gui.cfg.SettingsPanel#getProperties()
 	 */
 	@Override
 	public Properties getProperties() {
 		if (chooser.checkSaveDir()) {
-			settings.put(CfgKeys.PLOT_SAVE_DIR, chooser.getSaveDir());
+			properties.put(CfgKeys.PLOT_SAVE_DIR, chooser.getSaveDir());
 		}
-		return settings;
+		return properties;
 	}
 
 	/*
@@ -77,8 +88,10 @@ public class SettingsPanelPlot extends SettingsPanel {
 	 */
 	@Override
 	public void init() {
-		chooser = new DirectoryChooser(null, settings.get(CfgKeys.PLOT_SAVE_DIR).toString());
-		chooser.setBorder(BorderFactory.createTitledBorder(" Output directory for images "));
+		chooser = new DirectoryChooser(null, properties.get(
+				CfgKeys.PLOT_SAVE_DIR).toString());
+		chooser.setBorder(BorderFactory
+				.createTitledBorder(" Output directory for images "));
 
 		String names[] = { "Logarithmic scale", "Show grid", "Include legend",
 				"Display tooltips" };
@@ -88,8 +101,8 @@ public class SettingsPanelPlot extends SettingsPanel {
 		JPanel layout = new JPanel();
 		LayoutHelper lh = new LayoutHelper(layout);
 		for (int i = 0; i < check.length; i++) {
-			check[i] = new JCheckBox(names[i],
-					((Boolean) settings.get(keys[i])).booleanValue());
+			check[i] = new JCheckBox(names[i], ((Boolean) properties
+					.get(keys[i])).booleanValue());
 			check[i].setName(keys[i].toString());
 			check[i].addItemListener(this);
 			lh.add(check[i]);
@@ -97,7 +110,7 @@ public class SettingsPanelPlot extends SettingsPanel {
 		layout.setBorder(BorderFactory.createTitledBorder(" Layout "));
 
 		JSpinner compression = new JSpinner(new SpinnerNumberModel(
-				((Number) settings.get(CfgKeys.JPEG_COMPRESSION_FACTOR))
+				((Number) properties.get(CfgKeys.JPEG_COMPRESSION_FACTOR))
 						.doubleValue(), 0d, 1d, stepSize));
 		compression.addChangeListener(this);
 		JPanel image = new JPanel();
@@ -117,6 +130,18 @@ public class SettingsPanelPlot extends SettingsPanel {
 	 * (non-Javadoc)
 	 * 
 	 * @see
+	 * de.zbit.gui.cfg.SettingsPanel#initConstantFields(java.util.Properties)
+	 */
+	@Override
+	public void initConstantFields(Properties properties) {
+		stepSize = ((Number) properties.get(CfgKeys.SPINNER_STEP_SIZE))
+				.doubleValue();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
 	 * de.zbit.gui.cfg.SettingsPanel#itemStateChanged(java.awt.event.ItemEvent)
 	 */
 	@Override
@@ -124,31 +149,11 @@ public class SettingsPanelPlot extends SettingsPanel {
 		if (e.getSource() instanceof JCheckBox) {
 			JCheckBox box = (JCheckBox) e.getSource();
 			if (box.getName() != null) {
-				settings.put(CfgKeys.valueOf(box.getName()), Boolean
+				properties.put(CfgKeys.valueOf(box.getName()), Boolean
 						.valueOf(box.isSelected()));
 			}
 		}
 		super.itemStateChanged(e);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see de.zbit.gui.cfg.SettingsPanel#setProperties(java.util.Properties)
-	 */
-	@Override
-	public void setProperties(Properties properties) {
-		this.settings = new Properties();
-		String k;
-		for (Object key : properties.keySet()) {
-			k = key.toString();
-			if (k.startsWith("PLOT_") || k.equals("JPEG_COMPRESSION_FACTOR")) {
-				settings.put(key, properties.get(key));
-			}
-		}
-		stepSize = ((Number) properties.get(CfgKeys.SPINNER_STEP_SIZE))
-				.doubleValue();
-		init();
 	}
 
 	/*
@@ -160,7 +165,7 @@ public class SettingsPanelPlot extends SettingsPanel {
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() instanceof JSpinner) {
-			settings.put(CfgKeys.JPEG_COMPRESSION_FACTOR,
+			properties.put(CfgKeys.JPEG_COMPRESSION_FACTOR,
 					(Double) ((JSpinner) e.getSource()).getValue());
 		}
 		super.stateChanged(e);
