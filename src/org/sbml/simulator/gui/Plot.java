@@ -110,7 +110,10 @@ public class Plot extends FunctionArea {
 	 * 
 	 * @param saveDir
 	 * @param compression
-	 * @return
+	 * @return The path to the directory where the user wants to save the plot
+	 *         image. If no image is saved, i.e., the user canceled this action,
+	 *         the same directory will be returned that has been given as an
+	 *         argument.
 	 * @throws AWTException
 	 * @throws IOException
 	 */

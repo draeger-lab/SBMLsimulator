@@ -219,6 +219,15 @@ public class LegendTableModel extends AbstractTableModel {
 
 	/**
 	 * 
+	 * @param rowIndex
+	 * @return
+	 */
+	public String getId(int rowIndex) {
+		return ((NamedSBase) data[rowIndex][getNamedSBaseColumn()]).getId();
+	}
+
+	/**
+	 * 
 	 * @param id
 	 * @return
 	 */
@@ -348,6 +357,27 @@ public class LegendTableModel extends AbstractTableModel {
 		this.includeReactions = includeReactions;
 		this.model = model;
 		init();
+	}
+
+	/**
+	 * Changes the selection status for the {@link NamedSBase} in the given row.
+	 * 
+	 * @param rowIndex
+	 * @param selected
+	 */
+	public void setSelected(int rowIndex, boolean selected) {
+		setValueAt(Boolean.valueOf(selected), rowIndex, getBooleanColumn());
+	}
+
+	/**
+	 * Changes the selection status for the {@link NamedSBase} with the given
+	 * identifier.
+	 * 
+	 * @param identifier
+	 * @param selected
+	 */
+	public void setSelected(String identifier, boolean selected) {
+		setSelected(getRowFor(identifier), selected);
 	}
 
 	/*

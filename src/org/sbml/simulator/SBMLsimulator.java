@@ -97,11 +97,8 @@ public class SBMLsimulator {
 	 */
 	public static void main(String[] args) throws FileNotFoundException,
 			XMLStreamException {
-		if (args.length == 1) {
-			new SBMLsimulator(args[0]);
-		} else {
-			new SBMLsimulator();
-		}
+		CfgKeys.getProperties().putAll(CfgKeys.analyzeCommandLineArguments(args));
+		new SBMLsimulator();
 	}
 
 	/**
