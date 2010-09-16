@@ -33,9 +33,7 @@ import java.util.Properties;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JEditorPane;
-import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -44,12 +42,12 @@ import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JToolBar;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.text.NumberFormatter;
 
 import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.ListOf;
@@ -58,17 +56,13 @@ import org.sbml.jsbml.NamedSBase;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.QuantityWithDefinedUnit;
 import org.sbml.jsbml.Reaction;
-import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.Species;
 import org.sbml.jsbml.Symbol;
 import org.sbml.jsbml.UnitDefinition;
 import org.sbml.jsbml.Variable;
-import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.math.Distance;
-import org.sbml.simulator.math.SBMLinterpreter;
-import org.sbml.simulator.math.odes.AbstractDESSolver;
-import org.sbml.simulator.math.odes.IntegrationException;
+import org.sbml.simulator.math.odes.DESSolver;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 import org.sbml.squeezer.CfgKeys;
 import org.sbml.squeezer.util.HTMLFormula;
@@ -92,292 +86,9 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	private static final long serialVersionUID = -7278034514446047207L;
 
 	/**
-	 * Default value to be used for simulation
-	 */
-	private double defaultCompartmentValue;
-
-	/**
-	 * Default value to be used for simulation
-	 */
-	private double defaultParameterValue;
-
-	/**
-	 * Default value to be used for simulation
-	 */
-	private double defaultSpeciesValue;
-
-	/**
-	 * The currently used distance function.
-	 */
-	private Distance distance;
-
-	/**
-	 * Necessary to remember the originally set distance function.
-	 */
-	private int distanceFunc;
-
-	/**
-	 * Text field to display the quality of a simulation with respect to a given
-	 * data set.
-	 */
-	private JFormattedTextField distField;
-
-	/**
-	 * Contains all available distance functions.
-	 */
-	private JComboBox distFun;
-
-	/**
-	 * Table for experimental data.
-	 */
-	private JTable expTable;
-
-	/**
-	 * Switches inclusion of reactions in the plot on or off.
-	 */
-	private boolean includeReactions = true;
-
-	/**
-	 * Table that contains the legend of this plot.
-	 */
-	private JTable legend;
-
-	/**
-	 * Whether or not to plot in a logarithmic scale.
-	 */
-	private JCheckBox logScale;
-
-	/**
 	 * 
 	 */
-	private double maxCompartmentValue;
-
-	/**
-	 * The maximal allowable parameter value.
-	 */
-	private double maxParameterValue;
-
-	/**
-	 * 
-	 */
-	private double maxSpeciesValue;
-
-	/**
-	 * 
-	 */
-	private double maxSpinVal = 1E10;
-
-	/**
-	 * Maximal allowable number of integration steps per time unit
-	 */
-	private int maxStepsPerUnit;
-	/**
-	 * The maximal allowable simulation time
-	 */
-	private double maxTime;
-
-	/**
-	 * Model to be simulated
-	 */
-	private Model model;
-
-	/**
-	 * The step size for the spinner in the interactive parameter scan.
-	 */
-	private double paramStepSize;
-
-	/**
-	 * Plot area
-	 */
-	private Plot plot;
-
-	/**
-	 * Decides whether or not a grid should be displayed in the plot.
-	 */
-	private JCheckBox showGrid;
-	/**
-	 * Decides whether or not to add a legend to the plot.
-	 */
-	private JCheckBox showLegend;
-	/**
-	 * Table for the simulation data.
-	 */
-	private JTable simTable;
-
-	/**
-	 * The integrator for the simulation
-	 */
-	private AbstractDESSolver solver;
-
-	/**
-	 * The index of the class name of the solver to be used
-	 */
-	private JComboBox solvers;
-
-	/**
-	 * 
-	 */
-	private SpinnerNumberModel[] spinModSymbol;
-	/**
-	 * The spinner to change the number of integration steps.
-	 */
-	private SpinnerNumberModel stepsModel;
-	/**
-	 * Simulation start time
-	 */
-	private SpinnerNumberModel t1;
-	/**
-	 * Simulation end time
-	 */
-	private SpinnerNumberModel t2;
-	/**
-	 * The main tabbed pane showing plot, simulatin and experimental data.
-	 */
-	private JTabbedPane tabbedPane;
-
-	/**
-	 * Switch to decide whether or not to draw the foot panel.
-	 */
-	private boolean showSettingsPanel;
-
-	private Component footPanel;
-
-	/**
-	 * 
-	 * @param model
-	 */
-	public SimulationPanel(Model model) {
-		super();
-		showSettingsPanel = true;
-		if (SBMLsimulator.getAvailableSolvers().length == 0) {
-			String msg = "Could not find any solvers for differential equation systems. A simulation is therefore not possible.";
-			JOptionPane.showMessageDialog(this, GUITools.toHTML(msg),
-					"No ODE solver available", JOptionPane.WARNING_MESSAGE);
-		} else
-			try {
-				this.model = model;
-				setProperties(getDefaultProperties());
-			} catch (Exception exc) {
-				GUITools.showErrorMessage(this, exc);
-			}
-	}
-
-	/**
-	 * 
-	 * @param model
-	 * @param settings
-	 */
-	public SimulationPanel(Model model, Properties settings) {
-		this(model);
-		try {
-			setProperties((Properties) settings.clone());
-		} catch (Exception exc) {
-			GUITools.showErrorMessage(this, exc);
-		}
-	}
-
-	/**
-	 * 
-	 * @param model
-	 * @param stepSize
-	 * @return
-	 * @throws Exception
-	 */
-	private double computeDistance(Model model, double stepSize)
-			throws Exception {
-		MultiBlockTable simData = solveAtTimePoints(model,
-				((MultiBlockTable) expTable.getModel()).getTimePoints(),
-				stepSize);
-		MultiBlockTable expData = (MultiBlockTable) expTable.getModel();
-		return distance.distance(simData.getBlock(0), expData.getBlock(0));
-	}
-
-	/**
-	 * 
-	 * @return
-	 * @throws NoSuchMethodException
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws InstantiationException
-	 * @throws SecurityException
-	 * @throws IllegalArgumentException
-	 */
-	private Component createFootPanel() throws IllegalArgumentException,
-			SecurityException, InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException {
-
-		// Settings
-		JSpinner startTime = new JSpinner(t1);
-		startTime.addChangeListener(this);
-		startTime.setName("t1");
-		startTime.setEnabled(false);
-		JSpinner endTime = new JSpinner(t2);
-		endTime.addChangeListener(this);
-		endTime.setName("t2");
-		double t1val = ((Double) t1.getValue()).doubleValue();
-		double t2val = ((Double) t2.getValue()).doubleValue();
-		int val = (int) Math.round((t2val - t1val) / solver.getStepSize());
-		int min = 1;
-		int max = (int) Math.round((t2val - t1val) * maxStepsPerUnit);
-		int steps = 1;
-		val = Math.max(min, val);
-		max = Math.max(max, val);
-		stepsModel = new SpinnerNumberModel(val, min, max, steps);
-		JPanel sPanel = new JPanel();
-		LayoutHelper settings = new LayoutHelper(sPanel);
-		settings.add("Start time: ", startTime, new JLabel("Steps: "),
-				new JSpinner(stepsModel));
-		settings.add(new JPanel());
-		settings
-				.add("End time: ", endTime, new JLabel("ODE Solver: "), solvers);
-		settings.add(new JPanel());
-		sPanel.setBorder(BorderFactory.createTitledBorder(" Integration "));
-
-		JPanel dPanel = new JPanel();
-		LayoutHelper dSet = new LayoutHelper(dPanel);
-		Class<Distance>[] distFunctions = SBMLsimulator.getAvailableDistances();
-		String distances[] = new String[distFunctions.length];
-		for (int i = 0; i < distFunctions.length; i++) {
-			Distance dist = distFunctions[i].getConstructor().newInstance();
-			distances[i] = dist.getName();
-			if (i == distanceFunc) {
-				distance = dist;
-			}
-		}
-		distFun = new JComboBox(distances);
-		distFun.setName("distfun");
-		distFun.addItemListener(this);
-		distFun.setSelectedItem(distanceFunc);
-		distField = new JFormattedTextField(new NumberFormatter());
-		distField.setEnabled(false);
-		dSet.add(distFun);
-		dSet.add(new JPanel());
-		dSet.add(distField);
-		dPanel
-				.setBorder(BorderFactory
-						.createTitledBorder(" Distance to data "));
-
-		JPanel pPanel = new JPanel();
-		LayoutHelper pSet = new LayoutHelper(pPanel);
-		pSet.add(showGrid);
-		pSet.add(logScale);
-		pSet.add(showLegend);
-		pPanel.setBorder(BorderFactory.createTitledBorder(" Plot "));
-
-		LayoutHelper aSet = new LayoutHelper(new JPanel());
-		aSet.add(sPanel, dPanel, pPanel);
-
-		// Main
-		JPanel mPanel = new JPanel(new BorderLayout());
-		mPanel.add(aSet.getContainer(), BorderLayout.CENTER);
-
-		return mPanel;
-	}
-
-	/**
-	 * 
-	 */
-	private Properties getDefaultProperties() {
+	private static Properties getDefaultProperties() {
 		Properties p = new Properties();
 		Double maxVal = Double.valueOf(1E5);
 		/*
@@ -405,6 +116,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		p.put(CfgKeys.PLOT_SHOW_GRID, Boolean.valueOf(true));
 		p.put(CfgKeys.PLOT_SHOW_LEGEND, Boolean.valueOf(true));
 		p.put(CfgKeys.PLOT_LOG_SCALE, Boolean.valueOf(false));
+		p.put(CfgKeys.PLOT_SHOW_TOOLTIPS, Boolean.valueOf(false));
 
 		/*
 		 * CSV file parsing
@@ -428,11 +140,143 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	}
 
 	/**
+	 * Swaps a and b if a is greater then b.
+	 * 
+	 * @param a
+	 * @param b
+	 */
+	public static void swap(double a, double b) {
+		if (a > b) {
+			double swap = b;
+			b = a;
+			a = swap;
+		}
+	}
+
+	/**
+	 * Table for experimental data, the legend, and the simulation data.
+	 */
+	private JTable expTable, legend, simTable;
+
+	/**
+	 * Switches inclusion of reactions in the plot on or off and switch to
+	 * decide whether or not to draw the foot panel.
+	 */
+	private boolean includeReactions = true, showSettingsPanel;
+	/**
+	 * The maximal allowable and default values.
+	 */
+	private double maxCompartmentValue, maxParameterValue, maxSpeciesValue,
+			defaultCompartmentValue, defaultParameterValue,
+			defaultSpeciesValue;
+	/**
+	 * The step size for the spinner in the interactive parameter scan. and the
+	 * maximal value for {@link JSpinner}s.
+	 */
+	private double maxSpinVal = 1E10, paramStepSize;
+	/**
+	 * Model to be simulated
+	 */
+	private Model model;
+	/**
+	 * Plot area
+	 */
+	private Plot plot;
+	/**
+	 * 
+	 */
+	private SpinnerNumberModel[] spinModSymbol;
+
+	/**
+	 * The main tabbed pane showing plot, simulatin and experimental data.
+	 */
+	private JTabbedPane tabbedPane;
+
+	/**
+	 * 
+	 */
+	private JToolBar footPanel;
+
+	/**
+	 * 
+	 * @param model
+	 */
+	public SimulationPanel(Model model) {
+		this(model, getDefaultProperties());
+	}
+
+	/**
+	 * 
+	 * @param model
+	 * @param properties
+	 */
+	public SimulationPanel(Model model, Properties properties) {
+		super();
+		showSettingsPanel = true;
+		if (SBMLsimulator.getAvailableSolvers().length == 0) {
+			String msg = "Could not find any solvers for differential equation systems. A simulation is therefore not possible.";
+			JOptionPane.showMessageDialog(this, GUITools.toHTML(msg),
+					"No ODE solver available", JOptionPane.WARNING_MESSAGE);
+		} else {
+			try {
+				this.model = model;
+				setProperties(properties);
+			} catch (Exception exc) {
+				GUITools.showErrorMessage(this, exc);
+			}
+		}
+	}
+
+	/**
+	 * 
+	 */
+	public void closeExperimentalData() {
+		expTable = new JTable();
+		tabbedPane.setEnabledAt(2, false);
+		if (tabbedPane.getSelectedIndex() == 2) {
+			tabbedPane.setSelectedIndex(0);
+		}
+	}
+
+	/**
+	 * 
+	 * @return
+	 * @throws NoSuchMethodException
+	 * @throws InvocationTargetException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
+	 * @throws SecurityException
+	 * @throws IllegalArgumentException
+	 */
+	private SimulationPanelFoot createFootPanel()
+			throws IllegalArgumentException, SecurityException,
+			InstantiationException, IllegalAccessException,
+			InvocationTargetException, NoSuchMethodException {
+		footPanel = new JToolBar();
+		SimulationPanelFoot foot = new SimulationPanelFoot();
+		footPanel.add(foot);
+		return foot;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * eva2.server.stat.InterfaceStatisticsListener#finalMultiRunResults(java
+	 * .lang.String[], java.util.List)
+	 */
+	public void finalMultiRunResults(String[] header,
+			List<Object[]> multiRunFinalObjectData) {
+		// TODO Auto-generated method stub
+		System.out.println("finalMultiRunResults");
+	}
+
+	/**
 	 * 
 	 * @return
 	 */
 	public Distance getDistance() {
-		return distance;
+		return ((SimulationPanelFoot) footPanel.getComponent(0)).getDistance();
 	}
 
 	/**
@@ -454,6 +298,26 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	/**
 	 * 
 	 * @return
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws InvocationTargetException
+	 * @throws NoSuchMethodException
+	 */
+	private SimulationPanelFoot getOrCreateFootPanel()
+			throws IllegalArgumentException, SecurityException,
+			InstantiationException, IllegalAccessException,
+			InvocationTargetException, NoSuchMethodException {
+		if (footPanel == null) {
+			return createFootPanel();
+		}
+		return (SimulationPanelFoot) footPanel.getComponent(0);
+	}
+
+	/**
+	 * 
+	 * @return
 	 */
 	public Plot getPlot() {
 		return plot;
@@ -463,33 +327,16 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 * 
 	 */
 	public Properties getProperties() {
-		Properties p = new Properties();
+		Properties p = ((SimulationPanelFoot) footPanel.getComponent(0))
+				.getProperties();
 		/*
 		 * Simulation
 		 */
-		p.put(CfgKeys.SIM_MAX_TIME, this.maxTime);
-		p.put(CfgKeys.SIM_START_TIME, (Double) t1.getValue());
-		p.put(CfgKeys.SIM_END_TIME, (Double) t2.getValue());
-		p.put(CfgKeys.SIM_STEP_SIZE, Double.valueOf(solver.getStepSize()));
 		p.put(CfgKeys.SIM_MAX_COMPARTMENT_SIZE, Double
 				.valueOf(maxCompartmentValue));
 		p.put(CfgKeys.SIM_MAX_SPECIES_VALUE, Double.valueOf(maxSpeciesValue));
 		p.put(CfgKeys.SIM_MAX_PARAMETER_VALUE, Double
 				.valueOf(maxParameterValue));
-		p.put(CfgKeys.SIM_MAX_STEPS_PER_UNIT_TIME, Integer
-				.valueOf(maxStepsPerUnit));
-		p.put(CfgKeys.SIM_DISTANCE_FUNCTION, distance.getClass().getName());
-		p.put(CfgKeys.SIM_ODE_SOLVER,
-				SBMLsimulator.getAvailableSolvers()[solvers.getSelectedIndex()]
-						.getName());
-
-		/*
-		 * Plot
-		 */
-		p.put(CfgKeys.PLOT_SHOW_GRID, Boolean.valueOf(showGrid.isSelected()));
-		p.put(CfgKeys.PLOT_SHOW_LEGEND, Boolean
-				.valueOf(showLegend.isSelected()));
-		p.put(CfgKeys.PLOT_LOG_SCALE, Boolean.valueOf(logScale.isSelected()));
 
 		/*
 		 * General settings
@@ -519,8 +366,8 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 * 
 	 * @return
 	 */
-	public AbstractDESSolver getSolver() {
-		return solver;
+	public DESSolver getSolver() {
+		return ((SimulationPanelFoot) footPanel.getComponent(0)).getSolver();
 	}
 
 	/***
@@ -529,63 +376,69 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 * @param properties
 	 */
 	private void init() {
+		setLayout(new BorderLayout());
 		try {
-			UnitDefinition timeUnits = this.model.getTimeUnitsInstance();
-			String xLab = "Time";
-			if (timeUnits != null)
-				xLab += " in " + UnitDefinition.printUnits(timeUnits, true);
-			plot = new Plot(xLab, "Value");
-			plot.setGridVisible(showGrid.isSelected());
-			plot.setShowLegend(showLegend.isSelected());
-			// get rid of this pop-up menu.
-			MouseListener listeners[] = plot.getMouseListeners();
-			for (int i = listeners.length - 1; i >= 0; i--) {
-				plot.removeMouseListener(listeners[i]);
+			if (plot == null) {
+				UnitDefinition timeUnits = this.model.getTimeUnitsInstance();
+				String xLab = "Time";
+				if (timeUnits != null) {
+					xLab += " in " + UnitDefinition.printUnits(timeUnits, true);
+				}
+				plot = new Plot(xLab, "Value");
+				// get rid of this pop-up menu.
+				MouseListener listeners[] = plot.getMouseListeners();
+				for (int i = listeners.length - 1; i >= 0; i--) {
+					plot.removeMouseListener(listeners[i]);
+				}
 			}
-
-			JPanel simPanel = new JPanel(new BorderLayout());
-			simTable = new JTable();
-			simPanel.add(new JScrollPane(simTable,
-					JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-					JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
-					BorderLayout.CENTER);
-
-			JPanel expPanel = new JPanel(new BorderLayout());
-			expTable = new JTable();
-			expPanel.add(new JScrollPane(expTable,
-					JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-					JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
-					BorderLayout.CENTER);
-
-			JPanel legendPanel = new JPanel(new BorderLayout());
-			legend = legendTable(model);
-			legendPanel.add(new JScrollPane(legend,
-					JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-					JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
-					BorderLayout.CENTER);
-
-			JSplitPane topDown = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-					true, legendPanel, interactiveScanPanel(model,
-							maxCompartmentValue, maxSpeciesValue,
-							maxParameterValue, paramStepSize));
-			topDown.setDividerLocation(topDown.getDividerLocation() + 200);
-			JSplitPane leftRight = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-					true, topDown, plot);
-			leftRight.setDividerLocation(topDown.getDividerLocation() + 200);
-			tabbedPane = new JTabbedPane();
-			tabbedPane.add("Plot ", leftRight);
-			tabbedPane.add("Simulated data", simPanel);
-			tabbedPane.add("Experimental data", expPanel);
-			tabbedPane.setEnabledAt(0, true);
-			tabbedPane.setEnabledAt(1, false);
-			tabbedPane.setEnabledAt(2, false);
-
-			setLayout(new BorderLayout());
-			add(tabbedPane, BorderLayout.CENTER);
-			footPanel = createFootPanel();
+			SimulationPanelFoot foot = getOrCreateFootPanel();
+			foot.addItemListener(this);
 			if (showSettingsPanel) {
 				add(footPanel, BorderLayout.SOUTH);
 			}
+			plot.setGridVisible(foot.getShowGrid());
+			plot.setShowLegend(foot.getShowLegend());
+			
+			if (tabbedPane == null) {
+				JPanel simPanel = new JPanel(new BorderLayout());
+				simTable = new JTable();
+				simPanel.add(new JScrollPane(simTable,
+						JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
+						BorderLayout.CENTER);
+
+				JPanel expPanel = new JPanel(new BorderLayout());
+				expTable = new JTable();
+				expPanel.add(new JScrollPane(expTable,
+						JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
+						BorderLayout.CENTER);
+
+				JPanel legendPanel = new JPanel(new BorderLayout());
+				legend = legendTable(model);
+				legendPanel.add(new JScrollPane(legend,
+						JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
+						BorderLayout.CENTER);
+
+				JSplitPane topDown = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+						true, legendPanel, interactiveScanPanel(model,
+								maxCompartmentValue, maxSpeciesValue,
+								maxParameterValue, paramStepSize));
+				topDown.setDividerLocation(topDown.getDividerLocation() + 200);
+				JSplitPane leftRight = new JSplitPane(
+						JSplitPane.HORIZONTAL_SPLIT, true, topDown, plot);
+				leftRight
+						.setDividerLocation(topDown.getDividerLocation() + 200);
+				tabbedPane = new JTabbedPane();
+				tabbedPane.add("Plot ", leftRight);
+				tabbedPane.add("Simulated data", simPanel);
+				tabbedPane.add("Experimental data", expPanel);
+				tabbedPane.setEnabledAt(0, true);
+				tabbedPane.setEnabledAt(1, false);
+				tabbedPane.setEnabledAt(2, false);
+			}
+			add(tabbedPane, BorderLayout.CENTER);
 		} catch (Exception exc) {
 			GUITools.showErrorMessage(this, exc);
 		}
@@ -727,6 +580,14 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	}
 
 	/**
+	 * 
+	 * @return
+	 */
+	public boolean isSetExperimentalData() {
+		return expTable.getRowCount() > 0;
+	}
+
+	/**
 	 * @return the showSettingsPanel
 	 */
 	public boolean isShowSettingsPanel() {
@@ -757,38 +618,6 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 			} else if (chck.getName().equals("legend")) {
 				plot.setShowLegend(chck.isSelected());
 			}
-		} else if (e.getSource() instanceof JComboBox) {
-			JComboBox comBox = (JComboBox) e.getSource();
-			if (comBox.getName().equals("distfun")) {
-				try {
-					distanceFunc = comBox.getSelectedIndex();
-					distance = SBMLsimulator.getAvailableDistances()[distanceFunc]
-							.getConstructor().newInstance();
-					if (expTable.getRowCount() > 0) {
-						distField.setText(Double.toString(computeDistance(
-								model, solver.getStepSize())));
-					}
-					distField.setEditable(false);
-					distField.setEnabled(true);
-				} catch (Exception exc) {
-					GUITools.showErrorMessage(this, exc);
-				}
-			} else if (comBox.getName().equals("solvers")) {
-				Class<AbstractDESSolver>[] solFun = SBMLsimulator
-						.getAvailableSolvers();
-				for (int i = 0; i < solFun.length; i++) {
-					try {
-						Class<AbstractDESSolver> c = solFun[i];
-						solver = c.getConstructor().newInstance();
-						if (solver.getName().equals(
-								solvers.getSelectedItem().toString())) {
-							break;
-						}
-					} catch (Exception exc) {
-						GUITools.showErrorMessage(this, exc);
-					}
-				}
-			}
 		}
 	}
 
@@ -807,6 +636,46 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		tab.setDefaultRenderer(NamedSBase.class, renderer);
 		tab.getModel().addTableModelListener(this);
 		return tab;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * eva2.server.stat.InterfaceStatisticsListener#notifyGenerationPerformed
+	 * (java.lang.String[], java.lang.Object[], java.lang.Double[])
+	 */
+	public void notifyGenerationPerformed(String[] header,
+			Object[] statObjects, Double[] statDoubles) {
+		// TODO Auto-generated method stub
+		for (int i = 0; i < statObjects.length; i++) {
+			System.out.printf("%s\t%s\n", i, statObjects[i].getClass()
+					.getName());
+		}
+		System.out.println("notifyGenerationPerformed");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStarted(int,
+	 * int, java.lang.String[], java.lang.String[])
+	 */
+	public void notifyRunStarted(int runNumber, int plannedMultiRuns,
+			String[] header, String[] metaInfo) {
+		// TODO Auto-generated method stub
+		System.out.println("notifyRunStarted");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStopped(int,
+	 * boolean)
+	 */
+	public void notifyRunStopped(int runsPerformed, boolean completedLastRun) {
+		// TODO Auto-generated method stub
+		System.out.println("notifyRunStopped");
 	}
 
 	/**
@@ -829,8 +698,10 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 			plotColors[i] = legend.getColorFor(name);
 			infos[i] = legend.getNameFor(name);
 		}
-		plot.plot(data, connected, showLegend, showGrid.isSelected(),
-				plotColumns, plotColors, infos);
+		plot
+				.plot(data, connected, showLegend,
+						((SimulationPanelFoot) footPanel.getComponent(0))
+								.getShowGrid(), plotColumns, plotColors, infos);
 	}
 
 	/**
@@ -846,12 +717,11 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		for (int i = 0; i < tabMod.getRowCount(); i++) {
 			tabMod.setSelected(i, data.getColumn(tabMod.getId(i)) != null);
 		}
-		plot(data, false, showLegend.isSelected());
+		plot(data, false, ((SimulationPanelFoot) footPanel.getComponent(0))
+				.getShowLegend());
 		tabbedPane.setEnabledAt(2, true);
-		distField.setText(Double.toString(computeDistance(model, solver
-				.getStepSize())));
-		distField.setEditable(false);
-		distField.setEnabled(true);
+		((SimulationPanelFoot) footPanel.getComponent(0)).computeDistance(
+				model, data.getBlock(0));
 	}
 
 	/**
@@ -865,7 +735,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	/**
 	 * Assign properties from the settings
 	 * 
-	 * @param settings
+	 * @param properties
 	 * @throws NoSuchMethodException
 	 * @throws InvocationTargetException
 	 * @throws IllegalAccessException
@@ -873,89 +743,39 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 * @throws SecurityException
 	 * @throws IllegalArgumentException
 	 */
-	public void setProperties(Properties settings)
+	public void setProperties(Properties properties)
 			throws IllegalArgumentException, SecurityException,
 			InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException {
-		maxSpinVal = ((Number) settings.get(CfgKeys.SPINNER_MAX_VALUE))
+		maxSpinVal = ((Number) properties.get(CfgKeys.SPINNER_MAX_VALUE))
 				.doubleValue();
-		defaultCompartmentValue = ((Number) settings
+		defaultCompartmentValue = ((Number) properties
 				.get(CfgKeys.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE))
 				.doubleValue();
-		defaultSpeciesValue = ((Number) settings
+		defaultSpeciesValue = ((Number) properties
 				.get(CfgKeys.OPT_DEFAULT_SPECIES_INITIAL_VALUE)).doubleValue();
-		defaultParameterValue = ((Number) settings
+		defaultParameterValue = ((Number) properties
 				.get(CfgKeys.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS))
 				.doubleValue();
-		paramStepSize = ((Number) settings.get(CfgKeys.SPINNER_STEP_SIZE))
+		paramStepSize = ((Number) properties.get(CfgKeys.SPINNER_STEP_SIZE))
 				.doubleValue();
-		double startTime = ((Number) settings.get(CfgKeys.SIM_START_TIME))
+		double startTime = ((Number) properties.get(CfgKeys.SIM_START_TIME))
 				.doubleValue();
-		double endTime = ((Number) settings.get(CfgKeys.SIM_END_TIME))
+		double endTime = ((Number) properties.get(CfgKeys.SIM_END_TIME))
 				.doubleValue();
 		startTime = Math.max(0, startTime);
 		if (startTime > endTime) {
 			swap(startTime, endTime);
 		}
-		double stepSize = ((Number) settings.get(CfgKeys.SIM_STEP_SIZE))
-				.doubleValue();
-		maxTime = Math.max(((Number) settings.get(CfgKeys.SIM_MAX_TIME))
-				.doubleValue(), Math.max(startTime, endTime));
-		t1 = new SpinnerNumberModel(startTime, 0, maxTime, stepSize);
-		t2 = new SpinnerNumberModel(endTime, Math.min(((Number) t1.getValue())
-				.doubleValue(), endTime), maxTime, stepSize);
-		showGrid = GUITools.createJCheckBox("Grid", ((Boolean) settings
-				.get(CfgKeys.PLOT_SHOW_GRID)).booleanValue(), "grid", this,
-				"Decide whether or not to draw a grid in the plot area.");
-		String toolTip = "Select this checkbox if the y-axis should be drawn in a logarithmic scale. This is, however, only possible if all values are greater than zero.";
-		logScale = GUITools.createJCheckBox("Log", ((Boolean) settings
-				.get(CfgKeys.PLOT_LOG_SCALE)).booleanValue(), "log", this,
-				toolTip);
-		showLegend = GUITools.createJCheckBox("Legend", ((Boolean) settings
-				.get(CfgKeys.PLOT_SHOW_LEGEND)).booleanValue(), "legend", this,
-				"Add or remove a legend in the plot.");
-		maxStepsPerUnit = ((Integer) settings
-				.get(CfgKeys.SIM_MAX_STEPS_PER_UNIT_TIME)).intValue();
-		maxCompartmentValue = ((Number) settings
+
+		maxCompartmentValue = ((Number) properties
 				.get(CfgKeys.SIM_MAX_COMPARTMENT_SIZE)).doubleValue();
-		maxSpeciesValue = ((Number) settings.get(CfgKeys.SIM_MAX_SPECIES_VALUE))
-				.doubleValue();
-		maxParameterValue = ((Number) settings
+		maxSpeciesValue = ((Number) properties
+				.get(CfgKeys.SIM_MAX_SPECIES_VALUE)).doubleValue();
+		maxParameterValue = ((Number) properties
 				.get(CfgKeys.SIM_MAX_PARAMETER_VALUE)).doubleValue();
-		/*
-		 * Solver and distance.
-		 */
-		Class<Distance>[] distFun = SBMLsimulator.getAvailableDistances();
-		Class<AbstractDESSolver>[] solFun = SBMLsimulator.getAvailableSolvers();
-		distanceFunc = 0;
-		String name = CfgKeys.SIM_DISTANCE_FUNCTION.getProperty().toString();
-		name = name.substring(name.lastIndexOf('.') + 1);
-		while (distanceFunc < distFun.length
-				&& !distFun[distanceFunc].getSimpleName().equals(name)) {
-			distanceFunc++;
-		}
-		if (this.distFun != null) {
-			this.distFun.setSelectedIndex(distanceFunc);
-		}
-		solvers = new JComboBox();
-		name = CfgKeys.SIM_ODE_SOLVER.getProperty().toString();
-		name = name.substring(name.lastIndexOf('.') + 1);
-		for (int i = 0; i < solFun.length; i++) {
-			Class<AbstractDESSolver> c = solFun[i];
-			solver = c.getConstructor().newInstance();
-			solvers.addItem(solver.getName());
-			if (c.getName().substring(c.getName().lastIndexOf('.') + 1).equals(
-					name)) {
-				solvers.setSelectedIndex(i);
-			}
-		}
-		solvers.setEnabled(solvers.getItemCount() > 1);
-		if (solvers.getSelectedIndex() != solvers.getItemCount() - 1) {
-			solver = solFun[solvers.getSelectedIndex()].getConstructor()
-					.newInstance();
-		}
-		solvers.setName("solvers");
-		solvers.addItemListener(this);
+
+		getOrCreateFootPanel().setProperties(properties);
 		removeAll();
 		init();
 	}
@@ -1002,11 +822,10 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 * @throws Exception
 	 */
 	public void simulate() throws Exception {
-		double t1val = ((Double) t1.getValue()).doubleValue();
-		double t2val = ((Double) t2.getValue()).doubleValue();
-		double stepSize = (t2val - t1val)
-				/ stepsModel.getNumber().doubleValue();
-		simulate(model, t1val, t2val, stepSize);
+		SimulationPanelFoot foot = (SimulationPanelFoot) footPanel
+				.getComponent(0);
+		simulate(model, foot.getSimulationStartTime(), foot
+				.getSimulationEndTime(), foot.getStepSize());
 		tabbedPane.setEnabledAt(1, true);
 	}
 
@@ -1020,68 +839,21 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 */
 	private void simulate(Model model, double t1val, double t2val,
 			double stepSize) throws Exception {
-		MultiBlockTable data = solveByStepSize(model, t1val, t2val, stepSize);
+		SimulationPanelFoot foot = (SimulationPanelFoot) footPanel
+				.getComponent(0);
+		MultiBlockTable data = foot.solveByStepSize(model, t1val, t2val,
+				stepSize);
 		simTable.setModel(data);
 		plot.clearAll();
-		plot(data, true, showLegend.isSelected());
+		plot(data, true, foot.getShowLegend());
+		if (stepSize != foot.getStepSize()) {
+			foot.setStepSize(stepSize);
+		}
 		if (expTable.getColumnCount() > 0) {
-			plot((MultiBlockTable) expTable.getModel(), false, showLegend
-					.isSelected());
-			distField
-					.setText(Double.toString(computeDistance(model, stepSize)));
-			distField.setEditable(false);
-			distField.setEnabled(true);
+			plot((MultiBlockTable) expTable.getModel(), false, foot
+					.getShowLegend());
+			foot.computeDistance(model, data.getBlock(0));
 		}
-	}
-
-	/**
-	 * 
-	 * @param model
-	 * @param timePoints
-	 * @param stepSize
-	 * @return
-	 * @throws SBMLException
-	 * @throws IntegrationException
-	 * @throws ModelOverdeterminedException
-	 */
-	private MultiBlockTable solveAtTimePoints(Model model, double times[],
-			double stepSize) throws SBMLException, IntegrationException,
-			ModelOverdeterminedException {
-		SBMLinterpreter interpreter = new SBMLinterpreter(model);
-		solver.setStepSize(stepSize);
-		solver.setIncludeIntermediates(false);
-		MultiBlockTable solution = solver.solve(interpreter, interpreter
-				.getInitialValues(), times);
-		if (solver.isUnstable()) {
-			JOptionPane.showMessageDialog(this, "Unstable!",
-					"Simulation not possible", JOptionPane.WARNING_MESSAGE);
-		}
-		return solution;
-	}
-
-	/**
-	 * 
-	 * @param model
-	 * @param t1
-	 *            Time begin
-	 * @param t2
-	 *            Time end
-	 * @param stepSize
-	 * @return
-	 * @throws Exception
-	 */
-	private MultiBlockTable solveByStepSize(Model model, double t1, double t2,
-			double stepSize) throws Exception {
-		SBMLinterpreter interpreter = new SBMLinterpreter(model);
-		solver.setStepSize(stepSize);
-		solver.setIncludeIntermediates(includeReactions);
-		MultiBlockTable solution = solver.solve(interpreter, interpreter
-				.getInitialValues(), t1, t2);
-		if (solver.isUnstable()) {
-			JOptionPane.showMessageDialog(this, "Unstable!",
-					"Simulation not possible", JOptionPane.WARNING_MESSAGE);
-		}
-		return solution;
 	}
 
 	/*
@@ -1094,30 +866,11 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() instanceof JSpinner) {
 			JSpinner spin = (JSpinner) e.getSource();
-			if (spin.getName() != null && spin.getName().equals("t2")) {
-				// do nothing.
-			} else {
-				Variable s = model.findVariable(spin.getName());
-				if (s != null && s instanceof Symbol) {
-					((Symbol) s)
-							.setValue(((SpinnerNumberModel) spin.getModel())
-									.getNumber().doubleValue());
-				}
+			Variable s = model.findVariable(spin.getName());
+			if (s != null && s instanceof Symbol) {
+				((Symbol) s).setValue(((SpinnerNumberModel) spin.getModel())
+						.getNumber().doubleValue());
 			}
-		}
-	}
-
-	/**
-	 * Swaps a and b if a is greater then b.
-	 * 
-	 * @param a
-	 * @param b
-	 */
-	private void swap(double a, double b) {
-		if (a > b) {
-			double swap = b;
-			b = a;
-			a = swap;
 		}
 	}
 
@@ -1131,91 +884,21 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		if (e.getSource() instanceof LegendTableModel) {
 			if ((e.getColumn() == LegendTableModel.getBooleanColumn())
 					&& (e.getType() == TableModelEvent.UPDATE)) {
+				SimulationPanelFoot foot = (SimulationPanelFoot) footPanel
+						.getComponent(0);
 				plot.clearAll();
 				if (simTable.getRowCount() > 0) {
-					plot((MultiBlockTable) simTable.getModel(), true,
-							showLegend.isSelected());
+					plot((MultiBlockTable) simTable.getModel(), true, foot
+							.getShowLegend());
 				}
 				if (expTable.getRowCount() > 0) {
-					plot((MultiBlockTable) expTable.getModel(), false,
-							showLegend.isSelected());
+					plot((MultiBlockTable) expTable.getModel(), false, foot
+							.getShowLegend());
 				}
-				if (showLegend.isSelected()) {
+				if (foot.getShowLegend()) {
 					plot.updateLegend();
 				}
 			}
 		}
-	}
-
-	/**
-	 * 
-	 */
-	public void closeExperimentalData() {
-		expTable = new JTable();
-		tabbedPane.setEnabledAt(2, false);
-		if (tabbedPane.getSelectedIndex() == 2) {
-			tabbedPane.setSelectedIndex(0);
-		}
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public boolean isSetExperimentalData() {
-		return expTable.getRowCount() > 0;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * eva2.server.stat.InterfaceStatisticsListener#finalMultiRunResults(java
-	 * .lang.String[], java.util.List)
-	 */
-	public void finalMultiRunResults(String[] header,
-			List<Object[]> multiRunFinalObjectData) {
-		// TODO Auto-generated method stub
-		System.out.println("finalMultiRunResults");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * eva2.server.stat.InterfaceStatisticsListener#notifyGenerationPerformed
-	 * (java.lang.String[], java.lang.Object[], java.lang.Double[])
-	 */
-	public void notifyGenerationPerformed(String[] header,
-			Object[] statObjects, Double[] statDoubles) {
-		// TODO Auto-generated method stub
-		for (int i = 0; i < statObjects.length; i++) {
-			System.out.printf("%s\t%s\n", i, statObjects[i].getClass()
-					.getName());
-		}
-		System.out.println("notifyGenerationPerformed");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStarted(int,
-	 * int, java.lang.String[], java.lang.String[])
-	 */
-	public void notifyRunStarted(int runNumber, int plannedMultiRuns,
-			String[] header, String[] metaInfo) {
-		// TODO Auto-generated method stub
-		System.out.println("notifyRunStarted");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStopped(int,
-	 * boolean)
-	 */
-	public void notifyRunStopped(int runsPerformed, boolean completedLastRun) {
-		// TODO Auto-generated method stub
-		System.out.println("notifyRunStopped");
 	}
 }
