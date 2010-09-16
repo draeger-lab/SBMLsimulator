@@ -77,7 +77,7 @@ public class MultiBlockTable extends AbstractTableModel implements
 			 * @return The {@link String} that identifies this {@link Column}.
 			 */
 			public String getId() {
-				return   identifiers[columnIndex];
+				return identifiers[columnIndex];
 			}
 
 			/**
@@ -86,8 +86,7 @@ public class MultiBlockTable extends AbstractTableModel implements
 			 * @return
 			 */
 			public int getRowCount() {
-				return 
-						 data.length;
+				return data.length;
 			}
 
 			/**
@@ -97,7 +96,7 @@ public class MultiBlockTable extends AbstractTableModel implements
 			 * @return
 			 */
 			public double getValue(int rowIndex) {
-				return  data[rowIndex][columnIndex];
+				return data[rowIndex][columnIndex];
 			}
 
 			/*
@@ -155,7 +154,7 @@ public class MultiBlockTable extends AbstractTableModel implements
 			 */
 			public void setValue(double doubleValue, int rowIndex) {
 				data[rowIndex][columnIndex] = ((Double) doubleValue)
-							.doubleValue();
+						.doubleValue();
 			}
 
 			/*
@@ -313,26 +312,6 @@ public class MultiBlockTable extends AbstractTableModel implements
 			return Double.valueOf(data[rowIndex][columnIndex - 1]);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * javax.swing.table.AbstractTableModel#setValueAt(java.lang.Object,
-		 * int, int)
-		 */
-		@Override
-		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-			if (!(aValue instanceof Double)) {
-				throw new IllegalArgumentException(ONLY_DOUBLE_VALUES_ACCEPTED);
-			}
-			if (columnIndex == 0) {
-				timePoints[rowIndex] = ((Double) aValue).doubleValue();
-			} else {
-				data[rowIndex][columnIndex - 1] = ((Double) aValue)
-						.doubleValue();
-			}
-		}
-
 		/**
 		 * Checks whether or not a data matrix has been defined in this object
 		 * 
@@ -397,6 +376,26 @@ public class MultiBlockTable extends AbstractTableModel implements
 						identifiers.length));
 			}
 			data[rowIndex] = array;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * javax.swing.table.AbstractTableModel#setValueAt(java.lang.Object,
+		 * int, int)
+		 */
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+			if (!(aValue instanceof Double)) {
+				throw new IllegalArgumentException(ONLY_DOUBLE_VALUES_ACCEPTED);
+			}
+			if (columnIndex == 0) {
+				timePoints[rowIndex] = ((Double) aValue).doubleValue();
+			} else {
+				data[rowIndex][columnIndex - 1] = ((Double) aValue)
+						.doubleValue();
+			}
 		}
 
 		/*
@@ -542,7 +541,8 @@ public class MultiBlockTable extends AbstractTableModel implements
 			throw new IndexOutOfBoundsException(Integer.toString(column));
 		}
 		if (column == 0) {
-			throw new IllegalArgumentException("no column 0: use getTimePoints()");
+			throw new IllegalArgumentException(
+					"no column 0: use getTimePoints()");
 		}
 		int index = column - 1;
 		int bidx = 0;
@@ -552,6 +552,23 @@ public class MultiBlockTable extends AbstractTableModel implements
 			b = listOfBlocks.get(++bidx);
 		}
 		return b.getColumn(index);
+	}
+
+	/**
+	 * Returns the column corresponding to the given identifier.
+	 * 
+	 * @param identifier
+	 *            An identifier.
+	 * @return A {@link Column} object for this identifier or null if no such
+	 *         {@link Column} exists.
+	 */
+	public Column getColumn(String identifier) {
+		for (int i = 1; i < getColumnCount(); i++) {
+			if (getColumnName(i).equals(identifier)) {
+				return getColumn(i);
+			}
+		}
+		return null;
 	}
 
 	/*

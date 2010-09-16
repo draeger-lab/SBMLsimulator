@@ -159,7 +159,7 @@ public class SettingsPanelComputation extends SettingsPanel {
 		for (int i = 0; i < classes.length; i++) {
 			name = properties.get(key).toString();
 			if (classes[i].getSimpleName().equals(
-					name.substring(name.lastIndexOf('.')))) {
+					name.substring(name.lastIndexOf('.') + 1))) {
 				selectedIndex = i;
 			}
 			if (key.equals(CfgKeys.SIM_ODE_SOLVER)) {

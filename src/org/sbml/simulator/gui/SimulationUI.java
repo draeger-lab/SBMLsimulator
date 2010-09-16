@@ -137,36 +137,6 @@ public class SimulationUI extends JFrame implements ActionListener,
 	}
 
 	/**
-	 * Compression factor for JPEG output
-	 */
-	private float compression;
-
-	/**
-	 * Pointer to the model
-	 */
-	private Model model;
-
-	/**
-	 * Standard directory to open data files.
-	 */
-	private String openDir;
-
-	/**
-	 * This is the quote character in CSV files
-	 */
-	private char quoteChar;
-
-	/**
-	 * 
-	 */
-	private String saveDir;
-
-	/**
-	 * This is the separator char in CSV files
-	 */
-	private char separatorChar;
-
-	/**
 	 * GUI element that lets the user run the simulation.
 	 */
 	private SimulationPanel simPanel;
@@ -179,15 +149,16 @@ public class SimulationUI extends JFrame implements ActionListener,
 	/**
 	 * 
 	 */
+	public static final String defaultTitle = "SBML simulator "
+			+ SBMLsimulator.getVersionNumber();
+
+	/**
+	 * 
+	 */
 	public SimulationUI() {
 		super(defaultTitle);
 
-		// init properties
-		this.openDir = System.getProperty("user.home");
-		this.saveDir = System.getProperty("user.home");
-		this.compression = 0.9f;
-		this.quoteChar = '#';
-		this.separatorChar = ',';
+		setProperties(CfgKeys.getProperties());
 
 		/*
 		 * Add menubar and toolbar
@@ -234,7 +205,6 @@ public class SimulationUI extends JFrame implements ActionListener,
 		this();
 		setProperties(simulationPanel.getProperties());
 		simPanel = simulationPanel;
-		this.model = model;
 		getContentPane().add(simPanel, BorderLayout.CENTER);
 	}
 
@@ -272,7 +242,7 @@ public class SimulationUI extends JFrame implements ActionListener,
 			adjustPreferences();
 			break;
 		case EXIT:
-			try { // TODO
+			try {
 				CfgKeys.saveProperties(CfgKeys.getProperties());
 			} catch (BackingStoreException exc) {
 				exc.printStackTrace();
@@ -325,10 +295,11 @@ public class SimulationUI extends JFrame implements ActionListener,
 			// "Simulation Preferences", defaults);
 			if (dialog.showSettingsDialog(CfgKeys.getProperties()) == SettingsDialog.APPROVE_OPTION) {
 				Properties p = dialog.getProperties();
-				CfgKeys.saveProperties(p);
+				CfgKeys.getProperties().putAll(p);
 				if (simPanel != null) {
 					simPanel.setProperties(p);
 				}
+				CfgKeys.saveProperties();
 			}
 		} catch (Exception exc) {
 			GUITools.showErrorMessage(this, exc);
@@ -358,9 +329,6 @@ public class SimulationUI extends JFrame implements ActionListener,
 					.setEnabled(true, getJMenuBar(), toolbar, Command.OPEN_DATA);
 		}
 	}
-
-	public static final String defaultTitle = "SBML simulator "
-			+ SBMLsimulator.getVersionNumber();
 
 	/**
 	 * 
@@ -522,32 +490,6 @@ public class SimulationUI extends JFrame implements ActionListener,
 		return toolbar;
 	}
 
-	/**
-	 * 
-	 * @return
-	 */
-	public Properties getProperties() {
-
-		Properties p = simPanel != null ? simPanel.getProperties()
-				: new Properties();
-
-		/*
-		 * General
-		 */
-		p.put(CfgKeys.JPEG_COMPRESSION_FACTOR, Float.valueOf(compression));
-
-		/*
-		 * CSV file parsing
-		 */
-		p.put(CfgKeys.CSV_FILES_OPEN_DIR, openDir);
-		p.put(CfgKeys.CSV_FILES_SAVE_DIR, saveDir);
-		p.put(CfgKeys.CSV_FILES_SEPARATOR_CHAR, Character
-				.valueOf(separatorChar));
-		p.put(CfgKeys.CSV_FILES_QUOTE_CHAR, Character.valueOf(quoteChar));
-
-		return p;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -567,8 +509,9 @@ public class SimulationUI extends JFrame implements ActionListener,
 	 * 
 	 */
 	public void openExperimentalData() {
-		JFileChooser chooser = GUITools.createJFileChooser(openDir, false,
-				false, JFileChooser.FILES_ONLY, SBFileFilter.CSV_FILE_FILTER);
+		JFileChooser chooser = GUITools.createJFileChooser(CfgKeys.OPEN_DIR
+				.getProperty().toString(), false, false,
+				JFileChooser.FILES_ONLY, SBFileFilter.CSV_FILE_FILTER);
 		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 			try {
 				openExperimentalData(chooser.getSelectedFile());
@@ -585,8 +528,9 @@ public class SimulationUI extends JFrame implements ActionListener,
 	 * @throws Exception
 	 */
 	public void openExperimentalData(File file) throws Exception {
-		openDir = file.getParent();
+		CfgKeys.OPEN_DIR.putProperty(file.getParent());
 		CSVDataImporter importer = new CSVDataImporter();
+		Model model = simPanel.getModel();
 		MultiBlockTable data = importer.convert(model, file.getAbsolutePath());
 		if (data != null) {
 			simPanel.setExperimentalData(data);
@@ -615,19 +559,22 @@ public class SimulationUI extends JFrame implements ActionListener,
 	 * 
 	 */
 	public void openModel() {
-		JFileChooser chooser = GUITools.createJFileChooser(openDir, false,
-				false, JFileChooser.FILES_ONLY, SBFileFilter.SBML_FILE_FILTER);
+		JFileChooser chooser = GUITools.createJFileChooser(CfgKeys.OPEN_DIR
+				.getProperty().toString(), false, false,
+				JFileChooser.FILES_ONLY, SBFileFilter.SBML_FILE_FILTER);
 		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 			try {
 				SBMLDocument doc = SBMLReader.readSBML(chooser
 						.getSelectedFile());
 				if ((doc != null) && (doc.isSetModel())) {
-					this.model = doc.getModel();
-					simPanel = new SimulationPanel(model);
-					if (!GUITools.contains(getContentPane(), simPanel)) {
-						getContentPane().add(simPanel, BorderLayout.CENTER);
-						setOptimalSize();
+					CfgKeys.OPEN_DIR.putProperty(chooser.getSelectedFile()
+							.getParent());
+					simPanel = new SimulationPanel(doc.getModel());
+					if (GUITools.contains(getContentPane(), simPanel)) {
+						getContentPane().remove(simPanel);
 					}
+					getContentPane().add(simPanel, BorderLayout.CENTER);
+					setOptimalSize();
 					setTitle(defaultTitle + " - "
 							+ chooser.getSelectedFile().getName());
 					GUITools.setEnabled(true, getJMenuBar(), toolbar,
@@ -651,8 +598,10 @@ public class SimulationUI extends JFrame implements ActionListener,
 	 */
 	private void savePlotImage() {
 		try {
-			this.saveDir = simPanel.getPlot().savePlotImage(saveDir,
-					compression);
+			CfgKeys.PLOT_SAVE_DIR.putProperty(simPanel.getPlot().savePlotImage(
+					CfgKeys.PLOT_SAVE_DIR.getProperty().toString(),
+					((Number) CfgKeys.JPEG_COMPRESSION_FACTOR.getProperty())
+							.floatValue()));
 		} catch (Exception exc) {
 			GUITools.showErrorMessage(this, exc);
 		}
@@ -666,16 +615,19 @@ public class SimulationUI extends JFrame implements ActionListener,
 			TableModel simTabModel = simPanel.getSimulationResultsTable()
 					.getModel();
 			if (simTabModel.getRowCount() > 0) {
-				JFileChooser fc = GUITools.createJFileChooser(saveDir, false,
-						false, JFileChooser.FILES_ONLY,
+				JFileChooser fc = GUITools.createJFileChooser(
+						CfgKeys.CSV_FILES_SAVE_DIR.getProperty().toString(),
+						false, false, JFileChooser.FILES_ONLY,
 						SBFileFilter.CSV_FILE_FILTER);
 				if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
 					File out = fc.getSelectedFile();
-					this.saveDir = out.getParent();
+					CfgKeys.CSV_FILES_SAVE_DIR.putProperty(out.getParent());
 					if (!out.exists()
 							|| GUITools.overwriteExistingFile(this, out)) {
 						CSVWriter writer = new CSVWriter();
-						writer.write(simTabModel, separatorChar, out);
+						writer.write(simTabModel,
+								CfgKeys.CSV_FILES_SEPARATOR_CHAR.getProperty()
+										.toString().charAt(0), out);
 					}
 				}
 			} else {
@@ -706,32 +658,6 @@ public class SimulationUI extends JFrame implements ActionListener,
 	 * @param p
 	 */
 	public void setProperties(Properties p) {
-		/*
-		 * CSV file parsing
-		 */
-		if (p.containsKey(CfgKeys.CSV_FILES_OPEN_DIR)) {
-			openDir = p.get(CfgKeys.CSV_FILES_OPEN_DIR).toString();
-		}
-		if (p.containsKey(CfgKeys.CSV_FILES_SEPARATOR_CHAR)) {
-			separatorChar = ((Character) p
-					.get(CfgKeys.CSV_FILES_SEPARATOR_CHAR)).charValue();
-		}
-		if (p.containsKey(CfgKeys.CSV_FILES_QUOTE_CHAR)) {
-			quoteChar = ((Character) p.get(CfgKeys.CSV_FILES_QUOTE_CHAR))
-					.charValue();
-		}
-		if (p.containsKey(CfgKeys.CSV_FILES_SAVE_DIR)) {
-			saveDir = p.get(CfgKeys.CSV_FILES_SAVE_DIR).toString();
-		}
-
-		/*
-		 * General
-		 */
-		if (p.containsKey(CfgKeys.JPEG_COMPRESSION_FACTOR)) {
-			compression = Float.parseFloat(p.get(
-					CfgKeys.JPEG_COMPRESSION_FACTOR).toString());
-		}
-
 		if (simPanel != null) {
 			try {
 				simPanel.setProperties(p);
@@ -768,6 +694,7 @@ public class SimulationUI extends JFrame implements ActionListener,
 	 * 
 	 */
 	public void startOptimization() {
+		Model model = simPanel.getModel();
 		QuantitySelectionPanel panel = new QuantitySelectionPanel(model);
 		if (JOptionPane.showConfirmDialog(this, panel,
 				"Select quantities for optimization",

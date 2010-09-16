@@ -840,6 +840,12 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 */
 	public void setExperimentalData(MultiBlockTable data) throws Exception {
 		expTable.setModel(data);
+		// deselect non available elements in the legend and select those that
+		// are present in the data
+		LegendTableModel tabMod = (LegendTableModel) legend.getModel();
+		for (int i = 0; i < tabMod.getRowCount(); i++) {
+			tabMod.setSelected(i, data.getColumn(tabMod.getId(i)) != null);
+		}
 		plot(data, false, showLegend.isSelected());
 		tabbedPane.setEnabledAt(2, true);
 		distField.setText(Double.toString(computeDistance(model, solver
@@ -922,20 +928,24 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		Class<Distance>[] distFun = SBMLsimulator.getAvailableDistances();
 		Class<AbstractDESSolver>[] solFun = SBMLsimulator.getAvailableSolvers();
 		distanceFunc = 0;
+		String name = CfgKeys.SIM_DISTANCE_FUNCTION.getProperty().toString();
+		name = name.substring(name.lastIndexOf('.') + 1);
 		while (distanceFunc < distFun.length
-				&& !distFun[distanceFunc].getName().equals(
-						settings.get(CfgKeys.SIM_DISTANCE_FUNCTION))) {
+				&& !distFun[distanceFunc].getSimpleName().equals(name)) {
 			distanceFunc++;
 		}
 		if (this.distFun != null) {
 			this.distFun.setSelectedIndex(distanceFunc);
 		}
 		solvers = new JComboBox();
+		name = CfgKeys.SIM_ODE_SOLVER.getProperty().toString();
+		name = name.substring(name.lastIndexOf('.') + 1);
 		for (int i = 0; i < solFun.length; i++) {
 			Class<AbstractDESSolver> c = solFun[i];
 			solver = c.getConstructor().newInstance();
 			solvers.addItem(solver.getName());
-			if (c.getName().equals(settings.get(CfgKeys.SIM_ODE_SOLVER))) {
+			if (c.getName().substring(c.getName().lastIndexOf('.') + 1).equals(
+					name)) {
 				solvers.setSelectedIndex(i);
 			}
 		}
@@ -1158,30 +1168,39 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 
 	/*
 	 * (non-Javadoc)
-	 * @see eva2.server.stat.InterfaceStatisticsListener#finalMultiRunResults(java.lang.String[], java.util.List)
+	 * 
+	 * @see
+	 * eva2.server.stat.InterfaceStatisticsListener#finalMultiRunResults(java
+	 * .lang.String[], java.util.List)
 	 */
 	public void finalMultiRunResults(String[] header,
 			List<Object[]> multiRunFinalObjectData) {
-		// TODO Auto-generated method stub	
+		// TODO Auto-generated method stub
 		System.out.println("finalMultiRunResults");
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyGenerationPerformed(java.lang.String[], java.lang.Object[], java.lang.Double[])
+	 * 
+	 * @see
+	 * eva2.server.stat.InterfaceStatisticsListener#notifyGenerationPerformed
+	 * (java.lang.String[], java.lang.Object[], java.lang.Double[])
 	 */
 	public void notifyGenerationPerformed(String[] header,
 			Object[] statObjects, Double[] statDoubles) {
 		// TODO Auto-generated method stub
-		for (int i=0; i<statObjects.length;i++) {
-		  System.out.printf("%s\t%s\n",i,statObjects[i].getClass().getName());
+		for (int i = 0; i < statObjects.length; i++) {
+			System.out.printf("%s\t%s\n", i, statObjects[i].getClass()
+					.getName());
 		}
 		System.out.println("notifyGenerationPerformed");
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStarted(int, int, java.lang.String[], java.lang.String[])
+	 * 
+	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStarted(int,
+	 * int, java.lang.String[], java.lang.String[])
 	 */
 	public void notifyRunStarted(int runNumber, int plannedMultiRuns,
 			String[] header, String[] metaInfo) {
@@ -1191,7 +1210,9 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 
 	/*
 	 * (non-Javadoc)
-	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStopped(int, boolean)
+	 * 
+	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStopped(int,
+	 * boolean)
 	 */
 	public void notifyRunStopped(int runsPerformed, boolean completedLastRun) {
 		// TODO Auto-generated method stub
