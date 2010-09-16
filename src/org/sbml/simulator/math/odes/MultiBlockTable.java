@@ -206,21 +206,28 @@ public class MultiBlockTable extends AbstractTableModel implements
 		private String name;
 
 		/**
-		 * 
+		 * Pointer to the containing table.
 		 */
-		private Block() {
-			idHash = new Hashtable<String, Integer>();
-		}
+		private MultiBlockTable parent;
 
 		/**
 		 * 
 		 * @param data
 		 * @param identifiers
 		 */
-		private Block(double[][] data, String[] identifiers) {
-			this();
+		private Block(double[][] data, String[] identifiers,
+				MultiBlockTable parent) {
+			this(parent);
 			setData(data);
 			setIdentifiers(identifiers);
+		}
+
+		/**
+		 * 
+		 */
+		private Block(MultiBlockTable parent) {
+			this.parent = parent;
+			idHash = new Hashtable<String, Integer>();
 		}
 
 		/**
@@ -298,6 +305,15 @@ public class MultiBlockTable extends AbstractTableModel implements
 		 */
 		public int getRowCount() {
 			return isSetTimePoints() ? timePoints.length : 0;
+		}
+
+		/**
+		 * Access to the time points of the overall table.
+		 * 
+		 * @return A pointer to the time points in the containing table.
+		 */
+		public double[] getTimePoints() {
+			return parent.getTimePoints();
 		}
 
 		/*
@@ -494,7 +510,7 @@ public class MultiBlockTable extends AbstractTableModel implements
 		} else {
 			ids = identifiers;
 		}
-		listOfBlocks.add(new Block(data, ids));
+		listOfBlocks.add(new Block(data, ids, this));
 	}
 
 	/**
@@ -506,7 +522,7 @@ public class MultiBlockTable extends AbstractTableModel implements
 	 *            The column identifiers of the new block.
 	 */
 	public void addBlock(String[] identifiers) {
-		Block block = new Block();
+		Block block = new Block(this);
 		block.setIdentifiers(identifiers);
 		if (isSetTimePoints()) {
 			block.setData(new double[timePoints.length][identifiers.length]);

@@ -132,6 +132,7 @@ public class SettingsPanelOptimization extends SettingsPanel {
 		keys = new CfgKeys[] { CfgKeys.EST_INIT_MIN_VALUE,
 				CfgKeys.EST_INIT_MAX_VALUE, CfgKeys.EST_MIN_VALUE,
 				CfgKeys.EST_MAX_VALUE };
+		int row = 0;
 		for (i = 0; i < spinner.length; i++) {
 			spinner[i] = new JSpinner(new SpinnerNumberModel(
 					((Number) properties.get(keys[i])).doubleValue(),
@@ -141,11 +142,12 @@ public class SettingsPanelOptimization extends SettingsPanel {
 					SPINNER_TOOLTIP, StringTools.firstLetterLowerCase(names[i]
 							.substring(0, names[i].length() - 1))), 60));
 			spinner[i].addChangeListener(this);
-			lh.add(new JLabel(names[i]), 0, i, 1, 1, 0, 0);
+			lh.add(new JLabel(names[i]), 0, row, 1, 1, 0, 0);
 			if (i == 0) {
 				lh.add(new JPanel(), 1, 0, 1, 1, 0, 0);
 			}
-			lh.add(spinner[i], 2, i, 1, 1, 1, 0);
+			lh.add(spinner[i], 2, row++, 1, 1, 1, 0);
+			lh.add(new JPanel(), 0, row++, 3, 1, 0, 0);
 		}
 		panelRanges.setBorder(BorderFactory
 				.createTitledBorder(" Ranges of all optimization targets "));

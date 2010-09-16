@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.sbml.jsbml.util.StringTools;
 import org.sbml.simulator.SBMLsimulator;
@@ -51,7 +52,8 @@ public class SettingsPanelComputation extends SettingsPanel {
 	 */
 	@Override
 	public boolean accepts(Object key) {
-		return key.toString().startsWith("SIM_");
+		String k = key.toString();
+		return k.startsWith("SIM_") || k.startsWith("OPT_DEFAULT_");
 	}
 
 	/*
@@ -77,17 +79,24 @@ public class SettingsPanelComputation extends SettingsPanel {
 		CfgKeys keys[] = { CfgKeys.SIM_DISTANCE_DEFAULT_VALUE,
 				CfgKeys.SIM_DISTANCE_ROOT, CfgKeys.SIM_MAX_TIME,
 				CfgKeys.SIM_START_TIME, CfgKeys.SIM_END_TIME,
-				CfgKeys.SIM_MAX_STEPS_PER_UNIT_TIME, CfgKeys.SIM_STEP_SIZE };
+				CfgKeys.SIM_MAX_STEPS_PER_UNIT_TIME, CfgKeys.SIM_STEP_SIZE,
+				CfgKeys.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE,
+				CfgKeys.OPT_DEFAULT_SPECIES_INITIAL_VALUE,
+				CfgKeys.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS };
 		String names[] = { "Default value:", "Root:",
 				"Maximal simulation time:", "Simulation start time:",
 				"Simulation end time:",
 				"Maximal number of steps per time unit:",
-				"Simulation step size:" };
-		String toolTips[] = { "", "", "", "", "", "", "" };
-		JPanel panelSolver = new JPanel(), panelDistance = new JPanel(), panelTimes = new JPanel();
-		LayoutHelper lSolver = new LayoutHelper(panelSolver);
+				"Simulation step size:", "Default compartment size:",
+				"Default species value:", "Default parameter value:" };
+		String toolTips[] = { "", "", "", "", "", "", "", "", "", "" };
+		JPanel panelDistance = new JPanel(), panelTimes = new JPanel(), panelDefaults = new JPanel();
 		LayoutHelper lDistance = new LayoutHelper(panelDistance);
 		LayoutHelper lTimes = new LayoutHelper(panelTimes);
+		LayoutHelper lDefaults = new LayoutHelper(panelDefaults);
+
+		lTimes.add(new JLabel("Default ODE solver:"), new JPanel(), solverBox);
+		lTimes.add(new JPanel());
 
 		try {
 			initComboBox(solverBox, SBMLsimulator.getAvailableSolvers(),
@@ -98,43 +107,76 @@ public class SettingsPanelComputation extends SettingsPanel {
 			GUITools.showErrorMessage(this, exc);
 		}
 
-		lSolver.add(new JLabel("Default ODE solver:"), new JPanel(), solverBox);
-		lSolver.add(new JPanel());
 		lDistance.add(new JLabel("Default distance function:"), new JPanel(),
 				distanceBox);
 		lDistance.add(new JPanel());
 
 		JSpinner spinner[] = new JSpinner[keys.length];
 		for (i = 0; i < spinner.length; i++) {
-			spinner[i] = new JSpinner(new SpinnerNumberModel(
-					((Number) properties.get(keys[i])).doubleValue(),
-					spinnerMinValue, spinnerMaxValue, spinnerStepSize));
-			spinner[i].setName(keys[i].toString());
-			spinner[i].setToolTipText(GUITools.toHTML(String.format(
-					toolTips[i], StringTools.firstLetterLowerCase(names[i]
-							.substring(0, names[i].length() - 1))), 60));
+			spinner[i] = createJSpinner(keys[i], names[i], toolTips[i]);
 			if (keys[i].equals(CfgKeys.SIM_START_TIME)) {
 				spinner[i].setEnabled(false);
 			}
-			spinner[i].addChangeListener(this);
 			if (keys[i].toString().contains("DISTANCE")) {
 				addSpinner(lDistance, spinner[i], keys[i], names[i]);
+			} else if (keys[i].toString().startsWith("OPT_DEFAULT_")) {
+				addSpinner(lDefaults, spinner[i], keys[i], names[i]);
 			} else {
 				addSpinner(lTimes, spinner[i], keys[i], names[i]);
 			}
 		}
 
-		panelSolver.setBorder(BorderFactory
-				.createTitledBorder(" Numerical integrator "));
 		panelDistance.setBorder(BorderFactory
 				.createTitledBorder(" Distance function "));
 		panelTimes.setBorder(BorderFactory
-				.createTitledBorder(" Integration time settings "));
+				.createTitledBorder(" Numerical integration "));
+		panelDefaults.setBorder(BorderFactory
+				.createTitledBorder(" Missing values "));
 
 		LayoutHelper lh = new LayoutHelper(this);
-		lh.add(panelSolver);
-		lh.add(panelDistance);
-		lh.add(panelTimes);
+		lh.add(panelTimes, 0, 0, 2, 1, 1, 0);
+		lh.add(panelDistance, 0, 1, 1, 1, 1, 0);
+		lh.add(panelDefaults, 1, 1, 1, 1, 1, 0);
+	}
+
+	/**
+	 * Creates a new {@link JSpinner} with all necessary properties and adds
+	 * this as a {@link ChangeListener}.
+	 * 
+	 * @param key
+	 * @param name
+	 * @param toolTip
+	 * @return
+	 */
+	private JSpinner createJSpinner(Object key, String name, String toolTip) {
+		return createJSpinner(key, name, toolTip, spinnerMinValue,
+				spinnerMaxValue, spinnerStepSize);
+	}
+
+	/**
+	 * Creates a new {@link JSpinner} with all necessary properties and adds
+	 * this as a {@link ChangeListener}.
+	 * 
+	 * @param key
+	 * @param name
+	 * @param toolTip
+	 * @param spinnerMinValue
+	 * @param spinnerMaxValue
+	 * @param spinnerStepSize
+	 * @return
+	 */
+	private JSpinner createJSpinner(Object key, String name, String toolTip,
+			double spinnerMinValue, double spinnerMaxValue,
+			double spinnerStepSize) {
+		double value = ((Number) properties.get(key)).doubleValue();
+		JSpinner spinner = new JSpinner(new SpinnerNumberModel(value,
+				spinnerMinValue, spinnerMaxValue, spinnerStepSize));
+		spinner.setName(key.toString());
+		spinner.setToolTipText(GUITools.toHTML(String.format(toolTip,
+				StringTools.firstLetterLowerCase(name.substring(0, name
+						.length() - 1))), 60));
+		spinner.addChangeListener(this);
+		return spinner;
 	}
 
 	/**

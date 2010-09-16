@@ -131,7 +131,7 @@ public class SettingsPanelParsing extends SettingsPanel {
 				.createTitledBorder(" Separator and comment character "));
 
 		lh = new LayoutHelper(this);
-		lh.add(chooser);
-		lh.add(panel);
+		lh.add(chooser, 0, 0, 1, 1, 1, 0);
+		lh.add(panel, 0, 1, 1, 1, 1, 0);
 	}
 }
