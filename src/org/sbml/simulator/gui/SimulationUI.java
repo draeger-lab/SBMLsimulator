@@ -703,7 +703,7 @@ public class SimulationUI extends JFrame implements ActionListener,
 				EvA2GUIStarter.init(new EstimationProblem(simPanel.getSolver(),
 						simPanel.getDistance(), model, simPanel
 								.getExperimentalData(), panel
-								.getSelectedQuantityRanges()), this, simPanel);
+								.getSelectedQuantityRanges()), this, new SimulationWorker(simPanel));
 			} catch (Exception exc) {
 				exc.printStackTrace();
 				GUITools.showErrorMessage(this, exc);

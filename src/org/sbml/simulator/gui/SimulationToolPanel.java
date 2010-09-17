@@ -15,7 +15,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
@@ -29,8 +28,8 @@ import org.sbml.jsbml.util.ValuePair;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.math.Distance;
-import org.sbml.simulator.math.SBMLinterpreter;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
+import org.sbml.simulator.math.odes.DESSolver;
 import org.sbml.simulator.math.odes.IntegrationException;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 import org.sbml.squeezer.CfgKeys;
@@ -42,7 +41,7 @@ import de.zbit.gui.LayoutHelper;
  * @author Andreas Dr&auml;ger
  * @date 2010-09-16
  */
-public class SimulationPanelFoot extends JPanel implements ItemListener,
+public class SimulationToolPanel extends JPanel implements ItemListener,
 		ChangeListener {
 
 	/**
@@ -53,14 +52,6 @@ public class SimulationPanelFoot extends JPanel implements ItemListener,
 	 * Contains all available distance functions.
 	 */
 	private JComboBox distFun;
-	/**
-	 * The currently used distance function.
-	 */
-	private Distance distance;
-	/**
-	 * Necessary to remember the originally set distance function.
-	 */
-	private int distanceFunc;
 	/**
 	 * Text field to display the quality of a simulation with respect to a given
 	 * data set.
@@ -91,10 +82,6 @@ public class SimulationPanelFoot extends JPanel implements ItemListener,
 	 */
 	private JCheckBox showToolTips;
 	/**
-	 * The integrator for the simulation
-	 */
-	private AbstractDESSolver solver;
-	/**
 	 * The index of the class name of the solver to be used
 	 */
 	private JComboBox solvers;
@@ -111,19 +98,21 @@ public class SimulationPanelFoot extends JPanel implements ItemListener,
 	 */
 	private SpinnerNumberModel stepsModel;
 	/**
-	 * Pointer to experimental data
+	 * 
 	 */
-	private MultiBlockTable data;
-	/**
-	 * Pointer to a {@link Model}
-	 */
-	private Model model;
-	private boolean includeReactions;
 	private double spinnerStepSize;
+	/**
+	 * 
+	 */
 	private Set<ItemListener> setOfItemListeners;
+	/**
+	 * 
+	 */
+	private SimulationWorker worker;
 
 	/**
 	 * 
+	 * @param worker
 	 * @throws IllegalArgumentException
 	 * @throws SecurityException
 	 * @throws InstantiationException
@@ -131,11 +120,14 @@ public class SimulationPanelFoot extends JPanel implements ItemListener,
 	 * @throws InvocationTargetException
 	 * @throws NoSuchMethodException
 	 */
-	public SimulationPanelFoot() throws IllegalArgumentException,
-			SecurityException, InstantiationException, IllegalAccessException,
+	public SimulationToolPanel(SimulationWorker worker)
+			throws IllegalArgumentException, SecurityException,
+			InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException {
 		super(new BorderLayout());
 
+		this.setOfItemListeners = new HashSet<ItemListener>();
+		this.worker = worker;
 		spinnerStepSize = .01d;
 		maxTime = 1E5;
 		t1 = new SpinnerNumberModel(0d, 0d, maxTime, spinnerStepSize);
@@ -153,7 +145,6 @@ public class SimulationPanelFoot extends JPanel implements ItemListener,
 				"Add or remove a legend in the plot.");
 		showToolTips = GUITools.createJCheckBox("Tool tips", true, "tooltips",
 				this, "Let the plot display tool tips for each curve.");
-		setOfItemListeners = new HashSet<ItemListener>();
 
 		// Settings
 		JSpinner startTime = new JSpinner(t1);
@@ -165,7 +156,7 @@ public class SimulationPanelFoot extends JPanel implements ItemListener,
 		endTime.setName("t2");
 		double t1val = ((Double) t1.getValue()).doubleValue();
 		double t2val = ((Double) t2.getValue()).doubleValue();
-		int val = (int) Math.round((t2val - t1val) / integrationStepSize);
+		int val = numSteps(t1val, t2val, integrationStepSize);
 		int min = 1;
 		int max = (int) Math.round((t2val - t1val) * maxStepsPerUnit);
 		int steps = 1;
@@ -187,11 +178,12 @@ public class SimulationPanelFoot extends JPanel implements ItemListener,
 		LayoutHelper dSet = new LayoutHelper(dPanel);
 		Class<Distance>[] distFunctions = SBMLsimulator.getAvailableDistances();
 		String distances[] = new String[distFunctions.length];
+		int distanceFunc = 0;
 		for (int i = 0; i < distFunctions.length; i++) {
 			Distance dist = distFunctions[i].getConstructor().newInstance();
 			distances[i] = dist.getName();
 			if (i == distanceFunc) {
-				distance = dist;
+				worker.setDistance(dist);
 			}
 		}
 		distFun = new JComboBox(distances);
@@ -227,6 +219,57 @@ public class SimulationPanelFoot extends JPanel implements ItemListener,
 
 	/**
 	 * 
+	 * @param t1
+	 * @param t2
+	 * @param stepSize
+	 * @return
+	 */
+	private int numSteps(double t1, double t2, double stepSize) {
+		return (int) Math.round((t2 - t1) / stepSize);
+	}
+
+	/**
+	 * 
+	 * @param listener
+	 */
+	public void addItemListener(ItemListener listener) {
+		setOfItemListeners.add(listener);
+	}
+
+	/**
+	 * 
+	 * @param model
+	 * @param data
+	 * @throws ModelOverdeterminedException
+	 * @throws IntegrationException
+	 * @throws SBMLException
+	 * @throws Exception
+	 */
+	public void computeDistance(Model model, MultiBlockTable data)
+			throws SBMLException, IntegrationException,
+			ModelOverdeterminedException {
+		computeDistance(model, data.getBlock(0));
+	}
+
+	/**
+	 * 
+	 * @param model
+	 * @param data
+	 * @throws ModelOverdeterminedException
+	 * @throws IntegrationException
+	 * @throws SBMLException
+	 * @throws Exception
+	 */
+	public void computeDistance(Model model, MultiBlockTable.Block data)
+			throws SBMLException, IntegrationException,
+			ModelOverdeterminedException {
+		distField.setText(Double.toString(worker.computeDistance(model, data)));
+		distField.setEditable(false);
+		distField.setEnabled(true);
+	}
+
+	/**
+	 * 
 	 * @param name
 	 * @return
 	 * @throws IllegalArgumentException
@@ -243,6 +286,7 @@ public class SimulationPanelFoot extends JPanel implements ItemListener,
 		JComboBox solvers = new JComboBox();
 		name = name.substring(name.lastIndexOf('.') + 1);
 		Class<AbstractDESSolver>[] solFun = SBMLsimulator.getAvailableSolvers();
+		AbstractDESSolver solver;
 		for (int i = 0; i < solFun.length; i++) {
 			Class<AbstractDESSolver> c = solFun[i];
 			solver = c.getConstructor().newInstance();
@@ -250,6 +294,7 @@ public class SimulationPanelFoot extends JPanel implements ItemListener,
 			if (c.getName().substring(c.getName().lastIndexOf('.') + 1).equals(
 					name)) {
 				solvers.setSelectedIndex(i);
+				worker.setDESSolver(solver);
 			}
 		}
 		solvers.setEnabled(solvers.getItemCount() > 1);
@@ -264,38 +309,18 @@ public class SimulationPanelFoot extends JPanel implements ItemListener,
 
 	/**
 	 * 
-	 * @param model
-	 * @param timePoints
-	 * @param stepSize
-	 * @return
-	 * @throws Exception
-	 */
-	private double computeDistance(Model model, double stepSize,
-			MultiBlockTable.Block data) throws Exception {
-		return distance.distance(solveAtTimePoints(model, data.getTimePoints(),
-				stepSize).getBlock(0), data);
-	}
-
-	/**
-	 * 
-	 * @param model
-	 * @param data
-	 * @throws Exception
-	 */
-	public void computeDistance(Model model, MultiBlockTable.Block data)
-			throws Exception {
-		distField.setText(Double.toString(computeDistance(model, solver
-				.getStepSize(), data)));
-		distField.setEditable(false);
-		distField.setEnabled(true);
-	}
-
-	/**
-	 * 
 	 * @return
 	 */
 	public Distance getDistance() {
-		return distance;
+		return worker.getDistance();
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public double getNumIntegrationSteps() {
+		return stepsModel.getNumber().doubleValue();
 	}
 
 	/**
@@ -310,10 +335,12 @@ public class SimulationPanelFoot extends JPanel implements ItemListener,
 		p.put(CfgKeys.SIM_MAX_TIME, this.maxTime);
 		p.put(CfgKeys.SIM_START_TIME, (Double) t1.getValue());
 		p.put(CfgKeys.SIM_END_TIME, (Double) t2.getValue());
-		p.put(CfgKeys.SIM_STEP_SIZE, Double.valueOf(solver.getStepSize()));
+		p.put(CfgKeys.SIM_STEP_SIZE, Double.valueOf(worker.getDESSolver()
+				.getStepSize()));
 		p.put(CfgKeys.SIM_MAX_STEPS_PER_UNIT_TIME, Integer
 				.valueOf(maxStepsPerUnit));
-		p.put(CfgKeys.SIM_DISTANCE_FUNCTION, distance.getClass().getName());
+		p.put(CfgKeys.SIM_DISTANCE_FUNCTION, worker.getDistance().getClass()
+				.getName());
 		p.put(CfgKeys.SIM_ODE_SOLVER,
 				SBMLsimulator.getAvailableSolvers()[solvers.getSelectedIndex()]
 						.getName());
@@ -349,8 +376,44 @@ public class SimulationPanelFoot extends JPanel implements ItemListener,
 	 * 
 	 * @return
 	 */
-	public AbstractDESSolver getSolver() {
-		return solver;
+	public double getSimulationEndTime() {
+		return ((Double) t2.getValue()).doubleValue();
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public double getSimulationStartTime() {
+		return ((Double) t1.getValue()).doubleValue();
+	}
+
+	/**
+	 * Start time and end time.
+	 * 
+	 * @return
+	 */
+	public ValuePair<Double, Double> getSimulationTime() {
+		return new ValuePair<Double, Double>(Double
+				.valueOf(getSimulationStartTime()), Double
+				.valueOf(getSimulationEndTime()));
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public DESSolver getSolver() {
+		return worker.getDESSolver();
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public double getStepSize() {
+		return (getSimulationEndTime() - getSimulationStartTime())
+				/ getNumIntegrationSteps();
 	}
 
 	/*
@@ -364,13 +427,13 @@ public class SimulationPanelFoot extends JPanel implements ItemListener,
 			JComboBox comBox = (JComboBox) e.getSource();
 			if (comBox.getName().equals("distfun")) {
 				try {
-					distanceFunc = comBox.getSelectedIndex();
-					distance = SBMLsimulator.getAvailableDistances()[distanceFunc]
-							.getConstructor().newInstance();
-					if (this.data != null) {
-						distField.setText(Double.toString(computeDistance(
-								this.model, solver.getStepSize(), data
-										.getBlock(0))));
+					worker
+							.setDistance(SBMLsimulator.getAvailableDistances()[comBox
+									.getSelectedIndex()].getConstructor()
+									.newInstance());
+					if (worker.isSetData()) {
+						distField.setText(Double.toString(worker
+								.computeDistance()));
 					}
 					distField.setEditable(false);
 					distField.setEnabled(true);
@@ -380,23 +443,32 @@ public class SimulationPanelFoot extends JPanel implements ItemListener,
 			} else if (comBox.getName().equals("solvers")) {
 				Class<AbstractDESSolver>[] solFun = SBMLsimulator
 						.getAvailableSolvers();
-				for (int i = 0; i < solFun.length; i++) {
-					try {
-						Class<AbstractDESSolver> c = solFun[i];
+				try {
+					AbstractDESSolver solver;
+					int i = 0;
+					do {
+						Class<AbstractDESSolver> c = solFun[i++];
 						solver = c.getConstructor().newInstance();
-						if (solver.getName().equals(
-								solvers.getSelectedItem().toString())) {
-							break;
-						}
-					} catch (Exception exc) {
-						GUITools.showErrorMessage(this, exc);
-					}
+					} while ((i < solFun.length)
+							&& (!solver.getName().equals(
+									solvers.getSelectedItem().toString())));
+					worker.setDESSolver(solver);
+				} catch (Exception exc) {
+					GUITools.showErrorMessage(this, exc);
 				}
 			}
 		}
 		for (ItemListener l : setOfItemListeners) {
 			l.itemStateChanged(e);
 		}
+	}
+
+	/**
+	 * 
+	 * @param data
+	 */
+	public void setData(MultiBlockTable data) {
+		worker.setData(data);
 	}
 
 	/**
@@ -417,19 +489,20 @@ public class SimulationPanelFoot extends JPanel implements ItemListener,
 		/*
 		 * Solver and distance.
 		 */
+		double simEndTime = ((Number) properties.get(CfgKeys.SIM_END_TIME))
+				.doubleValue();
 		spinnerStepSize = ((Number) properties.get(CfgKeys.SIM_STEP_SIZE))
 				.doubleValue();
 		Class<Distance>[] distFun = SBMLsimulator.getAvailableDistances();
 
 		maxTime = Math.max(((Number) properties.get(CfgKeys.SIM_MAX_TIME))
-				.doubleValue(), Math.max(getSimulationStartTime(),
-				getSimulationEndTime()));
+				.doubleValue(), Math.max(getSimulationStartTime(), simEndTime));
 		t1.setMinimum(Double.valueOf(0));
 		t1.setValue(Double.valueOf(getSimulationStartTime()));
 		t1.setMaximum(Double.valueOf(maxTime));
 		t1.setStepSize(Double.valueOf(spinnerStepSize));
 		t2.setMinimum(Double.valueOf(getSimulationStartTime()));
-		t2.setValue(Double.valueOf(getSimulationEndTime()));
+		t2.setValue(Double.valueOf(simEndTime));
 		t2.setMaximum(Double.valueOf(maxTime));
 		t2.setStepSize(Double.valueOf(spinnerStepSize));
 		showGrid.setSelected(((Boolean) properties.get(CfgKeys.PLOT_SHOW_GRID))
@@ -441,10 +514,10 @@ public class SimulationPanelFoot extends JPanel implements ItemListener,
 		showToolTips.setSelected(((Boolean) properties
 				.get(CfgKeys.PLOT_SHOW_TOOLTIPS)).booleanValue());
 
-		maxStepsPerUnit = ((Integer) properties
+		maxStepsPerUnit = ((Number) properties
 				.get(CfgKeys.SIM_MAX_STEPS_PER_UNIT_TIME)).intValue();
 
-		distanceFunc = 0;
+		int distanceFunc = 0;
 		String name = properties.get(CfgKeys.SIM_DISTANCE_FUNCTION).toString();
 		name = name.substring(name.lastIndexOf('.') + 1);
 		while (distanceFunc < distFun.length
@@ -460,101 +533,13 @@ public class SimulationPanelFoot extends JPanel implements ItemListener,
 
 	/**
 	 * 
-	 * @return
+	 * @param stepSize
 	 */
-	public double getSimulationStartTime() {
-		return ((Double) t1.getValue()).doubleValue();
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public double getSimulationEndTime() {
-		return ((Double) t2.getValue()).doubleValue();
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public double getNumIntegrationSteps() {
-		return stepsModel.getNumber().doubleValue();
-	}
-
-	/**
-	 * Start time and end time.
-	 * 
-	 * @return
-	 */
-	public ValuePair<Double, Double> getSimulationTime() {
-		return new ValuePair<Double, Double>(Double
-				.valueOf(getSimulationStartTime()), Double
-				.valueOf(getSimulationEndTime()));
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public double getStepSize() {
-		return (getSimulationEndTime() - getSimulationStartTime())
-				/ getNumIntegrationSteps();
-	}
-
 	public void setStepSize(double stepSize) {
-		solver.setStepSize(stepSize);
-		// TODO
-	}
-
-	/**
-	 * 
-	 * @param model
-	 * @param timePoints
-	 * @param stepSize
-	 * @return
-	 * @throws SBMLException
-	 * @throws IntegrationException
-	 * @throws ModelOverdeterminedException
-	 */
-	private MultiBlockTable solveAtTimePoints(Model model, double times[],
-			double stepSize) throws SBMLException, IntegrationException,
-			ModelOverdeterminedException {
-		SBMLinterpreter interpreter = new SBMLinterpreter(model);
-		solver.setStepSize(stepSize);
-		solver.setIncludeIntermediates(false);
-		MultiBlockTable solution = solver.solve(interpreter, interpreter
-				.getInitialValues(), times);
-		if (solver.isUnstable()) {
-			JOptionPane.showMessageDialog(this, "Unstable!",
-					"Simulation not possible", JOptionPane.WARNING_MESSAGE);
-		}
-		return solution;
-	}
-
-	/**
-	 * 
-	 * @param model
-	 * @param t1
-	 *            Time begin
-	 * @param t2
-	 *            Time end
-	 * @param stepSize
-	 * @return
-	 * @throws Exception
-	 */
-	public MultiBlockTable solveByStepSize(Model model, double t1, double t2,
-			double stepSize) throws Exception {
-		SBMLinterpreter interpreter = new SBMLinterpreter(model);
-		solver.setStepSize(stepSize);
-		solver.setIncludeIntermediates(includeReactions);
-		MultiBlockTable solution = solver.solve(interpreter, interpreter
-				.getInitialValues(), t1, t2);
-		if (solver.isUnstable()) {
-			JOptionPane.showMessageDialog(this, "Unstable!",
-					"Simulation not possible", JOptionPane.WARNING_MESSAGE);
-		}
-		return solution;
+		worker.getDESSolver().setStepSize(stepSize);
+		this.stepsModel.setValue(Integer.valueOf(numSteps(((Number) t1
+				.getValue()).doubleValue(), ((Number) t2.getValue())
+				.doubleValue(), stepSize)));
 	}
 
 	/*
@@ -575,10 +560,30 @@ public class SimulationPanelFoot extends JPanel implements ItemListener,
 
 	/**
 	 * 
-	 * @param listener
+	 * @throws ModelOverdeterminedException
+	 * @throws IntegrationException
+	 * @throws SBMLException
+	 * @throws Exception
 	 */
-	public void addItemListener(ItemListener listener) {
-		setOfItemListeners.add(listener);
+	public void computeDistance() throws SBMLException, IntegrationException,
+			ModelOverdeterminedException {
+		computeDistance(worker.getModel(), worker.getData());
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean getShowGraphToolTips() {
+		return showToolTips.isSelected();
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public JCheckBox getJCheckBoxLegend() {
+		return logScale;
 	}
 
 }
