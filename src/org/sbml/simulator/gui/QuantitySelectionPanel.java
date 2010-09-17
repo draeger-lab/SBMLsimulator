@@ -42,49 +42,6 @@ import de.zbit.gui.LayoutHelper;
 public class QuantitySelectionPanel extends JPanel implements ActionListener {
 
 	/**
-	 * 
-	 * @author Andreas Dr&auml;ger
-	 * @date 2010-09-08
-	 */
-	public enum Command {
-		/**
-		 * Action to select all elements of one group
-		 */
-		SELECT_ALL,
-		/**
-		 * Action to deselect all elements of one groupo
-		 */
-		SELECT_NONE;
-
-		/**
-		 * Human readable text corresponding to these commands.
-		 * 
-		 * @return
-		 */
-		public String getText() {
-			switch (this) {
-			case SELECT_ALL:
-				return "Select all";
-			default:
-				return "Deselect all";
-			}
-		}
-
-		/**
-		 * 
-		 * @return
-		 */
-		public String getToolTip() {
-			switch (this) {
-			case SELECT_ALL:
-				return "With this button you can easily select all elements on this panel";
-			default:
-				return "With this button you can easily deselect all elements on this panel";
-			}
-		}
-	}
-
-	/**
 	 * A data structure that contains all necessary information for one
 	 * {@link Quantity}: a {@link JCheckBox} to select or de-select it and the
 	 * values for the optimization. Furthermore, this data structure takes care
@@ -473,13 +430,13 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		}
 		boolean select;
 		Dimension d = (Dimension) button.getPreferredSize().clone();
-		switch (Command.valueOf(e.getActionCommand())) {
-		case SELECT_ALL:
+		switch (SelectionCommand.valueOf(e.getActionCommand())) {
+		case ALL:
 			select = true;
 			selectAllButtons[i].setEnabled(false);
 			deselectAllButtons[i].setEnabled(true);
 			break;
-		case SELECT_NONE:
+		case NONE:
 			select = false;
 			selectAllButtons[i].setEnabled(true);
 			deselectAllButtons[i].setEnabled(false);
@@ -503,12 +460,12 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	 * @return
 	 */
 	private Component createButtonPanel(int buttonIndex, boolean select) {
-		JButton selectAllButton = GUITools.createButton(Command.SELECT_ALL
-				.getText(), null, this, Command.SELECT_ALL, Command.SELECT_ALL
-				.getToolTip());
-		JButton deselectAllButton = GUITools.createButton(Command.SELECT_NONE
-				.getText(), null, this, Command.SELECT_NONE,
-				Command.SELECT_NONE.getToolTip());
+		JButton selectAllButton = GUITools.createButton(SelectionCommand.ALL
+				.getText(), null, this, SelectionCommand.ALL,
+				SelectionCommand.ALL.getToolTip());
+		JButton deselectAllButton = GUITools.createButton(SelectionCommand.NONE
+				.getText(), null, this, SelectionCommand.NONE,
+				SelectionCommand.NONE.getToolTip());
 		selectAllButton.setEnabled(!select);
 		deselectAllButton.setEnabled(select);
 		selectAllButton.setPreferredSize(deselectAllButton.getPreferredSize());

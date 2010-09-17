@@ -329,6 +329,15 @@ public class LegendTableModel extends AbstractTableModel {
 
 	/**
 	 * 
+	 * @param rowIndex
+	 * @return
+	 */
+	public boolean isSelected(int rowIndex) {
+		return ((Boolean) data[rowIndex][boolCol]).booleanValue();
+	}
+
+	/**
+	 * 
 	 * @param id
 	 * @return
 	 */
@@ -378,6 +387,26 @@ public class LegendTableModel extends AbstractTableModel {
 	 */
 	public void setSelected(String identifier, boolean selected) {
 		setSelected(getRowFor(identifier), selected);
+	}
+
+	/**
+	 * Runs over the legend and sets all variables corresponding to the given
+	 * identifiers as selected. All others will be unselected.
+	 * 
+	 * @param identifiers
+	 *            The identifiers of the variables to be selected and to occur
+	 *            in the plot.
+	 */
+	public void setSelectedVariables(String... identifiers) {
+		for (int i = 0; i < getRowCount(); i++) {
+			setValueAt(Boolean.valueOf(false), i, 0);
+			for (String id : identifiers) {
+				if (getValueAt(i, 2).toString().trim().equals(id.trim())) {
+					setValueAt(Boolean.valueOf(true), i, 0);
+					break;
+				}
+			}
+		}
 	}
 
 	/*
