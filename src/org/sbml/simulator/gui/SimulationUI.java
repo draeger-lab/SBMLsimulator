@@ -203,7 +203,6 @@ public class SimulationUI extends JFrame implements ActionListener,
 	 */
 	public SimulationUI(Model model, SimulationPanel simulationPanel) {
 		this();
-		setProperties(simulationPanel.getProperties());
 		simPanel = simulationPanel;
 		getContentPane().add(simPanel, BorderLayout.CENTER);
 	}
@@ -243,6 +242,9 @@ public class SimulationUI extends JFrame implements ActionListener,
 			break;
 		case EXIT:
 			try {
+				if (simPanel != null) {
+					CfgKeys.getProperties().putAll(simPanel.getProperties());
+				}
 				CfgKeys.saveProperties(CfgKeys.getProperties());
 			} catch (BackingStoreException exc) {
 				exc.printStackTrace();
@@ -569,7 +571,8 @@ public class SimulationUI extends JFrame implements ActionListener,
 				if ((doc != null) && (doc.isSetModel())) {
 					CfgKeys.OPEN_DIR.putProperty(chooser.getSelectedFile()
 							.getParent());
-					simPanel = new SimulationPanel(doc.getModel());
+					simPanel = new SimulationPanel(doc.getModel(), CfgKeys
+							.getProperties());
 					if (GUITools.contains(getContentPane(), simPanel)) {
 						getContentPane().remove(simPanel);
 					}
@@ -703,7 +706,8 @@ public class SimulationUI extends JFrame implements ActionListener,
 				EvA2GUIStarter.init(new EstimationProblem(simPanel.getSolver(),
 						simPanel.getDistance(), model, simPanel
 								.getExperimentalData(), panel
-								.getSelectedQuantityRanges()), this, new SimulationWorker(simPanel));
+								.getSelectedQuantityRanges()), this,
+						new SimulationWorker(simPanel));
 			} catch (Exception exc) {
 				exc.printStackTrace();
 				GUITools.showErrorMessage(this, exc);
