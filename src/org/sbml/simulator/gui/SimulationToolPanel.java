@@ -22,7 +22,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.NumberFormatter;
 
-import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.util.ValuePair;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
@@ -238,34 +237,17 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 
 	/**
 	 * 
-	 * @param model
-	 * @param data
-	 * @throws ModelOverdeterminedException
-	 * @throws IntegrationException
 	 * @throws SBMLException
-	 * @throws Exception
-	 */
-	public void computeDistance(Model model, MultiBlockTable data)
-			throws SBMLException, IntegrationException,
-			ModelOverdeterminedException {
-		computeDistance(model, data.getBlock(0));
-	}
-
-	/**
-	 * 
-	 * @param model
-	 * @param data
-	 * @throws ModelOverdeterminedException
 	 * @throws IntegrationException
-	 * @throws SBMLException
-	 * @throws Exception
+	 * @throws ModelOverdeterminedException
 	 */
-	public void computeDistance(Model model, MultiBlockTable.Block data)
-			throws SBMLException, IntegrationException,
+	public void computeDistance() throws SBMLException, IntegrationException,
 			ModelOverdeterminedException {
-		distField.setText(Double.toString(worker.computeDistance(model, data)));
-		distField.setEditable(false);
-		distField.setEnabled(true);
+		if (worker.isSetModel() && worker.isSetData()) {
+			distField.setText(Double.toString(worker.computeDistance()));
+			distField.setEditable(false);
+			distField.setEnabled(true);
+		}
 	}
 
 	/**
@@ -341,9 +323,8 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 				.valueOf(maxStepsPerUnit));
 		p.put(CfgKeys.SIM_DISTANCE_FUNCTION, worker.getDistance().getClass()
 				.getName());
-		p.put(CfgKeys.SIM_ODE_SOLVER,
-				SBMLsimulator.getAvailableSolvers()[solvers.getSelectedIndex()]
-						.getName());
+		p.put(CfgKeys.SIM_ODE_SOLVER, worker.getDESSolver().getClass()
+				.getName());
 
 		/*
 		 * Plot
@@ -423,39 +404,25 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 * java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
 	 */
 	public void itemStateChanged(ItemEvent e) {
-		if (e.getSource() instanceof JComboBox) {
+		if ((e.getSource() instanceof JComboBox)
+				&& (e.getStateChange() == ItemEvent.SELECTED)) {
 			JComboBox comBox = (JComboBox) e.getSource();
-			if (comBox.getName().equals("distfun")) {
-				try {
+			try {
+				if (comBox.getName().equals("distfun")) {
 					worker
 							.setDistance(SBMLsimulator.getAvailableDistances()[comBox
 									.getSelectedIndex()].getConstructor()
 									.newInstance());
-					if (worker.isSetData()) {
-						distField.setText(Double.toString(worker
-								.computeDistance()));
-					}
-					distField.setEditable(false);
-					distField.setEnabled(true);
-				} catch (Exception exc) {
-					GUITools.showErrorMessage(this, exc);
+					computeDistance();
+				} else if (comBox.getName().equals("solvers")) {
+					worker
+							.setDESSolver(SBMLsimulator.getAvailableSolvers()[comBox
+									.getSelectedIndex()].getConstructor()
+									.newInstance());
+					computeDistance();
 				}
-			} else if (comBox.getName().equals("solvers")) {
-				Class<AbstractDESSolver>[] solFun = SBMLsimulator
-						.getAvailableSolvers();
-				try {
-					AbstractDESSolver solver;
-					int i = 0;
-					do {
-						Class<AbstractDESSolver> c = solFun[i++];
-						solver = c.getConstructor().newInstance();
-					} while ((i < solFun.length)
-							&& (!solver.getName().equals(
-									solvers.getSelectedItem().toString())));
-					worker.setDESSolver(solver);
-				} catch (Exception exc) {
-					GUITools.showErrorMessage(this, exc);
-				}
+			} catch (Exception exc) {
+				GUITools.showErrorMessage(this, exc);
 			}
 		}
 		for (ItemListener l : setOfItemListeners) {
@@ -556,18 +523,6 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 				// do nothing.
 			}
 		}
-	}
-
-	/**
-	 * 
-	 * @throws ModelOverdeterminedException
-	 * @throws IntegrationException
-	 * @throws SBMLException
-	 * @throws Exception
-	 */
-	public void computeDistance() throws SBMLException, IntegrationException,
-			ModelOverdeterminedException {
-		computeDistance(worker.getModel(), worker.getData());
 	}
 
 	/**

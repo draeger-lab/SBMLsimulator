@@ -314,6 +314,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	public Properties getProperties() {
 		Properties p = ((SimulationToolPanel) footPanel.getComponent(0))
 				.getProperties();
+		
 		/*
 		 * Simulation
 		 */
@@ -616,9 +617,8 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 			chck.setSelected(false);
 			chck.setEnabled(false);
 			String msg = "Cannot change to logarithmic scale because at least one value on the y-axis is not greater than zero.";
-			JOptionPane.showMessageDialog(this, GUITools
-					.toHTML(msg, 40), "Warning",
-					JOptionPane.WARNING_MESSAGE);
+			JOptionPane.showMessageDialog(this, GUITools.toHTML(msg, 40),
+					"Warning", JOptionPane.WARNING_MESSAGE);
 		}
 		plot.toggleLog(chck.isSelected());
 	}
@@ -816,7 +816,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		if (expTable.getColumnCount() > 0) {
 			plot((MultiBlockTable) expTable.getModel(), false, foot
 					.getShowLegend());
-			foot.computeDistance(model, data.getBlock(0));
+			foot.computeDistance();
 		}
 	}
 

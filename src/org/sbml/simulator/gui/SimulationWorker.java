@@ -18,7 +18,6 @@ import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.math.odes.DESSolver;
 import org.sbml.simulator.math.odes.IntegrationException;
 import org.sbml.simulator.math.odes.MultiBlockTable;
-import org.sbml.simulator.math.odes.MultiBlockTable.Block;
 
 import eva2.server.stat.InterfaceStatisticsListener;
 
@@ -28,27 +27,6 @@ import eva2.server.stat.InterfaceStatisticsListener;
  */
 public class SimulationWorker extends SwingWorker<MultiBlockTable, Object>
 		implements InterfaceStatisticsListener {
-
-	/**
-	 * 
-	 * @param solver
-	 * @param model
-	 * @param stepSize
-	 * @param data
-	 * @param distance
-	 * @param parent
-	 * @return
-	 * @throws SBMLException
-	 * @throws IntegrationException
-	 * @throws ModelOverdeterminedException
-	 */
-	public static double computeDistance(DESSolver solver, Model model,
-			double stepSize, MultiBlockTable.Block data, Distance distance,
-			Component parent) throws SBMLException, IntegrationException,
-			ModelOverdeterminedException {
-		return distance.distance(solveAtTimePoints(solver, model,
-				data.getTimePoints(), stepSize, parent).getBlock(0), data);
-	}
 
 	/**
 	 * 
@@ -113,6 +91,7 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object>
 		}
 		return solution;
 	}
+
 	/**
 	 * Pointer to experimental data
 	 */
@@ -166,39 +145,8 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object>
 	 */
 	public double computeDistance() throws SBMLException, IntegrationException,
 			ModelOverdeterminedException {
-		return computeDistance(model, data.getBlock(0));
-	}
-
-	/**
-	 * 
-	 * @param solver
-	 * @param model
-	 * @param data
-	 * @return
-	 * @throws SBMLException
-	 * @throws IntegrationException
-	 * @throws ModelOverdeterminedException
-	 */
-	public double computeDistance(DESSolver solver, Model model, Block data)
-			throws SBMLException, IntegrationException,
-			ModelOverdeterminedException {
-		return computeDistance(solver, model, solver.getStepSize(), data,
-				distance, parent);
-	}
-
-	/**
-	 * 
-	 * @param model
-	 * @param data
-	 * @return
-	 * @throws SBMLException
-	 * @throws IntegrationException
-	 * @throws ModelOverdeterminedException
-	 */
-	public double computeDistance(Model model, Block data)
-			throws SBMLException, IntegrationException,
-			ModelOverdeterminedException {
-		return computeDistance(solver, model, data);
+		return distance.distance(solveAtTimePoints(solver, model, data
+				.getTimePoints(), solver.getStepSize(), parent), data);
 	}
 
 	/*
@@ -372,6 +320,14 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object>
 	 */
 	public void setParent(Component parent) {
 		this.parent = parent;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean isSetModel() {
+		return model != null;
 	}
 
 }

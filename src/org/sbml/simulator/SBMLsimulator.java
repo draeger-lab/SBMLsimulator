@@ -120,8 +120,7 @@ public class SBMLsimulator {
 	 * 
 	 */
 	public SBMLsimulator() {
-		SimulationUI d = new SimulationUI();
-		d.setVisible(true);
+		(new SimulationUI()).setVisible(true);
 	}
 
 	/**
