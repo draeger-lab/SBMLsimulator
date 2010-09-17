@@ -672,11 +672,13 @@ public class SimulationUI extends JFrame implements ActionListener,
 	}
 
 	/**
+	 * Selects only those variables in the {@link Plot}, whose identifiers equal
+	 * the given ones.
 	 * 
 	 * @param identifiers
 	 */
-	public void setVariables(String... identifiers) {
-		simPanel.setVariables(identifiers);
+	public void setSelectedVariables(String... identifiers) {
+		simPanel.setSelectedVariables(identifiers);
 	}
 
 	/**

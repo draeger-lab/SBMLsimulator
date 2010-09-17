@@ -20,20 +20,14 @@ package org.sbml.simulator.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseListener;
 import java.lang.reflect.InvocationTargetException;
-import java.util.LinkedList;
 import java.util.Properties;
 
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
-import javax.swing.JEditorPane;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -48,14 +42,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
-import org.sbml.jsbml.Compartment;
-import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.Model;
-import org.sbml.jsbml.NamedSBase;
-import org.sbml.jsbml.Parameter;
-import org.sbml.jsbml.QuantityWithDefinedUnit;
-import org.sbml.jsbml.Reaction;
-import org.sbml.jsbml.Species;
 import org.sbml.jsbml.Symbol;
 import org.sbml.jsbml.UnitDefinition;
 import org.sbml.jsbml.Variable;
@@ -64,10 +51,8 @@ import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.odes.DESSolver;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 import org.sbml.squeezer.CfgKeys;
-import org.sbml.squeezer.util.HTMLFormula;
 
 import de.zbit.gui.GUITools;
-import de.zbit.gui.LayoutHelper;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -154,8 +139,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	/**
 	 * Table for experimental data, the legend, and the simulation data.
 	 */
-	private JTable expTable, legend, simTable;
-
+	private JTable expTable, simTable;
 	/**
 	 * 
 	 */
@@ -166,11 +150,9 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 */
 	private boolean includeReactions = true, showSettingsPanel;
 	/**
-	 * The maximal allowable and default values.
+	 * The maximal allowable values.
 	 */
-	private double maxCompartmentValue, maxParameterValue, maxSpeciesValue,
-			defaultCompartmentValue, defaultParameterValue,
-			defaultSpeciesValue;
+	private double maxCompartmentValue, maxParameterValue, maxSpeciesValue;
 	/**
 	 * The step size for the spinner in the interactive parameter scan. and the
 	 * maximal value for {@link JSpinner}s.
@@ -182,11 +164,6 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	private Plot plot;
 
 	/**
-	 * 
-	 */
-	private SpinnerNumberModel[] spinModSymbol;
-
-	/**
 	 * The main tabbed pane showing plot, simulation and experimental data.
 	 */
 	private JTabbedPane tabbedPane;
@@ -194,6 +171,14 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 * 
 	 */
 	private SimulationWorker worker;
+	/**
+	 * 
+	 */
+	private InteractiveScanPanel interactiveScanPanel;
+	/**
+	 * 
+	 */
+	private LegendPanel legendPanel;
 
 	/**
 	 * 
@@ -314,7 +299,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	public Properties getProperties() {
 		Properties p = ((SimulationToolPanel) footPanel.getComponent(0))
 				.getProperties();
-		
+
 		/*
 		 * Simulation
 		 */
@@ -330,12 +315,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		p.put(CfgKeys.SPINNER_STEP_SIZE, Double.valueOf(paramStepSize));
 		p.put(CfgKeys.SPINNER_MAX_VALUE, Double.valueOf(maxSpinVal));
 
-		p.put(CfgKeys.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE, Double
-				.valueOf(defaultCompartmentValue));
-		p.put(CfgKeys.OPT_DEFAULT_SPECIES_INITIAL_VALUE, Double
-				.valueOf(defaultSpeciesValue));
-		p.put(CfgKeys.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS, Double
-				.valueOf(defaultParameterValue));
+		p.putAll(interactiveScanPanel.getProperties());
 
 		return p;
 	}
@@ -403,18 +383,15 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
 						BorderLayout.CENTER);
 
-				JPanel legendPanel = new JPanel(new BorderLayout());
-				legend = legendTable(worker.getModel());
-				legendPanel.add(new JScrollPane(legend,
-						JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
-						BorderLayout.CENTER);
-
+				interactiveScanPanel = new InteractiveScanPanel(worker
+						.getModel(), maxCompartmentValue, maxSpeciesValue,
+						maxParameterValue, paramStepSize);
+				interactiveScanPanel.setBorder(BorderFactory.createLoweredBevelBorder());
+				legendPanel = new LegendPanel(worker.getModel(), includeReactions);
+				legendPanel.addTableModelListener(this);
+				legendPanel.setBorder(BorderFactory.createLoweredBevelBorder());
 				JSplitPane topDown = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-						true, legendPanel, interactiveScanPanel(worker
-								.getModel(), maxCompartmentValue,
-								maxSpeciesValue, maxParameterValue,
-								paramStepSize));
+						true, legendPanel, interactiveScanPanel);
 				topDown.setDividerLocation(topDown.getDividerLocation() + 200);
 				JSplitPane leftRight = new JSplitPane(
 						JSplitPane.HORIZONTAL_SPLIT, true, topDown, plot);
@@ -432,144 +409,6 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		} catch (Exception exc) {
 			GUITools.showErrorMessage(this, exc);
 		}
-	}
-
-	/**
-	 * 
-	 * @param model
-	 * @param maxCompartmentValue
-	 * @param maxSpeciesValue
-	 * @param maxParameterValue
-	 * @param paramStepSize
-	 * @return
-	 */
-	private JTabbedPane interactiveScanPanel(Model model,
-			double maxCompartmentValue, double maxSpeciesValue,
-			double maxParameterValue, double paramStepSize) {
-		JTabbedPane tab = new JTabbedPane();
-		JPanel parameterPanel = new JPanel();
-		parameterPanel.setLayout(new BoxLayout(parameterPanel,
-				BoxLayout.PAGE_AXIS));
-		spinModSymbol = new SpinnerNumberModel[model.getNumCompartments()
-				+ model.getNumSpecies() + model.getNumParameters()];
-		boolean hasLocalParameters = false;
-		for (Reaction r : model.getListOfReactions())
-			if (r.isSetKineticLaw() && r.getKineticLaw().getNumParameters() > 0) {
-				hasLocalParameters = true;
-				JPanel panel = interactiveScanTable(r.getKineticLaw()
-						.getListOfParameters(), maxParameterValue,
-						paramStepSize);
-				panel.setBorder(BorderFactory.createTitledBorder(String.format(
-						" Reaction %s ", r.getId())));
-				parameterPanel.add(panel);
-			}
-		tab.add("Compartments", new JScrollPane(interactiveScanTable(model
-				.getListOfCompartments(), maxCompartmentValue, paramStepSize),
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
-		tab.setEnabledAt(0, model.getNumCompartments() > 0);
-		tab.add("Species", new JScrollPane(interactiveScanTable(model
-				.getListOfSpecies(), maxParameterValue, paramStepSize),
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
-		tab.setEnabledAt(1, model.getNumSpecies() > 0);
-		tab.add("Global Parameters", new JScrollPane(interactiveScanTable(model
-				.getListOfParameters(), maxSpeciesValue, paramStepSize),
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
-		tab.setEnabledAt(2, model.getNumParameters() > 0);
-		tab.add("Local Parameters", new JScrollPane(parameterPanel,
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
-		tab.setEnabledAt(3, hasLocalParameters);
-		for (int i = tab.getTabCount() - 1; i >= 0; i--) {
-			if (tab.isEnabledAt(i)) {
-				tab.setSelectedIndex(i);
-			}
-		}
-		return tab;
-	}
-
-	/**
-	 * 
-	 * @param maxValue
-	 *            , double stepSize
-	 * @param model
-	 * @return
-	 */
-	private JPanel interactiveScanTable(
-			ListOf<? extends QuantityWithDefinedUnit> list, double maxValue,
-			double stepSize) {
-		JPanel panel = new JPanel();
-		LayoutHelper lh = new LayoutHelper(panel);
-		int offset = 0;
-		LinkedList<String> nans = new LinkedList<String>();
-		double val = 0;
-		String name = "";
-		Model model = worker.getModel();
-		for (int i = 0; i < list.size(); i++) {
-			QuantityWithDefinedUnit p = list.get(i);
-			if (p instanceof Species) {
-				offset = model.getNumCompartments();
-			}
-			if (p instanceof Parameter) {
-				offset = model.getNumCompartments() + model.getNumSpecies();
-			}
-			val = p.getValue();
-			if (Double.isNaN(p.getValue())) {
-				name = p.getClass().getSimpleName().toLowerCase();
-				if (p instanceof Compartment) {
-					val = defaultCompartmentValue;
-				} else if (p instanceof Species) {
-					val = defaultSpeciesValue;
-				} else if (p instanceof Parameter) {
-					val = defaultParameterValue;
-				}
-				p.setValue(val);
-				nans.add(p.getId());
-				if (!(p instanceof Species) && (list.size() > 1)) {
-					name += "s";
-				}
-			}
-			maxValue = Math.max(val, maxValue);
-			spinModSymbol[i + offset] = new SpinnerNumberModel(val, Math.min(
-					0d, val), maxValue, stepSize);
-			JSpinner spinner = new JSpinner(spinModSymbol[i + offset]);
-			spinner.setName(p.getId());
-			spinner.addChangeListener(this);
-			lh.add(new JLabel(GUITools.toHTML(p.toString(), 40)), 0, i, 1, 1,
-					0, 0);
-			lh.add(spinner, 2, i, 1, 1, 0, 0);
-			lh.add(new JLabel(GUITools.toHTML(p.isSetUnits() ? HTMLFormula
-					.toHTML(p.getUnitsInstance()) : "")), 4, i, 1, 1, 0, 0);
-		}
-		lh.add(new JPanel(), 1, 0, 1, 1, 0, 0);
-		lh.add(new JPanel(), 3, 0, 1, 1, 0, 0);
-		if (nans.size() > 0) {
-			String l = nans.toString().substring(1);
-			String msg = String
-					.format(
-							"Undefined value%s for the %s %s ha%s been replaced by its default value %.3f.",
-							nans.size() > 1 ? "s" : "", name, l.substring(0, l
-									.length() - 1), nans.size() > 1 ? "ve"
-									: "s", val);
-			JEditorPane label = new JEditorPane("text/html", GUITools.toHTML(
-					msg, 80));
-			label.setEditable(false);
-			Component component;
-			if (nans.size() > 20) {
-				component = new JScrollPane(label,
-						JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-				label.setPreferredSize(new Dimension(450, 450));
-			} else {
-				component = label;
-			}
-			JOptionPane.showMessageDialog(this, component,
-					"Replacing undefined values",
-					JOptionPane.INFORMATION_MESSAGE);
-		}
-		return panel;
 	}
 
 	/**
@@ -624,23 +463,6 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	}
 
 	/**
-	 * 
-	 * @param model
-	 * @return
-	 */
-	private JTable legendTable(Model model) {
-		JTable tab = new JTable();
-		tab.setName("legend");
-		tab.setModel(new LegendTableModel(model, includeReactions));
-		tab.setDefaultEditor(Color.class, new ColorEditor());
-		LegendTableCellRenderer renderer = new LegendTableCellRenderer();
-		tab.setDefaultRenderer(Color.class, renderer);
-		tab.setDefaultRenderer(NamedSBase.class, renderer);
-		tab.getModel().addTableModelListener(this);
-		return tab;
-	}
-
-	/**
 	 * Plots the given data set with respect to the selected columns in the
 	 * legend.
 	 * 
@@ -649,16 +471,15 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 * @param showLegend
 	 */
 	public void plot(MultiBlockTable data, boolean connected, boolean showLegend) {
-		LegendTableModel legend = (LegendTableModel) this.legend.getModel();
 		String name;
 		boolean plotColumns[] = new boolean[data.getColumnCount() - 1];
 		Color plotColors[] = new Color[data.getColumnCount() - 1];
 		String infos[] = new String[data.getColumnCount() - 1];
 		for (int i = 0; i < data.getColumnCount() - 1; i++) {
 			name = data.getColumnName(i + 1);
-			plotColumns[i] = legend.isSelected(name);
-			plotColors[i] = legend.getColorFor(name);
-			infos[i] = legend.getNameFor(name);
+			plotColumns[i] = legendPanel.isSelected(name);
+			plotColors[i] = legendPanel.getColorFor(name);
+			infos[i] = legendPanel.getNameFor(name);
 		}
 		plot
 				.plot(data, connected, showLegend,
@@ -675,9 +496,9 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		expTable.setModel(data);
 		// deselect non available elements in the legend and select those that
 		// are present in the data
-		LegendTableModel tabMod = (LegendTableModel) legend.getModel();
-		for (int i = 0; i < tabMod.getRowCount(); i++) {
-			tabMod.setSelected(i, data.getColumn(tabMod.getId(i)) != null);
+		LegendTableModel legend = legendPanel.getLegendTableModel();
+		for (int i = 0; i < legend.getRowCount(); i++) {
+			legend.setSelected(i, data.getColumn(legend.getId(i)) != null);
 		}
 		plot(data, false, ((SimulationToolPanel) footPanel.getComponent(0))
 				.getShowLegend());
@@ -710,15 +531,12 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 			throws IllegalArgumentException, SecurityException,
 			InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException {
+
+		if (interactiveScanPanel != null) {
+			interactiveScanPanel.setProperties(properties);
+		}
+
 		maxSpinVal = ((Number) properties.get(CfgKeys.SPINNER_MAX_VALUE))
-				.doubleValue();
-		defaultCompartmentValue = ((Number) properties
-				.get(CfgKeys.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE))
-				.doubleValue();
-		defaultSpeciesValue = ((Number) properties
-				.get(CfgKeys.OPT_DEFAULT_SPECIES_INITIAL_VALUE)).doubleValue();
-		defaultParameterValue = ((Number) properties
-				.get(CfgKeys.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS))
 				.doubleValue();
 		paramStepSize = ((Number) properties.get(CfgKeys.SPINNER_STEP_SIZE))
 				.doubleValue();
@@ -768,16 +586,8 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 *            The identifiers of the variables to be selected and to occur
 	 *            in the plot.
 	 */
-	public void setVariables(String[] identifiers) {
-		for (int i = 0; i < legend.getRowCount(); i++) {
-			legend.setValueAt(Boolean.valueOf(false), i, 0);
-			for (String id : identifiers) {
-				if (legend.getValueAt(i, 2).toString().trim().equals(id.trim())) {
-					legend.setValueAt(Boolean.valueOf(true), i, 0);
-					break;
-				}
-			}
-		}
+	public void setSelectedVariables(String... identifiers) {
+		legendPanel.getLegendTableModel().setSelectedVariables(identifiers);
 	}
 
 	/**

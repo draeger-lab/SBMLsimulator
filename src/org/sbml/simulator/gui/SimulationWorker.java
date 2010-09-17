@@ -119,6 +119,10 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object>
 	 * The integrator for the simulation
 	 */
 	private DESSolver solver;
+	/**
+	 * Pointer to the {@link SimulationPanel}
+	 */
+	private SimulationPanel simPanel;
 
 	/**
 	 * 
@@ -133,7 +137,7 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object>
 	 * @param simPanel
 	 */
 	public SimulationWorker(SimulationPanel simPanel) {
-		// TODO Auto-generated constructor stub
+		this.simPanel = simPanel;
 	}
 
 	/**
