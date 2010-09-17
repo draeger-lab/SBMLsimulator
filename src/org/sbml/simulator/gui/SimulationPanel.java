@@ -27,7 +27,6 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseListener;
 import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
 
 import javax.swing.BorderFactory;
@@ -69,7 +68,6 @@ import org.sbml.squeezer.util.HTMLFormula;
 
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;
-import eva2.server.stat.InterfaceStatisticsListener;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -78,7 +76,7 @@ import eva2.server.stat.InterfaceStatisticsListener;
  * 
  */
 public class SimulationPanel extends JPanel implements ChangeListener,
-		ItemListener, TableModelListener, InterfaceStatisticsListener {
+		ItemListener, TableModelListener {
 
 	/**
 	 * Generated serial version identifier
@@ -159,6 +157,10 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	private JTable expTable, legend, simTable;
 
 	/**
+	 * 
+	 */
+	private JToolBar footPanel;
+	/**
 	 * Switches inclusion of reactions in the plot on or off and switch to
 	 * decide whether or not to draw the foot panel.
 	 */
@@ -175,27 +177,23 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 */
 	private double maxSpinVal = 1E10, paramStepSize;
 	/**
-	 * Model to be simulated
-	 */
-	private Model model;
-	/**
 	 * Plot area
 	 */
 	private Plot plot;
+
 	/**
 	 * 
 	 */
 	private SpinnerNumberModel[] spinModSymbol;
 
 	/**
-	 * The main tabbed pane showing plot, simulatin and experimental data.
+	 * The main tabbed pane showing plot, simulation and experimental data.
 	 */
 	private JTabbedPane tabbedPane;
-
 	/**
 	 * 
 	 */
-	private JToolBar footPanel;
+	private SimulationWorker worker;
 
 	/**
 	 * 
@@ -219,7 +217,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 					"No ODE solver available", JOptionPane.WARNING_MESSAGE);
 		} else {
 			try {
-				this.model = model;
+				worker = new SimulationWorker(model);
 				setProperties(properties);
 			} catch (Exception exc) {
 				GUITools.showErrorMessage(this, exc);
@@ -248,27 +246,14 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 * @throws SecurityException
 	 * @throws IllegalArgumentException
 	 */
-	private SimulationPanelFoot createFootPanel()
+	private SimulationToolPanel createFootPanel()
 			throws IllegalArgumentException, SecurityException,
 			InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException {
 		footPanel = new JToolBar();
-		SimulationPanelFoot foot = new SimulationPanelFoot();
+		SimulationToolPanel foot = new SimulationToolPanel(worker);
 		footPanel.add(foot);
 		return foot;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * eva2.server.stat.InterfaceStatisticsListener#finalMultiRunResults(java
-	 * .lang.String[], java.util.List)
-	 */
-	public void finalMultiRunResults(String[] header,
-			List<Object[]> multiRunFinalObjectData) {
-		// TODO Auto-generated method stub
-		System.out.println("finalMultiRunResults");
 	}
 
 	/**
@@ -276,7 +261,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 * @return
 	 */
 	public Distance getDistance() {
-		return ((SimulationPanelFoot) footPanel.getComponent(0)).getDistance();
+		return ((SimulationToolPanel) footPanel.getComponent(0)).getDistance();
 	}
 
 	/**
@@ -292,7 +277,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 * @return
 	 */
 	public Model getModel() {
-		return model;
+		return worker.getModel();
 	}
 
 	/**
@@ -305,14 +290,14 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 * @throws InvocationTargetException
 	 * @throws NoSuchMethodException
 	 */
-	private SimulationPanelFoot getOrCreateFootPanel()
+	private SimulationToolPanel getOrCreateFootPanel()
 			throws IllegalArgumentException, SecurityException,
 			InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException {
 		if (footPanel == null) {
 			return createFootPanel();
 		}
-		return (SimulationPanelFoot) footPanel.getComponent(0);
+		return (SimulationToolPanel) footPanel.getComponent(0);
 	}
 
 	/**
@@ -327,7 +312,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 * 
 	 */
 	public Properties getProperties() {
-		Properties p = ((SimulationPanelFoot) footPanel.getComponent(0))
+		Properties p = ((SimulationToolPanel) footPanel.getComponent(0))
 				.getProperties();
 		/*
 		 * Simulation
@@ -367,7 +352,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 * @return
 	 */
 	public DESSolver getSolver() {
-		return ((SimulationPanelFoot) footPanel.getComponent(0)).getSolver();
+		return ((SimulationToolPanel) footPanel.getComponent(0)).getSolver();
 	}
 
 	/***
@@ -379,7 +364,8 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		setLayout(new BorderLayout());
 		try {
 			if (plot == null) {
-				UnitDefinition timeUnits = this.model.getTimeUnitsInstance();
+				UnitDefinition timeUnits = worker.getModel()
+						.getTimeUnitsInstance();
 				String xLab = "Time";
 				if (timeUnits != null) {
 					xLab += " in " + UnitDefinition.printUnits(timeUnits, true);
@@ -391,14 +377,16 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 					plot.removeMouseListener(listeners[i]);
 				}
 			}
-			SimulationPanelFoot foot = getOrCreateFootPanel();
+			SimulationToolPanel foot = getOrCreateFootPanel();
 			foot.addItemListener(this);
 			if (showSettingsPanel) {
 				add(footPanel, BorderLayout.SOUTH);
 			}
 			plot.setGridVisible(foot.getShowGrid());
 			plot.setShowLegend(foot.getShowLegend());
-			
+			plot.setShowGraphToolTips(foot.getShowGraphToolTips());
+			setPlotToLogScale(foot.getJCheckBoxLegend());
+
 			if (tabbedPane == null) {
 				JPanel simPanel = new JPanel(new BorderLayout());
 				simTable = new JTable();
@@ -415,16 +403,17 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 						BorderLayout.CENTER);
 
 				JPanel legendPanel = new JPanel(new BorderLayout());
-				legend = legendTable(model);
+				legend = legendTable(worker.getModel());
 				legendPanel.add(new JScrollPane(legend,
 						JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
 						BorderLayout.CENTER);
 
 				JSplitPane topDown = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-						true, legendPanel, interactiveScanPanel(model,
-								maxCompartmentValue, maxSpeciesValue,
-								maxParameterValue, paramStepSize));
+						true, legendPanel, interactiveScanPanel(worker
+								.getModel(), maxCompartmentValue,
+								maxSpeciesValue, maxParameterValue,
+								paramStepSize));
 				topDown.setDividerLocation(topDown.getDividerLocation() + 200);
 				JSplitPane leftRight = new JSplitPane(
 						JSplitPane.HORIZONTAL_SPLIT, true, topDown, plot);
@@ -516,12 +505,15 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		LinkedList<String> nans = new LinkedList<String>();
 		double val = 0;
 		String name = "";
+		Model model = worker.getModel();
 		for (int i = 0; i < list.size(); i++) {
 			QuantityWithDefinedUnit p = list.get(i);
-			if (p instanceof Species)
+			if (p instanceof Species) {
 				offset = model.getNumCompartments();
-			if (p instanceof Parameter)
+			}
+			if (p instanceof Parameter) {
 				offset = model.getNumCompartments() + model.getNumSpecies();
+			}
 			val = p.getValue();
 			if (Double.isNaN(p.getValue())) {
 				name = p.getClass().getSimpleName().toLowerCase();
@@ -606,19 +598,29 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 			if (chck.getName().equals("grid")) {
 				plot.setGridVisible(chck.isSelected());
 			} else if (chck.getName().equals("log")) {
-				if (chck.isSelected() && !plot.checkLoggable()) {
-					chck.setSelected(false);
-					chck.setEnabled(false);
-					String msg = "Cannot change to logarithmic scale because at least one value on the y-axis is not greater than zero.";
-					JOptionPane.showMessageDialog(this, GUITools
-							.toHTML(msg, 40), "Warning",
-							JOptionPane.WARNING_MESSAGE);
-				}
-				plot.toggleLog(chck.isSelected());
+				setPlotToLogScale(chck);
 			} else if (chck.getName().equals("legend")) {
 				plot.setShowLegend(chck.isSelected());
+			} else if (chck.getName().equals("tooltips")) {
+				plot.setShowGraphToolTips(chck.isSelected());
 			}
 		}
+	}
+
+	/**
+	 * 
+	 * @param chck
+	 */
+	private void setPlotToLogScale(JCheckBox chck) {
+		if (chck.isSelected() && !plot.checkLoggable()) {
+			chck.setSelected(false);
+			chck.setEnabled(false);
+			String msg = "Cannot change to logarithmic scale because at least one value on the y-axis is not greater than zero.";
+			JOptionPane.showMessageDialog(this, GUITools
+					.toHTML(msg, 40), "Warning",
+					JOptionPane.WARNING_MESSAGE);
+		}
+		plot.toggleLog(chck.isSelected());
 	}
 
 	/**
@@ -636,46 +638,6 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		tab.setDefaultRenderer(NamedSBase.class, renderer);
 		tab.getModel().addTableModelListener(this);
 		return tab;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * eva2.server.stat.InterfaceStatisticsListener#notifyGenerationPerformed
-	 * (java.lang.String[], java.lang.Object[], java.lang.Double[])
-	 */
-	public void notifyGenerationPerformed(String[] header,
-			Object[] statObjects, Double[] statDoubles) {
-		// TODO Auto-generated method stub
-		for (int i = 0; i < statObjects.length; i++) {
-			System.out.printf("%s\t%s\n", i, statObjects[i].getClass()
-					.getName());
-		}
-		System.out.println("notifyGenerationPerformed");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStarted(int,
-	 * int, java.lang.String[], java.lang.String[])
-	 */
-	public void notifyRunStarted(int runNumber, int plannedMultiRuns,
-			String[] header, String[] metaInfo) {
-		// TODO Auto-generated method stub
-		System.out.println("notifyRunStarted");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStopped(int,
-	 * boolean)
-	 */
-	public void notifyRunStopped(int runsPerformed, boolean completedLastRun) {
-		// TODO Auto-generated method stub
-		System.out.println("notifyRunStopped");
 	}
 
 	/**
@@ -700,7 +662,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		}
 		plot
 				.plot(data, connected, showLegend,
-						((SimulationPanelFoot) footPanel.getComponent(0))
+						((SimulationToolPanel) footPanel.getComponent(0))
 								.getShowGrid(), plotColumns, plotColors, infos);
 	}
 
@@ -717,11 +679,12 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		for (int i = 0; i < tabMod.getRowCount(); i++) {
 			tabMod.setSelected(i, data.getColumn(tabMod.getId(i)) != null);
 		}
-		plot(data, false, ((SimulationPanelFoot) footPanel.getComponent(0))
+		plot(data, false, ((SimulationToolPanel) footPanel.getComponent(0))
 				.getShowLegend());
 		tabbedPane.setEnabledAt(2, true);
-		((SimulationPanelFoot) footPanel.getComponent(0)).computeDistance(
-				model, data.getBlock(0));
+		SimulationToolPanel tools = getOrCreateFootPanel();
+		worker.setData(data);
+		tools.computeDistance();
 	}
 
 	/**
@@ -792,6 +755,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 			} else {
 				add(footPanel, BorderLayout.SOUTH);
 			}
+			footPanel.setVisible(showSettingsPanel);
 			validate();
 		}
 	}
@@ -822,9 +786,8 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 * @throws Exception
 	 */
 	public void simulate() throws Exception {
-		SimulationPanelFoot foot = (SimulationPanelFoot) footPanel
-				.getComponent(0);
-		simulate(model, foot.getSimulationStartTime(), foot
+		SimulationToolPanel foot = getOrCreateFootPanel();
+		simulate(worker.getModel(), foot.getSimulationStartTime(), foot
 				.getSimulationEndTime(), foot.getStepSize());
 		tabbedPane.setEnabledAt(1, true);
 	}
@@ -839,10 +802,11 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 */
 	private void simulate(Model model, double t1val, double t2val,
 			double stepSize) throws Exception {
-		SimulationPanelFoot foot = (SimulationPanelFoot) footPanel
+		SimulationToolPanel foot = (SimulationToolPanel) footPanel
 				.getComponent(0);
-		MultiBlockTable data = foot.solveByStepSize(model, t1val, t2val,
-				stepSize);
+		MultiBlockTable data = SimulationWorker.solveByStepSize(foot
+				.getSolver(), model, t1val, t2val, stepSize, includeReactions,
+				this);
 		simTable.setModel(data);
 		plot.clearAll();
 		plot(data, true, foot.getShowLegend());
@@ -866,7 +830,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() instanceof JSpinner) {
 			JSpinner spin = (JSpinner) e.getSource();
-			Variable s = model.findVariable(spin.getName());
+			Variable s = worker.getModel().findVariable(spin.getName());
 			if (s != null && s instanceof Symbol) {
 				((Symbol) s).setValue(((SpinnerNumberModel) spin.getModel())
 						.getNumber().doubleValue());
@@ -884,7 +848,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		if (e.getSource() instanceof LegendTableModel) {
 			if ((e.getColumn() == LegendTableModel.getBooleanColumn())
 					&& (e.getType() == TableModelEvent.UPDATE)) {
-				SimulationPanelFoot foot = (SimulationPanelFoot) footPanel
+				SimulationToolPanel foot = (SimulationToolPanel) footPanel
 						.getComponent(0);
 				plot.clearAll();
 				if (simTable.getRowCount() > 0) {
