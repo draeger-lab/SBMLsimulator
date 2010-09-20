@@ -40,6 +40,70 @@ public class Plot extends FunctionArea {
 
 	/**
 	 * 
+	 * @author Andreas Dr&auml;ger
+	 * @date 2010-09-20
+	 */
+	public enum Command {
+		/**
+		 * 
+		 */
+		LOG_SCALE,
+		/**
+		 * 
+		 */
+		SHOW_GRID,
+		/**
+		 * 
+		 */
+		SHOW_LEGEND,
+		/**
+		 * 
+		 */
+		SHOW_TOOL_TIPS;
+
+		/**
+		 * Returns a human-readable text for each {@link Command}.
+		 * 
+		 * @return
+		 */
+		public String getText() {
+			switch (this) {
+			case LOG_SCALE:
+				return "Log scale";
+			case SHOW_GRID:
+				return "Grid";
+			case SHOW_LEGEND:
+				return "Legend";
+			case SHOW_TOOL_TIPS:
+				return "Tool tips";
+			default:
+				return null;
+			}
+		}
+
+		/**
+		 * Returns tool tip information for each command.
+		 * 
+		 * @return
+		 */
+		public String getToolTip() {
+			switch (this) {
+			case LOG_SCALE:
+				return "Select this checkbox if the y-axis should be drawn in a logarithmic scale. This is, however, only possible if all values are greater than zero.";
+			case SHOW_GRID:
+				return "Decide whether or not to draw a grid in the plot area.";
+			case SHOW_LEGEND:
+				return "Add or remove a legend in the plot.";
+			case SHOW_TOOL_TIPS:
+				return "Let the plot display tool tips for each curve.";
+			default:
+				return null;
+			}
+		}
+	}
+
+	/**
+	 * 
 	 */
 	public Plot() {
 		super();
@@ -68,26 +132,24 @@ public class Plot extends FunctionArea {
 	 *            If true, a legend will be displayed in the plot.
 	 * @param showGrid
 	 *            If true, a grid will be added to the plot.
-	 * @param plotColumns
-	 *            An array of the same length as columns in the data object
-	 *            (excluding the x-axis). Each value in this array decides
-	 *            whether or not to plot the associated column.
 	 * @param plotColors
 	 *            Colors to be used to plot the columns. This array must also be
-	 *            of the same length as all columns in the plotData.
+	 *            of the same length as all columns in the plotData. Null values
+	 *            mean that this column is not to be plotted.
 	 * @param infos
 	 *            Information to be associated with each column in the plot.
 	 *            This array must have the same length as the number of columns
 	 *            in the plotData field.
 	 */
 	public void plot(MultiBlockTable plotData, boolean connected,
-			boolean showLegend, boolean showGrid, boolean[] plotColumns,
-			Color[] plotColors, String[] infos) {
+			boolean showLegend, boolean showGrid, Color[] plotColors,
+			String[] infos) {
 		int i, j, graphLabel;
 		for (i = 1; i < plotData.getColumnCount(); i++) {
 			Column column = plotData.getColumn(i);
-			if (plotColumns[i - 1]) {
-				graphLabel = connected ? i : i + plotData.getColumnCount();
+			if (plotColors[i - 1] != null) {
+				graphLabel = connected ? i : Integer.MAX_VALUE
+						- plotData.getColumnCount() + i;
 				// plot.clearGraph(graphLabel);
 				setGraphColor(graphLabel, plotColors[i - 1]);
 				setInfoString(graphLabel, infos[i - 1], 1);
@@ -104,6 +166,9 @@ public class Plot extends FunctionArea {
 		}
 		setGridVisible(showGrid);
 		setShowLegend(showLegend);
+		if (showLegend) {
+			updateLegend();
+		}
 	}
 
 	/**
@@ -146,6 +211,18 @@ public class Plot extends FunctionArea {
 			}
 		}
 		return saveDir;
+	}
+
+	/**
+	 * 
+	 * @param data
+	 * @param connected
+	 * @param plotColors
+	 * @param infos
+	 */
+	public void plot(MultiBlockTable data, boolean connected,
+			Color[] plotColors, String[] infos) {
+		plot(data, connected, isShowLegend(), isShowGrid(), plotColors, infos);
 	}
 
 }
