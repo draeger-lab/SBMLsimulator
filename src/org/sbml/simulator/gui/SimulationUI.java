@@ -26,7 +26,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.IOException;
 import java.util.Properties;
 import java.util.prefs.BackingStoreException;
 
@@ -43,7 +42,6 @@ import javax.swing.JSeparator;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
-import javax.swing.table.TableModel;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLDocument;
@@ -56,7 +54,6 @@ import org.sbml.simulator.resources.Resource;
 import org.sbml.squeezer.CfgKeys;
 
 import de.zbit.gui.cfg.SettingsDialog;
-import de.zbit.io.CSVWriter;
 import de.zbit.io.SBFileFilter;
 
 /**
@@ -232,10 +229,10 @@ public class SimulationUI extends JFrame implements ActionListener,
 			closeData();
 			break;
 		case SAVE_PLOT_IMAGE:
-			savePlotImage();
+			simPanel.savePlotImage();
 			break;
 		case SAVE_SIMULATION:
-			saveSimulationResults();
+			simPanel.saveSimulationResults();
 			break;
 		case SETTINGS:
 			adjustPreferences();
@@ -597,52 +594,6 @@ public class SimulationUI extends JFrame implements ActionListener,
 	}
 
 	/**
-	 * 
-	 */
-	private void savePlotImage() {
-		try {
-			CfgKeys.PLOT_SAVE_DIR.putProperty(simPanel.getPlot().savePlotImage(
-					CfgKeys.PLOT_SAVE_DIR.getProperty().toString(),
-					((Number) CfgKeys.JPEG_COMPRESSION_FACTOR.getProperty())
-							.floatValue()));
-		} catch (Exception exc) {
-			GUITools.showErrorMessage(this, exc);
-		}
-	}
-
-	/**
-	 * 
-	 */
-	private void saveSimulationResults() {
-		try {
-			TableModel simTabModel = simPanel.getSimulationResultsTable()
-					.getModel();
-			if (simTabModel.getRowCount() > 0) {
-				JFileChooser fc = GUITools.createJFileChooser(
-						CfgKeys.CSV_FILES_SAVE_DIR.getProperty().toString(),
-						false, false, JFileChooser.FILES_ONLY,
-						SBFileFilter.CSV_FILE_FILTER);
-				if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-					File out = fc.getSelectedFile();
-					CfgKeys.CSV_FILES_SAVE_DIR.putProperty(out.getParent());
-					if (!out.exists()
-							|| GUITools.overwriteExistingFile(this, out)) {
-						CSVWriter writer = new CSVWriter();
-						writer.write(simTabModel,
-								CfgKeys.CSV_FILES_SEPARATOR_CHAR.getProperty()
-										.toString().charAt(0), out);
-					}
-				}
-			} else {
-				String msg = "No simulation has been performed yet. Please run the simulation first.";
-				JOptionPane.showMessageDialog(this, GUITools.toHTML(msg, 40));
-			}
-		} catch (IOException exc) {
-			GUITools.showErrorMessage(this, exc);
-		}
-	}
-
-	/**
 	 * Resizes this {@link JFrame} to an apropriate size.
 	 */
 	private void setOptimalSize() {
@@ -669,16 +620,6 @@ public class SimulationUI extends JFrame implements ActionListener,
 				GUITools.showErrorMessage(this, exc);
 			}
 		}
-	}
-
-	/**
-	 * Selects only those variables in the {@link Plot}, whose identifiers equal
-	 * the given ones.
-	 * 
-	 * @param identifiers
-	 */
-	public void setSelectedVariables(String... identifiers) {
-		simPanel.setSelectedVariables(identifiers);
 	}
 
 	/**

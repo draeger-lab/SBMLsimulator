@@ -48,6 +48,19 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 */
 	private static final long serialVersionUID = -6540887561618807199L;
 	/**
+	 * Swaps a and b if a is greater then b.
+	 * 
+	 * @param a
+	 * @param b
+	 */
+	public static void swap(double a, double b) {
+		if (a > b) {
+			double swap = b;
+			b = a;
+			a = swap;
+		}
+	}
+	/**
 	 * Contains all available distance functions.
 	 */
 	private JComboBox distFun;
@@ -104,6 +117,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 * 
 	 */
 	private Set<ItemListener> setOfItemListeners;
+
 	/**
 	 * 
 	 */
@@ -135,15 +149,17 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 		double integrationStepSize = spinnerStepSize;
 		solvers = createSolversCombo(CfgKeys.SIM_ODE_SOLVER.getProperty()
 				.toString());
-		showGrid = GUITools.createJCheckBox("Grid", false, "grid", this,
-				"Decide whether or not to draw a grid in the plot area.");
-		String toolTip = "Select this checkbox if the y-axis should be drawn in a logarithmic scale. This is, however, only possible if all values are greater than zero.";
-		logScale = GUITools.createJCheckBox("Log scale", false, "log", this,
-				toolTip);
-		showLegend = GUITools.createJCheckBox("Legend", true, "legend", this,
-				"Add or remove a legend in the plot.");
-		showToolTips = GUITools.createJCheckBox("Tool tips", true, "tooltips",
-				this, "Let the plot display tool tips for each curve.");
+		showGrid = GUITools.createJCheckBox(Plot.Command.SHOW_GRID.getText(),
+				false, Plot.Command.SHOW_GRID, Plot.Command.SHOW_GRID
+						.getToolTip(), this);
+		logScale = GUITools.createJCheckBox(Plot.Command.LOG_SCALE.getText(),
+				false, Plot.Command.LOG_SCALE, Plot.Command.LOG_SCALE.getToolTip(), this);
+		showLegend = GUITools.createJCheckBox(Plot.Command.SHOW_LEGEND
+				.getText(), true, Plot.Command.SHOW_LEGEND,
+				Plot.Command.SHOW_LEGEND.getToolTip(), this);
+		showToolTips = GUITools.createJCheckBox(Plot.Command.SHOW_TOOL_TIPS
+				.getText(), true, Plot.Command.SHOW_TOOL_TIPS,
+				Plot.Command.SHOW_TOOL_TIPS.getToolTip(), this);
 
 		// Settings
 		JSpinner startTime = new JSpinner(t1);
@@ -214,17 +230,6 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 
 		// Main
 		add(aSet.getContainer(), BorderLayout.CENTER);
-	}
-
-	/**
-	 * 
-	 * @param t1
-	 * @param t2
-	 * @param stepSize
-	 * @return
-	 */
-	private int numSteps(double t1, double t2, double stepSize) {
-		return (int) Math.round((t2 - t1) / stepSize);
 	}
 
 	/**
@@ -301,6 +306,14 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 * 
 	 * @return
 	 */
+	public JCheckBox getJCheckBoxLegend() {
+		return logScale;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
 	public double getNumIntegrationSteps() {
 		return stepsModel.getNumber().doubleValue();
 	}
@@ -335,6 +348,14 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 				.valueOf(showLegend.isSelected()));
 
 		return p;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean getShowGraphToolTips() {
+		return showToolTips.isSelected();
 	}
 
 	/**
@@ -432,6 +453,17 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 
 	/**
 	 * 
+	 * @param t1
+	 * @param t2
+	 * @param stepSize
+	 * @return
+	 */
+	private int numSteps(double t1, double t2, double stepSize) {
+		return (int) Math.round((t2 - t1) / stepSize);
+	}
+
+	/**
+	 * 
 	 * @param data
 	 */
 	public void setData(MultiBlockTable data) {
@@ -496,6 +528,15 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 		}
 		solvers = createSolversCombo(properties.get(CfgKeys.SIM_ODE_SOLVER)
 				.toString());
+
+		double startTime = ((Number) properties.get(CfgKeys.SIM_START_TIME))
+				.doubleValue();
+		double endTime = ((Number) properties.get(CfgKeys.SIM_END_TIME))
+				.doubleValue();
+		startTime = Math.max(0, startTime);
+		if (startTime > endTime) {
+			swap(startTime, endTime);
+		}
 	}
 
 	/**
@@ -523,22 +564,6 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 				// do nothing.
 			}
 		}
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public boolean getShowGraphToolTips() {
-		return showToolTips.isSelected();
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public JCheckBox getJCheckBoxLegend() {
-		return logScale;
 	}
 
 }
