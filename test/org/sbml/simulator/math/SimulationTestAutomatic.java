@@ -126,7 +126,7 @@ public class SimulationTestAutomatic {
 				for (int i = 1; i < data.length + 1; i++) {
 					for (int j = 0; j < input.length; j++) {
 						data[i - 1][j] = Double.valueOf(input[j][i]);
-						solutiontrans[i - 1][j] = solution.getValueAt(j, i - 1
+						solutiontrans[i - 1][j] = solution.getValueAt(j, i
 								+ from);
 					}
 				}

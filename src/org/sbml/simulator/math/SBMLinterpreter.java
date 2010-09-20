@@ -432,8 +432,6 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 							/ getCompartmentValueOf(nsb.getId()), this);
 				}
 
-				// return new ASTNodeValue(Y[speciesVal.getIndex()] /
-				// Maths.root(getCompartmentValueOf(speciesVal), 2), this);
 				if (s.isSetInitialConcentration()
 						&& s.getHasOnlySubstanceUnits()) {
 					return new ASTNodeValue(Y[symbolIndex]
@@ -441,8 +439,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 				}
 			}
 			return new ASTNodeValue(Y[symbolIndex], this);
-			// return Y[speciesVal.getIndex()] /
-			// Maths.root(Y[compVal.getIndex()],2);
+
 		}
 
 		else if (nsb instanceof Compartment || nsb instanceof Parameter
@@ -827,8 +824,8 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 			/*
 			 * We have to compute the system for the given state. But we are not
 			 * interested in the rates of change, but only in the reaction
-			 * velocities. Therefore, we throw away the results into a
-			 * senseless array.
+			 * velocities. Therefore, we throw away the results into a senseless
+			 * array.
 			 */
 			getValue(t, Y);
 		}
@@ -1521,15 +1518,51 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	 * @throws SBMLException
 	 */
 	private void processInitialAssignments() throws SBMLException {
+		Species majority = determineMajorSpeciesAttributes();
 		for (int i = 0; i < model.getNumInitialAssignments(); i++) {
 			InitialAssignment iA = model.getInitialAssignment(i);
 			Integer index = null;
 			if (iA.isSetMath() && iA.isSetVariable()) {
 				if (model.getSpecies(iA.getVariable()) != null) {
 					Species s = model.getSpecies(iA.getVariable());
-					index = symbolHash.get(s.getId());
-					// TODO: consider compartment of the species
-					this.Y[index] = iA.getMath().compile(this).toDouble();
+					double compartmentValue;
+					String id = s.getId();
+					index = symbolHash.get(id);
+
+					if (!s.isSetInitialAmount()
+							&& !s.isSetInitialConcentration()) {
+						if (majority.isSetInitialAmount()) {
+							s.setInitialAmount(0.0);
+						} else {
+							s.setInitialConcentration(0.0);
+						}
+
+						s.setHasOnlySubstanceUnits(majority
+								.getHasOnlySubstanceUnits());
+					}
+
+					if (compartmentHash.containsKey(id)) {
+						if (s.isSetInitialAmount()
+								&& !s.getHasOnlySubstanceUnits()) {
+							compartmentValue = getCompartmentValueOf(id);
+							this.Y[index] = iA.getMath().compile(this)
+									.toDouble()
+									* compartmentValue;
+						} else if (s.isSetInitialConcentration()
+								&& s.getHasOnlySubstanceUnits()) {
+							compartmentValue = getCompartmentValueOf(id);
+							this.Y[index] = iA.getMath().compile(this)
+									.toDouble()
+									/ compartmentValue;
+						} else {
+							this.Y[index] = iA.getMath().compile(this)
+									.toDouble();
+						}
+
+					} else {
+						this.Y[index] = iA.getMath().compile(this).toDouble();
+					}
+
 				} else if (model.getCompartment(iA.getVariable()) != null) {
 					Compartment c = model.getCompartment(iA.getVariable());
 					index = symbolHash.get(c.getId());
@@ -1542,9 +1575,44 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 					System.err
 							.println("The model contains an initial assignment for a component other than species, compartment or parameter.");
 				}
-
 			}
 		}
+	}
+
+	/**
+	 * Due to missing information about the attributes of species set by initial
+	 * Assignments, a majorty vote of all other species is performed to
+	 * determine the attributes.
+	 * 
+	 * @return
+	 */
+	private Species determineMajorSpeciesAttributes() {
+		Species majority = new Species();
+		int concentration = 0, amount = 0, substanceUnits = 0;
+
+		for (Species species : model.getListOfSpecies()) {
+			if (species.isSetInitialAmount()) {
+				amount++;
+			} else if (species.isSetInitialConcentration()) {
+				concentration++;
+			}
+			if (species.hasOnlySubstanceUnits()) {
+				substanceUnits++;
+			}
+		}
+		if (amount >= concentration) {
+			majority.setInitialAmount(0.0);
+		} else {
+			majority.setInitialConcentration(0.0);
+		}
+
+		if (substanceUnits > (model.getNumSpecies() - substanceUnits)) {
+			majority.setHasOnlySubstanceUnits(true);
+		} else
+			majority.setHasOnlySubstanceUnits(false);
+
+		return majority;
+
 	}
 
 	/**
@@ -1556,7 +1624,9 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		// evaluation of assignment rules through the DESystem itself
 		// only at time point 0d, at time points >=0d the solver carries on
 		// with this task. Assignment rules are only processed during
-		// initialization in this class
+		// initialization in this class. During this process the passed array
+		// changerate is not the actual changerate but the Y vector since there
+		// is no change at timepoint zero
 
 		for (int i = 0; i < model.getNumRules(); i++) {
 			Rule rule = model.getRule(i);
