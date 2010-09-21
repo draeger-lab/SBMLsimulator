@@ -643,21 +643,22 @@ public class SimulationUI extends JFrame implements ActionListener,
 	 * 
 	 */
 	public void startOptimization() {
-		Model model = simPanel.getModel();
+		Model model = simPanel.getModel().clone();
 		QuantitySelectionPanel panel = new QuantitySelectionPanel(model);
 		if (JOptionPane.showConfirmDialog(this, panel,
 				"Select quantities for optimization",
 				JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
+			simPanel.setAllEnabled(false);
 			try {
 				EvA2GUIStarter.init(new EstimationProblem(simPanel.getSolver(),
 						simPanel.getDistance(), model, simPanel
 								.getExperimentalData(), panel
-								.getSelectedQuantityRanges()), this,
-						new SimulationWorker(simPanel));
+								.getSelectedQuantityRanges()), this, simPanel);
 			} catch (Exception exc) {
 				exc.printStackTrace();
 				GUITools.showErrorMessage(this, exc);
 			}
+			simPanel.setAllEnabled(true);
 		}
 	}
 }

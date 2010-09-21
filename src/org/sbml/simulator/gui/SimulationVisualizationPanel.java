@@ -69,6 +69,38 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 
 	/**
 	 * 
+	 */
+	public SimulationVisualizationPanel() {
+		super(HORIZONTAL_SPLIT, true);
+		includeReactions = true;
+	}
+
+	/**
+	 * 
+	 * @param model
+	 */
+	public SimulationVisualizationPanel(Model model) {
+		this();
+		setModel(model);
+	}
+
+	/**
+	 * @return the experimentData
+	 */
+	public MultiBlockTable getExperimentData() {
+		return experimentData;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean getIncludeReactions() {
+		return includeReactions;
+	}
+
+	/**
+	 * 
 	 * @return
 	 */
 	public Plot getPlot() {
@@ -101,54 +133,10 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	}
 
 	/**
-	 * 
-	 * @param model
+	 * @return the simData
 	 */
-	public SimulationVisualizationPanel(Model model) {
-		this();
-		setModel(model);
-	}
-
-	/**
-	 * 
-	 */
-	public SimulationVisualizationPanel() {
-		super(HORIZONTAL_SPLIT, true);
-		includeReactions = true;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seejavax.swing.event.TableModelListener#tableChanged(javax.swing.event.
-	 * TableModelEvent)
-	 */
-	public void tableChanged(TableModelEvent e) {
-		if (e.getSource() instanceof LegendTableModel) {
-			if ((e.getColumn() == LegendTableModel.getBooleanColumn())
-					&& (e.getType() == TableModelEvent.UPDATE)) {
-				plot();
-			}
-		}
-	}
-
-	/**
-	 * 
-	 */
-	public void plot() {
-		if ((simData != null) && (simData.getRowCount() > 0)) {
-			plot(simData, true, true);
-		}
-		if ((experimentData != null) && (experimentData.getRowCount() > 0)) {
-			plot(experimentData, false, simData == null);
-		}
-	}
-
-	/**
-	 * 
-	 */
-	public void unsetSimulationData() {
-		setSimulationData(null);
+	public MultiBlockTable getSimulationData() {
+		return simData;
 	}
 
 	/*
@@ -184,6 +172,18 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	}
 
 	/**
+	 * 
+	 */
+	public void plot() {
+		if ((simData != null) && (simData.getRowCount() > 0)) {
+			plot(simData, true, true);
+		}
+		if ((experimentData != null) && (experimentData.getRowCount() > 0)) {
+			plot(experimentData, false, simData == null);
+		}
+	}
+
+	/**
 	 * Plots the given data set with respect to the selected columns in the
 	 * legend.
 	 * 
@@ -213,10 +213,76 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 
 	/**
 	 * 
+	 * @param data
+	 *            the experimentData to set
+	 */
+	public void setExperimentData(MultiBlockTable data) {
+		// deselect non available elements in the legend and select those that
+		// are present in the data
+		this.experimentData = data;
+		if (experimentData != null) {
+			LegendTableModel legend = legendPanel.getLegendTableModel();
+			for (int i = 0; i < legend.getRowCount(); i++) {
+				legend.setSelected(i,
+						experimentData.getColumn(legend.getId(i)) != null);
+			}
+		}
+	}
+
+	/**
+	 * 
 	 * @param includeReactions
 	 */
 	public void setIncludeReactions(boolean includeReactions) {
 		this.includeReactions = includeReactions;
+	}
+
+	/**
+	 * 
+	 * @param enabled
+	 */
+	public void setInteractiveScanEnabled(boolean enabled) {
+		interactiveScanPanel.setAllEnabled(enabled);
+	}
+
+	/**
+	 * 
+	 * @param model
+	 */
+	public void setModel(Model model) {
+		if (leftComponent != null) {
+			remove(leftComponent);
+		}
+		if (rightComponent != null) {
+			remove(rightComponent);
+		}
+		UnitDefinition timeUnits = model.getTimeUnitsInstance();
+		String xLab = "Time";
+		if (timeUnits != null) {
+			xLab += " in " + UnitDefinition.printUnits(timeUnits, true);
+		}
+		plot = new Plot(xLab, "Value");
+		// get rid of this pop-up menu.
+		// TODO: maybe we can make use of this later.
+		MouseListener listeners[] = plot.getMouseListeners();
+		for (int i = listeners.length - 1; i >= 0; i--) {
+			plot.removeMouseListener(listeners[i]);
+		}
+
+		interactiveScanPanel = new InteractiveScanPanel(model,
+				maxCompartmentValue, maxSpeciesValue, maxParameterValue,
+				paramStepSize);
+		interactiveScanPanel
+				.setBorder(BorderFactory.createLoweredBevelBorder());
+		legendPanel = new LegendPanel(model, includeReactions);
+		legendPanel.addTableModelListener(this);
+		legendPanel.setBorder(BorderFactory.createLoweredBevelBorder());
+		JSplitPane topDown = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true,
+				legendPanel, interactiveScanPanel);
+		topDown.setDividerLocation(topDown.getDividerLocation() + 200);
+		setLeftComponent(topDown);
+		setRightComponent(plot);
+		setDividerLocation(topDown.getDividerLocation() + 200);
 	}
 
 	/**
@@ -232,24 +298,6 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 					"Warning", JOptionPane.WARNING_MESSAGE);
 		}
 		plot.toggleLog(button.isSelected());
-	}
-
-	/**
-	 * 
-	 * @param data
-	 *            the experimentData to set
-	 */
-	public void setExperimentData(MultiBlockTable data) {
-		// deselect non available elements in the legend and select those that
-		// are present in the data
-		this.experimentData = data;
-		if (experimentData != null) {
-			LegendTableModel legend = legendPanel.getLegendTableModel();
-			for (int i = 0; i < legend.getRowCount(); i++) {
-				legend.setSelected(i,
-						experimentData.getColumn(legend.getId(i)) != null);
-			}
-		}
 	}
 
 	/**
@@ -287,76 +335,43 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	}
 
 	/**
-	 * 
-	 * @return
-	 */
-	public boolean getIncludeReactions() {
-		return includeReactions;
-	}
-
-	/**
-	 * @return the experimentData
-	 */
-	public MultiBlockTable getExperimentData() {
-		return experimentData;
-	}
-
-	/**
 	 * @param simData
 	 *            the simData to set
 	 */
 	public void setSimulationData(MultiBlockTable simData) {
 		this.simData = simData;
+		this.simData.addTableModelListener(this);
 		plot();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @seejavax.swing.event.TableModelListener#tableChanged(javax.swing.event.
+	 * TableModelEvent)
+	 */
+	public void tableChanged(TableModelEvent e) {
+		if (e.getSource() instanceof LegendTableModel) {
+			if ((e.getColumn() == LegendTableModel.getBooleanColumn())
+					&& (e.getType() == TableModelEvent.UPDATE)) {
+				plot();
+			}
+		} else if (e.getSource() instanceof MultiBlockTable) {
+			setSimulationData((MultiBlockTable) e.getSource());
+		}
+	}
+
+	/**
+	 * 
+	 */
 	public void unsetExperimentData() {
 		setExperimentData(null);
 	}
 
 	/**
-	 * @return the simData
-	 */
-	public MultiBlockTable getSimulationData() {
-		return simData;
-	}
-
-	/**
 	 * 
-	 * @param model
 	 */
-	public void setModel(Model model) {
-		if (leftComponent != null) {
-			remove(leftComponent);
-		}
-		if (rightComponent != null) {
-			remove(rightComponent);
-		}
-		UnitDefinition timeUnits = model.getTimeUnitsInstance();
-		String xLab = "Time";
-		if (timeUnits != null) {
-			xLab += " in " + UnitDefinition.printUnits(timeUnits, true);
-		}
-		plot = new Plot(xLab, "Value");
-		// get rid of this pop-up menu.
-		MouseListener listeners[] = plot.getMouseListeners();
-		for (int i = listeners.length - 1; i >= 0; i--) {
-			plot.removeMouseListener(listeners[i]);
-		}
-
-		interactiveScanPanel = new InteractiveScanPanel(model,
-				maxCompartmentValue, maxSpeciesValue, maxParameterValue,
-				paramStepSize);
-		interactiveScanPanel
-				.setBorder(BorderFactory.createLoweredBevelBorder());
-		legendPanel = new LegendPanel(model, includeReactions);
-		legendPanel.addTableModelListener(this);
-		legendPanel.setBorder(BorderFactory.createLoweredBevelBorder());
-		JSplitPane topDown = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true,
-				legendPanel, interactiveScanPanel);
-		topDown.setDividerLocation(topDown.getDividerLocation() + 200);
-		setLeftComponent(topDown);
-		setRightComponent(plot);
-		setDividerLocation(topDown.getDividerLocation() + 200);
+	public void unsetSimulationData() {
+		setSimulationData(null);
 	}
 }

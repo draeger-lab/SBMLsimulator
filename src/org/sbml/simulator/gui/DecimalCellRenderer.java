@@ -1,30 +1,22 @@
 package org.sbml.simulator.gui;
 
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 
 /**
- * A table renderer for numbers.
+ * A table renderer for decimal numbers.
  * 
  * @author Andreas Dr&auml;ger
  * @date 2010-09-21
  */
-public class FractionCellRenderer extends DefaultTableCellRenderer {
+public class DecimalCellRenderer extends DefaultTableCellRenderer {
 	/**
 	 * Generated serial version identifier
 	 */
 	private static final long serialVersionUID = 7169267933533860622L;
-
-	/**
-	 * maximum integer digits
-	 */
-	final private int integer;
-
-	/**
-	 * exact number of fraction digits
-	 */
-	final private int fraction;
 
 	/**
 	 * alignment (LEFT, CENTER, RIGHT)
@@ -39,7 +31,8 @@ public class FractionCellRenderer extends DefaultTableCellRenderer {
 	/**
 	 * 
 	 */
-	final private NumberFormat formatter = NumberFormat.getInstance();
+	private NumberFormat formatter;
+
 	/**
 	 * 
 	 * @param integer
@@ -49,10 +42,11 @@ public class FractionCellRenderer extends DefaultTableCellRenderer {
 	 * @param align
 	 *            alignment (LEFT, CENTER, RIGHT)
 	 */
-	public FractionCellRenderer(final int integer, final int fraction,
+	public DecimalCellRenderer(final int integer, final int fraction,
 			final int align) {
 		this(integer, fraction, align, false);
 	}
+
 	/**
 	 * 
 	 * @param integer
@@ -65,13 +59,24 @@ public class FractionCellRenderer extends DefaultTableCellRenderer {
 	 *            whether or not fraction should be the exact number of fraction
 	 *            digits.
 	 */
-	public FractionCellRenderer(int integer, int fraction, int align,
+	public DecimalCellRenderer(int integer, int fraction, int align,
 			boolean exact) {
-		this.integer = integer;
-		this.fraction = fraction;
+		this.formatter = NumberFormat.getInstance();
+		formatter.setMaximumIntegerDigits(integer);
+		formatter.setMaximumFractionDigits(fraction);
+		formatter.setMinimumFractionDigits(allSame ? fraction : 0);
 		this.align = align;
-		this.allSame = exact;
 	}
+
+	/**
+	 * 
+	 */
+	public DecimalCellRenderer() {
+		this.formatter = new DecimalFormat("########0.#########E0");
+		this.align = SwingConstants.RIGHT;
+		this.allSame = false;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -81,9 +86,6 @@ public class FractionCellRenderer extends DefaultTableCellRenderer {
 	@Override
 	protected void setValue(final Object value) {
 		if ((value != null) && (value instanceof Number)) {
-			formatter.setMaximumIntegerDigits(integer);
-			formatter.setMaximumFractionDigits(fraction);
-			formatter.setMinimumFractionDigits(allSame ? fraction : 0);
 			setText(formatter.format(((Number) value).doubleValue()));
 		} else {
 			super.setValue(value);

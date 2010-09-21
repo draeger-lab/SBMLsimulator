@@ -106,6 +106,10 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * {@link QuantityRange} field.
 	 */
 	private double[][] initRanges;
+	/**
+	 * 
+	 */
+	public static final String SIMULATION_DATA = "simulation data";
 
 	/**
 	 * 
@@ -190,6 +194,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 					|| (fitness[0] < bestPerGenerationDist)) {
 				bestPerGenerationDist = fitness[0];
 				bestPerGeneration = solution;
+				bestPerGeneration.setName(SIMULATION_DATA);
 			}
 
 		} catch (Exception e) {
@@ -199,6 +204,13 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		return fitness;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * eva2.server.go.problems.AbstractOptimizationProblem#evaluatePopulationStart
+	 * (eva2.server.go.populations.Population)
+	 */
 	@Override
 	public void evaluatePopulationStart(Population population) {
 		super.evaluatePopulationStart(population);
@@ -206,12 +218,26 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		bestPerGenerationDist = Double.POSITIVE_INFINITY;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * eva2.server.go.problems.AbstractProblemDouble#getAdditionalFileStringHeader
+	 * ()
+	 */
 	@Override
 	public String[] getAdditionalFileStringHeader() {
 		String[] superHead = super.getAdditionalFileStringHeader();
-		return ToolBox.appendArrays(superHead, "simulationData");
+		return ToolBox.appendArrays(superHead, SIMULATION_DATA);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * eva2.server.go.problems.AbstractProblemDouble#getAdditionalFileStringInfo
+	 * ()
+	 */
 	@Override
 	public String[] getAdditionalFileStringInfo() {
 		String[] superInfo = super.getAdditionalFileStringInfo();
@@ -219,6 +245,13 @@ public class EstimationProblem extends AbstractProblemDouble implements
 				"Result of the best per generation model simulation");
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * eva2.server.go.problems.AbstractProblemDouble#getAdditionalFileStringValue
+	 * (eva2.server.go.PopulationInterface)
+	 */
 	@Override
 	public Object[] getAdditionalFileStringValue(PopulationInterface pop) {
 		Object[] superVals = super.getAdditionalFileStringValue(pop);
@@ -384,8 +417,8 @@ public class EstimationProblem extends AbstractProblemDouble implements
 			initRanges = new double[quantityRanges.length][2];
 			for (int i = 0; i < originalValues.length; i++) {
 				originalValues[i] = quantityRanges[i].getQuantity().getValue();
-				initRanges[i][0]=quantityRanges[i].getInitialMinimum();
-				initRanges[i][1]=quantityRanges[i].getInitialMaximum();
+				initRanges[i][0] = quantityRanges[i].getInitialMinimum();
+				initRanges[i][1] = quantityRanges[i].getInitialMaximum();
 			}
 		} else {
 			throw new IllegalArgumentException(
