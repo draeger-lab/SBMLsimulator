@@ -22,7 +22,7 @@ import java.awt.BorderLayout;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.text.NumberFormat;
+import java.util.List;
 import java.util.Properties;
 
 import javax.swing.JFileChooser;
@@ -33,7 +33,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
 import org.sbml.jsbml.Model;
@@ -46,6 +45,7 @@ import org.sbml.squeezer.CfgKeys;
 import de.zbit.gui.GUITools;
 import de.zbit.io.CSVWriter;
 import de.zbit.io.SBFileFilter;
+import eva2.server.stat.InterfaceStatisticsListener;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -53,7 +53,7 @@ import de.zbit.io.SBFileFilter;
  * @date 2010-04-06
  * 
  */
-public class SimulationPanel extends JPanel {
+public class SimulationPanel extends JPanel implements InterfaceStatisticsListener {
 
 	/**
 	 * Generated serial version identifier
@@ -175,7 +175,8 @@ public class SimulationPanel extends JPanel {
 	 */
 	public void closeExperimentalData() {
 		expTable = new JTable();
-		expTable.setDefaultRenderer(Double.class, new FractionCellRenderer(10, 4, SwingConstants.RIGHT));
+		expTable.setDefaultRenderer(Double.class, new DecimalCellRenderer(10,
+				4, SwingConstants.RIGHT));
 		tabbedPane.setEnabledAt(2, false);
 		if (tabbedPane.getSelectedIndex() == 2) {
 			tabbedPane.setSelectedIndex(0);
@@ -201,6 +202,16 @@ public class SimulationPanel extends JPanel {
 		SimulationToolPanel foot = new SimulationToolPanel(worker);
 		footPanel.add(foot);
 		return foot;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see eva2.server.stat.InterfaceStatisticsListener#finalMultiRunResults(java.lang.String[], java.util.List)
+	 */
+	public void finalMultiRunResults(String[] header,
+			List<Object[]> multiRunFinalObjectData) {
+		// TODO Auto-generated method stub
+		System.out.println("finalMultiRunResults");
 	}
 
 	/**
@@ -299,7 +310,8 @@ public class SimulationPanel extends JPanel {
 			if (tabbedPane == null) {
 				JPanel simPanel = new JPanel(new BorderLayout());
 				simTable = new JTable();
-				simTable.setDefaultRenderer(Double.class, new FractionCellRenderer(10, 4, SwingConstants.RIGHT));
+				simTable.setDefaultRenderer(Double.class,
+						new DecimalCellRenderer(10, 4, SwingConstants.RIGHT));
 				simPanel.add(new JScrollPane(simTable,
 						JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
@@ -307,7 +319,8 @@ public class SimulationPanel extends JPanel {
 
 				JPanel expPanel = new JPanel(new BorderLayout());
 				expTable = new JTable();
-				expTable.setDefaultRenderer(Double.class, new FractionCellRenderer(10, 4, SwingConstants.RIGHT));
+				expTable.setDefaultRenderer(Double.class,
+						new DecimalCellRenderer(10, 4, SwingConstants.RIGHT));
 				expPanel.add(new JScrollPane(expTable,
 						JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
@@ -340,6 +353,94 @@ public class SimulationPanel extends JPanel {
 	 */
 	public boolean isShowSettingsPanel() {
 		return showSettingsPanel;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyGenerationPerformed(java.lang.String[], java.lang.Object[], java.lang.Double[])
+	 */
+	public void notifyGenerationPerformed(String[] header,
+			Object[] statObjects, Double[] statDoubles) {
+		// TODO Auto-generated method stub
+		for (int i = 0; i < statObjects.length; i++) {
+			System.out.printf("%s\t%s\n", i, statObjects[i].getClass()
+					.getName());
+		}
+		System.out.println("notifyGenerationPerformed");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStarted(int, int, java.lang.String[], java.lang.String[])
+	 */
+	public void notifyRunStarted(int runNumber, int plannedMultiRuns,
+			String[] header, String[] metaInfo) {
+		// TODO Auto-generated method stub
+		System.out.println("notifyRunStarted");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStopped(int, boolean)
+	 */
+	public void notifyRunStopped(int runsPerformed, boolean completedLastRun) {
+		// TODO Auto-generated method stub
+		System.out.println("notifyRunStopped");
+	}
+
+	/**
+	 * 
+	 */
+	public void savePlotImage() {
+		try {
+			CfgKeys.PLOT_SAVE_DIR.putProperty(visualizationPanel.getPlot()
+					.savePlotImage(
+							CfgKeys.PLOT_SAVE_DIR.getProperty().toString(),
+							((Number) CfgKeys.JPEG_COMPRESSION_FACTOR
+									.getProperty()).floatValue()));
+		} catch (Exception exc) {
+			GUITools.showErrorMessage(this, exc);
+		}
+	}
+
+	/**
+	 * 
+	 */
+	public void saveSimulationResults() {
+		try {
+			TableModel simTabModel = getSimulationResultsTable();
+			if (simTabModel.getRowCount() > 0) {
+				JFileChooser fc = GUITools.createJFileChooser(
+						CfgKeys.CSV_FILES_SAVE_DIR.getProperty().toString(),
+						false, false, JFileChooser.FILES_ONLY,
+						SBFileFilter.CSV_FILE_FILTER);
+				if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+					File out = fc.getSelectedFile();
+					CfgKeys.CSV_FILES_SAVE_DIR.putProperty(out.getParent());
+					if (!out.exists()
+							|| GUITools.overwriteExistingFile(this, out)) {
+						CSVWriter writer = new CSVWriter();
+						writer.write(simTabModel,
+								CfgKeys.CSV_FILES_SEPARATOR_CHAR.getProperty()
+										.toString().charAt(0), out);
+					}
+				}
+			} else {
+				String msg = "No simulation has been performed yet. Please run the simulation first.";
+				JOptionPane.showMessageDialog(this, GUITools.toHTML(msg, 40));
+			}
+		} catch (IOException exc) {
+			GUITools.showErrorMessage(this, exc);
+		}
+	}
+
+	/**
+	 * 
+	 * @param enabled
+	 */
+	public void setAllEnabled(boolean enabled) {
+		this.visualizationPanel.setInteractiveScanEnabled(enabled);
+		((SimulationToolPanel) footPanel.getComponent(0)).setAllEnabled(enabled);
 	}
 
 	/**
@@ -429,52 +530,6 @@ public class SimulationPanel extends JPanel {
 		visualizationPanel.setSimulationData(data);
 		if (stepSize != foot.getStepSize()) {
 			foot.setStepSize(stepSize);
-		}
-	}
-
-	/**
-	 * 
-	 */
-	public void savePlotImage() {
-		try {
-			CfgKeys.PLOT_SAVE_DIR.putProperty(visualizationPanel.getPlot()
-					.savePlotImage(
-							CfgKeys.PLOT_SAVE_DIR.getProperty().toString(),
-							((Number) CfgKeys.JPEG_COMPRESSION_FACTOR
-									.getProperty()).floatValue()));
-		} catch (Exception exc) {
-			GUITools.showErrorMessage(this, exc);
-		}
-	}
-
-	/**
-	 * 
-	 */
-	public void saveSimulationResults() {
-		try {
-			TableModel simTabModel = getSimulationResultsTable();
-			if (simTabModel.getRowCount() > 0) {
-				JFileChooser fc = GUITools.createJFileChooser(
-						CfgKeys.CSV_FILES_SAVE_DIR.getProperty().toString(),
-						false, false, JFileChooser.FILES_ONLY,
-						SBFileFilter.CSV_FILE_FILTER);
-				if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-					File out = fc.getSelectedFile();
-					CfgKeys.CSV_FILES_SAVE_DIR.putProperty(out.getParent());
-					if (!out.exists()
-							|| GUITools.overwriteExistingFile(this, out)) {
-						CSVWriter writer = new CSVWriter();
-						writer.write(simTabModel,
-								CfgKeys.CSV_FILES_SEPARATOR_CHAR.getProperty()
-										.toString().charAt(0), out);
-					}
-				}
-			} else {
-				String msg = "No simulation has been performed yet. Please run the simulation first.";
-				JOptionPane.showMessageDialog(this, GUITools.toHTML(msg, 40));
-			}
-		} catch (IOException exc) {
-			GUITools.showErrorMessage(this, exc);
 		}
 	}
 }

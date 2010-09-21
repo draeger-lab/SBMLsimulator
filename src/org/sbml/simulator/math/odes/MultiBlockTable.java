@@ -483,6 +483,11 @@ public class MultiBlockTable extends AbstractTableModel implements
 	private double timePoints[];
 
 	/**
+	 * 
+	 */
+	private String name;
+
+	/**
 	 * Constructs an empty {@link MultiBlockTable} object.
 	 */
 	public MultiBlockTable() {
@@ -630,6 +635,15 @@ public class MultiBlockTable extends AbstractTableModel implements
 	}
 
 	/**
+	 * Gives this {@link MultiBlockTable}'s name.
+	 * 
+	 * @return
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
 	 * 
 	 * @return
 	 */
@@ -755,6 +769,15 @@ public class MultiBlockTable extends AbstractTableModel implements
 	}
 
 	/**
+	 * Sets the name of this {@link MultiBlockTable}.
+	 * 
+	 * @param name
+	 */
+	public void setName(String name) {
+		this.name = new String(name);
+	}
+
+	/**
 	 * Set the name of the time column
 	 * 
 	 * @param timeName
@@ -762,7 +785,6 @@ public class MultiBlockTable extends AbstractTableModel implements
 	 */
 	public void setTimeName(String timeName) {
 		this.timeName = timeName;
-
 	}
 
 	/**

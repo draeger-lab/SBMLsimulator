@@ -4,7 +4,6 @@
 package org.sbml.simulator.gui;
 
 import java.awt.Component;
-import java.util.List;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
@@ -19,14 +18,11 @@ import org.sbml.simulator.math.odes.DESSolver;
 import org.sbml.simulator.math.odes.IntegrationException;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 
-import eva2.server.stat.InterfaceStatisticsListener;
-
 /**
  * @author Andreas Dr&auml;ger
  * @date 2010-09-17
  */
-public class SimulationWorker extends SwingWorker<MultiBlockTable, Object>
-		implements InterfaceStatisticsListener {
+public class SimulationWorker extends SwingWorker<MultiBlockTable, Object> {
 
 	/**
 	 * 
@@ -119,10 +115,6 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object>
 	 * The integrator for the simulation
 	 */
 	private DESSolver solver;
-	/**
-	 * Pointer to the {@link SimulationPanel}
-	 */
-	private SimulationPanel simPanel;
 
 	/**
 	 * 
@@ -130,14 +122,6 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object>
 	 */
 	public SimulationWorker(Model model) {
 		this.model = model;
-	}
-
-	/**
-	 * 
-	 * @param simPanel
-	 */
-	public SimulationWorker(SimulationPanel simPanel) {
-		this.simPanel = simPanel;
 	}
 
 	/**
@@ -172,19 +156,6 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object>
 	@Override
 	protected void done() {
 		// TODO
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * eva2.server.stat.InterfaceStatisticsListener#finalMultiRunResults(java
-	 * .lang.String[], java.util.List)
-	 */
-	public void finalMultiRunResults(String[] header,
-			List<Object[]> multiRunFinalObjectData) {
-		// TODO Auto-generated method stub
-		System.out.println("finalMultiRunResults");
 	}
 
 	/**
@@ -236,46 +207,6 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object>
 	 */
 	public boolean isSetData() {
 		return data != null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * eva2.server.stat.InterfaceStatisticsListener#notifyGenerationPerformed
-	 * (java.lang.String[], java.lang.Object[], java.lang.Double[])
-	 */
-	public void notifyGenerationPerformed(String[] header,
-			Object[] statObjects, Double[] statDoubles) {
-		// TODO Auto-generated method stub
-		for (int i = 0; i < statObjects.length; i++) {
-			System.out.printf("%s\t%s\n", i, statObjects[i].getClass()
-					.getName());
-		}
-		System.out.println("notifyGenerationPerformed");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStarted(int,
-	 * int, java.lang.String[], java.lang.String[])
-	 */
-	public void notifyRunStarted(int runNumber, int plannedMultiRuns,
-			String[] header, String[] metaInfo) {
-		// TODO Auto-generated method stub
-		System.out.println("notifyRunStarted");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStopped(int,
-	 * boolean)
-	 */
-	public void notifyRunStopped(int runsPerformed, boolean completedLastRun) {
-		// TODO Auto-generated method stub
-		System.out.println("notifyRunStopped");
 	}
 
 	/**

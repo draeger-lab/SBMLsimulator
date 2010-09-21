@@ -119,11 +119,27 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 * 
 	 */
 	private Set<ItemListener> setOfItemListeners;
+	
+	/**
+	 * 
+	 * @param enabled
+	 */
+	public void setAllEnabled(boolean enabled) {
+		GUITools.setAllEnabled(this, enabled);
+		startTime.setEnabled(false);
+		if (enabled && (distField.getText().length() == 0)) {
+			distField.setEditable(false);
+		}
+	}
 
 	/**
 	 * 
 	 */
 	private SimulationWorker worker;
+	/**
+	 * 
+	 */
+	private JSpinner startTime;
 
 	/**
 	 * 
@@ -165,7 +181,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 				Plot.Command.SHOW_TOOL_TIPS.getToolTip(), this);
 
 		// Settings
-		JSpinner startTime = new JSpinner(t1);
+		startTime = new JSpinner(t1);
 		startTime.addChangeListener(this);
 		startTime.setName("t1");
 		startTime.setEnabled(false);
@@ -209,12 +225,6 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 		distFun.addItemListener(this);
 		distFun.setSelectedItem(distanceFunc);
 		DecimalFormat format = new DecimalFormat("########0.#########E0");
-		// (DecimalFormat) DecimalFormat.getInstance();
-		// format.setMaximumIntegerDigits(10);
-		// format.setMinimumIntegerDigits(0);
-		// format.setParseIntegerOnly(false);
-		// format.setMaximumFractionDigits(15);
-		// format.setMinimumFractionDigits(0);
 		distField = new JFormattedTextField(format);
 		distField.setEnabled(false);
 		dSet.add(distFun);
