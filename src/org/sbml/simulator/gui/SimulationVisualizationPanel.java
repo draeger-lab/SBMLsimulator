@@ -41,14 +41,15 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 */
 	private boolean includeReactions;
 	/**
-	 * The maximal allowable values.
-	 */
-	private double maxCompartmentValue, maxParameterValue, maxSpeciesValue;
-	/**
 	 * The step size for the spinner in the interactive parameter scan. and the
 	 * maximal value for {@link JSpinner}s.
 	 */
-	private double maxSpinVal = 1E10, paramStepSize;
+	private double maxSpinVal = 1E10, paramStepSize = 0.01d;
+	/**
+	 * The maximal allowable values.
+	 */
+	private double maxCompartmentValue = maxSpinVal,
+			maxParameterValue = maxSpinVal, maxSpeciesValue = maxSpinVal;
 	/**
 	 * Plot area
 	 */
@@ -104,36 +105,16 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 * @param model
 	 */
 	public SimulationVisualizationPanel(Model model) {
+		this();
+		setModel(model);
+	}
+
+	/**
+	 * 
+	 */
+	public SimulationVisualizationPanel() {
 		super(HORIZONTAL_SPLIT, true);
-
 		includeReactions = true;
-
-		UnitDefinition timeUnits = model.getTimeUnitsInstance();
-		String xLab = "Time";
-		if (timeUnits != null) {
-			xLab += " in " + UnitDefinition.printUnits(timeUnits, true);
-		}
-		plot = new Plot(xLab, "Value");
-		// get rid of this pop-up menu.
-		MouseListener listeners[] = plot.getMouseListeners();
-		for (int i = listeners.length - 1; i >= 0; i--) {
-			plot.removeMouseListener(listeners[i]);
-		}
-
-		interactiveScanPanel = new InteractiveScanPanel(model,
-				maxCompartmentValue, maxSpeciesValue, maxParameterValue,
-				paramStepSize);
-		interactiveScanPanel
-				.setBorder(BorderFactory.createLoweredBevelBorder());
-		legendPanel = new LegendPanel(model, includeReactions);
-		legendPanel.addTableModelListener(this);
-		legendPanel.setBorder(BorderFactory.createLoweredBevelBorder());
-		JSplitPane topDown = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true,
-				legendPanel, interactiveScanPanel);
-		topDown.setDividerLocation(topDown.getDividerLocation() + 200);
-		setLeftComponent(topDown);
-		setRightComponent(plot);
-		setDividerLocation(topDown.getDividerLocation() + 200);
 	}
 
 	/*
@@ -338,5 +319,44 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 */
 	public MultiBlockTable getSimulationData() {
 		return simData;
+	}
+
+	/**
+	 * 
+	 * @param model
+	 */
+	public void setModel(Model model) {
+		if (leftComponent != null) {
+			remove(leftComponent);
+		}
+		if (rightComponent != null) {
+			remove(rightComponent);
+		}
+		UnitDefinition timeUnits = model.getTimeUnitsInstance();
+		String xLab = "Time";
+		if (timeUnits != null) {
+			xLab += " in " + UnitDefinition.printUnits(timeUnits, true);
+		}
+		plot = new Plot(xLab, "Value");
+		// get rid of this pop-up menu.
+		MouseListener listeners[] = plot.getMouseListeners();
+		for (int i = listeners.length - 1; i >= 0; i--) {
+			plot.removeMouseListener(listeners[i]);
+		}
+
+		interactiveScanPanel = new InteractiveScanPanel(model,
+				maxCompartmentValue, maxSpeciesValue, maxParameterValue,
+				paramStepSize);
+		interactiveScanPanel
+				.setBorder(BorderFactory.createLoweredBevelBorder());
+		legendPanel = new LegendPanel(model, includeReactions);
+		legendPanel.addTableModelListener(this);
+		legendPanel.setBorder(BorderFactory.createLoweredBevelBorder());
+		JSplitPane topDown = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true,
+				legendPanel, interactiveScanPanel);
+		topDown.setDividerLocation(topDown.getDividerLocation() + 200);
+		setLeftComponent(topDown);
+		setRightComponent(plot);
+		setDividerLocation(topDown.getDividerLocation() + 200);
 	}
 }

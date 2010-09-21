@@ -19,29 +19,24 @@
 package org.sbml.simulator.gui;
 
 import java.awt.BorderLayout;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.text.NumberFormat;
 import java.util.Properties;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
 import org.sbml.jsbml.Model;
-import org.sbml.jsbml.Symbol;
-import org.sbml.jsbml.Variable;
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.odes.DESSolver;
@@ -58,8 +53,7 @@ import de.zbit.io.SBFileFilter;
  * @date 2010-04-06
  * 
  */
-public class SimulationPanel extends JPanel implements ChangeListener,
-		ItemListener {
+public class SimulationPanel extends JPanel {
 
 	/**
 	 * Generated serial version identifier
@@ -110,7 +104,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		/*
 		 * General settings
 		 */
-		p.put(CfgKeys.SPINNER_STEP_SIZE, Double.valueOf(.01));
+		p.put(CfgKeys.SPINNER_STEP_SIZE, Double.valueOf(.01d));
 		p.put(CfgKeys.JPEG_COMPRESSION_FACTOR, Float.valueOf(.8f));
 		p.put(CfgKeys.SPINNER_MAX_VALUE, Double.valueOf(1E5d));
 		p.put(CfgKeys.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE, Double.valueOf(1d));
@@ -168,6 +162,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		} else {
 			try {
 				worker = new SimulationWorker(model);
+				visualizationPanel = new SimulationVisualizationPanel();
 				setProperties(properties);
 			} catch (Exception exc) {
 				GUITools.showErrorMessage(this, exc);
@@ -180,6 +175,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 */
 	public void closeExperimentalData() {
 		expTable = new JTable();
+		expTable.setDefaultRenderer(Double.class, new FractionCellRenderer(10, 4, SwingConstants.RIGHT));
 		tabbedPane.setEnabledAt(2, false);
 		if (tabbedPane.getSelectedIndex() == 2) {
 			tabbedPane.setSelectedIndex(0);
@@ -286,11 +282,10 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		setLayout(new BorderLayout());
 		try {
 			if (visualizationPanel == null) {
-				visualizationPanel = new SimulationVisualizationPanel(worker
-						.getModel());
+				visualizationPanel = new SimulationVisualizationPanel();
 			}
+			visualizationPanel.setModel(worker.getModel());
 			SimulationToolPanel foot = getOrCreateFootPanel();
-			foot.addItemListener(this);
 			foot.addItemListener(visualizationPanel);
 			if (showSettingsPanel) {
 				add(footPanel, BorderLayout.SOUTH);
@@ -304,6 +299,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 			if (tabbedPane == null) {
 				JPanel simPanel = new JPanel(new BorderLayout());
 				simTable = new JTable();
+				simTable.setDefaultRenderer(Double.class, new FractionCellRenderer(10, 4, SwingConstants.RIGHT));
 				simPanel.add(new JScrollPane(simTable,
 						JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
@@ -311,6 +307,7 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 
 				JPanel expPanel = new JPanel(new BorderLayout());
 				expTable = new JTable();
+				expTable.setDefaultRenderer(Double.class, new FractionCellRenderer(10, 4, SwingConstants.RIGHT));
 				expPanel.add(new JScrollPane(expTable,
 						JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
@@ -343,16 +340,6 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 	 */
 	public boolean isShowSettingsPanel() {
 		return showSettingsPanel;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
-	 */
-	public void itemStateChanged(ItemEvent e) {
-		// TODO
 	}
 
 	/**
@@ -442,24 +429,6 @@ public class SimulationPanel extends JPanel implements ChangeListener,
 		visualizationPanel.setSimulationData(data);
 		if (stepSize != foot.getStepSize()) {
 			foot.setStepSize(stepSize);
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent
-	 * )
-	 */
-	public void stateChanged(ChangeEvent e) {
-		if (e.getSource() instanceof JSpinner) {
-			JSpinner spin = (JSpinner) e.getSource();
-			Variable s = worker.getModel().findVariable(spin.getName());
-			if ((s != null) && (s instanceof Symbol)) {
-				((Symbol) s).setValue(((SpinnerNumberModel) spin.getModel())
-						.getNumber().doubleValue());
-			}
 		}
 	}
 

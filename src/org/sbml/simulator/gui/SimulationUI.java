@@ -627,9 +627,12 @@ public class SimulationUI extends JFrame implements ActionListener,
 	 */
 	public void simulate() {
 		try {
+			GUITools.setEnabled(false, getJMenuBar(), toolbar,
+					Command.SIMULATION_START);
 			simPanel.simulate();
 			GUITools.setEnabled(true, getJMenuBar(), toolbar,
-					Command.SAVE_SIMULATION, Command.SAVE_PLOT_IMAGE);
+					Command.SAVE_SIMULATION, Command.SAVE_PLOT_IMAGE,
+					Command.SIMULATION_START);
 		} catch (Exception exc) {
 			exc.printStackTrace();
 			GUITools.showErrorMessage(this, exc);
