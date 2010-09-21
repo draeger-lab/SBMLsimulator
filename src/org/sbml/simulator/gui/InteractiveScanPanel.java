@@ -168,6 +168,75 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
 		add(foot, BorderLayout.SOUTH);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
+	public void actionPerformed(ActionEvent e) {
+		if ((e.getActionCommand() != null)
+				&& (e.getActionCommand().equals(Command.RESET.toString()))) {
+			for (int i = 0; i < originalValues.length; i++) {
+				spinModQuantity[i].setValue(Double.valueOf(originalValues[i]));
+				quantities[i].setValue(originalValues[i]);
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @param cl
+	 * @return
+	 */
+	public boolean addChangeListener(ChangeListener cl) {
+		return setOfChangeListeners.add(cl);
+	}
+
+	/**
+	 * Checks whether or not to enable the button to reset the values for each
+	 * {@link JSpinner}.
+	 */
+	private void checkButton() {
+		boolean allEqual = true;
+		for (int i = 0; i < originalValues.length && allEqual; i++) {
+			allEqual &= originalValues[i] == ((Number) spinModQuantity[i]
+					.getValue()).doubleValue();
+		}
+		buttonReset.setEnabled(!allEqual);
+	}
+
+	/**
+	 * 
+	 * @param id
+	 */
+	private void checkButton(String id) {
+		int i = 0;
+		while ((i < originalValues.length) && !id.equals(quantities[i].getId())) {
+			i++;
+		}
+		double newVal = ((Number) spinModQuantity[i].getValue()).doubleValue();
+		if (originalValues[i] != newVal) {
+			buttonReset.setEnabled(true);
+			quantities[i].setValue(newVal);
+		}
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public Properties getProperties() {
+		Properties p = new Properties();
+		p.put(CfgKeys.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE, Double
+				.valueOf(defaultCompartmentValue));
+		p.put(CfgKeys.OPT_DEFAULT_SPECIES_INITIAL_VALUE, Double
+				.valueOf(defaultSpeciesValue));
+		p.put(CfgKeys.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS, Double
+				.valueOf(defaultParameterValue));
+		return p;
+	}
+
 	/**
 	 * 
 	 * @param maxParameterValue
@@ -295,59 +364,8 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
 	 * @param cl
 	 * @return
 	 */
-	public boolean addChangeListener(ChangeListener cl) {
-		return setOfChangeListeners.add(cl);
-	}
-
-	/**
-	 * 
-	 * @param cl
-	 * @return
-	 */
 	public boolean removeChangeListener(ChangeListener cl) {
 		return setOfChangeListeners.remove(cl);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent
-	 * )
-	 */
-	public void stateChanged(ChangeEvent e) {
-		checkButton();
-		for (ChangeListener cl : setOfChangeListeners) {
-			cl.stateChanged(e);
-		}
-	}
-
-	/**
-	 * Checks whether or not to enable the button to reset the values for each
-	 * {@link JSpinner}.
-	 */
-	private void checkButton() {
-		boolean allEqual = true;
-		for (int i = 0; i < originalValues.length && allEqual; i++) {
-			allEqual &= originalValues[i] == ((Number) spinModQuantity[i]
-					.getValue()).doubleValue();
-		}
-		buttonReset.setEnabled(!allEqual);
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public Properties getProperties() {
-		Properties p = new Properties();
-		p.put(CfgKeys.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE, Double
-				.valueOf(defaultCompartmentValue));
-		p.put(CfgKeys.OPT_DEFAULT_SPECIES_INITIAL_VALUE, Double
-				.valueOf(defaultSpeciesValue));
-		p.put(CfgKeys.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS, Double
-				.valueOf(defaultParameterValue));
-		return p;
 	}
 
 	/**
@@ -369,15 +387,20 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 * javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent
+	 * )
 	 */
-	public void actionPerformed(ActionEvent e) {
-		if ((e.getActionCommand() != null)
-				&& (e.getActionCommand().equals(Command.RESET.toString()))) {
-			for (int i = 0; i < originalValues.length; i++) {
-				spinModQuantity[i].setValue(Double.valueOf(originalValues[i]));
-				quantities[i].setValue(originalValues[i]);
+	public void stateChanged(ChangeEvent e) {
+		if (e.getSource() instanceof JSpinner) {
+			String id = ((JSpinner) e.getSource()).getName();
+			if (id != null) {
+				checkButton(id);
 			}
+		} else {
+			checkButton();
+		}
+		for (ChangeListener cl : setOfChangeListeners) {
+			cl.stateChanged(e);
 		}
 	}
 }

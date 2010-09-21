@@ -7,6 +7,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.InvocationTargetException;
+import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -20,7 +21,6 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.text.NumberFormatter;
 
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.util.ValuePair;
@@ -47,6 +47,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 * Generated serial version identifier.
 	 */
 	private static final long serialVersionUID = -6540887561618807199L;
+
 	/**
 	 * Swaps a and b if a is greater then b.
 	 * 
@@ -60,6 +61,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 			a = swap;
 		}
 	}
+
 	/**
 	 * Contains all available distance functions.
 	 */
@@ -153,7 +155,8 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 				false, Plot.Command.SHOW_GRID, Plot.Command.SHOW_GRID
 						.getToolTip(), this);
 		logScale = GUITools.createJCheckBox(Plot.Command.LOG_SCALE.getText(),
-				false, Plot.Command.LOG_SCALE, Plot.Command.LOG_SCALE.getToolTip(), this);
+				false, Plot.Command.LOG_SCALE, Plot.Command.LOG_SCALE
+						.getToolTip(), this);
 		showLegend = GUITools.createJCheckBox(Plot.Command.SHOW_LEGEND
 				.getText(), true, Plot.Command.SHOW_LEGEND,
 				Plot.Command.SHOW_LEGEND.getToolTip(), this);
@@ -205,7 +208,14 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 		distFun.setName("distfun");
 		distFun.addItemListener(this);
 		distFun.setSelectedItem(distanceFunc);
-		distField = new JFormattedTextField(new NumberFormatter());
+		DecimalFormat format = new DecimalFormat("########0.#########E0");
+		// (DecimalFormat) DecimalFormat.getInstance();
+		// format.setMaximumIntegerDigits(10);
+		// format.setMinimumIntegerDigits(0);
+		// format.setParseIntegerOnly(false);
+		// format.setMaximumFractionDigits(15);
+		// format.setMinimumFractionDigits(0);
+		distField = new JFormattedTextField(format);
 		distField.setEnabled(false);
 		dSet.add(distFun);
 		dSet.add(new JPanel());
@@ -249,7 +259,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	public void computeDistance() throws SBMLException, IntegrationException,
 			ModelOverdeterminedException {
 		if (worker.isSetModel() && worker.isSetData()) {
-			distField.setText(Double.toString(worker.computeDistance()));
+			distField.setValue(Double.valueOf(worker.computeDistance()));
 			distField.setEditable(false);
 			distField.setEnabled(true);
 		}
