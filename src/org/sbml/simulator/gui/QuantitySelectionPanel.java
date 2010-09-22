@@ -623,6 +623,20 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		}
 		return quantityList.toArray(new Quantity[0]);
 	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public String[] getSelectedQuantityIds() {
+		LinkedList<String> quantityList = new LinkedList<String>();
+		for (int i = 0; i < quantityBlocks.length; i++) {
+			if (quantityBlocks[i].isSelected()) {
+				quantityList.add(quantityBlocks[i].getQuantity().getId());
+			}
+		}
+		return quantityList.toArray(new String[0]);
+	}
 
 	/**
 	 * 

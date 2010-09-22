@@ -6,9 +6,9 @@ package org.sbml.simulator.math.odes;
 import eva2.tools.math.Mathematics;
 
 /**
- * For tests
+ * Runge-Kutta method.
  * 
- * @author draeger
+ * @author Andreas Dr&auml;ger
  * 
  */
 public class RKEventSolver extends AbstractDESSolver {
@@ -26,6 +26,38 @@ public class RKEventSolver extends AbstractDESSolver {
 	 * Helper variable for the k values.
 	 */
 	transient protected double[] kHelp;
+
+	/**
+	 * 
+	 */
+	public RKEventSolver() {
+		super();
+	}
+	
+	/**
+	 * 
+	 * @param stepSize
+	 */
+	public RKEventSolver(double stepSize) {
+		super(stepSize);
+	}
+	
+	/**
+	 * 
+	 * @param stepSize
+	 * @param nonnegative
+	 */
+	public RKEventSolver(double stepSize, boolean nonnegative) {
+		super(stepSize, nonnegative);
+	}
+	
+	/**
+	 * 
+	 * @param rkEventSolver
+	 */
+	public RKEventSolver(RKEventSolver rkEventSolver) {
+		super(rkEventSolver);
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -79,6 +111,15 @@ public class RKEventSolver extends AbstractDESSolver {
 	@Override
 	public String getName() {
 		return "4th order Runge-Kutta event solver";
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.odes.AbstractDESSolver#clone()
+	 */
+	@Override
+	public RKEventSolver clone() {
+		return new RKEventSolver(this);
 	}
 
 }

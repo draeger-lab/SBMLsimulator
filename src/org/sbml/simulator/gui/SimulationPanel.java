@@ -36,6 +36,8 @@ import javax.swing.SwingConstants;
 import javax.swing.table.TableModel;
 
 import org.sbml.jsbml.Model;
+import org.sbml.jsbml.Quantity;
+import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.odes.DESSolver;
@@ -45,6 +47,8 @@ import org.sbml.squeezer.CfgKeys;
 import de.zbit.gui.GUITools;
 import de.zbit.io.CSVWriter;
 import de.zbit.io.SBFileFilter;
+import eva2.server.go.problems.AbstractOptimizationProblem;
+import eva2.server.stat.GraphSelectionEnum;
 import eva2.server.stat.InterfaceStatisticsListener;
 
 /**
@@ -53,7 +57,8 @@ import eva2.server.stat.InterfaceStatisticsListener;
  * @date 2010-04-06
  * 
  */
-public class SimulationPanel extends JPanel implements InterfaceStatisticsListener {
+public class SimulationPanel extends JPanel implements
+		InterfaceStatisticsListener {
 
 	/**
 	 * Generated serial version identifier
@@ -138,6 +143,16 @@ public class SimulationPanel extends JPanel implements InterfaceStatisticsListen
 	 * 
 	 */
 	private SimulationVisualizationPanel visualizationPanel;
+	/**
+	 * Indices to more efficiently memorize the location of interesting elements
+	 * in the call-back function.
+	 */
+	private int simulationDataIndex, solutionIndex, runBestIndex;
+	/**
+	 * Array of identifiers of those {@link Quantity}s that are the target of a
+	 * value optimization.
+	 */
+	private String[] selectedQuantityIds;
 
 	/**
 	 * 
@@ -206,7 +221,10 @@ public class SimulationPanel extends JPanel implements InterfaceStatisticsListen
 
 	/*
 	 * (non-Javadoc)
-	 * @see eva2.server.stat.InterfaceStatisticsListener#finalMultiRunResults(java.lang.String[], java.util.List)
+	 * 
+	 * @see
+	 * eva2.server.stat.InterfaceStatisticsListener#finalMultiRunResults(java
+	 * .lang.String[], java.util.List)
 	 */
 	public void finalMultiRunResults(String[] header,
 			List<Object[]> multiRunFinalObjectData) {
@@ -316,6 +334,7 @@ public class SimulationPanel extends JPanel implements InterfaceStatisticsListen
 						JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
 						BorderLayout.CENTER);
+				simTable.getModel().addTableModelListener(visualizationPanel);
 
 				JPanel expPanel = new JPanel(new BorderLayout());
 				expTable = new JTable();
@@ -325,6 +344,7 @@ public class SimulationPanel extends JPanel implements InterfaceStatisticsListen
 						JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
 						BorderLayout.CENTER);
+				expTable.getModel().addTableModelListener(visualizationPanel);
 
 				tabbedPane = new JTabbedPane();
 				tabbedPane.add("Plot ", visualizationPanel);
@@ -357,35 +377,72 @@ public class SimulationPanel extends JPanel implements InterfaceStatisticsListen
 
 	/*
 	 * (non-Javadoc)
-	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyGenerationPerformed(java.lang.String[], java.lang.Object[], java.lang.Double[])
+	 * 
+	 * @see
+	 * eva2.server.stat.InterfaceStatisticsListener#notifyGenerationPerformed
+	 * (java.lang.String[], java.lang.Object[], java.lang.Double[])
 	 */
 	public void notifyGenerationPerformed(String[] header,
 			Object[] statObjects, Double[] statDoubles) {
-		// TODO Auto-generated method stub
-		for (int i = 0; i < statObjects.length; i++) {
-			System.out.printf("%s\t%s\n", i, statObjects[i].getClass()
-					.getName());
+		SimulationToolPanel tools = (SimulationToolPanel) footPanel
+				.getComponent(0);
+		double currentDistance = tools.getCurrentDistance();
+		if (Double.isNaN(currentDistance)
+				|| (currentDistance > statDoubles[runBestIndex].doubleValue())) {
+			setSimulationData((MultiBlockTable) statObjects[simulationDataIndex]);
+			tools.setCurrentDistance(statDoubles[runBestIndex].doubleValue());
+			double solution[] = (double[]) statObjects[solutionIndex];
+			for (int i = 0; i < selectedQuantityIds.length; i++) {
+				visualizationPanel.updateQuantity(selectedQuantityIds[i],
+						solution[i]);
+			}
 		}
-		System.out.println("notifyGenerationPerformed");
+	}
+
+	/**
+	 * 
+	 * @param data
+	 */
+	private void setSimulationData(MultiBlockTable data) {
+		data.addTableModelListener(visualizationPanel);
+		visualizationPanel.setSimulationData(data);
+		simTable.setModel(data);
+		tabbedPane.setEnabledAt(1, true);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStarted(int, int, java.lang.String[], java.lang.String[])
+	 * 
+	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStarted(int,
+	 * int, java.lang.String[], java.lang.String[])
 	 */
 	public void notifyRunStarted(int runNumber, int plannedMultiRuns,
 			String[] header, String[] metaInfo) {
-		// TODO Auto-generated method stub
-		System.out.println("notifyRunStarted");
+		// Determine indices
+		int i, allFound = 0;
+		for (i = 0; (i < header.length) && (allFound < 3); i++) {
+			if (header[i].equals(EstimationProblem.SIMULATION_DATA)) {
+				simulationDataIndex = i;
+				allFound++;
+			} else if (header[i]
+					.equals(AbstractOptimizationProblem.STAT_SOLUTION_HEADER)) {
+				solutionIndex = i;
+				allFound++;
+			} else if (header[i].equals(GraphSelectionEnum.runBest.toString())) {
+				runBestIndex = i;
+				allFound++;
+			}
+		}
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStopped(int, boolean)
+	 * 
+	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStopped(int,
+	 * boolean)
 	 */
 	public void notifyRunStopped(int runsPerformed, boolean completedLastRun) {
-		// TODO Auto-generated method stub
-		System.out.println("notifyRunStopped");
+		// System.out.println("notifyRunStopped");
 	}
 
 	/**
@@ -440,7 +497,8 @@ public class SimulationPanel extends JPanel implements InterfaceStatisticsListen
 	 */
 	public void setAllEnabled(boolean enabled) {
 		this.visualizationPanel.setInteractiveScanEnabled(enabled);
-		((SimulationToolPanel) footPanel.getComponent(0)).setAllEnabled(enabled);
+		((SimulationToolPanel) footPanel.getComponent(0))
+				.setAllEnabled(enabled);
 	}
 
 	/**
@@ -508,7 +566,7 @@ public class SimulationPanel extends JPanel implements InterfaceStatisticsListen
 		SimulationToolPanel foot = getOrCreateFootPanel();
 		simulate(worker.getModel(), foot.getSimulationStartTime(), foot
 				.getSimulationEndTime(), foot.getStepSize());
-		tabbedPane.setEnabledAt(1, true);
+		foot.computeDistance();
 	}
 
 	/**
@@ -526,10 +584,17 @@ public class SimulationPanel extends JPanel implements InterfaceStatisticsListen
 		MultiBlockTable data = SimulationWorker.solveByStepSize(foot
 				.getSolver(), model, t1val, t2val, stepSize, visualizationPanel
 				.getIncludeReactions(), this);
-		simTable.setModel(data);
-		visualizationPanel.setSimulationData(data);
+		setSimulationData(data);
 		if (stepSize != foot.getStepSize()) {
 			foot.setStepSize(stepSize);
 		}
+	}
+
+	/**
+	 * 
+	 * @param selectedQuantityIds
+	 */
+	public void notifyQuantitiesSelected(String[] selectedQuantityIds) {
+		this.selectedQuantityIds = selectedQuantityIds;
 	}
 }

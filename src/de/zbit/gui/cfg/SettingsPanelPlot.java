@@ -148,9 +148,12 @@ public class SettingsPanelPlot extends SettingsPanel {
 	public void itemStateChanged(ItemEvent e) {
 		if (e.getSource() instanceof JCheckBox) {
 			JCheckBox box = (JCheckBox) e.getSource();
-			if (box.getName() != null) {
-				properties.put(CfgKeys.valueOf(box.getName()), Boolean
-						.valueOf(box.isSelected()));
+			if (box.getActionCommand() != null) {
+				try {
+					properties.put(CfgKeys.valueOf(box.getActionCommand()),
+							Boolean.valueOf(box.isSelected()));
+				} catch (Throwable t) {
+				}
 			}
 		}
 		super.itemStateChanged(e);

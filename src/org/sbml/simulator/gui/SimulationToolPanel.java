@@ -22,6 +22,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.util.ValuePair;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
@@ -119,7 +120,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 * 
 	 */
 	private Set<ItemListener> setOfItemListeners;
-	
+
 	/**
 	 * 
 	 * @param enabled
@@ -584,6 +585,32 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 				// do nothing.
 			}
 		}
+	}
+
+	/**
+	 * Access to the currently computed distance between measurement data and
+	 * simulation.
+	 * 
+	 * @return The distance based on the currently selected {@link Distance}
+	 *         function or {@link Double.#NaN} if no distance has been computed
+	 *         yet.
+	 */
+	public double getCurrentDistance() {
+		return distField.getValue() == null ? Double.NaN : ((Number) distField
+				.getValue()).doubleValue();
+	}
+
+	/**
+	 * Allows external methods do manipulate the distance field.
+	 * 
+	 * @param value
+	 *            The new distance value. This should be in accordance with the
+	 *            currently selected {@link Distance} function and also
+	 *            integration method. Furthermore, it should also belong to the
+	 *            correct {@link Model} and data set.
+	 */
+	void setCurrentDistance(double value) {
+		distField.setValue(Double.valueOf(value));
 	}
 
 }

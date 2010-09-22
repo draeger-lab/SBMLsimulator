@@ -55,6 +55,14 @@ public class EulerMethod extends AbstractDESSolver {
 		super(stepSize, nonnegative);
 	}
 
+	/**
+	 * 
+	 * @param eulerMethod
+	 */
+	public EulerMethod(EulerMethod eulerMethod) {
+		super(eulerMethod);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -78,5 +86,14 @@ public class EulerMethod extends AbstractDESSolver {
 		DES.getValue(t, yPrev, change);
 		Mathematics.scale(stepSize, change);
 		return change;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.odes.AbstractDESSolver#clone()
+	 */
+	@Override
+	public EulerMethod clone() {
+		return new EulerMethod(this);
 	}
 }

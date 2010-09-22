@@ -154,14 +154,10 @@ public class SettingsPanelOptimization extends SettingsPanel {
 
 		JPanel panelIntegrationStrategy = new JPanel();
 		lh = new LayoutHelper(panelIntegrationStrategy);
-		JCheckBox checkStrategy = new JCheckBox(
-				"Use multiple shooting strategy", ((Boolean) properties
-						.get(CfgKeys.EST_MULTI_SHOOT)).booleanValue());
-		checkStrategy.setToolTipText(GUITools.toHTML(CHECKBOX_TOOLTIP_STRATEGY,
-				60));
-		checkStrategy.setName(CfgKeys.EST_MULTI_SHOOT.toString());
-		checkStrategy.addChangeListener(this);
-		lh.add(checkStrategy, 0, 0, 1, 1, 1, 0);
+		lh.add(GUITools.createJCheckBox("Use multiple shooting strategy",
+				((Boolean) properties.get(CfgKeys.EST_MULTI_SHOOT))
+						.booleanValue(), CfgKeys.EST_MULTI_SHOOT,
+				CHECKBOX_TOOLTIP_STRATEGY, this), 0, 0, 1, 1, 1, 0);
 		panelIntegrationStrategy.setBorder(BorderFactory
 				.createTitledBorder(" Integration strategy "));
 
@@ -181,10 +177,11 @@ public class SettingsPanelOptimization extends SettingsPanel {
 	public void itemStateChanged(ItemEvent e) {
 		if (e.getSource() instanceof JCheckBox) {
 			JCheckBox check = (JCheckBox) e.getSource();
-			if (check.getName() != null) {
+			if (check.getActionCommand() != null) {
 				try {
-					CfgKeys key = CfgKeys.valueOf(check.getName());
+					CfgKeys key = CfgKeys.valueOf(check.getActionCommand());
 					properties.put(key, Boolean.valueOf(check.isSelected()));
+					
 				} catch (Throwable t) {
 				}
 			}
@@ -206,6 +203,7 @@ public class SettingsPanelOptimization extends SettingsPanel {
 				try {
 					CfgKeys key = CfgKeys.valueOf(spinner.getName());
 					properties.put(key, (Double) spinner.getValue());
+					
 				} catch (Throwable t) {
 				}
 			}

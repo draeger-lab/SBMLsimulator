@@ -1,6 +1,7 @@
 package org.sbml.optimization;
 
 import java.awt.Window;
+import java.awt.event.WindowListener;
 import java.util.List;
 
 import eva2.client.EvAClient;
@@ -29,14 +30,17 @@ public class EvA2GUIStarter {
 	 * 
 	 * @param problem
 	 * @param parentWindow
-	 * @param listener
+	 * @param statisticsListener
+	 * @param windowListener
 	 */
 	public static void init(InterfaceOptimizationProblem problem,
-			final Window parentWindow, InterfaceStatisticsListener listener) {
+			final Window parentWindow,
+			InterfaceStatisticsListener statisticsListener,
+			WindowListener windowListener) {
 		EvA2GUIStarter evaBP = new EvA2GUIStarter();
 		GOParameters goParams = new GOParameters(); // Instance for the general
-													// Genetic Optimization
-													// parameterization
+		// Genetic Optimization
+		// parameterization
 
 		goParams.setOptimizer(new ParticleSwarmOptimization(50, 2.05, 2.05,
 				PSOTopologyEnum.grid, 2));
@@ -57,20 +61,20 @@ public class EvA2GUIStarter {
 				false, true, false); // initializes GUI in the background
 		// important: wait for GUI initialization before accessing any internal
 		// settings:
-		evaBP.evaClient.awaitGuiInitialized(); // this returns as soon as the
-												// GUI is ready
+		evaBP.evaClient.awaitClientInitialized(); // this returns as soon as the
+		// GUI is ready
+		evaBP.evaClient.addWindowListener(windowListener);
 
 		// modify initial settings:
 		evaBP.evaClient.getStatistics().getStatisticsParameter()
 				.setOutputAllFieldsAsText(true); // activate output of all data
-													// fields
+		// fields
 
 		evaBP.evaClient.refreshMainPanels(); // GUI update due to the changes
-												// made through the API
+		// made through the API
 
-		evaBP.evaClient.getStatistics().addDataListener(listener); // add a data
-																	// listener
-																	// instance
+		// add a data listener instance:
+		evaBP.evaClient.getStatistics().addDataListener(statisticsListener); 
 	}
 
 	/*
