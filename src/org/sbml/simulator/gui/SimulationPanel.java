@@ -401,13 +401,10 @@ public class SimulationPanel extends JPanel implements
 
 	/**
 	 * 
-	 * @param data
+	 * @param selectedQuantityIds
 	 */
-	private void setSimulationData(MultiBlockTable data) {
-		data.addTableModelListener(visualizationPanel);
-		visualizationPanel.setSimulationData(data);
-		simTable.setModel(data);
-		tabbedPane.setEnabledAt(1, true);
+	public void notifyQuantitiesSelected(String[] selectedQuantityIds) {
+		this.selectedQuantityIds = selectedQuantityIds;
 	}
 
 	/*
@@ -541,6 +538,14 @@ public class SimulationPanel extends JPanel implements
 	}
 
 	/**
+	 * 
+	 * @param ids
+	 */
+	public void setSelectedQuantities(String... ids) {
+		visualizationPanel.setSelectedQuantities(ids);
+	}
+
+	/**
 	 * @param showSettingsPanel
 	 *            the showSettingsPanel to set
 	 */
@@ -555,6 +560,17 @@ public class SimulationPanel extends JPanel implements
 			footPanel.setVisible(showSettingsPanel);
 			validate();
 		}
+	}
+
+	/**
+	 * 
+	 * @param data
+	 */
+	private void setSimulationData(MultiBlockTable data) {
+		data.addTableModelListener(visualizationPanel);
+		visualizationPanel.setSimulationData(data);
+		simTable.setModel(data);
+		tabbedPane.setEnabledAt(1, true);
 	}
 
 	/**
@@ -588,13 +604,5 @@ public class SimulationPanel extends JPanel implements
 		if (stepSize != foot.getStepSize()) {
 			foot.setStepSize(stepSize);
 		}
-	}
-
-	/**
-	 * 
-	 * @param selectedQuantityIds
-	 */
-	public void notifyQuantitiesSelected(String[] selectedQuantityIds) {
-		this.selectedQuantityIds = selectedQuantityIds;
 	}
 }

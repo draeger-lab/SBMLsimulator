@@ -330,7 +330,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 *            The identifiers of the variables to be selected and to occur
 	 *            in the plot.
 	 */
-	public void setSelectedVariables(String... identifiers) {
+	public void setSelectedQuantities(String... identifiers) {
 		legendPanel.getLegendTableModel().setSelectedVariables(identifiers);
 	}
 

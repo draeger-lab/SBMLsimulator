@@ -627,6 +627,14 @@ public class SimulationUI extends JFrame implements ActionListener,
 
 	/**
 	 * 
+	 * @param ids
+	 */
+	public void setSelectedQuantities(String... ids) {
+		simPanel.setSelectedQuantities(ids);
+	}
+
+	/**
+	 * 
 	 */
 	public void simulate() {
 		try {
