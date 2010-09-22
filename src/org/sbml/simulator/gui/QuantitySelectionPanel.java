@@ -275,12 +275,12 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	/**
 	 * Values for {@link JSpinner}s of the initialization range
 	 */
-	private double initMinValue = 0d, initMaxValue = 14000d;
+	private double initMinValue = 0d, initMaxValue = 5d;
 
 	/**
 	 * Values for {@link JSpinner}s for the absolute ranges
 	 */
-	private double minValue = 0d, maxValue = 14000d, stepSize = 0.01d;
+	private double minValue = 0d, maxValue = 2000d, stepSize = 0.01d;
 
 	/**
 	 * A pointer to the model for which this panel is being created.
