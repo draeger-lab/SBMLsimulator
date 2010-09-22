@@ -45,20 +45,18 @@ public interface DESSolver extends Serializable {
 
 	/**
 	 * Solves the given {@link DESystem} using new initial conditions in each
-	 * time step. The given {@link MultiBlockTable} contains the expected solution of the
-	 * solver at certain time points. The solver has the task to re-initialize
-	 * the integration procedure in each given time point using the initial
-	 * values from this state.
+	 * time step. The given {@link MultiBlockTable} contains the expected
+	 * solution of the solver at certain time points. The solver has the task to
+	 * re-initialize the integration procedure in each given time point using
+	 * the initial values from this state.
 	 * 
 	 * @param DES
 	 * @param initConditions
-	 * @param timePoints
-	 *            The time points at which simulation should be performed.
 	 * @return
 	 * @throws IntegrationException
 	 */
-	public MultiBlockTable solve(DESystem DES, MultiBlockTable.Block initConditions,
-			double[] timePoints) throws IntegrationException;
+	public MultiBlockTable solve(DESystem DES,
+			MultiBlockTable.Block initConditions) throws IntegrationException;
 
 	/**
 	 * Solves the {@link DESystem} from the begin time till the end time
@@ -71,8 +69,8 @@ public interface DESSolver extends Serializable {
 	 * @return
 	 * @throws IntegrationException
 	 */
-	public MultiBlockTable solve(DESystem DES, double[] initialValues, double timeBegin,
-			double timeEnd) throws IntegrationException;
+	public MultiBlockTable solve(DESystem DES, double[] initialValues,
+			double timeBegin, double timeEnd) throws IntegrationException;
 
 	/**
 	 * Solves the given differential equation system with the step size h and
@@ -94,8 +92,8 @@ public interface DESSolver extends Serializable {
 	 * @throws IntegrationException
 	 *             if something's wrong...
 	 */
-	public MultiBlockTable solve(DESystem DES, double[] initalValues, double x, double h,
-			int steps) throws IntegrationException;
+	public MultiBlockTable solve(DESystem DES, double[] initalValues, double x,
+			double h, int steps) throws IntegrationException;
 
 	/**
 	 * Solves the given {@link DESystem} at the given time points using the
@@ -107,6 +105,12 @@ public interface DESSolver extends Serializable {
 	 * @return
 	 * @throws IntegrationException
 	 */
-	public MultiBlockTable solve(DESystem DES, double[] initialvalue, double[] timepoints)
-			throws IntegrationException;
+	public MultiBlockTable solve(DESystem DES, double[] initialvalue,
+			double[] timepoints) throws IntegrationException;
+
+	/**
+	 * 
+	 * @return
+	 */
+	public DESSolver clone();
 }

@@ -25,6 +25,8 @@ import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 import java.util.Properties;
 import java.util.prefs.BackingStoreException;
@@ -55,6 +57,7 @@ import org.sbml.squeezer.CfgKeys;
 
 import de.zbit.gui.cfg.SettingsDialog;
 import de.zbit.io.SBFileFilter;
+import eva2.client.EvAClient;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -63,7 +66,7 @@ import de.zbit.io.SBFileFilter;
  * 
  */
 public class SimulationUI extends JFrame implements ActionListener,
-		ItemListener {
+		ItemListener, WindowListener {
 
 	/**
 	 * Commands that can be understood by this dialog.
@@ -650,15 +653,92 @@ public class SimulationUI extends JFrame implements ActionListener,
 				JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
 			simPanel.setAllEnabled(false);
 			try {
+				simPanel.notifyQuantitiesSelected(panel
+						.getSelectedQuantityIds());
 				EvA2GUIStarter.init(new EstimationProblem(simPanel.getSolver(),
 						simPanel.getDistance(), model, simPanel
-								.getExperimentalData(), panel
-								.getSelectedQuantityRanges()), this, simPanel);
-			} catch (Exception exc) {
+								.getExperimentalData(),
+						((Boolean) CfgKeys.EST_MULTI_SHOOT.getProperty())
+								.booleanValue(), panel
+								.getSelectedQuantityRanges()), this, simPanel,
+						this);
+			} catch (Throwable exc) {
 				exc.printStackTrace();
 				GUITools.showErrorMessage(this, exc);
+				simPanel.setAllEnabled(true);
 			}
-			simPanel.setAllEnabled(true);
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * java.awt.event.WindowListener#windowActivated(java.awt.event.WindowEvent)
+	 */
+	public void windowActivated(WindowEvent e) {
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * java.awt.event.WindowListener#windowClosed(java.awt.event.WindowEvent)
+	 */
+	public void windowClosed(WindowEvent e) {
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * java.awt.event.WindowListener#windowClosing(java.awt.event.WindowEvent)
+	 */
+	public void windowClosing(WindowEvent e) {
+		if (e.getSource() instanceof JFrame) {
+			JFrame frame = (JFrame) e.getSource();
+			if ((frame.getName() != null)
+					&& (frame.getName().equals(EvAClient.class.getSimpleName()))) {
+				simPanel.setAllEnabled(true);
+			}
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * java.awt.event.WindowListener#windowDeactivated(java.awt.event.WindowEvent
+	 * )
+	 */
+	public void windowDeactivated(WindowEvent e) {
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * java.awt.event.WindowListener#windowDeiconified(java.awt.event.WindowEvent
+	 * )
+	 */
+	public void windowDeiconified(WindowEvent e) {
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * java.awt.event.WindowListener#windowIconified(java.awt.event.WindowEvent)
+	 */
+	public void windowIconified(WindowEvent e) {
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * java.awt.event.WindowListener#windowOpened(java.awt.event.WindowEvent)
+	 */
+	public void windowOpened(WindowEvent e) {
 	}
 }

@@ -25,6 +25,7 @@ import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.optimization.QuantityRange;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.SBMLinterpreter;
+import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.math.odes.DESSolver;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 
@@ -107,9 +108,38 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 */
 	private double[][] initRanges;
 	/**
+	 * Switch to decide whether or not to use a multiple shooting strategy.
+	 */
+	private boolean multishoot;
+
+	/**
 	 * 
 	 */
 	public static final String SIMULATION_DATA = "simulation data";
+
+	/**
+	 * 
+	 * @param solver
+	 * @param distance
+	 * @param model
+	 * @param referenceData
+	 * @param multishoot
+	 * @param quantityRanges
+	 * @throws ModelOverdeterminedException
+	 * @throws SBMLException
+	 */
+	public EstimationProblem(DESSolver solver, Distance distance, Model model,
+			MultiBlockTable referenceData, boolean multishoot,
+			QuantityRange... quantityRanges)
+			throws ModelOverdeterminedException, SBMLException {
+		this(solver, distance, model, referenceData, quantityRanges);
+		this.multishoot = multishoot;
+		if (multishoot) {
+			System.out.println("Using multiple shooting!");
+		} else {
+			System.out.println("Using single shooting!");
+		}
+	}
 
 	/**
 	 * 
@@ -125,6 +155,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 			MultiBlockTable referenceData, QuantityRange... quantityRanges)
 			throws ModelOverdeterminedException, SBMLException {
 		super();
+		multishoot = false;
 		setSolver(solver);
 		setDistance(distance);
 		setModel(model);
@@ -186,8 +217,10 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		}
 		try {
 			interpreter.init();
-			MultiBlockTable solution = solver.solve(interpreter, interpreter
-					.getInitialValues(), referenceData.getTimePoints());
+			MultiBlockTable solution = multishoot ? solver.solve(interpreter,
+					referenceData.getBlock(0)) : solver.solve(interpreter,
+					interpreter.getInitialValues(), referenceData
+							.getTimePoints());
 			fitness[0] = distance.distance(solution.getBlock(0), referenceData
 					.getBlock(0));
 			if (bestPerGeneration == null
@@ -362,6 +395,13 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	}
 
 	/**
+	 * @return the multishoot
+	 */
+	public boolean isMultishoot() {
+		return multishoot;
+	}
+
+	/**
 	 * 
 	 * @return
 	 */
@@ -407,6 +447,14 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	}
 
 	/**
+	 * @param multishoot
+	 *            the multishoot to set
+	 */
+	public void setMultishoot(boolean multishoot) {
+		this.multishoot = multishoot;
+	}
+
+	/**
 	 * 
 	 * @param quantityRanges
 	 */
@@ -444,7 +492,10 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * @param solver
 	 */
 	public void setSolver(DESSolver solver) {
-		this.solver = solver;
+		this.solver = solver.clone();
+		if (solver instanceof AbstractDESSolver) {
+			((AbstractDESSolver) this.solver).setIncludeIntermediates(false);
+		}
 	}
 
 	/**

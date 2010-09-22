@@ -374,4 +374,13 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	public void unsetSimulationData() {
 		setSimulationData(null);
 	}
+
+	/**
+	 * 
+	 * @param id
+	 * @param value
+	 */
+	public void updateQuantity(String id, double value) {
+		interactiveScanPanel.updateQuantity(id, value);
+	}
 }

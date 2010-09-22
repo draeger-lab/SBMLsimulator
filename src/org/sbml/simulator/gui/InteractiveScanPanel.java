@@ -517,5 +517,14 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
 	private void updateQuantitySpinner(String id) {
 		updateQuantitySpinner(quantitiesHash.get(id).intValue());
 	}
-	
+
+	/**
+	 * 
+	 * @param id
+	 * @param value
+	 */
+	public void updateQuantity(String id, double value) {
+		quantities[quantitiesHash.get(id).intValue()].setValue(value);
+	}
+
 }
