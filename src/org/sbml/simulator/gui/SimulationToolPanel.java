@@ -130,6 +130,8 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 		startTime.setEnabled(false);
 		if (enabled && (distField.getText().length() == 0)) {
 			distField.setEditable(false);
+		} else if (!enabled && (distField.getText().length() > 0)) {
+			distField.setEnabled(true);
 		}
 	}
 
@@ -141,6 +143,20 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 * 
 	 */
 	private JSpinner startTime;
+	/**
+	 * 
+	 */
+	private static final String DISTANCE_FIELD_TOOL_TIP = "This field shows the %s distance between the experimental data and the simulation of the model with the current configuration, computed by the %s.";
+	/**
+	 * 
+	 */
+	private static final DecimalFormat SCIENTIFIC_FORMAT = new DecimalFormat(
+			"########0.#########E0");
+	/**
+	 * 
+	 */
+	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat(
+			"#############0.##############");
 
 	/**
 	 * 
@@ -166,8 +182,8 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 		t2 = new SpinnerNumberModel(1d, 0d, maxTime, spinnerStepSize);
 		maxStepsPerUnit = 100;
 		double integrationStepSize = spinnerStepSize;
-		solvers = createSolversCombo(CfgKeys.SIM_ODE_SOLVER.getProperty()
-				.toString());
+		solvers = createSolversComboOrSetSelectedItem(CfgKeys.SIM_ODE_SOLVER
+				.getProperty().toString());
 		showGrid = GUITools.createJCheckBox(Plot.Command.SHOW_GRID.getText(),
 				false, Plot.Command.SHOW_GRID, Plot.Command.SHOW_GRID
 						.getToolTip(), this);
@@ -225,8 +241,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 		distFun.setName("distfun");
 		distFun.addItemListener(this);
 		distFun.setSelectedItem(distanceFunc);
-		DecimalFormat format = new DecimalFormat("########0.#########E0");
-		distField = new JFormattedTextField(format);
+		distField = new JFormattedTextField();
 		distField.setEnabled(false);
 		dSet.add(distFun);
 		dSet.add(new JPanel());
@@ -270,9 +285,10 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	public void computeDistance() throws SBMLException, IntegrationException,
 			ModelOverdeterminedException {
 		if (worker.isSetModel() && worker.isSetData()) {
-			distField.setValue(Double.valueOf(worker.computeDistance()));
-			distField.setEditable(false);
-			distField.setEnabled(true);
+			setCurrentDistance(worker.computeDistance());
+			distField.setToolTipText(GUITools.toHTML(String.format(
+					DISTANCE_FIELD_TOOL_TIP, distFun.getSelectedItem(), solvers
+							.getSelectedItem()), 60));
 		}
 	}
 
@@ -287,31 +303,47 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 * @throws InvocationTargetException
 	 * @throws NoSuchMethodException
 	 */
-	private JComboBox createSolversCombo(String name)
+	private JComboBox createSolversComboOrSetSelectedItem(String name)
 			throws IllegalArgumentException, SecurityException,
 			InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException {
-		JComboBox solvers = new JComboBox();
-		name = name.substring(name.lastIndexOf('.') + 1);
-		Class<AbstractDESSolver>[] solFun = SBMLsimulator.getAvailableSolvers();
-		AbstractDESSolver solver;
-		for (int i = 0; i < solFun.length; i++) {
-			Class<AbstractDESSolver> c = solFun[i];
-			solver = c.getConstructor().newInstance();
-			solvers.addItem(solver.getName());
-			if (c.getName().substring(c.getName().lastIndexOf('.') + 1).equals(
-					name)) {
-				solvers.setSelectedIndex(i);
-				worker.setDESSolver(solver);
+		if (solvers == null) {
+			solvers = new JComboBox();
+			name = name.substring(name.lastIndexOf('.') + 1);
+			Class<AbstractDESSolver>[] solFun = SBMLsimulator
+					.getAvailableSolvers();
+			AbstractDESSolver solver;
+			for (int i = 0; i < solFun.length; i++) {
+				Class<AbstractDESSolver> c = solFun[i];
+				solver = c.getConstructor().newInstance();
+				solvers.addItem(solver.getName());
+				if (c.getName().substring(c.getName().lastIndexOf('.') + 1)
+						.equals(name)) {
+					solvers.setSelectedIndex(i);
+					worker.setDESSolver(solver);
+				}
+			}
+			solvers.setEnabled(solvers.getItemCount() > 1);
+			if (solvers.getSelectedIndex() != solvers.getItemCount() - 1) {
+				solver = solFun[solvers.getSelectedIndex()].getConstructor()
+						.newInstance();
+			}
+			solvers.setName("solvers");
+			solvers.addItemListener(this);
+		} else {
+			Class<AbstractDESSolver>[] solFun = SBMLsimulator
+					.getAvailableSolvers();
+			AbstractDESSolver solver;
+			for (int i = 0; i < solFun.length; i++) {
+				Class<AbstractDESSolver> c = solFun[i];
+				solver = c.getConstructor().newInstance();
+				if (c.getName().substring(c.getName().lastIndexOf('.') + 1)
+						.equals(name)) {
+					solvers.setSelectedIndex(i);
+					worker.setDESSolver(solver);
+				}
 			}
 		}
-		solvers.setEnabled(solvers.getItemCount() > 1);
-		if (solvers.getSelectedIndex() != solvers.getItemCount() - 1) {
-			solver = solFun[solvers.getSelectedIndex()].getConstructor()
-					.newInstance();
-		}
-		solvers.setName("solvers");
-		solvers.addItemListener(this);
 		return solvers;
 	}
 
@@ -457,6 +489,8 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 									.newInstance());
 					computeDistance();
 				} else if (comBox.getName().equals("solvers")) {
+					System.out.println(comBox.getSelectedItem() + "\t"
+							+ comBox.getSelectedIndex());
 					worker
 							.setDESSolver(SBMLsimulator.getAvailableSolvers()[comBox
 									.getSelectedIndex()].getConstructor()
@@ -547,8 +581,8 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 		if (this.distFun != null) {
 			this.distFun.setSelectedIndex(distanceFunc);
 		}
-		solvers = createSolversCombo(properties.get(CfgKeys.SIM_ODE_SOLVER)
-				.toString());
+		solvers = createSolversComboOrSetSelectedItem(properties.get(
+				CfgKeys.SIM_ODE_SOLVER).toString());
 
 		double startTime = ((Number) properties.get(CfgKeys.SIM_START_TIME))
 				.doubleValue();
@@ -610,7 +644,17 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 *            correct {@link Model} and data set.
 	 */
 	void setCurrentDistance(double value) {
-		distField.setValue(Double.valueOf(value));
+		if ((value < 1E-5) || (1E5 < value)) {
+			distField.setText(SCIENTIFIC_FORMAT.format(value));
+		} else {
+			distField.setText(DECIMAL_FORMAT.format(value));
+		}
+		// distField.setValue(Double.valueOf(value));
+		if (!distField.isEnabled()) {
+			distField.setEditable(false);
+			distField.setEnabled(true);
+			distField.setAlignmentX(RIGHT_ALIGNMENT);
+		}
 	}
 
 }
