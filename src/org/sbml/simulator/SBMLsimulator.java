@@ -5,19 +5,16 @@ package org.sbml.simulator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Properties;
 import java.util.prefs.BackingStoreException;
 
-import javax.swing.JOptionPane;
 import javax.xml.stream.XMLStreamException;
 
-import org.sbml.jsbml.SBMLDocument;
-import org.sbml.jsbml.xml.stax.SBMLReader;
-import org.sbml.simulator.gui.SimulationUI;
+import org.sbml.simulator.gui.SimulatorUI;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.squeezer.CfgKeys;
 
-import de.zbit.gui.GUITools;
 import de.zbit.util.Reflect;
 
 /**
@@ -91,60 +88,74 @@ public class SBMLsimulator {
 	}
 
 	/**
-	 * @param args
-	 * @throws XMLStreamException
-	 * @throws FileNotFoundException
-	 */
-	public static void main(String[] args) throws FileNotFoundException,
-			XMLStreamException {
-		CfgKeys.getProperties().putAll(CfgKeys.analyzeCommandLineArguments(args));
-		new SBMLsimulator();
-	}
-
-	/**
-	 * 
-	 * @param pathname
-	 *            path to an SBML model
-	 * @throws XMLStreamException
-	 * @throws FileNotFoundException
-	 */
-	public SBMLsimulator(String pathname) throws FileNotFoundException,
-			XMLStreamException {
-		System.out.println("reading model");
-		SBMLDocument doc = SBMLReader.readSBML(pathname);
-		System.out.println("starting simulator");
-		showGUI(doc);
-	}
-
-	/**
-	 * 
-	 */
-	public SBMLsimulator() {
-		(new SimulationUI()).setVisible(true);
-	}
-
-	/**
-	 * 
-	 * @param doc
-	 */
-	private void showGUI(SBMLDocument doc) {
-		if ((doc != null) && (doc.isSetModel())) {
-			SimulationUI d = new SimulationUI(doc.getModel());
-			d.setVisible(true);
-		} else {
-			String msg = GUITools
-					.toHTML("Could not find a valid model in the given document.");
-			JOptionPane.showMessageDialog(null, msg, "No model found",
-					JOptionPane.WARNING_MESSAGE);
-		}
-	}
-
-	/**
 	 * Returns the version number of this program.
 	 * 
 	 * @return
 	 */
 	public static String getVersionNumber() {
 		return VERSION_NUMBER;
+	}
+
+	/**
+	 * @param args
+	 * @throws XMLStreamException
+	 * @throws FileNotFoundException
+	 */
+	public static void main(String[] args) throws FileNotFoundException,
+			XMLStreamException {
+		Properties p = CfgKeys.analyzeCommandLineArguments(args);
+		String openFile = null;
+		if (p.containsKey(CfgKeys.SBML_FILE)) {
+			openFile = p.get(CfgKeys.SBML_FILE).toString();
+		}
+		String timeSeriesFile = null;
+		if (p.containsKey(CfgKeys.TIME_SERIES_FILE)) {
+			timeSeriesFile = p.get(CfgKeys.TIME_SERIES_FILE).toString();
+		}
+		if ((openFile == null) || (openFile.length() == 0)) {
+			new SBMLsimulator();
+		} else {
+			if ((timeSeriesFile == null) || (timeSeriesFile.length() == 0)) {
+				new SBMLsimulator(openFile);
+			} else {
+				new SBMLsimulator(openFile, timeSeriesFile);
+			}
+		}
+	}
+
+	/**
+	 * 
+	 */
+	public SBMLsimulator() {
+		this(null);
+	}
+
+	/**
+	 * 
+	 * @param pathname
+	 *            path to an SBML model
+	 */
+	public SBMLsimulator(String pathname) {
+		this(pathname, null);
+	}
+
+	/**
+	 * 
+	 * @param sbmlFile
+	 * @param timeSeriesFile
+	 * @throws XMLStreamException
+	 * @throws FileNotFoundException
+	 */
+	public SBMLsimulator(String sbmlFile, String timeSeriesFile) {
+		super();
+		SimulatorUI simulatorUI = new SimulatorUI();
+		if (sbmlFile != null) {
+			simulatorUI.openModel(new File(sbmlFile));
+		}
+		simulatorUI.setLocationRelativeTo(null);
+		simulatorUI.setVisible(true);
+		if (timeSeriesFile != null) {
+			simulatorUI.openExperimentalData(timeSeriesFile);
+		}
 	}
 }

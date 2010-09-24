@@ -464,20 +464,15 @@ public class SimulationPanel extends JPanel implements
 		try {
 			TableModel simTabModel = getSimulationResultsTable();
 			if (simTabModel.getRowCount() > 0) {
-				JFileChooser fc = GUITools.createJFileChooser(
+				File out = GUITools.saveFileDialog(this,
 						CfgKeys.CSV_FILES_SAVE_DIR.getProperty().toString(),
 						false, false, JFileChooser.FILES_ONLY,
 						SBFileFilter.CSV_FILE_FILTER);
-				if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-					File out = fc.getSelectedFile();
+				if (out != null) {
+					(new CSVWriter()).write(simTabModel,
+							CfgKeys.CSV_FILES_SEPARATOR_CHAR.getProperty()
+									.toString().charAt(0), out);
 					CfgKeys.CSV_FILES_SAVE_DIR.putProperty(out.getParent());
-					if (!out.exists()
-							|| GUITools.overwriteExistingFile(this, out)) {
-						CSVWriter writer = new CSVWriter();
-						writer.write(simTabModel,
-								CfgKeys.CSV_FILES_SEPARATOR_CHAR.getProperty()
-										.toString().charAt(0), out);
-					}
 				}
 			} else {
 				String msg = "No simulation has been performed yet. Please run the simulation first.";

@@ -121,6 +121,9 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object> {
 	 * @param model
 	 */
 	public SimulationWorker(Model model) {
+		if (model == null) {
+			throw new NullPointerException("Model is null");
+		}
 		this.model = model;
 	}
 

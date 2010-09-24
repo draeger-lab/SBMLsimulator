@@ -187,14 +187,11 @@ public class Plot extends FunctionArea {
 		Rectangle area = getBounds();
 		area.setLocation(getLocationOnScreen());
 		BufferedImage bufferedImage = (new Robot()).createScreenCapture(area);
-		JFileChooser fc = GUITools.createJFileChooser(saveDir, false, false,
+		File file = GUITools.saveFileDialog(this, saveDir, false, false,
 				JFileChooser.FILES_ONLY, SBFileFilter.PNG_FILE_FILTER,
 				SBFileFilter.JPEG_FILE_FILTER);
-		if ((fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION)
-				&& (!fc.getSelectedFile().exists() || (GUITools
-						.overwriteExistingFile(this, fc.getSelectedFile())))) {
-			saveDir = fc.getSelectedFile().getParent();
-			File file = fc.getSelectedFile();
+		if (file != null) {
+			saveDir = file.getParent();
 			if (SBFileFilter.isPNGFile(file)) {
 				ImageIO.write(bufferedImage, "png", file);
 			} else if (SBFileFilter.isJPEGFile(file)) {

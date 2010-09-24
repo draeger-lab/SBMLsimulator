@@ -3,6 +3,10 @@
 <properties>
   <comment>This file captures the default configuration of SBMLsimulator</comment>
   
+  <!-- Command-line argument values -->
+  <entry key="SBML_FILE"></entry>
+  <entry key="TIME_SERIES_FILE"></entry>
+  
   <!-- General -->
   <entry key="OPEN_DIR">user.home</entry>
   <entry key="SAVE_DIR">user.home</entry>
