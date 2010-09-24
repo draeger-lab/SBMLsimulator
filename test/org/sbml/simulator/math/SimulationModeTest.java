@@ -1,14 +1,11 @@
 package org.sbml.simulator.math;
 
-import java.io.IOException;
 import java.util.Properties;
-
-import javax.swing.JOptionPane;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.resources.Resource;
 import org.sbml.jsbml.xml.stax.SBMLReader;
-import org.sbml.simulator.gui.SimulationUI;
+import org.sbml.simulator.gui.SimulatorUI;
 import org.sbml.squeezer.CfgKeys;
 
 /**
@@ -21,15 +18,15 @@ public class SimulationModeTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-//		try {
-//			System.loadLibrary("sbmlj");
-//			// Extra check to be sure we have access to libSBML:
-//			Class.forName("org.sbml.libsbml.libsbml");
-//		} catch (Exception e) {
-//			System.err.println("Error: could not load the libSBML library");
-//			e.printStackTrace();
-//			System.exit(1);
-//		}
+		// try {
+		// System.loadLibrary("sbmlj");
+		// // Extra check to be sure we have access to libSBML:
+		// Class.forName("org.sbml.libsbml.libsbml");
+		// } catch (Exception e) {
+		// System.err.println("Error: could not load the libSBML library");
+		// e.printStackTrace();
+		// System.exit(1);
+		// }
 		new SimulationModeTest(args[0]);
 	}
 
@@ -40,12 +37,12 @@ public class SimulationModeTest {
 			testCasesDir += "/";
 		}
 
-		Properties settings = new Properties(); 
-//			SBMLsqueezer.getProperties();
-//		settings.put(CfgKeys.CHECK_FOR_UPDATES, Boolean.valueOf(false));
+		Properties settings = new Properties();
+		// SBMLsqueezer.getProperties();
+		// settings.put(CfgKeys.CHECK_FOR_UPDATES, Boolean.valueOf(false));
 
-//		SBMLio sbmlIo = new SBMLio(new LibSBMLReader(), new LibSBMLWriter());
-//		SBMLsqueezerUI gui = new SBMLsqueezerUI(sbmlIo, settings);
+		// SBMLio sbmlIo = new SBMLio(new LibSBMLReader(), new LibSBMLWriter());
+		// SBMLsqueezerUI gui = new SBMLsqueezerUI(sbmlIo, settings);
 
 		// 919
 		for (int modelnr = 1; modelnr < 2; modelnr++)
@@ -78,23 +75,16 @@ public class SimulationModeTest {
 				settings.put(CfgKeys.SIM_END_TIME, Double.valueOf(end));
 				settings.put(CfgKeys.SIM_STEP_SIZE, Double.valueOf(stepsize));
 
-//				sbmlIo.convert2Model(sbmlfile);
+				// sbmlIo.convert2Model(sbmlfile);
 
 				Model model = SBMLReader.readSBML(sbmlfile).getModel();
 				if (model != null) {
-					SimulationUI d = new SimulationUI(model, settings);
-					d.setSelectedQuantities(cfg.get("variables").toString().trim()
-							.split(", "));
-					if (csvfile != null)
-						try {
-							d.openExperimentalData(csvfile);
-						} catch (IOException exc) {
-							exc.printStackTrace();
-							JOptionPane
-									.showMessageDialog(null, exc.getMessage(),
-											exc.getClass().getSimpleName(),
-											JOptionPane.ERROR_MESSAGE);
-						}
+					SimulatorUI d = new SimulatorUI(model, settings);
+					d.setSelectedQuantities(cfg.get("variables").toString()
+							.trim().split(", "));
+					if (csvfile != null) {
+						d.openExperimentalData(csvfile);
+					}
 					d.simulate();
 					d.setVisible(true);
 				}
@@ -103,7 +93,7 @@ public class SimulationModeTest {
 				e.printStackTrace();
 			}
 
-//		gui.dispose();
+		// gui.dispose();
 		System.exit(0);
 	}
 

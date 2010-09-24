@@ -48,6 +48,7 @@ import javax.swing.UIManager;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.xml.stax.SBMLReader;
+import org.sbml.jsbml.xml.stax.SBMLWriter;
 import org.sbml.optimization.EvA2GUIStarter;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.SBMLsimulator;
@@ -65,7 +66,7 @@ import eva2.client.EvAClient;
  * @date 2010-04-15
  * 
  */
-public class SimulationUI extends JFrame implements ActionListener,
+public class SimulatorUI extends JFrame implements ActionListener,
 		ItemListener, WindowListener {
 
 	/**
@@ -93,9 +94,9 @@ public class SimulationUI extends JFrame implements ActionListener,
 		 */
 		HELP_ONLINE,
 		/**
-		 * Open file with experimental data.
+		 * Open file with experimental data or the model file.
 		 */
-		OPEN_DATA,
+		OPEN,
 		/**
 		 * Close experimental data or SBML file.
 		 */
@@ -113,13 +114,21 @@ public class SimulationUI extends JFrame implements ActionListener,
 		 */
 		SAVE_SIMULATION,
 		/**
+		 * Save the optimized model in an SBML file
+		 */
+		SAVE_MODEL,
+		/**
 		 * Adjust user's preferences
 		 */
 		SETTINGS,
 		/**
 		 * Start a new simulation with the current settings.
 		 */
-		SIMULATION_START
+		SIMULATION_START,
+		/**
+		 * Whether or not to display a tool bar below the plot.
+		 */
+		SHOW_OPTIONS
 	}
 
 	/**
@@ -155,7 +164,7 @@ public class SimulationUI extends JFrame implements ActionListener,
 	/**
 	 * 
 	 */
-	public SimulationUI() {
+	public SimulatorUI() {
 		super(defaultTitle);
 
 		setProperties(CfgKeys.getProperties());
@@ -181,7 +190,7 @@ public class SimulationUI extends JFrame implements ActionListener,
 	 * @param owner
 	 * @param model
 	 */
-	public SimulationUI(Model model) {
+	public SimulatorUI(Model model) {
 		this(model, new SimulationPanel(model));
 	}
 
@@ -191,7 +200,7 @@ public class SimulationUI extends JFrame implements ActionListener,
 	 * @param model
 	 * @param settings
 	 */
-	public SimulationUI(Model model, Properties settings) {
+	public SimulatorUI(Model model, Properties settings) {
 		this(model, new SimulationPanel(model, settings));
 	}
 
@@ -201,10 +210,12 @@ public class SimulationUI extends JFrame implements ActionListener,
 	 * @param model
 	 * @param simulationPanel
 	 */
-	public SimulationUI(Model model, SimulationPanel simulationPanel) {
+	public SimulatorUI(Model model, SimulationPanel simulationPanel) {
 		this();
 		simPanel = simulationPanel;
 		getContentPane().add(simPanel, BorderLayout.CENTER);
+		setOptimalSize();
+		setLocationRelativeTo(null);
 	}
 
 	/*
@@ -221,7 +232,7 @@ public class SimulationUI extends JFrame implements ActionListener,
 		case SIMULATION_START:
 			simulate();
 			break;
-		case OPEN_DATA:
+		case OPEN:
 			if (simPanel == null) {
 				openModel();
 			} else {
@@ -229,13 +240,16 @@ public class SimulationUI extends JFrame implements ActionListener,
 			}
 			break;
 		case CLOSE_DATA:
-			closeData();
+			close();
 			break;
 		case SAVE_PLOT_IMAGE:
 			simPanel.savePlotImage();
 			break;
 		case SAVE_SIMULATION:
 			simPanel.saveSimulationResults();
+			break;
+		case SAVE_MODEL:
+			saveModel(simPanel.getModel());
 			break;
 		case SETTINGS:
 			adjustPreferences();
@@ -272,15 +286,41 @@ public class SimulationUI extends JFrame implements ActionListener,
 		case OPTIMIZATION:
 			new Thread(new Runnable() {
 				public void run() {
-					startOptimization();
+					optimize();
 				}
 			}).start();
+			break;
+		case SHOW_OPTIONS:
+			// treated in {@link #itemStateChanged(ItemEvent)
 			break;
 		default:
 			JOptionPane.showMessageDialog(this, "Invalid option "
 					+ e.getActionCommand(), "Warning",
 					JOptionPane.WARNING_MESSAGE);
 			break;
+		}
+	}
+
+	/**
+	 * 
+	 * @param model
+	 */
+	public void saveModel(Model model) {
+		File f = GUITools.saveFileDialog(this, CfgKeys.SAVE_DIR.getProperty()
+				.toString(), false, false, JFileChooser.FILES_ONLY,
+				SBFileFilter.SBML_FILE_FILTER);
+		if (f != null) {
+			try {
+				SBMLWriter.write(model.getSBMLDocument(), f,
+						SBMLsimulator.class.getSimpleName(), SBMLsimulator
+								.getVersionNumber());
+				// TODO Just for debugging:
+				SBMLWriter.write(model.getSBMLDocument(), System.out);
+				CfgKeys.SAVE_DIR.putProperty(f.getParent());
+			} catch (Exception exc) {
+				exc.printStackTrace();
+				GUITools.showErrorMessage(this, exc);
+			}
 		}
 	}
 
@@ -311,7 +351,7 @@ public class SimulationUI extends JFrame implements ActionListener,
 	/**
 	 * 
 	 */
-	public void closeData() {
+	public void close() {
 		if (simPanel != null) {
 			if (simPanel.isSetExperimentalData()) {
 				simPanel.closeExperimentalData();
@@ -327,8 +367,11 @@ public class SimulationUI extends JFrame implements ActionListener,
 				setOptimalSize();
 				setTitle(defaultTitle);
 			}
-			GUITools
-					.setEnabled(true, getJMenuBar(), toolbar, Command.OPEN_DATA);
+			GUITools.setEnabled(true, getJMenuBar(), toolbar, Command.OPEN);
+		}
+		if (simPanel == null) {
+			GUITools.setEnabled(false, getJMenuBar(), toolbar,
+					Command.SHOW_OPTIONS, Command.SAVE_MODEL);
 		}
 	}
 
@@ -343,14 +386,18 @@ public class SimulationUI extends JFrame implements ActionListener,
 		 * File
 		 */
 		JMenuItem openItem = GUITools.createJMenuItem("Open", this,
-				Command.OPEN_DATA, GUITools.getIconFolder(), KeyStroke
-						.getKeyStroke('O', InputEvent.CTRL_DOWN_MASK));
+				Command.OPEN, GUITools.getIconFolder(), KeyStroke.getKeyStroke(
+						'O', InputEvent.CTRL_DOWN_MASK));
 		JMenuItem closeItem = GUITools.createJMenuItem("Close", this,
 				Command.CLOSE_DATA, GUITools.getIconTrash(), KeyStroke
 						.getKeyStroke('W', KeyEvent.CTRL_DOWN_MASK));
+		JMenuItem saveModel = GUITools.createJMenuItem("Save model", this,
+				Command.SAVE_MODEL, GUITools.getIconSave(), KeyStroke
+						.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK), 'S',
+				false);
 		JMenuItem saveSimItem = GUITools.createJMenuItem("Save simulation",
 				this, Command.SAVE_SIMULATION, GUITools.getIconSave(),
-				KeyStroke.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK));
+				KeyStroke.getKeyStroke('E', InputEvent.CTRL_DOWN_MASK));
 		JMenuItem savePlotItem = GUITools.createJMenuItem("Save plot", this,
 				Command.SAVE_PLOT_IMAGE, GUITools.getIconCamera(), KeyStroke
 						.getKeyStroke('S', KeyEvent.ALT_DOWN_MASK));
@@ -359,7 +406,7 @@ public class SimulationUI extends JFrame implements ActionListener,
 						InputEvent.ALT_DOWN_MASK));
 
 		JMenu fileMenu = GUITools.createJMenu("File", openItem, closeItem,
-				saveSimItem, savePlotItem, exitItem);
+				saveModel, saveSimItem, savePlotItem, exitItem);
 
 		/*
 		 * Edit
@@ -374,7 +421,10 @@ public class SimulationUI extends JFrame implements ActionListener,
 
 		JCheckBoxMenuItem item = new JCheckBoxMenuItem("Show options",
 				simPanel != null ? simPanel.isShowSettingsPanel() : true);
-		item.setName("OPTIONS");
+		if (simPanel == null) {
+			item.setEnabled(false);
+		}
+		item.setActionCommand(Command.SHOW_OPTIONS.toString());
 		item.addItemListener(this);
 		editMenu.add(item);
 
@@ -421,7 +471,7 @@ public class SimulationUI extends JFrame implements ActionListener,
 		 */
 		ImageIcon icon = GUITools.getIconFolder();
 		if (icon != null)
-			toolbar.add(GUITools.createButton(icon, this, Command.OPEN_DATA,
+			toolbar.add(GUITools.createButton(icon, this, Command.OPEN,
 					"Load  experimental data from file."));
 		icon = GUITools.getIconTrash();
 		if (icon != null) {
@@ -501,7 +551,9 @@ public class SimulationUI extends JFrame implements ActionListener,
 	public void itemStateChanged(ItemEvent e) {
 		if (e.getSource() instanceof JCheckBoxMenuItem) {
 			JCheckBoxMenuItem item = (JCheckBoxMenuItem) e.getSource();
-			if ((item.getName() != null) && (item.getName().equals("OPTIONS"))) {
+			if ((item.getActionCommand() != null)
+					&& (item.getActionCommand().equals(Command.SHOW_OPTIONS
+							.toString()))) {
 				simPanel.setShowSettingsPanel(item.isSelected());
 			}
 		}
@@ -515,62 +567,71 @@ public class SimulationUI extends JFrame implements ActionListener,
 				.getProperty().toString(), false, false,
 				JFileChooser.FILES_ONLY, SBFileFilter.CSV_FILE_FILTER);
 		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-			try {
-				openExperimentalData(chooser.getSelectedFile());
-			} catch (Exception exc) {
-				exc.printStackTrace();
-				GUITools.showErrorMessage(this, exc);
-			}
+			openExperimentalData(chooser.getSelectedFile());
 		}
 	}
 
 	/**
 	 * 
 	 * @param file
-	 * @throws Exception
 	 */
-	public void openExperimentalData(File file) throws Exception {
-		CfgKeys.OPEN_DIR.putProperty(file.getParent());
+	public void openExperimentalData(File file) {
 		CSVDataImporter importer = new CSVDataImporter();
 		Model model = simPanel.getModel();
-		MultiBlockTable data = importer.convert(model, file.getAbsolutePath());
-		if (data != null) {
-			simPanel.setExperimentalData(data);
-			GUITools.setEnabled(false, getJMenuBar(), toolbar,
-					Command.OPEN_DATA);
-			GUITools.setEnabled(true, getJMenuBar(), toolbar,
-					Command.CLOSE_DATA);
-			// Optimization should not be available if there is nothing to
-			// optimize.
-			GUITools.setEnabled(model.getNumQuantities()
-					- model.getNumSpeciesReferences() > 0, getJMenuBar(),
-					toolbar, Command.OPTIMIZATION);
+		try {
+			MultiBlockTable data = importer.convert(model, file
+					.getAbsolutePath());
+			if (data != null) {
+				simPanel.setExperimentalData(data);
+				GUITools
+						.setEnabled(false, getJMenuBar(), toolbar, Command.OPEN);
+				GUITools.setEnabled(true, getJMenuBar(), toolbar,
+						Command.CLOSE_DATA);
+				// Optimization should not be available if there is nothing to
+				// optimize.
+				GUITools.setEnabled(model.getNumQuantities()
+						- model.getNumSpeciesReferences() > 0, getJMenuBar(),
+						toolbar, Command.OPTIMIZATION);
+			}
+			CfgKeys.OPEN_DIR.putProperty(file.getParent());
+		} catch (Exception exc) {
+			exc.printStackTrace();
+			GUITools.showErrorMessage(this, exc);
 		}
 	}
 
 	/**
 	 * 
 	 * @param path
-	 * @throws Exception
 	 */
-	public void openExperimentalData(String path) throws Exception {
-		openExperimentalData(new File(path));
+	public void openExperimentalData(String path) {
+		try {
+			openExperimentalData(new File(path));
+		} catch (Exception exc) {
+			exc.printStackTrace();
+			GUITools.showErrorMessage(this, exc);
+		}
 	}
 
 	/**
 	 * 
 	 */
 	public void openModel() {
-		JFileChooser chooser = GUITools.createJFileChooser(CfgKeys.OPEN_DIR
-				.getProperty().toString(), false, false,
-				JFileChooser.FILES_ONLY, SBFileFilter.SBML_FILE_FILTER);
-		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+		openModel(GUITools.openFileDialog(this, CfgKeys.OPEN_DIR.getProperty()
+				.toString(), false, false, JFileChooser.FILES_ONLY,
+				SBFileFilter.SBML_FILE_FILTER));
+	}
+
+	/**
+	 * 
+	 * @param file
+	 */
+	public void openModel(File file) {
+		if (file != null) {
 			try {
-				SBMLDocument doc = SBMLReader.readSBML(chooser
-						.getSelectedFile());
+				SBMLDocument doc = SBMLReader.readSBML(file);
 				if ((doc != null) && (doc.isSetModel())) {
-					CfgKeys.OPEN_DIR.putProperty(chooser.getSelectedFile()
-							.getParent());
+					CfgKeys.OPEN_DIR.putProperty(file.getParent());
 					simPanel = new SimulationPanel(doc.getModel(), CfgKeys
 							.getProperties());
 					if (GUITools.contains(getContentPane(), simPanel)) {
@@ -578,16 +639,15 @@ public class SimulationUI extends JFrame implements ActionListener,
 					}
 					getContentPane().add(simPanel, BorderLayout.CENTER);
 					setOptimalSize();
-					setTitle(defaultTitle + " - "
-							+ chooser.getSelectedFile().getName());
+					setTitle(defaultTitle + " - " + file.getName());
 					GUITools.setEnabled(true, getJMenuBar(), toolbar,
-							Command.SAVE_PLOT_IMAGE, Command.SIMULATION_START,
-							Command.CLOSE_DATA);
+							Command.SAVE_PLOT_IMAGE, Command.SAVE_MODEL,
+							Command.SIMULATION_START, Command.CLOSE_DATA,
+							Command.SHOW_OPTIONS);
 				} else {
 					JOptionPane.showMessageDialog(this, GUITools.toHTML(
-							"Could not open model "
-									+ chooser.getSelectedFile()
-											.getAbsolutePath(), 40));
+							"Could not open model " + file.getAbsolutePath(),
+							60));
 				}
 			} catch (Exception exc) {
 				exc.printStackTrace();
@@ -653,8 +713,8 @@ public class SimulationUI extends JFrame implements ActionListener,
 	/**
 	 * 
 	 */
-	public void startOptimization() {
-		Model model = simPanel.getModel().clone();
+	public void optimize() {
+		Model model = simPanel.getModel().getSBMLDocument().clone().getModel();
 		QuantitySelectionPanel panel = new QuantitySelectionPanel(model);
 		if (JOptionPane.showConfirmDialog(this, panel,
 				"Select quantities for optimization",
@@ -663,6 +723,9 @@ public class SimulationUI extends JFrame implements ActionListener,
 			try {
 				simPanel.notifyQuantitiesSelected(panel
 						.getSelectedQuantityIds());
+				GUITools.setEnabled(false, getJMenuBar(), toolbar,
+						Command.SIMULATION_START, Command.CLOSE_DATA,
+						Command.OPTIMIZATION, Command.SETTINGS);
 				EvA2GUIStarter.init(new EstimationProblem(simPanel.getSolver(),
 						simPanel.getDistance(), model, simPanel
 								.getExperimentalData(),
@@ -708,6 +771,10 @@ public class SimulationUI extends JFrame implements ActionListener,
 			if ((frame.getName() != null)
 					&& (frame.getName().equals(EvAClient.class.getSimpleName()))) {
 				simPanel.setAllEnabled(true);
+				GUITools.setEnabled(true, getJMenuBar(), toolbar,
+						Command.SAVE_MODEL, Command.SIMULATION_START,
+						Command.CLOSE_DATA, Command.OPTIMIZATION,
+						Command.SETTINGS);
 			}
 		}
 	}

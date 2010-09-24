@@ -29,8 +29,10 @@ import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.Reaction;
+import org.sbml.jsbml.util.StringTools;
 import org.sbml.jsbml.util.ValuePair;
 import org.sbml.optimization.QuantityRange;
+import org.sbml.squeezer.util.HTMLFormula;
 
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;
@@ -97,13 +99,15 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 			checkbox.setToolTipText(GUITools.toHTML(String.format(
 					checkBoxToolTip, className, name), 40));
 			minInitSpinner.setToolTipText(GUITools.toHTML(String.format(
-					initMinMaxSpinnerToolTip, "minimum", className, name), 40));
+					INIT_MIN_MAX_SPINNER_TOOL_TIP, MINIMUM, className, name),
+					40));
 			maxInitSpinner.setToolTipText(GUITools.toHTML(String.format(
-					initMinMaxSpinnerToolTip, "maximum", className, name), 40));
+					INIT_MIN_MAX_SPINNER_TOOL_TIP, MAXIMUM, className, name),
+					40));
 			minSpinner.setToolTipText(GUITools.toHTML(String.format(
-					minMaxSpinnerToolTip, "minimum", className, name), 40));
+					MIN_MAX_SPINNER_TOOL_TIP, MINIMUM, className, name), 40));
 			maxSpinner.setToolTipText(GUITools.toHTML(String.format(
-					minMaxSpinnerToolTip, "maximum", className, name), 40));
+					MIN_MAX_SPINNER_TOOL_TIP, MAXIMUM, className, name), 40));
 		}
 
 		/**
@@ -216,17 +220,11 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		 */
 		@Override
 		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			sb.append('[');
-			sb.append(quantity.toString());
-			sb.append(", ");
-			sb.append(isSelected());
-			sb.append(", ");
-			sb.append(getMinimum());
-			sb.append(", ");
-			sb.append(getMaximum());
-			sb.append(']');
-			return sb.toString();
+			return StringTools.concat(Character.valueOf('['), quantity, ", ",
+					Boolean.valueOf(isSelected()), ": initRange(",
+					getInitialMinimum(), ", ", getInitialMaximum(),
+					"), absolutRange(", getMinimum(), ", ", getMaximum(), ")]")
+					.toString();
 		}
 	}
 
@@ -234,11 +232,15 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	 * Template {@link String} to be displayed as explanation for the minimum
 	 * and maximum {@link JSpinner}s.
 	 */
-	private static final String minMaxSpinnerToolTip = "Select the absolute %s allowable value for this %s named %s.";
+	private static final String MIN_MAX_SPINNER_TOOL_TIP = "Select the absolute %s allowable value for this %s named %s.";
 	/**
 	 * Template tool tip for the the initialization {@link JSpinner}s.
 	 */
-	private static final String initMinMaxSpinnerToolTip = "Select the %s allowable value for this %s named %s in the initialization.";
+	private static final String INIT_MIN_MAX_SPINNER_TOOL_TIP = "Select the %s allowable value for this %s named %s in the initialization.";
+	/**
+	 * The words for minimum and maximum.
+	 */
+	private static final String MINIMUM = "minimum", MAXIMUM = "maximum";
 
 	/**
 	 * Template tool tip for the {@link JCheckBox}es to switch the values on or
@@ -268,7 +270,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	/**
 	 * @return the serialversionuid
 	 */
-	public static long getSerialversionuid() {
+	public static long getSerialVersionUId() {
 		return serialVersionUID;
 	}
 
@@ -307,12 +309,12 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	/**
 	 * Text to explain what the user is supposed to do here.
 	 */
-	private static final String explanation = "Please select the model components, whose values are to be optimized. You can also change the allowable ranges for each element.";
+	private static final String EXPLANATION = "Please select the model components, whose values are to be optimized. You can also change the allowable ranges for each element.";
 
 	/**
 	 * Tool tip that explains the purpose of each tab.
 	 */
-	private static final String tabToolTip = "In this tab you can select the %s in the model whose values are to be optimized.";
+	private static final String TAB_TOOL_TIP = "In this tab you can select the %s in the model whose values are to be optimized.";
 
 	/**
 	 * This pane displays all selections for each group of different
@@ -328,8 +330,10 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		this.model = model;
 		quantityBlocks = new QuantityBlock[model.getNumSymbols()
 				+ model.getNumLocalParameters()];
+		// One button each for every group of elements
 		selectAllButtons = new JButton[4];
 		deselectAllButtons = new JButton[4];
+
 		tabs = new JTabbedPane();
 		int curr = 0;
 		tabs.add(COMPARTMENTS, createQuantityPanel(model
@@ -347,17 +351,17 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		 * Enable tabs with selectable elements and disable all others.
 		 */
 		tabs.setEnabledAt(3, model.getNumLocalParameters() > 0);
-		tabs.setToolTipTextAt(3, GUITools.toHTML(String.format(tabToolTip,
-				"local parameters"), 40));
+		tabs.setToolTipTextAt(3, GUITools.toHTML(String.format(TAB_TOOL_TIP,
+				LOCAL_PARAMETERS), 40));
 		tabs.setEnabledAt(2, model.getNumParameters() > 0);
-		tabs.setToolTipTextAt(2, GUITools.toHTML(String.format(tabToolTip,
-				"global parameters"), 40));
+		tabs.setToolTipTextAt(2, GUITools.toHTML(String.format(TAB_TOOL_TIP,
+				GLOBAL_PARAMETERS), 40));
 		tabs.setEnabledAt(1, model.getNumSpecies() > 0);
-		tabs.setToolTipTextAt(1, GUITools.toHTML(String.format(tabToolTip,
-				"species"), 40));
+		tabs.setToolTipTextAt(1, GUITools.toHTML(String.format(TAB_TOOL_TIP,
+				SPECIES), 40));
 		tabs.setEnabledAt(0, model.getNumCompartments() > 0);
-		tabs.setToolTipTextAt(0, GUITools.toHTML(String.format(tabToolTip,
-				"compartments"), 40));
+		tabs.setToolTipTextAt(0, GUITools.toHTML(String.format(TAB_TOOL_TIP,
+				COMPARTMENTS), 40));
 		int i = 3;
 		while ((i < tabs.getTabCount()) && (!tabs.isEnabledAt(i))) {
 			i--;
@@ -395,7 +399,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		}
 
 		LayoutHelper lh = new LayoutHelper(this);
-		lh.add(new JLabel(GUITools.toHTML(explanation, 60)));
+		lh.add(new JLabel(GUITools.toHTML(EXPLANATION, 60)));
 		lh.add(tabs);
 	}
 
@@ -516,11 +520,12 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		LayoutHelper lh = new LayoutHelper(new JPanel());
 		boolean isLocalParameter = false;
 		boolean select = true;
-		lh.add(new JLabel(), new JLabel("<html>initial<br/>minimum</html>"),
-				new JLabel("<html>initial<br/>maximum</html>"), new JSeparator(
-						JSeparator.VERTICAL), new JLabel(
-						"<html>absolute<br/>minimum</html>"), new JLabel(
-						"<html>absolute<br/>maximum</html>"));
+		JSeparator sep = new JSeparator(JSeparator.VERTICAL);
+		lh.add(true, new JLabel(), new JLabel("<html>initial<br/>minimum</html>"),
+				new JLabel("<html>initial<br/>maximum</html>"), sep,
+				new JLabel("<html>absolute<br/>minimum</html>"), new JLabel(
+						"<html>absolute<br/>maximum</html>"), sep, new JLabel(
+						"<html>derived<br/>unit</html>"));
 		for (Quantity q : listOfQuantities) {
 			isLocalParameter |= q instanceof LocalParameter;
 			select = isLocalParameter || (q instanceof Parameter);
@@ -541,8 +546,10 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 
 			quantityBlocks[curr++] = new QuantityBlock(q, chck, minInit,
 					maxInit, min, max);
-			lh.add(chck, minInit, maxInit, new JSeparator(JSeparator.VERTICAL),
-					min, max);
+			lh.add(true, chck, minInit, maxInit, sep, min, max, sep, new JLabel(
+					StringTools.concat("<html>",
+							HTMLFormula.toHTML(q.getDerivedUnitDefinition()),
+							"</html>").toString()));
 		}
 		if (!isLocalParameter) {
 			return finishContainer(lh, tabIndex, select, listOfQuantities
@@ -623,7 +630,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		}
 		return quantityList.toArray(new Quantity[0]);
 	}
-	
+
 	/**
 	 * 
 	 * @return
