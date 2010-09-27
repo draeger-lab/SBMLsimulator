@@ -54,6 +54,7 @@ import org.sbml.jsbml.validator.OverdeterminationValidator;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.math.odes.DESAssignment;
 import org.sbml.simulator.math.odes.EventDESystem;
+import org.sbml.simulator.math.odes.FastProcessDESystem;
 import org.sbml.simulator.math.odes.IntegrationException;
 import org.sbml.simulator.math.odes.RichDESystem;
 
@@ -71,7 +72,7 @@ import org.sbml.simulator.math.odes.RichDESystem;
  * @date 2007-09-06
  */
 public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
-		RichDESystem {
+		RichDESystem, FastProcessDESystem {
 
 	/**
 	 * Generated serial version UID
@@ -804,7 +805,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	 * 
 	 * @see eva2.tools.math.des.RichDESystem#getIntermediateIds()
 	 */
-	public String[] getIntermediateIds() {
+	public String[] getAdditionalValueIds() {
 		String ids[] = new String[v.length];
 		int i = 0;
 		for (Reaction r : model.getListOfReactions()) {
@@ -818,15 +819,19 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	 * 
 	 * @see eva2.tools.math.des.RichDESystem#getIntermediates(double, double[])
 	 */
-	public double[] getIntermediates(double t, double[] Y)
+	public double[] getAdditionalValues(double t, double[] Y)
 			throws IntegrationException {
-		if ((t != currentTime) || ((Y != this.Y) && !Arrays.equals(Y, this.Y))) {
+		if ((t - currentTime > 1E-15)
+				|| ((Y != this.Y) && !Arrays.equals(Y, this.Y))) {
 			/*
 			 * We have to compute the system for the given state. But we are not
 			 * interested in the rates of change, but only in the reaction
 			 * velocities. Therefore, we throw away the results into a senseless
 			 * array.
 			 */
+			System.out.printf("%s\t%s\n", currentTime, t);
+			System.out.printf("this.Y = %s\n     Y = %s\n", Arrays
+					.toString(this.Y), Arrays.toString(Y));
 			getValue(t, Y);
 		}
 		return v;
@@ -864,7 +869,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	 * 
 	 * @see eva2.tools.math.des.RichDESystem#getNumIntermediates()
 	 */
-	public int getNumIntermediates() {
+	public int getNumAdditionalValues() {
 		return v.length;
 	}
 
@@ -1933,6 +1938,23 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 			}
 		}
 		return new ASTNodeValue(value, this);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.odes.FastProcessDESystem#containsFastProcesses()
+	 */
+	public boolean containsFastProcesses() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.odes.FastProcessDESystem#setFastProcessComputation(boolean)
+	 */
+	public void setFastProcessComputation(boolean isProcessing) {
+		// TODO Auto-generated method stub	
 	}
 
 }

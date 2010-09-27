@@ -218,9 +218,9 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		try {
 			interpreter.init();
 			MultiBlockTable solution = multishoot ? solver.solve(interpreter,
-					referenceData.getBlock(0)) : solver.solve(interpreter,
-					interpreter.getInitialValues(), referenceData
-							.getTimePoints());
+					referenceData.getBlock(0), interpreter.getInitialValues())
+					: solver.solve(interpreter, interpreter.getInitialValues(),
+							referenceData.getTimePoints());
 			fitness[0] = distance.distance(solution.getBlock(0), referenceData
 					.getBlock(0));
 			if (bestPerGeneration == null
