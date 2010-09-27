@@ -644,6 +644,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 *            correct {@link Model} and data set.
 	 */
 	void setCurrentDistance(double value) {
+		distField.setValue(value);
 		if ((value < 1E-5) || (1E5 < value)) {
 			distField.setText(SCIENTIFIC_FORMAT.format(value));
 		} else {

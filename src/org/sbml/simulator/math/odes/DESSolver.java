@@ -10,6 +10,8 @@ package org.sbml.simulator.math.odes;
 
 import java.io.Serializable;
 
+import org.sbml.simulator.math.odes.MultiBlockTable.Block;
+
 /**
  * A {@link DESSolver} provides algorithm for the numerical simulation of given
  * {@link DESystem}s.
@@ -51,12 +53,26 @@ public interface DESSolver extends Serializable {
 	 * the initial values from this state.
 	 * 
 	 * @param DES
-	 * @param initConditions
-	 * @return
+	 *            The {@link DESystem} to be simulated.
+	 * @param timeSeriesInitConditions
+	 *            A time series of initial conditions for each time point. In
+	 *            some cases the dimension of the given {@link DESystem} may
+	 *            exceed the number of columns in this given time-series. Thus,
+	 *            for the initialization of the simulation a full vector of
+	 *            initial values is required and must be passed to this method
+	 *            as a separate double array.
+	 * @param initialValues
+	 *            An array of all initial values. This array may exceed the
+	 *            number of columns in the given {@link Block} but its length
+	 *            must equal the dimension of the given {@link DESystem}.
+	 * @return A new {@link MultiBlockTable} containing a time series of the
+	 *         same dimension as given by the {@link DESystem} and simulated
+	 *         values at each time point.
 	 * @throws IntegrationException
 	 */
 	public MultiBlockTable solve(DESystem DES,
-			MultiBlockTable.Block initConditions) throws IntegrationException;
+			MultiBlockTable.Block timeSeriesInitConditions,
+			double[] initialValues) throws IntegrationException;
 
 	/**
 	 * Solves the {@link DESystem} from the begin time till the end time

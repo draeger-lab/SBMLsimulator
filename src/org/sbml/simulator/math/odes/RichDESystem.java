@@ -18,12 +18,12 @@ public interface RichDESystem extends DESystem {
 	 * This provides the column/row identifiers of all intermediate results: one
 	 * identifier per result. This means, the length of the returned
 	 * {@link String} array must equal the length of the array returned by
-	 * {@link #getIntermediates(double, double[])}.
+	 * {@link #getAdditionalValues(double, double[])}.
 	 * 
 	 * @return The identifiers of all intermediate results computed during
 	 *         evaluation.
 	 */
-	public String[] getIntermediateIds();
+	public String[] getAdditionalValueIds();
 
 	/**
 	 * Computes and/or delivers the intermediate results at the given time and
@@ -44,18 +44,18 @@ public interface RichDESystem extends DESystem {
 	 *             If the system cannot be solved for the given configuration or
 	 *             no intermediate results can be computed in this step.
 	 */
-	public double[] getIntermediates(double t, double[] Y)
+	public double[] getAdditionalValues(double t, double[] Y)
 			throws IntegrationException;
 
 	/**
 	 * Gives the number of intermediate results that are computed by this class.
 	 * The number returned here must equal the length of the arrays returned by
-	 * the methods {@link #getIntermediateIds()} and
-	 * {@link #getIntermediates(double, double[])}.
+	 * the methods {@link #getAdditionalValueIds()} and
+	 * {@link #getAdditionalValues(double, double[])}.
 	 * 
 	 * @return The number of intermediate values that are computed in each time
 	 *         step.
 	 */
-	public int getNumIntermediates();
+	public int getNumAdditionalValues();
 
 }

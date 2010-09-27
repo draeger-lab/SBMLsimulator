@@ -261,7 +261,7 @@ public abstract class AbstractDESSolver implements DESSolver {
 				.getIdentifiers());
 		data.getBlock(0).setName("Values");
 		if (includeIntermediates && (DES instanceof RichDESystem)) {
-			data.addBlock(((RichDESystem) DES).getIntermediateIds());
+			data.addBlock(((RichDESystem) DES).getAdditionalValueIds());
 			data.getBlock(data.getBlockCount() - 1)
 					.setName("Additional values");
 		}
@@ -387,7 +387,7 @@ public abstract class AbstractDESSolver implements DESSolver {
 			throws IntegrationException {
 		if (includeIntermediates && (DES instanceof RichDESystem)) {
 			MultiBlockTable.Block block = data.getBlock(1);
-			double v[] = ((RichDESystem) DES).getIntermediates(t, yTemp);
+			double v[] = ((RichDESystem) DES).getAdditionalValues(t, yTemp);
 			block.setRowData(rowIndex, v.clone());
 		}
 	}
@@ -525,9 +525,11 @@ public abstract class AbstractDESSolver implements DESSolver {
 	 * eva2.tools.math.des.DESystem, double[][], double[])
 	 */
 	public MultiBlockTable solve(DESystem DES,
-			MultiBlockTable.Block initConditions) throws IntegrationException {
+			MultiBlockTable.Block initConditions, double[] initialValues)
+			throws IntegrationException {
 		double[] timePoints = initConditions.getTimePoints();
-		// TODO: if number of init conditions per time step is not equal the number
+		// TODO: if number of init conditions per time step is not equal the
+		// number
 		// of items to be simulated, this will cause a problem!
 		MultiBlockTable data = initResultMatrix(DES, initConditions.getRow(0),
 				timePoints);
