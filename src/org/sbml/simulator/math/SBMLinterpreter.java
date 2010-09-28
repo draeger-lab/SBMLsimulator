@@ -829,9 +829,6 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 			 * velocities. Therefore, we throw away the results into a senseless
 			 * array.
 			 */
-			System.out.printf("%s\t%s\n", currentTime, t);
-			System.out.printf("this.Y = %s\n     Y = %s\n", Arrays
-					.toString(this.Y), Arrays.toString(Y));
 			getValue(t, Y);
 		}
 		return v;

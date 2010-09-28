@@ -43,7 +43,7 @@ public class MultiBlockTable extends AbstractTableModel implements
 	 * @date 2010-08-31
 	 */
 	public class Block extends AbstractTableModel {
-
+		
 		/**
 		 * A column of the {@link MultiBlockTable.Block} matrix.
 		 * 
@@ -231,6 +231,17 @@ public class MultiBlockTable extends AbstractTableModel implements
 		}
 
 		/**
+		 * Checks whether or not this {@link Block} contains a {@link Column}
+		 * with the given identifier.
+		 * 
+		 * @param id
+		 * @return
+		 */
+		public boolean containsColumn(String id) {
+			return idHash.containsKey(id);
+		}
+
+		/**
 		 * Grants access to the specified column.
 		 * 
 		 * @param columnIndex
@@ -262,6 +273,15 @@ public class MultiBlockTable extends AbstractTableModel implements
 		 */
 		public int getColumnCount() {
 			return identifiers.length;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see javax.swing.table.AbstractTableModel#getColumnName(int)
+		 */
+		@Override
+		public String getColumnName(int column) {
+			return identifiers[column]; 
 		}
 
 		/**
