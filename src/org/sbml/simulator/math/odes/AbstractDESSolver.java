@@ -3,6 +3,9 @@
  */
 package org.sbml.simulator.math.odes;
 
+import java.util.HashMap;
+import java.util.HashSet;
+
 import eva2.tools.math.Mathematics;
 
 /**
@@ -382,9 +385,8 @@ public abstract class AbstractDESSolver implements DESSolver {
 	 * @param rowIndex
 	 * @throws IntegrationException
 	 */
-	private void saveIntermediateResults(DESystem DES, double t,
-			double[] yTemp, MultiBlockTable data, int rowIndex)
-			throws IntegrationException {
+	private void additionalResults(DESystem DES, double t, double[] yTemp,
+			MultiBlockTable data, int rowIndex) throws IntegrationException {
 		if (includeIntermediates && (DES instanceof RichDESystem)) {
 			MultiBlockTable.Block block = data.getBlock(1);
 			double v[] = ((RichDESystem) DES).getAdditionalValues(t, yTemp);
@@ -448,13 +450,13 @@ public abstract class AbstractDESSolver implements DESSolver {
 		// double yPrev[] = new double[initialValues.length];
 		// double yTemp[] = new double[initialValues.length];
 		double t = timeBegin;
-		saveIntermediateResults(DES, t, result[0], data, 0);
+		additionalResults(DES, t, result[0], data, 0);
 		for (int i = 1; i < result.length; i++) {
 			// yPrev = result[i - 1];
 			// System.arraycopy(result[i-1], 0, yPrev, 0, result[i-1].length);
 			t = computeNextState(DES, t, stepSize, result[i - 1], change,
 					result[i], true);
-			saveIntermediateResults(DES, t - stepSize, result[i - 1], data, i);
+			additionalResults(DES, t - stepSize, result[i - 1], data, i);
 			// System.arraycopy(yTemp, 0, result[i], 0, yTemp.length);
 		}
 		return data;
@@ -494,7 +496,7 @@ public abstract class AbstractDESSolver implements DESSolver {
 		double yTemp[] = new double[initialValues.length];
 		double t = timePoints[0];
 		double h = stepSize;
-		saveIntermediateResults(DES, t, result[0], data, 0);
+		additionalResults(DES, t, result[0], data, 0);
 		for (int i = 1; i < timePoints.length; i++) {
 			h = stepSize;
 
@@ -510,7 +512,7 @@ public abstract class AbstractDESSolver implements DESSolver {
 			// System.arraycopy(yTemp, 0, result[i], 0, yTemp.length);
 			t = computeNextState(DES, t, h, yTemp, change, result[i], false);
 
-			saveIntermediateResults(DES, t, yTemp, data, i);
+			additionalResults(DES, t, yTemp, data, i);
 
 			t += h;
 		}
@@ -528,22 +530,40 @@ public abstract class AbstractDESSolver implements DESSolver {
 			MultiBlockTable.Block initConditions, double[] initialValues)
 			throws IntegrationException {
 		double[] timePoints = initConditions.getTimePoints();
-		// TODO: if number of init conditions per time step is not equal the
-		// number
 		// of items to be simulated, this will cause a problem!
-		MultiBlockTable data = initResultMatrix(DES, initConditions.getRow(0),
-				timePoints);
+		MultiBlockTable data = initResultMatrix(DES, initialValues, timePoints);
+		HashMap<String, Integer> idIndex = new HashMap<String, Integer>();
+		HashSet<String> missingIds = new HashSet<String>();
+		int i, j, k;
+		String ids[] = DES.getIdentifiers();
+		for (i = 0; i < ids.length; i++) {
+			if (!initConditions.containsColumn(ids[i])) {
+				missingIds.add(ids[i]);
+			}
+			idIndex.put(ids[i], Integer.valueOf(i));
+		}
 		double[][] result = data.getBlock(0).getData();
 		double[] yTemp = new double[DES.getDESystemDimension()];
 		double[] change = new double[DES.getDESystemDimension()];
 		double t = timePoints[0];
-		saveIntermediateResults(DES, t, result[0], data, 0);
-		for (int i = 1; i < timePoints.length; i++) {
+		additionalResults(DES, t, result[0], data, 0);
+		for (i = 1; i < timePoints.length; i++) {
 			double h = stepSize;
-			System.arraycopy(initConditions.getRow(i - 1), 0, yTemp, 0,
-					yTemp.length);
-			for (int j = 0; j < inBetweenSteps(timePoints[i - 1],
-					timePoints[i], h); j++) {
+			if (!missingIds.isEmpty()) {
+				for (k = 0; k < initConditions.getColumnCount(); k++) {
+					yTemp[idIndex.get(initConditions.getColumnName(k))
+							.intValue()] = initConditions.getValueAt(i - 1,
+							k + 1);
+				}
+				for (String key : missingIds) {
+					k = idIndex.get(key).intValue();
+					yTemp[k] = result[i - 1][k];
+				}
+			} else {
+				System.arraycopy(initConditions.getRow(i - 1), 0, yTemp, 0,
+						yTemp.length);
+			}
+			for (j = 0; j < inBetweenSteps(timePoints[i - 1], timePoints[i], h); j++) {
 				computeChange(DES, yTemp, t, h, change);
 				checkSolution(change);
 				Mathematics.vvAdd(yTemp, change, yTemp);
@@ -556,7 +576,7 @@ public abstract class AbstractDESSolver implements DESSolver {
 			checkNonNegativity(yTemp);
 			System.arraycopy(yTemp, 0, result[i], 0, yTemp.length);
 
-			saveIntermediateResults(DES, t, yTemp, data, i);
+			additionalResults(DES, t, yTemp, data, i);
 
 			t += h;
 		}
