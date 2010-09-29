@@ -523,7 +523,6 @@ public abstract class AbstractDESSolver implements DESSolver {
 
 		additionalResults(DES, t, result[0], data, 0);
 
-
 		if (DES instanceof FastProcessDESystem) {
 			fastFlag = ((FastProcessDESystem) DES).containsFastProcesses();
 		}
@@ -550,7 +549,6 @@ public abstract class AbstractDESSolver implements DESSolver {
 
 			t = computeNextState(DES, t, h, yTemp, change, result[i], false);
 
-
 			if (fastFlag) {
 				steady = computeSteadyState(((FastProcessDESystem) DES),
 						result[i], timePoints[0]);
@@ -558,7 +556,6 @@ public abstract class AbstractDESSolver implements DESSolver {
 			}
 
 			additionalResults(DES, t, yTemp, data, i);
-
 
 			t += h;
 
@@ -639,6 +636,8 @@ public abstract class AbstractDESSolver implements DESSolver {
 		double ft = timeBegin;
 		((FastProcessDESystem) DES).setFastProcessComputation(true);
 
+		// TODO what if there is oscillation, so no state with no change will be
+		// reached
 		while (!noChange(oldValues, newValues)) {
 			System.arraycopy(newValues, 0, oldValues, 0, newValues.length);
 			newValues = new double[result.length];
