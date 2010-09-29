@@ -1164,8 +1164,11 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 				hasFastReactions = true;
 			}
 			if (model.getReaction(i).getKineticLaw() != null) {
-				model.getReaction(i).getKineticLaw().getMath()
-						.updateVariables();
+				if (model.getReaction(i).getKineticLaw().getListOfParameters()
+						.size() > 0) {
+					model.getReaction(i).getKineticLaw().getMath()
+							.updateVariables();
+				}
 			}
 
 		}
