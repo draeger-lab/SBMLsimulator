@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.sbml.jsbml.ASTNode;
 import org.sbml.jsbml.AssignmentRule;
@@ -166,13 +167,6 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	protected Model model;
 
 	/**
-	 * This array is to avoid to allocate memory repeatedly. It stores the
-	 * values computed during the linear combination of velocities. These values
-	 * are passed to the array Y afterwards.
-	 */
-	protected double[] swap;
-
-	/**
 	 * Hashes the name of all compartments, species, and global parameters to an
 	 * value object which contains the position in the Y vector
 	 */
@@ -196,6 +190,17 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	 * system.
 	 */
 	protected double[] Y;
+
+	/**
+	 * A boolean indicating whether the solver is currently processing fast
+	 * reactions or not
+	 */
+	private boolean isProcessingFastReactions = false;
+
+	/**
+	 * A boolean indicating whether a model has fast reactions or not.
+	 */
+	private boolean hasFastReactions = false;
 
 	/**
 	 * <p>
@@ -458,6 +463,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 									this);
 						}
 					}
+
 				}
 			}
 			symbolIndex = symbolHash.get(nsb.getId());
@@ -617,9 +623,43 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	private void evaluateRateRule(RateRule rr, double changeRate[])
 			throws SBMLException {
 		int speciesIndex;
+		isProcessingVelocities = true;
+
 		// get symbol and assign its new rate
 		speciesIndex = symbolHash.get(rr.getVariable());
-		changeRate[speciesIndex] = rr.getMath().compile(this).toDouble();
+		// changeRate[speciesIndex] = rr.getMath().compile(this).toDouble();
+
+		changeRate[speciesIndex] = processAssignmentVaribale(rr.getVariable(),
+				rr.getMath());
+		// when the size of a compartment changes, the concentrations of the
+		// species located in this compartment have to change as well
+		if (compartmentHash.containsValue(speciesIndex)) {
+			updateSpeciesConcentration(speciesIndex, changeRate);
+		}
+		isProcessingVelocities = false;
+	}
+
+	/**
+	 * Updates the concentration of species due to a change in the size of their
+	 * compartment
+	 * 
+	 * @param compartmentIndex
+	 */
+	private void updateSpeciesConcentration(int compartmentIndex,
+			double changeRate[]) {
+		int speciesIndex;
+		Species s;
+		for (Entry<String, Integer> entry : compartmentHash.entrySet()) {
+			if (entry.getValue() == compartmentIndex) {
+				s = model.getSpecies(entry.getKey());
+				if (s.isSetInitialConcentration()) {
+					speciesIndex = symbolHash.get(entry.getKey());
+					changeRate[speciesIndex] = -changeRate[compartmentIndex]
+							* Y[speciesIndex] / Y[compartmentIndex];
+				}
+
+			}
+		}
 
 	}
 
@@ -947,7 +987,6 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	 */
 	public void getValue(double time, double[] Y, double[] changeRate)
 			throws IntegrationException {
-
 		this.currentTime = time;
 		this.Y = Y;
 
@@ -1117,6 +1156,21 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		}
 
 		/*
+		 * Check for fast reactions & update math of kinetic law to avoid wrong
+		 * links concerning local parameters
+		 */
+		for (i = 0; i < model.getNumReactions(); i++) {
+			if (model.getReaction(i).isFast() && !hasFastReactions) {
+				hasFastReactions = true;
+			}
+			if (model.getReaction(i).getKineticLaw() != null) {
+				model.getReaction(i).getKineticLaw().getMath()
+						.updateVariables();
+			}
+
+		}
+
+		/*
 		 * All other rules
 		 */
 		processRules(Y);
@@ -1129,7 +1183,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		// save the initial values of this system
 		initialValues = new double[Y.length];
 		System.arraycopy(Y, 0, initialValues, 0, initialValues.length);
-		this.swap = new double[this.Y.length];
+
 		this.events = new ArrayList<DESAssignment>();
 	}
 
@@ -1673,13 +1727,29 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		HashSet<String> inConcentration = new HashSet<String>();
 
 		// Velocities of each reaction.
-		for (int i = 0; i < v.length; i++) {
-			currentReaction = model.getReaction(i);
-			KineticLaw kin = currentReaction.getKineticLaw();
-			if (kin != null) {
-				v[i] = kin.getMath().compile(this).toDouble();
-			} else {
-				v[i] = 0;
+		if (hasFastReactions) {
+			for (int i = 0; i < v.length; i++) {
+				currentReaction = model.getReaction(i);
+				KineticLaw kin = currentReaction.getKineticLaw();
+				if (kin != null
+						&& isProcessingFastReactions == currentReaction
+								.isFast()) {
+					v[i] = kin.getMath().compile(this).toDouble();
+				} else {
+					v[i] = 0;
+				}
+			}
+		}
+
+		else {
+			for (int i = 0; i < v.length; i++) {
+				currentReaction = model.getReaction(i);
+				KineticLaw kin = currentReaction.getKineticLaw();
+				if (kin != null) {
+					v[i] = kin.getMath().compile(this).toDouble();
+				} else {
+					v[i] = 0;
+				}
 			}
 		}
 
@@ -1737,6 +1807,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		// When the unit of reacting specie is given mol/volume
 		// then it has to be considered in the change rate that should
 		// always be only in mol/time
+
 		for (String s : inConcentration) {
 			speciesIndex = symbolHash.get(s);
 			changeRate[speciesIndex] = changeRate[speciesIndex]
@@ -1939,19 +2010,23 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.sbml.simulator.math.odes.FastProcessDESystem#containsFastProcesses()
+	 * 
+	 * @see
+	 * org.sbml.simulator.math.odes.FastProcessDESystem#containsFastProcesses()
 	 */
 	public boolean containsFastProcesses() {
-		// TODO Auto-generated method stub
-		return false;
+		return hasFastReactions;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.sbml.simulator.math.odes.FastProcessDESystem#setFastProcessComputation(boolean)
+	 * 
+	 * @see
+	 * org.sbml.simulator.math.odes.FastProcessDESystem#setFastProcessComputation
+	 * (boolean)
 	 */
 	public void setFastProcessComputation(boolean isProcessing) {
-		// TODO Auto-generated method stub	
+		isProcessingFastReactions = isProcessing;
 	}
 
 }

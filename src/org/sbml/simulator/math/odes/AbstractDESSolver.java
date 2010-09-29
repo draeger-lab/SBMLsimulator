@@ -329,11 +329,13 @@ public abstract class AbstractDESSolver implements DESSolver {
 			index = event.getIndex();
 			// newYtemp[index] = event.getValue() - (Ytemp[index]);
 			newYtemp[index] = event.getValue() - (Ytemp[index] - change[index]);
-			System.out
-					.printf(
-							"time %s: \tYtemp[%s]_old = %s\tYtemp[%s]_new = %s\t change %s \n",
-							time, index, Ytemp[index], index,
-							(event.getValue() - (Ytemp[index])), change[index]);
+
+			/*
+			 * System.out .printf(
+			 * "time %s: \tYtemp[%s]_old = %s\tYtemp[%s]_new = %s\t change %s \n"
+			 * , time, index, Ytemp[index], index, (event.getValue() -
+			 * (Ytemp[index])), change[index]);
+			 */
 		}
 
 		return newYtemp;
@@ -448,14 +450,33 @@ public abstract class AbstractDESSolver implements DESSolver {
 		double result[][] = data.getBlock(0).getData();
 		double change[] = new double[initialValues.length];
 		// double yPrev[] = new double[initialValues.length];
-		// double yTemp[] = new double[initialValues.length];
+		double yTemp[] = new double[initialValues.length];
 		double t = timeBegin;
 		additionalResults(DES, t, result[0], data, 0);
+		boolean fastFlag = false;
+
+		if (DES instanceof FastProcessDESystem) {
+			fastFlag = ((FastProcessDESystem) DES).containsFastProcesses();
+		}
+
+		if (fastFlag) {
+			result[0] = computeSteadyState(((FastProcessDESystem) DES),
+					result[0], timeBegin);
+		}
+
 		for (int i = 1; i < result.length; i++) {
-			// yPrev = result[i - 1];
-			// System.arraycopy(result[i-1], 0, yPrev, 0, result[i-1].length);
 			t = computeNextState(DES, t, stepSize, result[i - 1], change,
 					result[i], true);
+
+			if (fastFlag) {
+				yTemp = computeSteadyState(((FastProcessDESystem) DES),
+						result[i], timeBegin);
+				System.arraycopy(yTemp, 0, result[i], 0, yTemp.length);
+			}
+
+			// yPrev = result[i - 1];
+			// System.arraycopy(result[i-1], 0, yPrev, 0, result[i-1].length);
+
 			additionalResults(DES, t - stepSize, result[i - 1], data, i);
 			// System.arraycopy(yTemp, 0, result[i], 0, yTemp.length);
 		}
@@ -494,13 +515,29 @@ public abstract class AbstractDESSolver implements DESSolver {
 		double result[][] = data.getBlock(0).getData();
 		double change[] = new double[initialValues.length];
 		double yTemp[] = new double[initialValues.length];
+		double steady[] = new double[initialValues.length];
 		double t = timePoints[0];
 		double h = stepSize;
+
+		boolean fastFlag = false;
+
 		additionalResults(DES, t, result[0], data, 0);
+
+
+		if (DES instanceof FastProcessDESystem) {
+			fastFlag = ((FastProcessDESystem) DES).containsFastProcesses();
+		}
+
+		if (fastFlag) {
+			result[0] = computeSteadyState(((FastProcessDESystem) DES),
+					result[0], timePoints[0]);
+		}
+
 		for (int i = 1; i < timePoints.length; i++) {
-			h = stepSize;
 
 			System.arraycopy(result[i - 1], 0, yTemp, 0, result[i - 1].length);
+
+			h = stepSize;
 
 			for (int j = 0; j < inBetweenSteps(timePoints[i - 1],
 					timePoints[i], h); j++) {
@@ -510,11 +547,21 @@ public abstract class AbstractDESSolver implements DESSolver {
 			h = timePoints[i] - t;
 			// t = computeNextState(DES, t, h, yTemp, change, yTemp, false);
 			// System.arraycopy(yTemp, 0, result[i], 0, yTemp.length);
+
 			t = computeNextState(DES, t, h, yTemp, change, result[i], false);
+
+
+			if (fastFlag) {
+				steady = computeSteadyState(((FastProcessDESystem) DES),
+						result[i], timePoints[0]);
+				System.arraycopy(steady, 0, result[i], 0, yTemp.length);
+			}
 
 			additionalResults(DES, t, yTemp, data, i);
 
+
 			t += h;
+
 		}
 		return data;
 	}
@@ -581,5 +628,44 @@ public abstract class AbstractDESSolver implements DESSolver {
 			t += h;
 		}
 		return data;
+	}
+
+	private double[] computeSteadyState(FastProcessDESystem DES,
+			double[] result, double timeBegin) throws IntegrationException {
+		double[] oldValues = new double[result.length];
+		double[] newValues = new double[result.length];
+		double[] change = new double[result.length];
+		System.arraycopy(result, 0, newValues, 0, result.length);
+		double ft = timeBegin;
+		((FastProcessDESystem) DES).setFastProcessComputation(true);
+
+		while (!noChange(oldValues, newValues)) {
+			System.arraycopy(newValues, 0, oldValues, 0, newValues.length);
+			newValues = new double[result.length];
+
+			ft = computeNextState(DES, ft, stepSize, oldValues, change,
+					newValues, true);
+
+		}
+		((FastProcessDESystem) DES).setFastProcessComputation(false);
+		return oldValues;
+
+	}
+
+	/**
+	 * 
+	 * @param newValues
+	 * @param oldValues
+	 * @return
+	 */
+	private boolean noChange(double newValues[], double oldValues[]) {
+		for (int i = 0; i < newValues.length; i++) {
+			if (Math.abs(newValues[i] - oldValues[i]) > 1e-15) {
+
+				return false;
+			}
+		}
+		return true;
+
 	}
 }
