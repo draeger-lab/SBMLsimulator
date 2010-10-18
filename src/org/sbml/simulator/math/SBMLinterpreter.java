@@ -150,12 +150,6 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	protected double[] initialValues;
 
 	/**
-	 * A boolean that indicates, whether the intepreter is currently processing
-	 * the reaction velocities or not.
-	 */
-	private boolean isProcessingVelocities;
-
-	/**
 	 * An array, which stores for each constraint the list of times, in which
 	 * the constraint was violated during the simulation.
 	 */
@@ -427,23 +421,20 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 			Species s = (Species) nsb;
 			symbolIndex = symbolHash.get(nsb.getId());
 
-			if (isProcessingVelocities) {
-
-				if (getCompartmentValueOf(nsb.getId()) == 0d) {
-					return new ASTNodeValue(Y[symbolIndex], this);
-				}
-
-				if (s.isSetInitialAmount() && !s.getHasOnlySubstanceUnits()) {
-					return new ASTNodeValue(Y[symbolIndex]
-							/ getCompartmentValueOf(nsb.getId()), this);
-				}
-
-				if (s.isSetInitialConcentration()
-						&& s.getHasOnlySubstanceUnits()) {
-					return new ASTNodeValue(Y[symbolIndex]
-							* getCompartmentValueOf(nsb.getId()), this);
-				}
+			if (getCompartmentValueOf(nsb.getId()) == 0d) {
+				return new ASTNodeValue(Y[symbolIndex], this);
 			}
+
+			if (s.isSetInitialAmount() && !s.getHasOnlySubstanceUnits()) {
+				return new ASTNodeValue(Y[symbolIndex]
+						/ getCompartmentValueOf(nsb.getId()), this);
+			}
+
+			if (s.isSetInitialConcentration() && s.getHasOnlySubstanceUnits()) {
+				return new ASTNodeValue(Y[symbolIndex]
+						* getCompartmentValueOf(nsb.getId()), this);
+			}
+
 			return new ASTNodeValue(Y[symbolIndex], this);
 
 		}
@@ -610,7 +601,8 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		int speciesIndex;
 		// get symbol and assign its new value
 		speciesIndex = symbolHash.get(as.getVariable());
-		changeRate[speciesIndex] = as.getMath().compile(this).toDouble();
+		changeRate[speciesIndex] = processAssignmentVaribale(as.getVariable(),
+				as.getMath());
 	}
 
 	/**
@@ -623,7 +615,6 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	private void evaluateRateRule(RateRule rr, double changeRate[])
 			throws SBMLException {
 		int speciesIndex;
-		isProcessingVelocities = true;
 
 		// get symbol and assign its new rate
 		speciesIndex = symbolHash.get(rr.getVariable());
@@ -636,7 +627,6 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		if (compartmentHash.containsValue(speciesIndex)) {
 			updateSpeciesConcentration(speciesIndex, changeRate);
 		}
-		isProcessingVelocities = false;
 	}
 
 	/**
@@ -997,9 +987,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 			/*
 			 * Compute changes due to reactions
 			 */
-			this.isProcessingVelocities = true;
 			processVelocities(changeRate);
-			this.isProcessingVelocities = false;
 
 			/*
 			 * Compute changes due to rules
@@ -1058,7 +1046,6 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		compartmentHash = new HashMap<String, Integer>();
 		Integer compartmentIndex, yIndex = 0;
 		currentTime = 0d;
-		isProcessingVelocities = false;
 
 		this.Y = new double[model.getNumCompartments() + model.getNumSpecies()
 				+ model.getNumParameters()];
@@ -1082,6 +1069,10 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 
 		}
 
+		// Due to unset initial amount or concentration of species try to set
+		// one of them
+		Species majority = determineMajorSpeciesAttributes();
+
 		/*
 		 * Save starting values of the model's species in Y and link them with
 		 * their compartment
@@ -1089,6 +1080,17 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		for (i = 0; i < model.getNumSpecies(); i++) {
 			Species s = model.getSpecies(i);
 			compartmentIndex = symbolHash.get(s.getCompartment());
+
+			// Set initial amount or concentration when not already done
+			if (!s.isSetInitialAmount() && !s.isSetInitialConcentration()) {
+				if (majority.isSetInitialAmount()) {
+					s.setInitialAmount(0.0);
+				} else {
+					s.setInitialConcentration(0.0);
+				}
+
+				s.setHasOnlySubstanceUnits(majority.getHasOnlySubstanceUnits());
+			}
 
 			if (s.isSetInitialAmount()) {
 				Y[yIndex] = s.getInitialAmount();
@@ -1179,7 +1181,9 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		processRules(Y);
 
 		/*
-		 * Initial assignments
+		 * Process initial assignments a 2nd time because there can be rules
+		 * dependent on initial assignments and vice versa, so one of both has
+		 * te be evaluated twice at the start
 		 */
 		processInitialAssignments();
 
@@ -1405,15 +1409,17 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 				if (rule.isAssignment()) {
 					AssignmentRule as = (AssignmentRule) rule;
 					symbolIndex = symbolHash.get(as.getVariable());
-					assignmentRules.add(new DESAssignment(t, symbolIndex, as
-							.getMath().compile(this).toDouble()));
+					assignmentRules.add(new DESAssignment(t, symbolIndex,
+							processAssignmentVaribale(as.getVariable(), as
+									.getMath())));
 				}
 			}
 			if (algebraicRules != null) {
 				for (AssignmentRule as : algebraicRules) {
 					symbolIndex = symbolHash.get(as.getVariable());
-					assignmentRules.add(new DESAssignment(t, symbolIndex, as
-							.getMath().compile(this).toDouble()));
+					assignmentRules.add(new DESAssignment(t, symbolIndex,
+							processAssignmentVaribale(as.getVariable(), as
+									.getMath())));
 				}
 			}
 		} catch (SBMLException exc) {
@@ -1481,7 +1487,6 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 			// number of events = listOfEvents_delay.length
 			for (i = 0; i < model.getNumEvents(); i++) {
 				ev = model.getEvent(i);
-				isProcessingVelocities = true;
 				// check if event triggers
 				if (ev.getTrigger().getMath().compile(this).toBoolean()) {
 					// check if trigger has just become true
@@ -1564,7 +1569,6 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 					i++;
 				}
 			}
-			isProcessingVelocities = false;
 		} catch (SBMLException exc) {
 			throw new IntegrationException(exc);
 		}
@@ -1577,7 +1581,6 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	 * @throws SBMLException
 	 */
 	private void processInitialAssignments() throws SBMLException {
-		Species majority = determineMajorSpeciesAttributes();
 		for (int i = 0; i < model.getNumInitialAssignments(); i++) {
 			InitialAssignment iA = model.getInitialAssignment(i);
 			Integer index = null;
@@ -1587,18 +1590,6 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 					double compartmentValue;
 					String id = s.getId();
 					index = symbolHash.get(id);
-
-					if (!s.isSetInitialAmount()
-							&& !s.isSetInitialConcentration()) {
-						if (majority.isSetInitialAmount()) {
-							s.setInitialAmount(0.0);
-						} else {
-							s.setInitialConcentration(0.0);
-						}
-
-						s.setHasOnlySubstanceUnits(majority
-								.getHasOnlySubstanceUnits());
-					}
 
 					if (compartmentHash.containsKey(id)) {
 						if (s.isSetInitialAmount()
