@@ -13,9 +13,10 @@ import javax.xml.stream.XMLStreamException;
 import org.sbml.simulator.gui.SimulatorUI;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
-import org.sbml.squeezer.CfgKeys;
 
+import de.zbit.util.Configuration;
 import de.zbit.util.Reflect;
+import de.zbit.util.SBProperties;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -23,26 +24,30 @@ import de.zbit.util.Reflect;
  */
 public class SBMLsimulator {
 	/**
+	 * 
+	 */
+	private static Configuration configuration;
+	/**
 	 * The possible location of this class in a jar file if used in plug-in
 	 * mode.
 	 */
 	public static final String JAR_LOCATION = "plugin" + File.separatorChar;
-	/**
-	 * The package where all ODE solvers are assumed to be located.
-	 */
-	public static final String SOLVER_PACKAGE = "org.sbml.simulator.math.odes";
+
 	/**
 	 * The package where all mathematical functions, in particular distance
 	 * functions, are located.
 	 */
 	public static final String MATH_PACKAGE = "org.sbml.simulator.math";
-	/**
-	 * An array of all available ordinary differential equation solvers.
-	 */
-	private static final Class<AbstractDESSolver> AVAILABLE_SOLVERS[] = Reflect
-			.getAllClassesInPackage(SOLVER_PACKAGE, true, true,
-					AbstractDESSolver.class, JAR_LOCATION, true);
 
+	/**
+	 * The package where all ODE solvers are assumed to be located.
+	 */
+	public static final String SOLVER_PACKAGE = "org.sbml.simulator.math.odes";
+	/**
+	 * The version number of this program.
+	 */
+	private static final String VERSION_NUMBER = "0.5";
+	
 	/**
 	 * An array of all available implementations of distance functions to judge
 	 * the quality of a simulation based on parameter and initial value
@@ -51,24 +56,21 @@ public class SBMLsimulator {
 	private static final Class<Distance> AVAILABLE_DISTANCES[] = Reflect
 			.getAllClassesInPackage(MATH_PACKAGE, true, true, Distance.class,
 					JAR_LOCATION, true);
-
 	/**
-	 * The version number of this program.
+	 * An array of all available ordinary differential equation solvers.
 	 */
-	private static final String VERSION_NUMBER = "0.5";
+	private static final Class<AbstractDESSolver> AVAILABLE_SOLVERS[] = Reflect
+			.getAllClassesInPackage(SOLVER_PACKAGE, true, true,
+					AbstractDESSolver.class, JAR_LOCATION, true);
 
 	static {
-		CfgKeys.setCommentCfgFile(String.format(
+		String userPrefNode = "/org/sbml/simulator";
+		String defaultsNode = "/org/sbml/simulator/resources/cfg/Configuration.xml";
+		String comment = String.format(
 				"SBMLsimulator %s configuration. Do not change manually.",
-				VERSION_NUMBER));
-		CfgKeys
-				.setDefaultsCfgFile("/org/sbml/simulator/resources/cfg/Configuration.xml");
-		CfgKeys.setUserPrefNode("/org/sbml/simulator");
-		try {
-			CfgKeys.initProperties();
-		} catch (BackingStoreException e) {
-			e.printStackTrace();
-		}
+				VERSION_NUMBER);
+		configuration = new Configuration(SimulatorCfgKeys.class, userPrefNode,
+				defaultsNode, comment);
 	}
 
 	/**
@@ -85,6 +87,14 @@ public class SBMLsimulator {
 	 */
 	public static Class<AbstractDESSolver>[] getAvailableSolvers() {
 		return AVAILABLE_SOLVERS;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public static SBProperties getProperties() {
+		return configuration.getProperties();
 	}
 
 	/**
@@ -103,14 +113,15 @@ public class SBMLsimulator {
 	 */
 	public static void main(String[] args) throws FileNotFoundException,
 			XMLStreamException {
-		Properties p = CfgKeys.analyzeCommandLineArguments(args);
+		Properties p = configuration.analyzeCommandLineArguments(args);
 		String openFile = null;
-		if (p.containsKey(CfgKeys.SBML_FILE)) {
-			openFile = p.get(CfgKeys.SBML_FILE).toString();
+		if (p.containsKey(SimulatorCfgKeys.SBML_FILE)) {
+			openFile = p.get(SimulatorCfgKeys.SBML_FILE).toString();
 		}
 		String timeSeriesFile = null;
-		if (p.containsKey(CfgKeys.TIME_SERIES_FILE)) {
-			timeSeriesFile = p.get(CfgKeys.TIME_SERIES_FILE).toString();
+		if (p.containsKey(SimulatorCfgKeys.TIME_SERIES_FILE)) {
+			timeSeriesFile = p.get(SimulatorCfgKeys.TIME_SERIES_FILE)
+					.toString();
 		}
 		if ((openFile == null) || (openFile.length() == 0)) {
 			new SBMLsimulator();
@@ -121,6 +132,14 @@ public class SBMLsimulator {
 				new SBMLsimulator(openFile, timeSeriesFile);
 			}
 		}
+	}
+
+	/**
+	 * @throws BackingStoreException 
+	 * 
+	 */
+	public static void saveProperties() throws BackingStoreException {
+		configuration.saveProperties();
 	}
 
 	/**

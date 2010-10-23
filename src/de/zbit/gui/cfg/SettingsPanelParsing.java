@@ -3,17 +3,16 @@
  */
 package de.zbit.gui.cfg;
 
-import java.util.Properties;
-
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.sbml.squeezer.CfgKeys;
+import org.sbml.simulator.SimulatorCfgKeys;
 
 import de.zbit.gui.LayoutHelper;
+import de.zbit.util.SBProperties;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -38,13 +37,13 @@ public class SettingsPanelParsing extends SettingsPanel {
 	 * @param properties
 	 * @param defaultProperties
 	 */
-	public SettingsPanelParsing(Properties properties,
-			Properties defaultProperties) {
-		super(properties, defaultProperties);
+	public SettingsPanelParsing(SBProperties properties) {
+		super(properties);
 	}
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see de.zbit.gui.cfg.SettingsPanel#accepts(java.lang.Object)
 	 */
 	@Override
@@ -71,21 +70,26 @@ public class SettingsPanelParsing extends SettingsPanel {
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see de.zbit.gui.cfg.SettingsPanel#getProperties()
 	 */
 	@Override
-	public Properties getProperties() {
+	public SBProperties getProperties() {
 		if (chooser.checkOpenDir()) {
-			properties.put(CfgKeys.CSV_FILES_OPEN_DIR, chooser.getOpenDir());
+			properties.put(SimulatorCfgKeys.CSV_FILES_OPEN_DIR, chooser
+					.getOpenDir());
 		}
 		if (chooser.checkSaveDir()) {
-			properties.put(CfgKeys.CSV_FILES_SAVE_DIR, chooser.getSaveDir());
+			properties.put(SimulatorCfgKeys.CSV_FILES_SAVE_DIR, chooser
+					.getSaveDir());
 		}
 		if (check(tfQuoteChar)) {
-			properties.put(CfgKeys.CSV_FILES_QUOTE_CHAR, tfQuoteChar.getText());
+			properties.put(SimulatorCfgKeys.CSV_FILES_QUOTE_CHAR, tfQuoteChar
+					.getText());
 		}
 		if (check(tfSeparatorChar)) {
-			properties.put(CfgKeys.CSV_FILES_QUOTE_CHAR, tfQuoteChar.getText());
+			properties.put(SimulatorCfgKeys.CSV_FILES_QUOTE_CHAR, tfQuoteChar
+					.getText());
 		}
 		return properties;
 	}
@@ -107,17 +111,17 @@ public class SettingsPanelParsing extends SettingsPanel {
 	 */
 	@Override
 	public void init() {
-		chooser = new DirectoryChooser(properties.get(CfgKeys.CSV_FILES_OPEN_DIR)
-				.toString(), properties.get(CfgKeys.CSV_FILES_SAVE_DIR)
-				.toString());
+		chooser = new DirectoryChooser(properties.get(
+				SimulatorCfgKeys.CSV_FILES_OPEN_DIR).toString(), properties
+				.get(SimulatorCfgKeys.CSV_FILES_SAVE_DIR).toString());
 		chooser.setBorder(BorderFactory
 				.createTitledBorder(" Default directories for CSV files "));
 
-		tfQuoteChar = new JTextField(properties.get(CfgKeys.CSV_FILES_QUOTE_CHAR)
-				.toString());
+		tfQuoteChar = new JTextField(properties.get(
+				SimulatorCfgKeys.CSV_FILES_QUOTE_CHAR).toString());
 		tfQuoteChar.addKeyListener(this);
 		tfSeparatorChar = new JTextField(properties.get(
-				CfgKeys.CSV_FILES_SEPARATOR_CHAR).toString());
+				SimulatorCfgKeys.CSV_FILES_SEPARATOR_CHAR).toString());
 		tfSeparatorChar.addKeyListener(this);
 		JPanel panel = new JPanel();
 		LayoutHelper lh = new LayoutHelper(panel);

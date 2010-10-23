@@ -52,12 +52,13 @@ import org.sbml.jsbml.xml.stax.SBMLWriter;
 import org.sbml.optimization.EvA2GUIStarter;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.SBMLsimulator;
+import org.sbml.simulator.SimulatorCfgKeys;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 import org.sbml.simulator.resources.Resource;
-import org.sbml.squeezer.CfgKeys;
 
 import de.zbit.gui.cfg.SettingsDialog;
 import de.zbit.io.SBFileFilter;
+import de.zbit.util.SBProperties;
 import eva2.client.EvAClient;
 
 /**
@@ -167,7 +168,7 @@ public class SimulatorUI extends JFrame implements ActionListener,
 	public SimulatorUI() {
 		super(defaultTitle);
 
-		setProperties(CfgKeys.getProperties());
+		setProperties(SBMLsimulator.getProperties());
 
 		/*
 		 * Add menubar and toolbar
@@ -200,7 +201,7 @@ public class SimulatorUI extends JFrame implements ActionListener,
 	 * @param model
 	 * @param settings
 	 */
-	public SimulatorUI(Model model, Properties settings) {
+	public SimulatorUI(Model model, SBProperties settings) {
 		this(model, new SimulationPanel(model, settings));
 	}
 
@@ -257,9 +258,10 @@ public class SimulatorUI extends JFrame implements ActionListener,
 		case EXIT:
 			try {
 				if (simPanel != null) {
-					CfgKeys.getProperties().putAll(simPanel.getProperties());
+					SBMLsimulator.getProperties().putAll(
+							simPanel.getProperties());
 				}
-				CfgKeys.saveProperties(CfgKeys.getProperties());
+				SBMLsimulator.saveProperties();
 			} catch (BackingStoreException exc) {
 				exc.printStackTrace();
 				GUITools.showErrorMessage(this, exc);
@@ -306,9 +308,10 @@ public class SimulatorUI extends JFrame implements ActionListener,
 	 * @param model
 	 */
 	public void saveModel(Model model) {
-		File f = GUITools.saveFileDialog(this, CfgKeys.SAVE_DIR.getProperty()
-				.toString(), false, false, JFileChooser.FILES_ONLY,
-				SBFileFilter.SBML_FILE_FILTER);
+		Properties props = SBMLsimulator.getProperties();
+		File f = GUITools.saveFileDialog(this, props.get(
+				SimulatorCfgKeys.SAVE_DIR).toString(), false, false,
+				JFileChooser.FILES_ONLY, SBFileFilter.SBML_FILE_FILTER);
 		if (f != null) {
 			try {
 				SBMLWriter.write(model.getSBMLDocument(), f,
@@ -316,7 +319,7 @@ public class SimulatorUI extends JFrame implements ActionListener,
 								.getVersionNumber());
 				// TODO Just for debugging:
 				SBMLWriter.write(model.getSBMLDocument(), System.out);
-				CfgKeys.SAVE_DIR.putProperty(f.getParent());
+				props.put(SimulatorCfgKeys.SAVE_DIR, f.getParent());
 			} catch (Exception exc) {
 				exc.printStackTrace();
 				GUITools.showErrorMessage(this, exc);
@@ -329,19 +332,14 @@ public class SimulatorUI extends JFrame implements ActionListener,
 	 */
 	private void adjustPreferences() {
 		try {
-			Properties defaults = CfgKeys.getDefaultProperties();
-			// SettingsPanelSimulation ps = new SettingsPanelSimulation(
-			// SBMLsimulator.getUserProperties(), defaults);
-			// ps.setProperties(getProperties());
-			SettingsDialog dialog = new SettingsDialog(this, defaults);
-			// "Simulation Preferences", defaults);
-			if (dialog.showSettingsDialog(CfgKeys.getProperties()) == SettingsDialog.APPROVE_OPTION) {
-				Properties p = dialog.getProperties();
-				CfgKeys.getProperties().putAll(p);
+			SettingsDialog dialog = new SettingsDialog(this);
+			if (dialog.showSettingsDialog(SBMLsimulator.getProperties()) == SettingsDialog.APPROVE_OPTION) {
+				SBProperties p = dialog.getProperties();
+				SBMLsimulator.getProperties().putAll(p);
 				if (simPanel != null) {
 					simPanel.setProperties(p);
 				}
-				CfgKeys.saveProperties();
+				SBMLsimulator.saveProperties();
 			}
 		} catch (Exception exc) {
 			GUITools.showErrorMessage(this, exc);
@@ -563,9 +561,10 @@ public class SimulatorUI extends JFrame implements ActionListener,
 	 * 
 	 */
 	public void openExperimentalData() {
-		JFileChooser chooser = GUITools.createJFileChooser(CfgKeys.OPEN_DIR
-				.getProperty().toString(), false, false,
-				JFileChooser.FILES_ONLY, SBFileFilter.CSV_FILE_FILTER);
+		JFileChooser chooser = GUITools.createJFileChooser(SBMLsimulator
+				.getProperties().get(SimulatorCfgKeys.OPEN_DIR).toString(),
+				false, false, JFileChooser.FILES_ONLY,
+				SBFileFilter.CSV_FILE_FILTER);
 		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 			openExperimentalData(chooser.getSelectedFile());
 		}
@@ -577,26 +576,30 @@ public class SimulatorUI extends JFrame implements ActionListener,
 	 */
 	public void openExperimentalData(File file) {
 		CSVDataImporter importer = new CSVDataImporter();
-		Model model = simPanel.getModel();
-		try {
-			MultiBlockTable data = importer.convert(model, file
-					.getAbsolutePath());
-			if (data != null) {
-				simPanel.setExperimentalData(data);
-				GUITools
-						.setEnabled(false, getJMenuBar(), toolbar, Command.OPEN);
-				GUITools.setEnabled(true, getJMenuBar(), toolbar,
-						Command.CLOSE_DATA);
-				// Optimization should not be available if there is nothing to
-				// optimize.
-				GUITools.setEnabled(model.getNumQuantities()
-						- model.getNumSpeciesReferences() > 0, getJMenuBar(),
-						toolbar, Command.OPTIMIZATION);
+		if (simPanel != null) {
+			Model model = simPanel.getModel();
+			try {
+				MultiBlockTable data = importer.convert(model, file
+						.getAbsolutePath());
+				if (data != null) {
+					simPanel.setExperimentalData(data);
+					GUITools.setEnabled(false, getJMenuBar(), toolbar,
+							Command.OPEN);
+					GUITools.setEnabled(true, getJMenuBar(), toolbar,
+							Command.CLOSE_DATA);
+					// Optimization should not be available if there is nothing
+					// to
+					// optimize.
+					GUITools.setEnabled(model.getNumQuantities()
+							- model.getNumSpeciesReferences() > 0,
+							getJMenuBar(), toolbar, Command.OPTIMIZATION);
+				}
+				SBMLsimulator.getProperties().put(SimulatorCfgKeys.OPEN_DIR,
+						file.getParent());
+			} catch (Exception exc) {
+				exc.printStackTrace();
+				GUITools.showErrorMessage(this, exc);
 			}
-			CfgKeys.OPEN_DIR.putProperty(file.getParent());
-		} catch (Exception exc) {
-			exc.printStackTrace();
-			GUITools.showErrorMessage(this, exc);
 		}
 	}
 
@@ -617,9 +620,9 @@ public class SimulatorUI extends JFrame implements ActionListener,
 	 * 
 	 */
 	public void openModel() {
-		openModel(GUITools.openFileDialog(this, CfgKeys.OPEN_DIR.getProperty()
-				.toString(), false, false, JFileChooser.FILES_ONLY,
-				SBFileFilter.SBML_FILE_FILTER));
+		openModel(GUITools.openFileDialog(this, SBMLsimulator.getProperties()
+				.get(SimulatorCfgKeys.OPEN_DIR).toString(), false, false,
+				JFileChooser.FILES_ONLY, SBFileFilter.SBML_FILE_FILTER));
 	}
 
 	/**
@@ -631,9 +634,9 @@ public class SimulatorUI extends JFrame implements ActionListener,
 			try {
 				SBMLDocument doc = SBMLReader.readSBML(file);
 				if ((doc != null) && (doc.isSetModel())) {
-					CfgKeys.OPEN_DIR.putProperty(file.getParent());
-					simPanel = new SimulationPanel(doc.getModel(), CfgKeys
-							.getProperties());
+					SBProperties props = SBMLsimulator.getProperties();
+					props.put(SimulatorCfgKeys.OPEN_DIR, file.getParent());
+					simPanel = new SimulationPanel(doc.getModel(), props);
 					if (GUITools.contains(getContentPane(), simPanel)) {
 						getContentPane().remove(simPanel);
 					}
@@ -674,7 +677,7 @@ public class SimulatorUI extends JFrame implements ActionListener,
 	 * 
 	 * @param p
 	 */
-	public void setProperties(Properties p) {
+	public void setProperties(SBProperties p) {
 		if (simPanel != null) {
 			try {
 				simPanel.setProperties(p);
@@ -729,7 +732,8 @@ public class SimulatorUI extends JFrame implements ActionListener,
 				EvA2GUIStarter.init(new EstimationProblem(simPanel.getSolver(),
 						simPanel.getDistance(), model, simPanel
 								.getExperimentalData(),
-						((Boolean) CfgKeys.EST_MULTI_SHOOT.getProperty())
+						((Boolean) SBMLsimulator.getProperties().get(
+								SimulatorCfgKeys.EST_MULTI_SHOOT))
 								.booleanValue(), panel
 								.getSelectedQuantityRanges()), this, simPanel,
 						this);

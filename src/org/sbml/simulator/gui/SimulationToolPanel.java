@@ -7,7 +7,6 @@ import java.awt.BorderLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.InvocationTargetException;
-import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -24,15 +23,16 @@ import javax.swing.event.ChangeListener;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLException;
+import org.sbml.jsbml.util.StringTools;
 import org.sbml.jsbml.util.ValuePair;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.simulator.SBMLsimulator;
+import org.sbml.simulator.SimulatorCfgKeys;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.math.odes.DESSolver;
 import org.sbml.simulator.math.odes.IntegrationException;
 import org.sbml.simulator.math.odes.MultiBlockTable;
-import org.sbml.squeezer.CfgKeys;
 
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;
@@ -147,16 +147,6 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 * 
 	 */
 	private static final String DISTANCE_FIELD_TOOL_TIP = "This field shows the %s distance between the experimental data and the simulation of the model with the current configuration, computed by the %s.";
-	/**
-	 * 
-	 */
-	private static final DecimalFormat SCIENTIFIC_FORMAT = new DecimalFormat(
-			"########0.#########E0");
-	/**
-	 * 
-	 */
-	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat(
-			"#############0.##############");
 
 	/**
 	 * 
@@ -182,8 +172,9 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 		t2 = new SpinnerNumberModel(1d, 0d, maxTime, spinnerStepSize);
 		maxStepsPerUnit = 100;
 		double integrationStepSize = spinnerStepSize;
-		solvers = createSolversComboOrSetSelectedItem(CfgKeys.SIM_ODE_SOLVER
-				.getProperty().toString());
+		solvers = createSolversComboOrSetSelectedItem(SBMLsimulator
+				.getProperties().get(SimulatorCfgKeys.SIM_ODE_SOLVER)
+				.toString());
 		showGrid = GUITools.createJCheckBox(Plot.Command.SHOW_GRID.getText(),
 				false, Plot.Command.SHOW_GRID, Plot.Command.SHOW_GRID
 						.getToolTip(), this);
@@ -380,25 +371,27 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 		/*
 		 * Simulation
 		 */
-		p.put(CfgKeys.SIM_MAX_TIME, this.maxTime);
-		p.put(CfgKeys.SIM_START_TIME, (Double) t1.getValue());
-		p.put(CfgKeys.SIM_END_TIME, (Double) t2.getValue());
-		p.put(CfgKeys.SIM_STEP_SIZE, Double.valueOf(worker.getDESSolver()
-				.getStepSize()));
-		p.put(CfgKeys.SIM_MAX_STEPS_PER_UNIT_TIME, Integer
+		p.put(SimulatorCfgKeys.SIM_MAX_TIME, this.maxTime);
+		p.put(SimulatorCfgKeys.SIM_START_TIME, (Double) t1.getValue());
+		p.put(SimulatorCfgKeys.SIM_END_TIME, (Double) t2.getValue());
+		p.put(SimulatorCfgKeys.SIM_STEP_SIZE, Double.valueOf(worker
+				.getDESSolver().getStepSize()));
+		p.put(SimulatorCfgKeys.SIM_MAX_STEPS_PER_UNIT_TIME, Integer
 				.valueOf(maxStepsPerUnit));
-		p.put(CfgKeys.SIM_DISTANCE_FUNCTION, worker.getDistance().getClass()
-				.getName());
-		p.put(CfgKeys.SIM_ODE_SOLVER, worker.getDESSolver().getClass()
+		p.put(SimulatorCfgKeys.SIM_DISTANCE_FUNCTION, worker.getDistance()
+				.getClass().getName());
+		p.put(SimulatorCfgKeys.SIM_ODE_SOLVER, worker.getDESSolver().getClass()
 				.getName());
 
 		/*
 		 * Plot
 		 */
-		p.put(CfgKeys.PLOT_SHOW_GRID, Boolean.valueOf(showGrid.isSelected()));
-		p.put(CfgKeys.PLOT_LOG_SCALE, Boolean.valueOf(logScale.isSelected()));
-		p.put(CfgKeys.PLOT_SHOW_LEGEND, Boolean
-				.valueOf(showLegend.isSelected()));
+		p.put(SimulatorCfgKeys.PLOT_SHOW_GRID, Boolean.valueOf(showGrid
+				.isSelected()));
+		p.put(SimulatorCfgKeys.PLOT_LOG_SCALE, Boolean.valueOf(logScale
+				.isSelected()));
+		p.put(SimulatorCfgKeys.PLOT_SHOW_LEGEND, Boolean.valueOf(showLegend
+				.isSelected()));
 
 		return p;
 	}
@@ -543,14 +536,15 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 		/*
 		 * Solver and distance.
 		 */
-		double simEndTime = ((Number) properties.get(CfgKeys.SIM_END_TIME))
-				.doubleValue();
-		spinnerStepSize = ((Number) properties.get(CfgKeys.SIM_STEP_SIZE))
-				.doubleValue();
+		double simEndTime = ((Number) properties
+				.get(SimulatorCfgKeys.SIM_END_TIME)).doubleValue();
+		spinnerStepSize = ((Number) properties
+				.get(SimulatorCfgKeys.SIM_STEP_SIZE)).doubleValue();
 		Class<Distance>[] distFun = SBMLsimulator.getAvailableDistances();
 
-		maxTime = Math.max(((Number) properties.get(CfgKeys.SIM_MAX_TIME))
-				.doubleValue(), Math.max(getSimulationStartTime(), simEndTime));
+		maxTime = Math.max(((Number) properties
+				.get(SimulatorCfgKeys.SIM_MAX_TIME)).doubleValue(), Math.max(
+				getSimulationStartTime(), simEndTime));
 		t1.setMinimum(Double.valueOf(0));
 		t1.setValue(Double.valueOf(getSimulationStartTime()));
 		t1.setMaximum(Double.valueOf(maxTime));
@@ -559,20 +553,21 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 		t2.setValue(Double.valueOf(simEndTime));
 		t2.setMaximum(Double.valueOf(maxTime));
 		t2.setStepSize(Double.valueOf(spinnerStepSize));
-		showGrid.setSelected(((Boolean) properties.get(CfgKeys.PLOT_SHOW_GRID))
-				.booleanValue());
-		logScale.setSelected(((Boolean) properties.get(CfgKeys.PLOT_LOG_SCALE))
-				.booleanValue());
+		showGrid.setSelected(((Boolean) properties
+				.get(SimulatorCfgKeys.PLOT_SHOW_GRID)).booleanValue());
+		logScale.setSelected(((Boolean) properties
+				.get(SimulatorCfgKeys.PLOT_LOG_SCALE)).booleanValue());
 		showLegend.setSelected(((Boolean) properties
-				.get(CfgKeys.PLOT_SHOW_LEGEND)).booleanValue());
+				.get(SimulatorCfgKeys.PLOT_SHOW_LEGEND)).booleanValue());
 		showToolTips.setSelected(((Boolean) properties
-				.get(CfgKeys.PLOT_SHOW_TOOLTIPS)).booleanValue());
+				.get(SimulatorCfgKeys.PLOT_SHOW_TOOLTIPS)).booleanValue());
 
 		maxStepsPerUnit = ((Number) properties
-				.get(CfgKeys.SIM_MAX_STEPS_PER_UNIT_TIME)).intValue();
+				.get(SimulatorCfgKeys.SIM_MAX_STEPS_PER_UNIT_TIME)).intValue();
 
 		int distanceFunc = 0;
-		String name = properties.get(CfgKeys.SIM_DISTANCE_FUNCTION).toString();
+		String name = properties.get(SimulatorCfgKeys.SIM_DISTANCE_FUNCTION)
+				.toString();
 		name = name.substring(name.lastIndexOf('.') + 1);
 		while (distanceFunc < distFun.length
 				&& !distFun[distanceFunc].getSimpleName().equals(name)) {
@@ -582,12 +577,12 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 			this.distFun.setSelectedIndex(distanceFunc);
 		}
 		solvers = createSolversComboOrSetSelectedItem(properties.get(
-				CfgKeys.SIM_ODE_SOLVER).toString());
+				SimulatorCfgKeys.SIM_ODE_SOLVER).toString());
 
-		double startTime = ((Number) properties.get(CfgKeys.SIM_START_TIME))
-				.doubleValue();
-		double endTime = ((Number) properties.get(CfgKeys.SIM_END_TIME))
-				.doubleValue();
+		double startTime = ((Number) properties
+				.get(SimulatorCfgKeys.SIM_START_TIME)).doubleValue();
+		double endTime = ((Number) properties
+				.get(SimulatorCfgKeys.SIM_END_TIME)).doubleValue();
 		startTime = Math.max(0, startTime);
 		if (startTime > endTime) {
 			swap(startTime, endTime);
@@ -645,11 +640,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 */
 	void setCurrentDistance(double value) {
 		distField.setValue(value);
-		if ((value < 1E-5) || (1E5 < value)) {
-			distField.setText(SCIENTIFIC_FORMAT.format(value));
-		} else {
-			distField.setText(DECIMAL_FORMAT.format(value));
-		}
+		distField.setText(StringTools.toString(value));
 		// distField.setValue(Double.valueOf(value));
 		if (!distField.isEnabled()) {
 			distField.setEditable(false);

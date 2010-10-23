@@ -13,7 +13,7 @@ import org.sbml.jsbml.Model;
 import org.sbml.jsbml.NamedSBase;
 import org.sbml.jsbml.NamedSBaseWithDerivedUnit;
 import org.sbml.jsbml.util.ValuePair;
-import org.sbml.squeezer.util.HTMLFormula;
+import org.sbml.jsbml.util.compilers.HTMLFormula;
 
 import de.zbit.gui.GUITools;
 
