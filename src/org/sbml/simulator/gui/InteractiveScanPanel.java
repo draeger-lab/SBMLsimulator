@@ -38,8 +38,8 @@ import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBase;
 import org.sbml.jsbml.SBaseChangedListener;
 import org.sbml.jsbml.Species;
-import org.sbml.squeezer.CfgKeys;
-import org.sbml.squeezer.util.HTMLFormula;
+import org.sbml.jsbml.util.compilers.HTMLFormula;
+import org.sbml.simulator.SimulatorCfgKeys;
 
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;
@@ -257,11 +257,11 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
 	 */
 	public Properties getProperties() {
 		Properties p = new Properties();
-		p.put(CfgKeys.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE, Double
+		p.put(SimulatorCfgKeys.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE, Double
 				.valueOf(defaultCompartmentValue));
-		p.put(CfgKeys.OPT_DEFAULT_SPECIES_INITIAL_VALUE, Double
+		p.put(SimulatorCfgKeys.OPT_DEFAULT_SPECIES_INITIAL_VALUE, Double
 				.valueOf(defaultSpeciesValue));
-		p.put(CfgKeys.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS, Double
+		p.put(SimulatorCfgKeys.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS, Double
 				.valueOf(defaultParameterValue));
 		return p;
 	}
@@ -449,12 +449,13 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
 	 */
 	public void setProperties(Properties properties) {
 		defaultCompartmentValue = ((Number) properties
-				.get(CfgKeys.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE))
+				.get(SimulatorCfgKeys.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE))
 				.doubleValue();
 		defaultSpeciesValue = ((Number) properties
-				.get(CfgKeys.OPT_DEFAULT_SPECIES_INITIAL_VALUE)).doubleValue();
+				.get(SimulatorCfgKeys.OPT_DEFAULT_SPECIES_INITIAL_VALUE))
+				.doubleValue();
 		defaultParameterValue = ((Number) properties
-				.get(CfgKeys.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS))
+				.get(SimulatorCfgKeys.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS))
 				.doubleValue();
 	}
 

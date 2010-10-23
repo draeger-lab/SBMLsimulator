@@ -31,8 +31,8 @@ import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.util.StringTools;
 import org.sbml.jsbml.util.ValuePair;
+import org.sbml.jsbml.util.compilers.HTMLFormula;
 import org.sbml.optimization.QuantityRange;
-import org.sbml.squeezer.util.HTMLFormula;
 
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;

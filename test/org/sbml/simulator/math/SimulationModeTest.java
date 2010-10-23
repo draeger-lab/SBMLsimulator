@@ -5,8 +5,10 @@ import java.util.Properties;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.resources.Resource;
 import org.sbml.jsbml.xml.stax.SBMLReader;
+import org.sbml.simulator.SimulatorCfgKeys;
 import org.sbml.simulator.gui.SimulatorUI;
-import org.sbml.squeezer.CfgKeys;
+
+import de.zbit.util.SBProperties;
 
 /**
  * @author draeger
@@ -37,7 +39,7 @@ public class SimulationModeTest {
 			testCasesDir += "/";
 		}
 
-		Properties settings = new Properties();
+		SBProperties settings = new SBProperties();
 		// SBMLsqueezer.getProperties();
 		// settings.put(CfgKeys.CHECK_FOR_UPDATES, Boolean.valueOf(false));
 
@@ -61,8 +63,8 @@ public class SimulationModeTest {
 				csvfile = path + "-results.csv";
 				configfile = path + "-settings.txt";
 
-				settings.put(CfgKeys.SBML_FILE, sbmlfile);
-				settings.put(CfgKeys.CSV_FILE, csvfile);
+				settings.put(SimulatorCfgKeys.SBML_FILE, sbmlfile);
+				settings.put(SimulatorCfgKeys.CSV_FILE, csvfile);
 
 				Properties cfg = Resource.readProperties(configfile);
 				double start = Double.parseDouble(cfg.get("start").toString());
@@ -71,9 +73,12 @@ public class SimulationModeTest {
 				double stepsize = (end - start)
 						/ Double.parseDouble(cfg.get("steps").toString());
 
-				settings.put(CfgKeys.SIM_START_TIME, Double.valueOf(start));
-				settings.put(CfgKeys.SIM_END_TIME, Double.valueOf(end));
-				settings.put(CfgKeys.SIM_STEP_SIZE, Double.valueOf(stepsize));
+				settings.put(SimulatorCfgKeys.SIM_START_TIME, Double
+						.valueOf(start));
+				settings
+						.put(SimulatorCfgKeys.SIM_END_TIME, Double.valueOf(end));
+				settings.put(SimulatorCfgKeys.SIM_STEP_SIZE, Double
+						.valueOf(stepsize));
 
 				// sbmlIo.convert2Model(sbmlfile);
 

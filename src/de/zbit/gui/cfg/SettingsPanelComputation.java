@@ -18,12 +18,13 @@ import javax.swing.event.ChangeListener;
 
 import org.sbml.jsbml.util.StringTools;
 import org.sbml.simulator.SBMLsimulator;
+import org.sbml.simulator.SimulatorCfgKeys;
 import org.sbml.simulator.gui.GUITools;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
-import org.sbml.squeezer.CfgKeys;
 
 import de.zbit.gui.LayoutHelper;
+import de.zbit.util.SBProperties;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -40,9 +41,8 @@ public class SettingsPanelComputation extends SettingsPanel {
 	 * @param properties
 	 * @param defaultProperties
 	 */
-	public SettingsPanelComputation(Properties properties,
-			Properties defaultProperties) {
-		super(properties, defaultProperties);
+	public SettingsPanelComputation(SBProperties properties) {
+		super(properties);
 	}
 
 	/*
@@ -76,13 +76,15 @@ public class SettingsPanelComputation extends SettingsPanel {
 		JComboBox solverBox = new JComboBox();
 		JComboBox distanceBox = new JComboBox();
 		int i;
-		CfgKeys keys[] = { CfgKeys.SIM_DISTANCE_DEFAULT_VALUE,
-				CfgKeys.SIM_DISTANCE_ROOT, CfgKeys.SIM_MAX_TIME,
-				CfgKeys.SIM_START_TIME, CfgKeys.SIM_END_TIME,
-				CfgKeys.SIM_MAX_STEPS_PER_UNIT_TIME, CfgKeys.SIM_STEP_SIZE,
-				CfgKeys.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE,
-				CfgKeys.OPT_DEFAULT_SPECIES_INITIAL_VALUE,
-				CfgKeys.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS };
+		String keys[] = { SimulatorCfgKeys.SIM_DISTANCE_DEFAULT_VALUE,
+				SimulatorCfgKeys.SIM_DISTANCE_ROOT,
+				SimulatorCfgKeys.SIM_MAX_TIME, SimulatorCfgKeys.SIM_START_TIME,
+				SimulatorCfgKeys.SIM_END_TIME,
+				SimulatorCfgKeys.SIM_MAX_STEPS_PER_UNIT_TIME,
+				SimulatorCfgKeys.SIM_STEP_SIZE,
+				SimulatorCfgKeys.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE,
+				SimulatorCfgKeys.OPT_DEFAULT_SPECIES_INITIAL_VALUE,
+				SimulatorCfgKeys.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS };
 		String names[] = { "Default value:", "Root:",
 				"Maximal simulation time:", "Simulation start time:",
 				"Simulation end time:",
@@ -100,9 +102,9 @@ public class SettingsPanelComputation extends SettingsPanel {
 
 		try {
 			initComboBox(solverBox, SBMLsimulator.getAvailableSolvers(),
-					CfgKeys.SIM_ODE_SOLVER);
+					SimulatorCfgKeys.SIM_ODE_SOLVER);
 			initComboBox(distanceBox, SBMLsimulator.getAvailableDistances(),
-					CfgKeys.SIM_DISTANCE_DEFAULT_VALUE);
+					SimulatorCfgKeys.SIM_DISTANCE_DEFAULT_VALUE);
 		} catch (Exception exc) {
 			GUITools.showErrorMessage(this, exc);
 		}
@@ -114,7 +116,7 @@ public class SettingsPanelComputation extends SettingsPanel {
 		JSpinner spinner[] = new JSpinner[keys.length];
 		for (i = 0; i < spinner.length; i++) {
 			spinner[i] = createJSpinner(keys[i], names[i], toolTips[i]);
-			if (keys[i].equals(CfgKeys.SIM_START_TIME)) {
+			if (keys[i].equals(SimulatorCfgKeys.SIM_START_TIME)) {
 				spinner[i].setEnabled(false);
 			}
 			if (keys[i].toString().contains("DISTANCE")) {
@@ -192,7 +194,7 @@ public class SettingsPanelComputation extends SettingsPanel {
 	 * @throws InvocationTargetException
 	 * @throws NoSuchMethodException
 	 */
-	private void initComboBox(JComboBox combo, Class<?>[] classes, CfgKeys key)
+	private void initComboBox(JComboBox combo, Class<?>[] classes, String key)
 			throws IllegalArgumentException, SecurityException,
 			InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException {
@@ -204,7 +206,7 @@ public class SettingsPanelComputation extends SettingsPanel {
 					name.substring(name.lastIndexOf('.') + 1))) {
 				selectedIndex = i;
 			}
-			if (key.equals(CfgKeys.SIM_ODE_SOLVER)) {
+			if (key.equals(SimulatorCfgKeys.SIM_ODE_SOLVER)) {
 				AbstractDESSolver solver = (AbstractDESSolver) classes[i]
 						.getConstructor().newInstance();
 				combo.addItem(solver.getName());
@@ -231,12 +233,12 @@ public class SettingsPanelComputation extends SettingsPanel {
 			JComboBox combo = (JComboBox) e.getSource();
 			if (combo.getName() != null) {
 				try {
-					CfgKeys key = CfgKeys.valueOf(combo.getName());
-					if (key.equals(CfgKeys.SIM_DISTANCE_FUNCTION)) {
+					String key = combo.getName();
+					if (key.equals(SimulatorCfgKeys.SIM_DISTANCE_FUNCTION)) {
 						properties.put(key, SBMLsimulator
 								.getAvailableDistances()[combo
 								.getSelectedIndex()]);
-					} else if (key.equals(CfgKeys.SIM_ODE_SOLVER)) {
+					} else if (key.equals(SimulatorCfgKeys.SIM_ODE_SOLVER)) {
 						properties.put(key,
 								SBMLsimulator.getAvailableSolvers()[combo
 										.getSelectedIndex()]);
@@ -255,7 +257,7 @@ public class SettingsPanelComputation extends SettingsPanel {
 	 * @param cfgKeys
 	 * @param string
 	 */
-	private void addSpinner(LayoutHelper lh, JSpinner spinner, CfgKeys cfgKeys,
+	private void addSpinner(LayoutHelper lh, JSpinner spinner, String cfgKeys,
 			String label) {
 		// lh.add(new JLabel(label), 0, lh.getRow()+1, 1, 1, 0, 0);
 		// if (lh.getRow() == 1) {
@@ -280,12 +282,12 @@ public class SettingsPanelComputation extends SettingsPanel {
 	 */
 	@Override
 	public void initConstantFields(Properties properties) {
-		spinnerMaxValue = ((Number) properties.get(CfgKeys.SPINNER_MAX_VALUE))
-				.doubleValue();
-		spinnerMinValue = ((Number) properties.get(CfgKeys.SPINNER_MIN_VALUE))
-				.doubleValue();
-		spinnerStepSize = ((Number) properties.get(CfgKeys.SPINNER_STEP_SIZE))
-				.doubleValue();
+		spinnerMaxValue = ((Number) properties
+				.get(SimulatorCfgKeys.SPINNER_MAX_VALUE)).doubleValue();
+		spinnerMinValue = ((Number) properties
+				.get(SimulatorCfgKeys.SPINNER_MIN_VALUE)).doubleValue();
+		spinnerStepSize = ((Number) properties
+				.get(SimulatorCfgKeys.SPINNER_STEP_SIZE)).doubleValue();
 	}
 
 	/*
@@ -300,8 +302,8 @@ public class SettingsPanelComputation extends SettingsPanel {
 			JSpinner spinner = (JSpinner) e.getSource();
 			if (spinner.getName() != null) {
 				try {
-					CfgKeys key = CfgKeys.valueOf(spinner.getName());
-					properties.put(key, (Double) spinner.getValue());
+					properties.put(spinner.getName(), (Double) spinner
+							.getValue());
 				} catch (Throwable t) {
 				}
 			}

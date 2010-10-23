@@ -19,8 +19,8 @@ import javax.swing.event.TableModelListener;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.UnitDefinition;
+import org.sbml.simulator.SimulatorCfgKeys;
 import org.sbml.simulator.math.odes.MultiBlockTable;
-import org.sbml.squeezer.CfgKeys;
 
 import de.zbit.gui.GUITools;
 
@@ -117,16 +117,16 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 		/*
 		 * Simulation
 		 */
-		p.put(CfgKeys.SIM_MAX_COMPARTMENT_SIZE, Double
+		p.put(SimulatorCfgKeys.SIM_MAX_COMPARTMENT_SIZE, Double
 				.valueOf(maxCompartmentValue));
-		p.put(CfgKeys.SIM_MAX_SPECIES_VALUE, Double.valueOf(maxSpeciesValue));
-		p.put(CfgKeys.SIM_MAX_PARAMETER_VALUE, Double
+		p.put(SimulatorCfgKeys.SIM_MAX_SPECIES_VALUE, Double.valueOf(maxSpeciesValue));
+		p.put(SimulatorCfgKeys.SIM_MAX_PARAMETER_VALUE, Double
 				.valueOf(maxParameterValue));
 		/*
 		 * General settings
 		 */
-		p.put(CfgKeys.SPINNER_STEP_SIZE, Double.valueOf(paramStepSize));
-		p.put(CfgKeys.SPINNER_MAX_VALUE, Double.valueOf(maxSpinVal));
+		p.put(SimulatorCfgKeys.SPINNER_STEP_SIZE, Double.valueOf(paramStepSize));
+		p.put(SimulatorCfgKeys.SPINNER_MAX_VALUE, Double.valueOf(maxSpinVal));
 		p.putAll(interactiveScanPanel.getProperties());
 
 		return p;
@@ -309,17 +309,17 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 			interactiveScanPanel.setProperties(properties);
 		}
 
-		maxSpinVal = ((Number) properties.get(CfgKeys.SPINNER_MAX_VALUE))
+		maxSpinVal = ((Number) properties.get(SimulatorCfgKeys.SPINNER_MAX_VALUE))
 				.doubleValue();
-		paramStepSize = ((Number) properties.get(CfgKeys.SPINNER_STEP_SIZE))
+		paramStepSize = ((Number) properties.get(SimulatorCfgKeys.SPINNER_STEP_SIZE))
 				.doubleValue();
 
 		maxCompartmentValue = ((Number) properties
-				.get(CfgKeys.SIM_MAX_COMPARTMENT_SIZE)).doubleValue();
+				.get(SimulatorCfgKeys.SIM_MAX_COMPARTMENT_SIZE)).doubleValue();
 		maxSpeciesValue = ((Number) properties
-				.get(CfgKeys.SIM_MAX_SPECIES_VALUE)).doubleValue();
+				.get(SimulatorCfgKeys.SIM_MAX_SPECIES_VALUE)).doubleValue();
 		maxParameterValue = ((Number) properties
-				.get(CfgKeys.SIM_MAX_PARAMETER_VALUE)).doubleValue();
+				.get(SimulatorCfgKeys.SIM_MAX_PARAMETER_VALUE)).doubleValue();
 	}
 
 	/**

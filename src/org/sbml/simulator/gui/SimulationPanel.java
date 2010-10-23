@@ -39,14 +39,15 @@ import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Quantity;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.SBMLsimulator;
+import org.sbml.simulator.SimulatorCfgKeys;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.odes.DESSolver;
 import org.sbml.simulator.math.odes.MultiBlockTable;
-import org.sbml.squeezer.CfgKeys;
 
 import de.zbit.gui.GUITools;
 import de.zbit.io.CSVWriter;
 import de.zbit.io.SBFileFilter;
+import de.zbit.util.SBProperties;
 import eva2.server.go.problems.AbstractOptimizationProblem;
 import eva2.server.stat.GraphSelectionEnum;
 import eva2.server.stat.InterfaceStatisticsListener;
@@ -68,53 +69,64 @@ public class SimulationPanel extends JPanel implements
 	/**
 	 * 
 	 */
-	private static Properties getDefaultProperties() {
-		Properties p = new Properties();
+	private static SBProperties getDefaultProperties() {
+		SBProperties p = new SBProperties();
 		Double maxVal = Double.valueOf(1E5);
 		/*
 		 * Simulation
 		 */
-		p.put(CfgKeys.SIM_MAX_TIME, maxVal);
-		p.put(CfgKeys.SIM_START_TIME, Double.valueOf(0));
-		p.put(CfgKeys.SIM_END_TIME, Double.valueOf(5));
-		p.put(CfgKeys.SIM_STEP_SIZE, Double.valueOf(.01));
-		p.put(CfgKeys.SIM_MAX_COMPARTMENT_SIZE, maxVal);
-		p.put(CfgKeys.SIM_MAX_SPECIES_VALUE, maxVal);
-		p.put(CfgKeys.SIM_MAX_PARAMETER_VALUE, maxVal);
-		p.put(CfgKeys.SIM_MAX_STEPS_PER_UNIT_TIME, Integer.valueOf(500));
-		p.put(CfgKeys.SIM_DISTANCE_FUNCTION, SBMLsimulator
+		p.put(SimulatorCfgKeys.SIM_MAX_TIME, maxVal);
+		p.put(SimulatorCfgKeys.SIM_START_TIME, Double.valueOf(0));
+		p.put(SimulatorCfgKeys.SIM_END_TIME, Double.valueOf(5));
+		p.put(SimulatorCfgKeys.SIM_STEP_SIZE, Double.valueOf(.01));
+		p.put(SimulatorCfgKeys.SIM_MAX_COMPARTMENT_SIZE, maxVal);
+		p.put(SimulatorCfgKeys.SIM_MAX_SPECIES_VALUE, maxVal);
+		p.put(SimulatorCfgKeys.SIM_MAX_PARAMETER_VALUE, maxVal);
+		p.put(SimulatorCfgKeys.SIM_MAX_STEPS_PER_UNIT_TIME, Integer
+				.valueOf(500));
+		p.put(SimulatorCfgKeys.SIM_DISTANCE_FUNCTION, SBMLsimulator
 				.getAvailableDistances()[0].getName());
-		p.put(CfgKeys.SIM_ODE_SOLVER, SBMLsimulator.getAvailableSolvers()[0]
-				.getName());
-		p.put(CfgKeys.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE, Double.valueOf(1d));
-		p.put(CfgKeys.OPT_DEFAULT_SPECIES_INITIAL_VALUE, Double.valueOf(1d));
-		p.put(CfgKeys.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS, Double.valueOf(1d));
+		p.put(SimulatorCfgKeys.SIM_ODE_SOLVER, SBMLsimulator
+				.getAvailableSolvers()[0].getName());
+		p.put(SimulatorCfgKeys.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE, Double
+				.valueOf(1d));
+		p.put(SimulatorCfgKeys.OPT_DEFAULT_SPECIES_INITIAL_VALUE, Double
+				.valueOf(1d));
+		p.put(SimulatorCfgKeys.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS, Double
+				.valueOf(1d));
 
 		/*
 		 * Plot
 		 */
-		p.put(CfgKeys.PLOT_SHOW_GRID, Boolean.valueOf(true));
-		p.put(CfgKeys.PLOT_SHOW_LEGEND, Boolean.valueOf(true));
-		p.put(CfgKeys.PLOT_LOG_SCALE, Boolean.valueOf(false));
-		p.put(CfgKeys.PLOT_SHOW_TOOLTIPS, Boolean.valueOf(false));
+		p.put(SimulatorCfgKeys.PLOT_SHOW_GRID, Boolean.valueOf(true));
+		p.put(SimulatorCfgKeys.PLOT_SHOW_LEGEND, Boolean.valueOf(true));
+		p.put(SimulatorCfgKeys.PLOT_LOG_SCALE, Boolean.valueOf(false));
+		p.put(SimulatorCfgKeys.PLOT_SHOW_TOOLTIPS, Boolean.valueOf(false));
 
 		/*
 		 * CSV file parsing
 		 */
-		p.put(CfgKeys.CSV_FILES_OPEN_DIR, System.getProperty("user.home"));
-		p.put(CfgKeys.CSV_FILES_SEPARATOR_CHAR, Character.valueOf(','));
-		p.put(CfgKeys.CSV_FILES_QUOTE_CHAR, Character.valueOf('\''));
-		p.put(CfgKeys.CSV_FILES_SAVE_DIR, System.getProperty("user.home"));
+		p.put(SimulatorCfgKeys.CSV_FILES_OPEN_DIR, System
+				.getProperty("user.home"));
+		p
+				.put(SimulatorCfgKeys.CSV_FILES_SEPARATOR_CHAR, Character
+						.valueOf(','));
+		p.put(SimulatorCfgKeys.CSV_FILES_QUOTE_CHAR, Character.valueOf('\''));
+		p.put(SimulatorCfgKeys.CSV_FILES_SAVE_DIR, System
+				.getProperty("user.home"));
 
 		/*
 		 * General settings
 		 */
-		p.put(CfgKeys.SPINNER_STEP_SIZE, Double.valueOf(.01d));
-		p.put(CfgKeys.JPEG_COMPRESSION_FACTOR, Float.valueOf(.8f));
-		p.put(CfgKeys.SPINNER_MAX_VALUE, Double.valueOf(1E5d));
-		p.put(CfgKeys.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE, Double.valueOf(1d));
-		p.put(CfgKeys.OPT_DEFAULT_SPECIES_INITIAL_VALUE, Double.valueOf(1d));
-		p.put(CfgKeys.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS, Double.valueOf(1d));
+		p.put(SimulatorCfgKeys.SPINNER_STEP_SIZE, Double.valueOf(.01d));
+		p.put(SimulatorCfgKeys.JPEG_COMPRESSION_FACTOR, Float.valueOf(.8f));
+		p.put(SimulatorCfgKeys.SPINNER_MAX_VALUE, Double.valueOf(1E5d));
+		p.put(SimulatorCfgKeys.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE, Double
+				.valueOf(1d));
+		p.put(SimulatorCfgKeys.OPT_DEFAULT_SPECIES_INITIAL_VALUE, Double
+				.valueOf(1d));
+		p.put(SimulatorCfgKeys.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS, Double
+				.valueOf(1d));
 
 		return p;
 	}
@@ -167,7 +179,7 @@ public class SimulationPanel extends JPanel implements
 	 * @param model
 	 * @param properties
 	 */
-	public SimulationPanel(Model model, Properties properties) {
+	public SimulationPanel(Model model, SBProperties properties) {
 		super();
 		showSettingsPanel = true;
 		if (SBMLsimulator.getAvailableSolvers().length == 0) {
@@ -447,11 +459,15 @@ public class SimulationPanel extends JPanel implements
 	 */
 	public void savePlotImage() {
 		try {
-			CfgKeys.PLOT_SAVE_DIR.putProperty(visualizationPanel.getPlot()
-					.savePlotImage(
-							CfgKeys.PLOT_SAVE_DIR.getProperty().toString(),
-							((Number) CfgKeys.JPEG_COMPRESSION_FACTOR
-									.getProperty()).floatValue()));
+			SBProperties props = SBMLsimulator.getProperties();
+			String saveDir = props.get(SimulatorCfgKeys.PLOT_SAVE_DIR)
+					.toString();
+			float compression = ((Number) props
+					.get(SimulatorCfgKeys.JPEG_COMPRESSION_FACTOR))
+					.floatValue();
+			props.put(SimulatorCfgKeys.PLOT_SAVE_DIR, visualizationPanel
+					.getPlot().savePlotImage(saveDir,
+							Float.valueOf(compression)));
 		} catch (Exception exc) {
 			GUITools.showErrorMessage(this, exc);
 		}
@@ -463,16 +479,18 @@ public class SimulationPanel extends JPanel implements
 	public void saveSimulationResults() {
 		try {
 			TableModel simTabModel = getSimulationResultsTable();
+			SBProperties props = SBMLsimulator.getProperties();
 			if (simTabModel.getRowCount() > 0) {
-				File out = GUITools.saveFileDialog(this,
-						CfgKeys.CSV_FILES_SAVE_DIR.getProperty().toString(),
-						false, false, JFileChooser.FILES_ONLY,
+				File out = GUITools.saveFileDialog(this, props.getProperty(
+						SimulatorCfgKeys.CSV_FILES_SAVE_DIR).toString(), false,
+						false, JFileChooser.FILES_ONLY,
 						SBFileFilter.CSV_FILE_FILTER);
 				if (out != null) {
-					(new CSVWriter()).write(simTabModel,
-							CfgKeys.CSV_FILES_SEPARATOR_CHAR.getProperty()
-									.toString().charAt(0), out);
-					CfgKeys.CSV_FILES_SAVE_DIR.putProperty(out.getParent());
+					(new CSVWriter()).write(simTabModel, props.get(
+							SimulatorCfgKeys.CSV_FILES_SEPARATOR_CHAR)
+							.toString().charAt(0), out);
+					props.put(SimulatorCfgKeys.CSV_FILES_SAVE_DIR, out
+							.getParent());
 				}
 			} else {
 				String msg = "No simulation has been performed yet. Please run the simulation first.";
@@ -518,7 +536,7 @@ public class SimulationPanel extends JPanel implements
 	 * @throws SecurityException
 	 * @throws IllegalArgumentException
 	 */
-	public void setProperties(Properties properties)
+	public void setProperties(SBProperties properties)
 			throws IllegalArgumentException, SecurityException,
 			InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException {

@@ -1066,7 +1066,6 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 			symbolHash.put(c.getId(), yIndex);
 			symbolIdentifiers[yIndex] = c.getId();
 			yIndex++;
-
 		}
 
 		// Due to unset initial amount or concentration of species try to set
@@ -1154,7 +1153,6 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 				evaluateAlgebraicRule();
 				break;
 			}
-
 		}
 
 		/*
