@@ -18,7 +18,7 @@ import de.zbit.util.SBProperties;
  * @author Andreas Dr&auml;ger
  * @date 2010-09-14
  */
-public class SettingsPanelParsing extends SettingsPanel {
+public class SettingsPanelParsing extends PreferencesPanel {
 
 	/**
 	 * Generated serial version identifier.
