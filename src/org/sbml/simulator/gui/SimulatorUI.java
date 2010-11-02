@@ -56,7 +56,7 @@ import org.sbml.simulator.SimulatorCfgKeys;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 import org.sbml.simulator.resources.Resource;
 
-import de.zbit.gui.cfg.SettingsDialog;
+import de.zbit.gui.cfg.PreferencesDialog;
 import de.zbit.io.SBFileFilter;
 import de.zbit.util.SBProperties;
 import eva2.client.EvAClient;
@@ -332,8 +332,8 @@ public class SimulatorUI extends JFrame implements ActionListener,
 	 */
 	private void adjustPreferences() {
 		try {
-			SettingsDialog dialog = new SettingsDialog(this);
-			if (dialog.showSettingsDialog(SBMLsimulator.getProperties()) == SettingsDialog.APPROVE_OPTION) {
+			PreferencesDialog dialog = new PreferencesDialog(this);
+			if (dialog.showSettingsDialog(SBMLsimulator.getProperties()) == PreferencesDialog.APPROVE_OPTION) {
 				SBProperties p = dialog.getProperties();
 				SBMLsimulator.getProperties().putAll(p);
 				if (simPanel != null) {
