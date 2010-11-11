@@ -30,6 +30,7 @@ import org.sbml.jsbml.AssignmentRule;
 import org.sbml.jsbml.FunctionDefinition;
 import org.sbml.jsbml.MathContainer;
 import org.sbml.jsbml.Model;
+import org.sbml.jsbml.NamedSBaseWithDerivedUnit;
 import org.sbml.jsbml.Rule;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.SBase;
@@ -426,6 +427,7 @@ public class AlgebraicRuleConverter {
 			Rule r = model.getRule(i);
 			if (r instanceof AlgebraicRule) {
 				AlgebraicRule ar = (AlgebraicRule) r;
+
 				ASTNode node = ar.getMath().clone();
 
 				// substitute function definitions
@@ -569,6 +571,7 @@ public class AlgebraicRuleConverter {
 	 * @param indexParent
 	 */
 	private ASTNode substituteFunctions(ASTNode node, int indexParent) {
+		NamedSBaseWithDerivedUnit variable;
 		// Check if node is a function
 		if (node.isName()) {
 			FunctionDefinition fd = model.getFunctionDefinition(node.getName());
@@ -583,7 +586,11 @@ public class AlgebraicRuleConverter {
 
 				// Hash its variables to the parameter
 				for (int i = 0; i < node.getNumChildren(); i++) {
-					if (node.getChild(i).isFunction()) {
+					variable = null; 
+					if (node.getChild(i).isName()) {
+						variable = node.getChild(i).getVariable();
+					}
+					if (variable instanceof FunctionDefinition) {
 						nodeHash.put(function.getChild(i).getName(), node
 								.getChild(i).clone());
 					} else if (node.getChild(i).isOperator()) {
@@ -602,10 +609,12 @@ public class AlgebraicRuleConverter {
 						}
 					}
 				}
+
 				parent = (ASTNode) node.getParent();
 				// Function definiton is child
 				if (parent != null) {
-					System.out.println(parent.getType());
+					// System.out.println(parent.getType());
+
 					// Replace the reference to a function definition with the
 					// function definiton itself
 					parent.replaceChild(indexParent, function.getRightChild()
