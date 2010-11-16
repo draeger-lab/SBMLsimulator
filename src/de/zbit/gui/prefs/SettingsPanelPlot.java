@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.zbit.gui.cfg;
+package de.zbit.gui.prefs;
 
 import java.awt.event.ItemEvent;
 import java.util.Properties;
@@ -14,9 +14,10 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 
-import org.sbml.simulator.SimulatorCfgKeys;
+import org.sbml.simulator.SimulatorOptions;
 
 import de.zbit.gui.LayoutHelper;
+import de.zbit.gui.cfg.DirectoryChooser;
 import de.zbit.util.SBProperties;
 
 /**
@@ -68,7 +69,7 @@ public class SettingsPanelPlot extends PreferencesPanel {
 	public SBProperties getProperties() {
 		if (chooser.checkSaveDir()) {
 			properties
-					.put(SimulatorCfgKeys.PLOT_SAVE_DIR, chooser.getSaveDir());
+					.put(SimulatorOptions.PLOT_SAVE_DIR, chooser.getSaveDir());
 		}
 		return properties;
 	}
@@ -91,16 +92,16 @@ public class SettingsPanelPlot extends PreferencesPanel {
 	@Override
 	public void init() {
 		chooser = new DirectoryChooser(null, properties.get(
-				SimulatorCfgKeys.PLOT_SAVE_DIR).toString());
+				SimulatorOptions.PLOT_SAVE_DIR).toString());
 		chooser.setBorder(BorderFactory
 				.createTitledBorder(" Output directory for images "));
 
 		String names[] = { "Logarithmic scale", "Show grid", "Include legend",
 				"Display tooltips" };
-		String keys[] = { SimulatorCfgKeys.PLOT_LOG_SCALE,
-				SimulatorCfgKeys.PLOT_SHOW_GRID,
-				SimulatorCfgKeys.PLOT_SHOW_LEGEND,
-				SimulatorCfgKeys.PLOT_SHOW_TOOLTIPS };
+		String keys[] = { SimulatorOptions.PLOT_LOG_SCALE,
+				SimulatorOptions.PLOT_SHOW_GRID,
+				SimulatorOptions.PLOT_SHOW_LEGEND,
+				SimulatorOptions.PLOT_SHOW_TOOLTIPS };
 		JCheckBox check[] = new JCheckBox[names.length];
 		JPanel layout = new JPanel();
 		LayoutHelper lh = new LayoutHelper(layout);
@@ -115,7 +116,7 @@ public class SettingsPanelPlot extends PreferencesPanel {
 
 		JSpinner compression = new JSpinner(new SpinnerNumberModel(
 				((Number) properties
-						.get(SimulatorCfgKeys.JPEG_COMPRESSION_FACTOR))
+						.get(SimulatorOptions.JPEG_COMPRESSION_FACTOR))
 						.doubleValue(), 0d, 1d, stepSize));
 		compression.addChangeListener(this);
 		JPanel image = new JPanel();
@@ -139,7 +140,7 @@ public class SettingsPanelPlot extends PreferencesPanel {
 	 */
 	@Override
 	public void initConstantFields(Properties properties) {
-		stepSize = ((Number) properties.get(SimulatorCfgKeys.SPINNER_STEP_SIZE))
+		stepSize = ((Number) properties.get(SimulatorCfgKeys.SimulatorOptions))
 				.doubleValue();
 	}
 
@@ -173,7 +174,7 @@ public class SettingsPanelPlot extends PreferencesPanel {
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() instanceof JSpinner) {
-			properties.put(SimulatorCfgKeys.JPEG_COMPRESSION_FACTOR,
+			properties.put(SimulatorOptions.JPEG_COMPRESSION_FACTOR,
 					(Double) ((JSpinner) e.getSource()).getValue());
 		}
 		super.stateChanged(e);

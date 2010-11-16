@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.zbit.gui.cfg;
+package de.zbit.gui.prefs;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -9,9 +9,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.sbml.simulator.SimulatorCfgKeys;
+import org.sbml.simulator.SimulatorOptions;
 
 import de.zbit.gui.LayoutHelper;
+import de.zbit.gui.cfg.DirectoryChooser;
 import de.zbit.util.SBProperties;
 
 /**
@@ -76,19 +77,19 @@ public class SettingsPanelParsing extends PreferencesPanel {
 	@Override
 	public SBProperties getProperties() {
 		if (chooser.checkOpenDir()) {
-			properties.put(SimulatorCfgKeys.CSV_FILES_OPEN_DIR, chooser
+			properties.put(SimulatorCfgKeys.SimulatorOptions, chooser
 					.getOpenDir());
 		}
 		if (chooser.checkSaveDir()) {
-			properties.put(SimulatorCfgKeys.CSV_FILES_SAVE_DIR, chooser
+			properties.put(SimulatorCfgKeys.SimulatorOptions, chooser
 					.getSaveDir());
 		}
 		if (check(tfQuoteChar)) {
-			properties.put(SimulatorCfgKeys.CSV_FILES_QUOTE_CHAR, tfQuoteChar
+			properties.put(SimulatorCfgKeys.SimulatorOptions, tfQuoteChar
 					.getText());
 		}
 		if (check(tfSeparatorChar)) {
-			properties.put(SimulatorCfgKeys.CSV_FILES_QUOTE_CHAR, tfQuoteChar
+			properties.put(SimulatorCfgKeys.SimulatorOptions, tfQuoteChar
 					.getText());
 		}
 		return properties;
@@ -112,16 +113,16 @@ public class SettingsPanelParsing extends PreferencesPanel {
 	@Override
 	public void init() {
 		chooser = new DirectoryChooser(properties.get(
-				SimulatorCfgKeys.CSV_FILES_OPEN_DIR).toString(), properties
-				.get(SimulatorCfgKeys.CSV_FILES_SAVE_DIR).toString());
+				SimulatorCfgKeys.SimulatorOptions).toString(), properties
+				.get(SimulatorCfgKeys.SimulatorOptions).toString());
 		chooser.setBorder(BorderFactory
 				.createTitledBorder(" Default directories for CSV files "));
 
 		tfQuoteChar = new JTextField(properties.get(
-				SimulatorCfgKeys.CSV_FILES_QUOTE_CHAR).toString());
+				SimulatorCfgKeys.SimulatorOptions).toString());
 		tfQuoteChar.addKeyListener(this);
 		tfSeparatorChar = new JTextField(properties.get(
-				SimulatorCfgKeys.CSV_FILES_SEPARATOR_CHAR).toString());
+				SimulatorCfgKeys.SimulatorOptions).toString());
 		tfSeparatorChar.addKeyListener(this);
 		JPanel panel = new JPanel();
 		LayoutHelper lh = new LayoutHelper(panel);

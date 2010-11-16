@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.zbit.gui.cfg;
+package de.zbit.gui.prefs;
 
 import java.awt.event.ItemEvent;
 
@@ -14,7 +14,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 
 import org.sbml.jsbml.util.StringTools;
-import org.sbml.simulator.SimulatorCfgKeys;
+import org.sbml.simulator.SimulatorOptions;
 import org.sbml.simulator.gui.GUITools;
 
 import de.zbit.gui.LayoutHelper;
@@ -65,11 +65,11 @@ public class SettingsPanelOptimization extends PreferencesPanel {
 	 */
 	public void initConstantFields(SBProperties properties) {
 		spinnerMaxValue = ((Number) properties
-				.get(SimulatorCfgKeys.SPINNER_MAX_VALUE)).doubleValue();
+				.get(SimulatorCfgKeys.SimulatorOptions)).doubleValue();
 		spinnerMinValue = ((Number) properties
-				.get(SimulatorCfgKeys.SPINNER_MIN_VALUE)).doubleValue();
+				.get(SimulatorCfgKeys.SimulatorOptions)).doubleValue();
 		spinnerStepSize = ((Number) properties
-				.get(SimulatorCfgKeys.SPINNER_STEP_SIZE)).doubleValue();
+				.get(SimulatorCfgKeys.SimulatorOptions)).doubleValue();
 	}
 
 	/*
@@ -102,10 +102,10 @@ public class SettingsPanelOptimization extends PreferencesPanel {
 		JCheckBox check[] = new JCheckBox[4];
 		String names[] = { "Local parameters", "Global parameters",
 				"Compartments", "Species" };
-		String keys[] = { SimulatorCfgKeys.EST_ALL_LOCAL_PARAMETERS,
-				SimulatorCfgKeys.EST_ALL_GLOBAL_PARAMETERS,
-				SimulatorCfgKeys.EST_ALL_COMPARTMENTS,
-				SimulatorCfgKeys.EST_ALL_SPECIES };
+		String keys[] = { SimulatorOptions.EST_ALL_LOCAL_PARAMETERS,
+				SimulatorOptions.EST_ALL_GLOBAL_PARAMETERS,
+				SimulatorOptions.EST_ALL_COMPARTMENTS,
+				SimulatorOptions.EST_ALL_SPECIES };
 		JPanel panelWhatToEstimate = new JPanel();
 		LayoutHelper lh = new LayoutHelper(panelWhatToEstimate);
 		int i;
@@ -128,9 +128,9 @@ public class SettingsPanelOptimization extends PreferencesPanel {
 		names = new String[] { "Lower initialization bound:",
 				"Upper initialization bound:", "Minimal allowable value:",
 				"Maximal allowable value:" };
-		keys = new String[] { SimulatorCfgKeys.EST_INIT_MIN_VALUE,
-				SimulatorCfgKeys.EST_INIT_MAX_VALUE,
-				SimulatorCfgKeys.EST_MIN_VALUE, SimulatorCfgKeys.EST_MAX_VALUE };
+		keys = new String[] { SimulatorOptions.EST_INIT_MIN_VALUE,
+				SimulatorOptions.EST_INIT_MAX_VALUE,
+				SimulatorOptions.EST_MIN_VALUE, SimulatorOptions.EST_MAX_VALUE };
 		int row = 0;
 		for (i = 0; i < spinner.length; i++) {
 			spinner[i] = new JSpinner(new SpinnerNumberModel(
@@ -154,8 +154,8 @@ public class SettingsPanelOptimization extends PreferencesPanel {
 		JPanel panelIntegrationStrategy = new JPanel();
 		lh = new LayoutHelper(panelIntegrationStrategy);
 		lh.add(GUITools.createJCheckBox("Use multiple shooting strategy",
-				((Boolean) properties.get(SimulatorCfgKeys.EST_MULTI_SHOOT))
-						.booleanValue(), SimulatorCfgKeys.EST_MULTI_SHOOT,
+				((Boolean) properties.get(SimulatorOptions.EST_MULTI_SHOOT))
+						.booleanValue(), SimulatorOptions.EST_MULTI_SHOOT,
 				CHECKBOX_TOOLTIP_STRATEGY, this), 0, 0, 1, 1, 1, 0);
 		panelIntegrationStrategy.setBorder(BorderFactory
 				.createTitledBorder(" Integration strategy "));
