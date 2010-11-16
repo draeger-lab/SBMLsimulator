@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.zbit.gui.cfg;
+package de.zbit.gui.prefs;
 
 import java.awt.event.ItemEvent;
 import java.lang.reflect.InvocationTargetException;
@@ -18,7 +18,7 @@ import javax.swing.event.ChangeListener;
 
 import org.sbml.jsbml.util.StringTools;
 import org.sbml.simulator.SBMLsimulator;
-import org.sbml.simulator.SimulatorCfgKeys;
+import org.sbml.simulator.SimulatorOptions;
 import org.sbml.simulator.gui.GUITools;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
@@ -76,15 +76,15 @@ public class SettingsPanelComputation extends PreferencesPanel {
 		JComboBox solverBox = new JComboBox();
 		JComboBox distanceBox = new JComboBox();
 		int i;
-		String keys[] = { SimulatorCfgKeys.SIM_DISTANCE_DEFAULT_VALUE,
-				SimulatorCfgKeys.SIM_DISTANCE_ROOT,
-				SimulatorCfgKeys.SIM_MAX_TIME, SimulatorCfgKeys.SIM_START_TIME,
-				SimulatorCfgKeys.SIM_END_TIME,
-				SimulatorCfgKeys.SIM_MAX_STEPS_PER_UNIT_TIME,
-				SimulatorCfgKeys.SIM_STEP_SIZE,
-				SimulatorCfgKeys.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE,
-				SimulatorCfgKeys.OPT_DEFAULT_SPECIES_INITIAL_VALUE,
-				SimulatorCfgKeys.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS };
+		String keys[] = { SimulatorOptions.SIM_DISTANCE_DEFAULT_VALUE,
+				SimulatorOptions.SIM_DISTANCE_ROOT,
+				SimulatorOptions.SIM_MAX_TIME, SimulatorOptions.SIM_START_TIME,
+				SimulatorOptions.SIM_END_TIME,
+				SimulatorOptions.SIM_MAX_STEPS_PER_UNIT_TIME,
+				SimulatorOptions.SIM_STEP_SIZE,
+				SimulatorOptions.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE,
+				SimulatorOptions.OPT_DEFAULT_SPECIES_INITIAL_VALUE,
+				SimulatorOptions.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS };
 		String names[] = { "Default value:", "Root:",
 				"Maximal simulation time:", "Simulation start time:",
 				"Simulation end time:",
@@ -102,9 +102,9 @@ public class SettingsPanelComputation extends PreferencesPanel {
 
 		try {
 			initComboBox(solverBox, SBMLsimulator.getAvailableSolvers(),
-					SimulatorCfgKeys.SIM_ODE_SOLVER);
+					SimulatorOptions.SIM_ODE_SOLVER);
 			initComboBox(distanceBox, SBMLsimulator.getAvailableDistances(),
-					SimulatorCfgKeys.SIM_DISTANCE_DEFAULT_VALUE);
+					SimulatorOptions.SIM_DISTANCE_DEFAULT_VALUE);
 		} catch (Exception exc) {
 			GUITools.showErrorMessage(this, exc);
 		}
@@ -116,7 +116,7 @@ public class SettingsPanelComputation extends PreferencesPanel {
 		JSpinner spinner[] = new JSpinner[keys.length];
 		for (i = 0; i < spinner.length; i++) {
 			spinner[i] = createJSpinner(keys[i], names[i], toolTips[i]);
-			if (keys[i].equals(SimulatorCfgKeys.SIM_START_TIME)) {
+			if (keys[i].equals(SimulatorOptions.SIM_START_TIME)) {
 				spinner[i].setEnabled(false);
 			}
 			if (keys[i].toString().contains("DISTANCE")) {
@@ -206,7 +206,7 @@ public class SettingsPanelComputation extends PreferencesPanel {
 					name.substring(name.lastIndexOf('.') + 1))) {
 				selectedIndex = i;
 			}
-			if (key.equals(SimulatorCfgKeys.SIM_ODE_SOLVER)) {
+			if (key.equals(SimulatorOptions.SIM_ODE_SOLVER)) {
 				AbstractDESSolver solver = (AbstractDESSolver) classes[i]
 						.getConstructor().newInstance();
 				combo.addItem(solver.getName());
@@ -234,11 +234,11 @@ public class SettingsPanelComputation extends PreferencesPanel {
 			if (combo.getName() != null) {
 				try {
 					String key = combo.getName();
-					if (key.equals(SimulatorCfgKeys.SIM_DISTANCE_FUNCTION)) {
+					if (key.equals(SimulatorOptions.SIM_DISTANCE_FUNCTION)) {
 						properties.put(key, SBMLsimulator
 								.getAvailableDistances()[combo
 								.getSelectedIndex()]);
-					} else if (key.equals(SimulatorCfgKeys.SIM_ODE_SOLVER)) {
+					} else if (key.equals(SimulatorOptions.SIM_ODE_SOLVER)) {
 						properties.put(key,
 								SBMLsimulator.getAvailableSolvers()[combo
 										.getSelectedIndex()]);
@@ -283,11 +283,11 @@ public class SettingsPanelComputation extends PreferencesPanel {
 	@Override
 	public void initConstantFields(Properties properties) {
 		spinnerMaxValue = ((Number) properties
-				.get(SimulatorCfgKeys.SPINNER_MAX_VALUE)).doubleValue();
+				.get(SimulatorCfgKeys.SimulatorOptions)).doubleValue();
 		spinnerMinValue = ((Number) properties
-				.get(SimulatorCfgKeys.SPINNER_MIN_VALUE)).doubleValue();
+				.get(SimulatorCfgKeys.SimulatorOptions)).doubleValue();
 		spinnerStepSize = ((Number) properties
-				.get(SimulatorCfgKeys.SPINNER_STEP_SIZE)).doubleValue();
+				.get(SimulatorCfgKeys.SimulatorOptions)).doubleValue();
 	}
 
 	/*
