@@ -6,7 +6,8 @@ package org.sbml.optimization;
 import java.io.Serializable;
 
 import org.sbml.jsbml.Quantity;
-import org.sbml.jsbml.util.ValuePair;
+
+import de.zbit.util.ValuePair;
 
 /**
  * A {@link QuantityRange} gathers all necessary information about a
