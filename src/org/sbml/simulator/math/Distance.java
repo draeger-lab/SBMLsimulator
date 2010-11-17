@@ -309,7 +309,7 @@ public abstract class Distance implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return String.format("%s, root = %d, default = %d", getName(),
+		return String.format("%s, root = %s, default = %s", getName(),
 				getRoot(), getDefaultValue());
 	}
 

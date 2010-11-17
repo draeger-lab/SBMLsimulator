@@ -22,7 +22,7 @@ public interface SimulatorOptions extends KeyProvider {
      */
     public static final Option<File> SBML_FILE = new Option<File>("SBML_FILE",
 	File.class, "SBML input file", new Range<File>(File.class,
-	    SBFileFilter.DIRECTORY_FILTER), new File(System
+	    SBFileFilter.SBML_FILE_FILTER), new File(System
 		.getProperty("user.dir")));
     /**
      * When storing any GUI elements or other pictures into a JPEG graphics file
@@ -201,11 +201,11 @@ public interface SimulatorOptions extends KeyProvider {
      * mask of how many time steps per unit time can maximally be performed when
      * simulating a model.
      */
-    public static final Option<Double> SIM_MAX_STEPS_PER_UNIT_TIME = new Option<Double>(
+    public static final Option<Integer> SIM_MAX_STEPS_PER_UNIT_TIME = new Option<Integer>(
 	"SIM_MAX_STEPS_PER_UNIT_TIME",
-	Double.class,
+	Integer.class,
 	"This key tells the graphical user interface the upper bound for the input mask of how many time steps per unit time can maximally be performed when simulating a model.",
-	Double.valueOf(100d));
+	Integer.valueOf(100));
     /**
      * This is important for the graphical user interface as it defines the
      * upper bound for the input mask for the simulation time.

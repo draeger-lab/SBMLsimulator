@@ -504,31 +504,29 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
     }
 
     /**
-     * @param properties
-     * @throws IllegalArgumentException
-     * @throws SecurityException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws InvocationTargetException
      * @throws NoSuchMethodException
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     * @throws SecurityException
+     * @throws IllegalArgumentException
      */
-    public void setProperties(Properties properties)
-	throws IllegalArgumentException, SecurityException,
-	InstantiationException, IllegalAccessException,
+    public void loadPreferences() throws IllegalArgumentException,
+	SecurityException, InstantiationException, IllegalAccessException,
 	InvocationTargetException, NoSuchMethodException {
+
+	SBPreferences prefs = SBPreferences
+		.getPreferencesFor(SimulatorOptions.class);
 
 	/*
 	 * Solver and distance.
 	 */
-	double simEndTime = ((Number) properties
-		.get(SimulatorOptions.SIM_END_TIME)).doubleValue();
-	spinnerStepSize = ((Number) properties
-		.get(SimulatorOptions.SIM_STEP_SIZE)).doubleValue();
+	double simEndTime = prefs.getDouble(SimulatorOptions.SIM_END_TIME);
+	spinnerStepSize = prefs.getDouble(SimulatorOptions.SIM_STEP_SIZE);
 	Class<Distance>[] distFun = SBMLsimulator.getAvailableDistances();
 
-	maxTime = Math.max(((Number) properties
-		.get(SimulatorOptions.SIM_MAX_TIME)).doubleValue(), Math.max(
-	    getSimulationStartTime(), simEndTime));
+	maxTime = Math.max(prefs.getDouble(SimulatorOptions.SIM_MAX_TIME), Math
+		.max(getSimulationStartTime(), simEndTime));
 	t1.setMinimum(Double.valueOf(0));
 	t1.setValue(Double.valueOf(getSimulationStartTime()));
 	t1.setMaximum(Double.valueOf(maxTime));
@@ -537,21 +535,18 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	t2.setValue(Double.valueOf(simEndTime));
 	t2.setMaximum(Double.valueOf(maxTime));
 	t2.setStepSize(Double.valueOf(spinnerStepSize));
-	showGrid.setSelected(((Boolean) properties
-		.get(SimulatorOptions.PLOT_SHOW_GRID)).booleanValue());
-	logScale.setSelected(((Boolean) properties
-		.get(SimulatorOptions.PLOT_LOG_SCALE)).booleanValue());
-	showLegend.setSelected(((Boolean) properties
-		.get(SimulatorOptions.PLOT_SHOW_LEGEND)).booleanValue());
-	showToolTips.setSelected(((Boolean) properties
-		.get(SimulatorOptions.PLOT_SHOW_TOOLTIPS)).booleanValue());
+	showGrid.setSelected(prefs.getBoolean(SimulatorOptions.PLOT_SHOW_GRID));
+	logScale.setSelected(prefs.getBoolean(SimulatorOptions.PLOT_LOG_SCALE));
+	showLegend.setSelected(prefs
+		.getBoolean(SimulatorOptions.PLOT_SHOW_LEGEND));
+	showToolTips.setSelected(prefs
+		.getBoolean(SimulatorOptions.PLOT_SHOW_TOOLTIPS));
 
-	maxStepsPerUnit = ((Number) properties
-		.get(SimulatorOptions.SIM_MAX_STEPS_PER_UNIT_TIME)).intValue();
+	maxStepsPerUnit = prefs
+		.getInt(SimulatorOptions.SIM_MAX_STEPS_PER_UNIT_TIME);
 
 	int distanceFunc = 0;
-	String name = properties.get(SimulatorOptions.SIM_DISTANCE_FUNCTION)
-		.toString();
+	String name = prefs.get(SimulatorOptions.SIM_DISTANCE_FUNCTION);
 	name = name.substring(name.lastIndexOf('.') + 1);
 	while (distanceFunc < distFun.length
 		&& !distFun[distanceFunc].getSimpleName().equals(name)) {
@@ -560,13 +555,11 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	if (this.distFun != null) {
 	    this.distFun.setSelectedIndex(distanceFunc);
 	}
-	solvers = createSolversComboOrSetSelectedItem(properties.get(
-	    SimulatorOptions.SIM_ODE_SOLVER).toString());
+	solvers = createSolversComboOrSetSelectedItem(prefs
+		.get(SimulatorOptions.SIM_ODE_SOLVER));
 
-	double startTime = ((Number) properties
-		.get(SimulatorOptions.SIM_START_TIME)).doubleValue();
-	double endTime = ((Number) properties
-		.get(SimulatorOptions.SIM_END_TIME)).doubleValue();
+	double startTime = prefs.getDouble(SimulatorOptions.SIM_START_TIME);
+	double endTime = prefs.getDouble(SimulatorOptions.SIM_END_TIME);
 	startTime = Math.max(0, startTime);
 	if (startTime > endTime) {
 	    swap(startTime, endTime);

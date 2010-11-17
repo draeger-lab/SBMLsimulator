@@ -47,7 +47,6 @@ import de.zbit.io.CSVWriter;
 import de.zbit.io.SBFileFilter;
 import de.zbit.util.StringUtil;
 import de.zbit.util.prefs.SBPreferences;
-import de.zbit.util.prefs.SBProperties;
 import eva2.server.go.problems.AbstractOptimizationProblem;
 import eva2.server.stat.GraphSelectionEnum;
 import eva2.server.stat.InterfaceStatisticsListener;
@@ -64,67 +63,6 @@ public class SimulationPanel extends JPanel implements
      * Generated serial version identifier
      */
     private static final long serialVersionUID = -7278034514446047207L;
-
-    /**
-	 * 
-	 */
-    private static SBProperties getDefaultProperties() {
-	SBProperties p = new SBProperties();
-	Double maxVal = Double.valueOf(1E5);
-	/*
-	 * Simulation
-	 */
-	p.put(SimulatorOptions.SIM_MAX_TIME, maxVal);
-	p.put(SimulatorOptions.SIM_START_TIME, Double.valueOf(0));
-	p.put(SimulatorOptions.SIM_END_TIME, Double.valueOf(5));
-	p.put(SimulatorOptions.SIM_STEP_SIZE, Double.valueOf(.01));
-	p.put(SimulatorOptions.SIM_MAX_COMPARTMENT_SIZE, maxVal);
-	p.put(SimulatorOptions.SIM_MAX_SPECIES_VALUE, maxVal);
-	p.put(SimulatorOptions.SIM_MAX_PARAMETER_VALUE, maxVal);
-	p.put(SimulatorOptions.SIM_MAX_STEPS_PER_UNIT_TIME, Integer
-		.valueOf(500));
-	p.put(SimulatorOptions.SIM_DISTANCE_FUNCTION, SBMLsimulator
-		.getAvailableDistances()[0].getName());
-	p.put(SimulatorOptions.SIM_ODE_SOLVER, SBMLsimulator
-		.getAvailableSolvers()[0].getName());
-	p.put(SimulatorOptions.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE, Double
-		.valueOf(1d));
-	p.put(SimulatorOptions.OPT_DEFAULT_SPECIES_INITIAL_VALUE, Double
-		.valueOf(1d));
-	p.put(SimulatorOptions.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS, Double
-		.valueOf(1d));
-
-	/*
-	 * Plot
-	 */
-	p.put(SimulatorOptions.PLOT_SHOW_GRID, Boolean.valueOf(true));
-	p.put(SimulatorOptions.PLOT_SHOW_LEGEND, Boolean.valueOf(true));
-	p.put(SimulatorOptions.PLOT_LOG_SCALE, Boolean.valueOf(false));
-	p.put(SimulatorOptions.PLOT_SHOW_TOOLTIPS, Boolean.valueOf(false));
-
-	/*
-	 * CSV file parsing
-	 */
-	p.put(CSVOptions.CSV_FILES_OPEN_DIR, System.getProperty("user.home"));
-	p.put(CSVOptions.CSV_FILES_SEPARATOR_CHAR, Character.valueOf(','));
-	p.put(CSVOptions.CSV_FILES_QUOTE_CHAR, Character.valueOf('\''));
-	p.put(CSVOptions.CSV_FILES_SAVE_DIR, System.getProperty("user.home"));
-
-	/*
-	 * General settings
-	 */
-	p.put(GUIOptions.SPINNER_STEP_SIZE, Double.valueOf(.01d));
-	p.put(SimulatorOptions.JPEG_COMPRESSION_FACTOR, Float.valueOf(.8f));
-	p.put(GUIOptions.SPINNER_MAX_VALUE, Double.valueOf(1E5d));
-	p.put(SimulatorOptions.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE, Double
-		.valueOf(1d));
-	p.put(SimulatorOptions.OPT_DEFAULT_SPECIES_INITIAL_VALUE, Double
-		.valueOf(1d));
-	p.put(SimulatorOptions.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS, Double
-		.valueOf(1d));
-
-	return p;
-    }
 
     /**
      * Table for experimental data, the legend, and the simulation data.
@@ -165,14 +103,6 @@ public class SimulationPanel extends JPanel implements
      * @param model
      */
     public SimulationPanel(Model model) {
-	this(model, getDefaultProperties());
-    }
-
-    /**
-     * @param model
-     * @param properties
-     */
-    public SimulationPanel(Model model, SBProperties properties) {
 	super();
 	showSettingsPanel = true;
 	if (SBMLsimulator.getAvailableSolvers().length == 0) {
@@ -183,7 +113,7 @@ public class SimulationPanel extends JPanel implements
 	    try {
 		worker = new SimulationWorker(model);
 		visualizationPanel = new SimulationVisualizationPanel();
-		setProperties(properties);
+		loadPreferences();
 	    } catch (Exception exc) {
 		GUITools.showErrorMessage(this, exc);
 	    }
@@ -503,9 +433,6 @@ public class SimulationPanel extends JPanel implements
     }
 
     /**
-     * Assign properties from the settings
-     * 
-     * @param properties
      * @throws NoSuchMethodException
      * @throws InvocationTargetException
      * @throws IllegalAccessException
@@ -513,16 +440,14 @@ public class SimulationPanel extends JPanel implements
      * @throws SecurityException
      * @throws IllegalArgumentException
      */
-    public void setProperties(SBProperties properties)
-	throws IllegalArgumentException, SecurityException,
-	InstantiationException, IllegalAccessException,
+    public void loadPreferences() throws IllegalArgumentException,
+	SecurityException, InstantiationException, IllegalAccessException,
 	InvocationTargetException, NoSuchMethodException {
 
 	if (visualizationPanel != null) {
-	    visualizationPanel.setProperties(properties);
+	    visualizationPanel.loadPreferences();
 	}
-
-	getOrCreateFootPanel().setProperties(properties);
+	getOrCreateFootPanel().loadPreferences();
 	removeAll();
 	init();
     }

@@ -16,6 +16,7 @@
 package org.sbml.simulator.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -57,7 +58,6 @@ import de.zbit.gui.prefs.PreferencesDialog;
 import de.zbit.io.SBFileFilter;
 import de.zbit.util.StringUtil;
 import de.zbit.util.prefs.SBPreferences;
-import de.zbit.util.prefs.SBProperties;
 import eva2.client.EvAClient;
 
 /**
@@ -241,8 +241,7 @@ public class SimulatorUI extends JFrame implements ActionListener,
     public SimulatorUI() {
 	super(defaultTitle);
 
-	setProperties(SBPreferences.getPreferencesFor(SimulatorOptions.class)
-		.toProperties());
+	loadPreferences();
 
 	/*
 	 * Add menubar and toolbar
@@ -266,15 +265,6 @@ public class SimulatorUI extends JFrame implements ActionListener,
      */
     public SimulatorUI(Model model) {
 	this(model, new SimulationPanel(model));
-    }
-
-    /**
-     * @param owner
-     * @param model
-     * @param settings
-     */
-    public SimulatorUI(Model model, SBProperties settings) {
-	this(model, new SimulationPanel(model, settings));
     }
 
     /**
@@ -405,8 +395,7 @@ public class SimulatorUI extends JFrame implements ActionListener,
 	    PreferencesDialog dialog = new PreferencesDialog(this);
 	    if (dialog.showPrefsDialog() == PreferencesDialog.APPROVE_OPTION) {
 		if (simPanel != null) {
-		    simPanel.setProperties(SBPreferences.getPreferencesFor(
-			SimulatorOptions.class).toProperties());
+		    simPanel.loadPreferences();
 		}
 	    }
 	} catch (Exception exc) {
@@ -696,8 +685,7 @@ public class SimulatorUI extends JFrame implements ActionListener,
 		    SBPreferences prefs = SBPreferences
 			    .getPreferencesFor(GUIOptions.class);
 		    prefs.put(GUIOptions.OPEN_DIR, file.getParent());
-		    simPanel = new SimulationPanel(doc.getModel(), prefs
-			    .toProperties());
+		    simPanel = new SimulationPanel(doc.getModel());
 		    if (GUITools.contains(getContentPane(), simPanel)) {
 			getContentPane().remove(simPanel);
 		    }
@@ -724,6 +712,7 @@ public class SimulatorUI extends JFrame implements ActionListener,
      */
     private void setOptimalSize() {
 	pack();
+	setMinimumSize(new Dimension(640, 480));
 	int maxSize = 700;
 	if (getWidth() > 1.5 * maxSize) {
 	    this.setSize((int) Math.round(1.5 * maxSize), getHeight());
@@ -734,12 +723,12 @@ public class SimulatorUI extends JFrame implements ActionListener,
     }
 
     /**
-     * @param p
+     * 
      */
-    public void setProperties(SBProperties p) {
+    public void loadPreferences() {
 	if (simPanel != null) {
 	    try {
-		simPanel.setProperties(p);
+		simPanel.loadPreferences();
 	    } catch (Exception exc) {
 		exc.printStackTrace();
 		GUITools.showErrorMessage(this, exc);

@@ -23,6 +23,7 @@ import org.sbml.simulator.SimulatorOptions;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 
 import de.zbit.util.StringUtil;
+import de.zbit.util.prefs.SBPreferences;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -294,22 +295,25 @@ public class SimulationVisualizationPanel extends JSplitPane implements
     /**
      * @param properties
      */
-    public void setProperties(Properties properties) {
+    public void loadPreferences() {
+	SBPreferences prefsGUI = SBPreferences
+		.getPreferencesFor(GUIOptions.class);
+	SBPreferences prefsSIM = SBPreferences
+		.getPreferencesFor(SimulatorOptions.class);
+
 	if (interactiveScanPanel != null) {
-	    interactiveScanPanel.setProperties(properties);
+	    interactiveScanPanel.loadPreferences();
 	}
 
-	maxSpinVal = ((Number) properties.get(GUIOptions.SPINNER_MAX_VALUE))
-		.doubleValue();
-	paramStepSize = ((Number) properties.get(GUIOptions.SPINNER_STEP_SIZE))
-		.doubleValue();
+	maxSpinVal = prefsGUI.getDouble(GUIOptions.SPINNER_MAX_VALUE);
+	paramStepSize = prefsGUI.getDouble(GUIOptions.SPINNER_STEP_SIZE);
 
-	maxCompartmentValue = ((Number) properties
-		.get(SimulatorOptions.SIM_MAX_COMPARTMENT_SIZE)).doubleValue();
-	maxSpeciesValue = ((Number) properties
-		.get(SimulatorOptions.SIM_MAX_SPECIES_VALUE)).doubleValue();
-	maxParameterValue = ((Number) properties
-		.get(SimulatorOptions.SIM_MAX_PARAMETER_VALUE)).doubleValue();
+	maxCompartmentValue = prefsSIM
+		.getDouble(SimulatorOptions.SIM_MAX_COMPARTMENT_SIZE);
+	maxSpeciesValue = prefsSIM
+		.getDouble(SimulatorOptions.SIM_MAX_SPECIES_VALUE);
+	maxParameterValue = prefsSIM
+		.getDouble(SimulatorOptions.SIM_MAX_PARAMETER_VALUE);
     }
 
     /**
