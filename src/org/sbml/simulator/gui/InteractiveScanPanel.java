@@ -45,6 +45,7 @@ import org.sbml.simulator.SimulatorOptions;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;
 import de.zbit.util.StringUtil;
+import de.zbit.util.prefs.SBPreferences;
 
 /**
  * An {@link InteractiveScanPanel} is an element that allows the user to change
@@ -434,16 +435,15 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     /**
      * @param properties
      */
-    public void setProperties(Properties properties) {
-	defaultCompartmentValue = ((Number) properties
-		.get(SimulatorOptions.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE))
-		.doubleValue();
-	defaultSpeciesValue = ((Number) properties
-		.get(SimulatorOptions.OPT_DEFAULT_SPECIES_INITIAL_VALUE))
-		.doubleValue();
-	defaultParameterValue = ((Number) properties
-		.get(SimulatorOptions.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS))
-		.doubleValue();
+    public void loadPreferences() {
+	SBPreferences prefs = SBPreferences
+		.getPreferencesFor(SimulatorOptions.class);
+	defaultCompartmentValue = prefs
+		.getDouble(SimulatorOptions.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE);
+	defaultSpeciesValue = prefs
+		.getDouble(SimulatorOptions.OPT_DEFAULT_SPECIES_INITIAL_VALUE);
+	defaultParameterValue = prefs
+		.getDouble(SimulatorOptions.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS);
     }
 
     /*
