@@ -123,8 +123,6 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	/*
 	 * General settings
 	 */
-	p.put(GUIOptions.SPINNER_STEP_SIZE, Double.valueOf(paramStepSize));
-	p.put(GUIOptions.SPINNER_MAX_VALUE, Double.valueOf(maxSpinVal));
 	p.putAll(interactiveScanPanel.getProperties());
 
 	return p;
@@ -296,8 +294,6 @@ public class SimulationVisualizationPanel extends JSplitPane implements
      * @param properties
      */
     public void loadPreferences() {
-	SBPreferences prefsGUI = SBPreferences
-		.getPreferencesFor(GUIOptions.class);
 	SBPreferences prefsSIM = SBPreferences
 		.getPreferencesFor(SimulatorOptions.class);
 
@@ -305,8 +301,8 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	    interactiveScanPanel.loadPreferences();
 	}
 
-	maxSpinVal = prefsGUI.getDouble(GUIOptions.SPINNER_MAX_VALUE);
-	paramStepSize = prefsGUI.getDouble(GUIOptions.SPINNER_STEP_SIZE);
+	maxSpinVal = 2000;
+	paramStepSize = .1d;
 
 	maxCompartmentValue = prefsSIM
 		.getDouble(SimulatorOptions.SIM_MAX_COMPARTMENT_SIZE);

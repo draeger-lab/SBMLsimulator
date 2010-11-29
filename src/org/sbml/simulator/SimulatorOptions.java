@@ -22,7 +22,7 @@ public interface SimulatorOptions extends KeyProvider {
      */
     public static final Option<File> SBML_FILE = new Option<File>("SBML_FILE",
 	File.class, "SBML input file", new Range<File>(File.class,
-	    SBFileFilter.SBML_FILE_FILTER), new File(System
+	    SBFileFilter.createSBMLFileFilter()), new File(System
 		.getProperty("user.dir")));
     /**
      * When storing any GUI elements or other pictures into a JPEG graphics file
@@ -101,7 +101,7 @@ public interface SimulatorOptions extends KeyProvider {
     public static final Option<File> PLOT_SAVE_DIR = new Option<File>(
 	"PLOT_SAVE_DIR", File.class,
 	"The default save directory for graphics files as a result of a plot.",
-	new Range<File>(File.class, SBFileFilter.DIRECTORY_FILTER), new File(
+	new Range<File>(File.class, SBFileFilter.createDirectoryFilter()), new File(
 	    System.getProperty("user.home")));
     /**
      * Path to a file with a time series of species/compartment/parameter
@@ -111,7 +111,7 @@ public interface SimulatorOptions extends KeyProvider {
 	"TIME_SERIES_FILE",
 	File.class,
 	"Path to a file with a time series of species/compartment/parameter values.",
-	new Range<File>(File.class, SBFileFilter.CSV_FILE_FILTER), new File(
+	new Range<File>(File.class, SBFileFilter.createCSVFileFilter()), new File(
 	    System.getProperty("user.home")));
     /**
      * Boolean argument to specify if SBMLsqueezer should be used as a pure

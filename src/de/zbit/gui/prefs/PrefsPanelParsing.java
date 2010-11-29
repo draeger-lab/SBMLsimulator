@@ -63,7 +63,7 @@ public class PrefsPanelParsing extends PreferencesPanel {
      * @see de.zbit.gui.prefs.PreferencesPanel#init()
      */
     public void init() {
-	chooser = new FileSelector(Type.OPEN, SBFileFilter.CSV_FILE_FILTER);
+	chooser = new FileSelector(Type.OPEN, SBFileFilter.createCSVFileFilter());
 	chooser.setBorder(BorderFactory
 		.createTitledBorder(" Default directories for CSV files "));
 

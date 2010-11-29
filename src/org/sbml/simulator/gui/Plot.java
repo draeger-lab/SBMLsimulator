@@ -188,8 +188,8 @@ public class Plot extends FunctionArea {
 		area.setLocation(getLocationOnScreen());
 		BufferedImage bufferedImage = (new Robot()).createScreenCapture(area);
 		File file = GUITools.saveFileDialog(this, saveDir, false, false,
-				JFileChooser.FILES_ONLY, SBFileFilter.PNG_FILE_FILTER,
-				SBFileFilter.JPEG_FILE_FILTER);
+				JFileChooser.FILES_ONLY, SBFileFilter.createPNGFileFilter(),
+				SBFileFilter.createJPEGFileFilter());
 		if (file != null) {
 			saveDir = file.getParent();
 			if (SBFileFilter.isPNGFile(file)) {

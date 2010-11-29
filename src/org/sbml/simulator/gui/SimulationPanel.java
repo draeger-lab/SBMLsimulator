@@ -394,7 +394,7 @@ public class SimulationPanel extends JPanel implements
 	    if (simTabModel.getRowCount() > 0) {
 		File out = GUITools.saveFileDialog(this, prefs.get(
 		    CSVOptions.CSV_FILES_SAVE_DIR).toString(), false, false,
-		    JFileChooser.FILES_ONLY, SBFileFilter.CSV_FILE_FILTER);
+		    JFileChooser.FILES_ONLY, SBFileFilter.createCSVFileFilter());
 		if (out != null) {
 		    (new CSVWriter()).write(simTabModel, prefs.get(
 			CSVOptions.CSV_FILES_SEPARATOR_CHAR).toString().charAt(
