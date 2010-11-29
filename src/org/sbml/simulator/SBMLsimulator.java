@@ -10,11 +10,11 @@ import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
 
-import org.sbml.simulator.gui.GUIOptions;
 import org.sbml.simulator.gui.SimulatorUI;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 
+import de.zbit.gui.GUIOptions;
 import de.zbit.io.CSVOptions;
 import de.zbit.util.Reflect;
 import de.zbit.util.prefs.KeyProvider;
