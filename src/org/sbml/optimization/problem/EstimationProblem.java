@@ -258,9 +258,8 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * eva2.server.go.problems.AbstractProblemDouble#getAdditionalFileStringHeader
 	 * ()
 	 */
-	@Override
 	public String[] getAdditionalFileStringHeader() {
-		String[] superHead = super.getAdditionalFileStringHeader();
+		String[] superHead = super.getAdditionalDataHeader();
 		return ToolBox.appendArrays(superHead, SIMULATION_DATA);
 	}
 
@@ -271,9 +270,8 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * eva2.server.go.problems.AbstractProblemDouble#getAdditionalFileStringInfo
 	 * ()
 	 */
-	@Override
 	public String[] getAdditionalFileStringInfo() {
-		String[] superInfo = super.getAdditionalFileStringInfo();
+		String[] superInfo = super.getAdditionalDataInfo();
 		return ToolBox.appendArrays(superInfo,
 				"Result of the best per generation model simulation");
 	}
@@ -285,9 +283,8 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * eva2.server.go.problems.AbstractProblemDouble#getAdditionalFileStringValue
 	 * (eva2.server.go.PopulationInterface)
 	 */
-	@Override
 	public Object[] getAdditionalFileStringValue(PopulationInterface pop) {
-		Object[] superVals = super.getAdditionalFileStringValue(pop);
+		Object[] superVals = super.getAdditionalDataValue(pop);
 		return ToolBox.appendArrays(superVals, bestPerGeneration);
 	}
 
