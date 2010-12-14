@@ -459,7 +459,7 @@ public class AlgebraicRuleConverter {
 	private void replaceNames(ASTNode node, Map<String, String> varibales,
 			Map<String, Double> numberHash, Map<String, ASTNode> nodeHash) {
 
-		if (node.isName()) {
+		if (node.isString()) {
 			if (varibales.get(node.getName()) != null) {
 				node.setName(varibales.get(node.getName()));
 			} else if (numberHash.get(node.getName()) != null) {
@@ -489,7 +489,7 @@ public class AlgebraicRuleConverter {
 
 		while (nodes.hasMoreElements()) {
 			subnode = (ASTNode) nodes.nextElement();
-			if (subnode.isName()) {
+			if (subnode.isString()) {
 				if (subnode.getName() == variable.getId()) {
 					variableNodeParent = node;
 					variableNode = subnode;
@@ -573,7 +573,7 @@ public class AlgebraicRuleConverter {
 	private ASTNode substituteFunctions(ASTNode node, int indexParent) {
 		NamedSBaseWithDerivedUnit variable;
 		// Check if node is a function
-		if (node.isName()) {
+		if (node.isString()) {
 			FunctionDefinition fd = model.getFunctionDefinition(node.getName());
 			// Node represents a function definiton in the model
 			if (fd != null) {
@@ -587,7 +587,7 @@ public class AlgebraicRuleConverter {
 				// Hash its variables to the parameter
 				for (int i = 0; i < node.getNumChildren(); i++) {
 					variable = null; 
-					if (node.getChild(i).isName()) {
+					if (node.getChild(i).isString()) {
 						variable = node.getChild(i).getVariable();
 					}
 					if (variable instanceof FunctionDefinition) {
@@ -596,7 +596,7 @@ public class AlgebraicRuleConverter {
 					} else if (node.getChild(i).isOperator()) {
 						nodeHash.put(function.getChild(i).getName(), node
 								.getChild(i).clone());
-					} else if (node.getChild(i).isName()) {
+					} else if (node.getChild(i).isString()) {
 						nameHash.put(function.getChild(i).getName(), node
 								.getChild(i).getName());
 					} else if (node.getChild(i).isNumber()) {
