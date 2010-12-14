@@ -303,7 +303,7 @@ public class SBMLMatrixParser {
 		String nodename = new String();
 		int i;
 
-		if (astnode.isName())
+		if (astnode.isString())
 			nodename = astnode.getName();
 
 		for (i = 0; i < los.size() && !found; i++) {

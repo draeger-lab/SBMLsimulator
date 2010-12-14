@@ -1635,7 +1635,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	 * @return
 	 */
 	private Species determineMajorSpeciesAttributes() {
-		Species majority = new Species();
+		Species majority = new Species(model.getLevel(), model.getVersion());
 		int concentration = 0, amount = 0, substanceUnits = 0;
 
 		for (Species species : model.getListOfSpecies()) {
@@ -1656,9 +1656,9 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 
 		if (substanceUnits > (model.getNumSpecies() - substanceUnits)) {
 			majority.setHasOnlySubstanceUnits(true);
-		} else
+		} else {
 			majority.setHasOnlySubstanceUnits(false);
-
+		}
 		return majority;
 
 	}
