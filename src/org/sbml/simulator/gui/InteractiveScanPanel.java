@@ -33,7 +33,7 @@ import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.LocalParameter;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Parameter;
-import org.sbml.jsbml.QuantityWithDefinedUnit;
+import org.sbml.jsbml.QuantityWithUnit;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBase;
 import org.sbml.jsbml.SBaseChangedEvent;
@@ -52,7 +52,7 @@ import de.zbit.util.prefs.SBPreferences;
  * the values of all instances of {@link Compartment}, {@link Species},
  * {@link Parameter}, and {@link LocalParameter} within a {@link Model}. To this
  * end, it contains a {@link JTabbedPane} for to structure these four groups of
- * {@link QuantityWithDefinedUnit}, each containing a {@link JScrollPane} with
+ * {@link QuantityWithUnit}, each containing a {@link JScrollPane} with
  * one {@link JSpinner} for each element. On the bottom there is a reset button
  * to restore the original values.
  * 
@@ -97,7 +97,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     /**
      * Direct pointers to all important quantities in the model.
      */
-    private QuantityWithDefinedUnit[] quantities;
+    private QuantityWithUnit[] quantities;
     /**
 	 * 
 	 */
@@ -159,7 +159,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
 	this.spinQuantity = new JSpinner[model
 		.getNumQuantitiesWithDefinedUnit()];
 	this.originalValues = new double[spinQuantity.length];
-	this.quantities = new QuantityWithDefinedUnit[originalValues.length];
+	this.quantities = new QuantityWithUnit[originalValues.length];
 	this.quantitiesHash = new HashMap<String, Integer>();
 	this.hasLocalParameters = false;
 	this.tab.add("Compartments", interactiveScanScrollPane(model
@@ -297,7 +297,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
      * @return
      */
     private JScrollPane interactiveScanScrollPane(
-	ListOf<? extends QuantityWithDefinedUnit> list, double maxValue,
+	ListOf<? extends QuantityWithUnit> list, double maxValue,
 	double stepSize, int offset) {
 	return new JScrollPane(interactiveScanTable(list, maxValue, stepSize,
 	    offset), JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -313,7 +313,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
      * @return
      */
     private JPanel interactiveScanTable(
-	ListOf<? extends QuantityWithDefinedUnit> list, double maxValue,
+	ListOf<? extends QuantityWithUnit> list, double maxValue,
 	double stepSize, int offset) {
 	JPanel panel = new JPanel();
 	LayoutHelper lh = new LayoutHelper(panel);
@@ -322,7 +322,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
 	String name = "";
 	int index;
 	for (int i = 0; i < list.size(); i++) {
-	    QuantityWithDefinedUnit p = list.get(i);
+	    QuantityWithUnit p = list.get(i);
 	    value = p.getValue();
 	    if (Double.isNaN(p.getValue())) {
 		name = p.getClass().getSimpleName().toLowerCase();
@@ -398,7 +398,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
      * @see org.sbml.jsbml.SBaseChangedListener#sbaseAdded(org.sbml.jsbml.SBase)
      */
     public void sbaseAdded(SBase sb) {
-	if (sb instanceof QuantityWithDefinedUnit) {
+	if (sb instanceof QuantityWithUnit) {
 	    tab.removeAll();
 	    init(sb.getModel());
 	}
@@ -410,7 +410,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
      * org.sbml.jsbml.SBaseChangedListener#sbaseRemoved(org.sbml.jsbml.SBase)
      */
     public void sbaseRemoved(SBase sb) {
-	if (sb instanceof QuantityWithDefinedUnit) {
+	if (sb instanceof QuantityWithUnit) {
 	    tab.removeAll();
 	    init(sb.getModel());
 	}
@@ -473,8 +473,8 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
      * SBaseChangedEvent)
      */
     public void stateChanged(SBaseChangedEvent ev) {
-	if (ev.getSource() instanceof QuantityWithDefinedUnit) {
-	    QuantityWithDefinedUnit q = (QuantityWithDefinedUnit) ev
+	if (ev.getSource() instanceof QuantityWithUnit) {
+	    QuantityWithUnit q = (QuantityWithUnit) ev
 		    .getSource();
 	    updateQuantitySpinner(q.getId());
 	}
@@ -496,7 +496,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
 
     /**
      * Updates the value for the spinner corresponding to the
-     * {@link QuantityWithDefinedUnit} with the given identifier only.
+     * {@link QuantityWithUnit} with the given identifier only.
      * 
      * @param id
      *        Identifier of the element to be updated.
