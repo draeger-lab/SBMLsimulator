@@ -1,25 +1,28 @@
 package org.sbml.simulator.math;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import eva2.tools.math.Jama.LUDecomposition;
+import eva2.tools.math.Jama.Matrix;
 
 /**
- * This Class represents a m x m stoichimetric matrix
+ * This Class represents a m x n stoichimetric matrix
  * 
  * @author <a href="mailto:a.doerr@uni-tuebingen.de">Alexander D&ouml;rr</a>
- * @date 2009-12-18
+ * @date 2010-12-23
  * @since 1.4
- *
+ * 
  */
 public class StoichiometricMatrix extends StabilityMatrix {
 
 	private static final long serialVersionUID = 1L;
+	private StabilityMatrix linkMatrix = null;
+	private StabilityMatrix reducedMatrix = null;
+	private StabilityMatrix conservationRelations = null;
+	private StabilityMatrix steadyStateFluxes = null;
+
+	private int rank;
 
 	/**
-	 * Creates a m x n stoichiometric matrix
+	 * Creates a m x n stoichiometric matrix N
 	 * 
 	 * @param m
 	 *            number of rows
@@ -32,7 +35,7 @@ public class StoichiometricMatrix extends StabilityMatrix {
 	}
 
 	/**
-	 * Creates a m x n stoichiometric matrix with all entries set to c
+	 * Creates a m x n stoichiometric matrix N with all entries set to c
 	 * 
 	 * @param m
 	 *            number of rows
@@ -47,7 +50,7 @@ public class StoichiometricMatrix extends StabilityMatrix {
 	}
 
 	/**
-	 * Creates a m x n stoichiometric matrix with the entries given in array
+	 * Creates a m x n stoichiometric matrix N with the entries given in array
 	 * 
 	 * @param array
 	 *            entries
@@ -61,346 +64,204 @@ public class StoichiometricMatrix extends StabilityMatrix {
 
 	}
 
-	public StabilityMatrix getConservationRelations() {
-		// tableauLeft and tableauRight are representing together the whole
-		// tableau T
-		StabilityMatrix tableauLeft = this;
-		StabilityMatrix tableauRight = new IdentityMatrix(this
-				.getRowDimension());
-		// backup varibales for the tableaux
-		StabilityMatrix backupLeft, backupRight;
-
-		List<Set<Integer>> listOfSetsS;
-		ArrayList<int[]> combinations = new ArrayList<int[]>();
-		ArrayList<Integer> listOfZeroRows = new ArrayList<Integer>();
-
-		int j = 0, i = 0, rownum = 0;
-
-		// for each column and as long as there are remaining tableaux to build
-		// and matrixS contains not only zero values
-		for (j = 0; j < tableauLeft.getColumnDimension()
-				&& !tableauLeft.allZero(); j++) {
-			// build sets
-			listOfSetsS = buildSets(tableauRight);
-			for (i = 0; i < tableauLeft.getRowDimension(); i++) {
-				// for each row
-				if (tableauLeft.get(i, j) == 0) {
-					listOfZeroRows.add(Integer.valueOf(i));
-					continue; // violating condition (3.7) anyways.
-				}
-				// for each remaining row
-				for (int k = i + 1; k < tableauLeft.getRowDimension(); k++) {
-					// check conditions
-					if (tableauLeft.get(k, j) == 0)
-						continue; // otherwise violating condition (3.7)
-
-					if (tableauLeft.get(i, j) * tableauLeft.get(k, j) < 0) {
-						// condition (3.7) satisfied now checking (3.8)
-						Set<Integer> intersection = new HashSet<Integer>(
-								listOfSetsS.get(i));
-						intersection.retainAll(listOfSetsS.get(k));
-						boolean isSubset = false;
-						for (int l = 0; l < listOfSetsS.size() && !isSubset; l++) {
-							if (l == k || l == i)
-								continue;
-							if (listOfSetsS.get(l).containsAll(intersection))
-								isSubset = true;
-						}
-						if (!isSubset) // condition (3.8) satisfied
-							// create a new combination of rows
-							combinations.add(new int[] { i, k });
-					}
-				}
-			}
-			backupLeft = new StabilityMatrix(combinations.size()
-					+ listOfZeroRows.size(), tableauLeft.getColumnDimension(),
-					0);
-			backupRight = new StabilityMatrix(combinations.size()
-					+ listOfZeroRows.size(), tableauRight.getColumnDimension(),
-					0);
-
-			// build T(j+1)
-
-			// uses all found combinations to construct rows for T(j+1)
-			// single rows for addition und multiplication
-			StabilityMatrix rowS1 = new StabilityMatrix(1, this
-					.getColumnDimension());
-			StabilityMatrix rowS2 = new StabilityMatrix(1, this
-					.getColumnDimension());
-			StabilityMatrix rowI1 = new StabilityMatrix(1, this
-					.getRowDimension());
-			StabilityMatrix rowI2 = new StabilityMatrix(1, this
-					.getRowDimension());
-			// compute all theta values
-			for (rownum = 0; rownum < combinations.size(); rownum++) {
-				// calculate a row for the left tableau
-				// ith row of left tableau
-				rowS1
-						.setRow(0, tableauLeft
-								.getRow(combinations.get(rownum)[0]));
-				// kth element of column j in left tableau
-				rowS1.multi(Math.abs(tableauLeft.get(
-						combinations.get(rownum)[1], j)));
-				// kth row of left tableau
-				rowS2
-						.setRow(0, tableauLeft
-								.getRow(combinations.get(rownum)[1]));
-				// ith element of column j in left tableau
-				rowS2.multi(Math.abs(tableauLeft.get(
-						combinations.get(rownum)[0], j)));
-				// theta left:
-				backupLeft.setRow(rownum, rowS1.plusRow(0, rowS2.getRow(0)));
-
-				// calculate a row for the right tableau
-				// ith row of right tableau
-				rowI1.setRow(0, tableauRight
-						.getRow(combinations.get(rownum)[0]));
-				// kth element of jth column in left tableau (because j is in
-				// [0,..,r])
-				rowI1.multi(Math.abs(tableauLeft.get(
-						combinations.get(rownum)[1], j)));
-				// kth row of right tableau
-				rowI2.setRow(0, tableauRight
-						.getRow(combinations.get(rownum)[1]));
-				// ith element of jth column in left tableau
-				rowI2.multi(Math.abs(tableauLeft.get(
-						combinations.get(rownum)[0], j)));
-				// theta right:
-				backupRight.setRow(rownum, rowI1.plusRow(0, rowI2.getRow(0)));
-			}
-
-			// takes over all rows from T(j) to T(j+1) where the entry at column
-			// j is zero
-			for (i = 0; i < listOfZeroRows.size(); i++) {
-				backupLeft.setRow(rownum, tableauLeft.getRow(listOfZeroRows
-						.get(i).intValue()));
-				backupRight.setRow(rownum, tableauRight.getRow(listOfZeroRows
-						.get(i).intValue()));
-				rownum++;
-			}
-			tableauLeft = backupLeft.clone();
-			tableauRight = backupRight.clone();
-
-			combinations.clear();
-			listOfZeroRows.clear();
-
+	public StabilityMatrix getLinkMatrix() {
+		if (linkMatrix == null) {
+			reduceModel();
 		}
-		return tableauRight;
+
+		return linkMatrix;
+	}
+
+	public StabilityMatrix getReducedMatrix() {
+		if (reducedMatrix == null) {
+			reduceModel();
+		}
+
+		return reducedMatrix;
+	}
+
+	public StabilityMatrix getConservationRelations() {
+		if (conservationRelations == null) {
+			reduceModel();
+		}
+
+		return conservationRelations;
 	}
 
 	/**
-	 * Returns a list of sets (one for each row) of a matrix with the column
-	 * indices where the elements are zero
+	 * This method calculates the reduced stoichiometric matrix with its
+	 * metabolic link matrix and its conservation relations as side products.
+	 * Refering to Palsson, the conservation relations are also known as the
+	 * left null space of N. This is achieved by performing an QR decomposition
+	 * as described in "Conservation analysis of large biochemical networks" by
+	 * Ravishankar Rao Vallabhajosyula and Herbert Sauro. The permutation matrix
+	 * is calculated through LU decomposition
 	 * 
-	 * @param matrixI
-	 *            matrix from which to build the sets
-	 * @param listofsets
-	 *            ArrayList to save the sets
+	 * Vallabhajosyula
 	 */
-	private List<Set<Integer>> buildSets(StabilityMatrix matrixI) {
-		List<Set<Integer>> listofsets = new ArrayList<Set<Integer>>();
-		for (int i = 0; i < matrixI.getRowDimension(); i++)
-			listofsets.add(matrixI.getColIndecesEqual(i, 0));
-
-		return listofsets;
-
-	}
-
-	public StabilityMatrix getNullSpace() {
-		int[] constraints = new int[this.getColumnDimension()];
-		int[] meta = new int[this.getRowDimension()];
-		int unconstrained = 0;
-		getFluxConstraints(constraints, unconstrained);
-		getMetaboliteConstraints(meta);
-		Integer[] toDrop;
-		int dropCounter=0;
-
-		// tableauLeft and tableauRight are representing together the whole
-		// tableau T
-		StabilityMatrix tableauLeft =	new StabilityMatrix(this.transpose()
-				.getArray(), this.getColumnDimension(), this
-				.getRowDimension());
-		
-		StabilityMatrix tableauRight = new IdentityMatrix(tableauLeft
-				.getRowDimension());
-
-		StabilityMatrix tableauLeftEx = new StabilityMatrix(unconstrained,
-				tableauLeft.getRowDimension());
-		StabilityMatrix tableauRightEx = new StabilityMatrix(unconstrained,
-				tableauRight.getRowDimension());
-		
-		toDrop = new Integer[unconstrained];
-		
-		for (int i = 0; i < constraints.length; i++) {
-			if (constraints[i] == -1){
-			tableauLeft.mulitplyRow(i, -1);
-			//tableauRight.mulitplyRow(i, -1); ????
-			}
-			else if(constraints[i] == 0){
-				tableauLeftEx.setRow(dropCounter, tableauLeftEx.getRow(i));
-				tableauRightEx.setRow(dropCounter, tableauRightEx.getRow(i));
-				toDrop[dropCounter] = i;
-				dropCounter++;
-			}
-				
+	private void reduceModel() {
+		StabilityMatrix stoich;
+		if ((this.getRowDimension() > 0 && this.getColumnDimension() > 0)) {
+			System.out.println("Wrong dimensions");
 		}
-		tableauLeft.dropColumns(toDrop);
-		tableauRight.dropColumns(toDrop);
-		
-		
-		
+		if (this.getRowDimension() >= this.getColumnDimension()) {
+			stoich = this;
+		} else {
+			stoich = augmentN();
+		}
 
-		// backup varibales for the tableaux
-		StabilityMatrix backupLeft, backupRight;
+		LUDecomposition lu = new LUDecomposition(stoich);
+		int m = stoich.getRowDimension();
 
-		List<Set<Integer>> listOfSetsS;
-		ArrayList<int[]> combinations = new ArrayList<int[]>();
-		ArrayList<Integer> listOfZeroRows = new ArrayList<Integer>();
+		StabilityMatrix P = new StabilityMatrix(m, m, 0);
 
-		int j = 0, i = 0, rownum = 0;
+		int[] pivot = lu.getPivot();
+		for (int i = 0; i < pivot.length; i++) {
+			P.set(pivot[i], i, 1);
+		}
+		System.out.println("P");
+		System.out.println(P);
 
-	
-		
-		// for each column and as long as there are remaining tableau to build
-		// and matrixS contains not only zero values
-		for (j = 0; j < tableauLeft.getColumnDimension()
-				&& !tableauLeft.allZero(); j++) {
-			
-			if  (meta[j] != 1){
-				continue;
-			}
-				
-			// build sets
-			listOfSetsS = buildSets(tableauRight);
-			for (i = 0; i < tableauLeft.getRowDimension(); i++) {
-				// for each row
-				if (tableauLeft.get(i, j) == 0) {
-					listOfZeroRows.add(Integer.valueOf(i));
-					continue; // violating condition (3.7) anyways.
+		QRDecomposition qr = new QRDecomposition(stoich.transpose().times(P));
+
+		Matrix Q = qr.getQ();
+		Matrix R = roundValues(qr.getR());
+
+		System.out.println("Q");
+		System.out.println(Q);
+
+		System.out.println("R");
+		System.out.println(R);
+
+		StabilityMatrix Rt = new StabilityMatrix(R.copy().getArray(), R
+				.getRowDimension(), R.getColumnDimension());
+
+		for (int i = 0; i < Rt.getRowDimension(); i++) {
+			double unity = Rt.get(i, i);
+			if (unity != 0.0) {
+				for (int j = 0; j < Rt.getColumnDimension(); j++) {
+					Rt.set(i, j,
+							(Math.round(Rt.get(i, j) / unity * 1000.)) / 1000.);
 				}
-				// for each remaining row
-				for (int k = i + 1; k < tableauLeft.getRowDimension(); k++) {
-					// check conditions
-					if (tableauLeft.get(k, j) == 0)
-						continue; // otherwise violating condition (3.7)
+			}
 
-					if (tableauLeft.get(i, j) * tableauLeft.get(k, j) < 0) {
-						// condition (3.7) satisfied now checking (3.8)
-						Set<Integer> intersection = new HashSet<Integer>(
-								listOfSetsS.get(i));
-						intersection.retainAll(listOfSetsS.get(k));
-						boolean isSubset = false;
-						for (int l = 0; l < listOfSetsS.size() && !isSubset; l++) {
-							if (l == k || l == i)
-								continue;
-							if (listOfSetsS.get(l).containsAll(intersection))
-								isSubset = true;
-						}
-						if (!isSubset) // condition (3.8) satisfied
-							// create a new combination of rows
-							combinations.add(new int[] { i, k });
+		}
+		rank = Rt.getRowDimension();
+
+		for (int i = Rt.getRowDimension() - 1; i >= 0; i--) {
+			if (Rt.get(i, i) == 0.0) {
+				rank--;
+
+			} else {
+
+				double[] row = Rt.getRow(i);
+
+				for (int j = i - 1; j >= 0; j--) {
+					double value = Rt.get(j, i);
+
+					for (int k = row.length - 1; k >= j; k--) {
+						Rt.set(j, k, Rt.get(j, k) - (value * row[k]));
 					}
+
+				}
+
+			}
+
+		}
+		System.out.println("rank: " + rank);
+		System.out.println("Rt");
+		System.out.println(Rt);
+
+		StabilityMatrix L = new StabilityMatrix(Rt.getColumnDimension(), rank);
+
+		for (int i = 0; i < L.getRowDimension(); i++) {
+			if (i < rank) {
+				L.set(i, i, 1);
+			} else {
+				double[] column = Rt.getColumn(i);
+				for (int j = 0; j < L.getColumnDimension(); j++) {
+					L.set(i, j, column[j]);
+
 				}
 			}
-			backupLeft = new StabilityMatrix(combinations.size()
-					+ listOfZeroRows.size(), tableauLeft.getColumnDimension(),
-					0);
-			backupRight = new StabilityMatrix(combinations.size()
-					+ listOfZeroRows.size(), tableauRight.getColumnDimension(),
-					0);
-
-			// build T(j+1)
-
-			// uses all found combinations to construct rows for T(j+1)
-			// single rows for addition und multiplication
-			StabilityMatrix rowS1 = new StabilityMatrix(1, this
-					.getColumnDimension());
-			StabilityMatrix rowS2 = new StabilityMatrix(1, this
-					.getColumnDimension());
-			StabilityMatrix rowI1 = new StabilityMatrix(1, this
-					.getRowDimension());
-			StabilityMatrix rowI2 = new StabilityMatrix(1, this
-					.getRowDimension());
-			// compute all theta values
-			for (rownum = 0; rownum < combinations.size(); rownum++) {
-				// calculate a row for the left tableau
-				// ith row of left tableau
-				rowS1
-						.setRow(0, tableauLeft
-								.getRow(combinations.get(rownum)[0]));
-				// kth element of column j in left tableau
-				rowS1.multi(Math.abs(tableauLeft.get(
-						combinations.get(rownum)[1], j)));
-				// kth row of left tableau
-				rowS2
-						.setRow(0, tableauLeft
-								.getRow(combinations.get(rownum)[1]));
-				// ith element of column j in left tableau
-				rowS2.multi(Math.abs(tableauLeft.get(
-						combinations.get(rownum)[0], j)));
-				// theta left:
-				backupLeft.setRow(rownum, rowS1.plusRow(0, rowS2.getRow(0)));
-
-				// calculate a row for the right tableau
-				// ith row of right tableau
-				rowI1.setRow(0, tableauRight
-						.getRow(combinations.get(rownum)[0]));
-				// kth element of jth column in left tableau (because j is in
-				// [0,..,r])
-				rowI1.multi(Math.abs(tableauLeft.get(
-						combinations.get(rownum)[1], j)));
-				// kth row of right tableau
-				rowI2.setRow(0, tableauRight
-						.getRow(combinations.get(rownum)[1]));
-				// ith element of jth column in left tableau
-				rowI2.multi(Math.abs(tableauLeft.get(
-						combinations.get(rownum)[0], j)));
-				// theta right:
-				backupRight.setRow(rownum, rowI1.plusRow(0, rowI2.getRow(0)));
-			}
-
-			// takes over all rows from T(j) to T(j+1) where the entry at column
-			// j is zero
-			for (i = 0; i < listOfZeroRows.size(); i++) {
-				backupLeft.setRow(rownum, tableauLeft.getRow(listOfZeroRows
-						.get(i).intValue()));
-				backupRight.setRow(rownum, tableauRight.getRow(listOfZeroRows
-						.get(i).intValue()));
-				rownum++;
-			}
-			tableauLeft = backupLeft.clone();
-			tableauRight = backupRight.clone();
-
-			combinations.clear();
-			listOfZeroRows.clear();
-
 		}
-		
-		
-		
-		for (i = 0; i < tableauLeft.getColumnDimension(); i++) {
-			
-			for (j = 0; j < tableauLeft.getRowDimension(); j++) {
-				
-				
-			}
-		}
+		this.linkMatrix = L;
+		buildReducedN(P);
+		buildConservationRelations(L);
 
-		return tableauRight;
 	}
-	
 
-
-	private void getFluxConstraints(int[] constraints, int unconstrained) {
-		for (int i = 0; i < constraints.length; i++) {
-			constraints[i] = -1;
-		}
+	/**
+	 * When the number of reactions is greater than the number of metabolites,
+	 * the LU decomposition does not work. This is circumvented by adding additional
+	 * zero rows at the end of the matrix as described in
+	 * "Conservation analysis of large biochemical networks" by Ravishankar Rao
+	 * Vallabhajosyula and Herbert Sauro.
+	 * 
+	 * @return
+	 */
+	private StabilityMatrix augmentN() {
+		StabilityMatrix augmentedN = null;
+		return augmentedN;
 	}
-	
-	private void getMetaboliteConstraints(int[] constraints){
-		for (int i = 0; i < constraints.length; i++) {
-			constraints[i] = 1;
+
+	/**
+	 * This method uses the metabolic link matrix to build a matrix with the
+	 * conservation relations of the model
+	 * 
+	 * @param linkMatrix
+	 */
+	private void buildConservationRelations(StabilityMatrix linkMatrix) {
+
+	}
+
+	/**
+	 * This method uses the permutation matrix to build the reduced
+	 * stoichiometric matrix
+	 * 
+	 * @param permutationMatrix
+	 */
+	private void buildReducedN(StabilityMatrix permutationMatrix) {
+
+	}
+
+	/**
+	 * This method calculates the feasible steady state fluxes of the model with
+	 * this stoichiometrix matrix, referring to Palsson also known as the null
+	 * space of N. This is achieved by performing an SVD decomposition as
+	 * described in "Conservation Analysis in Biochemical Networks" by Herbert
+	 * Sauro
+	 */
+	private void calculateSteadyStateFluxes() {
+
+	}
+
+	/**
+	 * This method changes values that are as good as zero to zero
+	 * 
+	 * @param matrix
+	 * @return
+	 */
+	public static Matrix roundValues(Matrix matrix) {
+		for (int m = 0; m < matrix.getRowDimension(); m++) {
+			for (int n = 0; n < matrix.getColumnDimension(); n++) {
+
+				if (matrix.get(m, n) < 1E-9 && matrix.get(m, n) > 0) {
+					matrix.set(m, n, 0);
+				} else if (matrix.get(m, n) > -1E-9 && matrix.get(m, n) < 0) {
+					matrix.set(m, n, 0);
+				}
+
+			}
 		}
+		return matrix;
+	}
+
+	public StabilityMatrix getSteadyStateFluxes() {
+		if (steadyStateFluxes == null) {
+			calculateSteadyStateFluxes();
+		}
+		return steadyStateFluxes;
 	}
 
 }
