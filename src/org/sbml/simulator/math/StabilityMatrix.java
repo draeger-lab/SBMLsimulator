@@ -7,7 +7,6 @@ import java.util.Set;
 
 import eva2.tools.math.Jama.EigenvalueDecomposition;
 import eva2.tools.math.Jama.Matrix;
-import eva2.tools.math.Jama.QRDecomposition;
 
 /**
  * This Class extends the representation of a m x n Matrix with some additional
@@ -200,8 +199,9 @@ public class StabilityMatrix extends Matrix {
 	/**
 	 * Returns a new StabilityMatrix without the given rows
 	 * 
-	 * @param integers array with indices of the rows to be dropped, the indices
-	 *            have to be unique and in ascending order
+	 * @param integers
+	 *            array with indices of the rows to be dropped, the indices have
+	 *            to be unique and in ascending order
 	 * 
 	 * @return
 	 */
@@ -233,7 +233,7 @@ public class StabilityMatrix extends Matrix {
 		this.setColumn(j, columni);
 
 	}
-	
+
 	/**
 	 * Changes the position of column i with column j and vice versa
 	 * 
@@ -280,12 +280,8 @@ public class StabilityMatrix extends Matrix {
 		for (int i = 0; i < getColumnDimension(); i++) {
 			if (get(m, i) != value)
 				list.add(i);
-
-			
-		
-		
 		}
-				
+
 		Integer arr[] = new Integer[list.size()];
 
 		return list.toArray(arr);
@@ -326,7 +322,7 @@ public class StabilityMatrix extends Matrix {
 
 		return row;
 	}
-	
+
 	/**
 	 * 
 	 * @param m
@@ -373,94 +369,6 @@ public class StabilityMatrix extends Matrix {
 
 	}
 
-	/**
-	 * Searches in this Matrix for columns that are linear dependent on other
-	 * columns in this matrix (not working correctly)
-	 * 
-	 * @return ArrayList with arrays where the columns in each array are
-	 *         dependent from each other
-	 */
-	@Deprecated
-	public ArrayList<Integer[]> getDependencies() {
-		ArrayList<Integer[]> dependencies = new ArrayList<Integer[]>();
-		ArrayList<Integer> columns = new ArrayList<Integer>();
-		ArrayList<Integer> remove = new ArrayList<Integer>();
-		ArrayList<Integer> map = new ArrayList<Integer>();
-		StabilityMatrix matrix = this;
-		int listIndex = 0;
-		int colIndex = 0;
-		QRDecomposition qrDec;
-		StabilityMatrix matrixA;
-		StabilityMatrix matrixB = new StabilityMatrix(matrix.getRowDimension(),
-				1, 0);
-		Matrix matrixX;
-		boolean dependency = false;
-		boolean addedB = false;
-		double value;
-		Integer array[];
 
-		for (int i = 0; i < getColumnDimension(); i++) {
-			map.add(i);
-		}
 
-		while (matrix.getColumnDimension() > colIndex) {
-			System.out.println("colsize: " + matrix.getColumnDimension());
-			System.out.println("mapsize: " + map.size());
-			matrixA = matrix.dropColumns(new Integer[] { colIndex });
-			matrixB.setColumn(0, matrix.getColumn(colIndex));
-			qrDec = new QRDecomposition(matrixA);
-
-			matrixX = qrDec.solve(matrixB);
-			System.out.println(matrixB.toString());
-			System.out.println(matrixX.toString());
-
-			for (int i = 0; i < matrixX.getRowDimension(); i++) {
-				value = Math.round(matrixX.get(i, 0) * 100000.0);
-				value = value / 10000;
-
-				if (value % 10 == 0 && value != 0) {
-
-					if (!addedB) {
-						columns.add(map.get(colIndex));
-						addedB = true;
-					}
-					// wenn pointer auf B kleiner als i
-					if (colIndex <= i) {
-						columns.add(map.get(i + 1));
-						remove.add(i + 1);
-					}
-
-					else {
-						columns.add(map.get(i));
-						remove.add(i);
-					}
-					dependency = true;
-				}
-
-			}
-
-			if (dependency) {
-				remove.add(colIndex);
-				map.removeAll(remove);
-
-				array = new Integer[columns.size()];
-				array = columns.toArray(array);
-				System.out.println();
-				dependencies.add(array);
-
-				System.out.println("removing: "
-						+ dependencies.get(listIndex).length);
-				matrix = dropColumns(dependencies.get(listIndex));
-				listIndex++;
-				colIndex = 0;
-				dependency = false;
-				addedB = false;
-
-			} else
-				colIndex++;
-
-		}
-
-		return dependencies;
-	}
 }
