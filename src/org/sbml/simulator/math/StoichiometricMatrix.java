@@ -1,5 +1,8 @@
 package org.sbml.simulator.math;
 
+import java.util.HashMap;
+import java.util.HashSet;
+
 import eva2.tools.math.Jama.LUDecomposition;
 import eva2.tools.math.Jama.Matrix;
 
@@ -18,6 +21,8 @@ public class StoichiometricMatrix extends StabilityMatrix {
 	private StabilityMatrix reducedMatrix = null;
 	private StabilityMatrix conservationRelations = null;
 	private StabilityMatrix steadyStateFluxes = null;
+	private HashMap<Integer, Integer> permutations = null;
+	private HashSet<Integer> linearDependent;
 
 	private int rank;
 
@@ -101,7 +106,9 @@ public class StoichiometricMatrix extends StabilityMatrix {
 	 */
 	private void reduceModel() {
 		StabilityMatrix stoich;
-		if ((this.getRowDimension() > 0 && this.getColumnDimension() > 0)) {
+		permutations = new HashMap<Integer, Integer>();
+
+		if (!(this.getRowDimension() > 0 && this.getColumnDimension() > 0)) {
 			System.out.println("Wrong dimensions");
 		}
 		if (this.getRowDimension() >= this.getColumnDimension()) {
@@ -124,14 +131,14 @@ public class StoichiometricMatrix extends StabilityMatrix {
 
 		QRDecomposition qr = new QRDecomposition(stoich.transpose().times(P));
 
-		Matrix Q = qr.getQ();
+		//Matrix Q = qr.getQ();
 		Matrix R = roundValues(qr.getR());
 
-		System.out.println("Q");
-		System.out.println(Q);
-
-		System.out.println("R");
-		System.out.println(R);
+//		System.out.println("Q");
+//		System.out.println(Q);
+//
+//		System.out.println("R");
+//		System.out.println(R);
 
 		StabilityMatrix Rt = new StabilityMatrix(R.copy().getArray(), R
 				.getRowDimension(), R.getColumnDimension());
@@ -140,8 +147,9 @@ public class StoichiometricMatrix extends StabilityMatrix {
 			double unity = Rt.get(i, i);
 			if (unity != 0.0) {
 				for (int j = 0; j < Rt.getColumnDimension(); j++) {
-					Rt.set(i, j,
-							(Math.round(Rt.get(i, j) / unity * 1000.)) / 1000.);
+					Rt
+							.set(i, j, (Math.round(Rt.get(i, j) / unity
+									* 10000.)) / 10000.);
 				}
 			}
 
@@ -168,62 +176,109 @@ public class StoichiometricMatrix extends StabilityMatrix {
 			}
 
 		}
-		System.out.println("rank: " + rank);
-		System.out.println("Rt");
-		System.out.println(Rt);
+		//System.out.println("rank: " + rank);
+		//System.out.println("Rt");
+		//System.out.println(Rt);
 
-		StabilityMatrix L = new StabilityMatrix(Rt.getColumnDimension(), rank);
+		StabilityMatrix L = new StabilityMatrix(this.getRowDimension(), rank);
+		StabilityMatrix Lo = new StabilityMatrix(this.getRowDimension() - rank,
+				this.getRowDimension());
 
+		buildReducedN(P);
+
+		int l = 0, n, loindex;
+		double value;
+		double[] column;
 		for (int i = 0; i < L.getRowDimension(); i++) {
 			if (i < rank) {
 				L.set(i, i, 1);
 			} else {
-				double[] column = Rt.getColumn(i);
+				column = Rt.getColumn(i);
 				for (int j = 0; j < L.getColumnDimension(); j++) {
-					L.set(i, j, column[j]);
-
+					if (column[j] != 0.0) {
+						value = Math.round(column[j] * 1000.) / 1000.;
+						n = permutations.get(j);
+						Lo.set(l, n, -value);
+					}
 				}
+				
+				m = permutations.get(i);
+				Lo.set(l, m, 1);
+				
+				l++;
+				loindex = 0;
+				
+				for (int j = 0; j < Lo.getColumnDimension(); j++) {
+					if (!linearDependent.contains(j)) {
+						if (Lo.get(i - rank, j) != 0) {
+							L.set(i, loindex, -Lo.get(i - rank, j));
+						}						
+						loindex++;
+					}					
+				}				
 			}
 		}
+
 		this.linkMatrix = L;
-		buildReducedN(P);
-		buildConservationRelations(L);
+		this.conservationRelations = Lo;
 
 	}
 
 	/**
 	 * When the number of reactions is greater than the number of metabolites,
-	 * the LU decomposition does not work. This is circumvented by adding additional
-	 * zero rows at the end of the matrix as described in
+	 * the LU decomposition does not work. This is circumvented by adding
+	 * additional zero rows at the end of the matrix as described in
 	 * "Conservation analysis of large biochemical networks" by Ravishankar Rao
 	 * Vallabhajosyula and Herbert Sauro.
 	 * 
 	 * @return
 	 */
 	private StabilityMatrix augmentN() {
-		StabilityMatrix augmentedN = null;
+		StabilityMatrix augmentedN = new StabilityMatrix(this
+				.getColumnDimension(), this.getColumnDimension(), 0);
+
+		for (int i = 0; i < this.getRowDimension(); i++) {
+			augmentedN.setRow(i, this.getRow(i));
+
+		}
+
 		return augmentedN;
 	}
 
-	/**
-	 * This method uses the metabolic link matrix to build a matrix with the
-	 * conservation relations of the model
-	 * 
-	 * @param linkMatrix
-	 */
-	private void buildConservationRelations(StabilityMatrix linkMatrix) {
-
-	}
-
-	/**
+   /**
 	 * This method uses the permutation matrix to build the reduced
 	 * stoichiometric matrix
 	 * 
 	 * @param permutationMatrix
 	 */
 	private void buildReducedN(StabilityMatrix permutationMatrix) {
+		linearDependent = new HashSet<Integer>();
+		reducedMatrix = new StabilityMatrix(rank, this.getColumnDimension());
+		for (int i = 0; i < this.getRowDimension(); i++) {
+			for (int j = 0; j < this.getRowDimension(); j++) {
+
+				if (permutationMatrix.get(i, j) == 1.0) {
+					if (j >= rank) {
+						linearDependent.add(i);
+					}
+					permutations.put(j, i);
+					continue;
+
+				}
+			}
+		}
+		int l = 0;
+		for (int i = 0; i < this.getRowDimension(); i++) {
+
+			if (!linearDependent.contains(i)) {
+				reducedMatrix.setRow(l, this.getRow(i));
+				l++;
+			}
+
+		}
 
 	}
+
 
 	/**
 	 * This method calculates the feasible steady state fluxes of the model with
