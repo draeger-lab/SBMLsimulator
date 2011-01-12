@@ -23,7 +23,6 @@ public class StoichiometricMatrix extends StabilityMatrix {
 	private StabilityMatrix steadyStateFluxes = null;
 	private HashMap<Integer, Integer> permutations = null;
 	private HashSet<Integer> linearDependent;
-
 	private int rank;
 
 	/**
@@ -131,14 +130,14 @@ public class StoichiometricMatrix extends StabilityMatrix {
 
 		QRDecomposition qr = new QRDecomposition(stoich.transpose().times(P));
 
-		//Matrix Q = qr.getQ();
+		// Matrix Q = qr.getQ();
 		Matrix R = roundValues(qr.getR());
 
-//		System.out.println("Q");
-//		System.out.println(Q);
-//
-//		System.out.println("R");
-//		System.out.println(R);
+		// System.out.println("Q");
+		// System.out.println(Q);
+		//
+		// System.out.println("R");
+		// System.out.println(R);
 
 		StabilityMatrix Rt = new StabilityMatrix(R.copy().getArray(), R
 				.getRowDimension(), R.getColumnDimension());
@@ -176,9 +175,9 @@ public class StoichiometricMatrix extends StabilityMatrix {
 			}
 
 		}
-		//System.out.println("rank: " + rank);
-		//System.out.println("Rt");
-		//System.out.println(Rt);
+		// System.out.println("rank: " + rank);
+		// System.out.println("Rt");
+		// System.out.println(Rt);
 
 		StabilityMatrix L = new StabilityMatrix(this.getRowDimension(), rank);
 		StabilityMatrix Lo = new StabilityMatrix(this.getRowDimension() - rank,
@@ -201,21 +200,21 @@ public class StoichiometricMatrix extends StabilityMatrix {
 						Lo.set(l, n, -value);
 					}
 				}
-				
+
 				m = permutations.get(i);
 				Lo.set(l, m, 1);
-				
+
 				l++;
 				loindex = 0;
-				
+
 				for (int j = 0; j < Lo.getColumnDimension(); j++) {
 					if (!linearDependent.contains(j)) {
 						if (Lo.get(i - rank, j) != 0) {
 							L.set(i, loindex, -Lo.get(i - rank, j));
-						}						
+						}
 						loindex++;
-					}					
-				}				
+					}
+				}
 			}
 		}
 
@@ -245,7 +244,7 @@ public class StoichiometricMatrix extends StabilityMatrix {
 		return augmentedN;
 	}
 
-   /**
+	/**
 	 * This method uses the permutation matrix to build the reduced
 	 * stoichiometric matrix
 	 * 
@@ -278,7 +277,6 @@ public class StoichiometricMatrix extends StabilityMatrix {
 		}
 
 	}
-
 
 	/**
 	 * This method calculates the feasible steady state fluxes of the model with
@@ -317,6 +315,21 @@ public class StoichiometricMatrix extends StabilityMatrix {
 			calculateSteadyStateFluxes();
 		}
 		return steadyStateFluxes;
+	}
+
+	/**
+	 * This method returns a HashSet of integer values corresponding to the rows
+	 * of this matrix, that are removed when building the reduced stoichiometrix
+	 * matrix. Please note that the indeces correspond to the array notation,
+	 * where e.g. 0 stands for the first row in the matrix.
+	 * 
+	 * @return
+	 */
+	public HashSet<Integer> getLinearDependent() {
+		if (linearDependent == null) {
+			reduceModel();
+		}
+		return linearDependent;
 	}
 
 }
