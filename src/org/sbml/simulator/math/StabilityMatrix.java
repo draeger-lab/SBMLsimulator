@@ -62,7 +62,7 @@ public class StabilityMatrix extends Matrix {
 		super(array, m, n);
 
 	}
-
+	
 	/**
 	 * Returns the real part of the eigenvalues of this matrix
 	 * 

@@ -10,7 +10,6 @@ import org.sbml.jsbml.Model;
 import org.sbml.jsbml.ModifierSpeciesReference;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.Reaction;
-import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.Species;
 import org.sbml.jsbml.SpeciesReference;
@@ -30,7 +29,7 @@ public class SBMLMatrixParser {
 	 * Loads the the SBML library
 	 */
 
-	private SBMLDocument doc;
+	private Model model;
 	private HashMap<String, Integer> hashReactions, hashSpecies;
 	private int numSpecies, numReactions;
 	private HashMap<String, HashMap<Integer, Integer>> sBOTerms;
@@ -42,14 +41,12 @@ public class SBMLMatrixParser {
 	 * 
 	 * @param path
 	 */
-	public SBMLMatrixParser(SBMLDocument doc) {
-		this.doc = doc;
-		Model m = doc.getModel();
-		System.out.println(m.getName());
+	public SBMLMatrixParser(Model model) {
+		this.model = model;
 		this.hashReactions = new HashMap<String, Integer>();
 		this.hashSpecies = new HashMap<String, Integer>();
-		this.numSpecies = (int) m.getListOfSpecies().size();
-		this.numReactions = (int) m.getListOfReactions().size();
+		this.numSpecies = (int) model.getListOfSpecies().size();
+		this.numReactions = (int) model.getListOfReactions().size();
 		this.reactions = new String[numReactions];
 		this.species = new String[numSpecies];
 		hashSpezies();
@@ -63,10 +60,9 @@ public class SBMLMatrixParser {
 	 * the stoichiometric matrix
 	 */
 	private void hashSpezies() {
-		Model m = doc.getModel();
 		for (int i = 0; i < numSpecies; i++) {
-			hashSpecies.put(m.getSpecies(i).getId(), Integer.valueOf(i));
-			species[i] = m.getSpecies(i).getId();
+			hashSpecies.put(model.getSpecies(i).getId(), Integer.valueOf(i));
+			species[i] = model.getSpecies(i).getId();
 		}
 
 	}
@@ -77,10 +73,9 @@ public class SBMLMatrixParser {
 	 * the stoichiometric matrix
 	 */
 	private void hashReactions() {
-		Model m = doc.getModel();
 		for (int i = 0; i < numReactions; i++) {
-			hashReactions.put(m.getReaction(i).getId(), i);
-			reactions[i] = m.getReaction(i).getId();
+			hashReactions.put(model.getReaction(i).getId(), i);
+			reactions[i] = model.getReaction(i).getId();
 		}
 
 	}
@@ -110,14 +105,13 @@ public class SBMLMatrixParser {
 	 * 
 	 * @return
 	 */
-	public StabilityMatrix getStoichiometric() {
+	public StoichiometricMatrix getStoichiometric() {
 		StoichiometricMatrix matrixN = new StoichiometricMatrix(numSpecies,
 				numReactions, 0);
 
 		ListOf<SpeciesReference> losr;
 		Reaction reac;
 		SpeciesReference speciesRef;
-		Model model = doc.getModel();
 		for (int n = 0; n < numReactions; n++) {
 			reac = model.getReaction(n);
 			// reactants
@@ -127,7 +121,7 @@ public class SBMLMatrixParser {
 				speciesRef = reac.getReactant(m);
 
 				matrixN.set(hashSpecies.get(speciesRef.getSpecies()),
-						hashReactions.get(reac.getId()), speciesRef
+						hashReactions.get(reac.getId()), -speciesRef
 								.getStoichiometry());
 			}
 
@@ -164,7 +158,6 @@ public class SBMLMatrixParser {
 		ModifierSpeciesReference modSpeciesRef;
 
 		int classification = 0;
-		Model model = doc.getModel();
 		for (int n = 0; n < numReactions; n++) {
 			reac = model.getReaction(n);
 			// modifier
@@ -232,21 +225,20 @@ public class SBMLMatrixParser {
 
 		initLocalParameter(reac.getKineticLaw().getListOfParameters());
 		initGlobalParameter(reac.getKineticLaw().getMath());
-		Model m = doc.getModel();
 		try {
-			sbmli = new SBMLinterpreter(m);
-			iA = m.getSpecies(msr.getSpecies()).getInitialAmount();
+			sbmli = new SBMLinterpreter(model);
+			iA = model.getSpecies(msr.getSpecies()).getInitialAmount();
 			// evaluate reaction with normal amount
 			normal = reac.getKineticLaw().getMath().compile(sbmli).toDouble();
 
 			// evaluate reaction with half of the normal amount
-			m.getSpecies(msr.getSpecies()).setInitialAmount(iA / 2);
-			sbmli = new SBMLinterpreter(m);
+			model.getSpecies(msr.getSpecies()).setInitialAmount(iA / 2);
+			sbmli = new SBMLinterpreter(model);
 			half = reac.getKineticLaw().getMath().compile(sbmli).toDouble();
 
 			// evaluate reaction with twice the normal amount
-			m.getSpecies(msr.getSpecies()).setInitialAmount(iA * 2);
-			sbmli = new SBMLinterpreter(m);
+			model.getSpecies(msr.getSpecies()).setInitialAmount(iA * 2);
+			sbmli = new SBMLinterpreter(model);
 			twice = reac.getKineticLaw().getMath().compile(sbmli).toDouble();
 
 			if (half < normal && normal < twice)
@@ -254,7 +246,7 @@ public class SBMLMatrixParser {
 			else if (half > normal && normal > twice)
 				result = -1;
 
-			m.getSpecies(msr.getSpecies()).setInitialAmount(iA);
+			model.getSpecies(msr.getSpecies()).setInitialAmount(iA);
 
 		} catch (ModelOverdeterminedException e) {
 
@@ -266,14 +258,13 @@ public class SBMLMatrixParser {
 	 * Adds SBOTerms to all modifiers hashed in the HashMap sBOTerms because
 	 * their SBOTerm hasn't been set yet
 	 */
-	// TODO noch nÃ¶tig?
+	// TODO noch nötig?
 	private void setSBOTerms() {
 		HashMap<Integer, Integer> sBOReaction;
-		Model m = doc.getModel();
 		for (String rid : sBOTerms.keySet()) {
 			sBOReaction = sBOTerms.get(rid);
 			for (Integer mid : sBOReaction.keySet())
-				m.getReaction(rid).getModifier(mid.intValue()).setSBOTerm(
+				model.getReaction(rid).getModifier(mid.intValue()).setSBOTerm(
 						sBOReaction.get(mid));
 		}
 	}
@@ -295,8 +286,7 @@ public class SBMLMatrixParser {
 	 * yet
 	 */
 	private void initGlobalParameter(ASTNode astnode) {
-		Model m = doc.getModel();
-		ListOf<Species> los = m.getListOfSpecies();
+		ListOf<Species> los = model.getListOfSpecies();
 		ListOf<Parameter> lop;
 		ListOf<Compartment> loc;
 		boolean found = false;
@@ -314,7 +304,7 @@ public class SBMLMatrixParser {
 					los.get(i).setInitialAmount(Double.valueOf(initvalue));
 			}
 		}
-		lop = m.getListOfParameters();
+		lop = model.getListOfParameters();
 		for (i = 0; i < lop.size() && !found; i++) {
 			if (lop.get(i).getName() == nodename) {
 				found = true;
@@ -323,7 +313,7 @@ public class SBMLMatrixParser {
 			}
 		}
 
-		loc = m.getListOfCompartments();
+		loc = model.getListOfCompartments();
 		for (i = 0; i < los.size() && !found; i++) {
 			if (loc.get(i).getName() == nodename) {
 				found = true;
