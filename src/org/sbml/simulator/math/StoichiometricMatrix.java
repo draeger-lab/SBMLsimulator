@@ -17,12 +17,39 @@ import eva2.tools.math.Jama.Matrix;
 public class StoichiometricMatrix extends StabilityMatrix {
 
 	private static final long serialVersionUID = 1L;
+	/**
+	 * A m x r matrix holding the link matrix for the reduced stoichiometric
+	 * matrix of this matrix
+	 */
 	private StabilityMatrix linkMatrix = null;
+	/**
+	 * A r x n matrix holding the reduced form of this matrix
+	 */
 	private StabilityMatrix reducedMatrix = null;
+	/**
+	 * A (m - r) x m matrix holding the conservation realtion/moieties of this
+	 * matrix
+	 * 
+	 */
 	private StabilityMatrix conservationRelations = null;
+	/**
+	 * A n x (n - r) matrix holding the feasible steady state fluxes of this
+	 * matrix
+	 */
 	private StabilityMatrix steadyStateFluxes = null;
+	/**
+	 * A HashMap containing inversion of the permutations of the metabolites due
+	 * to the LU decomposition and the algorithm
+	 */
 	private HashMap<Integer, Integer> permutations = null;
+	/**
+	 * A HashSet containing all indices of the removed rows when computing the
+	 * reduced stoichiometric matrix
+	 */
 	private HashSet<Integer> linearDependent;
+	/**
+	 * The rank of this matrix
+	 */
 	private int rank;
 
 	/**
@@ -68,6 +95,11 @@ public class StoichiometricMatrix extends StabilityMatrix {
 
 	}
 
+	/**
+	 * Returns the link matrix of this matrix
+	 * 
+	 * @return
+	 */
 	public StabilityMatrix getLinkMatrix() {
 		if (linkMatrix == null) {
 			reduceModel();
@@ -76,6 +108,11 @@ public class StoichiometricMatrix extends StabilityMatrix {
 		return linkMatrix;
 	}
 
+	/**
+	 * Returns the reduced form of this matrix
+	 * 
+	 * @return
+	 */
 	public StabilityMatrix getReducedMatrix() {
 		if (reducedMatrix == null) {
 			reduceModel();
@@ -84,6 +121,11 @@ public class StoichiometricMatrix extends StabilityMatrix {
 		return reducedMatrix;
 	}
 
+	/**
+	 * Returns the conservation relations of this matrix
+	 * 
+	 * @return
+	 */
 	public StabilityMatrix getConservationRelations() {
 		if (conservationRelations == null) {
 			reduceModel();
@@ -101,7 +143,6 @@ public class StoichiometricMatrix extends StabilityMatrix {
 	 * Ravishankar Rao Vallabhajosyula and Herbert Sauro. The permutation matrix
 	 * is calculated through LU decomposition
 	 * 
-	 * Vallabhajosyula
 	 */
 	private void reduceModel() {
 		StabilityMatrix stoich;
@@ -110,6 +151,9 @@ public class StoichiometricMatrix extends StabilityMatrix {
 		if (!(this.getRowDimension() > 0 && this.getColumnDimension() > 0)) {
 			System.out.println("Wrong dimensions");
 		}
+
+		// check if matrix has to be augmented befor performing the LU
+		// decomposition
 		if (this.getRowDimension() >= this.getColumnDimension()) {
 			stoich = this;
 		} else {
@@ -117,16 +161,19 @@ public class StoichiometricMatrix extends StabilityMatrix {
 		}
 
 		LUDecomposition lu = new LUDecomposition(stoich);
+
 		int m = stoich.getRowDimension();
 
 		StabilityMatrix P = new StabilityMatrix(m, m, 0);
 
+		// build the permutation matrix out of the pivot elements from the LU
+		// decomposition
 		int[] pivot = lu.getPivot();
 		for (int i = 0; i < pivot.length; i++) {
 			P.set(pivot[i], i, 1);
 		}
-		System.out.println("P");
-		System.out.println(P);
+		// System.out.println("P");
+		// System.out.println(P);
 
 		QRDecomposition qr = new QRDecomposition(stoich.transpose().times(P));
 
@@ -142,6 +189,7 @@ public class StoichiometricMatrix extends StabilityMatrix {
 		StabilityMatrix Rt = new StabilityMatrix(R.copy().getArray(), R
 				.getRowDimension(), R.getColumnDimension());
 
+		// dividing each row its diagonal element
 		for (int i = 0; i < Rt.getRowDimension(); i++) {
 			double unity = Rt.get(i, i);
 			if (unity != 0.0) {
@@ -151,10 +199,11 @@ public class StoichiometricMatrix extends StabilityMatrix {
 									* 10000.)) / 10000.);
 				}
 			}
-
 		}
 		rank = Rt.getRowDimension();
 
+		// Gauss-Jordan reduction to eliminate non-zero values above the
+		// diagonal
 		for (int i = Rt.getRowDimension() - 1; i >= 0; i--) {
 			if (Rt.get(i, i) == 0.0) {
 				rank--;
@@ -185,6 +234,7 @@ public class StoichiometricMatrix extends StabilityMatrix {
 
 		buildReducedN(P);
 
+		// build the conservation and the link matrix
 		int l = 0, n, loindex;
 		double value;
 		double[] column;
@@ -253,6 +303,11 @@ public class StoichiometricMatrix extends StabilityMatrix {
 	private void buildReducedN(StabilityMatrix permutationMatrix) {
 		linearDependent = new HashSet<Integer>();
 		reducedMatrix = new StabilityMatrix(rank, this.getColumnDimension());
+
+		// save permutations of the rows due to the LU
+		// decomposition and add dependent rows to the hash, strictly speaking
+		// rows that are moved to a new position with a higher index than the
+		// rank
 		for (int i = 0; i < this.getRowDimension(); i++) {
 			for (int j = 0; j < this.getRowDimension(); j++) {
 
@@ -266,31 +321,47 @@ public class StoichiometricMatrix extends StabilityMatrix {
 				}
 			}
 		}
+
 		int l = 0;
+
+		// exclude linear dependent rows when building the reduced
+		// stoichiometric matrix
 		for (int i = 0; i < this.getRowDimension(); i++) {
 
 			if (!linearDependent.contains(i)) {
 				reducedMatrix.setRow(l, this.getRow(i));
 				l++;
 			}
-
 		}
-
 	}
 
 	/**
 	 * This method calculates the feasible steady state fluxes of the model with
 	 * this stoichiometrix matrix, referring to Palsson also known as the null
 	 * space of N. This is achieved by performing an SVD decomposition as
-	 * described in "Conservation Analysis in Biochemical Networks" by Herbert
-	 * Sauro
+	 * described in "Systems Biology: Properties of Reconstructed Networks" by
+	 * Bernhard O. Palsson
 	 */
 	private void calculateSteadyStateFluxes() {
+		SingularValueDecomposition svd = new SingularValueDecomposition(this);
+		int rank = svd.rank();
+
+		steadyStateFluxes = new StabilityMatrix(this.getColumnDimension(), this
+				.getColumnDimension()
+				- rank);
+		Matrix V = svd.getV();
+
+		for (int i = 0; i < this.getColumnDimension() - rank; i++) {
+			for (int j = 0; j < this.getColumnDimension(); j++) {
+				steadyStateFluxes.set(j, i, V.get(j, rank + i));
+			}
+		}
 
 	}
 
 	/**
-	 * This method changes values that are as good as zero to zero
+	 * This method changes values that are as good as zero to zero due to
+	 * numerical inaccuracy
 	 * 
 	 * @param matrix
 	 * @return
@@ -310,6 +381,11 @@ public class StoichiometricMatrix extends StabilityMatrix {
 		return matrix;
 	}
 
+	/**
+	 * Returns the feasible steady state fluxes of this matrix
+	 * 
+	 * @return
+	 */
 	public StabilityMatrix getSteadyStateFluxes() {
 		if (steadyStateFluxes == null) {
 			calculateSteadyStateFluxes();
