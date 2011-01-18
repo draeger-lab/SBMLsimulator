@@ -156,8 +156,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     private void init(Model model) {
 	int offset = 0;
 	// initialize fields
-	this.spinQuantity = new JSpinner[model
-		.getNumQuantitiesWithDefinedUnit()];
+	this.spinQuantity = new JSpinner[model.getNumQuantitiesWithUnit()];
 	this.originalValues = new double[spinQuantity.length];
 	this.quantities = new QuantityWithUnit[originalValues.length];
 	this.quantitiesHash = new HashMap<String, Integer>();
