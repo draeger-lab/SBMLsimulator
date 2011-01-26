@@ -50,34 +50,35 @@ public class CSVDataImporter {
      * @throws XMLStreamException
      * @throws IOException
      */
-    public static void main(String[] args) throws XMLStreamException,
-	IOException {
-	SBMLDocument doc = SBMLReader.readSBML(args[0]);
-	CSVDataImporter importer = new CSVDataImporter();
+	public static void main(String[] args) throws XMLStreamException,
+			IOException {
+		SBMLReader reader = new SBMLReader();
+		SBMLDocument doc = reader.readSBML(args[0]);
+		CSVDataImporter importer = new CSVDataImporter();
 
-	JFrame frame = new JFrame("Conveter test");
-	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	try {
-	    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-	} catch (Exception exc) {
-	    exc.printStackTrace();
-	    GUITools.showErrorMessage(frame, exc);
+		JFrame frame = new JFrame("Conveter test");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception exc) {
+			exc.printStackTrace();
+			GUITools.showErrorMessage(frame, exc);
+		}
+
+		TableModel table = importer.convert(doc.getModel(), args[1], frame);
+
+		if (table != null) {
+			frame.getContentPane().add(
+					new JScrollPane(new JTable(table),
+							JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+							JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
+			frame.pack();
+			frame.setLocationRelativeTo(null);
+			frame.setVisible(true);
+		} else {
+			System.exit(0);
+		}
 	}
-
-	TableModel table = importer.convert(doc.getModel(), args[1], frame);
-
-	if (table != null) {
-	    frame.getContentPane().add(
-		new JScrollPane(new JTable(table),
-		    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-		    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
-	    frame.pack();
-	    frame.setLocationRelativeTo(null);
-	    frame.setVisible(true);
-	} else {
-	    System.exit(0);
-	}
-    }
 
     /**
 	 * 

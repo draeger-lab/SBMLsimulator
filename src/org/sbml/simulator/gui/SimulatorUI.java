@@ -381,11 +381,11 @@ public class SimulatorUI extends JFrame implements ActionListener,
 				SBFileFilter.createSBMLFileFilter());
 		if (f != null) {
 			try {
-				SBMLWriter.write(model.getSBMLDocument(), f,
-						SBMLsimulator.class.getSimpleName(), SBMLsimulator
-								.getVersionNumber());
+				SBMLWriter writer = new SBMLWriter();
+				writer.write(model.getSBMLDocument(), f, SBMLsimulator.class
+						.getSimpleName(), SBMLsimulator.getVersionNumber());
 				// TODO Just for debugging:
-				SBMLWriter.write(model.getSBMLDocument(), System.out);
+				writer.write(model.getSBMLDocument(), System.out);
 				prefs.put(GUIOptions.SAVE_DIR, f.getParent());
 			} catch (Exception exc) {
 				exc.printStackTrace();
@@ -696,7 +696,8 @@ public class SimulatorUI extends JFrame implements ActionListener,
 	public void openModel(File file) {
 		if (file != null) {
 			try {
-				SBMLDocument doc = SBMLReader.readSBML(file);
+				SBMLReader reader = new SBMLReader();
+				SBMLDocument doc = reader.readSBML(file);
 				if ((doc != null) && (doc.isSetModel())) {
 					SBPreferences prefs = SBPreferences
 							.getPreferencesFor(GUIOptions.class);

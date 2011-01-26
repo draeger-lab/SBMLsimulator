@@ -22,7 +22,7 @@ public class JSBMLvisualizer extends JFrame {
 
 	public static void main(String[] args) throws Exception {
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		new JSBMLvisualizer(SBMLReader.readSBML(args[0]));
+		new JSBMLvisualizer((new SBMLReader()).readSBML(args[0]));
 	}
 
 }
