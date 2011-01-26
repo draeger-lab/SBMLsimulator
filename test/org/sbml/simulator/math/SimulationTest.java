@@ -37,7 +37,7 @@ public class SimulationTest {
 		// System.out.println(args[0]);
 		// System.out.println(path);
 		try {
-			Model model = SBMLReader.readSBML(args[0]).getModel(); 
+			Model model = (new SBMLReader()).readSBML(args[0]).getModel(); 
 				//sbmlIo.convert2Model(args[0]);
 			// Model model = sbmlIo.readModel(path);
 			AbstractDESSolver rk = new RKEventSolver();

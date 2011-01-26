@@ -82,7 +82,7 @@ public class SimulationModeTest {
 
 		// sbmlIo.convert2Model(sbmlfile);
 
-		Model model = SBMLReader.readSBML(sbmlfile).getModel();
+		Model model = (new SBMLReader()).readSBML(sbmlfile).getModel();
 		if (model != null) {
 		    SimulatorUI d = new SimulatorUI(model);
 		    d.setSelectedQuantities(cfg.get("variables").toString()
