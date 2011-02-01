@@ -548,7 +548,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	int distanceFunc = 0;
 	String name = prefs.get(SimulatorOptions.SIM_DISTANCE_FUNCTION);
 	name = name.substring(name.lastIndexOf('.') + 1);
-	while (distanceFunc < distFun.length
+	while ((distanceFunc < distFun.length - 1)
 		&& !distFun[distanceFunc].getSimpleName().equals(name)) {
 	    distanceFunc++;
 	}
