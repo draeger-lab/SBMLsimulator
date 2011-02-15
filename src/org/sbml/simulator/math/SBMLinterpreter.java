@@ -37,7 +37,7 @@ import org.sbml.jsbml.KineticLaw;
 import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.LocalParameter;
 import org.sbml.jsbml.Model;
-import org.sbml.jsbml.NamedSBaseWithDerivedUnit;
+import org.sbml.jsbml.CallableSBase;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.RateRule;
 import org.sbml.jsbml.Reaction;
@@ -410,11 +410,9 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 
 	/*
 	 * (non-Javadoc)
-	 * 
-	 * @seeorg.sbml.jsbml.ASTNodeCompiler#compile(org.sbml.jsbml.
-	 * NamedSBaseWithDerivedUnit)
+	 * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#compile(org.sbml.jsbml.CallableSBase)
 	 */
-	public ASTNodeValue compile(NamedSBaseWithDerivedUnit nsb)
+	public ASTNodeValue compile(CallableSBase nsb)
 			throws SBMLException {
 		Integer symbolIndex;
 		if (nsb instanceof Species) {
