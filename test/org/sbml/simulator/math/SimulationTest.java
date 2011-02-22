@@ -43,10 +43,11 @@ public class SimulationTest {
 			AbstractDESSolver rk = new RKEventSolver();
 			SBMLinterpreter interpreter = new SBMLinterpreter(model);
 			double time = 0;
-
+			
+			rk.setStepSize(0.01);
 			MultiBlockTable solution = rk.solve(interpreter, interpreter
 					.getInitialValues(), time, 2);
-			rk.setStepSize(0.01);
+
 
 			// rk.solveAtTimePoints(interpreter, interpreter
 			// .getInitialValues(), timePoints)
