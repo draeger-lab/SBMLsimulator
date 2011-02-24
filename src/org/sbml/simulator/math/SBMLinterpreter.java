@@ -22,10 +22,13 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.sbml.jsbml.ASTNode;
+import org.sbml.jsbml.Assignment;
 import org.sbml.jsbml.AssignmentRule;
+import org.sbml.jsbml.CallableSBase;
 import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.Event;
 import org.sbml.jsbml.FunctionDefinition;
@@ -34,7 +37,6 @@ import org.sbml.jsbml.KineticLaw;
 import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.LocalParameter;
 import org.sbml.jsbml.Model;
-import org.sbml.jsbml.CallableSBase;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.RateRule;
 import org.sbml.jsbml.Reaction;
@@ -88,7 +90,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
      * of their compartment in the Y vector. When a species has no compartment,
      * it is hashed to null.
      */
-    private HashMap<String, Integer> compartmentHash;
+    private Map<String, Integer> compartmentHash;
 
     /**
      * This field is necessary to also consider local parameters of the current
@@ -114,7 +116,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
      * expression of this assignment when the mathematical expression of this
      * DESAssignment has to be processed at a later time point in the simulation
      */
-    private HashMap<DESAssignment, ASTNode> eventMath;
+    private Map<DESAssignment, ASTNode> eventMath;
 
     /**
      * Contains a list of all DESAssignment that emerged due to events and have
@@ -127,14 +129,14 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
      * when the mathematical expression of this DESAssignment has to be
      * processed at a later time point in the simulation
      */
-    private HashMap<DESAssignment, String> eventSpecies;
+    private Map<DESAssignment, String> eventSpecies;
 
     /**
      * This table is necessary to store the values of arguments when a function
      * definition is evaluated. For an identifier of the argument the
      * corresponding value will be stored.
      */
-    private Hashtable<String, Double> funcArgs;
+    private Map<String, Double> funcArgs;
 
     /**
      * An array, which stores all computed initial values of the model. If this
@@ -161,7 +163,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
      * Hashes the name of all compartments, species, and global parameters to an
      * value object which contains the position in the Y vector
      */
-    private HashMap<String, Integer> symbolHash;
+    private Map<String, Integer> symbolHash;
 
     /**
      * An array of strings that memorizes at each position the identifier of the
@@ -175,6 +177,13 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
      * time.
      */
     protected double[] v;
+    
+    /**
+     * This {@link Map} saves the current stoichiometric coefficients for those
+     * {@link SpeciesReference} objects that are a target to an
+     * {@link Assignment}.
+     */
+    protected Map<String, Double> stochiometricCoefHash;
 
     /**
      * An array of the current concentration of each species within the model
@@ -1690,6 +1699,10 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 				.toDouble()
 				* v[reactionIndex];
 		    } else {
+			// TODO: look if this species reference is one of
+			// those that might be changed due to some assignment (Event, Rule)
+			// if yes, look up the current value; else do the same as it
+			// is in this implementation:
 			changeRate[speciesIndex] -= speciesRef
 				.getStoichiometry()
 				* v[reactionIndex];
@@ -1714,6 +1727,10 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 				.toDouble()
 				* v[reactionIndex];
 		    } else {
+			// TODO: look if this species reference is one of
+			// those that might be changed due to some assignment (Event, Rule)
+			// if yes, look up the current value; else do the same as it
+			// is in this implementation:
 			changeRate[speciesIndex] += speciesRef
 				.getStoichiometry()
 				* v[reactionIndex];
