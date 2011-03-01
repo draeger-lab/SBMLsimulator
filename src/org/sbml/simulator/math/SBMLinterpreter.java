@@ -1737,8 +1737,8 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 					index = symbolHash.get(p.getId());
 					this.Y[index] = iA.getMath().compile(this).toDouble();
 				} else if (model.findSpeciesReference(iA.getVariable()) != null) {
-					Parameter p = model.getParameter(iA.getVariable());
-					stoichiometricCoefHash.put(p.getId(),
+					SpeciesReference sr = model.findSpeciesReference(iA.getVariable());
+					stoichiometricCoefHash.put(sr.getId(),
 							iA.getMath().compile(this).toDouble());
 				} else {
 					System.err
