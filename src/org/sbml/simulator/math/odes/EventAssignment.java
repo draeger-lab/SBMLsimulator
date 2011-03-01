@@ -2,13 +2,13 @@ package org.sbml.simulator.math.odes;
 
 /**
  * 
- * @author Alexander D&ouml;rr
+ * @author Alexander D&ouml;rr, Roland Keller
  *
  */
-public class DESAssignment{
-	private double processTime;
-	private int index;
-	private Double value;
+
+public class EventAssignment {
+	protected double processTime;
+	protected Double value;
 	
 	/**
 	 * 
@@ -16,9 +16,8 @@ public class DESAssignment{
 	 * @param index
 	 * @param value
 	 */
-	public DESAssignment(double processTime, int index, Double value){
+	public EventAssignment(double processTime, Double value){
 		this.processTime = processTime;
-		this.index = index;
 		this.value = value;			
 	}
 	
@@ -27,9 +26,8 @@ public class DESAssignment{
 	 * @param processTime
 	 * @param index
 	 */
-	public DESAssignment(double processTime, int index){
+	public EventAssignment(double processTime){
 		this.processTime = processTime;
-		this.index = index;
 		this.value = null;			
 	}
 	
@@ -41,13 +39,6 @@ public class DESAssignment{
 		return processTime;
 	}
 	
-	/**
-	 * 
-	 * @return
-	 */
-	public int getIndex() {
-		return index;
-	}
 
 	/**
 	 * 
@@ -66,3 +57,5 @@ public class DESAssignment{
 	}
 	
 }
+
+
