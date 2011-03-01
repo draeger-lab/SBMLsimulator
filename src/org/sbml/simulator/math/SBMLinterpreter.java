@@ -1568,14 +1568,14 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 																		.getMath()
 																		.compile(this)
 																		.toDouble(),
-														id, newVal));
+														id, newVal, ev.getPriority(), ev.getTrigger()));
 
 									} else {
 										sra = new SpeciesReferenceAssignment(
 												currentTime
 														+ ev.getDelay()
 																.getMath()
-																.compile(this).toDouble(), id);
+																.compile(this).toDouble(), id, ev.getPriority(), ev.getTrigger());
 
 										this.eventMath.put(sra,assignment_math);
 										this.eventSpecies.put(sra,variable.getId());
@@ -1589,8 +1589,10 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 									if (sr.getConstant() == false) {
 										stoichiometricCoefHash.put(id, newVal);
 									}
+									/*events.add(new SpeciesReferenceAssignment(currentTime,
+											id, newVal,ev.getPriority()));*/
 								}
-							}
+							} 
 
 							else {
 
@@ -1609,14 +1611,14 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 																.getMath()
 																.compile(this)
 																.toDouble(),
-												symbolIndex, newVal));
+												symbolIndex, newVal, ev.getPriority(), ev.getTrigger()));
 
 									} else {
 										desa = new DESAssignment(currentTime
 												+ ev.getDelay().getMath()
 														.compile(this)
 														.toDouble(),
-												symbolIndex);
+												symbolIndex, ev.getPriority(), ev.getTrigger());
 										this.eventMath.put(desa,
 												assignment_math);
 										this.eventSpecies.put(desa,
@@ -1630,7 +1632,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 											variable.getId(), assignment_math);
 
 									events.add(new DESAssignment(currentTime,
-											symbolIndex, newVal));
+											symbolIndex, newVal,ev.getPriority(),ev.getTrigger()));
 								}
 							}
 						}
@@ -1678,7 +1680,13 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 						this.eventSpecies.remove(a);
 
 					}
-				} else {
+				}
+				else if(a.getTrigger().getPersistent()==false && a.getTrigger().getMath().compile(this).toBoolean()==false) {
+					this.events.remove(a);
+					this.eventMath.remove(a);
+					this.eventSpecies.remove(a);
+				}
+				else {
 					i++;
 				}
 			}
@@ -1689,7 +1697,8 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		}
 		return events;
 	}
-
+	
+	
 	/**
 	 * Processes the initial assignments of the model
 	 * 
