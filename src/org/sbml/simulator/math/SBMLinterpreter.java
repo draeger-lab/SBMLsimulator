@@ -1238,9 +1238,14 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	 */
 	private void initEvents() throws SBMLException {
 		for (int i = 0; i < eventFired.length; i++) {
-			if (model.getEvent(i).getTrigger().getMath().compile(this)
+			if(model.getEvent(i).getTrigger().isSetInitialValue()) {
+				eventFired[i]=model.getEvent(i).getTrigger().getInitialValue();
+			}
+			else {
+				if (model.getEvent(i).getTrigger().getMath().compile(this)
 					.toBoolean()) {
-				eventFired[i] = true;
+					eventFired[i] = true;
+				}
 			}
 		}
 	}
@@ -1568,14 +1573,14 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 																		.getMath()
 																		.compile(this)
 																		.toDouble(),
-														id, newVal, ev.getPriority(), ev.getTrigger()));
+														i, id, newVal, ev.getPriority(), ev.getTrigger()));
 
 									} else {
 										sra = new SpeciesReferenceAssignment(
 												currentTime
 														+ ev.getDelay()
 																.getMath()
-																.compile(this).toDouble(), id, ev.getPriority(), ev.getTrigger());
+																.compile(this).toDouble(), i,id, ev.getPriority(), ev.getTrigger());
 
 										this.eventMath.put(sra,assignment_math);
 										this.eventSpecies.put(sra,variable.getId());
@@ -1611,14 +1616,14 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 																.getMath()
 																.compile(this)
 																.toDouble(),
-												symbolIndex, newVal, ev.getPriority(), ev.getTrigger()));
+												symbolIndex, i, newVal, ev.getPriority(), ev.getTrigger()));
 
 									} else {
 										desa = new DESAssignment(currentTime
 												+ ev.getDelay().getMath()
 														.compile(this)
 														.toDouble(),
-												symbolIndex, ev.getPriority(), ev.getTrigger());
+												symbolIndex, i,ev.getPriority(), ev.getTrigger());
 										this.eventMath.put(desa,
 												assignment_math);
 										this.eventSpecies.put(desa,
@@ -1632,7 +1637,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 											variable.getId(), assignment_math);
 
 									events.add(new DESAssignment(currentTime,
-											symbolIndex, newVal,ev.getPriority(),ev.getTrigger()));
+											symbolIndex, i, newVal,ev.getPriority(),ev.getTrigger()));
 								}
 							}
 						}
@@ -1685,6 +1690,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 					this.events.remove(a);
 					this.eventMath.remove(a);
 					this.eventSpecies.remove(a);
+					eventFired[a.getEventNumber()]=false;
 				}
 				else {
 					i++;
