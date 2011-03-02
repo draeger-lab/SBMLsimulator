@@ -15,10 +15,11 @@ public class DESAssignment extends EventAssignment{
 	 * 
 	 * @param processTime
 	 * @param index
+	 * @param eventNumber
 	 * @param value
 	 */
-	public DESAssignment(double processTime, int index, Double value){
-		super(processTime,value);
+	public DESAssignment(double processTime, int index, int eventNumber, Double value){
+		super(processTime,eventNumber,value);
 		this.index = index;		
 	}
 	
@@ -26,12 +27,13 @@ public class DESAssignment extends EventAssignment{
 	 * 
 	 * @param processTime
 	 * @param index
+	 * @param eventNumber
 	 * @param value
 	 * @param priority
 	 * @param trigger
 	 */
-	public DESAssignment(double processTime, int index, Double value, Priority prio, Trigger trigger){
-		super(processTime,value, prio, trigger);
+	public DESAssignment(double processTime, int index, int eventNumber, Double value, Priority prio, Trigger trigger){
+		super(processTime,eventNumber,value, prio, trigger);
 		this.index = index;		
 	}
 	
@@ -39,9 +41,10 @@ public class DESAssignment extends EventAssignment{
 	 * 
 	 * @param processTime
 	 * @param index
+	 * @param eventNumber
 	 */
-	public DESAssignment(double processTime, int index){
-		super(processTime);
+	public DESAssignment(double processTime, int index, int eventNumber){
+		super(processTime,eventNumber);
 		this.index = index;			
 	}
 	
@@ -49,13 +52,20 @@ public class DESAssignment extends EventAssignment{
 	 * 
 	 * @param processTime
 	 * @param index
+	 * @param eventNumber
 	 * @param priority
 	 * @param trigger
 	 */
-	public DESAssignment(double processTime, int index,
+	public DESAssignment(double processTime, int index, int eventNumber,
 			Priority priority, Trigger trigger) {
-		super(processTime,priority,trigger);
+		super(processTime,eventNumber, priority,trigger);
 		this.index=index;
+	}
+
+	public DESAssignment(double processTime, int index,
+			double value) {
+		super(processTime,value);
+		this.index = index;		
 	}
 
 	/**
