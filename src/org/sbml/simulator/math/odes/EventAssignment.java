@@ -14,26 +14,31 @@ public class EventAssignment {
 	protected Double value;
 	protected Priority prio;
 	protected Trigger trigger;
+	protected int eventNumber;
 	
 	
 	/**
 	 * 
 	 * @param processTime
+	 * @param eventNumber
 	 * @param value
 	 */
-	public EventAssignment(double processTime, Double value){
+	public EventAssignment(double processTime, int eventNumber, Double value){
 		this.processTime = processTime;
 		this.value = value;			
+		this.eventNumber=eventNumber;
 	}
 	
 	/**
 	 * 
 	 * @param processTime
+	 * @param eventNumber
 	 * @param value
 	 * @param trigger
 	 */
-	public EventAssignment(double processTime, Double value, Priority prio,Trigger trigger){
+	public EventAssignment(double processTime, int eventNumber, Double value, Priority prio,Trigger trigger){
 		this.processTime = processTime;
+		this.eventNumber=eventNumber;
 		this.value = value;			
 		this.prio=prio;
 		this.trigger=trigger;
@@ -42,9 +47,11 @@ public class EventAssignment {
 	/**
 	 * 
 	 * @param processTime
+	 * @param eventNumber
 	 */
-	public EventAssignment(double processTime){
+	public EventAssignment(double processTime, int eventNumber){
 		this.processTime = processTime;
+		this.eventNumber=eventNumber;
 		this.value = null;			
 	}
 	
@@ -52,13 +59,20 @@ public class EventAssignment {
 	/**
 	 * 
 	 * @param processTime
+	 * @param eventNumber
 	 * @param prio
 	 * @param trigger
 	 */
-	public EventAssignment(double processTime, Priority prio, Trigger trigger) {
+	public EventAssignment(double processTime, int eventNumber, Priority prio, Trigger trigger) {
 		this.processTime=processTime;
+		this.eventNumber=eventNumber;
 		this.prio=prio;
 		this.trigger=trigger;
+	}
+
+	public EventAssignment(double processTime, double value) {
+		this.processTime=processTime;
+		this.value=value;
 	}
 
 	/**
@@ -92,6 +106,14 @@ public class EventAssignment {
 	 */
 	public Trigger getTrigger() {
 		return trigger;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public int getEventNumber() {
+		return eventNumber;
 	}
 	
 	/**
