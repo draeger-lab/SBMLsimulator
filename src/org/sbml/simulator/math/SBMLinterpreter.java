@@ -1535,7 +1535,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		Boolean persistent, aborted;
 		HashSet<Double> priorities = new HashSet<Double>();
 		double count = 0;
-
+	
 		try {
 
 			// check events that have fired for this point in time but have not
@@ -1725,9 +1725,11 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 
 						assignments.add(new DESAssignment(currentTime,
 								symbolIndex, i, newVal));
-					}
+					}				
+					
 
 				}
+				this.events.remove(event);
 
 			}
 
