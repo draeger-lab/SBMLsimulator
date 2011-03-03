@@ -334,7 +334,7 @@ public abstract class AbstractDESSolver implements DESSolver {
 
 		while (assignments != null) {
 
-			for (DESAssignment assignment : EDES.getEventAssignments(time, Ytemp)) {
+			for (DESAssignment assignment : assignments) {
 				index = assignment.getIndex();
 				// newYtemp[index] = event.getValue() - (Ytemp[index]);
 				newYtemp[index] = assignment.getValue()
