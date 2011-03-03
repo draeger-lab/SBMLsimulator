@@ -324,22 +324,23 @@ public abstract class AbstractDESSolver implements DESSolver {
 	 * 
 	 * @throws IntegrationException
 	 */
-	public double[] processEvents(EventDESystem EDES, double time,
-			double[] Ytemp, double[] change) throws IntegrationException {
-		double[] newYtemp = new double[Ytemp.length];
+	public void processEvents(EventDESystem EDES, double time, double[] yTemp,
+			double[] change) throws IntegrationException {
+		//double[] newYtemp = new double[yTemp.length];
 		int index;
 		ArrayList<DESAssignment> assignments;
-		assignments = (ArrayList<DESAssignment>) EDES
-				.getEventAssignments(time, Ytemp);
+		assignments = (ArrayList<DESAssignment>) EDES.getEventAssignments(time,
+				yTemp);
 
 		while (assignments != null) {
-
 			for (DESAssignment assignment : assignments) {
 				index = assignment.getIndex();
-				// newYtemp[index] = event.getValue() - (Ytemp[index]);
-				newYtemp[index] = assignment.getValue()
-						- (Ytemp[index] - change[index]);
+				// System.out.println(time + " " +index);
 
+				// newYtemp[index] = assignment.getValue()
+				// - (yTemp[index] - change[index]);
+
+				yTemp[index] = assignment.getValue() + change[index];
 				/*
 				 * System.out .printf(
 				 * "time %s: \tYtemp[%s]_old = %s\tYtemp[%s]_new = %s\t change %s \n"
@@ -348,11 +349,16 @@ public abstract class AbstractDESSolver implements DESSolver {
 				 */
 			}
 
-			assignments = (ArrayList<DESAssignment>) EDES
-			.getEventAssignments(time, newYtemp);
+			// assignments = (ArrayList<DESAssignment>) EDES
+			// .getEventAssignments(time, newYtemp);
+
+			// Mathematics.vvAdd(yTemp, newYtemp, yTemp);
+
+			assignments = (ArrayList<DESAssignment>) EDES.getEventAssignments(
+					time, yTemp);
 		}
 
-		return newYtemp;
+		// return newYtemp;
 
 	}
 
@@ -369,8 +375,10 @@ public abstract class AbstractDESSolver implements DESSolver {
 		if (DES instanceof EventDESystem) {
 			EventDESystem EDES = (EventDESystem) DES;
 			if (EDES.getNumEvents() > 0) {
-				Mathematics.vvAdd(yTemp, processEvents(EDES, t, yTemp, change),
-						yTemp);
+				processEvents(EDES, t, yTemp, change);
+				// Mathematics.vvAdd(yTemp, processEvents(EDES, t, yTemp,
+				// change),
+				// yTemp);
 			}
 			if (EDES.getNumRules() > 0) {
 				processRules(EDES, t, yTemp);
@@ -387,7 +395,8 @@ public abstract class AbstractDESSolver implements DESSolver {
 	 */
 	public void processRules(EventDESystem EDES, double time, double[] Ytemp)
 			throws IntegrationException {
-		for (DESAssignment assignment : EDES.processAssignmentRules(time, Ytemp)) {
+		for (DESAssignment assignment : EDES
+				.processAssignmentRules(time, Ytemp)) {
 			Ytemp[assignment.getIndex()] = assignment.getValue();
 		}
 	}
