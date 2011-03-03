@@ -108,9 +108,9 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	private double currentTime;
 
 	/**
-	 * This map stores for every event the latest status of its trigger
+	 * This array stores for every event the latest status of its trigger
 	 */
-	private HashMap<Event, Boolean> eventFired;
+	private boolean eventFired[];
 
 	/**
 	 * Contains a list of all EventAssignments that emerged due to events and
@@ -428,7 +428,6 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		if (nsb instanceof Species) {
 			Species s = (Species) nsb;
 			symbolIndex = symbolHash.get(nsb.getId());
-
 			if (getCompartmentValueOf(nsb.getId()) == 0d) {
 				return new ASTNodeValue(Y[symbolIndex], this);
 			}
@@ -1175,7 +1174,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		 */
 		if (model.getNumEvents() > 0) {
 			this.events = new HashMap<Event, Double>();
-			this.eventFired = new HashMap<Event, Boolean>();
+			this.eventFired = new boolean[model.getNumEvents()];
 			this.eventQueue = new HashMap<Event, Double>();
 			this.triggerTimeValues = new HashMap<Event, Double[]>();
 			initEvents();
@@ -1234,9 +1233,8 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	 * @throws SBMLException
 	 */
 	private void initEvents() throws SBMLException {
-		for (Event event : model.getListOfEvents()) {
-			eventFired.put(event, event.getTrigger().getInitialValue());
-
+		for (int i = 0; i < model.getNumEvents(); i++) {
+			eventFired[i] = model.getEvent(i).getTrigger().getInitialValue();
 		}
 	}
 
@@ -1529,7 +1527,6 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		this.Y = Y;
 		this.currentTime = t;
 		Double priority;
-		int i;
 		Double triggerTimeValues[];
 		Event ev;
 		Boolean persistent, aborted;
@@ -1550,8 +1547,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 			}
 
 			// check events that have fired at an earlier point in time but have
-			// not
-			// been executed yet due to a delay
+			// not been executed yet due to a delay
 			for (Event event : eventQueue.keySet()) {
 				if (eventQueue.get(event) <= currentTime) {
 					aborted = false;
@@ -1582,15 +1578,14 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 					}
 				}
 			}
-
+			
 			// check the trigger of all events in the model
-			for (i = 0; i < model.getNumEvents(); i++) {
+			for (int i = 0; i < model.getNumEvents(); i++) {
 				ev = model.getEvent(i);
 				if (ev.getTrigger().getMath().compile(this).toBoolean()) {
-
+					
 					// event has not fired recently -> can fire
-					if (!eventFired.get(ev)) {
-
+					if (!eventFired[i]) {
 						// event has a delay
 						if (ev.getDelay() != null) {
 							// event uses values from trigger time
@@ -1600,9 +1595,9 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 
 								// store values from trigger time for later
 								// execution
-								for (i = 0; i < ev.getNumEventAssignments(); i++) {
-									triggerTimeValues[i] = ev
-											.getEventAssignment(i).getMath()
+								for (int j = 0; j < ev.getNumEventAssignments(); j++) {
+									triggerTimeValues[j] = ev
+											.getEventAssignment(j).getMath()
 											.compile(this).toDouble();
 								}
 
@@ -1631,17 +1626,17 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 							}
 							events.put(ev, priority);
 						}
-						eventFired.put(ev, true);
+						eventFired[i] = true;						
 					}
 
 				}
 				// event has fired recently -> can not fire
 				else {
-					eventFired.put(ev, false);
+					eventFired[i] = false;					
 				}
 
 			}
-
+			
 			// there are events to fire
 			if (events.size() > 0) {
 				return processEvents(priorities, count);
@@ -1719,12 +1714,11 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 
 					} else {
 						symbolIndex = symbolHash.get(variable.getId());
-
 						newVal = processAssignmentVaribale(variable.getId(),
 								assignment_math);
-
+						
 						assignments.add(new DESAssignment(currentTime,
-								symbolIndex, i, newVal));
+								symbolIndex, newVal));
 					}				
 					
 
