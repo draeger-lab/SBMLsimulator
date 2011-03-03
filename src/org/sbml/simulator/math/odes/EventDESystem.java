@@ -43,21 +43,18 @@ public interface EventDESystem extends DESystem {
 			throws IntegrationException;
 
 	/**
-	 * Returns an array with delays (entries >=0) for the events triggered
-	 * either by the time t or by the concentrations of the species stored in Y.
-	 * The new values for the species are stored in res. The positions in the
-	 * array returned by this method correspond to the positions in Y/res.
+	 * Returns a list with event assignments for the events triggered either by
+	 * the time t or by the concentrations of the species stored in Y.
 	 * 
 	 * @param t
 	 *            The current simulation time.
 	 * @param Y
 	 *            The current change of the system.
 	 * 
-	 * @return Returns an array with delays for the change of concentration due
-	 *         to events
+	 * @return Returns a list with event assignments for the events triggered
 	 * @throws IntegrationException
 	 */
-	public List<DESAssignment> processEvents(double t, double Y[])
+	public List<DESAssignment> getEventAssignments(double t, double Y[])
 			throws IntegrationException;
 
 }

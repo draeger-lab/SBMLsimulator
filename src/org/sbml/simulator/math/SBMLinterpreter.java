@@ -53,12 +53,12 @@ import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.jsbml.validator.OverdeterminationValidator;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.math.odes.DESAssignment;
-import org.sbml.simulator.math.odes.EventAssignment;
 import org.sbml.simulator.math.odes.EventDESystem;
 import org.sbml.simulator.math.odes.FastProcessDESystem;
 import org.sbml.simulator.math.odes.IntegrationException;
 import org.sbml.simulator.math.odes.RichDESystem;
-import org.sbml.simulator.math.odes.SpeciesReferenceAssignment;
+
+import eva2.tools.math.RNG;
 
 /**
  * <p>
@@ -108,30 +108,15 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	private double currentTime;
 
 	/**
-	 * This array data structure stores at the position i if the ith event has
-	 * fired recently
+	 * This map stores for every event the latest status of its trigger
 	 */
-	private boolean[] eventFired;
+	private HashMap<Event, Boolean> eventFired;
 
 	/**
-	 * Hashes an EventAssignment to an ASTNode containing the mathematical
-	 * expression of this assignment when the mathematical expression of this
-	 * DESAssignment has to be processed at a later time point in the simulation
+	 * Contains a list of all EventAssignments that emerged due to events and
+	 * have not been processed so far
 	 */
-	private Map<EventAssignment, ASTNode> eventMath;
-
-	/**
-	 * Contains a list of all EventAssignments that emerged due to events and have
-	 * not been processed so far
-	 */
-	private List<EventAssignment> events;
-
-	/**
-	 * Hashes an EventAssignment to the species id the DESAssignment is refering to
-	 * when the mathematical expression of this DESAssignment has to be
-	 * processed at a later time point in the simulation
-	 */
-	private Map<EventAssignment, String> eventSpecies;
+	private HashMap<Event, Double> events;
 
 	/**
 	 * This table is necessary to store the values of arguments when a function
@@ -203,6 +188,21 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	 * A boolean indicating whether a model has fast reactions or not.
 	 */
 	private boolean hasFastReactions = false;
+
+	/**
+	 * Hashes an event with a delay in its execution to a double value
+	 * representing its priority for execution at a later time point in the
+	 * simulation.
+	 */
+	private Map<Event, Double> eventQueue;
+
+	/**
+	 * Hashes an event with a delay in its execution and that uses values from
+	 * trigger time to an array of double values representing the values of its
+	 * assignment at the time the event was triggered for execution at a later
+	 * time point in the simulation.
+	 */
+	private Map<Event, Double[]> triggerTimeValues;
 
 	/**
 	 * <p>
@@ -445,20 +445,18 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 
 			return new ASTNodeValue(Y[symbolIndex], this);
 
-		}
-		else if(nsb instanceof SpeciesReference) {
+		} else if (nsb instanceof SpeciesReference) {
 			SpeciesReference sr = (SpeciesReference) nsb;
 			if ((sr.getLevel() >= 3)
 					&& this.stoichiometricCoefHash.containsKey(sr.getId())) {
-						return new ASTNodeValue(this.stoichiometricCoefHash.get(sr.getId()),this);
-				} 
-				else if(sr.isSetStoichiometryMath()) {
-					return new ASTNodeValue(sr.getStoichiometryMath().getMath().compile(this)
-							.toDouble(),this);
-				}
-				else {
-					return new ASTNodeValue(sr.getStoichiometry(),this);
-				}
+				return new ASTNodeValue(this.stoichiometricCoefHash.get(sr
+						.getId()), this);
+			} else if (sr.isSetStoichiometryMath()) {
+				return new ASTNodeValue(sr.getStoichiometryMath().getMath()
+						.compile(this).toDouble(), this);
+			} else {
+				return new ASTNodeValue(sr.getStoichiometry(), this);
+			}
 		}
 
 		else if (nsb instanceof Compartment || nsb instanceof Parameter
@@ -602,8 +600,8 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 			throw new ModelOverdeterminedException();
 		}
 		// create assignment rules out of the algebraic rules
-		AlgebraicRuleConverter arc = new AlgebraicRuleConverter(
-				odv.getMatching(), model);
+		AlgebraicRuleConverter arc = new AlgebraicRuleConverter(odv
+				.getMatching(), model);
 		algebraicRules = arc.getAssignmentRules();
 	}
 
@@ -623,13 +621,13 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		// get symbol and assign its new value
 		Integer speciesIndex = symbolHash.get(as.getVariable());
 		if (speciesIndex != null) {
-			changeRate[speciesIndex.intValue()] = processAssignmentVaribale(
-					as.getVariable(), as.getMath());
+			changeRate[speciesIndex.intValue()] = processAssignmentVaribale(as
+					.getVariable(), as.getMath());
 		} else if (model.findSpeciesReference(as.getVariable()) != null) {
 			SpeciesReference sr = model.findSpeciesReference(as.getVariable());
 			if (sr.getConstant() == false) {
-				stoichiometricCoefHash.put(sr.getId(), as.getMath()
-						.compile(this).toDouble());
+				stoichiometricCoefHash.put(sr.getId(), as.getMath().compile(
+						this).toDouble());
 			}
 		}
 	}
@@ -648,8 +646,8 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		Integer speciesIndex = symbolHash.get(rr.getVariable());
 		// changeRate[speciesIndex] = rr.getMath().compile(this).toDouble();
 		if (speciesIndex != null) {
-			changeRate[speciesIndex.intValue()] = processAssignmentVaribale(
-					rr.getVariable(), rr.getMath());
+			changeRate[speciesIndex.intValue()] = processAssignmentVaribale(rr
+					.getVariable(), rr.getMath());
 			// when the size of a compartment changes, the concentrations of the
 			// species located in this compartment have to change as well
 			if (compartmentHash.containsValue(speciesIndex)) {
@@ -658,8 +656,8 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		} else if (model.findSpeciesReference(rr.getVariable()) != null) {
 			SpeciesReference sr = model.findSpeciesReference(rr.getVariable());
 			if (sr.getConstant() == false) {
-				stoichiometricCoefHash.put(sr.getId(), rr.getMath()
-						.compile(this).toDouble());
+				stoichiometricCoefHash.put(sr.getId(), rr.getMath().compile(
+						this).toDouble());
 			}
 		}
 	}
@@ -1013,6 +1011,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 			throws IntegrationException {
 		this.currentTime = time;
 		this.Y = Y;
+		this.events.clear();
 
 		// make sure not to have invalid older values in the change rate
 		Arrays.fill(changeRate, 0d);
@@ -1039,6 +1038,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		} catch (SBMLException exc) {
 			throw new IntegrationException(exc);
 		}
+
 	}
 
 	/*
@@ -1174,12 +1174,10 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		 * Initialize Events
 		 */
 		if (model.getNumEvents() > 0) {
-
-			// TODO: Treat Priority!
-
-			this.eventFired = new boolean[model.getNumEvents()];
-			this.eventMath = new HashMap<EventAssignment, ASTNode>();
-			this.eventSpecies = new HashMap<EventAssignment, String>();
+			this.events = new HashMap<Event, Double>();
+			this.eventFired = new HashMap<Event, Boolean>();
+			this.eventQueue = new HashMap<Event, Double>();
+			this.triggerTimeValues = new HashMap<Event, Double[]>();
 			initEvents();
 		}
 
@@ -1227,7 +1225,6 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		initialValues = new double[Y.length];
 		System.arraycopy(Y, 0, initialValues, 0, initialValues.length);
 
-		this.events = new ArrayList<EventAssignment>();
 	}
 
 	/**
@@ -1237,16 +1234,9 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	 * @throws SBMLException
 	 */
 	private void initEvents() throws SBMLException {
-		for (int i = 0; i < eventFired.length; i++) {
-			if(model.getEvent(i).getTrigger().isSetInitialValue()) {
-				eventFired[i]=model.getEvent(i).getTrigger().getInitialValue();
-			}
-			else {
-				if (model.getEvent(i).getTrigger().getMath().compile(this)
-					.toBoolean()) {
-					eventFired[i] = true;
-				}
-			}
+		for (Event event : model.getListOfEvents()) {
+			eventFired.put(event, event.getTrigger().getInitialValue());
+
 		}
 	}
 
@@ -1451,12 +1441,15 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 					symbolIndex = symbolHash.get(as.getVariable());
 					if (symbolIndex != null) {
 						assignmentRules.add(new DESAssignment(t, symbolIndex,
-								processAssignmentVaribale(as.getVariable(),as.getMath())));
-					}
-					else if (model.findSpeciesReference(as.getVariable()) != null) {
-						SpeciesReference sr = model.findSpeciesReference(as.getVariable());
+								processAssignmentVaribale(as.getVariable(), as
+										.getMath())));
+					} else if (model.findSpeciesReference(as.getVariable()) != null) {
+						SpeciesReference sr = model.findSpeciesReference(as
+								.getVariable());
 						if (sr.getConstant() == false) {
-							stoichiometricCoefHash.put(sr.getId(), processAssignmentVaribale(as.getVariable(),as.getMath()));
+							stoichiometricCoefHash.put(sr.getId(),
+									processAssignmentVaribale(as.getVariable(),
+											as.getMath()));
 						}
 					}
 				}
@@ -1466,12 +1459,15 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 					symbolIndex = symbolHash.get(as.getVariable());
 					if (symbolIndex != null) {
 						assignmentRules.add(new DESAssignment(t, symbolIndex,
-								processAssignmentVaribale(as.getVariable(),as.getMath())));
-					}
-					else if (model.findSpeciesReference(as.getVariable()) != null) {
-						SpeciesReference sr = model.findSpeciesReference(as.getVariable());
+								processAssignmentVaribale(as.getVariable(), as
+										.getMath())));
+					} else if (model.findSpeciesReference(as.getVariable()) != null) {
+						SpeciesReference sr = model.findSpeciesReference(as
+								.getVariable());
 						if (sr.getConstant() == false) {
-							stoichiometricCoefHash.put(sr.getId(), processAssignmentVaribale(as.getVariable(),as.getMath()));
+							stoichiometricCoefHash.put(sr.getId(),
+									processAssignmentVaribale(as.getVariable(),
+											as.getMath()));
 						}
 					}
 				}
@@ -1520,191 +1516,239 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see eva2.tools.math.des.EventDESystem#processEvents(double, double[],
+	 * @see
+	 * org.sbml.simulator.math.odes.EventDESystem#getEventAssignments(double,
 	 * double[])
 	 */
-	public ArrayList<DESAssignment> processEvents(double t, double[] Y)
+	public ArrayList<DESAssignment> getEventAssignments(double t, double[] Y)
 			throws IntegrationException {
-		ArrayList<DESAssignment> events = new ArrayList<DESAssignment>();
-		// change point because of different time point due to events
+
+		// change Y because of different priorites and reevaluation of
+		// trigger/priority
+		// after the execution of events
 		this.Y = Y;
 		this.currentTime = t;
-		Integer symbolIndex;
-		ASTNode assignment_math;
-		Variable variable;
-		double newVal;
+		Double priority;
 		int i;
-		DESAssignment desa;
-		SpeciesReferenceAssignment sra;
+		Double triggerTimeValues[];
 		Event ev;
+		Boolean persistent, aborted;
+		HashSet<Double> priorities = new HashSet<Double>();
+		double count = 0;
 
 		try {
-			// number of events = listOfEvents_delay.length
+
+			// check events that have fired for this point in time but have not
+			// been executed yet
+			for (Event event : events.keySet()) {
+				persistent = event.getTrigger().getPersistent();
+				if (!persistent) {
+					if (!event.getTrigger().getMath().compile(this).toBoolean()) {
+						events.remove(event);
+					}
+				}
+			}
+
+			// check events that have fired at an earlier point in time but have
+			// not
+			// been executed yet due to a delay
+			for (Event event : eventQueue.keySet()) {
+				if (eventQueue.get(event) <= currentTime) {
+					aborted = false;
+					persistent = event.getTrigger().getPersistent();
+					if (!persistent) {
+						if (!event.getTrigger().getMath().compile(this)
+								.toBoolean()) {
+							eventQueue.remove(event);
+							aborted = true;
+						}
+					}
+
+					if (!aborted) {
+						if (event.getPriority() != null) {
+							priority = event.getPriority().getMath().compile(
+									this).toDouble();
+							if (!priorities.contains(priority)) {
+								count++;
+								priorities.add(priority);
+							}
+
+						} else {
+							priority = null;
+						}
+						events.put(event, priority);
+						eventQueue.remove(event);
+
+					}
+				}
+			}
+
+			// check the trigger of all events in the model
 			for (i = 0; i < model.getNumEvents(); i++) {
 				ev = model.getEvent(i);
-				// check if event triggers
 				if (ev.getTrigger().getMath().compile(this).toBoolean()) {
-					// check if trigger has just become true
-					if (!eventFired[i]) {
 
-						// fire event
-						eventFired[i] = true;
-						for (int l = 0; l < ev.getNumEventAssignments(); l++) {
-							assignment_math = ev.getEventAssignment(l)
-									.getMath();
-							variable = ev.getEventAssignment(l)
-									.getVariableInstance();
+					// event has not fired recently -> can fire
+					if (!eventFired.get(ev)) {
 
-							if (model.findSpeciesReference(variable.getId()) != null) {
-								String id = variable.getId();
-								SpeciesReference sr = model.findSpeciesReference(id);
-								
-								// check conditions of the event
-								if (ev.getDelay() != null) {
-									if (ev.getUseValuesFromTriggerTime()) {
+						// event has a delay
+						if (ev.getDelay() != null) {
+							// event uses values from trigger time
+							if (ev.getUseValuesFromTriggerTime()) {
+								triggerTimeValues = new Double[ev
+										.getNumEventAssignments()];
 
-										newVal = processAssignmentVaribale(
-												variable.getId(),
-												assignment_math);
-
-										this.events.add(new SpeciesReferenceAssignment(
-														currentTime
-																+ ev.getDelay()
-																		.getMath()
-																		.compile(this)
-																		.toDouble(),
-														i, id, newVal, ev.getPriority(), ev.getTrigger()));
-
-									} else {
-										sra = new SpeciesReferenceAssignment(
-												currentTime
-														+ ev.getDelay()
-																.getMath()
-																.compile(this).toDouble(), i,id, ev.getPriority(), ev.getTrigger());
-
-										this.eventMath.put(sra,assignment_math);
-										this.eventSpecies.put(sra,variable.getId());
-										this.events.add(sra);
-									}
-
-								} else {
-
-									newVal = processAssignmentVaribale(
-											variable.getId(), assignment_math);
-									if (sr.getConstant() == false) {
-										stoichiometricCoefHash.put(id, newVal);
-									}
-									/*events.add(new SpeciesReferenceAssignment(currentTime,
-											id, newVal,ev.getPriority()));*/
+								// store values from trigger time for later
+								// execution
+								for (i = 0; i < ev.getNumEventAssignments(); i++) {
+									triggerTimeValues[i] = ev
+											.getEventAssignment(i).getMath()
+											.compile(this).toDouble();
 								}
-							} 
 
-							else {
-
-								symbolIndex = symbolHash.get(variable.getId());
-								// check conditions of the event
-								if (ev.getDelay() != null) {
-									if (ev.getUseValuesFromTriggerTime()) {
-
-										newVal = processAssignmentVaribale(
-												variable.getId(),
-												assignment_math);
-
-										this.events.add(new DESAssignment(
-												currentTime
-														+ ev.getDelay()
-																.getMath()
-																.compile(this)
-																.toDouble(),
-												symbolIndex, i, newVal, ev.getPriority(), ev.getTrigger()));
-
-									} else {
-										desa = new DESAssignment(currentTime
-												+ ev.getDelay().getMath()
-														.compile(this)
-														.toDouble(),
-												symbolIndex, i,ev.getPriority(), ev.getTrigger());
-										this.eventMath.put(desa,
-												assignment_math);
-										this.eventSpecies.put(desa,
-												variable.getId());
-										this.events.add(desa);
-									}
-
-								} else {
-
-									newVal = processAssignmentVaribale(
-											variable.getId(), assignment_math);
-
-									events.add(new DESAssignment(currentTime,
-											symbolIndex, i, newVal,ev.getPriority(),ev.getTrigger()));
-								}
+								this.triggerTimeValues.put(ev,
+										triggerTimeValues);
 							}
+							// store event for later execution
+							eventQueue.put(ev, ev.getDelay().getMath().compile(
+									this).toDouble()
+									+ currentTime);
+
 						}
+						// event has no delay -> execute now
+						else {
+							if (ev.getPriority() != null) {
+								priority = ev.getPriority().getMath().compile(
+										this).toDouble();
+
+								if (!priorities.contains(priority)) {
+									count++;
+									priorities.add(priority);
+								}
+
+							} else {
+								priority = null;
+							}
+							events.put(ev, priority);
+						}
+						eventFired.put(ev, true);
 					}
+
 				}
-				// trigger is false -> event has not fired recently
+				// event has fired recently -> can not fire
 				else {
-					eventFired[i] = false;
+					eventFired.put(ev, false);
 				}
+
 			}
 
-			i = 0;
-			while (this.events.size() > i) {
-				EventAssignment a = this.events.get(i);
-
-				if (a.getProcessTime() <= currentTime) {
-					// uses value from trigger time
-					if (a.getValue() != null) {
-						if(a instanceof SpeciesReferenceAssignment) {
-							String id = ((SpeciesReferenceAssignment)a).getSpeciesReferenceID();
-							if (model.findSpeciesReference(id).getConstant() == false) {
-								stoichiometricCoefHash.put(id, a.getValue());
-							}
-						}
-						else {
-							events.add((DESAssignment)a);
-						}
-						this.events.remove(a);
-					}
-					// don't uses value from trigger time
-					else {
-
-						a.setValue(processAssignmentVaribale(eventSpecies.get(a), eventMath.get(a)));
-						if(a instanceof SpeciesReferenceAssignment) {
-							String id = ((SpeciesReferenceAssignment)a).getSpeciesReferenceID();
-							if (model.findSpeciesReference(id).getConstant() == false) {
-								stoichiometricCoefHash.put(id, a.getValue());
-							}
-						}
-						else {
-							events.add((DESAssignment)a);
-						}
-						this.events.remove(a);
-						this.eventMath.remove(a);
-						this.eventSpecies.remove(a);
-
-					}
-				}
-				else if(a.getTrigger().getPersistent()==false && a.getTrigger().getMath().compile(this).toBoolean()==false) {
-					this.events.remove(a);
-					this.eventMath.remove(a);
-					this.eventSpecies.remove(a);
-					eventFired[a.getEventNumber()]=false;
-				}
-				else {
-					i++;
-				}
+			// there are events to fire
+			if (events.size() > 0) {
+				return processEvents(priorities, count);
+			}
+			// nothing to do
+			else {
+				return null;
 			}
 
-			
 		} catch (SBMLException exc) {
 			throw new IntegrationException(exc);
 		}
-		return events;
+
 	}
-	
-	
+
+	/**
+	 * This method creates assignments from the events currently stored in the
+	 * associated HashMap with respect to their priority.
+	 * 
+	 * 
+	 * @param priorities
+	 * @return
+	 */
+	private ArrayList<DESAssignment> processEvents(HashSet<Double> priorities,
+			double count) throws IntegrationException {
+		ArrayList<DESAssignment> assignments = new ArrayList<DESAssignment>();
+		HashMap<Event, Double> highOrderEvents, events;
+		Integer symbolIndex;
+		ASTNode assignment_math;
+		Variable variable;
+		double newVal, highestPriority;
+		Double[] array;
+
+		// check if more than one event has a priority set at this point in time
+		if (count > 1) {
+			highOrderEvents = new HashMap<Event, Double>();
+			double number = 0d;
+			array = priorities.toArray(new Double[priorities.size()]);
+			Arrays.sort(array);
+			highestPriority = array[array.length - 1];
+			// get event with the current highest priority
+			for (Event event : this.events.keySet()) {
+				if (this.events.get(event) == highestPriority) {
+					highOrderEvents.put(event, number);
+					number++;
+				}
+			}
+			// pick one event randomly
+			if (highOrderEvents.size() > 1) {
+				pickRandomEvent(highOrderEvents);
+			}
+			events = highOrderEvents;
+
+		} else {
+			events = this.events;
+		}
+		try {
+
+			// execute the events chosen for execution
+			for (Event event : events.keySet()) {
+
+				for (int i = 0; i < event.getNumEventAssignments(); i++) {
+					assignment_math = event.getEventAssignment(i).getMath();
+					variable = event.getEventAssignment(i)
+							.getVariableInstance();
+
+					if (model.findSpeciesReference(variable.getId()) != null) {
+						String id = variable.getId();
+						SpeciesReference sr = model.findSpeciesReference(id);
+						newVal = assignment_math.compile(this).toDouble();
+
+						if (sr.getConstant() == false) {
+							stoichiometricCoefHash.put(id, newVal);
+						}
+
+					} else {
+						symbolIndex = symbolHash.get(variable.getId());
+
+						newVal = processAssignmentVaribale(variable.getId(),
+								assignment_math);
+
+						assignments.add(new DESAssignment(currentTime,
+								symbolIndex, i, newVal));
+					}
+
+				}
+
+			}
+
+		} catch (SBMLException exc) {
+			throw new IntegrationException(exc);
+		}
+
+		return assignments;
+	}
+
+	private void pickRandomEvent(HashMap<Event, Double> highOrderEvents) {
+		int length = highOrderEvents.size();
+		double random = RNG.randomInt(0, length - 1);
+
+		for (Event event : highOrderEvents.keySet()) {
+			if (highOrderEvents.get(event) != random) {
+				highOrderEvents.remove(event);
+			}
+		}
+	}
+
 	/**
 	 * Processes the initial assignments of the model
 	 * 
@@ -1752,9 +1796,10 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 					index = symbolHash.get(p.getId());
 					this.Y[index] = iA.getMath().compile(this).toDouble();
 				} else if (model.findSpeciesReference(iA.getVariable()) != null) {
-					SpeciesReference sr = model.findSpeciesReference(iA.getVariable());
-					stoichiometricCoefHash.put(sr.getId(),
-							iA.getMath().compile(this).toDouble());
+					SpeciesReference sr = model.findSpeciesReference(iA
+							.getVariable());
+					stoichiometricCoefHash.put(sr.getId(), iA.getMath()
+							.compile(this).toDouble());
 				} else {
 					System.err
 							.println("The model contains an initial assignment for a component other than species, compartment, parameter or species reference.");
@@ -1889,20 +1934,21 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 				if (!species.getBoundaryCondition() && !species.getConstant()) {
 					speciesIndex = symbolHash.get(species.getId());
 					if ((speciesRef.getLevel() >= 3)
-						&& (speciesRef.getId() != null)
-						&& this.stoichiometricCoefHash.containsKey(speciesRef.getId())) {
-							changeRate[speciesIndex] -= this.stoichiometricCoefHash
-									.get(speciesRef.getId()) * v[reactionIndex];
-					} 
-					else if (speciesRef.isSetStoichiometryMath()) {
+							&& (speciesRef.getId() != null)
+							&& this.stoichiometricCoefHash
+									.containsKey(speciesRef.getId())) {
+						changeRate[speciesIndex] -= this.stoichiometricCoefHash
+								.get(speciesRef.getId())
+								* v[reactionIndex];
+					} else if (speciesRef.isSetStoichiometryMath()) {
 						changeRate[speciesIndex] -= speciesRef
 								.getStoichiometryMath().getMath().compile(this)
 								.toDouble()
 								* v[reactionIndex];
-					}
-					else {
+					} else {
 						changeRate[speciesIndex] -= speciesRef
-								.getStoichiometry() * v[reactionIndex];
+								.getStoichiometry()
+								* v[reactionIndex];
 					}
 					if (species.isSetInitialConcentration()) {
 						inConcentration.add(species.getId());
@@ -1918,28 +1964,28 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 					speciesIndex = symbolHash.get(species.getId());
 
 					if (speciesRef.getLevel() >= 3
-								&& speciesRef.getId() != null
-								&& this.stoichiometricCoefHash
-										.containsKey(speciesRef.getId())) {
-							changeRate[speciesIndex] += this.stoichiometricCoefHash
-									.get(speciesRef.getId()) * v[reactionIndex];
-					}
-					else if (speciesRef.isSetStoichiometryMath()) {
+							&& speciesRef.getId() != null
+							&& this.stoichiometricCoefHash
+									.containsKey(speciesRef.getId())) {
+						changeRate[speciesIndex] += this.stoichiometricCoefHash
+								.get(speciesRef.getId())
+								* v[reactionIndex];
+					} else if (speciesRef.isSetStoichiometryMath()) {
 						changeRate[speciesIndex] += speciesRef
 								.getStoichiometryMath().getMath().compile(this)
 								.toDouble()
 								* v[reactionIndex];
-					} 
-					else {
+					} else {
 						changeRate[speciesIndex] += speciesRef
-							.getStoichiometry() * v[reactionIndex];
+								.getStoichiometry()
+								* v[reactionIndex];
 					}
-				
+
 					if (species.isSetInitialConcentration()) {
 						inConcentration.add(species.getId());
 					}
 				}
-				
+
 			}
 		}
 
@@ -2161,6 +2207,47 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	 * (non-Javadoc)
 	 * 
 	 * @see
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
 	 * 
 	 * org.sbml.simulator.math.odes.FastProcessDESystem#setFastProcessComputation
 	 * (boolean)

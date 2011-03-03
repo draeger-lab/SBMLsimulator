@@ -3,8 +3,11 @@
  */
 package org.sbml.simulator.math.odes;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+
+import com.sun.xml.internal.fastinfoset.algorithm.DoubleEncodingAlgorithm;
 
 import eva2.tools.math.Mathematics;
 
@@ -325,17 +328,28 @@ public abstract class AbstractDESSolver implements DESSolver {
 			double[] Ytemp, double[] change) throws IntegrationException {
 		double[] newYtemp = new double[Ytemp.length];
 		int index;
-		for (DESAssignment event : EDES.processEvents(time, Ytemp)) {
-			index = event.getIndex();
-			// newYtemp[index] = event.getValue() - (Ytemp[index]);
-			newYtemp[index] = event.getValue() - (Ytemp[index] - change[index]);
+		ArrayList<DESAssignment> assignments;
+		assignments = (ArrayList<DESAssignment>) EDES
+				.getEventAssignments(time, Ytemp);
 
-			/*
-			 * System.out .printf(
-			 * "time %s: \tYtemp[%s]_old = %s\tYtemp[%s]_new = %s\t change %s \n"
-			 * , time, index, Ytemp[index], index, (event.getValue() -
-			 * (Ytemp[index])), change[index]);
-			 */
+		while (assignments != null) {
+
+			for (DESAssignment assignment : EDES.getEventAssignments(time, Ytemp)) {
+				index = assignment.getIndex();
+				// newYtemp[index] = event.getValue() - (Ytemp[index]);
+				newYtemp[index] = assignment.getValue()
+						- (Ytemp[index] - change[index]);
+
+				/*
+				 * System.out .printf(
+				 * "time %s: \tYtemp[%s]_old = %s\tYtemp[%s]_new = %s\t change %s \n"
+				 * , time, index, Ytemp[index], index, (event.getValue() -
+				 * (Ytemp[index])), change[index]);
+				 */
+			}
+
+			assignments = (ArrayList<DESAssignment>) EDES
+			.getEventAssignments(time, newYtemp);
 		}
 
 		return newYtemp;
@@ -373,8 +387,8 @@ public abstract class AbstractDESSolver implements DESSolver {
 	 */
 	public void processRules(EventDESystem EDES, double time, double[] Ytemp)
 			throws IntegrationException {
-		for (DESAssignment event : EDES.processAssignmentRules(time, Ytemp)) {
-			Ytemp[event.getIndex()] = event.getValue();
+		for (DESAssignment assignment : EDES.processAssignmentRules(time, Ytemp)) {
+			Ytemp[assignment.getIndex()] = assignment.getValue();
 		}
 	}
 
