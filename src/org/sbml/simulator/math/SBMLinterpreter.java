@@ -1010,7 +1010,10 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 			throws IntegrationException {
 		this.currentTime = time;
 		this.Y = Y;
-		this.events.clear();
+
+		if (model.getNumEvents() > 0) {
+			this.events.clear();
+		}
 
 		// make sure not to have invalid older values in the change rate
 		Arrays.fill(changeRate, 0d);
@@ -1532,7 +1535,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		Boolean persistent, aborted;
 		HashSet<Double> priorities = new HashSet<Double>();
 		double count = 0;
-	
+
 		try {
 
 			// check events that have fired for this point in time but have not
@@ -1578,12 +1581,12 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 					}
 				}
 			}
-			
+
 			// check the trigger of all events in the model
 			for (int i = 0; i < model.getNumEvents(); i++) {
 				ev = model.getEvent(i);
 				if (ev.getTrigger().getMath().compile(this).toBoolean()) {
-					
+
 					// event has not fired recently -> can fire
 					if (!eventFired[i]) {
 						// event has a delay
@@ -1626,17 +1629,17 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 							}
 							events.put(ev, priority);
 						}
-						eventFired[i] = true;						
+						eventFired[i] = true;
 					}
 
 				}
 				// event has fired recently -> can not fire
 				else {
-					eventFired[i] = false;					
+					eventFired[i] = false;
 				}
 
 			}
-			
+
 			// there are events to fire
 			if (events.size() > 0) {
 				return processEvents(priorities, count);
@@ -1716,11 +1719,10 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 						symbolIndex = symbolHash.get(variable.getId());
 						newVal = processAssignmentVaribale(variable.getId(),
 								assignment_math);
-						
+
 						assignments.add(new DESAssignment(currentTime,
 								symbolIndex, newVal));
-					}				
-					
+					}
 
 				}
 				this.events.remove(event);
@@ -2203,48 +2205,6 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
 	 * org.sbml.simulator.math.odes.FastProcessDESystem#setFastProcessComputation
 	 * (boolean)
 	 */
