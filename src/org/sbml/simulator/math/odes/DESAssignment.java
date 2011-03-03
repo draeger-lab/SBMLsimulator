@@ -1,71 +1,53 @@
 package org.sbml.simulator.math.odes;
 
-import org.sbml.jsbml.Priority;
-import org.sbml.jsbml.Trigger;
-
 /**
  * 
  * @author Alexander D&ouml;rr
- *
+ * 
  */
-public class DESAssignment extends EventAssignment{
+public class DESAssignment {
 	private int index;
-	
+	private double processTime;
+	private Double value;
+	private int eventNumber;
+
 	/**
 	 * 
 	 * @param processTime
 	 * @param index
 	 * @param eventNumber
 	 * @param value
-	 */
-	public DESAssignment(double processTime, int index, int eventNumber, Double value){
-		super(processTime,eventNumber,value);
-		this.index = index;		
-	}
-	
-	/**
-	 * 
-	 * @param processTime
-	 * @param index
-	 * @param eventNumber
-	 * @param value
-	 * @param priority
-	 * @param trigger
-	 */
-	public DESAssignment(double processTime, int index, int eventNumber, Double value, Priority prio, Trigger trigger){
-		super(processTime,eventNumber,value, prio, trigger);
-		this.index = index;		
-	}
-	
-	/**
-	 * 
-	 * @param processTime
-	 * @param index
-	 * @param eventNumber
-	 */
-	public DESAssignment(double processTime, int index, int eventNumber){
-		super(processTime,eventNumber);
-		this.index = index;			
-	}
-	
-	/**
-	 * 
-	 * @param processTime
-	 * @param index
-	 * @param eventNumber
-	 * @param priority
-	 * @param trigger
 	 */
 	public DESAssignment(double processTime, int index, int eventNumber,
-			Priority priority, Trigger trigger) {
-		super(processTime,eventNumber, priority,trigger);
-		this.index=index;
+			Double value) {
+		this.processTime = processTime;
+		this.value = value;
+		this.eventNumber = eventNumber;
+		this.index = index;
 	}
 
-	public DESAssignment(double processTime, int index,
-			double value) {
-		super(processTime,value);
-		this.index = index;		
+	/**
+	 * 
+	 * @param processTime
+	 * @param index
+	 * @param eventNumber
+	 */
+	public DESAssignment(double processTime, int index, int eventNumber) {
+		this.processTime = processTime;
+		this.eventNumber = eventNumber;
+		this.index = index;
+	}
+
+	/**
+	 * 
+	 * @param processTime
+	 * @param index
+	 * @param value
+	 */
+	public DESAssignment(double processTime, int index, double value) {
+		this.processTime = processTime;
+		this.value = value;
+		this.index = index;
 	}
 
 	/**
@@ -75,6 +57,37 @@ public class DESAssignment extends EventAssignment{
 	public int getIndex() {
 		return index;
 	}
-	
-	
+
+	/**
+	 * 
+	 * @return
+	 */
+	public double getProcessTime() {
+		return processTime;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public Double getValue() {
+		return value;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public int getEventNumber() {
+		return eventNumber;
+	}
+
+	/**
+	 * 
+	 * @param value
+	 */
+	public void setValue(Double value) {
+		this.value = value;
+	}
+
 }
