@@ -57,6 +57,7 @@ import org.sbml.simulator.math.odes.EventDESystem;
 import org.sbml.simulator.math.odes.FastProcessDESystem;
 import org.sbml.simulator.math.odes.IntegrationException;
 import org.sbml.simulator.math.odes.RichDESystem;
+import org.w3c.dom.events.EventException;
 
 import eva2.tools.math.RNG;
 
@@ -75,6 +76,46 @@ import eva2.tools.math.RNG;
  */
 public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		RichDESystem, FastProcessDESystem {
+
+	private class EventWithPriority {
+		private Event event;
+		private Double priority;
+
+		EventWithPriority(Event event, Double priority) {
+			this.event = event;
+			this.priority = priority;
+
+		}
+
+		public Event getEvent() {
+			return event;
+		}
+
+		public Double getPriority() {
+			return priority;
+		}
+
+	}
+
+	private class DelayTimeWithValues {
+		private double time;
+		private Double[] values;
+
+		DelayTimeWithValues(double time, Double[] values) {
+			this.time = time;
+			this.values = values;
+
+		}
+
+		public double getTime() {
+			return time;
+		}
+
+		public Double[] getValues() {
+			return values;
+		}
+
+	}
 
 	/**
 	 * Generated serial version UID
@@ -113,10 +154,16 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	private boolean eventFired[];
 
 	/**
-	 * Contains a list of all EventAssignments that emerged due to events and
-	 * have not been processed so far
+	 * Contains a list of all events that emerged due to events at the current
+	 * point in time and have not been processed so far
 	 */
-	private HashMap<Event, Double> events;
+	private ArrayList<EventWithPriority> events;
+
+	/**
+	 * Contains a list of all events that emerged due to events at a former
+	 * point in time and have not been processed so far due to delay
+	 */
+	private ArrayList<Event> eventQueue;
 
 	/**
 	 * This table is necessary to store the values of arguments when a function
@@ -190,19 +237,11 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	private boolean hasFastReactions = false;
 
 	/**
-	 * Hashes an event with a delay in its execution to a double value
-	 * representing its priority for execution at a later time point in the
-	 * simulation.
+	 * Hashes an event with a delay in its execution to a class representing its
+	 * time for execution at a later time point in the simulation and the values
+	 * used for this event.
 	 */
-	private Map<Event, Double> eventQueue;
-
-	/**
-	 * Hashes an event with a delay in its execution and that uses values from
-	 * trigger time to an array of double values representing the values of its
-	 * assignment at the time the event was triggered for execution at a later
-	 * time point in the simulation.
-	 */
-	private Map<Event, Double[]> triggerTimeValues;
+	private Map<Event, DelayTimeWithValues> eventQueueHash;
 
 	/**
 	 * <p>
@@ -1176,10 +1215,10 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		 * Initialize Events
 		 */
 		if (model.getNumEvents() > 0) {
-			this.events = new HashMap<Event, Double>();
+			this.events = new ArrayList<EventWithPriority>();
+			this.eventQueue = new ArrayList<Event>();
 			this.eventFired = new boolean[model.getNumEvents()];
-			this.eventQueue = new HashMap<Event, Double>();
-			this.triggerTimeValues = new HashMap<Event, Double[]>();
+			this.eventQueueHash = new HashMap<Event, DelayTimeWithValues>();
 			initEvents();
 		}
 
@@ -1524,6 +1563,10 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	public ArrayList<DESAssignment> getEventAssignments(double t, double[] Y)
 			throws IntegrationException {
 
+		if (model.getNumEvents() == 0) {
+			return null;
+		}
+
 		// change Y because of different priorites and reevaluation of
 		// trigger/priority
 		// after the execution of events
@@ -1532,6 +1575,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		Double priority;
 		Double triggerTimeValues[];
 		Event ev;
+		int i = 0;
 		Boolean persistent, aborted;
 		HashSet<Double> priorities = new HashSet<Double>();
 		double count = 0;
@@ -1540,33 +1584,39 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 
 			// check events that have fired for this point in time but have not
 			// been executed yet
-			for (Event event : events.keySet()) {
-				persistent = event.getTrigger().getPersistent();
+			while (i < events.size()) {
+				ev = events.get(i).getEvent();
+				persistent = ev.getTrigger().getPersistent();
 				if (!persistent) {
-					if (!event.getTrigger().getMath().compile(this).toBoolean()) {
-						events.remove(event);
+					if (!ev.getTrigger().getMath().compile(this).toBoolean()) {
+						events.remove(i);
+						i--;
 					}
 				}
+				i++;
 			}
 
+			i = 0;
 			// check events that have fired at an earlier point in time but have
 			// not been executed yet due to a delay
-			for (Event event : eventQueue.keySet()) {
-				if (eventQueue.get(event) <= currentTime) {
+			while (i < eventQueue.size()) {
+				ev = eventQueue.get(i);
+				if (eventQueueHash.get(ev).getTime() <= currentTime) {
 					aborted = false;
-					persistent = event.getTrigger().getPersistent();
+					persistent = ev.getTrigger().getPersistent();
 					if (!persistent) {
-						if (!event.getTrigger().getMath().compile(this)
+						if (!ev.getTrigger().getMath().compile(this)
 								.toBoolean()) {
-							eventQueue.remove(event);
+							eventQueue.remove(i);
+							i--;
 							aborted = true;
 						}
 					}
 
 					if (!aborted) {
-						if (event.getPriority() != null) {
-							priority = event.getPriority().getMath().compile(
-									this).toDouble();
+						if (ev.getPriority() != null) {
+							priority = ev.getPriority().getMath().compile(this)
+									.toDouble();
 							if (!priorities.contains(priority)) {
 								count++;
 								priorities.add(priority);
@@ -1575,15 +1625,17 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 						} else {
 							priority = null;
 						}
-						events.put(event, priority);
-						eventQueue.remove(event);
+						events.add(new EventWithPriority(ev, priority));
+						eventQueue.remove(i);
+						i--;
 
 					}
 				}
+				i++;
 			}
 
 			// check the trigger of all events in the model
-			for (int i = 0; i < model.getNumEvents(); i++) {
+			for (i = 0; i < model.getNumEvents(); i++) {
 				ev = model.getEvent(i);
 				if (ev.getTrigger().getMath().compile(this).toBoolean()) {
 
@@ -1592,6 +1644,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 						// event has a delay
 						if (ev.getDelay() != null) {
 							// event uses values from trigger time
+							triggerTimeValues = null;
 							if (ev.getUseValuesFromTriggerTime()) {
 								triggerTimeValues = new Double[ev
 										.getNumEventAssignments()];
@@ -1604,13 +1657,13 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 											.compile(this).toDouble();
 								}
 
-								this.triggerTimeValues.put(ev,
-										triggerTimeValues);
 							}
 							// store event for later execution
-							eventQueue.put(ev, ev.getDelay().getMath().compile(
-									this).toDouble()
-									+ currentTime);
+							eventQueue.add(ev);
+							eventQueueHash.put(ev, new DelayTimeWithValues(ev
+									.getDelay().getMath().compile(this)
+									.toDouble()
+									+ currentTime, triggerTimeValues));
 
 						}
 						// event has no delay -> execute now
@@ -1627,7 +1680,8 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 							} else {
 								priority = null;
 							}
-							events.put(ev, priority);
+
+							events.add(new EventWithPriority(ev, priority));
 						}
 						eventFired[i] = true;
 					}
@@ -1666,25 +1720,25 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	private ArrayList<DESAssignment> processEvents(HashSet<Double> priorities,
 			double count) throws IntegrationException {
 		ArrayList<DESAssignment> assignments = new ArrayList<DESAssignment>();
-		HashMap<Event, Double> highOrderEvents, events;
+		ArrayList<EventWithPriority> highOrderEvents, events;
 		Integer symbolIndex;
 		ASTNode assignment_math;
+		Event event;
 		Variable variable;
 		double newVal, highestPriority;
 		Double[] array;
-
+		int i = 0;
 		// check if more than one event has a priority set at this point in time
 		if (count > 1) {
-			highOrderEvents = new HashMap<Event, Double>();
-			double number = 0d;
+			highOrderEvents = new ArrayList<EventWithPriority>();
 			array = priorities.toArray(new Double[priorities.size()]);
 			Arrays.sort(array);
 			highestPriority = array[array.length - 1];
 			// get event with the current highest priority
-			for (Event event : this.events.keySet()) {
-				if (this.events.get(event) == highestPriority) {
-					highOrderEvents.put(event, number);
-					number++;
+			for (i = 0; i < this.events.size(); i++) {
+				event = this.events.get(i).getEvent();
+				if (this.events.get(i).getPriority() == highestPriority) {
+					highOrderEvents.add(new EventWithPriority(event, null));
 				}
 			}
 			// pick one event randomly
@@ -1699,33 +1753,60 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		try {
 
 			// execute the events chosen for execution
-			for (Event event : events.keySet()) {
+			while (events.size() > 0) {
+				event = events.get(0).getEvent();
+				if (event.getUseValuesFromTriggerTime()) {
+					for (int j = 0; j < event.getNumEventAssignments(); j++) {
+						assignment_math = event.getEventAssignment(j).getMath();
+						variable = event.getEventAssignment(j)
+								.getVariableInstance();
 
-				for (int i = 0; i < event.getNumEventAssignments(); i++) {
-					assignment_math = event.getEventAssignment(i).getMath();
-					variable = event.getEventAssignment(i)
-							.getVariableInstance();
+						if (model.findSpeciesReference(variable.getId()) != null) {
+							String id = variable.getId();
+							SpeciesReference sr = model
+									.findSpeciesReference(id);
+							newVal = assignment_math.compile(this).toDouble();
 
-					if (model.findSpeciesReference(variable.getId()) != null) {
-						String id = variable.getId();
-						SpeciesReference sr = model.findSpeciesReference(id);
-						newVal = assignment_math.compile(this).toDouble();
+							if (sr.getConstant() == false) {
+								stoichiometricCoefHash.put(id, newVal);
+							}
 
-						if (sr.getConstant() == false) {
-							stoichiometricCoefHash.put(id, newVal);
+						} else {
+							symbolIndex = symbolHash.get(variable.getId());
+							newVal = processAssignmentVaribale(
+									variable.getId(), assignment_math);
+
+							assignments.add(new DESAssignment(currentTime,
+									symbolIndex, newVal));
 						}
 
-					} else {
-						symbolIndex = symbolHash.get(variable.getId());
-						newVal = processAssignmentVaribale(variable.getId(),
-								assignment_math);
-
-						assignments.add(new DESAssignment(currentTime,
-								symbolIndex, newVal));
 					}
+				} else {
+					Double[] triggerTimeValues = eventQueueHash.get(event)
+							.getValues();
+					for (int j = 0; j < event.getNumEventAssignments(); j++) {
+						assignment_math = event.getEventAssignment(j).getMath();
+						variable = event.getEventAssignment(j)
+								.getVariableInstance();
+						newVal = triggerTimeValues[j];
 
+						if (model.findSpeciesReference(variable.getId()) != null) {
+							String id = variable.getId();
+							SpeciesReference sr = model
+									.findSpeciesReference(id);
+							if (sr.getConstant() == false) {
+								stoichiometricCoefHash.put(id, newVal);
+							}
+						} else {
+							symbolIndex = symbolHash.get(variable.getId());
+							assignments.add(new DESAssignment(currentTime,
+									symbolIndex, newVal));
+						}
+
+					}
 				}
-				this.events.remove(event);
+
+				this.events.remove(0);
 
 			}
 
@@ -1736,15 +1817,14 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		return assignments;
 	}
 
-	private void pickRandomEvent(HashMap<Event, Double> highOrderEvents) {
+	private void pickRandomEvent(ArrayList<EventWithPriority> highOrderEvents) {
 		int length = highOrderEvents.size();
-		double random = RNG.randomInt(0, length - 1);
+		int random = RNG.randomInt(0, length - 1);
+		EventWithPriority evwp = highOrderEvents.get(random);
 
-		for (Event event : highOrderEvents.keySet()) {
-			if (highOrderEvents.get(event) != random) {
-				highOrderEvents.remove(event);
-			}
-		}
+		highOrderEvents.clear();
+		highOrderEvents.add(evwp);
+
 	}
 
 	/**
