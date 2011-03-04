@@ -188,12 +188,12 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	/**
 	 * Stores the indices of the events trigged for the current point in time
 	 */
-	private ArrayList<Integer> runningEvents;
+	private List<Integer> runningEvents;
 
 	/**
 	 * Stores the indices of the events trigged for a future point in time
 	 */
-	private ArrayList<Integer> delayedEvents;
+	private List<Integer> delayedEvents;
 
 	/**
 	 * <p>
@@ -1168,8 +1168,8 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		if (model.getNumEvents() > 0) {
 			// this.events = new ArrayList<EventWithPriority>();
 			this.events = new EventInProcess[model.getNumEvents()];
-			this.runningEvents = new ArrayList<Integer>();
-			this.delayedEvents = new ArrayList<Integer>(); 
+			this.runningEvents = new LinkedList<Integer>();
+			this.delayedEvents = new LinkedList<Integer>();
 			initEvents();
 		}
 
@@ -1228,8 +1228,13 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	private void initEvents() throws SBMLException {
 		for (int i = 0; i < model.getNumEvents(); i++) {
 
-			events[i] = new EventInProcess(model.getEvent(i).getTrigger()
-					.getInitialValue());
+			if (model.getEvent(i).getDelay() == null) {
+				events[i] = new EventInProcess(model.getEvent(i).getTrigger()
+						.getInitialValue());
+			} else {
+				events[i] = new EventInProcessWithDelay(model.getEvent(i)
+						.getTrigger().getInitialValue());
+			}
 		}
 	}
 
@@ -1513,7 +1518,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	 * org.sbml.simulator.math.odes.EventDESystem#getEventAssignments(double,
 	 * double[])
 	 */
-	public ArrayList<DESAssignment> getEventAssignments(double t, double[] Y)
+	public List<DESAssignment> getEventAssignments(double t, double[] Y)
 			throws IntegrationException {
 
 		if (model.getNumEvents() == 0) {
@@ -1610,11 +1615,11 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 									priorities.add(priority);
 								}
 								events[i].changePriority(priority);
-							} 
-							
+							}
+
 							runningEvents.add(i);
 						}
-							triggerTimeValues = null;
+						triggerTimeValues = null;
 						if (ev.getUseValuesFromTriggerTime()) {
 							triggerTimeValues = new Double[ev
 									.getNumEventAssignments()];
@@ -1626,16 +1631,16 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 							}
 
 						}
-						
+
 						events[i].addValues(triggerTimeValues, execTime);
-						
+
 						events[i].fired();
 					}
 
 				}
 				// event has fired recently -> can not fire
 				else {
-					events[i].recoverd();					
+					events[i].recovered();
 				}
 
 			}
@@ -1663,10 +1668,10 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	 * @param priorities
 	 * @return
 	 */
-	private ArrayList<DESAssignment> processEvents(HashSet<Double> priorities,
+	private List<DESAssignment> processEvents(HashSet<Double> priorities,
 			double count) throws IntegrationException {
-		ArrayList<DESAssignment> assignments = new ArrayList<DESAssignment>();
-		ArrayList<Integer> highOrderEvents, events;
+		List<DESAssignment> assignments = new ArrayList<DESAssignment>();
+		List<Integer> highOrderEvents, events;
 		Integer symbolIndex;
 		ASTNode assignment_math;
 		Event event;
@@ -1676,7 +1681,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		int index;
 		// check if more than one event has a priority set at this point in time
 		if (count > 1) {
-			highOrderEvents = new ArrayList<Integer>();
+			highOrderEvents = new LinkedList<Integer>();
 			array = priorities.toArray(new Double[priorities.size()]);
 			Arrays.sort(array);
 			highestPriority = array[array.length - 1];
@@ -1732,8 +1737,8 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 				} else {
 					// event uses values from trigger time -> get stored values
 					// from the HashMap
-					Double[] triggerTimeValues = this.events[index].getValues(); 
-						
+					Double[] triggerTimeValues = this.events[index].getValues();
+
 					for (int j = 0; j < event.getNumEventAssignments(); j++) {
 						assignment_math = event.getEventAssignment(j).getMath();
 						variable = event.getEventAssignment(j)
@@ -1766,7 +1771,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		return assignments;
 	}
 
-	private void pickRandomEvent(ArrayList<Integer> highOrderEvents) {
+	private void pickRandomEvent(List<Integer> highOrderEvents) {
 		int length = highOrderEvents.size();
 		int random = RNG.randomInt(0, length - 1);
 		Integer winner = highOrderEvents.get(random);

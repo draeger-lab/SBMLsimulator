@@ -1,64 +1,145 @@
+/*
+ * SBMLsqueezer creates rate equations for reactions in SBML files
+ * (http://sbml.org).
+ * Copyright (C) 2009 ZBIT, University of Tübingen, Andreas Dräger
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.sbml.simulator.math;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
+/**
+ * <p>
+ * This class represents a compilation of all information calculated during
+ * simulation concering events. An EventInProcess especially stands for an event
+ * without delay, so it can only has one time of execution and one array of
+ * values from trigger time at all.
+ * </p>
+ * 
+ * @author Alexander D&ouml;rr
+ * @since 1.4
+ * @date 2011-03-04
+ */
 public class EventInProcess {
 
 	private boolean fired;
 	private double priority;
-	private Queue<Double> execTimes;
-	private Queue<Double[]> values;
-	
-	
-	EventInProcess(boolean fired){
+	private double execTimes;
+	private Double[] values;
+
+	/**
+	 * Creates a new EventInProcess with the given boolean value indicating
+	 * whether or not it can fire at time point 0d.
+	 * 
+	 * @param fired
+	 */
+	EventInProcess(boolean fired) {
 		this.fired = fired;
+		this.execTimes = -1;
+		this.values = null;
 		this.priority = Double.NEGATIVE_INFINITY;
-		this.execTimes = new LinkedList<Double>(); 
-		this.values = new LinkedList<Double[]>(); 
-				
-	}	
-	
-	public void addValues(Double[] values, double time){		
-		this.values.add(values);
-		this.execTimes.add(time);
+
 	}
-	
-	public Double getPriority(){
+
+	/**
+	 * The event has been aborted between trigger und execution. For this class
+	 * it has the same effect as the event has been executed.
+	 */
+	public void aborted() {
+		executed();
+	}
+
+	/**
+	 * The event associated with this class has been triggered. Therefore set
+	 * the time of execution and the values used at this point in time. Please
+	 * note that values can be null when the event does not use values from
+	 * trigger time.
+	 * 
+	 * @param values
+	 * @param time
+	 */
+	public void addValues(Double[] values, double time) {
+		this.execTimes = time;
+		this.values = values;
+
+	}
+
+	/**
+	 * Change the priority.
+	 * 
+	 * @param priority
+	 */
+	public void changePriority(double priority) {
+		this.priority = priority;
+	}
+
+	/**
+	 * The event associated with this class has been executed therefore reset
+	 * some values.
+	 */
+	public void executed() {
+		this.execTimes = -1;
+		this.values = null;
+	}
+
+	/**
+	 * Associated event has triggered therefore current value of fired to true
+	 */
+	public void fired() {
+		fired = true;
+	}
+
+	/**
+	 * Returns a boolean value indication if the associated event has recently
+	 * been triggered / fired
+	 * 
+	 * @return
+	 */
+	public boolean getFireStatus() {
+		return fired;
+	}
+
+	/**
+	 * Return the priority of the associated event.
+	 * 
+	 * @return
+	 */
+	public Double getPriority() {
 		return priority;
 	}
 	
-	public void changePriority(double priority){
-		this.priority = priority;
+	/**
+	 * Return the next time of execution of the associated event.
+	 * 
+	 * @return
+	 */
+	public double getTime() {
+		return execTimes;
 	}
 	
-	public Double[] getValues(){		
-		return values.peek();
+	/**
+	 * Return the values used in the next execution of the associated event.
+	 * 
+	 * @return
+	 */
+	public Double[] getValues() {
+		return values;
 	}
-	
-	public double getTime(){		
-		return execTimes.peek();
-	}
-	
-	public void executed(){
-		values.poll();
-		execTimes.poll();
-	}
-	
-	public void aborted(){
-		executed();
-	}
-	
-	public boolean getFireStatus(){
-		return fired;
-	}
-	
-	public void recoverd(){
+
+	/**
+	 * The trigger of the associated event has made a transition from true to
+	 * false, so the event can be triggered again.
+	 */
+	public void recovered() {
 		fired = false;
 	}
-	
-	public void fired(){
-		fired = true;
-	}
-	
+
 }
