@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import com.sun.xml.internal.fastinfoset.algorithm.DoubleEncodingAlgorithm;
-
 import eva2.tools.math.Mathematics;
 
 /**
@@ -364,9 +362,6 @@ public abstract class AbstractDESSolver implements DESSolver {
 			EventDESystem EDES = (EventDESystem) DES;
 			if (EDES.getNumEvents() > 0) {
 				processEvents(EDES, t, yTemp, change);
-				// Mathematics.vvAdd(yTemp, processEvents(EDES, t, yTemp,
-				// change),
-				// yTemp);
 			}
 			if (EDES.getNumRules() > 0) {
 				processRules(EDES, t, yTemp);
