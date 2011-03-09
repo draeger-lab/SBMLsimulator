@@ -57,7 +57,6 @@ import org.sbml.simulator.math.odes.EventDESystem;
 import org.sbml.simulator.math.odes.FastProcessDESystem;
 import org.sbml.simulator.math.odes.IntegrationException;
 import org.sbml.simulator.math.odes.RichDESystem;
-import org.w3c.dom.events.EventException;
 
 import eva2.tools.math.RNG;
 
@@ -186,12 +185,12 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	private boolean hasFastReactions = false;
 
 	/**
-	 * Stores the indices of the events trigged for the current point in time
+	 * Stores the indices of the events trigged for the current point in time.
 	 */
 	private List<Integer> runningEvents;
 
 	/**
-	 * Stores the indices of the events trigged for a future point in time
+	 * Stores the indices of the events trigged for a future point in time.
 	 */
 	private List<Integer> delayedEvents;
 
@@ -428,11 +427,15 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 			}
 
 			if (s.isSetInitialConcentration() && s.getHasOnlySubstanceUnits()) {
+				// return new ASTNodeValue(Y[symbolIndex], this);
+
 				return new ASTNodeValue(Y[symbolIndex]
 						* getCompartmentValueOf(nsb.getId()), this);
 			}
 
 			return new ASTNodeValue(Y[symbolIndex], this);
+			// return new ASTNodeValue(Y[symbolIndex]
+			// / getCompartmentValueOf(nsb.getId()), this);
 
 		} else if (nsb instanceof SpeciesReference) {
 			SpeciesReference sr = (SpeciesReference) nsb;
@@ -463,9 +466,9 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 									this);
 						}
 					}
-
 				}
 			}
+
 			symbolIndex = symbolHash.get(nsb.getId());
 			return new ASTNodeValue(symbolIndex != null ? Y[symbolIndex]
 					: Double.NaN, this);
@@ -1027,6 +1030,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 					listOfContraintsViolations[i].add(Double.valueOf(time));
 				}
 			}
+
 		} catch (SBMLException exc) {
 			throw new IntegrationException(exc);
 		}
@@ -1626,8 +1630,9 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 							// store values from trigger time for later
 							// execution
 							for (int j = 0; j < ev.getNumEventAssignments(); j++) {
-								triggerTimeValues[j] = ev.getEventAssignment(j)
-										.getMath().compile(this).toDouble();
+								triggerTimeValues[j] = processAssignmentVaribale(
+										ev.getEventAssignment(j).getVariable(),
+										ev.getEventAssignment(j).getMath());
 							}
 
 						}
@@ -1982,7 +1987,8 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 								.getStoichiometry()
 								* v[reactionIndex];
 					}
-					if (species.isSetInitialConcentration()) {
+					if (species.isSetInitialConcentration()
+							&& !species.getHasOnlySubstanceUnits()) {
 						inConcentration.add(species.getId());
 					}
 				}
@@ -2013,7 +2019,8 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 								* v[reactionIndex];
 					}
 
-					if (species.isSetInitialConcentration()) {
+					if (species.isSetInitialConcentration()
+							&& !species.getHasOnlySubstanceUnits()) {
 						inConcentration.add(species.getId());
 					}
 				}
