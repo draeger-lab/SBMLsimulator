@@ -19,8 +19,8 @@ package org.sbml.simulator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.LinkedList;
-import java.util.List;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -42,27 +42,28 @@ import de.zbit.util.prefs.SBProperties;
  * @since 1.0
  */
 public class SBMLsimulator {
+
     /**
      * The possible location of this class in a jar file if used in plug-in
      * mode.
      */
     public static final String JAR_LOCATION = "plugin" + File.separatorChar;
-
     /**
      * The package where all mathematical functions, in particular distance
      * functions, are located.
      */
     public static final String MATH_PACKAGE = "org.sbml.simulator.math";
-
+    
     /**
      * The package where all ODE solvers are assumed to be located.
      */
     public static final String SOLVER_PACKAGE = "org.sbml.simulator.math.odes";
+
     /**
      * The version number of this program.
      */
     private static final String VERSION_NUMBER = "0.7";
-
+    
     /**
      * An array of all available implementations of distance functions to judge
      * the quality of a simulation based on parameter and initial value
@@ -93,6 +94,24 @@ public class SBMLsimulator {
     }
 
     /**
+     * 
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static Class<? extends KeyProvider>[] getCommandLineOptions() {
+	return new Class[] {SimulatorOptions.class, GUIOptions.class, CSVOptions.class};
+    }
+
+    /**
+     * 
+     * @return
+     * @throws MalformedURLException 
+     */
+    public static URL getURLOnlineUpdate() throws MalformedURLException {
+	return new URL("http://www.ra.cs.uni-tuebingen.de/software/SBMLsimulator/downloads/");
+    }
+
+    /**
      * Returns the version number of this program.
      * 
      * @return
@@ -108,11 +127,7 @@ public class SBMLsimulator {
      */
     public static void main(String[] args) throws FileNotFoundException,
 	XMLStreamException {
-	List<Class<? extends KeyProvider>> defKeys = new LinkedList<Class<? extends KeyProvider>>();
-	defKeys.add(GUIOptions.class);
-	defKeys.add(SimulatorOptions.class);
-	defKeys.add(CSVOptions.class);
-	SBProperties p = SBPreferences.analyzeCommandLineArguments(defKeys,
+	SBProperties p = SBPreferences.analyzeCommandLineArguments(getCommandLineOptions(),
 	    args);
 	String openFile = null;
 	if (p.containsKey(SimulatorOptions.SBML_FILE)) {
@@ -135,8 +150,8 @@ public class SBMLsimulator {
     }
 
     /**
-	 * 
-	 */
+     * 
+     */
     public SBMLsimulator() {
 	this(null);
     }
