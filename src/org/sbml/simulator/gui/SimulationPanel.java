@@ -84,12 +84,12 @@ public class SimulationPanel extends JPanel implements
      */
     private JTabbedPane tabbedPane;
     /**
-	 * 
-	 */
+     * 
+     */
     private SimulationWorker worker;
     /**
-	 * 
-	 */
+     * 
+     */
     private SimulationVisualizationPanel visualizationPanel;
     /**
      * Indices to more efficiently memorize the location of interesting elements

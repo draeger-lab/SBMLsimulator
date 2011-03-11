@@ -147,6 +147,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     public InteractiveScanPanel(Model model, double maxCompartmentValue,
 	double maxSpeciesValue, double maxParameterValue, double paramStepSize) {
 	super(new BorderLayout());
+	loadPreferences();
 	this.paramStepSize = paramStepSize;
 	this.maxCompartmentValue = maxCompartmentValue;
 	this.maxParameterValue = maxParameterValue;
