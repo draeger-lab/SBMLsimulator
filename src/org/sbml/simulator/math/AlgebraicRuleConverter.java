@@ -1,20 +1,19 @@
 /*
- *  SBMLsqueezer creates rate equations for reactions in SBML files
- *  (http://sbml.org).
- *  Copyright (C) 2009 ZBIT, University of Tübingen, Andreas Dräger
+ * $Id$
+ * $URL$
+ * ---------------------------------------------------------------------
+ * This file is part of SBMLsimulator, a Java-based simulator for models
+ * of biochemical processes encoded in the modeling language SBML.
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * Copyright (C) 2007-2011 by the University of Tuebingen, Germany.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * This library is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation. A copy of the license
+ * agreement is provided in the file named "LICENSE.txt" included with
+ * this software distribution and also available online as
+ * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
+ * ---------------------------------------------------------------------
  */
 package org.sbml.simulator.math;
 
@@ -42,7 +41,8 @@ import org.sbml.jsbml.ASTNode.Type;
  * on the given matching
  * 
  * @author Alexander D&ouml;rr
- * @since 1.4
+ * @version $Rev$
+ * @since 1.0
  */
 public class AlgebraicRuleConverter {
 

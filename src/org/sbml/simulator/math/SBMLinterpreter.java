@@ -1,17 +1,19 @@
 /*
- * SBMLsqueezer creates rate equations for reactions in SBML files
- * (http://sbml.org).
- * Copyright (C) 2009 ZBIT, University of Tübingen, Andreas Dräger
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * $Id$
+ * $URL$
+ * ---------------------------------------------------------------------
+ * This file is part of SBMLsimulator, a Java-based simulator for models
+ * of biochemical processes encoded in the modeling language SBML.
+ *
+ * Copyright (C) 2007-2011 by the University of Tuebingen, Germany.
+ *
+ * This library is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation. A copy of the license
+ * agreement is provided in the file named "LICENSE.txt" included with
+ * this software distribution and also available online as
+ * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
+ * ---------------------------------------------------------------------
  */
 package org.sbml.simulator.math;
 
@@ -24,6 +26,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.sbml.jsbml.ASTNode;
 import org.sbml.jsbml.Assignment;
@@ -70,12 +74,19 @@ import eva2.tools.math.RNG;
  * @author Alexander D&ouml;rr
  * @author Andreas Dr&auml;ger
  * @author Dieudonn&eacute; Motsou Wouamba
- * @since 1.4
  * @date 2007-09-06
+ * @version $Rev$
+ * @since 1.0
  */
 public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		RichDESystem, FastProcessDESystem {
 
+    /**
+     * 
+     */
+    private static final Logger logger = Logger.getLogger(SBMLinterpreter.class
+	    .getName());
+    
 	/**
 	 * Generated serial version UID
 	 */
@@ -211,6 +222,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	 */
 	public SBMLinterpreter(Model model) throws ModelOverdeterminedException,
 			SBMLException {
+	    logger.log(Level.INFO, "Logger works");
 		this.model = model;
 		this.v = new double[this.model.getListOfReactions().size()];
 		this.init();
@@ -2244,10 +2256,7 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 
 	/*
 	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.sbml.simulator.math.odes.FastProcessDESystem#setFastProcessComputation
-	 * (boolean)
+	 * @see org.sbml.simulator.math.odes.FastProcessDESystem#setFastProcessComputation(boolean)
 	 */
 	public void setFastProcessComputation(boolean isProcessing) {
 		isProcessingFastReactions = isProcessing;
