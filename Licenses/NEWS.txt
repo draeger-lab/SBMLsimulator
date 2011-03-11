@@ -231,7 +231,7 @@ Released 7 September 2004.
 ----------------------------------------------------------------------
 Last Modified: $Date: 2010-03-12 02:39:27 -0800 (Fri, 12 Mar 2010) $
 Last Modified By: $Author: sarahkeating $
-$HeadURL: https://sbml.svn.sourceforge.net/svnroot/sbml/trunk/test-suite/NEWS.txt $
+$HeadURL$
 ----------------------------------------------------------------------
 
 # The following is for [X]Emacs users.  Please leave in place.
