@@ -80,7 +80,7 @@ import eva2.tools.math.RNG;
  * @version $Rev$
  * @since 1.0
  */
-public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
+public class SBMLinterpreter implements ValueHolder, EventDESystem,
 		RichDESystem, FastProcessDESystem, FirstOrderDifferentialEquations {
 
     /**
@@ -378,15 +378,6 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	 */
 	public ASTNodeValue ceiling(ASTNode node) throws SBMLException {
 		return new ASTNodeValue(Math.ceil(node.compile(this).toDouble()), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#compile(org.sbml.jsbml.Compartment)
-	 */
-	public ASTNodeValue compile(Compartment c) {
-		return new ASTNodeValue(c.getSize(), this);
 	}
 
 	/*
@@ -2264,12 +2255,18 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 		isProcessingFastReactions = isProcessing;
 	}
 	
-	@Override
+	/*
+	 * (non-Javadoc)
+	 * @see org.apache.commons.math.ode.FirstOrderDifferentialEquations#getDimension()
+	 */
 	public int getDimension() {
 		return this.getDESystemDimension();
 	}
 
-	@Override
+	/*
+	 * (non-Javadoc)
+	 * @see org.apache.commons.math.ode.FirstOrderDifferentialEquations#computeDerivatives(double, double[], double[])
+	 */
 	public void computeDerivatives(double t, double[] y, double[] yDot)
 			throws DerivativeException {
 		try {
