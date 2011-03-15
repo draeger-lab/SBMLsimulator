@@ -29,6 +29,8 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.math.ode.DerivativeException;
+import org.apache.commons.math.ode.FirstOrderDifferentialEquations;
 import org.sbml.jsbml.ASTNode;
 import org.sbml.jsbml.Assignment;
 import org.sbml.jsbml.AssignmentRule;
@@ -79,7 +81,7 @@ import eva2.tools.math.RNG;
  * @since 1.0
  */
 public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
-		RichDESystem, FastProcessDESystem {
+		RichDESystem, FastProcessDESystem, FirstOrderDifferentialEquations {
 
     /**
      * 
@@ -2260,6 +2262,22 @@ public class SBMLinterpreter implements ASTNodeCompiler, EventDESystem,
 	 */
 	public void setFastProcessComputation(boolean isProcessing) {
 		isProcessingFastReactions = isProcessing;
+	}
+	
+	@Override
+	public int getDimension() {
+		return this.getDESystemDimension();
+	}
+
+	@Override
+	public void computeDerivatives(double t, double[] y, double[] yDot)
+			throws DerivativeException {
+		try {
+			System.arraycopy(this.getValue(t, y),0, yDot, 0, yDot.length);
+		} catch (IntegrationException e) {
+			e.printStackTrace();
+		}
+			
 	}
 
 }
