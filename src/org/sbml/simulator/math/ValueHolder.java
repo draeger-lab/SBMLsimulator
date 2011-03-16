@@ -17,9 +17,6 @@
  */
 package org.sbml.simulator.math;
 
-import java.util.Hashtable;
-
-
 /**
  * @author Andreas Dr&auml;ger
  * @version $Rev$
