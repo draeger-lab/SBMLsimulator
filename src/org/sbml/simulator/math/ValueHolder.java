@@ -71,20 +71,10 @@ public interface ValueHolder {
 
 	/**
      * 
-     * @param name
-     * @return
-     */
-	public Double getFuncArg(String name);
-
-	/**
-     * 
      * @param time
      * @return
      */
 	public double getTime();
 
-	public void setFuncArgs(Hashtable<String, Double> argValues);
-
-	public void clearFuncArgs();
     
 }
