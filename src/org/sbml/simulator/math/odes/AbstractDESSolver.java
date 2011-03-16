@@ -20,7 +20,6 @@ package org.sbml.simulator.math.odes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.logging.Logger;
 
 import org.apache.commons.math.ode.events.EventException;
 import org.apache.commons.math.ode.events.EventHandler;
@@ -38,8 +37,6 @@ import eva2.tools.math.Mathematics;
  */
 public abstract class AbstractDESSolver implements DESSolver, EventHandler {
 
-	private static final Logger logger = Logger.getLogger(AbstractDESSolver.class.getName());
-	
 	/**
 	 * Generated serial version identifier.
 	 */

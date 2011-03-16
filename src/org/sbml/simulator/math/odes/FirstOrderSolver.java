@@ -4,8 +4,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.math.ode.AbstractIntegrator;
-import org.apache.commons.math.ode.DerivativeException;
-import org.apache.commons.math.ode.IntegratorException;
 import org.apache.commons.math.util.FastMath;
 
 import eva2.tools.math.Mathematics;
