@@ -17,6 +17,9 @@
  */
 package org.sbml.simulator.math;
 
+import java.util.Hashtable;
+
+
 /**
  * @author Andreas Dr&auml;ger
  * @version $Rev$
@@ -51,5 +54,37 @@ public interface ValueHolder {
      * @return
      */
     public double getCurrentStoichiometry(String id);
+
+    /**
+     * 
+     * @param id
+     * @return
+     */
+	public double getCompartmentValueOf(String id);
+	
+	/**
+     * 
+     * @param id
+     * @return
+     */
+	public double getValueOf(String id);
+
+	/**
+     * 
+     * @param name
+     * @return
+     */
+	public Double getFuncArg(String name);
+
+	/**
+     * 
+     * @param time
+     * @return
+     */
+	public double getTime();
+
+	public void setFuncArgs(Hashtable<String, Double> argValues);
+
+	public void clearFuncArgs();
     
 }

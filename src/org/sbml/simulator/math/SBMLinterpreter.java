@@ -32,27 +32,19 @@ import org.apache.commons.math.ode.FirstOrderDifferentialEquations;
 import org.sbml.jsbml.ASTNode;
 import org.sbml.jsbml.Assignment;
 import org.sbml.jsbml.AssignmentRule;
-import org.sbml.jsbml.CallableSBase;
 import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.Event;
-import org.sbml.jsbml.FunctionDefinition;
 import org.sbml.jsbml.InitialAssignment;
 import org.sbml.jsbml.KineticLaw;
-import org.sbml.jsbml.ListOf;
-import org.sbml.jsbml.LocalParameter;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.RateRule;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.Rule;
 import org.sbml.jsbml.SBMLException;
-import org.sbml.jsbml.SBase;
 import org.sbml.jsbml.Species;
 import org.sbml.jsbml.SpeciesReference;
 import org.sbml.jsbml.Variable;
-import org.sbml.jsbml.util.Maths;
-import org.sbml.jsbml.util.compilers.ASTNodeCompiler;
-import org.sbml.jsbml.util.compilers.ASTNodeValue;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.jsbml.validator.OverdeterminationValidator;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
@@ -205,6 +197,8 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 	 */
 	private List<Integer> delayedEvents;
 
+	private ASTNodeInterpreter nodeInterpreter;
+
 	/**
 	 * <p>
 	 * This constructs a new DifferentialEquationSystem for the given SBML
@@ -226,358 +220,6 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 		this.model = model;
 		this.v = new double[this.model.getListOfReactions().size()];
 		this.init();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#abs(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue abs(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Math.abs(node.compile(this).toDouble()), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#and(org.sbml.jsbml.ASTNode[])
-	 */
-	public ASTNodeValue and(List<ASTNode> nodes) throws SBMLException {
-		for (ASTNode node : nodes) {
-			if (!node.compile(this).toBoolean()) {
-				return getConstantFalse();
-			}
-		}
-		return getConstantTrue();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#arccos(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue arccos(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Math.acos(node.compile(this).toDouble()), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#arccosh(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue arccosh(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Maths.arccosh(node.compile(this).toDouble()),
-				this);
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#arccot(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue arccot(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Maths.arccot(node.compile(this).toDouble()),
-				this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#arccoth(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue arccoth(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Maths.arccoth(node.compile(this).toDouble()),
-				this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#arccsc(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue arccsc(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Maths.arccsc(node.compile(this).toDouble()),
-				this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#arccsch(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue arccsch(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Maths.arccsch(node.compile(this).toDouble()),
-				this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#arcsec(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue arcsec(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Maths.arcsec(node.compile(this).toDouble()),
-				this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#arcsech(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue arcsech(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Maths.arcsech(node.compile(this).toDouble()),
-				this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#arcsin(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue arcsin(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Math.asin(node.compile(this).toDouble()), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#arcsinh(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue arcsinh(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Maths.arcsinh(node.compile(this).toDouble()),
-				this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#arctan(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue arctan(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Math.atan(node.compile(this).toDouble()), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#arctanh(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue arctanh(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Maths.arctanh(node.compile(this).toDouble()),
-				this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#ceiling(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue ceiling(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Math.ceil(node.compile(this).toDouble()), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#compile(double, int,
-	 * java.lang.String)
-	 */
-	public ASTNodeValue compile(double mantissa, int exponent, String units) {
-		return new ASTNodeValue(mantissa * Math.pow(10, exponent), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#compile(double, java.lang.String)
-	 */
-	public ASTNodeValue compile(double value, String units) {
-		// TODO: units!
-		return new ASTNodeValue(value, this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#compile(int, java.lang.String)
-	 */
-	public ASTNodeValue compile(int value, String units) {
-		// TODO: units!
-		return new ASTNodeValue(value, this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.sbml.jsbml.util.compilers.ASTNodeCompiler#compile(org.sbml.jsbml.
-	 * CallableSBase)
-	 */
-	public ASTNodeValue compile(CallableSBase nsb) throws SBMLException {
-		Integer symbolIndex;
-		if (nsb instanceof Species) {
-			Species s = (Species) nsb;
-			symbolIndex = symbolHash.get(nsb.getId());
-			if (getCompartmentValueOf(nsb.getId()) == 0d) {
-				return new ASTNodeValue(Y[symbolIndex], this);
-			}
-
-			if (s.isSetInitialAmount() && !s.getHasOnlySubstanceUnits()) {
-				return new ASTNodeValue(Y[symbolIndex]
-						/ getCompartmentValueOf(nsb.getId()), this);
-			}
-
-			if (s.isSetInitialConcentration() && s.getHasOnlySubstanceUnits()) {
-				// return new ASTNodeValue(Y[symbolIndex], this);
-
-				return new ASTNodeValue(Y[symbolIndex]
-						* getCompartmentValueOf(nsb.getId()), this);
-			}
-
-			return new ASTNodeValue(Y[symbolIndex], this);
-			// return new ASTNodeValue(Y[symbolIndex]
-			// / getCompartmentValueOf(nsb.getId()), this);
-
-		} else if (nsb instanceof SpeciesReference) {
-			SpeciesReference sr = (SpeciesReference) nsb;
-			if ((sr.getLevel() >= 3)
-					&& this.stoichiometricCoefHash.containsKey(sr.getId())) {
-				return new ASTNodeValue(this.stoichiometricCoefHash.get(sr
-						.getId()), this);
-			} else if (sr.isSetStoichiometryMath()) {
-				return new ASTNodeValue(sr.getStoichiometryMath().getMath()
-						.compile(this).toDouble(), this);
-			} else {
-				return new ASTNodeValue(sr.getStoichiometry(), this);
-			}
-		}
-
-		else if (nsb instanceof Compartment || nsb instanceof Parameter
-				|| nsb instanceof LocalParameter) {
-			if (nsb instanceof LocalParameter) {
-				LocalParameter p = (LocalParameter) nsb;
-				// parent: list of parameter; parent of parent: kinetic law
-				SBase parent = p.getParentSBMLObject().getParentSBMLObject();
-				if (parent instanceof KineticLaw) {
-					ListOf<LocalParameter> params = ((KineticLaw) parent)
-							.getListOfParameters();
-					for (int i = 0; i < params.size(); i++) {
-						if (p.getId() == params.get(i).getId()) {
-							return new ASTNodeValue(params.get(i).getValue(),
-									this);
-						}
-					}
-				}
-			}
-
-			symbolIndex = symbolHash.get(nsb.getId());
-			return new ASTNodeValue(symbolIndex != null ? Y[symbolIndex]
-					: Double.NaN, this);
-
-		} else if (nsb instanceof FunctionDefinition) {
-			return function((FunctionDefinition) nsb, new LinkedList<ASTNode>());
-		} else if (nsb instanceof Reaction) {
-			Reaction r = (Reaction) nsb;
-			if (r.isSetKineticLaw()) {
-				return r.getKineticLaw().getMath().compile(this);
-			}
-		}
-		return new ASTNodeValue(Double.NaN, this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#compile(java.lang.String)
-	 */
-	public ASTNodeValue compile(String name) {
-		if (funcArgs != null && funcArgs.containsKey(name)) {
-			// replace the name by the associated value of the argument
-			return new ASTNodeValue(funcArgs.get(name).doubleValue(), this);
-		} else if (symbolHash.containsKey(name)) {
-			return new ASTNodeValue(Y[symbolHash.get(name)], this);
-		}
-		return new ASTNodeValue(String.valueOf(name), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#cos(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue cos(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Math.cos(node.compile(this).toDouble()), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#cosh(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue cosh(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Math.cosh(node.compile(this).toDouble()), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#cot(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue cot(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Maths.cot(node.compile(this).toDouble()), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#coth(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue coth(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Maths.coth(node.compile(this).toDouble()), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#csc(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue csc(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Maths.csc(node.compile(this).toDouble()), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#csch(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue csch(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Maths.csch(node.compile(this).toDouble()), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.sbml.jsbml.util.compilers.ASTNodeCompiler#delay(java.lang.String,
-	 * org.sbml.jsbml.ASTNode, org.sbml.jsbml.ASTNode, java.lang.String)
-	 */
-	public ASTNodeValue delay(String delayName, ASTNode x, ASTNode delay,
-			String timeUnits) throws SBMLException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#equal(org.sbml.jsbml.ASTNode,
-	 * org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue eq(ASTNode left, ASTNode right) throws SBMLException {
-		return new ASTNodeValue(left.compile(this).toDouble() == right.compile(
-				this).toDouble(), this);
 	}
 
 	/**
@@ -621,8 +263,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 		} else if (model.findSpeciesReference(as.getVariable()) != null) {
 			SpeciesReference sr = model.findSpeciesReference(as.getVariable());
 			if (sr.getConstant() == false) {
-				stoichiometricCoefHash.put(sr.getId(), as.getMath().compile(
-						this).toDouble());
+				stoichiometricCoefHash.put(sr.getId(), as.getMath().compile(nodeInterpreter).toDouble());
 			}
 		}
 	}
@@ -674,85 +315,6 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#exp(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue exp(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Math.exp(node.compile(this).toDouble()), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#factorial(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue factorial(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Maths.factorial(node.compile(this).toDouble()),
-				this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#floor(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue floor(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Math.floor(node.compile(this).toDouble()), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#frac(org.sbml.jsbml.ASTNode,
-	 * org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue frac(ASTNode left, ASTNode right) throws SBMLException {
-		return new ASTNodeValue(left.compile(this).toDouble()
-				/ right.compile(this).toDouble(), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#frac(int, int)
-	 */
-	public ASTNodeValue frac(int numerator, int denominator) {
-		return new ASTNodeValue((double) numerator / (double) denominator, this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#function(java.lang.String,
-	 * org.sbml.jsbml.ASTNode[])
-	 */
-	public ASTNodeValue function(FunctionDefinition function,
-			List<ASTNode> arguments) throws SBMLException {
-		ASTNode lambda = function.getMath();
-		Hashtable<String, Double> argValues = new Hashtable<String, Double>();
-		for (int i = 0; i < arguments.size(); i++) {
-			argValues.put(lambda.getChild(i).compile(this).toString(),
-					arguments.get(i).compile(this).toDouble());
-		}
-		funcArgs = argValues;
-		ASTNodeValue value = lambda.getRightChild().compile(this);
-		funcArgs.clear();
-		return value;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#geq(org.sbml.jsbml.ASTNode,
-	 * org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue geq(ASTNode nodeleft, ASTNode noderight)
-			throws SBMLException {
-		return new ASTNodeValue(nodeleft.compile(this).toDouble() >= noderight
-				.compile(this).toDouble(), this);
-	}
 
 	/**
 	 * Checks if the given symbol id refers to a species and returns the value
@@ -762,7 +324,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 	 * @param val
 	 * @return
 	 */
-	private double getCompartmentValueOf(String symbol) {
+	public double getCompartmentValueOf(String symbol) {
 		Integer compartmentIndex = compartmentHash.get(symbol);
 
 		// Is species with compartment
@@ -778,50 +340,6 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#getConstantAvogadro(java.lang.String)
-	 */
-	public ASTNodeValue getConstantAvogadro(String name) {
-		return new ASTNodeValue(Maths.AVOGADRO, this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#getConstantE()
-	 */
-	public ASTNodeValue getConstantE() {
-		return new ASTNodeValue(Math.E, this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#getConstantFalse()
-	 */
-	public ASTNodeValue getConstantFalse() {
-		return new ASTNodeValue(false, this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#getConstantPi()
-	 */
-	public ASTNodeValue getConstantPi() {
-		return new ASTNodeValue(Math.PI, this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#getConstantTrue()
-	 */
-	public ASTNodeValue getConstantTrue() {
-		return new ASTNodeValue(true, this);
-	}
 
 	/*
 	 * (non-Javadoc)
@@ -893,14 +411,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 		return model;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#getNegativeInfinity()
-	 */
-	public ASTNodeValue getNegativeInfinity() {
-		return new ASTNodeValue(Double.NEGATIVE_INFINITY, this);
-	}
+	
 
 	/*
 	 * (non-Javadoc)
@@ -958,14 +469,6 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 		return model.getNumCompartments() + model.getNumSpecies() - 1;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#getPositiveInfinity()
-	 */
-	public ASTNodeValue getPositiveInfinity() {
-		return new ASTNodeValue(Double.POSITIVE_INFINITY, this);
-	}
 
 	/**
 	 * Returns the timepoint where the simulation is currently situated
@@ -1022,7 +525,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 			 * Check the model's constraints
 			 */
 			for (int i = 0; i < (int) model.getNumConstraints(); i++) {
-				if (model.getConstraint(i).getMath().compile(this).toBoolean()) {
+				if (model.getConstraint(i).getMath().compile(nodeInterpreter).toBoolean()) {
 					listOfContraintsViolations[i].add(Double.valueOf(time));
 				}
 			}
@@ -1033,16 +536,6 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#greaterThan(org.sbml.jsbml.ASTNode,
-	 * org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue gt(ASTNode left, ASTNode right) throws SBMLException {
-		return new ASTNodeValue(left.compile(this).toDouble() > right.compile(
-				this).toDouble(), this);
-	}
 
 	/**
 	 * <p>
@@ -1074,7 +567,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 		currentTime = 0d;
 
 		this.stoichiometricCoefHash = new HashMap<String, Double>();
-		
+		this.nodeInterpreter=new ASTNodeInterpreter(this);
 		
 		Map<String,Integer> speciesReferenceToRateRule=new HashMap<String,Integer>();
 		int speciesReferencesInRateRules=0;
@@ -1184,7 +677,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 				if (listOfContraintsViolations[i] == null) {
 					this.listOfContraintsViolations[i] = new LinkedList<Double>();
 				}
-				if (model.getConstraint(i).getMath().compile(this).toBoolean()) {
+				if (model.getConstraint(i).getMath().compile(nodeInterpreter).toBoolean()) {
 					this.listOfContraintsViolations[i].add(Double.valueOf(0d));
 				}
 			}
@@ -1266,187 +759,6 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#lambda(org.sbml.jsbml.ASTNode[])
-	 */
-	public ASTNodeValue lambda(List<ASTNode> nodes) throws SBMLException {
-		double d[] = new double[Math.max(0, nodes.size() - 1)];
-		for (int i = 0; i < nodes.size() - 1; i++) {
-			d[i++] = nodes.get(i).compile(this).toDouble();
-		}
-		// TODO: what happens with d?
-		ASTNodeValue function = nodes.get(nodes.size() - 1).compile(this);
-		return function;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#lessEqual(org.sbml.jsbml.ASTNode,
-	 * org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue leq(ASTNode left, ASTNode right) throws SBMLException {
-		return new ASTNodeValue(left.compile(this).toDouble() <= right.compile(
-				this).toDouble(), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#ln(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue ln(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Maths.ln(node.compile(this).toDouble()), this);
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#log(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue log(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Maths.log(node.compile(this).toDouble()), this);
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#log(org.sbml.jsbml.ASTNode,
-	 * org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue log(ASTNode left, ASTNode right) throws SBMLException {
-		return new ASTNodeValue(Maths.log(left.compile(this).toDouble(), right
-				.compile(this).toDouble()), this);
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#lessThan(org.sbml.jsbml.ASTNode,
-	 * org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue lt(ASTNode nodeleft, ASTNode noderight)
-			throws SBMLException {
-		return new ASTNodeValue(nodeleft.compile(this).toDouble() < noderight
-				.compile(this).toDouble(), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#minus(org.sbml.jsbml.ASTNode[])
-	 */
-	public ASTNodeValue minus(List<ASTNode> nodes) throws SBMLException {
-		double value = 0d;
-		if (nodes.size() > 0) {
-			value = nodes.get(0).compile(this).toDouble();
-		}
-		for (int i = 1; i < nodes.size(); i++) {
-			value -= nodes.get(i).compile(this).toDouble();
-		}
-		return new ASTNodeValue(value, this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#notEqual(org.sbml.jsbml.ASTNode,
-	 * org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue neq(ASTNode left, ASTNode right) throws SBMLException {
-		return new ASTNodeValue(left.compile(this).toDouble() != right.compile(
-				this).toDouble(), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#not(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue not(ASTNode node) throws SBMLException {
-		return node.compile(this).toBoolean() ? getConstantFalse()
-				: getConstantTrue();
-	}
-
-	// /**
-	// *
-	// * @param lambda
-	// * @param names
-	// * @param d
-	// * @return
-	// */
-	// private ASTNode replace(ASTNode lambda, Hashtable<String, Double>
-	// args) {
-	// String name;
-	// for (ASTNode child : lambda.getListOfNodes())
-	// if (child.isName() && args.containsKey(child.getName())) {
-	// name = child.getName();
-	// child.setType(ASTNode.Type.REAL);
-	// child.setValue(args.get(name));
-	// } else if (child.getNumChildren() > 0)
-	// child = replace(child, args);
-	// return lambda;
-	// }
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#or(org.sbml.jsbml.ASTNode[])
-	 */
-	public ASTNodeValue or(List<ASTNode> nodes) throws SBMLException {
-		for (ASTNode node : nodes) {
-			if (node.compile(this).toBoolean()) {
-				return getConstantTrue();
-			}
-		}
-		return getConstantFalse();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#piecewise(org.sbml.jsbml.ASTNode[])
-	 */
-	public ASTNodeValue piecewise(List<ASTNode> nodes) throws SBMLException {
-		int i;
-		for (i = 1; i < nodes.size() - 1; i += 2) {
-			if (nodes.get(i).compile(this).toBoolean()) {
-				return new ASTNodeValue(nodes.get(i - 1).compile(this)
-						.toDouble(), this);
-			}
-		}
-		return new ASTNodeValue(nodes.get(i - 1).compile(this).toDouble(), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#plus(org.sbml.jsbml.ASTNode[])
-	 */
-	public ASTNodeValue plus(List<ASTNode> nodes) throws SBMLException {
-		double value = 0d;
-		for (ASTNode node : nodes) {
-			value += node.compile(this).toDouble();
-		}
-		return new ASTNodeValue(value, this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#pow(org.sbml.jsbml.ASTNode,
-	 * org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue pow(ASTNode left, ASTNode right) throws SBMLException {
-		return new ASTNodeValue(Math.pow(left.compile(this).toDouble(), right
-				.compile(this).toDouble()), this);
-
-	}
 
 	/*
 	 * (non-Javadoc)
@@ -1523,17 +835,17 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 			s = model.getSpecies(variable);
 			if (s.isSetInitialAmount() && !s.getHasOnlySubstanceUnits()) {
 				compartmentValue = getCompartmentValueOf(s.getId());
-				result = math.compile(this).toDouble() * compartmentValue;
+				result = math.compile(nodeInterpreter).toDouble() * compartmentValue;
 			} else if (s.isSetInitialConcentration()
 					&& s.getHasOnlySubstanceUnits()) {
 				compartmentValue = getCompartmentValueOf(s.getId());
-				result = math.compile(this).toDouble() / compartmentValue;
+				result = math.compile(nodeInterpreter).toDouble() / compartmentValue;
 			} else {
-				result = math.compile(this).toDouble();
+				result = math.compile(nodeInterpreter).toDouble();
 			}
 
 		} else {
-			result = math.compile(this).toDouble();
+			result = math.compile(nodeInterpreter).toDouble();
 		}
 
 		return result;
@@ -1575,7 +887,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 				ev = model.getEvent(index);
 				persistent = ev.getTrigger().getPersistent();
 				if (!persistent) {
-					if (!ev.getTrigger().getMath().compile(this).toBoolean()) {
+					if (!ev.getTrigger().getMath().compile(nodeInterpreter).toBoolean()) {
 						runningEvents.remove(i);
 						i--;
 					}
@@ -1593,7 +905,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 					aborted = false;
 					persistent = ev.getTrigger().getPersistent();
 					if (!persistent) {
-						if (!ev.getTrigger().getMath().compile(this)
+						if (!ev.getTrigger().getMath().compile(nodeInterpreter)
 								.toBoolean()) {
 							delayedEvents.remove(i);
 							events[index].aborted();
@@ -1604,7 +916,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 
 					if (!aborted) {
 						if (ev.getPriority() != null) {
-							priority = ev.getPriority().getMath().compile(this)
+							priority = ev.getPriority().getMath().compile(nodeInterpreter)
 									.toDouble();
 							if (!priorities.contains(priority)) {
 								count++;
@@ -1624,19 +936,19 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 			// check the trigger of all events in the model
 			for (i = 0; i < model.getNumEvents(); i++) {
 				ev = model.getEvent(i);
-				if (ev.getTrigger().getMath().compile(this).toBoolean()) {
+				if (ev.getTrigger().getMath().compile(nodeInterpreter).toBoolean()) {
 					// event has not fired recently -> can fire
 					if (!events[i].getFireStatus()) {
 						// event has a delay
 						execTime = currentTime;
 						if (ev.getDelay() != null) {
-							execTime += ev.getDelay().getMath().compile(this)
+							execTime += ev.getDelay().getMath().compile(nodeInterpreter)
 									.toDouble();
 							delayedEvents.add(i);
 						} else {
 							if (ev.getPriority() != null) {
 								priority = ev.getPriority().getMath().compile(
-										this).toDouble();
+										nodeInterpreter).toDouble();
 
 								if (!priorities.contains(priority)) {
 									count++;
@@ -1747,7 +1059,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 							String id = variable.getId();
 							SpeciesReference sr = model
 									.findSpeciesReference(id);
-							newVal = assignment_math.compile(this).toDouble();
+							newVal = assignment_math.compile(nodeInterpreter).toDouble();
 
 							if (sr.getConstant() == false) {
 								stoichiometricCoefHash.put(id, newVal);
@@ -1830,36 +1142,36 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 						if (s.isSetInitialAmount()
 								&& !s.getHasOnlySubstanceUnits()) {
 							compartmentValue = getCompartmentValueOf(id);
-							this.Y[index] = iA.getMath().compile(this)
+							this.Y[index] = iA.getMath().compile(nodeInterpreter)
 									.toDouble()
 									* compartmentValue;
 						} else if (s.isSetInitialConcentration()
 								&& s.getHasOnlySubstanceUnits()) {
 							compartmentValue = getCompartmentValueOf(id);
-							this.Y[index] = iA.getMath().compile(this)
+							this.Y[index] = iA.getMath().compile(nodeInterpreter)
 									.toDouble()
 									/ compartmentValue;
 						} else {
-							this.Y[index] = iA.getMath().compile(this)
+							this.Y[index] = iA.getMath().compile(nodeInterpreter)
 									.toDouble();
 						}
 
 					} else {
-						this.Y[index] = iA.getMath().compile(this).toDouble();
+						this.Y[index] = iA.getMath().compile(nodeInterpreter).toDouble();
 					}
 
 				} else if (model.getCompartment(iA.getVariable()) != null) {
 					Compartment c = model.getCompartment(iA.getVariable());
 					index = symbolHash.get(c.getId());
-					this.Y[index] = iA.getMath().compile(this).toDouble();
+					this.Y[index] = iA.getMath().compile(nodeInterpreter).toDouble();
 				} else if (model.getParameter(iA.getVariable()) != null) {
 					Parameter p = model.getParameter(iA.getVariable());
 					index = symbolHash.get(p.getId());
-					this.Y[index] = iA.getMath().compile(this).toDouble();
+					this.Y[index] = iA.getMath().compile(nodeInterpreter).toDouble();
 				} else if (model.findSpeciesReference(iA.getVariable()) != null) {
 					SpeciesReference sr = model.findSpeciesReference(iA
 							.getVariable());
-					double assignment=iA.getMath().compile(this).toDouble();
+					double assignment=iA.getMath().compile(nodeInterpreter).toDouble();
 					stoichiometricCoefHash.put(sr.getId(),assignment);
 					index=symbolHash.get(sr.getId());
 					if(index!=null) {
@@ -1971,7 +1283,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 				if (kin != null
 						&& isProcessingFastReactions == currentReaction
 								.isFast()) {
-					v[i] = kin.getMath().compile(this).toDouble();
+					v[i] = kin.getMath().compile(nodeInterpreter).toDouble();
 				} else {
 					v[i] = 0;
 				}
@@ -1983,7 +1295,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 				currentReaction = model.getReaction(i);
 				KineticLaw kin = currentReaction.getKineticLaw();
 				if (kin != null) {
-					v[i] = kin.getMath().compile(this).toDouble();
+					v[i] = kin.getMath().compile(nodeInterpreter).toDouble();
 				} else {
 					v[i] = 0;
 				}
@@ -2016,7 +1328,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 					
 					else if (speciesRef.isSetStoichiometryMath()) {
 						changeRate[speciesIndex] -= speciesRef
-								.getStoichiometryMath().getMath().compile(this)
+								.getStoichiometryMath().getMath().compile(nodeInterpreter)
 								.toDouble()
 								* v[reactionIndex];
 					} else {
@@ -2054,7 +1366,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 								* v[reactionIndex];
 					} else if (speciesRef.isSetStoichiometryMath()) {
 						changeRate[speciesIndex] += speciesRef
-								.getStoichiometryMath().getMath().compile(this)
+								.getStoichiometryMath().getMath().compile(nodeInterpreter)
 								.toDouble()
 								* v[reactionIndex];
 					} else {
@@ -2081,48 +1393,6 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 			changeRate[speciesIndex] = changeRate[speciesIndex]
 					/ getCompartmentValueOf(s);
 		}
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#root(org.sbml.jsbml.ASTNode,
-	 * org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue root(ASTNode rootExponent, ASTNode radiant)
-			throws SBMLException {
-		return root(rootExponent.compile(this).toDouble(), radiant);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#root(double, org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue root(double rootExponent, ASTNode radiant)
-			throws SBMLException {
-		return new ASTNodeValue(Maths.root(radiant.compile(this).toDouble(),
-				rootExponent), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#sec(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue sec(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Maths.sec(node.compile(this).toDouble()), this);
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#sech(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue sech(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Maths.sech(node.compile(this).toDouble()), this);
 
 	}
 
@@ -2158,122 +1428,6 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 				// This can never happen
 			}
 
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#sin(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue sin(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Math.sin(node.compile(this).toDouble()), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#sinh(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue sinh(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Math.sinh(node.compile(this).toDouble()), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#sqrt(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue sqrt(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Math.sqrt(node.compile(this).toDouble()), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#symbolTime(java.lang.String)
-	 */
-	public ASTNodeValue symbolTime(String timeSymbol) {
-		return new ASTNodeValue(getTime(), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#tan(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue tan(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Math.tan(node.compile(this).toDouble()), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#tanh(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue tanh(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(Math.tanh(node.compile(this).toDouble()), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#times(org.sbml.jsbml.ASTNode[])
-	 */
-	public ASTNodeValue times(List<ASTNode> nodes) throws SBMLException {
-		if (nodes.size() == 0) {
-			return new ASTNodeValue(0d, this);
-		}
-		double value = 1d;
-		for (ASTNode node : nodes) {
-			value *= node.compile(this).toDouble();
-		}
-		return new ASTNodeValue(value, this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#toString(org.sbml.jsbml.ASTNode)
-	 */
-	public String toString(ASTNode value) {
-		return value.toString();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#uiMinus(org.sbml.jsbml.ASTNode)
-	 */
-	public ASTNodeValue uMinus(ASTNode node) throws SBMLException {
-		return new ASTNodeValue(-node.compile(this).toDouble(), this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#unknownASTNode()
-	 */
-	public ASTNodeValue unknownValue() {
-		return new ASTNodeValue(Double.NaN, this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.jsbml.ASTNodeCompiler#xor(org.sbml.jsbml.ASTNode[])
-	 */
-	public ASTNodeValue xor(List<ASTNode> nodes) throws SBMLException {
-		boolean value = false;
-		for (int i = 0; i < nodes.size(); i++) {
-			if (nodes.get(i).compile(this).toBoolean()) {
-				if (value) {
-					return getConstantFalse();
-				} else {
-					value = true;
-				}
-			}
-		}
-		return new ASTNodeValue(value, this);
 	}
 
 	/*
@@ -2316,4 +1470,104 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 			
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.ValueHolder#getCurrentCompartmentSize()
+	 */
+	
+	public double getCurrentCompartmentSize(String id) {
+		return Y[symbolHash.get(id)];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.ValueHolder#getCurrentParameterValue()
+	 */
+	
+	public double getCurrentParameterValue(String id) {
+		return Y[symbolHash.get(id)];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.ValueHolder#getSpeciesValue()
+	 */
+	public double getCurrentSpeciesValue(String id) {
+		return Y[symbolHash.get(id)];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.ValueHolder#getCurrentStoichiometry()
+	 */
+	public double getCurrentStoichiometry(String id) {
+		Integer pos=symbolHash.get(id);
+		if(pos!=null) {
+			return Y[pos];
+		}
+		Double value=stoichiometricCoefHash.get(id);
+		if(value!=null) {
+			return value;
+		}
+		
+		SpeciesReference sr=model.findSpeciesReference(id);
+		
+		if(sr!=null && sr.isSetStoichiometryMath()) {
+			try {
+				return sr.getStoichiometryMath().getMath().compile(nodeInterpreter).toDouble();
+			} catch (SBMLException e) {
+				e.printStackTrace();
+			}
+		} 
+		else if(sr!=null){
+			return sr.getStoichiometry();
+		}
+		return 1;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.ValueHolder#getSpeciesValue()
+	 */
+	public double getValueOf(String id) {
+		Integer symbolIndex = symbolHash.get(id);
+		if(symbolIndex != null) {
+			return Y[symbolIndex];
+		}
+		else {
+			return Double.NaN;
+		}
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.ValueHolder#getFuncArg()
+	 */
+	public Double getFuncArg(String name) {
+		if (funcArgs != null && funcArgs.containsKey(name)) {
+			// replace the name by the associated value of the argument
+			return funcArgs.get(name).doubleValue();
+		}
+		return null;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.ValueHolder#setFuncArgs()
+	 */
+	public void setFuncArgs(Hashtable<String, Double> argValues) {
+		this.funcArgs=argValues;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.ValueHolder#setFuncArgs()
+	 */
+	public void clearFuncArgs() {
+		funcArgs.clear();
+	}
+	
+	public ASTNodeInterpreter getInterpreter() {
+		return nodeInterpreter;
+	}
 }
