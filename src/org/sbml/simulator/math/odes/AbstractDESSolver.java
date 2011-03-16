@@ -20,6 +20,10 @@ package org.sbml.simulator.math.odes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.logging.Logger;
+
+import org.apache.commons.math.ode.events.EventException;
+import org.apache.commons.math.ode.events.EventHandler;
 
 import eva2.tools.math.Mathematics;
 
@@ -32,8 +36,10 @@ import eva2.tools.math.Mathematics;
  * @version $Rev$
  * @since 1.0
  */
-public abstract class AbstractDESSolver implements DESSolver {
+public abstract class AbstractDESSolver implements DESSolver, EventHandler {
 
+	private static final Logger logger = Logger.getLogger(AbstractDESSolver.class.getName());
+	
 	/**
 	 * Generated serial version identifier.
 	 */
@@ -135,13 +141,14 @@ public abstract class AbstractDESSolver implements DESSolver {
 	 * @param currentState
 	 *            The current state of the system during a simulation.
 	 */
-	void checkSolution(double[] currentState) {
+	boolean checkSolution(double[] currentState) {
 		for (int k = 0; k < currentState.length; k++) {
 			if (Double.isNaN(currentState[k])) {
 				unstableFlag = true;
 				currentState[k] = 0;
 			}
 		}
+		return !unstableFlag;
 	}
 
 	/*
@@ -687,5 +694,20 @@ public abstract class AbstractDESSolver implements DESSolver {
 		}
 		return true;
 
+	}
+	
+	public double g(double t, double[] y) throws EventException {
+		if(Double.isNaN(t)) {
+			return -1d;
+		}
+		return checkSolution(y)?1d:-1d;
+	}
+
+	public int eventOccurred(double t, double[] y, boolean increasing)
+			throws EventException {
+		return STOP;
+	}
+
+	public void resetState(double t, double[] y) throws EventException {
 	}
 }

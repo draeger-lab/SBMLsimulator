@@ -48,7 +48,7 @@ public class DormandPrince853Solver extends FirstOrderSolver{
 	}
 
 	@Override
-	public void createIntegrator() {
+	protected void createIntegrator() {
 		integrator=new DormandPrince853Integrator(Math.min(1e-8,Math.min(1.0,getStepSize())), Math.min(1.0,getStepSize()),0.001, 0.001);
 	}
 
