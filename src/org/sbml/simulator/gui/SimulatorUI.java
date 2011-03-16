@@ -63,6 +63,8 @@ import de.zbit.util.prefs.SBPreferences;
 import eva2.client.EvAClient;
 
 /**
+ * Graphical user interface for {@link SBMLsimulator}.
+ * 
  * @author Andreas Dr&auml;ger
  * @date 2010-04-15
  * @version $Rev$
@@ -159,7 +161,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
      * Generated serial version identifier
      */
     private static final long serialVersionUID = -5289766427756813972L;
-
+    
     /**
      * GUI element that lets the user run the simulation.
      */
@@ -173,6 +175,9 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	loadPreferences();
 	// getContentPane().add(new StatusBar(), BorderLayout.SOUTH);
 	setOptimalSize();
+	GUITools.setEnabled(false, getJMenuBar(), toolBar,
+	    Command.SIMULATION_START, Command.SAVE_SIMULATION,
+	    Command.SAVE_PLOT_IMAGE);
     }
 
     /**
@@ -271,7 +276,6 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		writer.write(model.getSBMLDocument(), System.out);
 		prefs.put(GUIOptions.SAVE_DIR, f.getParent());
 	    } catch (Exception exc) {
-		exc.printStackTrace();
 		GUITools.showErrorMessage(this, exc);
 	    }
 	}
@@ -327,8 +331,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	if (e.getSource() instanceof JCheckBoxMenuItem) {
 	    JCheckBoxMenuItem item = (JCheckBoxMenuItem) e.getSource();
 	    if ((item.getActionCommand() != null)
-		    && (item.getActionCommand().equals(Command.SHOW_OPTIONS
-			    .toString()))) {
+		    && (item.getActionCommand().equals(Command.SHOW_OPTIONS.toString()))) {
 		simPanel.setShowSettingsPanel(item.isSelected());
 	    }
 	}
@@ -372,7 +375,6 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 			.getPreferencesFor(GUIOptions.class);
 		prefs.put(GUIOptions.OPEN_DIR, file.getParent());
 	    } catch (Exception exc) {
-		exc.printStackTrace();
 		GUITools.showErrorMessage(this, exc);
 	    }
 	}
@@ -382,12 +384,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
      * @param path
      */
     public void openExperimentalData(String path) {
-	try {
-	    openExperimentalData(new File(path));
-	} catch (Exception exc) {
-	    exc.printStackTrace();
-	    GUITools.showErrorMessage(this, exc);
-	}
+	openExperimentalData(new File(path));
     }
 
     /**
@@ -431,7 +428,6 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		JOptionPane.showMessageDialog(this, StringUtil.toHTML(
 		    "Could not open model " + file.getAbsolutePath(), 60));
 	    } catch (Exception exc) {
-		exc.printStackTrace();
 		GUITools.showErrorMessage(this, exc);
 	    }
 	}
@@ -493,7 +489,6 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		Command.SAVE_SIMULATION, Command.SAVE_PLOT_IMAGE,
 		Command.SIMULATION_START);
 	} catch (Exception exc) {
-	    exc.printStackTrace();
 	    GUITools.showErrorMessage(this, exc);
 	}
     }
@@ -522,7 +517,6 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 			    .getBoolean(SimulatorOptions.EST_MULTI_SHOOT),
 		    panel.getSelectedQuantityRanges()), this, simPanel, this);
 	    } catch (Throwable exc) {
-		exc.printStackTrace();
 		GUITools.showErrorMessage(this, exc);
 		simPanel.setAllEnabled(true);
 	    }
@@ -600,6 +594,10 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
     public void windowOpened(WindowEvent e) {
     }
 
+    /*
+     * (non-Javadoc)
+     * @see de.zbit.gui.BaseFrame#closeFile()
+     */
     @Override
     public boolean closeFile() {
 	if (simPanel != null) {
@@ -754,6 +752,10 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see de.zbit.gui.BaseFrame#saveFile()
+     */
     @Override
     public void saveFile() {
 	if (simPanel != null) {

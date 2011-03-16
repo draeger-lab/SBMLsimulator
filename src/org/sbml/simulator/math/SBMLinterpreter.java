@@ -218,6 +218,66 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 		this.init();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.apache.commons.math.ode.FirstOrderDifferentialEquations#computeDerivatives(double, double[], double[])
+	 */
+	public void computeDerivatives(double t, double[] y, double[] yDot)
+			throws DerivativeException {
+		try {
+			System.arraycopy(this.getValue(t, y),0, yDot, 0, yDot.length);
+		} catch (IntegrationException e) {
+			e.printStackTrace();
+		}
+			
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.sbml.simulator.math.odes.FastProcessDESystem#containsFastProcesses()
+	 */
+	public boolean containsFastProcesses() {
+		return hasFastReactions;
+	}
+
+	/**
+	 * Due to missing information about the attributes of species set by initial
+	 * Assignments, a majority vote of all other species is performed to
+	 * determine the attributes.
+	 * 
+	 * @return
+	 */
+	private Species determineMajorSpeciesAttributes() {
+		Species majority = new Species(model.getLevel(), model.getVersion());
+		int concentration = 0, amount = 0, substanceUnits = 0;
+
+		for (Species species : model.getListOfSpecies()) {
+			if (species.isSetInitialAmount()) {
+				amount++;
+			} else if (species.isSetInitialConcentration()) {
+				concentration++;
+			}
+			if (species.hasOnlySubstanceUnits()) {
+				substanceUnits++;
+			}
+		}
+		if (amount >= concentration) {
+			majority.setInitialAmount(0.0);
+		} else {
+			majority.setInitialConcentration(0.0);
+		}
+
+		if (substanceUnits > (model.getNumSpecies() - substanceUnits)) {
+			majority.setHasOnlySubstanceUnits(true);
+		} else {
+			majority.setHasOnlySubstanceUnits(false);
+		}
+		return majority;
+
+	}
+
 	/**
 	 * Evaluates the algebraic rules of the given model to assignment rules
 	 * 
@@ -237,6 +297,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 				.getMatching(), model);
 		algebraicRules = arc.getAssignmentRules();
 	}
+
 
 	/**
 	 * Evaluates the assignment rules of the given model. This method is not to
@@ -264,6 +325,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 		}
 	}
 
+
 	/**
 	 * Evaluates the rate rules of the given model
 	 * 
@@ -285,82 +347,6 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 			updateSpeciesConcentration(index, changeRate);
 		}
 		
-	}
-
-	/**
-	 * Updates the concentration of species due to a change in the size of their
-	 * compartment
-	 * 
-	 * @param compartmentIndex
-	 */
-	private void updateSpeciesConcentration(int compartmentIndex,
-			double changeRate[]) {
-		int speciesIndex;
-		Species s;
-		for (Entry<String, Integer> entry : compartmentHash.entrySet()) {
-			if (entry.getValue() == compartmentIndex) {
-				s = model.getSpecies(entry.getKey());
-				if (s.isSetInitialConcentration()) {
-					speciesIndex = symbolHash.get(entry.getKey());
-					changeRate[speciesIndex] = -changeRate[compartmentIndex]
-							* Y[speciesIndex] / Y[compartmentIndex];
-				}
-
-			}
-		}
-
-	}
-
-
-	/**
-	 * Checks if the given symbol id refers to a species and returns the value
-	 * of its compartment or 1d otherwise
-	 * 
-	 * @param speciesId
-	 * @param val
-	 * @return
-	 */
-	public double getCompartmentValueOf(String speciesId) {
-		Integer compartmentIndex = compartmentHash.get(speciesId);
-
-		// Is species with compartment
-		if ((compartmentIndex != null)
-				&& (Y[compartmentIndex.intValue()] != 0d)) {
-			return Y[compartmentIndex.intValue()];
-		}
-
-		// Is compartment or parameter or there is no compartment for this
-		// species
-		// TODO: Replace by user-defined default value?
-		return 1d;
-	}
-
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see eva2.tools.math.des.DESystem#getDESystemDimension()
-	 */
-	public int getDESystemDimension() {
-		return this.initialValues.length;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see eva2.tools.math.des.DESystem#getIdentifiers()
-	 */
-	public String[] getIdentifiers() {
-		return symbolIdentifiers;
-	}
-
-	/**
-	 * Returns the initial values of the model to be simulated.
-	 * 
-	 * @return Returns the initial values of the model to be simulated.
-	 */
-	public double[] getInitialValues() {
-		return this.initialValues;
 	}
 
 	/*
@@ -398,23 +384,278 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 	}
 
 	/**
+	 * 
+	 * @return
+	 */
+	public ASTNodeInterpreter getASTNodeInterpreter() {
+		return nodeInterpreter;
+	}
+
+	/**
+	 * Checks if the given symbol id refers to a species and returns the value
+	 * of its compartment or 1d otherwise
+	 * 
+	 * @param speciesId
+	 * @param val
+	 * @return
+	 */
+	public double getCurrentCompartmentValueOf(String speciesId) {
+		Integer compartmentIndex = compartmentHash.get(speciesId);
+
+		// Is species with compartment
+		if ((compartmentIndex != null)
+				&& (Y[compartmentIndex.intValue()] != 0d)) {
+			return Y[compartmentIndex.intValue()];
+		}
+
+		// Is compartment or parameter or there is no compartment for this
+		// species
+		// TODO: Replace by user-defined default value?
+		return 1d;
+	}
+
+	public double getCurrentCompartmentSize(String id) {
+		return Y[symbolHash.get(id)];
+	}
+
+	
+
+	public double getCurrentParameterValue(String id) {
+		return Y[symbolHash.get(id)];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.ValueHolder#getSpeciesValue()
+	 */
+	public double getCurrentSpeciesValue(String id) {
+		return Y[symbolHash.get(id)];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.ValueHolder#getCurrentStoichiometry()
+	 */
+	@SuppressWarnings("deprecation")
+	public double getCurrentStoichiometry(String id) {
+		Integer pos=symbolHash.get(id);
+		if(pos!=null) {
+			return Y[pos];
+		}
+		Double value=stoichiometricCoefHash.get(id);
+		if(value!=null) {
+			return value;
+		}
+		
+		SpeciesReference sr=model.findSpeciesReference(id);
+		
+		if(sr!=null && sr.isSetStoichiometryMath()) {
+			try {
+				return sr.getStoichiometryMath().getMath().compile(nodeInterpreter).toDouble();
+			} catch (SBMLException e) {
+				e.printStackTrace();
+			}
+		} 
+		else if(sr!=null){
+			return sr.getStoichiometry();
+		}
+		return 1d;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see eva2.tools.math.des.DESystem#getDESystemDimension()
+	 */
+	public int getDESystemDimension() {
+		return this.initialValues.length;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.apache.commons.math.ode.FirstOrderDifferentialEquations#getDimension()
+	 */
+	public int getDimension() {
+		return this.getDESystemDimension();
+	}
+
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.sbml.simulator.math.odes.EventDESystem#getEventAssignments(double,
+	 * double[])
+	 */
+	public List<DESAssignment> getEventAssignments(double t, double[] Y)
+			throws IntegrationException {
+
+		if (model.getNumEvents() == 0) {
+			return null;
+		}
+
+		// change Y because of different priorites and reevaluation of
+		// trigger/priority
+		// after the execution of events
+		this.Y = Y;
+		this.currentTime = t;
+		Double priority, execTime = 0d;
+		Double triggerTimeValues[];
+		Event ev;
+		int i = 0, index;
+		Boolean persistent, aborted;
+		HashSet<Double> priorities = new HashSet<Double>();
+		double count = 0;
+
+		try {
+
+			// recheck trigger of events that have fired for this point in time
+			// but have not been executed yet
+			while (i < runningEvents.size()) {
+				index = runningEvents.get(i);
+				ev = model.getEvent(index);
+				persistent = ev.getTrigger().getPersistent();
+				if (!persistent) {
+					if (!ev.getTrigger().getMath().compile(nodeInterpreter).toBoolean()) {
+						runningEvents.remove(i);
+						i--;
+					}
+				}
+				i++;
+			}
+
+			i = 0;
+			// check events that have fired at an earlier point in time but have
+			// not been executed yet due to a delay
+			while (i < delayedEvents.size()) {
+				index = delayedEvents.get(i);
+				ev = model.getEvent(index);
+				if (events[index].getTime() <= currentTime) {
+					aborted = false;
+					persistent = ev.getTrigger().getPersistent();
+					if (!persistent) {
+						if (!ev.getTrigger().getMath().compile(nodeInterpreter)
+								.toBoolean()) {
+							delayedEvents.remove(i);
+							events[index].aborted();
+							i--;
+							aborted = true;
+						}
+					}
+
+					if (!aborted) {
+						if (ev.getPriority() != null) {
+							priority = ev.getPriority().getMath().compile(nodeInterpreter)
+									.toDouble();
+							if (!priorities.contains(priority)) {
+								count++;
+								priorities.add(priority);
+							}
+							events[index].changePriority(priority);
+						}
+						runningEvents.add(index);
+						delayedEvents.remove(i);
+						i--;
+
+					}
+				}
+				i++;
+			}
+
+			// check the trigger of all events in the model
+			for (i = 0; i < model.getNumEvents(); i++) {
+				ev = model.getEvent(i);
+				if (ev.getTrigger().getMath().compile(nodeInterpreter).toBoolean()) {
+					// event has not fired recently -> can fire
+					if (!events[i].getFireStatus()) {
+						// event has a delay
+						execTime = currentTime;
+						if (ev.getDelay() != null) {
+							execTime += ev.getDelay().getMath().compile(nodeInterpreter)
+									.toDouble();
+							delayedEvents.add(i);
+						} else {
+							if (ev.getPriority() != null) {
+								priority = ev.getPriority().getMath().compile(
+										nodeInterpreter).toDouble();
+
+								if (!priorities.contains(priority)) {
+									count++;
+									priorities.add(priority);
+								}
+								events[i].changePriority(priority);
+							}
+
+							runningEvents.add(i);
+						}
+						triggerTimeValues = null;
+						if (ev.getUseValuesFromTriggerTime()) {
+							triggerTimeValues = new Double[ev
+									.getNumEventAssignments()];
+							// store values from trigger time for later
+							// execution
+							for (int j = 0; j < ev.getNumEventAssignments(); j++) {
+								triggerTimeValues[j] = processAssignmentVaribale(
+										ev.getEventAssignment(j).getVariable(),
+										ev.getEventAssignment(j).getMath());
+							}
+
+						}
+
+						events[i].addValues(triggerTimeValues, execTime);
+
+						events[i].fired();
+					}
+
+				}
+				// event has fired recently -> can not fire
+				else {
+					events[i].recovered();
+				}
+
+			}
+
+			// there are events to fire
+			if (runningEvents.size() > 0) {
+				return processEvents(priorities, count);
+			}
+			// nothing to do
+			else {
+				return null;
+			}
+
+		} catch (SBMLException exc) {
+			throw new IntegrationException(exc);
+		}
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see eva2.tools.math.des.DESystem#getIdentifiers()
+	 */
+	public String[] getIdentifiers() {
+		return symbolIdentifiers;
+	}
+
+	/**
+	 * Returns the initial values of the model to be simulated.
+	 * 
+	 * @return Returns the initial values of the model to be simulated.
+	 */
+	public double[] getInitialValues() {
+		return this.initialValues;
+	}
+
+
+	/**
 	 * Returns the model that is used by this object.
 	 * 
 	 * @return Returns the model that is used by this object.
 	 */
 	public Model getModel() {
 		return model;
-	}
-
-	
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see eva2.tools.math.des.EventDESystem#getNumEvents()
-	 */
-	public int getNumEvents() {
-		return model.getNumEvents();
 	}
 
 	/*
@@ -424,6 +665,16 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 	 */
 	public int getNumAdditionalValues() {
 		return v.length;
+	}
+
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see eva2.tools.math.des.EventDESystem#getNumEvents()
+	 */
+	public int getNumEvents() {
+		return model.getNumEvents();
 	}
 
 	/**
@@ -464,13 +715,12 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 		return model.getNumCompartments() + model.getNumSpecies() - 1;
 	}
 
-
 	/**
 	 * Returns the timepoint where the simulation is currently situated
 	 * 
 	 * @return
 	 */
-	public double getTime() {
+	public double getCurrentTime() {
 		return currentTime;
 	}
 
@@ -531,6 +781,19 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.ValueHolder#getSpeciesValue()
+	 */
+	public double getCurrentValueOf(String id) {
+		Integer symbolIndex = symbolHash.get(id);
+		if(symbolIndex != null) {
+			return Y[symbolIndex];
+		}
+		else {
+			return Double.NaN;
+		}
+	}
 
 	/**
 	 * <p>
@@ -754,6 +1017,15 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 		}
 	}
 
+	private void pickRandomEvent(List<Integer> highOrderEvents) {
+		int length = highOrderEvents.size();
+		int random = RNG.randomInt(0, length - 1);
+		Integer winner = highOrderEvents.get(random);
+
+		highOrderEvents.clear();
+		highOrderEvents.add(winner);
+
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -811,7 +1083,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 
 		return assignmentRules;
 	}
-
+	
 	/**
 	 * Processes the variable of an assignment in terms of determining whether
 	 * the variable references to a species or not and if so accounts the
@@ -829,11 +1101,11 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 		if (compartmentHash.containsKey(variable)) {
 			s = model.getSpecies(variable);
 			if (s.isSetInitialAmount() && !s.getHasOnlySubstanceUnits()) {
-				compartmentValue = getCompartmentValueOf(s.getId());
+				compartmentValue = getCurrentCompartmentValueOf(s.getId());
 				result = math.compile(nodeInterpreter).toDouble() * compartmentValue;
 			} else if (s.isSetInitialConcentration()
 					&& s.getHasOnlySubstanceUnits()) {
-				compartmentValue = getCompartmentValueOf(s.getId());
+				compartmentValue = getCurrentCompartmentValueOf(s.getId());
 				result = math.compile(nodeInterpreter).toDouble() / compartmentValue;
 			} else {
 				result = math.compile(nodeInterpreter).toDouble();
@@ -844,156 +1116,6 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 		}
 
 		return result;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.sbml.simulator.math.odes.EventDESystem#getEventAssignments(double,
-	 * double[])
-	 */
-	public List<DESAssignment> getEventAssignments(double t, double[] Y)
-			throws IntegrationException {
-
-		if (model.getNumEvents() == 0) {
-			return null;
-		}
-
-		// change Y because of different priorites and reevaluation of
-		// trigger/priority
-		// after the execution of events
-		this.Y = Y;
-		this.currentTime = t;
-		Double priority, execTime = 0d;
-		Double triggerTimeValues[];
-		Event ev;
-		int i = 0, index;
-		Boolean persistent, aborted;
-		HashSet<Double> priorities = new HashSet<Double>();
-		double count = 0;
-
-		try {
-
-			// recheck trigger of events that have fired for this point in time
-			// but have not been executed yet
-			while (i < runningEvents.size()) {
-				index = runningEvents.get(i);
-				ev = model.getEvent(index);
-				persistent = ev.getTrigger().getPersistent();
-				if (!persistent) {
-					if (!ev.getTrigger().getMath().compile(nodeInterpreter).toBoolean()) {
-						runningEvents.remove(i);
-						i--;
-					}
-				}
-				i++;
-			}
-
-			i = 0;
-			// check events that have fired at an earlier point in time but have
-			// not been executed yet due to a delay
-			while (i < delayedEvents.size()) {
-				index = delayedEvents.get(i);
-				ev = model.getEvent(index);
-				if (events[index].getTime() <= currentTime) {
-					aborted = false;
-					persistent = ev.getTrigger().getPersistent();
-					if (!persistent) {
-						if (!ev.getTrigger().getMath().compile(nodeInterpreter)
-								.toBoolean()) {
-							delayedEvents.remove(i);
-							events[index].aborted();
-							i--;
-							aborted = true;
-						}
-					}
-
-					if (!aborted) {
-						if (ev.getPriority() != null) {
-							priority = ev.getPriority().getMath().compile(nodeInterpreter)
-									.toDouble();
-							if (!priorities.contains(priority)) {
-								count++;
-								priorities.add(priority);
-							}
-							events[index].changePriority(priority);
-						}
-						runningEvents.add(index);
-						delayedEvents.remove(i);
-						i--;
-
-					}
-				}
-				i++;
-			}
-
-			// check the trigger of all events in the model
-			for (i = 0; i < model.getNumEvents(); i++) {
-				ev = model.getEvent(i);
-				if (ev.getTrigger().getMath().compile(nodeInterpreter).toBoolean()) {
-					// event has not fired recently -> can fire
-					if (!events[i].getFireStatus()) {
-						// event has a delay
-						execTime = currentTime;
-						if (ev.getDelay() != null) {
-							execTime += ev.getDelay().getMath().compile(nodeInterpreter)
-									.toDouble();
-							delayedEvents.add(i);
-						} else {
-							if (ev.getPriority() != null) {
-								priority = ev.getPriority().getMath().compile(
-										nodeInterpreter).toDouble();
-
-								if (!priorities.contains(priority)) {
-									count++;
-									priorities.add(priority);
-								}
-								events[i].changePriority(priority);
-							}
-
-							runningEvents.add(i);
-						}
-						triggerTimeValues = null;
-						if (ev.getUseValuesFromTriggerTime()) {
-							triggerTimeValues = new Double[ev
-									.getNumEventAssignments()];
-							// store values from trigger time for later
-							// execution
-							for (int j = 0; j < ev.getNumEventAssignments(); j++) {
-								triggerTimeValues[j] = processAssignmentVaribale(
-										ev.getEventAssignment(j).getVariable(),
-										ev.getEventAssignment(j).getMath());
-							}
-
-						}
-
-						events[i].addValues(triggerTimeValues, execTime);
-
-						events[i].fired();
-					}
-
-				}
-				// event has fired recently -> can not fire
-				else {
-					events[i].recovered();
-				}
-
-			}
-
-			// there are events to fire
-			if (runningEvents.size() > 0) {
-				return processEvents(priorities, count);
-			}
-			// nothing to do
-			else {
-				return null;
-			}
-
-		} catch (SBMLException exc) {
-			throw new IntegrationException(exc);
-		}
-
 	}
 
 	/**
@@ -1107,16 +1229,11 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 		return assignments;
 	}
 
-	private void pickRandomEvent(List<Integer> highOrderEvents) {
-		int length = highOrderEvents.size();
-		int random = RNG.randomInt(0, length - 1);
-		Integer winner = highOrderEvents.get(random);
-
-		highOrderEvents.clear();
-		highOrderEvents.add(winner);
-
-	}
-
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.ValueHolder#getCurrentCompartmentSize()
+	 */
+	
 	/**
 	 * Processes the initial assignments of the model
 	 * 
@@ -1136,13 +1253,13 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 					if (compartmentHash.containsKey(id)) {
 						if (s.isSetInitialAmount()
 								&& !s.getHasOnlySubstanceUnits()) {
-							compartmentValue = getCompartmentValueOf(id);
+							compartmentValue = getCurrentCompartmentValueOf(id);
 							this.Y[index] = iA.getMath().compile(nodeInterpreter)
 									.toDouble()
 									* compartmentValue;
 						} else if (s.isSetInitialConcentration()
 								&& s.getHasOnlySubstanceUnits()) {
-							compartmentValue = getCompartmentValueOf(id);
+							compartmentValue = getCurrentCompartmentValueOf(id);
 							this.Y[index] = iA.getMath().compile(nodeInterpreter)
 									.toDouble()
 									/ compartmentValue;
@@ -1180,42 +1297,11 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 		}
 	}
 
-	/**
-	 * Due to missing information about the attributes of species set by initial
-	 * Assignments, a majorty vote of all other species is performed to
-	 * determine the attributes.
-	 * 
-	 * @return
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.ValueHolder#getCurrentParameterValue()
 	 */
-	private Species determineMajorSpeciesAttributes() {
-		Species majority = new Species(model.getLevel(), model.getVersion());
-		int concentration = 0, amount = 0, substanceUnits = 0;
-
-		for (Species species : model.getListOfSpecies()) {
-			if (species.isSetInitialAmount()) {
-				amount++;
-			} else if (species.isSetInitialConcentration()) {
-				concentration++;
-			}
-			if (species.hasOnlySubstanceUnits()) {
-				substanceUnits++;
-			}
-		}
-		if (amount >= concentration) {
-			majority.setInitialAmount(0.0);
-		} else {
-			majority.setInitialConcentration(0.0);
-		}
-
-		if (substanceUnits > (model.getNumSpecies() - substanceUnits)) {
-			majority.setHasOnlySubstanceUnits(true);
-		} else {
-			majority.setHasOnlySubstanceUnits(false);
-		}
-		return majority;
-
-	}
-
+	
 	/**
 	 * @param changeRate
 	 * @throws SBMLException
@@ -1387,11 +1473,19 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 		for (String s : inConcentration) {
 			speciesIndex = symbolHash.get(s);
 			changeRate[speciesIndex] = changeRate[speciesIndex]
-					/ getCompartmentValueOf(s);
+					/ getCurrentCompartmentValueOf(s);
 		}
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.odes.FastProcessDESystem#setFastProcessComputation(boolean)
+	 */
+	public void setFastProcessComputation(boolean isProcessing) {
+		isProcessingFastReactions = isProcessing;
+	}
+	
 	/**
 	 * This method allows to set the parameters of the model to the specified
 	 * values in the given array.
@@ -1425,122 +1519,28 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 			}
 
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.sbml.simulator.math.odes.FastProcessDESystem#containsFastProcesses()
-	 */
-	public boolean containsFastProcesses() {
-		return hasFastReactions;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.sbml.simulator.math.odes.FastProcessDESystem#setFastProcessComputation(boolean)
-	 */
-	public void setFastProcessComputation(boolean isProcessing) {
-		isProcessingFastReactions = isProcessing;
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * @see org.apache.commons.math.ode.FirstOrderDifferentialEquations#getDimension()
-	 */
-	public int getDimension() {
-		return this.getDESystemDimension();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.apache.commons.math.ode.FirstOrderDifferentialEquations#computeDerivatives(double, double[], double[])
-	 */
-	public void computeDerivatives(double t, double[] y, double[] yDot)
-			throws DerivativeException {
-		try {
-			System.arraycopy(this.getValue(t, y),0, yDot, 0, yDot.length);
-		} catch (IntegrationException e) {
-			e.printStackTrace();
-		}
-			
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.sbml.simulator.math.ValueHolder#getCurrentCompartmentSize()
-	 */
-	
-	public double getCurrentCompartmentSize(String id) {
-		return Y[symbolHash.get(id)];
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.sbml.simulator.math.ValueHolder#getCurrentParameterValue()
-	 */
-	
-	public double getCurrentParameterValue(String id) {
-		return Y[symbolHash.get(id)];
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.sbml.simulator.math.ValueHolder#getSpeciesValue()
-	 */
-	public double getCurrentSpeciesValue(String id) {
-		return Y[symbolHash.get(id)];
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.sbml.simulator.math.ValueHolder#getCurrentStoichiometry()
-	 */
-	@SuppressWarnings("deprecation")
-	public double getCurrentStoichiometry(String id) {
-		Integer pos=symbolHash.get(id);
-		if(pos!=null) {
-			return Y[pos];
-		}
-		Double value=stoichiometricCoefHash.get(id);
-		if(value!=null) {
-			return value;
-		}
-		
-		SpeciesReference sr=model.findSpeciesReference(id);
-		
-		if(sr!=null && sr.isSetStoichiometryMath()) {
-			try {
-				return sr.getStoichiometryMath().getMath().compile(nodeInterpreter).toDouble();
-			} catch (SBMLException e) {
-				e.printStackTrace();
-			}
-		} 
-		else if(sr!=null){
-			return sr.getStoichiometry();
-		}
-		return 1d;
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * @see org.sbml.simulator.math.ValueHolder#getSpeciesValue()
-	 */
-	public double getValueOf(String id) {
-		Integer symbolIndex = symbolHash.get(id);
-		if(symbolIndex != null) {
-			return Y[symbolIndex];
-		}
-		else {
-			return Double.NaN;
-		}
-	}
 	
 	/**
+	 * Updates the concentration of species due to a change in the size of their
+	 * compartment
 	 * 
-	 * @return
+	 * @param compartmentIndex
 	 */
-	public ASTNodeInterpreter getInterpreter() {
-		return nodeInterpreter;
+	private void updateSpeciesConcentration(int compartmentIndex,
+			double changeRate[]) {
+		int speciesIndex;
+		Species s;
+		for (Entry<String, Integer> entry : compartmentHash.entrySet()) {
+			if (entry.getValue() == compartmentIndex) {
+				s = model.getSpecies(entry.getKey());
+				if (s.isSetInitialConcentration()) {
+					speciesIndex = symbolHash.get(entry.getKey());
+					changeRate[speciesIndex] = -changeRate[compartmentIndex]
+							* Y[speciesIndex] / Y[compartmentIndex];
+				}
+
+			}
+		}
+
 	}
 }
