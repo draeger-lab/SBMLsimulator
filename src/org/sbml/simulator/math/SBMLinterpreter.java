@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -640,23 +638,16 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 			throws SBMLException {
 
 		// get symbol and assign its new rate
-		Integer speciesIndex = symbolHash.get(rr.getVariable());
+		Integer index = symbolHash.get(rr.getVariable());
 		// changeRate[speciesIndex] = rr.getMath().compile(this).toDouble();
-		if (speciesIndex != null) {
-			changeRate[speciesIndex.intValue()] = processAssignmentVaribale(rr
+		changeRate[index.intValue()] = processAssignmentVaribale(rr
 					.getVariable(), rr.getMath());
 			// when the size of a compartment changes, the concentrations of the
 			// species located in this compartment have to change as well
-			if (compartmentHash.containsValue(speciesIndex)) {
-				updateSpeciesConcentration(speciesIndex, changeRate);
-			}
-		} else if (model.findSpeciesReference(rr.getVariable()) != null) {
-			SpeciesReference sr = model.findSpeciesReference(rr.getVariable());
-			if (sr.getConstant() == false) {
-				stoichiometricCoefHash.put(sr.getId(), rr.getMath().compile(
-						this).toDouble());
-			}
+		if (compartmentHash.containsValue(index)) {
+			updateSpeciesConcentration(index, changeRate);
 		}
+		
 	}
 
 	/**
@@ -1083,8 +1074,24 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 		currentTime = 0d;
 
 		this.stoichiometricCoefHash = new HashMap<String, Double>();
+		
+		
+		Map<String,Integer> speciesReferenceToRateRule=new HashMap<String,Integer>();
+		int speciesReferencesInRateRules=0;
+		for (int k = 0; k < model.getNumRules(); k++) {
+			Rule rule = model.getRule(k);
+			if (rule.isRate()) {
+				RateRule rr = (RateRule) rule;
+				SpeciesReference sr = model.findSpeciesReference(rr.getVariable());
+				if (sr!=null && sr.getConstant() == false) {
+					speciesReferencesInRateRules++;;
+					speciesReferenceToRateRule.put(sr.getId(), k);
+				}
+			} 
+		}
+		
 		this.Y = new double[model.getNumCompartments() + model.getNumSpecies()
-				+ model.getNumParameters()];
+				+ model.getNumParameters()+speciesReferencesInRateRules];
 		this.symbolIdentifiers = new String[Y.length];
 
 		/*
@@ -1149,6 +1156,18 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 			symbolIdentifiers[yIndex] = p.getId();
 			yIndex++;
 		}
+		
+		/*
+		 * Save starting values of the stoichiometries
+		 */
+		for (String id:speciesReferenceToRateRule.keySet()) {
+			Y[yIndex] = model.findSpeciesReference(id).getStoichiometry();
+			symbolHash.put(id, yIndex);
+			symbolIdentifiers[yIndex] = id;
+			yIndex++;
+		}
+		
+		
 
 		/*
 		 * Initial assignments
@@ -1840,8 +1859,12 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 				} else if (model.findSpeciesReference(iA.getVariable()) != null) {
 					SpeciesReference sr = model.findSpeciesReference(iA
 							.getVariable());
-					stoichiometricCoefHash.put(sr.getId(), iA.getMath()
-							.compile(this).toDouble());
+					double assignment=iA.getMath().compile(this).toDouble();
+					stoichiometricCoefHash.put(sr.getId(),assignment);
+					index=symbolHash.get(sr.getId());
+					if(index!=null) {
+						this.Y[index]=assignment;
+					}
 				} else {
 					System.err
 							.println("The model contains an initial assignment for a component other than species, compartment, parameter or species reference.");
@@ -1977,12 +2000,21 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 					speciesIndex = symbolHash.get(species.getId());
 					if ((speciesRef.getLevel() >= 3)
 							&& (speciesRef.getId() != null)
+							&& this.symbolHash.containsKey(speciesRef.getId())) {
+						double currentStoichiometry=this.Y[this.symbolHash.get(speciesRef.getId())];
+						changeRate[speciesIndex] -=currentStoichiometry* v[reactionIndex];
+						this.stoichiometricCoefHash.put(speciesRef.getId(), currentStoichiometry);
+					} 
+					else if ((speciesRef.getLevel() >= 3)
+							&& (speciesRef.getId() != null)
 							&& this.stoichiometricCoefHash
 									.containsKey(speciesRef.getId())) {
 						changeRate[speciesIndex] -= this.stoichiometricCoefHash
 								.get(speciesRef.getId())
 								* v[reactionIndex];
-					} else if (speciesRef.isSetStoichiometryMath()) {
+					}
+					
+					else if (speciesRef.isSetStoichiometryMath()) {
 						changeRate[speciesIndex] -= speciesRef
 								.getStoichiometryMath().getMath().compile(this)
 								.toDouble()
@@ -2005,8 +2037,15 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 
 				if (!species.getBoundaryCondition() && !species.getConstant()) {
 					speciesIndex = symbolHash.get(species.getId());
-
-					if (speciesRef.getLevel() >= 3
+					
+					if ((speciesRef.getLevel() >= 3)
+							&& (speciesRef.getId() != null)
+							&& this.symbolHash.containsKey(speciesRef.getId())) {
+						double currentStoichiometry=this.Y[this.symbolHash.get(speciesRef.getId())];
+						changeRate[speciesIndex] +=currentStoichiometry* v[reactionIndex];
+						this.stoichiometricCoefHash.put(speciesRef.getId(), currentStoichiometry);
+					}
+					else if (speciesRef.getLevel() >= 3
 							&& speciesRef.getId() != null
 							&& this.stoichiometricCoefHash
 									.containsKey(speciesRef.getId())) {
