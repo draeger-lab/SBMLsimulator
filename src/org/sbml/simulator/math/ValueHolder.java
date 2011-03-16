@@ -1,5 +1,5 @@
 /*
- * $Id:  ValueHolder.java 15:57:31 draeger$
+ * $Id: ValueHolder.java 15:57:31 draeger$
  * $URL: ValueHolder.java $
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
@@ -17,61 +17,68 @@
  */
 package org.sbml.simulator.math;
 
+import org.sbml.jsbml.ASTNode;
+import org.sbml.jsbml.Compartment;
+import org.sbml.jsbml.Model;
+import org.sbml.jsbml.Parameter;
+import org.sbml.jsbml.Species;
+import org.sbml.jsbml.SpeciesReference;
+
 /**
+ * A {@link ValueHolder} is necessary to provide the current values for
+ * {@link Compartment}s, {@link Species}, {@link Parameter}s, and
+ * {@link SpeciesReference}s at simulation time. It also grants access
+ * to the current simulation time. In this way, it is possible to separate
+ * the interpretation and simulation of a {@link Model} from the pure evaluation
+ * of {@link ASTNode}s.
+ * 
  * @author Andreas Dr&auml;ger
+ * @author Roland Keller
  * @version $Rev$
  * @since 1.0
  */
 public interface ValueHolder {
 
     /**
-     * 
      * @param id
      * @return
      */
     public double getCurrentCompartmentSize(String id);
-    
+
     /**
-     * 
+     * @param speciesId
+     * @return
+     */
+    public double getCurrentCompartmentValueOf(String speciesId);
+
+    /**
      * @param id
      * @return
      */
     public double getCurrentParameterValue(String id);
-    
+
     /**
-     * 
      * @param id
      * @return
      */
     public double getCurrentSpeciesValue(String id);
-    
+
     /**
-     * 
      * @param id
      * @return
      */
     public double getCurrentStoichiometry(String id);
 
     /**
-     * 
-     * @param id
-     * @return
-     */
-	public double getCompartmentValueOf(String id);
-	
-	/**
-     * 
-     * @param id
-     * @return
-     */
-	public double getValueOf(String id);
-
-	/**
-     * 
      * @param time
      * @return
      */
-	public double getTime();
+    public double getCurrentTime();
 
-    
+    /**
+     * @param id
+     * @return
+     */
+    public double getCurrentValueOf(String id);
+
 }

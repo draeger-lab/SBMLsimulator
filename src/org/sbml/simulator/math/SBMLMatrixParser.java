@@ -247,17 +247,17 @@ public class SBMLMatrixParser {
 			sbmli = new SBMLinterpreter(model);
 			iA = model.getSpecies(msr.getSpecies()).getInitialAmount();
 			// evaluate reaction with normal amount
-			normal = reac.getKineticLaw().getMath().compile(sbmli.getInterpreter()).toDouble();
+			normal = reac.getKineticLaw().getMath().compile(sbmli.getASTNodeInterpreter()).toDouble();
 
 			// evaluate reaction with half of the normal amount
 			model.getSpecies(msr.getSpecies()).setInitialAmount(iA / 2);
 			sbmli = new SBMLinterpreter(model);
-			half = reac.getKineticLaw().getMath().compile(sbmli.getInterpreter()).toDouble();
+			half = reac.getKineticLaw().getMath().compile(sbmli.getASTNodeInterpreter()).toDouble();
 
 			// evaluate reaction with twice the normal amount
 			model.getSpecies(msr.getSpecies()).setInitialAmount(iA * 2);
 			sbmli = new SBMLinterpreter(model);
-			twice = reac.getKineticLaw().getMath().compile(sbmli.getInterpreter()).toDouble();
+			twice = reac.getKineticLaw().getMath().compile(sbmli.getASTNodeInterpreter()).toDouble();
 
 			if (half < normal && normal < twice)
 				result = 1;
