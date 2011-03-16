@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +64,7 @@ import eva2.tools.math.RNG;
  * 
  * @author Alexander D&ouml;rr
  * @author Andreas Dr&auml;ger
+ * @author Roland Keller
  * @author Dieudonn&eacute; Motsou Wouamba
  * @date 2007-09-06
  * @version $Rev$
@@ -116,12 +116,6 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 	 */
 	private EventInProcess events[];
 
-	/**
-	 * This table is necessary to store the values of arguments when a function
-	 * definition is evaluated. For an identifier of the argument the
-	 * corresponding value will be stored.
-	 */
-	private Map<String, Double> funcArgs;
 
 	/**
 	 * An array, which stores all computed initial values of the model. If this
@@ -145,8 +139,10 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 	protected Model model;
 
 	/**
-	 * Hashes the name of all compartments, species, and global parameters to an
-	 * value object which contains the position in the Y vector
+	 * Hashes the name of all {@link Compartment}s, {@link Species}, global
+	 * {@link Parameter}s, and, if necessary, {@link SpeciesReference}s in
+	 * {@link RateRule}s to an value object which contains the position in the
+	 * {@link #Y} vector
 	 */
 	private Map<String, Integer> symbolHash;
 
@@ -320,24 +316,23 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 	 * Checks if the given symbol id refers to a species and returns the value
 	 * of its compartment or 1d otherwise
 	 * 
-	 * @param symbol
+	 * @param speciesId
 	 * @param val
 	 * @return
 	 */
-	public double getCompartmentValueOf(String symbol) {
-		Integer compartmentIndex = compartmentHash.get(symbol);
+	public double getCompartmentValueOf(String speciesId) {
+		Integer compartmentIndex = compartmentHash.get(speciesId);
 
 		// Is species with compartment
-		if (compartmentIndex != null) {
-			if (Y[compartmentIndex] != 0d) {
-				return Y[compartmentIndex];
-			}
+		if ((compartmentIndex != null)
+				&& (Y[compartmentIndex.intValue()] != 0d)) {
+			return Y[compartmentIndex.intValue()];
 		}
 
 		// Is compartment or parameter or there is no compartment for this
 		// species
+		// TODO: Replace by user-defined default value?
 		return 1d;
-
 	}
 
 
@@ -445,7 +440,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 		for (int i = 0; i < model.getNumReactions(); i++) {
 			KineticLaw k = model.getReaction(i).getKineticLaw();
 			if (k != null) {
-				p += k.getNumParameters();
+				p += k.getNumLocalParameters();
 			}
 		}
 		return p;
@@ -1269,6 +1264,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 	 *         model system of this class.
 	 * @throws SBMLException
 	 */
+	@SuppressWarnings("deprecation")
 	protected void processVelocities(double[] changeRate) throws SBMLException {
 		int reactionIndex, sReferenceIndex, speciesIndex;
 		Species species;
@@ -1418,8 +1414,8 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 			model.getParameter(paramNum).setValue(params[paramNum]);
 		for (reactionNum = 0; reactionNum < model.getNumReactions(); reactionNum++) {
 			KineticLaw law = model.getReaction(reactionNum).getKineticLaw();
-			for (localPnum = 0; localPnum < law.getNumParameters(); localPnum++)
-				law.getParameter(localPnum).setValue(params[paramNum++]);
+			for (localPnum = 0; localPnum < law.getNumLocalParameters(); localPnum++)
+				law.getLocalParameter(localPnum).setValue(params[paramNum++]);
 		}
 		if (model.getNumInitialAssignments() > 0 || model.getNumEvents() > 0)
 			try {
@@ -1500,6 +1496,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 	 * (non-Javadoc)
 	 * @see org.sbml.simulator.math.ValueHolder#getCurrentStoichiometry()
 	 */
+	@SuppressWarnings("deprecation")
 	public double getCurrentStoichiometry(String id) {
 		Integer pos=symbolHash.get(id);
 		if(pos!=null) {
@@ -1522,7 +1519,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 		else if(sr!=null){
 			return sr.getStoichiometry();
 		}
-		return 1;
+		return 1d;
 	}
 	
 	/*
@@ -1539,34 +1536,10 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 		}
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * @see org.sbml.simulator.math.ValueHolder#getFuncArg()
+	/**
+	 * 
+	 * @return
 	 */
-	public Double getFuncArg(String name) {
-		if (funcArgs != null && funcArgs.containsKey(name)) {
-			// replace the name by the associated value of the argument
-			return funcArgs.get(name).doubleValue();
-		}
-		return null;
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * @see org.sbml.simulator.math.ValueHolder#setFuncArgs()
-	 */
-	public void setFuncArgs(Hashtable<String, Double> argValues) {
-		this.funcArgs=argValues;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.sbml.simulator.math.ValueHolder#setFuncArgs()
-	 */
-	public void clearFuncArgs() {
-		funcArgs.clear();
-	}
-	
 	public ASTNodeInterpreter getInterpreter() {
 		return nodeInterpreter;
 	}

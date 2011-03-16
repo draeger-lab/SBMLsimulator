@@ -20,6 +20,7 @@ package org.sbml.simulator.math;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.sbml.jsbml.ASTNode;
 import org.sbml.jsbml.CallableSBase;
@@ -39,13 +40,20 @@ import org.sbml.jsbml.util.compilers.ASTNodeCompiler;
 import org.sbml.jsbml.util.compilers.ASTNodeValue;
 
 /**
+ * @author Roland Keller
  * @author Andreas Dr&auml;ger
  * @version $Rev$
  * @since 1.0
  */
 public class ASTNodeInterpreter implements ASTNodeCompiler {
 
-    /**
+	/**
+	 * This table is necessary to store the values of arguments when a function
+	 * definition is evaluated. For an identifier of the argument the
+	 * corresponding value will be stored.
+	 */
+	private Map<String, Double> funcArgs;
+	/**
      * 
      */
     private ValueHolder valueHolder;
@@ -177,28 +185,11 @@ public class ASTNodeInterpreter implements ASTNodeCompiler {
 		return new ASTNodeValue(Math.ceil(node.compile(this).toDouble()), this);
 	}
 
-    /* (non-Javadoc)
-     * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#compile(org.sbml.jsbml.Compartment)
-     */
-    public ASTNodeValue compile(Compartment c) {
-	return new ASTNodeValue(valueHolder.getCurrentCompartmentSize(c.getId()), this);
-    }
-
-    /* (non-Javadoc)
-     * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#compile(double, int, java.lang.String)
-     */
-    public ASTNodeValue compile(double mantissa, int exponent, String units) {
-		return new ASTNodeValue(mantissa * Math.pow(10, exponent), this);
-	}
-
-    public ASTNodeValue compile(double value, String units) {
-		// TODO: units!
-		return new ASTNodeValue(value, this);
-	}
-
-    public ASTNodeValue compile(int value, String units) {
-		// TODO: units!
-		return new ASTNodeValue(value, this);
+    /**
+	 * 
+	 */
+	private void clearFuncArgs() {
+		funcArgs.clear();
 	}
 
     /* (non-Javadoc)
@@ -239,7 +230,7 @@ public class ASTNodeInterpreter implements ASTNodeCompiler {
 				SBase parent = p.getParentSBMLObject().getParentSBMLObject();
 				if (parent instanceof KineticLaw) {
 					ListOf<LocalParameter> params = ((KineticLaw) parent)
-							.getListOfParameters();
+							.getListOfLocalParameters();
 					for (int i = 0; i < params.size(); i++) {
 						if (p.getId() == params.get(i).getId()) {
 							return new ASTNodeValue(params.get(i).getValue(),
@@ -263,10 +254,34 @@ public class ASTNodeInterpreter implements ASTNodeCompiler {
 	}
 
     /* (non-Javadoc)
+     * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#compile(org.sbml.jsbml.Compartment)
+     */
+    public ASTNodeValue compile(Compartment c) {
+	return new ASTNodeValue(valueHolder.getCurrentCompartmentSize(c.getId()), this);
+    }
+
+    /* (non-Javadoc)
+     * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#compile(double, int, java.lang.String)
+     */
+    public ASTNodeValue compile(double mantissa, int exponent, String units) {
+		return new ASTNodeValue(mantissa * Math.pow(10, exponent), this);
+	}
+
+    public ASTNodeValue compile(double value, String units) {
+		// TODO: units!
+		return new ASTNodeValue(value, this);
+	}
+
+    public ASTNodeValue compile(int value, String units) {
+		// TODO: units!
+		return new ASTNodeValue(value, this);
+	}
+
+    /* (non-Javadoc)
      * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#compile(java.lang.String)
      */
     public ASTNodeValue compile(String name) {
-		Double funcArg=valueHolder.getFuncArg(name);
+		Double funcArg=getFuncArg(name);
     	if (funcArg != null) {
 			return new ASTNodeValue(funcArg, this);
 		} else if (!Double.isNaN(valueHolder.getValueOf(name))) {
@@ -382,9 +397,9 @@ public class ASTNodeInterpreter implements ASTNodeCompiler {
 			argValues.put(lambda.getChild(i).compile(this).toString(),
 					arguments.get(i).compile(this).toDouble());
 		}
-		valueHolder.setFuncArgs(argValues);
+		setFuncArgs(argValues);
 		ASTNodeValue value = lambda.getRightChild().compile(this);
-		valueHolder.clearFuncArgs();
+		clearFuncArgs();
 		return value;
 	}
 
@@ -416,19 +431,32 @@ public class ASTNodeInterpreter implements ASTNodeCompiler {
     public ASTNodeValue getConstantFalse() {
 		return new ASTNodeValue(false, this);
 	}
-
+    
     /* (non-Javadoc)
      * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#getConstantPi()
      */
     public ASTNodeValue getConstantPi() {
 		return new ASTNodeValue(Math.PI, this);
 	}
-    
+
     /* (non-Javadoc)
      * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#getConstantTrue()
      */
     public ASTNodeValue getConstantTrue() {
 		return new ASTNodeValue(true, this);
+	}
+
+    /**
+     * 
+     * @param name
+     * @return
+     */
+	private Double getFuncArg(String name) {
+		if ((funcArgs != null) && funcArgs.containsKey(name)) {
+			// replace the name by the associated value of the argument
+			return funcArgs.get(name).doubleValue();
+		}
+		return null;
 	}
 
     /* (non-Javadoc)
@@ -465,7 +493,7 @@ public class ASTNodeInterpreter implements ASTNodeCompiler {
 		ASTNodeValue function = nodes.get(nodes.size() - 1).compile(this);
 		return function;
 	}
-
+    
     /* (non-Javadoc)
      * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#leq(org.sbml.jsbml.ASTNode, org.sbml.jsbml.ASTNode)
      */
@@ -481,7 +509,7 @@ public class ASTNodeInterpreter implements ASTNodeCompiler {
 		return new ASTNodeValue(Maths.ln(node.compile(this).toDouble()), this);
 
 	}
-    
+
     /* (non-Javadoc)
      * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#log(org.sbml.jsbml.ASTNode)
      */
@@ -521,22 +549,6 @@ public class ASTNodeInterpreter implements ASTNodeCompiler {
 		}
 		return new ASTNodeValue(value, this);
 	}
-
-    /* (non-Javadoc)
-     * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#neq(org.sbml.jsbml.ASTNode, org.sbml.jsbml.ASTNode)
-     */
-    public ASTNodeValue neq(ASTNode left, ASTNode right) throws SBMLException {
-		return new ASTNodeValue(left.compile(this).toDouble() != right.compile(
-				this).toDouble(), this);
-	}
-
-    /* (non-Javadoc)
-     * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#not(org.sbml.jsbml.ASTNode)
-     */
-    public ASTNodeValue not(ASTNode node) throws SBMLException {
-		return node.compile(this).toBoolean() ? getConstantFalse()
-				: getConstantTrue();
-	}
     
  // /**
 	// *
@@ -557,6 +569,22 @@ public class ASTNodeInterpreter implements ASTNodeCompiler {
 	// child = replace(child, args);
 	// return lambda;
 	// }
+
+    /* (non-Javadoc)
+     * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#neq(org.sbml.jsbml.ASTNode, org.sbml.jsbml.ASTNode)
+     */
+    public ASTNodeValue neq(ASTNode left, ASTNode right) throws SBMLException {
+		return new ASTNodeValue(left.compile(this).toDouble() != right.compile(
+				this).toDouble(), this);
+	}
+
+    /* (non-Javadoc)
+     * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#not(org.sbml.jsbml.ASTNode)
+     */
+    public ASTNodeValue not(ASTNode node) throws SBMLException {
+		return node.compile(this).toBoolean() ? getConstantFalse()
+				: getConstantTrue();
+	}
 
     /* (non-Javadoc)
      * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#or(java.util.List)
@@ -637,13 +665,21 @@ public class ASTNodeInterpreter implements ASTNodeCompiler {
 
 	}
 
+    /**
+	 * 
+	 * @param argValues
+	 */
+	private void setFuncArgs(Hashtable<String, Double> argValues) {
+		this.funcArgs=argValues;
+	}
+
     /* (non-Javadoc)
      * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#sin(org.sbml.jsbml.ASTNode)
      */
     public ASTNodeValue sin(ASTNode node) throws SBMLException {
 		return new ASTNodeValue(Math.sin(node.compile(this).toDouble()), this);
 	}
-
+    
     /* (non-Javadoc)
      * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#sinh(org.sbml.jsbml.ASTNode)
      */
@@ -657,6 +693,7 @@ public class ASTNodeInterpreter implements ASTNodeCompiler {
     public ASTNodeValue sqrt(ASTNode node) throws SBMLException {
 		return new ASTNodeValue(Math.sqrt(node.compile(this).toDouble()), this);
 	}
+    
 
     /* (non-Javadoc)
      * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#symbolTime(java.lang.String)
@@ -664,7 +701,7 @@ public class ASTNodeInterpreter implements ASTNodeCompiler {
     public ASTNodeValue symbolTime(String timeSymbol) {
 		return new ASTNodeValue(valueHolder.getTime(), this);
 	}
-    
+
     /* (non-Javadoc)
      * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#tan(org.sbml.jsbml.ASTNode)
      */
@@ -679,7 +716,6 @@ public class ASTNodeInterpreter implements ASTNodeCompiler {
 		return new ASTNodeValue(Math.tanh(node.compile(this).toDouble()), this);
 	}
     
-
     /* (non-Javadoc)
      * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#times(java.util.List)
      */
@@ -694,25 +730,25 @@ public class ASTNodeInterpreter implements ASTNodeCompiler {
 		return new ASTNodeValue(value, this);
 	}
 
+    public String toString(ASTNode value) {
+		return value.toString();
+	}
+    
     /* (non-Javadoc)
      * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#uMinus(org.sbml.jsbml.ASTNode)
      */
     public ASTNodeValue uMinus(ASTNode node) throws SBMLException {
 		return new ASTNodeValue(-node.compile(this).toDouble(), this);
 	}
-
-    public String toString(ASTNode value) {
-		return value.toString();
-	}
-    
-    /* (non-Javadoc)
+	
+	/* (non-Javadoc)
      * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#unknownValue()
      */
     public ASTNodeValue unknownValue() throws SBMLException{
 		return new ASTNodeValue(Double.NaN, this);
 	}
 
-    /* (non-Javadoc)
+	/* (non-Javadoc)
      * @see org.sbml.jsbml.util.compilers.ASTNodeCompiler#xor(java.util.List)
      */
     public ASTNodeValue xor(List<ASTNode> nodes) throws SBMLException {
