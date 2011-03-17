@@ -252,39 +252,21 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		bestPerGenerationDist = Double.POSITIVE_INFINITY;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * eva2.server.go.problems.AbstractProblemDouble#getAdditionalFileStringHeader
-	 * ()
-	 */
-	public String[] getAdditionalFileStringHeader() {
+	@Override
+	public String[] getAdditionalDataHeader() {
 		String[] superHead = super.getAdditionalDataHeader();
 		return ToolBox.appendArrays(superHead, SIMULATION_DATA);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * eva2.server.go.problems.AbstractProblemDouble#getAdditionalFileStringInfo
-	 * ()
-	 */
-	public String[] getAdditionalFileStringInfo() {
+	@Override
+	public String[] getAdditionalDataInfo() {
 		String[] superInfo = super.getAdditionalDataInfo();
 		return ToolBox.appendArrays(superInfo,
 				"Result of the best per generation model simulation");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * eva2.server.go.problems.AbstractProblemDouble#getAdditionalFileStringValue
-	 * (eva2.server.go.PopulationInterface)
-	 */
-	public Object[] getAdditionalFileStringValue(PopulationInterface pop) {
+	@Override
+	public Object[] getAdditionalDataValue(PopulationInterface pop) {
 		Object[] superVals = super.getAdditionalDataValue(pop);
 		return ToolBox.appendArrays(superVals, bestPerGeneration);
 	}
