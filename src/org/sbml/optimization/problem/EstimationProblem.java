@@ -69,7 +69,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	/**
 	 * 
 	 */
-	private DESSolver solver = null;
+	private transient DESSolver solver = null;
 
 	/**
 	 * 
