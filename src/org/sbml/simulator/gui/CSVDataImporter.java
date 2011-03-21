@@ -129,7 +129,7 @@ public class CSVDataImporter {
 	String expectedHeader[] = getExpectedTableHead(model, data
 		.getTimeName()); // According to the model: which symbols
 
-	CSVImporter converter = new CSVImporter(null, false, pathname, true,
+	CSVImporter converter = new CSVImporter(null, false, pathname, false,
 				expectedHeader);
 
 	CSVReader reader = converter.getCSVReader();
