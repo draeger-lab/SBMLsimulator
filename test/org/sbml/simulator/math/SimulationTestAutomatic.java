@@ -17,25 +17,23 @@
  */
 package org.sbml.simulator.math;
 
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-
-import javax.imageio.ImageIO;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.xml.stax.SBMLReader;
+import org.sbml.simulator.gui.CSVDataImporter;
+import org.sbml.simulator.gui.SimulationWorker;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
+import org.sbml.simulator.math.odes.HighamHall54Solver;
 import org.sbml.simulator.math.odes.MultiBlockTable;
-import org.sbml.simulator.math.odes.RKEventSolver;
-
-import de.zbit.io.CSVReader;
-import eva2.gui.Plot;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -43,7 +41,7 @@ import eva2.gui.Plot;
  * @since 1.0
  */
 public class SimulationTestAutomatic {
-
+	private static final Logger logger = Logger.getLogger(SimulationTestAutomatic.class.getName());
 	static {
 //		try {
 //			System.loadLibrary("sbmlj");
@@ -62,10 +60,7 @@ public class SimulationTestAutomatic {
 	 */
 	public static void main(String[] args) throws IOException {
 		String sbmlfile, csvfile, configfile;
-		int start = 0;
-		double duration = 0d, steps = 0d;
-
-		for (int modelnr = 1; modelnr <= 2; modelnr++) {
+		for (int modelnr = 28; modelnr <= 28; modelnr++) {
 			System.out.println("model " + modelnr);
 
 			StringBuilder modelFile = new StringBuilder();
@@ -77,110 +72,71 @@ public class SimulationTestAutomatic {
 			modelFile.append(path);
 			modelFile.insert(0, args[0]);
 			path = modelFile.toString();
-			sbmlfile = path + "-sbml-l2v4.xml";
+			sbmlfile = path + "-sbml-l3v1.xml";
 			csvfile = path + "-results.csv";
 			configfile = path + "-settings.txt";
 
-			try {
-				BufferedReader reader = new BufferedReader(new FileReader(
-						configfile));
-				String line = reader.readLine();
-				start = Integer.valueOf(line
-						.substring(line.lastIndexOf(' ') + 1));
-				line = reader.readLine();
-				duration = Double.valueOf(line
-						.substring(line.lastIndexOf(' ') + 1));
-				line = reader.readLine();
-				steps = Double.valueOf(line
-						.substring(line.lastIndexOf(' ') + 1));
-				reader.close();
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-
-//			SBMLio sbmlIo = new SBMLio(new LibSBMLReader(), new LibSBMLWriter());
+			Properties props = new Properties();
+			props.load(new BufferedReader(new FileReader(configfile)));
+//			int start = Integer.valueOf(props.getProperty("start"));
+			double duration = Double.valueOf(props.getProperty("duration"));
+			double steps = Double.valueOf(props.getProperty("steps"));
+//			double absolute = Double.valueOf(props.getProperty("absolute"));
+//			double relative = Double.valueOf(props.getProperty("relative"));
+			/*
+			 * Other variables:
+			 * variables: S1, S2
+			 * amount:
+			 * concentration:
+			 */
 
 			try {
 				Model model = (new SBMLReader()).readSBML(sbmlfile).getModel();
 					//sbmlIo.convert2Model(sbmlfile);
 
-				// RKSolver rk = new RKSolver();
-				AbstractDESSolver rk = new RKEventSolver();
-
-				SBMLinterpreter interpreter = new SBMLinterpreter(model);
-				double time = 0;
+				AbstractDESSolver solver = new HighamHall54Solver();
 
 				// get timepoints
-				CSVReader csvreader = new CSVReader(csvfile);
-//				,					',', '\'', 1);
-				String[][] input = csvreader.read();
-				double[] timepoints = new double[input.length];
-				for (int i = 0; i < timepoints.length; i++) {
-					timepoints[i] = Double.valueOf(input[i][0]);
-				}
-				csvreader.close();
+				CSVDataImporter csvimporter = new CSVDataImporter();
+				MultiBlockTable inputData = csvimporter.convertWithoutWindows(model, csvfile);
+				
+				double[] timepoints = inputData.getTimePoints();
 
-				// solve By StepSize
-				// rk.setStepSize(duration / steps);
-				// double solution[][] = rk.solveByStepSize(interpreter,
-				// interpreter
-				// .getInitialValues(), time, duration);
-
-				// solve At StepSize
-
-				MultiBlockTable solution = rk.solve(interpreter, interpreter
-						.getInitialValues(), timepoints);
-				Double[][] data = new Double[input[0].length - 1][input.length];
-				Double[][] solutiontrans = new Double[input[0].length - 1][input.length];
+				
+				duration=timepoints[timepoints.length-1]-timepoints[0];
+				solver.setStepSize(duration / steps);
+				MultiBlockTable solution=SimulationWorker.solveAtTimePoints(solver, model, timepoints, solver.getStepSize(), null);
+				
+				
 				int from = model.getNumCompartments();
 				// from = 0;
 				int to = from + model.getNumSpecies();
 
-				for (int i = 1; i < data.length + 1; i++) {
-					for (int j = 0; j < input.length; j++) {
-						data[i - 1][j] = Double.valueOf(input[j][i]);
-						solutiontrans[i - 1][j] = solution.getValueAt(j, i
-								+ from);
-					}
-				}
-
+				
 				Distance distance = new RSE();
 
+				double dist=distance.distance(solution, inputData);
+				
 				BufferedWriter writer = new BufferedWriter(new FileWriter(
 						args[1] + modelnr + "-deviation.txt"));
 				writer.write("relative distance for model-" + modelnr);
 				writer.newLine();
-				writer.write(String.valueOf(distance.distance(data,
-						solutiontrans)));
+				/*
+				writer.write(String.valueOf());
+				*/
+				writer.write(String.valueOf(dist));
 				writer.close();
-
-				if (rk.isUnstable())
-					System.err.println("unstable!");
-				else {
-					Plot plot = new Plot("Simulation", "time", "value");
-
-					for (int i = 0; i < solution.getRowCount(); i++) {
-						for (int j = 0; j < solutiontrans.length; j++) {
-
-							double sym = solutiontrans[j][i];
-							double un = data[j][i];
-							plot.setConnectedPoint(time, sym, j);
-							plot.setUnconnectedPoint(time, un, 90 + j);
-
-						}
-						time += rk.getStepSize();
-
-					}
-					// save graph as jpg
-					BufferedImage img = new BufferedImage(plot
-							.getFunctionArea().getWidth(), plot
-							.getFunctionArea().getHeight(),
-							BufferedImage.TYPE_INT_RGB);
-					plot.getFunctionArea().paint(img.createGraphics());
-					ImageIO.write(img, "jpg", new File(args[1] + modelnr
-							+ "-graph.jpg"));
-
-					// plot.dispose();
+				
+				
+				if(dist>0.1) {
+					logger.log(Level.INFO, "relative distance for model-" + modelnr);
+					logger.log(Level.INFO,String.valueOf(dist));
+				}
+				if (solver.isUnstable()) {
+					logger.warning("unstable!");
+				} else {
+					(new Thread(new Plotter(solution, inputData, args[1]
+							+ modelnr + "-graph.jpg"))).start();
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
