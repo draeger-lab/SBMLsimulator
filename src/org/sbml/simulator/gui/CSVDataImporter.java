@@ -129,7 +129,8 @@ public class CSVDataImporter {
 	String expectedHeader[] = getExpectedTableHead(model, data
 		.getTimeName()); // According to the model: which symbols
 
-	CSVImporter converter = new CSVImporter(pathname, expectedHeader);
+	CSVImporter converter = new CSVImporter(null, false, pathname, true,
+				expectedHeader);
 
 	CSVReader reader = converter.getCSVReader();
 	String stringData[][] = reader.getData();
@@ -179,6 +180,61 @@ public class CSVDataImporter {
 		    .toHTML(FILE_NOT_CORRECTLY_FORMATTED), "Unreadable file",
 		JOptionPane.WARNING_MESSAGE);
 	}
+	return null;
+    }
+    
+    
+    /**
+     * @param model
+     * @param pathname
+     * @return
+     * @throws IOException
+     */
+    public MultiBlockTable convertWithoutWindows(Model model, String pathname) throws IOException {
+
+	MultiBlockTable data = new MultiBlockTable();
+	String expectedHeader[] = getExpectedTableHead(model, data
+		.getTimeName()); // According to the model: which symbols
+
+	CSVImporter converter = new CSVImporter(null, true, pathname, true, expectedHeader);
+
+	CSVReader reader = converter.getCSVReader();
+	String stringData[][] = reader.getData();
+
+	int i, j, timeColumn = converter.getColumnIndex(data.getTimeName());
+	if (timeColumn >= 0) {
+	    double timePoints[] = new double[stringData.length];
+	    for (i = 0; i < stringData.length; i++) {
+		timePoints[i] = Double.parseDouble(stringData[i][timeColumn]);
+	    }
+	    data.setTimePoints(timePoints);
+	    // exclude time column
+	    String newHead[] = new String[(int) Math.max(0, converter
+		    .getNewHead().length - 1)];
+
+	    i = 0;
+	    for (String head : converter.getNewHead()) {
+		if (!head.equals(data.getTimeName())) {
+		    newHead[i++] = head;
+		}
+	    }
+	    data.addBlock(newHead); // alphabetically sorted
+	    Map<String, Integer> nameToColumn = new HashMap<String, Integer>();
+			for (i = 0; i < newHead.length; i++) {
+				nameToColumn.put(newHead[i], converter
+						.getColumnIndex(newHead[i]));
+			}
+	    double dataBlock[][] = data.getBlock(0).getData();
+			for (i = 0; i < dataBlock.length; i++) {
+				j = 0; // timeCorrection(j, timeColumn)
+				for (String head : newHead) {
+					dataBlock[i][j] = Double
+							.parseDouble(stringData[i][nameToColumn.get(head)]);
+					j++;
+				}
+			}
+	    return data;
+	} 
 	return null;
     }
 
