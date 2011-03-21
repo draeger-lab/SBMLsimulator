@@ -19,8 +19,10 @@ package org.sbml.simulator.gui;
 
 import java.awt.Component;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -125,7 +127,7 @@ public class CSVDataImporter {
 
 	MultiBlockTable data = new MultiBlockTable();
 	String expectedHeader[] = getExpectedTableHead(model, data
-		.getTimeName());
+		.getTimeName()); // According to the model: which symbols
 
 	CSVImporter converter = new CSVImporter(pathname, expectedHeader);
 
@@ -156,15 +158,21 @@ public class CSVDataImporter {
 		    newHead[i++] = head;
 		}
 	    }
-	    data.addBlock(newHead);
+	    data.addBlock(newHead); // alphabetically sorted
+	    Map<String, Integer> nameToColumn = new HashMap<String, Integer>();
+			for (i = 0; i < newHead.length; i++) {
+				nameToColumn.put(newHead[i], converter
+						.getColumnIndex(newHead[i]));
+			}
 	    double dataBlock[][] = data.getBlock(0).getData();
-	    for (i = 0; i < dataBlock.length; i++) {
-		for (String head : newHead) {
-		    j = converter.getColumnIndex(head);
-		    dataBlock[i][timeCorrection(j, timeColumn)] = Double
-			    .parseDouble(stringData[i][j]);
-		}
-	    }
+			for (i = 0; i < dataBlock.length; i++) {
+				j = 0; // timeCorrection(j, timeColumn)
+				for (String head : newHead) {
+					dataBlock[i][j] = Double
+							.parseDouble(stringData[i][nameToColumn.get(head)]);
+					j++;
+				}
+			}
 	    return data;
 	} else if (!converter.isCanceled()) {
 	    JOptionPane.showMessageDialog(parent, StringUtil
