@@ -50,7 +50,7 @@ public class AdamsMoultonSolver extends FirstOrderSolver{
 
 	@Override
 	protected void createIntegrator() {
-		integrator=new AdamsMoultonIntegrator(10, Math.min(1e-8,Math.min(1.0,getStepSize())), Math.min(1.0,getStepSize()), 0.00001, 0.00001);
+		integrator=new AdamsMoultonIntegrator(5, Math.min(1e-8,Math.min(1.0,getStepSize())), Math.min(1.0,getStepSize()), 0.00001, 0.00001);
 	}
 
 }

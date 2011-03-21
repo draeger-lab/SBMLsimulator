@@ -352,7 +352,9 @@ public abstract class AbstractDESSolver implements DESSolver, EventHandler {
 			for (DESAssignment assignment : assignments) {
 				index = assignment.getIndex();
 
-				yTemp[index] = assignment.getValue() + change[index];
+//				yTemp[index] = assignment.getValue() + change[index];
+				// TODO: Where do we have to add the change?
+				yTemp[index] = assignment.getValue();
 				/*
 				 * System.out .printf(
 				 * "time %s: \tYtemp[%s]_old = %s\tYtemp[%s]_new = %s\t change %s \n"
