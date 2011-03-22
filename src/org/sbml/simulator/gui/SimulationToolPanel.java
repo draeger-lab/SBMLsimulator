@@ -186,7 +186,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	maxTime = 1E5;
 	t1 = new SpinnerNumberModel(0d, 0d, maxTime, spinnerStepSize);
 	t2 = new SpinnerNumberModel(1d, 0d, maxTime, spinnerStepSize);
-	maxStepsPerUnit = 100;
+	maxStepsPerUnit = 1000;
 	double integrationStepSize = spinnerStepSize;
 	SBPreferences prefs = SBPreferences
 		.getPreferencesFor(SimulatorOptions.class);
