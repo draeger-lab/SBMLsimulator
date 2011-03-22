@@ -61,7 +61,7 @@ public class RSE extends Distance {
 	 */
 	@Override
 	double additiveTerm(double x, double y, double root, double defaultValue) {
-		return (y != 0d) ? Math.pow((x - y) / y, root) : defaultValue;
+		return (y != 0d) ? Math.pow((x - y) / y, root) : Math.abs(x - y);
 	}
 
 	/*
