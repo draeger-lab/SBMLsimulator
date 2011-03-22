@@ -192,7 +192,7 @@ public abstract class AbstractDESSolver implements DESSolver, EventHandler {
 	 */
 	double computeNextState(DESystem DES, double t, double stepSize,
 			double[] yPrev, double[] change, double[] yTemp, boolean increase)
-			throws IntegrationException {
+			throws IntegrationException {		
 		computeChange(DES, yPrev, t, stepSize, change);
 		checkSolution(change);
 		Mathematics.vvAdd(yPrev, change, yTemp);
@@ -230,7 +230,7 @@ public abstract class AbstractDESSolver implements DESSolver, EventHandler {
 	 * @return
 	 */
 	public int inBetweenSteps(double lastTime, double nextTime, double stepSize) {
-		return (int) Math.floor((nextTime - lastTime) / stepSize /* + 1 */);
+		return (int) (Math.floor((nextTime - lastTime) / stepSize) + 1);
 	}
 
 	/**
@@ -351,16 +351,7 @@ public abstract class AbstractDESSolver implements DESSolver, EventHandler {
 		while (assignments != null) {
 			for (DESAssignment assignment : assignments) {
 				index = assignment.getIndex();
-
-//				yTemp[index] = assignment.getValue() + change[index];
-				// TODO: Where do we have to add the change?
 				yTemp[index] = assignment.getValue();
-				/*
-				 * System.out .printf(
-				 * "time %s: \tYtemp[%s]_old = %s\tYtemp[%s]_new = %s\t change %s \n"
-				 * , time, index, Ytemp[index], index, (event.getValue() -
-				 * (Ytemp[index])), change[index]);
-				 */
 			}
 
 			assignments = (ArrayList<DESAssignment>) EDES.getEventAssignments(
