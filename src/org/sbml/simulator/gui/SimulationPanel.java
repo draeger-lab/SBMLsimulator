@@ -36,9 +36,9 @@ import javax.swing.table.TableModel;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Quantity;
+import org.sbml.optimization.PlotOptions;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.SBMLsimulator;
-import org.sbml.simulator.SimulatorOptions;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.odes.DESSolver;
 import org.sbml.simulator.math.odes.MultiBlockTable;
@@ -72,8 +72,8 @@ public class SimulationPanel extends JPanel implements
      */
     private JTable expTable, simTable;
     /**
-	 * 
-	 */
+     * 
+     */
     private JToolBar footPanel;
     /**
      * Switch to decide whether or not to draw the foot panel.
@@ -209,8 +209,9 @@ public class SimulationPanel extends JPanel implements
     }
 
     /**
-	 * 
-	 */
+     * 
+     * @return
+     */
     public Properties getProperties() {
 	Properties p = ((SimulationToolPanel) footPanel.getComponent(0))
 		.getProperties();
@@ -368,17 +369,17 @@ public class SimulationPanel extends JPanel implements
     }
 
     /**
-	 * 
-	 */
+     * 
+     */
     public void savePlotImage() {
 	try {
 	    SBPreferences prefs = SBPreferences
-		    .getPreferencesFor(SimulatorOptions.class);
-	    String saveDir = prefs.get(SimulatorOptions.PLOT_SAVE_DIR)
+		    .getPreferencesFor(PlotOptions.class);
+	    String saveDir = prefs.get(PlotOptions.PLOT_SAVE_DIR)
 		    .toString();
 	    float compression = prefs
-		    .getFloat(SimulatorOptions.JPEG_COMPRESSION_FACTOR);
-	    prefs.put(SimulatorOptions.PLOT_SAVE_DIR, visualizationPanel
+		    .getFloat(PlotOptions.JPEG_COMPRESSION_FACTOR);
+	    prefs.put(PlotOptions.PLOT_SAVE_DIR, visualizationPanel
 		    .getPlot().savePlotImage(saveDir,
 			Float.valueOf(compression)));
 	} catch (Exception exc) {
@@ -387,8 +388,8 @@ public class SimulationPanel extends JPanel implements
     }
 
     /**
-	 * 
-	 */
+     * 
+     */
     public void saveSimulationResults() {
 	try {
 	    TableModel simTabModel = getSimulationResultsTable();

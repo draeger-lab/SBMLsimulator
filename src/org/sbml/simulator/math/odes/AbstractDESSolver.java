@@ -645,6 +645,14 @@ public abstract class AbstractDESSolver implements DESSolver, EventHandler {
 		return data;
 	}
 
+	/**
+	 * 
+	 * @param DES
+	 * @param result
+	 * @param timeBegin
+	 * @return
+	 * @throws IntegrationException
+	 */
 	private double[] computeSteadyState(FastProcessDESystem DES,
 			double[] result, double timeBegin) throws IntegrationException {
 		double[] oldValues = new double[result.length];
@@ -685,7 +693,10 @@ public abstract class AbstractDESSolver implements DESSolver, EventHandler {
 		return true;
 
 	}
-	
+
+	/**
+	 * 
+	 */
 	public double g(double t, double[] y) throws EventException {
 		if(Double.isNaN(t)) {
 			return -1d;
@@ -693,11 +704,17 @@ public abstract class AbstractDESSolver implements DESSolver, EventHandler {
 		return checkSolution(y)?1d:-1d;
 	}
 
+	/**
+	 * 
+	 */
 	public int eventOccurred(double t, double[] y, boolean increasing)
 			throws EventException {
 		return STOP;
 	}
 
+	/**
+	 * 
+	 */
 	public void resetState(double t, double[] y) throws EventException {
 	}
 }

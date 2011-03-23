@@ -24,6 +24,7 @@ import org.sbml.jsbml.resources.Resource;
 import org.sbml.jsbml.xml.stax.SBMLReader;
 import org.sbml.simulator.SimulatorOptions;
 import org.sbml.simulator.gui.SimulatorUI;
+import org.sbml.simulator.math.odes.SimulationOptions;
 
 import de.zbit.io.CSVOptions;
 import de.zbit.util.prefs.SBProperties;
@@ -92,11 +93,11 @@ public class SimulationModeTest {
 		double stepsize = (end - start)
 			/ Double.parseDouble(cfg.get("steps").toString());
 
-		settings.put(SimulatorOptions.SIM_START_TIME, Double
+		settings.put(SimulationOptions.SIM_START_TIME, Double
 			.valueOf(start));
 		settings
-			.put(SimulatorOptions.SIM_END_TIME, Double.valueOf(end));
-		settings.put(SimulatorOptions.SIM_STEP_SIZE, Double
+			.put(SimulationOptions.SIM_END_TIME, Double.valueOf(end));
+		settings.put(SimulationOptions.SIM_STEP_SIZE, Double
 			.valueOf(stepsize));
 
 		// sbmlIo.convert2Model(sbmlfile);

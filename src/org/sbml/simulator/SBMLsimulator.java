@@ -24,9 +24,12 @@ import java.net.URL;
 
 import javax.xml.stream.XMLStreamException;
 
+import org.sbml.optimization.PlotOptions;
+import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.simulator.gui.SimulatorUI;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
+import org.sbml.simulator.math.odes.SimulationOptions;
 
 import de.zbit.gui.GUIOptions;
 import de.zbit.io.CSVOptions;
@@ -99,7 +102,9 @@ public class SBMLsimulator {
      */
     @SuppressWarnings("unchecked")
     public static Class<? extends KeyProvider>[] getCommandLineOptions() {
-	return new Class[] {SimulatorOptions.class, GUIOptions.class, CSVOptions.class};
+	return new Class[] { SimulatorOptions.class, SimulationOptions.class,
+		EstimationOptions.class, GUIOptions.class, PlotOptions.class,
+		CSVOptions.class };
     }
 
     /**

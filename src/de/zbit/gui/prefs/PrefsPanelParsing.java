@@ -28,7 +28,6 @@ import de.zbit.gui.LayoutHelper;
 import de.zbit.gui.prefs.FileSelector.Type;
 import de.zbit.io.CSVOptions;
 import de.zbit.io.SBFileFilter;
-import de.zbit.util.prefs.SBPreferences;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -36,57 +35,34 @@ import de.zbit.util.prefs.SBPreferences;
  * @version $Rev$
  * @since 1.0
  */
-public class PrefsPanelParsing extends PreferencesPanel {
+public class PrefsPanelParsing extends PreferencesPanelForKeyProvider {
 
     /**
      * Generated serial version identifier.
      */
     private static final long serialVersionUID = 4424293629377476108L;
-    /**
-	 * 
-	 */
-    private FileSelector chooser;
-    /**
-	 * 
-	 */
-    private JTextField tfQuoteChar, tfSeparatorChar;
-
+    
     /**
      * @throws IOException
      */
     public PrefsPanelParsing() throws IOException {
-	super();
+	super(CSVOptions.class);
     }
-
+    
     /*
      * (non-Javadoc)
-     * @see de.zbit.gui.prefs.PreferencesPanel#accepts(java.lang.Object)
+     * @see de.zbit.gui.prefs.PreferencesPanelForKeyProvider#init()
      */
-    public boolean accepts(Object key) {
-	return key.toString().startsWith("CSV_");
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see de.zbit.gui.prefs.PreferencesPanel#getTitle()
-     */
-    public String getTitle() {
-	return "Parsing and writing";
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see de.zbit.gui.prefs.PreferencesPanel#init()
-     */
+    @Override
     public void init() {
-	chooser = new FileSelector(Type.OPEN, SBFileFilter.createCSVFileFilter());
+	FileSelector chooser = new FileSelector(Type.OPEN, SBFileFilter.createCSVFileFilter());
 	chooser.setBorder(BorderFactory
 		.createTitledBorder(" Default directories for CSV files "));
 
-	tfQuoteChar = new JTextField(properties
+	JTextField tfQuoteChar = new JTextField(properties
 		.get(CSVOptions.CSV_FILES_QUOTE_CHAR));
 	tfQuoteChar.addKeyListener(this);
-	tfSeparatorChar = new JTextField(properties
+	JTextField tfSeparatorChar = new JTextField(properties
 		.get(CSVOptions.CSV_FILES_SEPARATOR_CHAR));
 	tfSeparatorChar.addKeyListener(this);
 	JPanel panel = new JPanel();
@@ -103,13 +79,5 @@ public class PrefsPanelParsing extends PreferencesPanel {
 	lh = new LayoutHelper(this);
 	lh.add(chooser, 0, 0, 1, 1, 1, 0);
 	lh.add(panel, 0, 1, 1, 1, 1, 0);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see de.zbit.gui.prefs.PreferencesPanel#loadPreferences()
-     */
-    protected SBPreferences loadPreferences() throws IOException {
-	return SBPreferences.getPreferencesFor(CSVOptions.class);
     }
 }

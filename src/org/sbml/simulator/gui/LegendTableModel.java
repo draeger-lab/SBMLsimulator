@@ -133,8 +133,8 @@ public class LegendTableModel extends AbstractTableModel {
     private Model model;
 
     /**
-	 * 
-	 */
+     * 
+     */
     public LegendTableModel() {
     }
 

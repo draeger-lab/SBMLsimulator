@@ -57,7 +57,6 @@ public class Plotter implements Runnable {
 	/* (non-Javadoc)
 	 * @see java.lang.Runnable#run()
 	 */
-	@Override
 	public void run() {
 		
 		Plot plot = new Plot("Simulation", "time", "value");
