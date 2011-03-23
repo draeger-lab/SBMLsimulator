@@ -91,7 +91,7 @@ public class NMetric extends Distance {
 	 */
 	@Override
 	public double getDefaultRoot() {
-		return 2d;
+		return 3d;
 	}
 
 	/*
@@ -101,12 +101,7 @@ public class NMetric extends Distance {
 	 */
 	@Override
 	public String getName() {
-		if (root == 1d) {
-			return "Manhattan";
-		} else if (root == 2d) {
-			return "Euclidean";
-		}
-		return root + "-metric";
+		return "N-metric";
 	}
 
 	/*

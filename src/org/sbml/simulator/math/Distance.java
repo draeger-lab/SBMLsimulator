@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.util.Iterator;
 
 import org.sbml.simulator.math.odes.MultiBlockTable;
+import org.sbml.simulator.math.odes.MultiBlockTable.Block;
 import org.sbml.simulator.util.ArrayIterator;
 
 /**
@@ -145,6 +146,26 @@ public abstract class Distance implements Serializable {
 			d += distance(x.getColumn(i), y.getColumn(identifiers[i]));
 		}
 		return d;
+	}
+	
+	/**
+	 * Computes the distance of a matrix to a zero matrix
+	 * 
+	 * @param block
+	 * @return
+	 */
+	public double distance(Block block) {
+		Double[][] data1 = new Double[block.getData().length][]; 
+		Double[][] data2 = new Double[block.getData().length][];
+		for(int i=0;i!=data1.length;i++) {
+			data1[i]=new Double[block.getData()[i].length];
+			data2[i]=new Double[block.getData()[i].length];
+			for(int j=0;j!=data1[i].length;j++) {
+				data1[i][j]=0d;
+				data2[i][j]=block.getData()[i][j];
+			}
+		}
+		return distance(data1,data2);
 	}
 
 	/**
