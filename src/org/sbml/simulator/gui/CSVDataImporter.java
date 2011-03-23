@@ -24,26 +24,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.UIManager;
-import javax.swing.table.TableModel;
-import javax.xml.stream.XMLStreamException;
 
 import org.sbml.jsbml.Model;
-import org.sbml.jsbml.SBMLDocument;
-import org.sbml.jsbml.xml.stax.SBMLReader;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 
 import de.zbit.gui.CSVImporter;
-import de.zbit.gui.GUITools;
 import de.zbit.io.CSVReader;
 import de.zbit.util.StringUtil;
 
 /**
  * @author Andreas Dr&auml;ger
+ * @author Roland Keller
  * @date 2010-09-03
  * @version $Rev$
  * @since 1.0
@@ -51,56 +43,18 @@ import de.zbit.util.StringUtil;
 public class CSVDataImporter {
 
     /**
-	 * 
-	 */
+     * 
+     */
     private static final String FILE_NOT_CORRECTLY_FORMATTED = "Cannot read this format, because no column identifiers are provided.";
 
     /**
-	 * 
-	 */
+     * 
+     */
     private static final String ADDITIONAL_COLUMNS_ARE_IGNORED = "The data file contains some elements that do not have a counterpart in the given model. These elements will not occur in the plot and are ignored in the analysis.";
 
     /**
-     * For testing only.
      * 
-     * @param args
-     *        path to an SBML file and path to a corresponding CSV file
-     * @throws XMLStreamException
-     * @throws IOException
      */
-	public static void main(String[] args) throws XMLStreamException,
-			IOException {
-		SBMLReader reader = new SBMLReader();
-		SBMLDocument doc = reader.readSBML(args[0]);
-		CSVDataImporter importer = new CSVDataImporter();
-
-		JFrame frame = new JFrame("Conveter test");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception exc) {
-			exc.printStackTrace();
-			GUITools.showErrorMessage(frame, exc);
-		}
-
-		TableModel table = importer.convert(doc.getModel(), args[1], frame);
-
-		if (table != null) {
-			frame.getContentPane().add(
-					new JScrollPane(new JTable(table),
-							JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-							JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
-			frame.pack();
-			frame.setLocationRelativeTo(null);
-			frame.setVisible(true);
-		} else {
-			System.exit(0);
-		}
-	}
-
-    /**
-	 * 
-	 */
     public CSVDataImporter() {
     }
 
