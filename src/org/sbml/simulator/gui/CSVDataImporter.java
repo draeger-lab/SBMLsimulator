@@ -196,7 +196,7 @@ public class CSVDataImporter {
 	String expectedHeader[] = getExpectedTableHead(model, data
 		.getTimeName()); // According to the model: which symbols
 
-	CSVImporter converter = new CSVImporter(null, true, pathname, true, expectedHeader);
+	CSVImporter converter = new CSVImporter(null, true, pathname, true, true,expectedHeader);
 
 	CSVReader reader = converter.getCSVReader();
 	String stringData[][] = reader.getData();
