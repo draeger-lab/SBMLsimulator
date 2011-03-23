@@ -155,6 +155,11 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object> {
 		return distance.distance(solveAtTimePoints(solver, model, data
 				.getTimePoints(), solver.getStepSize(), parent), data);
 	}
+	
+	
+	public void setStepSize(double stepSize) {
+		solver.setStepSize(stepSize);
+	}
 
 	/*
 	 * (non-Javadoc)

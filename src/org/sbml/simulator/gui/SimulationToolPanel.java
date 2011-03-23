@@ -291,7 +291,8 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
     public void computeDistance() throws SBMLException, IntegrationException,
 	ModelOverdeterminedException {
 	if (worker.isSetModel() && worker.isSetData()) {
-	    setCurrentDistance(worker.computeDistance());
+	    worker.setStepSize(getStepSize());
+		setCurrentDistance(worker.computeDistance());
 	    distField.setToolTipText(StringUtil.toHTML(String.format(
 		DISTANCE_FIELD_TOOL_TIP, distFun.getSelectedItem(), solvers
 			.getSelectedItem()), 60));
@@ -483,6 +484,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 			    .setDistance(SBMLsimulator.getAvailableDistances()[comBox
 				    .getSelectedIndex()].getConstructor()
 				    .newInstance());
+		    worker.setStepSize(getStepSize());
 		    computeDistance();
 		} else if (comBox.getName().equals("solvers")) {
 		    System.out.println(comBox.getSelectedItem() + "\t"
@@ -491,6 +493,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 			    .setDESSolver(SBMLsimulator.getAvailableSolvers()[comBox
 				    .getSelectedIndex()].getConstructor()
 				    .newInstance());
+		    worker.setStepSize(getStepSize());
 		    computeDistance();
 		}
 	    } catch (Exception exc) {
