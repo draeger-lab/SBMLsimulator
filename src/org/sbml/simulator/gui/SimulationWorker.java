@@ -156,7 +156,10 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object> {
 				.getTimePoints(), solver.getStepSize(), parent), data);
 	}
 	
-	
+	/**
+	 * 
+	 * @param stepSize
+	 */
 	public void setStepSize(double stepSize) {
 		solver.setStepSize(stepSize);
 	}
@@ -287,6 +290,14 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object> {
 	 */
 	public boolean isSetModel() {
 		return model != null;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean isSetSolver() {
+	    return solver != null;
 	}
 
 }

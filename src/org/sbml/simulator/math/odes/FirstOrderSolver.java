@@ -1,3 +1,20 @@
+/*
+ * $Id$
+ * $URL$
+ * ---------------------------------------------------------------------
+ * This file is part of SBMLsimulator, a Java-based simulator for models
+ * of biochemical processes encoded in the modeling language SBML.
+ *
+ * Copyright (C) 2007-2011 by the University of Tuebingen, Germany.
+ *
+ * This library is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation. A copy of the license
+ * agreement is provided in the file named "LICENSE.txt" included with
+ * this software distribution and also available online as
+ * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
+ * ---------------------------------------------------------------------
+ */
 package org.sbml.simulator.math.odes;
 
 import java.util.logging.Level;
@@ -8,18 +25,32 @@ import org.apache.commons.math.util.FastMath;
 
 import eva2.tools.math.Mathematics;
 
-public abstract class FirstOrderSolver extends AbstractDESSolver{
+/**
+ * 
+ * @author Roland Keller
+ * @version $Rev$
+ * @since 1.0
+ */
+public abstract class FirstOrderSolver extends AbstractDESSolver {
 	
-	private static final Logger logger = Logger.getLogger(FirstOrderSolver.class.getName());
+    /**
+     * 
+     */
+    private static final Logger logger = Logger.getLogger(FirstOrderSolver.class.getName());
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	/**
+	 * 
+	 */
 	protected AbstractIntegrator integrator;
 	
-	
-	protected abstract void createIntegrator();
+	/**
+	 * 
+	 */
 	public FirstOrderSolver() {
 		super();
 		createIntegrator();
@@ -36,7 +67,6 @@ public abstract class FirstOrderSolver extends AbstractDESSolver{
 		addHandler();
 	}
 	
-	
 	/**
 	 * 
 	 * @param stepSize
@@ -47,6 +77,7 @@ public abstract class FirstOrderSolver extends AbstractDESSolver{
 		createIntegrator();
 		addHandler();
 	}
+	
 	
 	/**
 	 * 
@@ -59,9 +90,19 @@ public abstract class FirstOrderSolver extends AbstractDESSolver{
 		
 	}
 	
+	/**
+	 * 
+	 */
 	private void addHandler() {
 		integrator.addEventHandler(this, 1, 1, 1);
 	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.odes.AbstractDESSolver#clone()
+	 */
+	@Override
+	public abstract FirstOrderSolver clone();
 	
 	/*
 	 * (non-Javadoc)
@@ -94,6 +135,11 @@ public abstract class FirstOrderSolver extends AbstractDESSolver{
 		}
 		return change;
 	}
+	
+	/**
+	 * 
+	 */
+	protected abstract void createIntegrator();
 	
 	/**
 	 * 

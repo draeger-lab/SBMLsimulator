@@ -22,15 +22,15 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
+import java.util.Properties;
 import java.util.prefs.BackingStoreException;
 
 import javax.swing.JCheckBoxMenuItem;
@@ -39,13 +39,13 @@ import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
-import javax.swing.KeyStroke;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.xml.stax.SBMLReader;
 import org.sbml.jsbml.xml.stax.SBMLWriter;
 import org.sbml.optimization.EvA2GUIStarter;
+import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.SimulatorOptions;
@@ -84,18 +84,6 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	 */
 	OPTIMIZATION,
 	/**
-	 * Save the plot as an image.
-	 */
-	SAVE_PLOT_IMAGE,
-	/**
-	 * Save the results of the simulation to a CSV file.
-	 */
-	SAVE_SIMULATION,
-	/**
-	 * Save the optimized model in an SBML file
-	 */
-	SAVE_MODEL,
-	/**
 	 * Start a new simulation with the current settings.
 	 */
 	SIMULATION_START,
@@ -112,12 +100,6 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	    switch (this) {
 	    case OPTIMIZATION:
 		return "Optimization";
-	    case SAVE_MODEL:
-		return "Save model";
-	    case SAVE_PLOT_IMAGE:
-		return "Save plot image";
-	    case SAVE_SIMULATION:
-		return "Save simulation results";
 	    case SHOW_OPTIONS:
 		return "Show options";
 	    case SIMULATION_START:
@@ -137,14 +119,6 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	    case OPTIMIZATION:
 		return "Launches the optimization of the quantities in the current model.";
 //		"Starts the optimization of the model with respect to given experimental data."
-	    case SAVE_MODEL:
-		return "Saves the model including estimated values.";
-	    case SAVE_PLOT_IMAGE:
-		return "Saves the plot as an image file.";
-//		"Save plot in an image."
-	    case SAVE_SIMULATION:
-		return "Saves the simulation results in a comma separated text file.";
-//		"Save simulation results to file."
 	    case SHOW_OPTIONS:
 		return "Decide whether or not to display the options.";
 	    case SIMULATION_START:
@@ -176,8 +150,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	// getContentPane().add(new StatusBar(), BorderLayout.SOUTH);
 	setOptimalSize();
 	GUITools.setEnabled(false, getJMenuBar(), toolBar,
-	    Command.SIMULATION_START, Command.SAVE_SIMULATION,
-	    Command.SAVE_PLOT_IMAGE);
+	    Command.SIMULATION_START);
     }
 
     /**
@@ -214,16 +187,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	case SIMULATION_START:
 	    simulate();
 	    break;
-	case SAVE_PLOT_IMAGE:
-	    simPanel.savePlotImage();
-	    break;
-	case SAVE_SIMULATION:
-	    simPanel.saveSimulationResults();
-	    break;
-	case SAVE_MODEL:
-	    saveModel(simPanel.getModel());
-	    break;
-	case OPTIMIZATION:
+        case OPTIMIZATION:
 	    new Thread(new Runnable() {
 		public void run() {
 		    optimize();
@@ -279,27 +243,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		GUITools.showErrorMessage(this, exc);
 	    }
 	}
-    }
-    
-    
-
-    /* (non-Javadoc)
-     * @see de.zbit.gui.BaseFrame#additionalFileMenuItems()
-     */
-    @Override
-    protected JMenuItem[] additionalFileMenuItems() {
-	JMenuItem saveModel = GUITools.createJMenuItem(this,
-	    Command.SAVE_MODEL, GUITools.getIconSave(), KeyStroke.getKeyStroke(
-		'S', InputEvent.CTRL_DOWN_MASK), 'S', false);
-	JMenuItem saveSimItem = GUITools.createJMenuItem(this,
-	    Command.SAVE_SIMULATION, GUITools.getIconSave(), KeyStroke
-		    .getKeyStroke('E', InputEvent.CTRL_DOWN_MASK));
-	JMenuItem savePlotItem = GUITools.createJMenuItem(this,
-	    Command.SAVE_PLOT_IMAGE, GUITools.getIconCamera(), KeyStroke
-		    .getKeyStroke('S', KeyEvent.ALT_DOWN_MASK));	
-	return new JMenuItem[] {saveModel, saveSimItem, savePlotItem};
-    }
-    
+    } 
     
 
     /* (non-Javadoc)
@@ -421,8 +365,8 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		    setOptimalSize();
 		    setTitle(getApplicationName() + " - " + file.getName());
 		    GUITools.setEnabled(true, getJMenuBar(), toolBar,
-			Command.SAVE_PLOT_IMAGE, Command.SAVE_MODEL,
-			Command.SIMULATION_START, Command.SHOW_OPTIONS);
+			BaseAction.FILE_SAVE, Command.SIMULATION_START,
+			Command.SHOW_OPTIONS);
 		    return new File[] {file};
 		}
 		JOptionPane.showMessageDialog(this, StringUtil.toHTML(
@@ -486,8 +430,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		Command.SIMULATION_START);
 	    simPanel.simulate();
 	    GUITools.setEnabled(true, getJMenuBar(), toolBar,
-		Command.SAVE_SIMULATION, Command.SAVE_PLOT_IMAGE,
-		Command.SIMULATION_START);
+		BaseAction.FILE_SAVE, Command.SIMULATION_START);
 	} catch (Exception exc) {
 	    GUITools.showErrorMessage(this, exc);
 	}
@@ -514,7 +457,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		EvA2GUIStarter.init(new EstimationProblem(simPanel.getSolver(),
 		    simPanel.getDistance(), model, simPanel
 			    .getExperimentalData(), prefs
-			    .getBoolean(SimulatorOptions.EST_MULTI_SHOOT),
+			    .getBoolean(EstimationOptions.EST_MULTI_SHOOT),
 		    panel.getSelectedQuantityRanges()), this, simPanel, this);
 	    } catch (Throwable exc) {
 		GUITools.showErrorMessage(this, exc);
@@ -551,7 +494,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		    && (frame.getName().equals(EvAClient.class.getSimpleName()))) {
 		simPanel.setAllEnabled(true);
 		GUITools.setEnabled(true, getJMenuBar(), toolBar,
-		    Command.SAVE_MODEL, Command.SIMULATION_START,
+		    BaseAction.FILE_SAVE, Command.SIMULATION_START,
 		    BaseAction.FILE_CLOSE, Command.OPTIMIZATION,
 		    BaseAction.EDIT_PREFERENCES);
 	    }
@@ -604,13 +547,13 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	    if (simPanel.isSetExperimentalData()) {
 		simPanel.closeExperimentalData();
 		GUITools.setEnabled(false, getJMenuBar(), toolBar,
-		    Command.OPTIMIZATION, Command.SAVE_PLOT_IMAGE,
-		    Command.SAVE_SIMULATION, Command.SIMULATION_START);
+		    Command.OPTIMIZATION, BaseAction.FILE_SAVE,
+		    Command.SIMULATION_START);
 	    } else {
 		getContentPane().remove(simPanel);
 		simPanel = null;
 		GUITools.setEnabled(false, getJMenuBar(), toolBar,
-		    BaseAction.FILE_CLOSE, Command.SAVE_PLOT_IMAGE,
+		    BaseAction.FILE_CLOSE, BaseAction.FILE_SAVE,
 		    Command.SIMULATION_START);
 		setOptimalSize();
 		setTitle(getApplicationName());
@@ -619,7 +562,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	}
 	if (simPanel == null) {
 	    GUITools.setEnabled(false, getJMenuBar(), toolBar,
-		Command.SHOW_OPTIONS, Command.SAVE_MODEL);
+		Command.SHOW_OPTIONS, BaseAction.FILE_SAVE);
 	}
 	return false;
     }
@@ -646,12 +589,17 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
     @Override
     public void exit() {
 	try {
-	    SBPreferences prefs = SBPreferences
-		    .getPreferencesFor(SimulatorOptions.class);
-	    if (simPanel != null) {
-		prefs.putAll(simPanel.getProperties());
+	    Properties props = simPanel.getProperties();
+	    for (Class<? extends KeyProvider> provider : getCommandLineOptions()) {
+		SBPreferences prefs = SBPreferences
+			.getPreferencesFor(provider);
+		for (Map.Entry<Object, Object> entry : props.entrySet()) {
+		    if (prefs.containsKey(entry.getKey())) {
+			prefs.put(entry.getKey(), entry.getValue());
+		    }
+		}
+		prefs.flush();
 	    }
-	    prefs.flush();
 	} catch (BackingStoreException exc) {
 	    GUITools.showErrorMessage(this, exc);
 	}
@@ -760,6 +708,9 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
     public void saveFile() {
 	if (simPanel != null) {
 	    // TODO Auto-generated method stub
+//	    simPanel.savePlotImage();
+//	    simPanel.saveSimulationResults();
+	    saveModel(simPanel.getModel());
 	}
     }
 }

@@ -26,11 +26,10 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
-import org.sbml.simulator.SimulatorOptions;
+import org.sbml.optimization.PlotOptions;
 
 import de.zbit.gui.LayoutHelper;
 import de.zbit.util.prefs.Option;
-import de.zbit.util.prefs.SBPreferences;
 
 /**
  * For configuration of how to save images of plotted diagrams.
@@ -40,7 +39,7 @@ import de.zbit.util.prefs.SBPreferences;
  * @version $Rev$
  * @since 1.0
  */
-public class PrefsPanelPlot extends PreferencesPanel {
+public class PrefsPanelPlot extends PreferencesPanelForKeyProvider {
 
     /**
      * Generated serial version identifier.
@@ -49,57 +48,29 @@ public class PrefsPanelPlot extends PreferencesPanel {
 
     /**
      * 
-     */
-    private FileSelector chooser;
-    /**
-     * Settings for {@link JSpinner}s to be applied here.
-     */
-    private double stepSize;
-    /**
-     * 
      * @throws IOException
      */
     public PrefsPanelPlot() throws IOException {
-	super();
-    }
-
-
-    /*
-     * (non-Javadoc)
-     * @see de.zbit.gui.cfg.SettingsPanel#accepts(java.lang.Object)
-     */
-    @Override
-    public boolean accepts(Object key) {
-	String k = key.toString();
-	return k.startsWith("PLOT_") || k.equals("JPEG_COMPRESSION_FACTOR");
+	super(PlotOptions.class);
     }
 
     /*
      * (non-Javadoc)
-     * @see de.zbit.gui.cfg.SettingsPanel#getTitle()
-     */
-    @Override
-    public String getTitle() {
-	return "Plot";
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see de.zbit.gui.cfg.SettingsPanel#init()
+     * @see de.zbit.gui.prefs.PreferencesPanelForKeyProvider#init()
      */
     @Override
     public void init() {
-	chooser = new FileSelector(null, properties.get(
-	    SimulatorOptions.PLOT_SAVE_DIR).toString());
+	FileSelector chooser = new FileSelector(null, properties.get(
+	    PlotOptions.PLOT_SAVE_DIR).toString());
 	chooser.setBorder(BorderFactory
 		.createTitledBorder(" Output directory for images "));
 
 	String names[] = { "Logarithmic scale", "Show grid", "Include legend",
 		"Display tooltips" };
-	Option<?> keys[] = { SimulatorOptions.PLOT_LOG_SCALE,
-		SimulatorOptions.PLOT_SHOW_GRID,
-		SimulatorOptions.PLOT_SHOW_LEGEND,
-		SimulatorOptions.PLOT_SHOW_TOOLTIPS };
+	Option<?> keys[] = { PlotOptions.PLOT_LOG_SCALE,
+		PlotOptions.PLOT_SHOW_GRID,
+		PlotOptions.PLOT_SHOW_LEGEND,
+		PlotOptions.PLOT_SHOW_TOOLTIPS };
 	JCheckBox check[] = new JCheckBox[names.length];
 	JPanel layout = new JPanel();
 	LayoutHelper lh = new LayoutHelper(layout);
@@ -112,9 +83,10 @@ public class PrefsPanelPlot extends PreferencesPanel {
 	}
 	layout.setBorder(BorderFactory.createTitledBorder(" Layout "));
 
+	double stepSize = 1E-3;
 	JSpinner compression = new JSpinner(new SpinnerNumberModel(Double
 		.parseDouble(properties
-			.get(SimulatorOptions.JPEG_COMPRESSION_FACTOR)), 0d,
+			.get(PlotOptions.JPEG_COMPRESSION_FACTOR)), 0d,
 	    1d, stepSize));
 	compression.addChangeListener(this);
 	JPanel image = new JPanel();
@@ -128,14 +100,6 @@ public class PrefsPanelPlot extends PreferencesPanel {
 	lh.add(chooser, 0, 0, 2, 1, 1, 0);
 	lh.add(layout, 0, 1, 1, 1, 1, 0);
 	lh.add(image, 1, 1, 1, 1, 1, 0);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see de.zbit.gui.prefs.PreferencesPanel#loadPreferences()
-     */
-    protected SBPreferences loadPreferences() throws IOException {
-	return SBPreferences.getPreferencesFor(SimulatorOptions.class);
     }
 
 }

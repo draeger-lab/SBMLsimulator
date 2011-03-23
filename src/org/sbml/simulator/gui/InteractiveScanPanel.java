@@ -55,6 +55,7 @@ import org.sbml.jsbml.SBaseChangedListener;
 import org.sbml.jsbml.Species;
 import org.sbml.jsbml.util.compilers.HTMLFormula;
 import org.sbml.simulator.SimulatorOptions;
+import org.sbml.simulator.math.odes.SimulationOptions;
 
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;
@@ -268,11 +269,11 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
      */
     public Properties getProperties() {
 	Properties p = new Properties();
-	p.put(SimulatorOptions.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE, Double
+	p.put(SimulationOptions.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE, Double
 		.valueOf(defaultCompartmentValue));
-	p.put(SimulatorOptions.OPT_DEFAULT_SPECIES_INITIAL_VALUE, Double
+	p.put(SimulationOptions.OPT_DEFAULT_SPECIES_INITIAL_VALUE, Double
 		.valueOf(defaultSpeciesValue));
-	p.put(SimulatorOptions.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS, Double
+	p.put(SimulationOptions.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS, Double
 		.valueOf(defaultParameterValue));
 	return p;
     }
@@ -453,13 +454,13 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
      */
     public void loadPreferences() {
 	SBPreferences prefs = SBPreferences
-		.getPreferencesFor(SimulatorOptions.class);
+		.getPreferencesFor(SimulationOptions.class);
 	defaultCompartmentValue = prefs
-		.getDouble(SimulatorOptions.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE);
+		.getDouble(SimulationOptions.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE);
 	defaultSpeciesValue = prefs
-		.getDouble(SimulatorOptions.OPT_DEFAULT_SPECIES_INITIAL_VALUE);
+		.getDouble(SimulationOptions.OPT_DEFAULT_SPECIES_INITIAL_VALUE);
 	defaultParameterValue = prefs
-		.getDouble(SimulatorOptions.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS);
+		.getDouble(SimulationOptions.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS);
     }
 
     /*
