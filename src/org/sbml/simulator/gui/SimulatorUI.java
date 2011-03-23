@@ -39,6 +39,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
+import javax.swing.UIManager;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLDocument;
@@ -252,7 +253,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
     @Override
     protected JMenuItem[] additionalEditMenuItems() {
 	JMenuItem simulation = GUITools.createJMenuItem(this,
-	    Command.SIMULATION_START, GUITools.getIconGear(), 'S');
+	    Command.SIMULATION_START, UIManager.getIcon("ICON_GEAR_16"), 'S');
 	JMenuItem optimization = GUITools.createJMenuItem(this,
 	    Command.OPTIMIZATION, GUITools.getIconEvA2(), 'O');
 	optimization.setEnabled(false);
@@ -588,20 +589,22 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
      */
     @Override
     public void exit() {
-	try {
-	    Properties props = simPanel.getProperties();
-	    for (Class<? extends KeyProvider> provider : getCommandLineOptions()) {
-		SBPreferences prefs = SBPreferences
-			.getPreferencesFor(provider);
-		for (Map.Entry<Object, Object> entry : props.entrySet()) {
-		    if (prefs.containsKey(entry.getKey())) {
-			prefs.put(entry.getKey(), entry.getValue());
+	if (simPanel != null) {
+	    try {
+		Properties props = simPanel.getProperties();
+		for (Class<? extends KeyProvider> provider : getCommandLineOptions()) {
+		    SBPreferences prefs = SBPreferences
+			    .getPreferencesFor(provider);
+		    for (Map.Entry<Object, Object> entry : props.entrySet()) {
+			if (prefs.containsKey(entry.getKey())) {
+			    prefs.put(entry.getKey(), entry.getValue());
+			}
 		    }
+		    prefs.flush();
 		}
-		prefs.flush();
+	    } catch (BackingStoreException exc) {
+		GUITools.showErrorMessage(this, exc);
 	    }
-	} catch (BackingStoreException exc) {
-	    GUITools.showErrorMessage(this, exc);
 	}
 	System.exit(0);
     }
