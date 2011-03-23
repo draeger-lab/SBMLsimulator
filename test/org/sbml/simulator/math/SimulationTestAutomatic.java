@@ -19,7 +19,6 @@ package org.sbml.simulator.math;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -107,11 +106,6 @@ public class SimulationTestAutomatic {
 				solver.setStepSize(duration / steps);
 				MultiBlockTable solution=SimulationWorker.solveAtTimePoints(solver, model, timepoints, solver.getStepSize(), null);
 				
-				
-				int from = model.getNumCompartments();
-				// from = 0;
-				int to = from + model.getNumSpecies();
-
 				
 				Distance distance = new RSE();
 
