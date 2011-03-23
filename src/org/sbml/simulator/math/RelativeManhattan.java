@@ -32,8 +32,7 @@ public class RelativeManhattan extends RelativeNMetric {
 	private static final long serialVersionUID = -5446188147827736620L;
 
 	public RelativeManhattan() {
-		super();
-		metric=new Manhattan();
+		super(new Manhattan());
 	}
 	
 	/*

@@ -37,10 +37,15 @@ public class RelativeNMetric extends Distance {
 		super();
 		metric=new NMetric();
 	}
-
+	
 	public RelativeNMetric(double root) {
 		super(root, Double.NaN);
 		metric=new NMetric(root);
+	}
+
+	public RelativeNMetric(NMetric metric) {
+		super(metric.getRoot(), Double.NaN);
+		this.metric=metric;
 	}
 	
 	
