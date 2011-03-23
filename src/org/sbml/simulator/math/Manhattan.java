@@ -24,11 +24,13 @@ package org.sbml.simulator.math;
  * @since
  */
 public class Manhattan extends NMetric {
+	
+	
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -2520265250898674233L;
-	
+	private static final long serialVersionUID = -7863697829237313786L;
+
 	/**
 	 * 
 	 */

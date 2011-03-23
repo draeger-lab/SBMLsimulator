@@ -31,8 +31,7 @@ public class RelativeEuclidean extends RelativeNMetric {
 	private static final long serialVersionUID = -7488743431449082030L;
 
 	public RelativeEuclidean() {
-		super();
-		metric=new Euclidean();
+		super(new Euclidean());
 	}
 	
 	/*
