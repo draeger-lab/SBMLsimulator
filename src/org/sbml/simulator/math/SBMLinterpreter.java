@@ -222,15 +222,14 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 	 * (non-Javadoc)
 	 * @see org.apache.commons.math.ode.FirstOrderDifferentialEquations#computeDerivatives(double, double[], double[])
 	 */
-	public void computeDerivatives(double t, double[] y, double[] yDot)
-			throws DerivativeException {
-		try {
-			System.arraycopy(this.getValue(t, y),0, yDot, 0, yDot.length);
-		} catch (IntegrationException e) {
-			e.printStackTrace();
-		}
-			
+    public void computeDerivatives(double t, double[] y, double[] yDot)
+	throws DerivativeException {
+	try {
+	    getValue(t, y, yDot);
+	} catch (IntegrationException exc) {
+	   throw new DerivativeException(exc);
 	}
+    }
 
 	/*
 	 * (non-Javadoc)
@@ -738,48 +737,48 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 		return changeRate;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see eva2.tools.math.des.DESystem#getValue(double, double[], double[])
-	 */
-	public void getValue(double time, double[] Y, double[] changeRate)
-			throws IntegrationException {
-		this.currentTime = time;
-		this.Y = Y;
+    /*
+     * (non-Javadoc)
+     * @see eva2.tools.math.des.DESystem#getValue(double, double[], double[])
+     */
+    public void getValue(double time, double[] Y, double[] changeRate)
+	throws IntegrationException {
+	this.currentTime = time;
+	this.Y = Y;
 
-		if (model.getNumEvents() > 0) {
-			this.runningEvents.clear();
-		}
-
-		// make sure not to have invalid older values in the change rate
-		Arrays.fill(changeRate, 0d);
-
-		try {
-			/*
-			 * Compute changes due to reactions
-			 */
-			processVelocities(changeRate);
-
-			/*
-			 * Compute changes due to rules
-			 */
-			processRules(changeRate);
-
-			/*
-			 * Check the model's constraints
-			 */
-			for (int i = 0; i < (int) model.getNumConstraints(); i++) {
-				if (model.getConstraint(i).getMath().compile(nodeInterpreter).toBoolean()) {
-					listOfContraintsViolations[i].add(Double.valueOf(time));
-				}
-			}
-
-		} catch (SBMLException exc) {
-			throw new IntegrationException(exc);
-		}
-
+	if (model.getNumEvents() > 0) {
+	    this.runningEvents.clear();
 	}
+
+	// make sure not to have invalid older values in the change rate
+	Arrays.fill(changeRate, 0d);
+
+	try {
+	    /*
+	     * Compute changes due to reactions
+	     */
+	    processVelocities(changeRate);
+
+	    /*
+	     * Compute changes due to rules
+	     */
+	    processRules(changeRate);
+
+	    /*
+	     * Check the model's constraints
+	     */
+	    for (int i = 0; i < (int) model.getNumConstraints(); i++) {
+		if (model.getConstraint(i).getMath().compile(nodeInterpreter)
+			.toBoolean()) {
+		    listOfContraintsViolations[i].add(Double.valueOf(time));
+		}
+	    }
+
+	} catch (SBMLException exc) {
+	    throw new IntegrationException(exc);
+	}
+
+    }
 
 	/*
 	 * (non-Javadoc)
