@@ -54,7 +54,6 @@ import org.sbml.jsbml.SBaseChangedEvent;
 import org.sbml.jsbml.SBaseChangedListener;
 import org.sbml.jsbml.Species;
 import org.sbml.jsbml.util.compilers.HTMLFormula;
-import org.sbml.simulator.SimulatorOptions;
 import org.sbml.simulator.math.odes.SimulationOptions;
 
 import de.zbit.gui.GUITools;

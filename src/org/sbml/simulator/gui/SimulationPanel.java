@@ -36,11 +36,14 @@ import javax.swing.table.TableModel;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Quantity;
+import org.sbml.jsbml.SBMLException;
+import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.optimization.PlotOptions;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.odes.DESSolver;
+import org.sbml.simulator.math.odes.IntegrationException;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 
 import de.zbit.gui.GUITools;
@@ -443,15 +446,20 @@ public class SimulationPanel extends JPanel implements
      * @throws InstantiationException
      * @throws SecurityException
      * @throws IllegalArgumentException
+     * @throws ModelOverdeterminedException 
+     * @throws IntegrationException 
+     * @throws SBMLException 
      */
     public void loadPreferences() throws IllegalArgumentException,
 	SecurityException, InstantiationException, IllegalAccessException,
-	InvocationTargetException, NoSuchMethodException {
+	InvocationTargetException, NoSuchMethodException, SBMLException, IntegrationException, ModelOverdeterminedException {
 
 	if (visualizationPanel != null) {
 	    visualizationPanel.loadPreferences();
 	}
-	getOrCreateFootPanel().loadPreferences();
+	SimulationToolPanel foot = getOrCreateFootPanel();
+	foot.loadPreferences();
+	foot.setSolver();
 	removeAll();
 	init();
     }
