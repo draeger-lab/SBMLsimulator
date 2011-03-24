@@ -134,7 +134,7 @@ public class PrefsPanelComputation extends PreferencesPanelForKeyProvider {
 	JComboBox distanceBox = new JComboBox();
 	int i;
 	Option<?> keys[] = { SimulationOptions.SIM_DISTANCE_DEFAULT_VALUE,
-		SimulationOptions.SIM_DISTANCE_ROOT,
+		SimulationOptions.N_METRIC_ROOT,
 		SimulationOptions.SIM_MAX_TIME,
 		SimulationOptions.SIM_START_TIME,
 		SimulationOptions.SIM_END_TIME,

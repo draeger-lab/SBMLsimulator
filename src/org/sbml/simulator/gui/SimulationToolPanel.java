@@ -18,8 +18,10 @@
 package org.sbml.simulator.gui;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.beans.EventHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Properties;
@@ -27,6 +29,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
@@ -148,22 +151,10 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
     private Set<ItemListener> setOfItemListeners;
 
     /**
-     * @param enabled
-     */
-    public void setAllEnabled(boolean enabled) {
-	GUITools.setAllEnabled(this, enabled);
-	startTime.setEnabled(false);
-	if (enabled && (distField.getText().length() == 0)) {
-	    distField.setEditable(false);
-	} else if (!enabled && (distField.getText().length() > 0)) {
-	    distField.setEnabled(true);
-	}
-    }
-
-    /**
 	 * 
 	 */
     private SimulationWorker worker;
+
     /**
 	 * 
 	 */
@@ -172,7 +163,6 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 * 
 	 */
     private static final String DISTANCE_FIELD_TOOL_TIP = "This field shows the %s distance between the experimental data and the simulation of the model with the current configuration, computed by the %s.";
-
     /**
      * @param worker
      * @throws IllegalArgumentException
@@ -268,11 +258,17 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 
 	JPanel pPanel = new JPanel();
 	LayoutHelper pSet = new LayoutHelper(pPanel);
+	JButton cameraButton = new JButton(org.sbml.simulator.gui.GUITools.getIconCamera());
+	cameraButton.addActionListener(EventHandler.create(
+	    ActionListener.class, this, "openFileAndLogHistory"));
+	// TODO
 	pSet.add(showGrid, 0, 0, 1, 1, 0, 0);
 	pSet.add(new JPanel(), 1, 0, 1, 1, 0, 0);
 	pSet.add(logScale, 2, 0, 1, 1, 0, 0);
 	pSet.add(showLegend, 0, 1, 1, 1, 0, 0);
 	pSet.add(showToolTips, 2, 1, 1, 1, 0, 0);
+	pSet.add(new JPanel(), 3, 0, 1, 1, 0, 0);
+	pSet.add(cameraButton, 4, 0, 1, 1, 0, 0);
 	pPanel.setBorder(BorderFactory.createTitledBorder(" Plot "));
 
 	LayoutHelper aSet = new LayoutHelper(new JPanel());
@@ -362,6 +358,19 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
     }
 
     /**
+     * Access to the currently computed distance between measurement data and
+     * simulation.
+     * 
+     * @return The distance based on the currently selected {@link Distance}
+     *         function or {@link Double.#NaN} if no distance has been computed
+     *         yet.
+     */
+    public double getCurrentDistance() {
+	return distField.getValue() == null ? Double.NaN : ((Number) distField
+		.getValue()).doubleValue();
+    }
+
+    /**
      * @return
      */
     public Distance getDistance() {
@@ -383,8 +392,9 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
     }
 
     /**
-	 * 
-	 */
+     * 
+     * @return
+     */
     public Properties getProperties() {
 	Properties p = new Properties();
 
@@ -515,48 +525,6 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
     }
 
     /**
-     * 
-     * @param comBox
-     * @throws IllegalArgumentException
-     * @throws SecurityException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws InvocationTargetException
-     * @throws NoSuchMethodException
-     * @throws SBMLException
-     * @throws IntegrationException
-     * @throws ModelOverdeterminedException
-     */
-    private void setSolver(JComboBox comBox) throws IllegalArgumentException,
-	SecurityException, InstantiationException, IllegalAccessException,
-	InvocationTargetException, NoSuchMethodException, SBMLException,
-	IntegrationException, ModelOverdeterminedException {
-	logger.fine(comBox.getSelectedItem() + "\t"
-			+ comBox.getSelectedIndex());
-	worker.setDESSolver(SBMLsimulator.getAvailableSolvers()[comBox
-		.getSelectedIndex()].getConstructor().newInstance());
-	worker.setStepSize(getStepSize());
-	computeDistance();
-    }
-
-    /**
-     * @param t1
-     * @param t2
-     * @param stepSize
-     * @return
-     */
-    private int numSteps(double t1, double t2, double stepSize) {
-	return (int) Math.round((t2 - t1) / stepSize);
-    }
-
-    /**
-     * @param data
-     */
-    public void setData(MultiBlockTable data) {
-	worker.setData(data);
-    }
-
-    /**
      * @throws NoSuchMethodException
      * @throws InvocationTargetException
      * @throws IllegalAccessException
@@ -622,6 +590,99 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
     }
 
     /**
+     * @param t1
+     * @param t2
+     * @param stepSize
+     * @return
+     */
+    private int numSteps(double t1, double t2, double stepSize) {
+	return (int) Math.round((t2 - t1) / stepSize);
+    }
+
+    /**
+     * @param enabled
+     */
+    public void setAllEnabled(boolean enabled) {
+	GUITools.setAllEnabled(this, enabled);
+	startTime.setEnabled(false);
+	if (enabled && (distField.getText().length() == 0)) {
+	    distField.setEditable(false);
+	} else if (!enabled && (distField.getText().length() > 0)) {
+	    distField.setEnabled(true);
+	}
+    }
+
+    /**
+     * Allows external methods do manipulate the distance field.
+     * 
+     * @param value
+     *        The new distance value. This should be in accordance with the
+     *        currently selected {@link Distance} function and also
+     *        integration method. Furthermore, it should also belong to the
+     *        correct {@link Model} and data set.
+     */
+    void setCurrentDistance(double value) {
+	distField.setValue(value);
+	distField.setText(StringTools.toString(value));
+	// distField.setValue(Double.valueOf(value));
+	if (!distField.isEnabled()) {
+	    distField.setEditable(false);
+	    distField.setEnabled(true);
+	    distField.setAlignmentX(RIGHT_ALIGNMENT);
+	}
+    }
+
+    /**
+     * @param data
+     */
+    public void setData(MultiBlockTable data) {
+	worker.setData(data);
+    }
+
+    /**
+     * @throws ModelOverdeterminedException
+     * @throws IntegrationException
+     * @throws SBMLException
+     * @throws NoSuchMethodException
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     * @throws SecurityException
+     * @throws IllegalArgumentException
+     */
+    public void setSolver() throws IllegalArgumentException, SecurityException,
+	InstantiationException, IllegalAccessException,
+	InvocationTargetException, NoSuchMethodException, SBMLException,
+	IntegrationException, ModelOverdeterminedException {
+	setSolver(solvers);
+    }
+
+    /**
+     * 
+     * @param comBox
+     * @throws IllegalArgumentException
+     * @throws SecurityException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     * @throws NoSuchMethodException
+     * @throws SBMLException
+     * @throws IntegrationException
+     * @throws ModelOverdeterminedException
+     */
+    private void setSolver(JComboBox comBox) throws IllegalArgumentException,
+	SecurityException, InstantiationException, IllegalAccessException,
+	InvocationTargetException, NoSuchMethodException, SBMLException,
+	IntegrationException, ModelOverdeterminedException {
+	logger.fine(comBox.getSelectedItem() + "\t"
+			+ comBox.getSelectedIndex());
+	worker.setDESSolver(SBMLsimulator.getAvailableSolvers()[comBox
+		.getSelectedIndex()].getConstructor().newInstance());
+	worker.setStepSize(getStepSize());
+	computeDistance();
+    }
+
+    /**
      * @param stepSize
      */
     public void setStepSize(double stepSize) {
@@ -644,39 +705,6 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	    if (spin.getName() != null && spin.getName().equals("t2")) {
 		// do nothing.
 	    }
-	}
-    }
-
-    /**
-     * Access to the currently computed distance between measurement data and
-     * simulation.
-     * 
-     * @return The distance based on the currently selected {@link Distance}
-     *         function or {@link Double.#NaN} if no distance has been computed
-     *         yet.
-     */
-    public double getCurrentDistance() {
-	return distField.getValue() == null ? Double.NaN : ((Number) distField
-		.getValue()).doubleValue();
-    }
-
-    /**
-     * Allows external methods do manipulate the distance field.
-     * 
-     * @param value
-     *        The new distance value. This should be in accordance with the
-     *        currently selected {@link Distance} function and also
-     *        integration method. Furthermore, it should also belong to the
-     *        correct {@link Model} and data set.
-     */
-    void setCurrentDistance(double value) {
-	distField.setValue(value);
-	distField.setText(StringTools.toString(value));
-	// distField.setValue(Double.valueOf(value));
-	if (!distField.isEnabled()) {
-	    distField.setEditable(false);
-	    distField.setEnabled(true);
-	    distField.setAlignmentX(RIGHT_ALIGNMENT);
 	}
     }
 

@@ -17,11 +17,15 @@
  */
 package org.sbml.simulator.math.odes;
 
+import java.util.ResourceBundle;
+
 import org.sbml.simulator.math.Distance;
 import org.sbml.simulator.math.RSE;
 
+import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.Option;
+import de.zbit.util.prefs.OptionGroup;
 import de.zbit.util.prefs.Range;
 
 /**
@@ -31,15 +35,24 @@ import de.zbit.util.prefs.Range;
  * @date 2011-03-23
  */
 public interface SimulationOptions extends KeyProvider {
+    
+    /**
+     * Location of the translation files for multiple language support.
+     */
+    public static final String BUNDLE_LOCATION = "org.sbml.simulator.locales.Simulator";
+    /**
+     * The bundle for the user's current language.
+     */
+    public static final ResourceBundle bundle = ResourceManager.getBundle(BUNDLE_LOCATION);
+    
     /**
      * If not specified the value corresponding to this argument will be used to
      * initialize the size of compartments.
      */
     public static final Option<Double> OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE = new Option<Double>(
-	"OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE",
-	Double.class,
-	"If not specified the value corresponding to this argument will be used to initialize the size of compartments.",
-	new Range<Double>(Double.class, "{(0.0, 9E9]}"), Double.valueOf(1d));
+	"OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE", Double.class, bundle
+		.getString("SIM:0000001"), new Range<Double>(Double.class,
+	    "{(0.0, 9E9]}"), Double.valueOf(1d));
     /**
      * If not specified the value corresponding to this argument will be used to
      * initialize species depending on their hasOnlySubstanceUnits property as
@@ -56,7 +69,19 @@ public interface SimulationOptions extends KeyProvider {
     public static final Option<Double> OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS = new Option<Double>(
 	"OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS", Double.class,
 	"The value that is set for newly created parameters.",
-	new Range<Double>(Double.class, "{(0.0, 9E9]}"), Double.valueOf(1d));    
+	new Range<Double>(Double.class, "{(0.0, 9E9]}"), Double.valueOf(1d));
+
+    /**
+     * Decide how to treat the values of compartments, species, and parameters
+     * if no initial value has been defined in the model.
+     */
+    @SuppressWarnings("unchecked")
+    public static final OptionGroup<Double> DEFAULT_VALUES = new OptionGroup<Double>(
+	"Missing values",
+	"Decide how to treat the values of compartments, species, and parameters if no initial value has been defined in the model.",
+	OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE,
+	OPT_DEFAULT_SPECIES_INITIAL_VALUE, OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS);  
+    
     /**
      * The default return value of a distance function that can be used if for
      * some reason a distance cannot be computed.
@@ -83,11 +108,12 @@ public interface SimulationOptions extends KeyProvider {
      * of one. In the RSE, the default root is also two, but this value may be
      * changed.
      */
-    public static final Option<Double> SIM_DISTANCE_ROOT = new Option<Double>(
-	"SIM_DISTANCE_ROOT",
+    public static final Option<Double> N_METRIC_ROOT = new Option<Double>(
+	"N_METRIC_ROOT",
 	Double.class,
-	"The root parameter in the distance function: in case of the n-norm this is at the same time also the exponent. For instance, the Eulidean distance has a root value of two, whereas the Manhattan norm has a root of one. In the RSE, the default root is also two, but this value may be changed.",
+	"The root parameter in the distance function for n-metrics: in case of the n-norm this is at the same time also the exponent. For instance, the Eulidean distance has a root value of two, whereas the Manhattan norm has a root of one. In the RSE, the default root is also two, but this value may be changed.",
 	Double.valueOf(2d));
+        
     /**
      * With the associated non-negative double number that has to be greater
      * than 0 when simulating SBML models, it is possible to perform a
