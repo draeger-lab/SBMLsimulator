@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.logging.Level;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -34,6 +35,7 @@ import org.sbml.simulator.math.odes.SimulationOptions;
 import de.zbit.gui.GUIOptions;
 import de.zbit.io.CSVOptions;
 import de.zbit.util.Reflect;
+import de.zbit.util.logging.LogUtil;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.SBPreferences;
 import de.zbit.util.prefs.SBProperties;
@@ -132,6 +134,9 @@ public class SBMLsimulator {
      */
     public static void main(String[] args) throws FileNotFoundException,
 	XMLStreamException {
+	
+	LogUtil.initializeLogging(Level.FINE, "org.sbml", "de.zbit");
+	
 	SBProperties p = SBPreferences.analyzeCommandLineArguments(getCommandLineOptions(),
 	    args);
 	String openFile = null;

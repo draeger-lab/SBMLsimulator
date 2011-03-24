@@ -407,7 +407,7 @@ public class ASTNodeInterpreter implements ASTNodeCompiler {
      * .ASTNode)
      */
     public ASTNodeValue factorial(ASTNode node) throws SBMLException {
-	return new ASTNodeValue(Maths.factorial(node.compile(this).toDouble()),
+	return new ASTNodeValue(Maths.factorial((int) Math.round(node.compile(this).toDouble())),
 	    this);
     }
 
