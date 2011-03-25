@@ -1,6 +1,6 @@
 /*
- * $Id:  RelativeNMetric.java 17:06:20 keller$
- * $URL: RelativeNMetric.java $
+ * $Id:  Pearson.java 09:55:58 keller$
+ * $URL: Pearson.java $
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -18,8 +18,7 @@
 
 package org.sbml.simulator.math;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Iterator;
 
 
 /**
@@ -27,56 +26,56 @@ import java.util.List;
  * @version $Rev$
  * @since
  */
-public class RelativeNMetric extends Distance {
-	
-	protected NMetric metric;
+public class Pearson extends Distance {
+
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 5066304615795368201L;
-
-	public RelativeNMetric() {
-		super();
-		metric=new NMetric();
-	}
-	
-	public RelativeNMetric(double root) {
-		super(Double.NaN);
-		metric=new NMetric(root);
-	}
-
-	public RelativeNMetric(NMetric metric) {
-		super(Double.NaN);
-		this.metric=metric;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.sbml.simulator.math.Distance#getName()
-	 */
-	@Override
-	public String getName() {
-		return "Relative " + metric.getName();
-	}
-
+	private static final long serialVersionUID = -493779339080103217L;
 
 	/* (non-Javadoc)
 	 * @see org.sbml.simulator.math.Distance#distance(java.lang.Iterable, java.lang.Iterable, double)
 	 */
 	@Override
 	public double distance(Iterable<? extends Number> x,
-			Iterable<? extends Number> expected, double defaultValue) {
-		double numerator=metric.distance(x, expected, defaultValue);
-		List<Double> nullVector = new LinkedList<Double>();
-		for(@SuppressWarnings("unused") Number n:expected) {
-			nullVector.add(0d);
+			Iterable<? extends Number> y, double defaultValue) {
+		Iterator<? extends Number> yIterator = y.iterator();
+		
+		MeanFunction meanF = new ArithmeticMean();
+		double meanX = meanF.computeMean(x);
+		double meanY = meanF.computeMean(y);
+		
+		double sumNumerator = 0d;
+		double sumXSquared = 0d;
+		double sumYSquared = 0d;
+		
+		for (Number number : x) {
+			if (!yIterator.hasNext()) {
+				break;
+			}
+			double x_i = number.doubleValue();
+			double y_i = yIterator.next().doubleValue();
+			sumNumerator+= (x_i-meanX)*(y_i-meanY);
+			sumXSquared+= (x_i-meanX)*(x_i-meanX);
+			sumYSquared+= (y_i-meanY)*(y_i-meanY);
+			
 		}
-		double denominator=metric.distance(expected,nullVector,defaultValue);
-		if(denominator != 0) {
-			return numerator/denominator;
+		
+		double denominator=Math.sqrt(sumXSquared*sumYSquared);
+		if(denominator!=0) {
+			return sumNumerator/denominator;
 		}
 		else {
-			return numerator;
+			return defaultValue;
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.math.Distance#getName()
+	 */
+	@Override
+	public String getName() {
+		return "Pearson correlation coefficient";
 	}
 
 	/* (non-Javadoc)
@@ -84,7 +83,8 @@ public class RelativeNMetric extends Distance {
 	 */
 	@Override
 	public String toString() {
-		return getName() + " distance";
+		return getName();
 	}
+
 
 }

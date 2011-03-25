@@ -17,6 +17,8 @@
  */
 package org.sbml.simulator.math;
 
+import java.util.Iterator;
+
 
 /**
  * An implementation of an n-metric. An n-metric is basically the n-th root of
@@ -34,6 +36,7 @@ public class NMetric extends Distance {
 	 * Generated serial identifier.
 	 */
 	private static final long serialVersionUID = -216525074796086162L;
+	protected double root;
 
 	/**
 	 * Constructs a new NMetric with a default root of two. This will result in
@@ -43,6 +46,7 @@ public class NMetric extends Distance {
 	 */
 	public NMetric() {
 		super();
+		this.root=3;
 	}
 
 	/**
@@ -57,41 +61,12 @@ public class NMetric extends Distance {
 	 * @param root
 	 */
 	public NMetric(double root) {
-		super(root, Double.NaN);
+		super(Double.NaN);
+		this.root=root;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.squeezer.math.Distance#additiveTerm(double, double, double,
-	 * double)
-	 */
-	@Override
 	double additiveTerm(double x_i, double y_i, double root, double defaultValue) {
 		return Math.pow(Math.abs(x_i - y_i), root);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.squeezer.math.Distance#distance(java.lang.Iterable,
-	 * java.lang.Iterable, double, double)
-	 */
-	@Override
-	public double distance(Iterable<? extends Number> x,
-			Iterable<? extends Number> y, double root, double defaultValue) {
-		return root == 0d ? defaultValue : super.distance(x, y, root,
-				defaultValue);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.squeezer.math.Distance#getStandardParameter()
-	 */
-	@Override
-	public double getDefaultRoot() {
-		return 3d;
 	}
 
 	/*
@@ -104,15 +79,46 @@ public class NMetric extends Distance {
 		return "N-metric";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.squeezer.math.Distance#overallDistance(double, double,
-	 * double)
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.math.Distance#distance(java.lang.Iterable, java.lang.Iterable, double)
 	 */
 	@Override
-	double overallDistance(double d, double root, double defaultValue) {
-		return Math.pow(d, 1d / root);
+	public double distance(Iterable<? extends Number> x,
+		Iterable<? extends Number> y, double defaultValue) {
+		if(root==0d) {
+			return defaultValue;
+		}
+		double d = 0;
+		double x_i;
+		double y_i;
+		Iterator<? extends Number> yIterator = y.iterator();
+		for (Number number : x) {
+			if (!yIterator.hasNext()) {
+				break;
+			}
+			x_i = number.doubleValue();
+			y_i = yIterator.next().doubleValue();
+			if (computeDistanceFor(x_i, y_i, root, defaultValue)) {
+				d += additiveTerm(x_i, y_i, root, defaultValue);
+			}
+		}
+		return overallDistance(d,root,defaultValue);
+	}
+	
+	double overallDistance(double distance, double root, double defaultValue) {
+		return Math.pow(distance, 1d / root);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.math.Distance#toString()
+	 */
+	@Override
+	public String toString() {
+		return getName() + " distance";
+	}
+	
+	public double getRoot() {
+		return root;
 	}
 
 }

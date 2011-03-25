@@ -18,11 +18,9 @@
 package org.sbml.simulator.math;
 
 import java.io.Serializable;
-import java.util.Iterator;
+import java.util.ArrayList;
 
 import org.sbml.simulator.math.odes.MultiBlockTable;
-import org.sbml.simulator.math.odes.MultiBlockTable.Block;
-import org.sbml.simulator.util.ArrayIterator;
 
 /**
  * This class is the basis of various implementations of distance functions.
@@ -44,11 +42,8 @@ public abstract class Distance implements Serializable {
 	 * cannot be computed.
 	 */
 	protected double defaultValue;
-
-	/**
-	 * A value to express a parameter of the implementing class.
-	 */
-	protected double root;
+	
+	protected MeanFunction mean;
 
 	/**
 	 * Default constructor. This sets the standard value for the parameter as
@@ -56,34 +51,30 @@ public abstract class Distance implements Serializable {
 	 * NaN.
 	 */
 	public Distance() {
-		this.root = getDefaultRoot();
 		this.defaultValue = Double.NaN;
+		mean=new ArithmeticMean();
 	}
 
 	/**
-	 * Constructor, which allows setting the parameter value for root.
+	 * Constructor, which allows setting the parameter value for default value.
 	 * 
-	 * @param root
-	 *            The parameter for this distance.
 	 * @param defaultValue
 	 */
-	public Distance(double root, double defaultValue) {
-		this.root = root;
+	public Distance(double defaultValue) {
 		this.defaultValue = defaultValue;
+		mean=new ArithmeticMean();
 	}
-
+	
 	/**
-	 * The additive term to compute the distance when only two elements are
-	 * given together with all default values.
+	 * Constructor, which allows setting the parameter values for meanFunction and default value.
 	 * 
-	 * @param x_i
-	 * @param y_i
-	 * @param root
 	 * @param defaultValue
-	 * @return
+	 * @param meanFunction
 	 */
-	abstract double additiveTerm(double x_i, double y_i, double root,
-			double defaultValue);
+	public Distance(double defaultValue, MeanFunction mean) {
+		this.defaultValue = defaultValue;
+		this.mean=mean;
+	}
 
 	/**
 	 * This method decides whether or not to consider the given values for the
@@ -109,17 +100,27 @@ public abstract class Distance implements Serializable {
 	 * @param y
 	 * @return
 	 */
-	public double distance(MultiBlockTable x, MultiBlockTable y) {
-		if (x.getBlockCount() > y.getBlockCount()) {
-			MultiBlockTable swap = y;
-			y = x;
+	public double distance(MultiBlockTable x, MultiBlockTable expected) {
+		if (x.getBlockCount() > expected.getBlockCount()) {
+			MultiBlockTable swap = expected;
+			expected = x;
 			x = swap;
 		}
-		double d = 0d;
+		ArrayList<Double> distances= new ArrayList<Double>();
 		for (int i = 0; i < x.getBlockCount(); i++) {
-			d += distance(x.getBlock(i), y.getBlock(i));
+			distances.addAll(getColumnDistances(x.getBlock(i), expected.getBlock(i)));
 		}
-		return overallDistance(d, getRoot(), getDefaultValue());
+		return mean.computeMean(distances);
+	}
+	
+	/**
+	 * 
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	public double distance(MultiBlockTable.Block x, MultiBlockTable.Block expected) {
+		return mean.computeMean(getColumnDistances(x,expected));
 	}
 
 	/**
@@ -134,56 +135,23 @@ public abstract class Distance implements Serializable {
 	 * @param y
 	 * @return
 	 */
-	public double distance(MultiBlockTable.Block x, MultiBlockTable.Block y) {
-		if (x.getColumnCount() > y.getColumnCount()) {
-			MultiBlockTable.Block swap = y;
-			y = x;
+	public ArrayList<Double> getColumnDistances(MultiBlockTable.Block x, MultiBlockTable.Block expected) {
+		if (x.getColumnCount() > expected.getColumnCount()) {
+			MultiBlockTable.Block swap = expected;
+			expected = x;
 			x = swap;
 		}
-		double d = 0d;
+		
 		String identifiers[] = x.getIdentifiers();
+		ArrayList<Double> distances= new ArrayList<Double>();
+		
 		for (int i = 0; i < identifiers.length; i++) {
-			d += distance(x.getColumn(i), y.getColumn(identifiers[i]));
+			distances.add(distance(x.getColumn(i), expected.getColumn(identifiers[i])));
 		}
-		return d;
+		return distances;
 	}
 	
-	/**
-	 * Computes the distance of a matrix to a zero matrix
-	 * 
-	 * @param block
-	 * @return
-	 */
-	public double distance(Block block) {
-		Double[][] data1 = new Double[block.getData().length][]; 
-		Double[][] data2 = new Double[block.getData().length][];
-		for(int i=0;i!=data1.length;i++) {
-			data1[i]=new Double[block.getData()[i].length];
-			data2[i]=new Double[block.getData()[i].length];
-			for(int j=0;j!=data1[i].length;j++) {
-				data1[i][j]=0d;
-				data2[i][j]=block.getData()[i][j];
-			}
-		}
-		return distance(data1,data2);
-	}
-
-	/**
-	 * 
-	 * @param x
-	 * @param y
-	 * @return
-	 */
-	public double distance(Double x[][], Double y[][]) {
-		double d = 0;
-		int j = 0;
-		for (Double[] x_i : x) {
-			d += distance(new ArrayIterator<Double>(x_i),
-					new ArrayIterator<Double>(y[j++]));
-		}
-		return d;
-	}
-
+	
 	/**
 	 * Returns the distance of the two vectors x and y where the currently set
 	 * root is used. This can be obtained by invoking the {@see getRoot} method.
@@ -199,7 +167,7 @@ public abstract class Distance implements Serializable {
 	 */
 	public double distance(Iterable<? extends Number> x,
 			Iterable<? extends Number> y) {
-		return distance(x, y, root, defaultValue);
+		return distance(x, y,defaultValue);
 	}
 
 	/**
@@ -213,56 +181,15 @@ public abstract class Distance implements Serializable {
 	 *            an array
 	 * @param y
 	 *            another array
-	 * @param root
-	 *            Some necessary parameter.
 	 * @param defaultValue
 	 *            The value to be returned in cases in which no distance
 	 *            computation is possible.
 	 * @return The distance between the two arrays x and y.
 	 * @throws IllegalArgumentException
 	 */
-	public double distance(Iterable<? extends Number> x,
-			Iterable<? extends Number> y, double root, double defaultValue) {
-		double d = 0;
-		double x_i;
-		double y_i;
-		Iterator<? extends Number> yIterator = y.iterator();
-		for (Number number : x) {
-			if (!yIterator.hasNext()) {
-				break;
-			}
-			x_i = number.doubleValue();
-			y_i = yIterator.next().doubleValue();
-			if (computeDistanceFor(x_i, y_i, root, defaultValue)) {
-				d += additiveTerm(x_i, y_i, root, defaultValue);
-			}
-		}
-		return overallDistance(d, root, defaultValue);
-	}
-
-	/**
-	 * Computes the distance between two-dimensional {@link Iterable} elements.
-	 * 
-	 * @param x
-	 * @param y
-	 * @return
-	 */
-	public double distance(Iterable<Iterable<? extends Number>> x,
-			Iterator<Iterable<? extends Number>> y) {
-		double d = 0;
-		for (Iterable<? extends Number> i : x) {
-			d += distance(i, y.next());
-		}
-		return d;
-	}
-
-	/**
-	 * Returns the default value for the parameter to compute the distance.
-	 * 
-	 * @return The root value of this {@link Distance} measure to be used if no
-	 *         other value has been set.
-	 */
-	public abstract double getDefaultRoot();
+	public abstract double distance(Iterable<? extends Number> x,
+			Iterable<? extends Number> y,double defaultValue);
+	
 
 	/**
 	 * Returns the default value that is returned by the distance function in
@@ -281,28 +208,7 @@ public abstract class Distance implements Serializable {
 	 */
 	public abstract String getName();
 
-	/**
-	 * Returns the currently set root or default value for the distance
-	 * function.
-	 * 
-	 * @return
-	 */
-	public double getRoot() {
-		return this.root;
-	}
-
-	/**
-	 * This method allows to change the value of an already computed distance
-	 * with the help of the given default values.
-	 * 
-	 * @param distance
-	 * @param root
-	 * @param defaultValue
-	 * @return
-	 */
-	abstract double overallDistance(double distance, double root,
-			double defaultValue);
-
+	
 	/**
 	 * Set the value to be returned by the distance function in cases, in which
 	 * no distance can be computed.
@@ -313,25 +219,12 @@ public abstract class Distance implements Serializable {
 		this.defaultValue = defaultValue;
 	}
 
-	/**
-	 * Set the current root to be used in the distance function to the specified
-	 * value.
-	 * 
-	 * @param root
-	 */
-	public void setRoot(double root) {
-		this.root = root;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
-	public String toString() {
-		return String.format("%s, root = %s, default = %s", getName(),
-				getRoot(), getDefaultValue());
-	}
+	public abstract String toString();
 
 }

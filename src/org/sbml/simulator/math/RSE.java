@@ -28,7 +28,7 @@ package org.sbml.simulator.math;
  * @version $Rev$
  * @since 1.0
  */
-public class RSE extends Distance {
+public class RSE extends NMetric {
 
 	/**
 	 * Generated serial identifier.
@@ -36,21 +36,11 @@ public class RSE extends Distance {
 	private static final long serialVersionUID = 1643317436479699973L;
 
 	/**
-	 * Constructs a new RelativeSquaredError with a default root of 10,000. Here
+	 * Constructs a new RelativeSquaredError. Here
 	 * the root is the default value to be returned by the distance function.
 	 */
 	public RSE() {
-		this(1E4d);
-	}
-
-	/**
-	 * Constructs a new relative squared error object with the specified default
-	 * value do avoid division by zero. The standard value is 10,000.
-	 * 
-	 * @param standard
-	 */
-	public RSE(double standard) {
-		super(2d, standard);
+		super(2d);
 	}
 
 	/*
@@ -67,16 +57,6 @@ public class RSE extends Distance {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.sbml.squeezer.math.Distance#getStandardParameter()
-	 */
-	@Override
-	public double getDefaultRoot() {
-		return 2d;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see org.sbml.squeezer.math.Distance#getName()
 	 */
 	@Override
@@ -87,16 +67,16 @@ public class RSE extends Distance {
 		}
 		return name;
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.sbml.squeezer.math.Distance#overallDistance(double, double,
-	 * double)
+	 * @see org.sbml.squeezer.math.NMetric#overallDistance()
 	 */
 	@Override
 	double overallDistance(double distance, double root, double defaultValue) {
 		return distance;
 	}
+
 
 }

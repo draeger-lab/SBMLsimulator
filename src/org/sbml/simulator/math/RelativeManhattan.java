@@ -35,12 +35,4 @@ public class RelativeManhattan extends RelativeNMetric {
 		super(new Manhattan());
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.squeezer.math.Distance#setRoot(double)
-	 */
-	@Override
-	public void setRoot(double root) {
-	}
 }

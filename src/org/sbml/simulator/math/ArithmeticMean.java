@@ -1,6 +1,6 @@
 /*
- * $Id:  RelativeEuclidean.java 10:12:44 keller$
- * $URL: RelativeEuclidean.java $
+ * $Id:  ArithmeticMean.java 11:27:18 keller$
+ * $URL: ArithmeticMean.java $
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -18,21 +18,23 @@
 
 package org.sbml.simulator.math;
 
+
+import eva2.tools.math.Mathematics;
+
 /**
  * @author Roland Keller
  * @version $Rev$
  * @since
  */
-public class RelativeEuclidean extends RelativeNMetric {
-	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -7488743431449082030L;
+public class ArithmeticMean extends MeanFunction{
 
-	public RelativeEuclidean() {
-		super(new Euclidean());
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.math.MeanFunction#computeMean(double[])
+	 */
+	@Override
+	public double computeMean(double[] distances) {
+		return Mathematics.mean(distances);
 	}
-	
+
 
 }

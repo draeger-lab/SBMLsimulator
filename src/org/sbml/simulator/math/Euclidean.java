@@ -37,21 +37,6 @@ public class Euclidean extends NMetric {
 		super(2d);
 	}
 	
-	/**
-	 * Set the current root to be used in the distance function to the specified
-	 * value.
-	 * 
-	 * @param root
-	 */
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.squeezer.math.Distance#setRoot(double)
-	 */
-	@Override
-	public void setRoot(double root) {
-	}
-	
 	/*
 	 * (non-Javadoc)
 	 * 
