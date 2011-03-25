@@ -47,7 +47,7 @@ public abstract class QualityMeasure implements Serializable {
 	/**
 	 * 
 	 */
-	protected MeanFunction mean;
+	protected MeanFunction meanFunction;
 
 	/**
 	 * Default constructor. This sets the standard value for the parameter as
@@ -56,7 +56,7 @@ public abstract class QualityMeasure implements Serializable {
 	 */
 	public QualityMeasure() {
 		this.defaultValue = Double.NaN;
-		mean=new ArithmeticMean();
+		meanFunction=new ArithmeticMean();
 	}
 
 	/**
@@ -66,9 +66,9 @@ public abstract class QualityMeasure implements Serializable {
 	 */
 	public QualityMeasure(double defaultValue) {
 		this.defaultValue = defaultValue;
-		mean=new ArithmeticMean();
+		meanFunction=new ArithmeticMean();
 	}
-	
+
 	/**
 	 * Constructor, which allows setting the parameter values for meanFunction and default value.
 	 * 
@@ -77,7 +77,7 @@ public abstract class QualityMeasure implements Serializable {
 	 */
 	public QualityMeasure(double defaultValue, MeanFunction mean) {
 		this.defaultValue = defaultValue;
-		this.mean=mean;
+		this.meanFunction=mean;
 	}
 
 	/**
@@ -97,64 +97,6 @@ public abstract class QualityMeasure implements Serializable {
 			double defaultValue) {
 		return !Double.isNaN(y_i) && !Double.isNaN(x_i) && (y_i != x_i);
 	}
-
-	/**
-	 * 
-	 * @param x
-	 * @param y
-	 * @return
-	 */
-	public double distance(MultiBlockTable x, MultiBlockTable expected) {
-		if (x.getBlockCount() > expected.getBlockCount()) {
-			MultiBlockTable swap = expected;
-			expected = x;
-			x = swap;
-		}
-		ArrayList<Double> distances= new ArrayList<Double>();
-		for (int i = 0; i < x.getBlockCount(); i++) {
-			distances.addAll(getColumnDistances(x.getBlock(i), expected.getBlock(i)));
-		}
-		return mean.computeMean(distances);
-	}
-	
-	/**
-	 * 
-	 * @param x
-	 * @param y
-	 * @return
-	 */
-	public double distance(MultiBlockTable.Block x, MultiBlockTable.Block expected) {
-		return mean.computeMean(getColumnDistances(x,expected));
-	}
-
-	/**
-	 * Computes the distance of two matrices as the sum of the distances of each
-	 * row. It is possible that one matrix contains more columns than the other
-	 * one. If so, the additional values in the bigger matrix are ignored and do
-	 * not contribute to the distance. {@link Double.NaN} values do also not
-	 * contribute to the distance. Only columns with matching identifiers are
-	 * considered for the distance computation.
-	 * 
-	 * @param x
-	 * @param y
-	 * @return
-	 */
-	public ArrayList<Double> getColumnDistances(MultiBlockTable.Block x, MultiBlockTable.Block expected) {
-		if (x.getColumnCount() > expected.getColumnCount()) {
-			MultiBlockTable.Block swap = expected;
-			expected = x;
-			x = swap;
-		}
-		
-		String identifiers[] = x.getIdentifiers();
-		ArrayList<Double> distances= new ArrayList<Double>();
-		
-		for (int i = 0; i < identifiers.length; i++) {
-			distances.add(distance(x.getColumn(i), expected.getColumn(identifiers[i])));
-		}
-		return distances;
-	}
-	
 	
 	/**
 	 * Returns the distance of the two vectors x and y where the currently set
@@ -193,8 +135,65 @@ public abstract class QualityMeasure implements Serializable {
 	 */
 	public abstract double distance(Iterable<? extends Number> x,
 			Iterable<? extends Number> y,double defaultValue);
-	
 
+	/**
+	 * 
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	public double distance(MultiBlockTable x, MultiBlockTable expected) {
+		if (x.getBlockCount() > expected.getBlockCount()) {
+			MultiBlockTable swap = expected;
+			expected = x;
+			x = swap;
+		}
+		ArrayList<Double> distances= new ArrayList<Double>();
+		for (int i = 0; i < x.getBlockCount(); i++) {
+			distances.addAll(getColumnDistances(x.getBlock(i), expected.getBlock(i)));
+		}
+		return meanFunction.computeMean(distances);
+	}
+	
+	/**
+	 * 
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	public double distance(MultiBlockTable.Block x, MultiBlockTable.Block expected) {
+		return meanFunction.computeMean(getColumnDistances(x,expected));
+	}
+
+	/**
+	 * Computes the distance of two matrices as the sum of the distances of each
+	 * row. It is possible that one matrix contains more columns than the other
+	 * one. If so, the additional values in the bigger matrix are ignored and do
+	 * not contribute to the distance. {@link Double.NaN} values do also not
+	 * contribute to the distance. Only columns with matching identifiers are
+	 * considered for the distance computation.
+	 * 
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	public ArrayList<Double> getColumnDistances(MultiBlockTable.Block x, MultiBlockTable.Block expected) {
+		if (x.getColumnCount() > expected.getColumnCount()) {
+			MultiBlockTable.Block swap = expected;
+			expected = x;
+			x = swap;
+		}
+		
+		String identifiers[] = x.getIdentifiers();
+		ArrayList<Double> distances= new ArrayList<Double>();
+		
+		for (int i = 0; i < identifiers.length; i++) {
+			distances.add(distance(x.getColumn(i), expected.getColumn(identifiers[i])));
+		}
+		return distances;
+	}
+	
+	
 	/**
 	 * Returns the default value that is returned by the distance function in
 	 * cases in which the computation of the distance is not possible.
@@ -206,13 +205,20 @@ public abstract class QualityMeasure implements Serializable {
 	}
 
 	/**
+	 * @return the meanFunction
+	 */
+	public final MeanFunction getMeanFunction() {
+	    return meanFunction;
+	}
+	
+
+	/**
 	 * The name of this distance measurement.
 	 * 
 	 * @return A human-readable name representing the specific distance measure.
 	 */
 	public abstract String getName();
 
-	
 	/**
 	 * Set the value to be returned by the distance function in cases, in which
 	 * no distance can be computed.
@@ -221,6 +227,14 @@ public abstract class QualityMeasure implements Serializable {
 	 */
 	public void setDefaultValue(double defaultValue) {
 		this.defaultValue = defaultValue;
+	}
+
+	
+	/**
+	 * @param meanFunction the meanFunction to set
+	 */
+	public final void setMeanFunction(MeanFunction meanFunction) {
+	    this.meanFunction = meanFunction;
 	}
 
 	/*
