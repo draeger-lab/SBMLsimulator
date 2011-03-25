@@ -28,7 +28,7 @@ import javax.xml.stream.XMLStreamException;
 import org.sbml.optimization.PlotOptions;
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.simulator.gui.SimulatorUI;
-import org.sbml.simulator.math.Distance;
+import org.sbml.simulator.math.QualityMeasure;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.math.odes.SimulationOptions;
 
@@ -74,8 +74,8 @@ public class SBMLsimulator {
      * the quality of a simulation based on parameter and initial value
      * settings.
      */
-    private static final Class<Distance> AVAILABLE_DISTANCES[] = Reflect
-	    .getAllClassesInPackage(MATH_PACKAGE, true, true, Distance.class,
+    private static final Class<QualityMeasure> AVAILABLE_DISTANCES[] = Reflect
+	    .getAllClassesInPackage(MATH_PACKAGE, true, true, QualityMeasure.class,
 		JAR_LOCATION, true);
     /**
      * An array of all available ordinary differential equation solvers.
@@ -87,7 +87,7 @@ public class SBMLsimulator {
     /**
      * @return
      */
-    public static final Class<Distance>[] getAvailableDistances() {
+    public static final Class<QualityMeasure>[] getAvailableQualityMeasures() {
 	return AVAILABLE_DISTANCES;
     }
 

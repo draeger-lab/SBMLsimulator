@@ -30,7 +30,7 @@ import java.util.Iterator;
  * @version $Rev$
  * @since 1.0
  */
-public class NMetric extends Distance {
+public class NMetric extends QualityMeasure {
 
 	/**
 	 * Generated serial identifier.

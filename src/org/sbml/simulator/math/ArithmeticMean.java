@@ -24,17 +24,22 @@ import eva2.tools.math.Mathematics;
 /**
  * @author Roland Keller
  * @version $Rev$
- * @since
+ * @since 1.0
  */
-public class ArithmeticMean extends MeanFunction{
+public class ArithmeticMean extends MeanFunction {
 
-	/* (non-Javadoc)
-	 * @see org.sbml.simulator.math.MeanFunction#computeMean(double[])
-	 */
-	@Override
-	public double computeMean(double[] distances) {
-		return Mathematics.mean(distances);
-	}
+    /**
+     * Generated serial identifier.
+     */
+    private static final long serialVersionUID = 1738283911802695133L;
 
+    /*
+     * (non-Javadoc)
+     * @see org.sbml.simulator.math.MeanFunction#computeMean(double[])
+     */
+    @Override
+    public double computeMean(double[] distances) {
+	return Mathematics.mean(distances);
+    }
 
 }

@@ -18,35 +18,50 @@
 
 package org.sbml.simulator.math;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * @author Roland Keller
  * @version $Rev$
- * @since
+ * @since 1.0
+ * @date 2011-03-25
  */
-public abstract class MeanFunction {
+public abstract class MeanFunction implements Serializable {
 	
-	public abstract double computeMean(double[] values);
+    /**
+     * Generated serial identifier.
+     */
+    private static final long serialVersionUID = -7272984374334773096L;
 
-	public double computeMean(ArrayList<Double> values) {
-		double[] val = new double[values.size()];
-		for(int i=0;i!=val.length;i++) {
-			val[i]=values.get(i);
-		}
-		return computeMean(val);
-	}
+    /**
+     * @param values
+     * @return
+     */
+    public abstract double computeMean(double[] values);
 
-	/**
-	 * @param x
-	 * @return
-	 */
-	public double computeMean(Iterable<? extends Number> values) {
-		ArrayList<Double> val = new ArrayList<Double>();
-		for (Number number : values) {
-			val.add(number.doubleValue());
-		}
-		return computeMean(val);
+    /**
+     * @param values
+     * @return
+     */
+    public double computeMean(ArrayList<Double> values) {
+	double[] val = new double[values.size()];
+	for (int i = 0; i != val.length; i++) {
+	    val[i] = values.get(i);
 	}
+	return computeMean(val);
+    }
+
+    /**
+     * @param x
+     * @return
+     */
+    public double computeMean(Iterable<? extends Number> values) {
+	ArrayList<Double> val = new ArrayList<Double>();
+	for (Number number : values) {
+	    val.add(number.doubleValue());
+	}
+	return computeMean(val);
+    }
 
 }

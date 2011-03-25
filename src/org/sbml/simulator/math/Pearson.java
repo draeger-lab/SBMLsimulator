@@ -26,7 +26,7 @@ import java.util.Iterator;
  * @version $Rev$
  * @since
  */
-public class Pearson extends Distance {
+public class Pearson extends QualityMeasure {
 
 	/**
 	 * 

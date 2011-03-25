@@ -107,7 +107,7 @@ public class SimulationTestAutomatic {
 				MultiBlockTable solution=SimulationWorker.solveAtTimePoints(solver, model, timepoints, solver.getStepSize(), null);
 				
 				
-				Distance distance = new RSE();
+				QualityMeasure distance = new RSE();
 
 				double dist=distance.distance(solution, inputData);
 				

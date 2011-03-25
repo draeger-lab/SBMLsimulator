@@ -41,7 +41,7 @@ import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.optimization.PlotOptions;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.SBMLsimulator;
-import org.sbml.simulator.math.Distance;
+import org.sbml.simulator.math.QualityMeasure;
 import org.sbml.simulator.math.odes.DESSolver;
 import org.sbml.simulator.math.odes.IntegrationException;
 import org.sbml.simulator.math.odes.MultiBlockTable;
@@ -174,8 +174,8 @@ public class SimulationPanel extends JPanel implements
     /**
      * @return
      */
-    public Distance getDistance() {
-	return ((SimulationToolPanel) footPanel.getComponent(0)).getDistance();
+    public QualityMeasure getDistance() {
+	return ((SimulationToolPanel) footPanel.getComponent(0)).getQualityMeasure();
     }
 
     /**
@@ -318,11 +318,11 @@ public class SimulationPanel extends JPanel implements
 	Object[] statObjects, Double[] statDoubles) {
 	SimulationToolPanel tools = (SimulationToolPanel) footPanel
 		.getComponent(0);
-	double currentDistance = tools.getCurrentDistance();
+	double currentDistance = tools.getCurrentQuality();
 	if (Double.isNaN(currentDistance)
 		|| (currentDistance > statDoubles[runBestIndex].doubleValue())) {
 	    setSimulationData((MultiBlockTable) statObjects[simulationDataIndex]);
-	    tools.setCurrentDistance(statDoubles[runBestIndex].doubleValue());
+	    tools.setCurrentQualityMeasure(statDoubles[runBestIndex].doubleValue());
 	    double solution[] = (double[]) statObjects[solutionIndex];
 	    for (int i = 0; i < selectedQuantityIds.length; i++) {
 		visualizationPanel.updateQuantity(selectedQuantityIds[i],
@@ -436,7 +436,7 @@ public class SimulationPanel extends JPanel implements
 	worker.setData(data);
 	SimulationToolPanel tools = getOrCreateFootPanel();
 	visualizationPanel.setExperimentData(data);
-	tools.computeDistance();
+	tools.computeModelQuality();
     }
 
     /**
@@ -507,7 +507,7 @@ public class SimulationPanel extends JPanel implements
 	SimulationToolPanel foot = getOrCreateFootPanel();
 	simulate(worker.getModel(), foot.getSimulationStartTime(), foot
 		.getSimulationEndTime(), foot.getStepSize());
-	foot.computeDistance();
+	foot.computeModelQuality();
     }
 
     /**
