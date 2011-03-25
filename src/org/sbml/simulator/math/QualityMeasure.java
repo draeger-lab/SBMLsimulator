@@ -25,12 +25,13 @@ import org.sbml.simulator.math.odes.MultiBlockTable;
 /**
  * This class is the basis of various implementations of distance functions.
  * 
+ * @author Roland Keller
  * @author Andreas Dr&auml;ger
  * @date 17.04.2007
  * @version $Rev$
  * @since 1.0
  */
-public abstract class Distance implements Serializable {
+public abstract class QualityMeasure implements Serializable {
 
 	/**
 	 * Generated serial identifier.
@@ -43,6 +44,9 @@ public abstract class Distance implements Serializable {
 	 */
 	protected double defaultValue;
 	
+	/**
+	 * 
+	 */
 	protected MeanFunction mean;
 
 	/**
@@ -50,7 +54,7 @@ public abstract class Distance implements Serializable {
 	 * given by the getStandardParameter() method. The default value is set to
 	 * NaN.
 	 */
-	public Distance() {
+	public QualityMeasure() {
 		this.defaultValue = Double.NaN;
 		mean=new ArithmeticMean();
 	}
@@ -60,7 +64,7 @@ public abstract class Distance implements Serializable {
 	 * 
 	 * @param defaultValue
 	 */
-	public Distance(double defaultValue) {
+	public QualityMeasure(double defaultValue) {
 		this.defaultValue = defaultValue;
 		mean=new ArithmeticMean();
 	}
@@ -71,7 +75,7 @@ public abstract class Distance implements Serializable {
 	 * @param defaultValue
 	 * @param meanFunction
 	 */
-	public Distance(double defaultValue, MeanFunction mean) {
+	public QualityMeasure(double defaultValue, MeanFunction mean) {
 		this.defaultValue = defaultValue;
 		this.mean=mean;
 	}

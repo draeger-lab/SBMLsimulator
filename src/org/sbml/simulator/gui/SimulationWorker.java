@@ -25,7 +25,7 @@ import javax.swing.SwingWorker;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
-import org.sbml.simulator.math.Distance;
+import org.sbml.simulator.math.QualityMeasure;
 import org.sbml.simulator.math.SBMLinterpreter;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.math.odes.DESSolver;
@@ -111,7 +111,7 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object> {
 	/**
 	 * The currently used distance function.
 	 */
-	private Distance distance;
+	private QualityMeasure distance;
 	/**
 	 * 
 	 */
@@ -150,7 +150,7 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object> {
 	 * @throws IntegrationException
 	 * @throws ModelOverdeterminedException
 	 */
-	public double computeDistance() throws SBMLException, IntegrationException,
+	public double computeQuality() throws SBMLException, IntegrationException,
 			ModelOverdeterminedException {
 		return distance.distance(solveAtTimePoints(solver, model, data
 				.getTimePoints(), solver.getStepSize(), parent), data);
@@ -203,7 +203,7 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object> {
 	/**
 	 * @return the distance
 	 */
-	public Distance getDistance() {
+	public QualityMeasure getQualityMeasure() {
 		return distance;
 	}
 
@@ -256,7 +256,7 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object> {
 	 * @param distance
 	 *            the distance to set
 	 */
-	public void setDistance(Distance distance) {
+	public void setQualityMeasure(QualityMeasure distance) {
 		this.distance = distance;
 	}
 

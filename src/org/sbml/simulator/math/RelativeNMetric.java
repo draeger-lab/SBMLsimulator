@@ -27,7 +27,7 @@ import java.util.List;
  * @version $Rev$
  * @since
  */
-public class RelativeNMetric extends Distance {
+public class RelativeNMetric extends QualityMeasure {
 	
 	protected NMetric metric;
 	/**

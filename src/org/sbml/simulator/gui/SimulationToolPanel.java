@@ -36,6 +36,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -45,7 +46,7 @@ import org.sbml.jsbml.util.StringTools;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.optimization.PlotOptions;
 import org.sbml.simulator.SBMLsimulator;
-import org.sbml.simulator.math.Distance;
+import org.sbml.simulator.math.QualityMeasure;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.math.odes.DESSolver;
 import org.sbml.simulator.math.odes.IntegrationException;
@@ -93,14 +94,14 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
     }
 
     /**
-     * Contains all available distance functions.
+     * Contains all available quality measure functions.
      */
-    private JComboBox distFun;
+    private JComboBox qualityMeasureFunctions;
     /**
      * Text field to display the quality of a simulation with respect to a given
      * data set.
      */
-    private JFormattedTextField distField;
+    private JFormattedTextField qualityMeasureField;
     /**
      * Whether or not to plot in a logarithmic scale.
      */
@@ -162,7 +163,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
     /**
 	 * 
 	 */
-    private static final String DISTANCE_FIELD_TOOL_TIP = "This field shows the %s distance between the experimental data and the simulation of the model with the current configuration, computed by the %s.";
+    private static final String QUALITY_FIELD_TOOL_TIP = "This field shows the %s quality between the experimental data and the simulation of the model with the current configuration, computed by the %s.";
     /**
      * @param worker
      * @throws IllegalArgumentException
@@ -233,34 +234,35 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 
 	JPanel dPanel = new JPanel();
 	LayoutHelper dSet = new LayoutHelper(dPanel);
-	Class<Distance>[] distFunctions = SBMLsimulator.getAvailableDistances();
-	String distances[] = new String[distFunctions.length];
-	int distanceFunc = 0;
+	Class<QualityMeasure>[] distFunctions = SBMLsimulator.getAvailableQualityMeasures();
+	String quality[] = new String[distFunctions.length];
+	int qualityFunction = 0;
 	for (int i = 0; i < distFunctions.length; i++) {
-	    Distance dist = distFunctions[i].getConstructor().newInstance();
-	    distances[i] = dist.getName();
-	    if (i == distanceFunc) {
-		worker.setDistance(dist);
+	    QualityMeasure dist = distFunctions[i].getConstructor().newInstance();
+	    quality[i] = dist.getName();
+	    if (i == qualityFunction) {
+		worker.setQualityMeasure(dist);
 	    }
 	}
-	distFun = new JComboBox(distances);
-	distFun.setName("distfun");
-	distFun.addItemListener(this);
-	distFun.setSelectedItem(distanceFunc);
-	distField = new JFormattedTextField();
-	distField.setEnabled(false);
-	dSet.add(distFun);
+	qualityMeasureFunctions = new JComboBox(quality);
+	qualityMeasureFunctions.setName("distfun");
+	qualityMeasureFunctions.addItemListener(this);
+	qualityMeasureFunctions.setSelectedItem(qualityFunction);
+	qualityMeasureField = new JFormattedTextField();
+	qualityMeasureField.setEnabled(false);
+	dSet.add(qualityMeasureFunctions);
 	dSet.add(new JPanel());
-	dSet.add(distField);
+	dSet.add(qualityMeasureField);
 	dPanel
 		.setBorder(BorderFactory
-			.createTitledBorder(" Distance to data "));
+			.createTitledBorder(" Model quality measure "));
 
 	JPanel pPanel = new JPanel();
 	LayoutHelper pSet = new LayoutHelper(pPanel);
 	JButton cameraButton = new JButton(org.sbml.simulator.gui.GUITools.getIconCamera());
-	cameraButton.addActionListener(EventHandler.create(
-	    ActionListener.class, this, "openFileAndLogHistory"));
+	JButton saveButton = new JButton(UIManager.getIcon("ICON_SAVE_16"));
+//	cameraButton.addActionListener(EventHandler.create(
+//	    ActionListener.class, this, "openFileAndLogHistory"));
 	// TODO
 	pSet.add(showGrid, 0, 0, 1, 1, 0, 0);
 	pSet.add(new JPanel(), 1, 0, 1, 1, 0, 0);
@@ -269,6 +271,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	pSet.add(showToolTips, 2, 1, 1, 1, 0, 0);
 	pSet.add(new JPanel(), 3, 0, 1, 1, 0, 0);
 	pSet.add(cameraButton, 4, 0, 1, 1, 0, 0);
+	pSet.add(saveButton, 4, 1, 1, 1, 0, 0);
 	pPanel.setBorder(BorderFactory.createTitledBorder(" Plot "));
 
 	LayoutHelper aSet = new LayoutHelper(new JPanel());
@@ -292,13 +295,13 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
      * @throws IntegrationException
      * @throws ModelOverdeterminedException
      */
-    public void computeDistance() throws SBMLException, IntegrationException,
+    public void computeModelQuality() throws SBMLException, IntegrationException,
 	ModelOverdeterminedException {
 	if (worker.isSetModel() && worker.isSetData()) {
 	    worker.setStepSize(getStepSize());
-		setCurrentDistance(worker.computeDistance());
-	    distField.setToolTipText(StringUtil.toHTML(String.format(
-		DISTANCE_FIELD_TOOL_TIP, distFun.getSelectedItem(), solvers
+		setCurrentQualityMeasure(worker.computeQuality());
+	    qualityMeasureField.setToolTipText(StringUtil.toHTML(String.format(
+		QUALITY_FIELD_TOOL_TIP, qualityMeasureFunctions.getSelectedItem(), solvers
 			.getSelectedItem()), 60));
 	}
     }
@@ -361,20 +364,20 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
      * Access to the currently computed distance between measurement data and
      * simulation.
      * 
-     * @return The distance based on the currently selected {@link Distance}
+     * @return The distance based on the currently selected {@link QualityMeasure}
      *         function or {@link Double.#NaN} if no distance has been computed
      *         yet.
      */
-    public double getCurrentDistance() {
-	return distField.getValue() == null ? Double.NaN : ((Number) distField
+    public double getCurrentQuality() {
+	return qualityMeasureField.getValue() == null ? Double.NaN : ((Number) qualityMeasureField
 		.getValue()).doubleValue();
     }
 
     /**
      * @return
      */
-    public Distance getDistance() {
-	return worker.getDistance();
+    public QualityMeasure getQualityMeasure() {
+	return worker.getQualityMeasure();
     }
 
     /**
@@ -408,7 +411,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 		.getDESSolver().getStepSize()));
 	p.put(SimulationOptions.SIM_MAX_STEPS_PER_UNIT_TIME, Integer
 		.valueOf(maxStepsPerUnit));
-	p.put(SimulationOptions.SIM_DISTANCE_FUNCTION, worker.getDistance()
+	p.put(SimulationOptions.SIM_QUALITY_FUNCTION, worker.getQualityMeasure()
 		.getClass().getName());
 	p.put(SimulationOptions.SIM_ODE_SOLVER, worker.getDESSolver().getClass()
 		.getName());
@@ -505,12 +508,12 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	    JComboBox comBox = (JComboBox) e.getSource();
 	    try {
 		if (comBox.getName().equals("distfun")) {
-		    worker.setDistance(SBMLsimulator.getAvailableDistances()[comBox
+		    worker.setQualityMeasure(SBMLsimulator.getAvailableQualityMeasures()[comBox
 				    .getSelectedIndex()].getConstructor()
 				    .newInstance());
 		    if (worker.isSetSolver()) {
 			worker.setStepSize(getStepSize());
-			computeDistance();
+			computeModelQuality();
 		    }
 		} else if (comBox.getName().equals("solvers")) {
 		    setSolver(comBox);
@@ -546,7 +549,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 */
 	double simEndTime = prefsSimulation.getDouble(SimulationOptions.SIM_END_TIME);
 	spinnerStepSize = prefsSimulation.getDouble(SimulationOptions.SIM_STEP_SIZE);
-	Class<Distance>[] distFun = SBMLsimulator.getAvailableDistances();
+	Class<QualityMeasure>[] distFun = SBMLsimulator.getAvailableQualityMeasures();
 
 	maxTime = Math.max(prefsSimulation.getDouble(SimulationOptions.SIM_MAX_TIME), Math
 		.max(getSimulationStartTime(), simEndTime));
@@ -568,15 +571,15 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	maxStepsPerUnit = prefsSimulation
 		.getInt(SimulationOptions.SIM_MAX_STEPS_PER_UNIT_TIME);
 
-	int distanceFunc = 0;
-	String name = prefsSimulation.get(SimulationOptions.SIM_DISTANCE_FUNCTION);
+	int qualityFunc = 0;
+	String name = prefsSimulation.get(SimulationOptions.SIM_QUALITY_FUNCTION);
 	name = name.substring(name.lastIndexOf('.') + 1);
-	while ((distanceFunc < distFun.length - 1)
-		&& !distFun[distanceFunc].getSimpleName().equals(name)) {
-	    distanceFunc++;
+	while ((qualityFunc < distFun.length - 1)
+		&& !distFun[qualityFunc].getSimpleName().equals(name)) {
+	    qualityFunc++;
 	}
-	if (this.distFun != null) {
-	    this.distFun.setSelectedIndex(distanceFunc);
+	if (this.qualityMeasureFunctions != null) {
+	    this.qualityMeasureFunctions.setSelectedIndex(qualityFunc);
 	}
 	solvers = createSolversComboOrSetSelectedItem(prefsSimulation
 		.get(SimulationOptions.SIM_ODE_SOLVER));
@@ -605,10 +608,10 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
     public void setAllEnabled(boolean enabled) {
 	GUITools.setAllEnabled(this, enabled);
 	startTime.setEnabled(false);
-	if (enabled && (distField.getText().length() == 0)) {
-	    distField.setEditable(false);
-	} else if (!enabled && (distField.getText().length() > 0)) {
-	    distField.setEnabled(true);
+	if (enabled && (qualityMeasureField.getText().length() == 0)) {
+	    qualityMeasureField.setEditable(false);
+	} else if (!enabled && (qualityMeasureField.getText().length() > 0)) {
+	    qualityMeasureField.setEnabled(true);
 	}
     }
 
@@ -617,18 +620,18 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
      * 
      * @param value
      *        The new distance value. This should be in accordance with the
-     *        currently selected {@link Distance} function and also
+     *        currently selected {@link QualityMeasure} function and also
      *        integration method. Furthermore, it should also belong to the
      *        correct {@link Model} and data set.
      */
-    void setCurrentDistance(double value) {
-	distField.setValue(value);
-	distField.setText(StringTools.toString(value));
+    void setCurrentQualityMeasure(double value) {
+	qualityMeasureField.setValue(value);
+	qualityMeasureField.setText(StringTools.toString(value));
 	// distField.setValue(Double.valueOf(value));
-	if (!distField.isEnabled()) {
-	    distField.setEditable(false);
-	    distField.setEnabled(true);
-	    distField.setAlignmentX(RIGHT_ALIGNMENT);
+	if (!qualityMeasureField.isEnabled()) {
+	    qualityMeasureField.setEditable(false);
+	    qualityMeasureField.setEnabled(true);
+	    qualityMeasureField.setAlignmentX(RIGHT_ALIGNMENT);
 	}
     }
 
@@ -679,7 +682,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	worker.setDESSolver(SBMLsimulator.getAvailableSolvers()[comBox
 		.getSelectedIndex()].getConstructor().newInstance());
 	worker.setStepSize(getStepSize());
-	computeDistance();
+	computeModelQuality();
     }
 
     /**

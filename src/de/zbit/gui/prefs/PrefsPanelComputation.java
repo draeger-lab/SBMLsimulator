@@ -31,7 +31,7 @@ import javax.swing.event.ChangeListener;
 import org.sbml.jsbml.util.StringTools;
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.gui.GUITools;
-import org.sbml.simulator.math.Distance;
+import org.sbml.simulator.math.QualityMeasure;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.math.odes.SimulationOptions;
 
@@ -161,7 +161,7 @@ public class PrefsPanelComputation extends PreferencesPanelForKeyProvider {
 	try {
 	    initComboBox(solverBox, SBMLsimulator.getAvailableSolvers(),
 		SimulationOptions.SIM_ODE_SOLVER);
-	    initComboBox(distanceBox, SBMLsimulator.getAvailableDistances(),
+	    initComboBox(distanceBox, SBMLsimulator.getAvailableQualityMeasures(),
 		SimulationOptions.SIM_DISTANCE_DEFAULT_VALUE);
 	} catch (Exception exc) {
 	    GUITools.showErrorMessage(this, exc);
@@ -229,7 +229,7 @@ public class PrefsPanelComputation extends PreferencesPanelForKeyProvider {
 			.getConstructor().newInstance();
 		combo.addItem(solver.getName());
 	    } else {
-		Distance distance = (Distance) classes[i].getConstructor()
+		QualityMeasure distance = (QualityMeasure) classes[i].getConstructor()
 			.newInstance();
 		combo.addItem(distance.getName());
 	    }

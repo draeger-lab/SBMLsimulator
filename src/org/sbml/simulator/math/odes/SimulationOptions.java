@@ -19,7 +19,7 @@ package org.sbml.simulator.math.odes;
 
 import java.util.ResourceBundle;
 
-import org.sbml.simulator.math.Distance;
+import org.sbml.simulator.math.QualityMeasure;
 import org.sbml.simulator.math.RSE;
 
 import de.zbit.util.ResourceManager;
@@ -96,9 +96,9 @@ public interface SimulationOptions extends KeyProvider {
      * evaluates the quality of a simulation with respect to given
      * (experimental) data.
      */
-    public static final Option<Distance> SIM_DISTANCE_FUNCTION = new Option<Distance>(
-	"SIM_DISTANCE_FUNCTION",
-	Distance.class,
+    public static final Option<QualityMeasure> SIM_QUALITY_FUNCTION = new Option<QualityMeasure>(
+	"SIM_QUALITY_FUNCTION",
+	QualityMeasure.class,
 	"This specifies the class name of the default distance function that evaluates the quality of a simulation with respect to given (experimental) data.",
 	new RSE());
     /**

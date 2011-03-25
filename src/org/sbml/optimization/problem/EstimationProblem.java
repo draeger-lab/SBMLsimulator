@@ -22,7 +22,7 @@ import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.optimization.QuantityRange;
-import org.sbml.simulator.math.Distance;
+import org.sbml.simulator.math.QualityMeasure;
 import org.sbml.simulator.math.SBMLinterpreter;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.math.odes.DESSolver;
@@ -74,7 +74,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	/**
 	 * 
 	 */
-	private Distance distance = null;
+	private QualityMeasure distance = null;
 
 	/**
 	 * 
@@ -129,7 +129,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * @throws ModelOverdeterminedException
 	 * @throws SBMLException
 	 */
-	public EstimationProblem(DESSolver solver, Distance distance, Model model,
+	public EstimationProblem(DESSolver solver, QualityMeasure distance, Model model,
 			MultiBlockTable referenceData, boolean multishoot,
 			QuantityRange... quantityRanges)
 			throws ModelOverdeterminedException, SBMLException {
@@ -152,7 +152,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * @throws ModelOverdeterminedException
 	 * @throws SBMLException
 	 */
-	public EstimationProblem(DESSolver solver, Distance distance, Model model,
+	public EstimationProblem(DESSolver solver, QualityMeasure distance, Model model,
 			MultiBlockTable referenceData, QuantityRange... quantityRanges)
 			throws ModelOverdeterminedException, SBMLException {
 		super();
@@ -275,7 +275,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * 
 	 * @return
 	 */
-	public Distance getDistance() {
+	public QualityMeasure getDistance() {
 		return distance;
 	}
 
@@ -411,7 +411,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * 
 	 * @param distance
 	 */
-	public void setDistance(Distance distance) {
+	public void setDistance(QualityMeasure distance) {
 		this.distance = distance;
 	}
 
