@@ -1,6 +1,6 @@
 /*
- * $Id:  RelativeEuclidean.java 10:12:44 keller$
- * $URL: RelativeEuclidean.java $
+ * $Id:  meanFunction.java 11:25:15 keller$
+ * $URL: meanFunction.java $
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -18,21 +18,35 @@
 
 package org.sbml.simulator.math;
 
+import java.util.ArrayList;
+
 /**
  * @author Roland Keller
  * @version $Rev$
  * @since
  */
-public class RelativeEuclidean extends RelativeNMetric {
+public abstract class MeanFunction {
 	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -7488743431449082030L;
+	public abstract double computeMean(double[] values);
 
-	public RelativeEuclidean() {
-		super(new Euclidean());
+	public double computeMean(ArrayList<Double> values) {
+		double[] val = new double[values.size()];
+		for(int i=0;i!=val.length;i++) {
+			val[i]=values.get(i);
+		}
+		return computeMean(val);
 	}
-	
+
+	/**
+	 * @param x
+	 * @return
+	 */
+	public double computeMean(Iterable<? extends Number> values) {
+		ArrayList<Double> val = new ArrayList<Double>();
+		for (Number number : values) {
+			val.add(number.doubleValue());
+		}
+		return computeMean(val);
+	}
 
 }
