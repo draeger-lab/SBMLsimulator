@@ -28,6 +28,7 @@ import org.sbml.jsbml.NamedSBase;
 import org.sbml.jsbml.NamedSBaseWithDerivedUnit;
 import org.sbml.jsbml.util.compilers.HTMLFormula;
 
+import de.zbit.gui.ColorPalette;
 import de.zbit.util.StringUtil;
 import de.zbit.util.ValuePair;
 
@@ -83,29 +84,63 @@ public class LegendTableModel extends AbstractTableModel {
      * @return
      */
     public static Color indexToColor(int index) {
-	switch (index % 10) {
+	switch (index % 27) {
 	case 0:
-	    return Color.black;
+	    return ColorPalette.ANTHRACITE;
 	case 1:
-	    return Color.red;
+	    return ColorPalette.SECOND_292;
 	case 2:
-	    return Color.blue;
+	    return ColorPalette.SECOND_131;
 	case 3:
-	    return Color.pink;
+	    return ColorPalette.SECOND_180;
 	case 4:
-	    return Color.green;
+	    return ColorPalette.SECOND_3015;
 	case 5:
-	    return Color.gray;
+	    return ColorPalette.SECOND_364;
 	case 6:
-	    return Color.magenta;
+	    return ColorPalette.SECOND_557;
 	case 7:
-	    return Color.cyan;
+	    return ColorPalette.SECOND_653;
 	case 8:
-	    return Color.orange;
+	    return ColorPalette.SECOND_6880;
 	case 9:
-	    return Color.darkGray;
+	    return ColorPalette.SECOND_7490;
+	case 10:
+	    return ColorPalette.SECOND_7505;
+	case 11:
+	    return ColorPalette.SECOND_7508;
+	case 12:
+	    return ColorPalette.SECOND_7530;
+	case 13:
+	    return ColorPalette.GOLD;
+	case 14:
+	    return ColorPalette.CAMINE_RED;
+	case 15:
+	    return ColorPalette.CAMINE_RED_50_PERCENT;
+	case 16:
+	    return ColorPalette.GOLD_50_PERCENT;
+	case 17:
+	    return Color.BLACK;
+	case 18:
+	    return Color.RED;
+	case 19:
+	    return Color.BLUE;
+	case 20:
+	    return Color.PINK;
+	case 21:
+	    return Color.GREEN;
+	case 22:
+	    return Color.GRAY;
+	case 23:
+	    return Color.MAGENTA;
+	case 24:
+	    return Color.CYAN;
+	case 25:
+	    return Color.ORANGE;
+	case 26:
+	    return Color.DARK_GRAY;
 	}
-	return Color.black;
+	return Color.BLACK;
     }
 
     /**

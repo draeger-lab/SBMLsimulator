@@ -9,4 +9,16 @@
 	   by a semicolon ";" the corresponding tool tip.
   </comment>
   <entry key="SIM:0000001">Falls nicht anders spezifiziert, wird der hier angegebene Wert dafür genutzt, um Kompartimentgrößen zu initialisieren.</entry>
+    
+  <!-- Plot -->
+  
+  <entry key="SIM:0000002">Log-Skala</entry>
+  <entry key="SIM:0000003">Gitter</entry>
+  <entry key="SIM:0000004">Legende</entry>
+  <entry key="SIM:0000005">Hilfstexte</entry>
+  <entry key="SIM:0000006">Klicken Sie hier, wenn die Ordinatenaxe in a logarithmischen Skala gezeichnet werden soll. Dies ist jedoch nur dann möglich, wenn ausschließlich Werte größer null vorkommen.</entry>
+  <entry key="SIM:0000007">Entscheiden Sie, ob Gitternetzlinien in das Koordinatensystem eingezeichnet werden sollen.</entry>
+  <entry key="SIM:0000008">Diese Option fügt eine Legende im Koordinatensystem ein oder entfernt diese.</entry>
+  <entry key="SIM:0000009">Hier kann festgelegt werden, ob an den einzelnen Kurven bzw. Punkten im Koordinatensystem Hilfstexte eingeblendet werden sollen.</entry>
+  
 </properties>

@@ -9,4 +9,16 @@
 	   by a semicolon ";" the corresponding tool tip.
   </comment>
   <entry key="SIM:0000001">If not specified the value corresponding to this argument will be used to initialize the size of compartments.</entry>
+  
+  <!-- Plot -->
+  
+  <entry key="SIM:0000002">Log scale</entry>
+  <entry key="SIM:0000003">Grid</entry>
+  <entry key="SIM:0000004">Legend</entry>
+  <entry key="SIM:0000005">Tool tips</entry>
+  <entry key="SIM:0000006">Select this checkbox if the y-axis should be drawn in a logarithmic scale. This is, however, only possible if all values are greater than zero.</entry>
+  <entry key="SIM:0000007">Decide whether or not to draw a grid in the plot area.</entry>
+  <entry key="SIM:0000008">Add or remove a legend in the plot.</entry>
+  <entry key="SIM:0000009">Let the plot display tool tips for each curve.</entry>
+  
 </properties>
