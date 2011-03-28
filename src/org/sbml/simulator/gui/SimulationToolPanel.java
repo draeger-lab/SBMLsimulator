@@ -191,17 +191,17 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 		.getPreferencesFor(SimulationOptions.class);
 	solvers = createSolversComboOrSetSelectedItem(prefs.get(
 	    SimulationOptions.SIM_ODE_SOLVER).toString());
-	showGrid = GUITools.createJCheckBox(Plot.Command.SHOW_GRID.getText(),
+	showGrid = GUITools.createJCheckBox(Plot.Command.SHOW_GRID.getName(),
 	    false, Plot.Command.SHOW_GRID, Plot.Command.SHOW_GRID.getToolTip(),
 	    this);
-	logScale = GUITools.createJCheckBox(Plot.Command.LOG_SCALE.getText(),
+	logScale = GUITools.createJCheckBox(Plot.Command.LOG_SCALE.getName(),
 	    false, Plot.Command.LOG_SCALE, Plot.Command.LOG_SCALE.getToolTip(),
 	    this);
 	showLegend = GUITools.createJCheckBox(Plot.Command.SHOW_LEGEND
-		.getText(), true, Plot.Command.SHOW_LEGEND,
+		.getName(), true, Plot.Command.SHOW_LEGEND,
 	    Plot.Command.SHOW_LEGEND.getToolTip(), this);
 	showToolTips = GUITools.createJCheckBox(Plot.Command.SHOW_TOOL_TIPS
-		.getText(), true, Plot.Command.SHOW_TOOL_TIPS,
+		.getName(), true, Plot.Command.SHOW_TOOL_TIPS,
 	    Plot.Command.SHOW_TOOL_TIPS.getToolTip(), this);
 
 	// Settings
