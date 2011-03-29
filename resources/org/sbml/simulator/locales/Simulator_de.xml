@@ -9,6 +9,8 @@
 	   by a semicolon ";" the corresponding tool tip.
   </comment>
   <entry key="SIM:0000001">Falls nicht anders spezifiziert, wird der hier angegebene Wert dafür genutzt, um Kompartimentgrößen zu initialisieren.</entry>
+  <entry key="SIM:0000010">Bewertungsfunktion der Modellqualität</entry>
+  <entry key="SIM:0000011">Diese Einstellungen ermöglichen es, festzulegen, wie die Qualität eines Parametersatzes bezüglich gegebener experimenteller Daten zu bewerten ist.</entry>
     
   <!-- Plot -->
   

@@ -91,6 +91,7 @@ public interface SimulationOptions extends KeyProvider {
 	Double.class,
 	"The default return value of a distance function that can be used if for some reason a distance cannot be computed.",
 	Double.valueOf(1E3));
+    
     /**
      * This specifies the class name of the default distance function that
      * evaluates the quality of a simulation with respect to given
@@ -101,6 +102,7 @@ public interface SimulationOptions extends KeyProvider {
 	QualityMeasure.class,
 	"This specifies the class name of the default distance function that evaluates the quality of a simulation with respect to given (experimental) data.",
 	new RSE());
+    
     /**
      * The root parameter in the distance function: in case of the n-norm this
      * is at the same time also the exponent. For instance, the Eulidean
@@ -124,6 +126,16 @@ public interface SimulationOptions extends KeyProvider {
 	Double.class,
 	"With the associated non-negative double number that has to be greater than 0 when simulating SBML models, it is possible to perform a simulation.",
 	Double.valueOf(5d));
+    
+    /**
+     * 
+     */
+    @SuppressWarnings("unchecked")
+    public static final OptionGroup MODEL_QUALITY = new OptionGroup(bundle
+	    .getString("SIM:0000010"), bundle.getString("SIM:0000011"),
+	SIM_QUALITY_FUNCTION, SIM_DISTANCE_DEFAULT_VALUE,
+	SIM_DISTANCE_N_METRIC_ROOT);
+    
     /**
      * This is important for the graphical user interface as it defines the
      * maximal possible value for compartments within the input mask. Expected
