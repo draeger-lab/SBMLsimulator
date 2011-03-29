@@ -46,7 +46,7 @@ public class NMetric extends QualityMeasure {
 	 */
 	public NMetric() {
 		super();
-		this.root=3;
+		this.root=3d;
 	}
 
 	/**
@@ -119,6 +119,13 @@ public class NMetric extends QualityMeasure {
 	
 	public double getRoot() {
 		return root;
+	}
+
+	/**
+	 * @param string
+	 */
+	public void setRoot(double root) {
+		this.root=root;
 	}
 
 }

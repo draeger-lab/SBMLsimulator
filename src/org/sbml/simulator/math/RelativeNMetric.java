@@ -87,4 +87,11 @@ public class RelativeNMetric extends QualityMeasure {
 		return getName() + " distance";
 	}
 
+	/**
+	 * @param double1
+	 */
+	public void setRoot(double root) {
+		metric.setRoot(root);
+	}
+
 }
