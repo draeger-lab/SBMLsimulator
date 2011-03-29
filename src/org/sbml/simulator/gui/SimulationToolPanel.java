@@ -46,7 +46,9 @@ import org.sbml.jsbml.util.StringTools;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.optimization.PlotOptions;
 import org.sbml.simulator.SBMLsimulator;
+import org.sbml.simulator.math.NMetric;
 import org.sbml.simulator.math.QualityMeasure;
+import org.sbml.simulator.math.RelativeNMetric;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.math.odes.DESSolver;
 import org.sbml.simulator.math.odes.IntegrationException;
@@ -241,6 +243,12 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	    QualityMeasure dist = distFunctions[i].getConstructor().newInstance();
 	    quality[i] = dist.getName();
 	    if (i == qualityFunction) {
+	   	if(dist instanceof NMetric) {
+	   		((NMetric)dist).setRoot(prefs.getDouble(SimulationOptions.SIM_DISTANCE_N_METRIC_ROOT));
+	   	}
+	   	else if(dist instanceof RelativeNMetric) {
+	   		((RelativeNMetric)dist).setRoot(prefs.getDouble(SimulationOptions.SIM_DISTANCE_N_METRIC_ROOT));
+	   	}
 		worker.setQualityMeasure(dist);
 	    }
 	}
@@ -508,9 +516,20 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	    JComboBox comBox = (JComboBox) e.getSource();
 	    try {
 		if (comBox.getName().equals("distfun")) {
-		    worker.setQualityMeasure(SBMLsimulator.getAvailableQualityMeasures()[comBox
+			QualityMeasure dist= SBMLsimulator.getAvailableQualityMeasures()[comBox
 				    .getSelectedIndex()].getConstructor()
-				    .newInstance());
+				    .newInstance();
+			if(dist instanceof NMetric) {
+				SBPreferences prefs = SBPreferences
+				.getPreferencesFor(SimulationOptions.class);
+		   		((NMetric)dist).setRoot(prefs.getDouble(SimulationOptions.SIM_DISTANCE_N_METRIC_ROOT));
+		   	}
+		   	else if(dist instanceof RelativeNMetric) {
+		   		SBPreferences prefs = SBPreferences
+				.getPreferencesFor(SimulationOptions.class);
+		   		((RelativeNMetric)dist).setRoot(prefs.getDouble(SimulationOptions.SIM_DISTANCE_N_METRIC_ROOT));
+		   	}
+		    worker.setQualityMeasure(dist);
 		    if (worker.isSetSolver()) {
 			worker.setStepSize(getStepSize());
 			computeModelQuality();

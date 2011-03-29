@@ -108,11 +108,11 @@ public interface SimulationOptions extends KeyProvider {
      * of one. In the RSE, the default root is also two, but this value may be
      * changed.
      */
-    public static final Option<Double> N_METRIC_ROOT = new Option<Double>(
-	"N_METRIC_ROOT",
+    public static final Option<Double> SIM_DISTANCE_N_METRIC_ROOT = new Option<Double>(
+	"SIM_DISTANCE_N_METRIC_ROOT",
 	Double.class,
 	"The root parameter in the distance function for n-metrics: in case of the n-norm this is at the same time also the exponent. For instance, the Eulidean distance has a root value of two, whereas the Manhattan norm has a root of one. In the RSE, the default root is also two, but this value may be changed.",
-	Double.valueOf(2d));
+	Double.valueOf(3d));
         
     /**
      * With the associated non-negative double number that has to be greater
