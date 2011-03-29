@@ -134,7 +134,7 @@ public class PrefsPanelComputation extends PreferencesPanelForKeyProvider {
 	JComboBox distanceBox = new JComboBox();
 	int i;
 	Option<?> keys[] = { SimulationOptions.SIM_DISTANCE_DEFAULT_VALUE,
-		SimulationOptions.N_METRIC_ROOT,
+		SimulationOptions.SIM_DISTANCE_N_METRIC_ROOT,
 		SimulationOptions.SIM_MAX_TIME,
 		SimulationOptions.SIM_START_TIME,
 		SimulationOptions.SIM_END_TIME,
@@ -143,7 +143,7 @@ public class PrefsPanelComputation extends PreferencesPanelForKeyProvider {
 		SimulationOptions.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE,
 		SimulationOptions.OPT_DEFAULT_SPECIES_INITIAL_VALUE,
 		SimulationOptions.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS };
-	String names[] = { "Default value:", "Root:",
+	String names[] = { "Default value:", "Value of N for N-metric",
 		"Maximal simulation time:", "Simulation start time:",
 		"Simulation end time:",
 		"Maximal number of steps per time unit:",
