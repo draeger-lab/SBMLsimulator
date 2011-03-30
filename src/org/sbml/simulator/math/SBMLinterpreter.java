@@ -249,7 +249,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 	 * @return
 	 */
 	private Species determineMajorSpeciesAttributes() {
-		Species majority = new Species(model.getLevel(), model.getVersion());
+		Species majority = new Species(2, 4);
 		int concentration = 0, amount = 0, substanceUnits = 0;
 
 		for (Species species : model.getListOfSpecies()) {

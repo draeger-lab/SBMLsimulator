@@ -230,7 +230,7 @@ public abstract class AbstractDESSolver implements DESSolver, EventHandler {
 	 * @return
 	 */
 	public int inBetweenSteps(double lastTime, double nextTime, double stepSize) {
-		return (int) (Math.floor((nextTime - lastTime) / stepSize) + 1);
+		return (int) (Math.floor((nextTime - lastTime) / stepSize) /*+ 1*/);
 	}
 
 	/**
