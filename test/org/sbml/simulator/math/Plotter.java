@@ -25,6 +25,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import org.sbml.simulator.math.odes.MultiBlockTable;
+import org.sbml.simulator.math.odes.MultiBlockTable.Block.Column;
 
 import de.zbit.gui.GUITools;
 
@@ -61,6 +62,25 @@ public class Plotter implements Runnable {
 		
 		Plot plot = new Plot("Simulation", "time", "value");
 		int i, j;
+		Column col;
+		
+		String identifiers[] = data.getBlock(0).getIdentifiers();	
+		
+		
+		for (i = 0; i < identifiers.length; i++) {
+			col = solution.getColumn(identifiers[i]);
+			for (j = 0; j < data.getRowCount(); j++) {
+				plot.setConnectedPoint(solution.getTimePoint(j),
+						col.getValue(j), i);
+				plot.setUnconnectedPoint(solution.getTimePoint(j),
+						data.getValueAt(j, i+1), 90 + i);
+				
+		
+			}
+			
+		}		
+		
+		/*
 		for (i = 0; i < solution.getRowCount(); i++) {
 			for (j = 0; j < solution.getColumnCount(); j++) {
 				plot.setConnectedPoint(solution.getTimePoint(i),
@@ -73,6 +93,8 @@ public class Plotter implements Runnable {
 						data.getValueAt(i, j), 90 + j);
 			}
 		}
+		*/
+		
 		
 		// save graph as jpg
 		BufferedImage img = new BufferedImage(plot
@@ -90,7 +112,7 @@ public class Plotter implements Runnable {
 //		} catch (InterruptedException exc) {
 //			GUITools.showErrorMessage(null, exc);
 //		}
-		plot.dispose();
+		//plot.dispose();
 	}
 
 }
