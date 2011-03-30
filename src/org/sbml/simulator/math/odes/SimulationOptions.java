@@ -86,10 +86,10 @@ public interface SimulationOptions extends KeyProvider {
      * The default return value of a distance function that can be used if for
      * some reason a distance cannot be computed.
      */
-    public static final Option<Double> SIM_DISTANCE_DEFAULT_VALUE = new Option<Double>(
-	"SIM_DISTANCE_DEFAULT_VALUE",
+    public static final Option<Double> SIM_QUALITY_DEFAULT_VALUE = new Option<Double>(
+	"SIM_QUALITY_DEFAULT_VALUE",
 	Double.class,
-	"The default return value of a distance function that can be used if for some reason a distance cannot be computed.",
+	"The default return value of a quality function that can be used if for some reason a quality cannot be computed.",
 	Double.valueOf(1E3));
     
     /**
@@ -100,7 +100,7 @@ public interface SimulationOptions extends KeyProvider {
     public static final Option<QualityMeasure> SIM_QUALITY_FUNCTION = new Option<QualityMeasure>(
 	"SIM_QUALITY_FUNCTION",
 	QualityMeasure.class,
-	"This specifies the class name of the default distance function that evaluates the quality of a simulation with respect to given (experimental) data.",
+	"This specifies the class name of the default quality function that evaluates the quality of a simulation with respect to given (experimental) data.",
 	new RSE());
     
     /**
@@ -110,8 +110,8 @@ public interface SimulationOptions extends KeyProvider {
      * of one. In the RSE, the default root is also two, but this value may be
      * changed.
      */
-    public static final Option<Double> SIM_DISTANCE_N_METRIC_ROOT = new Option<Double>(
-	"SIM_DISTANCE_N_METRIC_ROOT",
+    public static final Option<Double> SIM_QUALITY_N_METRIC_ROOT = new Option<Double>(
+	"SIM_QUALITY_N_METRIC_ROOT",
 	Double.class,
 	"The root parameter in the distance function for n-metrics: in case of the n-norm this is at the same time also the exponent. For instance, the Eulidean distance has a root value of two, whereas the Manhattan norm has a root of one. In the RSE, the default root is also two, but this value may be changed.",
 	Double.valueOf(3d));
@@ -133,8 +133,8 @@ public interface SimulationOptions extends KeyProvider {
     @SuppressWarnings("unchecked")
     public static final OptionGroup MODEL_QUALITY = new OptionGroup(bundle
 	    .getString("SIM:0000010"), bundle.getString("SIM:0000011"),
-	SIM_QUALITY_FUNCTION, SIM_DISTANCE_DEFAULT_VALUE,
-	SIM_DISTANCE_N_METRIC_ROOT);
+	SIM_QUALITY_FUNCTION, SIM_QUALITY_DEFAULT_VALUE,
+	SIM_QUALITY_N_METRIC_ROOT);
     
     /**
      * This is important for the graphical user interface as it defines the

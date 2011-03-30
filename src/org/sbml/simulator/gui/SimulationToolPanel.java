@@ -244,10 +244,10 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	    quality[i] = dist.getName();
 	    if (i == qualityFunction) {
 	   	if(dist instanceof NMetric) {
-	   		((NMetric)dist).setRoot(prefs.getDouble(SimulationOptions.SIM_DISTANCE_N_METRIC_ROOT));
+	   		((NMetric)dist).setRoot(prefs.getDouble(SimulationOptions.SIM_QUALITY_N_METRIC_ROOT));
 	   	}
 	   	else if(dist instanceof RelativeNMetric) {
-	   		((RelativeNMetric)dist).setRoot(prefs.getDouble(SimulationOptions.SIM_DISTANCE_N_METRIC_ROOT));
+	   		((RelativeNMetric)dist).setRoot(prefs.getDouble(SimulationOptions.SIM_QUALITY_N_METRIC_ROOT));
 	   	}
 		worker.setQualityMeasure(dist);
 	    }
@@ -522,12 +522,12 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 			if(dist instanceof NMetric) {
 				SBPreferences prefs = SBPreferences
 				.getPreferencesFor(SimulationOptions.class);
-		   		((NMetric)dist).setRoot(prefs.getDouble(SimulationOptions.SIM_DISTANCE_N_METRIC_ROOT));
+		   		((NMetric)dist).setRoot(prefs.getDouble(SimulationOptions.SIM_QUALITY_N_METRIC_ROOT));
 		   	}
 		   	else if(dist instanceof RelativeNMetric) {
 		   		SBPreferences prefs = SBPreferences
 				.getPreferencesFor(SimulationOptions.class);
-		   		((RelativeNMetric)dist).setRoot(prefs.getDouble(SimulationOptions.SIM_DISTANCE_N_METRIC_ROOT));
+		   		((RelativeNMetric)dist).setRoot(prefs.getDouble(SimulationOptions.SIM_QUALITY_N_METRIC_ROOT));
 		   	}
 		    worker.setQualityMeasure(dist);
 		    if (worker.isSetSolver()) {

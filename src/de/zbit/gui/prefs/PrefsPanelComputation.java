@@ -133,8 +133,8 @@ public class PrefsPanelComputation extends PreferencesPanelForKeyProvider {
 	JComboBox solverBox = new JComboBox();
 	JComboBox distanceBox = new JComboBox();
 	int i;
-	Option<?> keys[] = { SimulationOptions.SIM_DISTANCE_DEFAULT_VALUE,
-		SimulationOptions.SIM_DISTANCE_N_METRIC_ROOT,
+	Option<?> keys[] = { SimulationOptions.SIM_QUALITY_DEFAULT_VALUE,
+		SimulationOptions.SIM_QUALITY_N_METRIC_ROOT,
 		SimulationOptions.SIM_MAX_TIME,
 		SimulationOptions.SIM_START_TIME,
 		SimulationOptions.SIM_END_TIME,
@@ -162,12 +162,12 @@ public class PrefsPanelComputation extends PreferencesPanelForKeyProvider {
 	    initComboBox(solverBox, SBMLsimulator.getAvailableSolvers(),
 		SimulationOptions.SIM_ODE_SOLVER);
 	    initComboBox(distanceBox, SBMLsimulator.getAvailableQualityMeasures(),
-		SimulationOptions.SIM_DISTANCE_DEFAULT_VALUE);
+		SimulationOptions.SIM_QUALITY_DEFAULT_VALUE);
 	} catch (Exception exc) {
 	    GUITools.showErrorMessage(this, exc);
 	}
 
-	lDistance.add(new JLabel("Default distance function:"), new JPanel(),
+	lDistance.add(new JLabel("Default quality function:"), new JPanel(),
 	    distanceBox);
 	lDistance.add(new JPanel());
 
@@ -177,7 +177,7 @@ public class PrefsPanelComputation extends PreferencesPanelForKeyProvider {
 	    if (keys[i].equals(SimulationOptions.SIM_START_TIME)) {
 		spinner[i].setEnabled(false);
 	    }
-	    if (keys[i].toString().contains("DISTANCE")) {
+	    if (keys[i].toString().contains("QUALITY")) {
 		addSpinner(lDistance, spinner[i], keys[i], names[i]);
 	    } else if (keys[i].toString().startsWith("OPT_DEFAULT_")) {
 		addSpinner(lDefaults, spinner[i], keys[i], names[i]);
@@ -187,7 +187,7 @@ public class PrefsPanelComputation extends PreferencesPanelForKeyProvider {
 	}
 
 	panelDistance.setBorder(BorderFactory
-		.createTitledBorder(" Distance function "));
+		.createTitledBorder(" Quality function "));
 	panelTimes.setBorder(BorderFactory
 		.createTitledBorder(" Numerical integration "));
 	panelDefaults.setBorder(BorderFactory
