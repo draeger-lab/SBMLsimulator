@@ -116,16 +116,7 @@ public interface SimulationOptions extends KeyProvider {
 	"The root parameter in the distance function for n-metrics: in case of the n-norm this is at the same time also the exponent. For instance, the Eulidean distance has a root value of two, whereas the Manhattan norm has a root of one. In the RSE, the default root is also two, but this value may be changed.",
 	Double.valueOf(3d));
         
-    /**
-     * With the associated non-negative double number that has to be greater
-     * than 0 when simulating SBML models, it is possible to perform a
-     * simulation.
-     */
-    public static final Option<Double> SIM_END_TIME = new Option<Double>(
-	"SIM_END_TIME",
-	Double.class,
-	"With the associated non-negative double number that has to be greater than 0 when simulating SBML models, it is possible to perform a simulation.",
-	Double.valueOf(5d));
+   
     
     /**
      * 
@@ -135,6 +126,7 @@ public interface SimulationOptions extends KeyProvider {
 	    .getString("SIM:0000010"), bundle.getString("SIM:0000011"),
 	SIM_QUALITY_FUNCTION, SIM_QUALITY_DEFAULT_VALUE,
 	SIM_QUALITY_N_METRIC_ROOT);
+    
     
     /**
      * This is important for the graphical user interface as it defines the
@@ -205,7 +197,18 @@ public interface SimulationOptions extends KeyProvider {
 	"SIM_START_TIME",
 	Double.class,
 	"The double value associated with this key must, in case of SBML equal to zero. Generally, any start time would be possible. This is why this key exists. But SBML is defined to start its simulation at the time zero.",
-	Double.valueOf(0d));
+	Double.valueOf(0d)); 
+    
+    /**
+     * With the associated non-negative double number that has to be greater
+     * than 0 when simulating SBML models, it is possible to perform a
+     * simulation.
+     */
+    public static final Option<Double> SIM_END_TIME = new Option<Double>(
+	"SIM_END_TIME",
+	Double.class,
+	"With the associated non-negative double number that has to be greater than 0 when simulating SBML models, it is possible to perform a simulation.",
+	Double.valueOf(5d));
     /**
      * The greater this value the longer the computation time, but the more
      * accurate will be the result.
@@ -215,5 +218,14 @@ public interface SimulationOptions extends KeyProvider {
 	Double.class,
 	"The greater this value the longer the computation time, but the more accurate will be the result.",
 	Double.valueOf(.01));
-
+    
+    /**
+     * 
+     */
+   
+    @SuppressWarnings("unchecked")
+    public static final OptionGroup SIM_PARAMETERS = new OptionGroup(bundle
+	    .getString("SIM:0000012"), bundle.getString("SIM:0000013"),
+	    SIM_ODE_SOLVER,SIM_MAX_TIME,SIM_START_TIME,SIM_END_TIME,SIM_MAX_STEPS_PER_UNIT_TIME,SIM_STEP_SIZE, SIM_MAX_COMPARTMENT_SIZE,SIM_MAX_PARAMETER_VALUE,SIM_MAX_SPECIES_VALUE);
+    
 }
