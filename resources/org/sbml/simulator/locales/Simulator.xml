@@ -22,5 +22,7 @@
   <entry key="SIM:0000007">Decide whether or not to draw a grid in the plot area.</entry>
   <entry key="SIM:0000008">Add or remove a legend in the plot.</entry>
   <entry key="SIM:0000009">Let the plot display tool tips for each curve.</entry>
-  
+  <entry key="SIM:0000012">Parameters for the simulation</entry>
+  <entry key="SIM:0000013">Here you can specify parameters for the simulation of the model</entry>
+
 </properties>

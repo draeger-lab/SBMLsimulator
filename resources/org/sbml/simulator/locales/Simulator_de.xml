@@ -22,5 +22,7 @@
   <entry key="SIM:0000007">Entscheiden Sie, ob Gitternetzlinien in das Koordinatensystem eingezeichnet werden sollen.</entry>
   <entry key="SIM:0000008">Diese Option fügt eine Legende im Koordinatensystem ein oder entfernt diese.</entry>
   <entry key="SIM:0000009">Hier kann festgelegt werden, ob an den einzelnen Kurven bzw. Punkten im Koordinatensystem Hilfstexte eingeblendet werden sollen.</entry>
-  
+  <entry key="SIM:0000012">Parameter für die Simulation</entry>
+  <entry key="SIM:0000013">Hier können Parameter für die Simulation eingestellt werden.</entry>
+
 </properties>
