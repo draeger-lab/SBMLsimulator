@@ -33,6 +33,7 @@ import javax.swing.event.TableModelListener;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.UnitDefinition;
+import org.sbml.optimization.PlotOptions;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 import org.sbml.simulator.math.odes.SimulationOptions;
 
@@ -160,23 +161,18 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	if (e.getSource() instanceof AbstractButton) {
 	    AbstractButton button = (AbstractButton) e.getSource();
 	    if (button.getActionCommand() != null) {
-		Plot.Command com = Plot.Command.valueOf(button
-			.getActionCommand());
-		switch (com) {
-		case SHOW_GRID:
+		String com = button.getActionCommand();
+		if (com.equals(PlotOptions.SHOW_PLOT_GRID.getOptionName())) {
 		    plot.setGridVisible(button.isSelected());
-		    break;
-		case LOG_SCALE:
+		} else if (com.equals(PlotOptions.PLOT_LOG_SCALE
+			.getOptionName())) {
 		    setPlotToLogScale(button);
-		    break;
-		case SHOW_LEGEND:
+		} else if (com.equals(PlotOptions.SHOW_PLOT_LEGEND
+			.getOptionName())) {
 		    plot.setShowLegend(button.isSelected());
-		    break;
-		case SHOW_TOOL_TIPS:
+		} else if (com.equals(PlotOptions.SHOW_PLOT_TOOLTIPS
+			.getOptionName())) {
 		    plot.setShowGraphToolTips(button.isSelected());
-		    break;
-		default:
-		    break;
 		}
 	    }
 	}

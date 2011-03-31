@@ -24,7 +24,6 @@ import java.awt.Robot;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ResourceBundle;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -38,11 +37,8 @@ import javax.swing.JFileChooser;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 import org.sbml.simulator.math.odes.MultiBlockTable.Block.Column;
 
-import de.zbit.gui.ActionCommand;
 import de.zbit.gui.GUITools;
 import de.zbit.io.SBFileFilter;
-import de.zbit.util.ResourceManager;
-import de.zbit.util.StringUtil;
 import eva2.gui.FunctionArea;
 
 /**
@@ -57,74 +53,6 @@ public class Plot extends FunctionArea {
      * Generated serial version identifier.
      */
     private static final long serialVersionUID = 176134486775218455L;
-
-    /**
-     * @author Andreas Dr&auml;ger
-     * @date 2010-09-20
-     */
-    public enum Command implements ActionCommand {
-	/**
-	 * 
-	 */
-	LOG_SCALE,
-	/**
-	 * 
-	 */
-	SHOW_GRID,
-	/**
-	 * 
-	 */
-	SHOW_LEGEND,
-	/**
-	 * 
-	 */
-	SHOW_TOOL_TIPS;
-
-	/**
-	 * 
-	 */
-	public static ResourceBundle bundle = ResourceManager
-		.getBundle("org.sbml.simulator.locales.Simulator");
-
-	/*
-	 * (non-Javadoc)
-	 * @see de.zbit.gui.ActionCommand#getName()
-	 */
-	public String getName() {
-	    switch (this) {
-	    case LOG_SCALE:
-		return bundle.getString("SIM:0000002");
-	    case SHOW_GRID:
-		return bundle.getString("SIM:0000003");
-	    case SHOW_LEGEND:
-		return bundle.getString("SIM:0000004");
-	    case SHOW_TOOL_TIPS:
-		return bundle.getString("SIM:0000005");
-	    default:
-		return StringUtil.firstLetterUpperCase(this.toString()
-			.toLowerCase().replace('_', ' '));
-	    }
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see de.zbit.gui.ActionCommand#getToolTip()
-	 */
-	public String getToolTip() {
-	    switch (this) {
-	    case LOG_SCALE:
-		return bundle.getString("SIM:0000006");
-	    case SHOW_GRID:
-		return bundle.getString("SIM:0000007");
-	    case SHOW_LEGEND:
-		return bundle.getString("SIM:0000008");
-	    case SHOW_TOOL_TIPS:
-		return bundle.getString("SIM:0000009");
-	    default:
-		return null;
-	    }
-	}
-    }
 
     /**
      * 

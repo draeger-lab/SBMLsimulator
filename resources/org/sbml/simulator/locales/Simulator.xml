@@ -8,6 +8,9 @@
 	   and the given value consists of the actual short name and - separated
 	   by a semicolon ";" the corresponding tool tip.
   </comment>
+  
+  <!-- Options -->
+  
   <entry key="SIM:0000001">If not specified the value corresponding to this argument will be used to initialize the size of compartments.</entry>
   <entry key="SIM:0000010">Model quality function</entry>
   <entry key="SIM:0000011">Here you can specify how to evaluate the quality of a parameter set with respect to given experimental data.</entry>
