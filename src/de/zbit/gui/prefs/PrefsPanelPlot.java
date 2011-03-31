@@ -68,9 +68,9 @@ public class PrefsPanelPlot extends PreferencesPanelForKeyProvider {
 	String names[] = { "Logarithmic scale", "Show grid", "Include legend",
 		"Display tooltips" };
 	Option<?> keys[] = { PlotOptions.PLOT_LOG_SCALE,
-		PlotOptions.PLOT_SHOW_GRID,
-		PlotOptions.PLOT_SHOW_LEGEND,
-		PlotOptions.PLOT_SHOW_TOOLTIPS };
+		PlotOptions.SHOW_PLOT_GRID,
+		PlotOptions.SHOW_PLOT_LEGEND,
+		PlotOptions.SHOW_PLOT_TOOLTIPS };
 	JCheckBox check[] = new JCheckBox[names.length];
 	JPanel layout = new JPanel();
 	LayoutHelper lh = new LayoutHelper(layout);

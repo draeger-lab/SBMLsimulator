@@ -18,10 +18,8 @@
 package org.sbml.simulator.gui;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.beans.EventHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Properties;
@@ -193,18 +191,18 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 		.getPreferencesFor(SimulationOptions.class);
 	solvers = createSolversComboOrSetSelectedItem(prefs.get(
 	    SimulationOptions.SIM_ODE_SOLVER).toString());
-	showGrid = GUITools.createJCheckBox(Plot.Command.SHOW_GRID.getName(),
-	    false, Plot.Command.SHOW_GRID, Plot.Command.SHOW_GRID.getToolTip(),
+	showGrid = GUITools.createJCheckBox(PlotOptions.SHOW_PLOT_GRID.getName(),
+	    false, PlotOptions.SHOW_PLOT_GRID, PlotOptions.SHOW_PLOT_GRID.getToolTip(),
 	    this);
-	logScale = GUITools.createJCheckBox(Plot.Command.LOG_SCALE.getName(),
-	    false, Plot.Command.LOG_SCALE, Plot.Command.LOG_SCALE.getToolTip(),
+	logScale = GUITools.createJCheckBox(PlotOptions.PLOT_LOG_SCALE.getName(),
+	    false, PlotOptions.PLOT_LOG_SCALE, PlotOptions.PLOT_LOG_SCALE.getToolTip(),
 	    this);
-	showLegend = GUITools.createJCheckBox(Plot.Command.SHOW_LEGEND
-		.getName(), true, Plot.Command.SHOW_LEGEND,
-	    Plot.Command.SHOW_LEGEND.getToolTip(), this);
-	showToolTips = GUITools.createJCheckBox(Plot.Command.SHOW_TOOL_TIPS
-		.getName(), true, Plot.Command.SHOW_TOOL_TIPS,
-	    Plot.Command.SHOW_TOOL_TIPS.getToolTip(), this);
+	showLegend = GUITools.createJCheckBox(PlotOptions.SHOW_PLOT_LEGEND
+		.getName(), true, PlotOptions.SHOW_PLOT_LEGEND,
+	    PlotOptions.SHOW_PLOT_LEGEND.getToolTip(), this);
+	showToolTips = GUITools.createJCheckBox(PlotOptions.SHOW_PLOT_TOOLTIPS
+		.getName(), true, PlotOptions.SHOW_PLOT_TOOLTIPS,
+	    PlotOptions.SHOW_PLOT_TOOLTIPS.getToolTip(), this);
 
 	// Settings
 	startTime = new JSpinner(t1);
@@ -427,11 +425,11 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	/*
 	 * Plot
 	 */
-	p.put(PlotOptions.PLOT_SHOW_GRID, Boolean.valueOf(showGrid
+	p.put(PlotOptions.SHOW_PLOT_GRID, Boolean.valueOf(showGrid
 		.isSelected()));
 	p.put(PlotOptions.PLOT_LOG_SCALE, Boolean.valueOf(logScale
 		.isSelected()));
-	p.put(PlotOptions.PLOT_SHOW_LEGEND, Boolean.valueOf(showLegend
+	p.put(PlotOptions.SHOW_PLOT_LEGEND, Boolean.valueOf(showLegend
 		.isSelected()));
 
 	return p;
@@ -580,12 +578,12 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	t2.setValue(Double.valueOf(simEndTime));
 	t2.setMaximum(Double.valueOf(maxTime));
 	t2.setStepSize(Double.valueOf(spinnerStepSize));
-	showGrid.setSelected(prefsPlot.getBoolean(PlotOptions.PLOT_SHOW_GRID));
+	showGrid.setSelected(prefsPlot.getBoolean(PlotOptions.SHOW_PLOT_GRID));
 	logScale.setSelected(prefsPlot.getBoolean(PlotOptions.PLOT_LOG_SCALE));
 	showLegend.setSelected(prefsPlot
-		.getBoolean(PlotOptions.PLOT_SHOW_LEGEND));
+		.getBoolean(PlotOptions.SHOW_PLOT_LEGEND));
 	showToolTips.setSelected(prefsPlot
-		.getBoolean(PlotOptions.PLOT_SHOW_TOOLTIPS));
+		.getBoolean(PlotOptions.SHOW_PLOT_TOOLTIPS));
 
 	maxStepsPerUnit = prefsSimulation
 		.getInt(SimulationOptions.SIM_MAX_STEPS_PER_UNIT_TIME);

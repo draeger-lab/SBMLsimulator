@@ -18,8 +18,10 @@
 package org.sbml.optimization;
 
 import java.io.File;
+import java.util.ResourceBundle;
 
 import de.zbit.io.SBFileFilter;
+import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.Option;
 import de.zbit.util.prefs.Range;
@@ -31,6 +33,13 @@ import de.zbit.util.prefs.Range;
  * @date 2011-03-23
  */
 public interface PlotOptions extends KeyProvider {
+    
+    /**
+     * The resource where to obtain the names of all the options
+     */
+    public static ResourceBundle bundle = ResourceManager
+	    .getBundle("org.sbml.simulator.locales.Simulator");
+
     /**
      * When storing any GUI elements or other pictures into a JPEG graphics file
      * the value associated to this key is used for the degree of compression.
@@ -46,10 +55,8 @@ public interface PlotOptions extends KeyProvider {
      * be applied when plotting values in a two-dimensional figure.
      */
     public static final Option<Boolean> PLOT_LOG_SCALE = new Option<Boolean>(
-	"PLOT_LOG_SCALE",
-	Boolean.class,
-	" This field decides whether or not by default a logarithmic scale should be applied when plotting values in a two-dimensional figure.",
-	Boolean.FALSE);
+	"PLOT_LOG_SCALE", Boolean.class, bundle.getString("SIM:0000006"),
+	Boolean.FALSE, bundle.getString("SIM:0000002"));
     /**
      * The default save directory for graphics files as a result of a plot.
      */
@@ -62,26 +69,21 @@ public interface PlotOptions extends KeyProvider {
      * With this key it can be specified whether a two-dimensional plot should
      * display a grid to highlight the position of points and lines.
      */
-    public static final Option<Boolean> PLOT_SHOW_GRID = new Option<Boolean>(
-	"PLOT_SHOW_GRID",
-	Boolean.class,
-	"With this key it can be specified whether a two-dimensional plot should display a grid to highlight the position of points and lines.",
-	Boolean.FALSE);
+    public static final Option<Boolean> SHOW_PLOT_GRID = new Option<Boolean>(
+	"SHOW_PLOT_GRID", Boolean.class, bundle.getString("SIM:0000007"),
+	Boolean.FALSE, bundle.getString("SIM:0000003"));
+
     /**
      * Determines whether or not a legend should be shown by default when
      * plotting data into a two-dimensional figure.
      */
-    public static final Option<Boolean> PLOT_SHOW_LEGEND = new Option<Boolean>(
-	"PLOT_SHOW_LEGEND",
-	Boolean.class,
-	"Determines whether or not a legend should be shown by default when plotting data into a two-dimensional figure.",
-	Boolean.TRUE);
+    public static final Option<Boolean> SHOW_PLOT_LEGEND = new Option<Boolean>(
+	"SHOW_PLOT_LEGEND", Boolean.class, bundle.getString("SIM:0000008"),
+	Boolean.TRUE, bundle.getString("SIM:0000004"));
     /**
      * Decides whether or not plots should display tool tips next to each curve.
      */
-    public static final Option<Boolean> PLOT_SHOW_TOOLTIPS = new Option<Boolean>(
-	"PLOT_SHOW_TOOLTIPS",
-	Boolean.class,
-	"Decides whether or not plots should display tool tips next to each curve.",
-	Boolean.FALSE);
+    public static final Option<Boolean> SHOW_PLOT_TOOLTIPS = new Option<Boolean>(
+	"SHOW_PLOT_TOOLTIPS", Boolean.class, bundle.getString("SIM:0000009"),
+	Boolean.FALSE, bundle.getString("SIM:0000005"));
 }
