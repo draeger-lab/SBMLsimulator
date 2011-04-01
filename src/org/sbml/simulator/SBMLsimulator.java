@@ -21,7 +21,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -42,12 +46,18 @@ import de.zbit.util.prefs.SBProperties;
 
 /**
  * @author Andreas Dr&auml;ger
+ * @author Roland Keller
  * @date 2010-09-01
  * @version $Rev$
  * @since 1.0
  */
 public class SBMLsimulator {
 
+	/**
+	 * The logger for this class.
+	 */
+	public static final Logger logger = Logger.getLogger(SBMLsimulator.class.getName());
+	
     /**
      * The possible location of this class in a jar file if used in plug-in
      * mode.
@@ -74,7 +84,7 @@ public class SBMLsimulator {
      * the quality of a simulation based on parameter and initial value
      * settings.
      */
-    private static final Class<QualityMeasure> AVAILABLE_DISTANCES[] = Reflect
+    private static final Class<QualityMeasure> AVAILABLE_QUALITY_MEASURES[] = Reflect
 	    .getAllClassesInPackage(MATH_PACKAGE, true, true, QualityMeasure.class,
 		JAR_LOCATION, true);
     /**
@@ -88,7 +98,7 @@ public class SBMLsimulator {
      * @return
      */
     public static final Class<QualityMeasure>[] getAvailableQualityMeasures() {
-	return AVAILABLE_DISTANCES;
+	return AVAILABLE_QUALITY_MEASURES;
     }
 
     /**
@@ -97,6 +107,8 @@ public class SBMLsimulator {
     public static Class<AbstractDESSolver>[] getAvailableSolvers() {
 	return AVAILABLE_SOLVERS;
     }
+    
+    
 
     /**
      * 
@@ -191,5 +203,40 @@ public class SBMLsimulator {
 	if (timeSeriesFile != null) {
 	    simulatorUI.openExperimentalData(timeSeriesFile);
 	}
+    }
+
+	/**
+	 * @return
+	 */
+	@SuppressWarnings("rawtypes")
+	public static List<Class> getAvailableQualityMeasureClasses() {
+		List<Class> qualityList = new LinkedList<Class>();
+		for(Class qualityMeasureClass : AVAILABLE_QUALITY_MEASURES) {
+			try {
+				qualityList.add(qualityMeasureClass);
+			}
+			catch (Exception e) {
+				logger.warning(e.getLocalizedMessage());
+			} 
+		} 
+		return qualityList;
+	}
+	
+	/**
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+	public static List<Class> getAvailableSolverClasses() {
+    	List<Class> solverList = new LinkedList<Class>();
+		for(Class<AbstractDESSolver> solverClass: AVAILABLE_SOLVERS) {
+			try {
+				solverList.add(solverClass);
+			}
+			catch (Exception e) {
+				logger.warning(e.getLocalizedMessage());
+			} 
+			
+		} 
+		return solverList;
     }
 }
