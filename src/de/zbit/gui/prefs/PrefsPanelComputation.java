@@ -121,83 +121,83 @@ public class PrefsPanelComputation extends PreferencesPanelForKeyProvider {
 	return spinner;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see de.zbit.gui.prefs.PreferencesPanelForKeyProvider#init()
-     */
-    @Override
-    public void init() {
-	spinnerMaxValue = 2000;
-	spinnerMinValue = 0d;
-	spinnerStepSize = .1d;
-	JComboBox solverBox = new JComboBox();
-	JComboBox distanceBox = new JComboBox();
-	int i;
-	Option<?> keys[] = { SimulationOptions.SIM_QUALITY_DEFAULT_VALUE,
-		SimulationOptions.SIM_QUALITY_N_METRIC_ROOT,
-		SimulationOptions.SIM_MAX_TIME,
-		SimulationOptions.SIM_START_TIME,
-		SimulationOptions.SIM_END_TIME,
-		SimulationOptions.SIM_MAX_STEPS_PER_UNIT_TIME,
-		SimulationOptions.SIM_STEP_SIZE,
-		SimulationOptions.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE,
-		SimulationOptions.OPT_DEFAULT_SPECIES_INITIAL_VALUE,
-		SimulationOptions.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS };
-	String names[] = { "Default value:", "Value of N for N-metric",
-		"Maximal simulation time:", "Simulation start time:",
-		"Simulation end time:",
-		"Maximal number of steps per time unit:",
-		"Simulation step size:", "Default compartment size:",
-		"Default species value:", "Default parameter value:" };
-	String toolTips[] = { "", "", "", "", "", "", "", "", "", "" };
-	JPanel panelDistance = new JPanel(), panelTimes = new JPanel(), panelDefaults = new JPanel();
-	LayoutHelper lDistance = new LayoutHelper(panelDistance);
-	LayoutHelper lTimes = new LayoutHelper(panelTimes);
-	LayoutHelper lDefaults = new LayoutHelper(panelDefaults);
-
-	lTimes.add(new JLabel("Default ODE solver:"), new JPanel(), solverBox);
-	lTimes.add(new JPanel());
-
-	try {
-	    initComboBox(solverBox, SBMLsimulator.getAvailableSolvers(),
-		SimulationOptions.SIM_ODE_SOLVER);
-	    initComboBox(distanceBox, SBMLsimulator.getAvailableQualityMeasures(),
-		SimulationOptions.SIM_QUALITY_DEFAULT_VALUE);
-	} catch (Exception exc) {
-	    GUITools.showErrorMessage(this, exc);
-	}
-
-	lDistance.add(new JLabel("Default quality function:"), new JPanel(),
-	    distanceBox);
-	lDistance.add(new JPanel());
-
-	JSpinner spinner[] = new JSpinner[keys.length];
-	for (i = 0; i < spinner.length; i++) {
-	    spinner[i] = createJSpinner(keys[i], names[i], toolTips[i]);
-	    if (keys[i].equals(SimulationOptions.SIM_START_TIME)) {
-		spinner[i].setEnabled(false);
-	    }
-	    if (keys[i].toString().contains("QUALITY")) {
-		addSpinner(lDistance, spinner[i], keys[i], names[i]);
-	    } else if (keys[i].toString().startsWith("OPT_DEFAULT_")) {
-		addSpinner(lDefaults, spinner[i], keys[i], names[i]);
-	    } else {
-		addSpinner(lTimes, spinner[i], keys[i], names[i]);
-	    }
-	}
-
-	panelDistance.setBorder(BorderFactory
-		.createTitledBorder(" Quality function "));
-	panelTimes.setBorder(BorderFactory
-		.createTitledBorder(" Numerical integration "));
-	panelDefaults.setBorder(BorderFactory
-		.createTitledBorder(" Missing values "));
-
-	LayoutHelper lh = new LayoutHelper(this);
-	lh.add(panelTimes, 0, 0, 2, 1, 1, 0);
-	lh.add(panelDistance, 0, 1, 1, 1, 1, 0);
-	lh.add(panelDefaults, 1, 1, 1, 1, 1, 0);
-    }
+//    /*
+//     * (non-Javadoc)
+//     * @see de.zbit.gui.prefs.PreferencesPanelForKeyProvider#init()
+//     */
+//    @Override
+//    public void init() {
+//	spinnerMaxValue = 2000;
+//	spinnerMinValue = 0d;
+//	spinnerStepSize = .1d;
+//	JComboBox solverBox = new JComboBox();
+//	JComboBox distanceBox = new JComboBox();
+//	int i;
+//	Option<?> keys[] = { SimulationOptions.SIM_QUALITY_DEFAULT_VALUE,
+//		SimulationOptions.SIM_QUALITY_N_METRIC_ROOT,
+//		SimulationOptions.SIM_MAX_TIME,
+//		SimulationOptions.SIM_START_TIME,
+//		SimulationOptions.SIM_END_TIME,
+//		SimulationOptions.SIM_MAX_STEPS_PER_UNIT_TIME,
+//		SimulationOptions.SIM_STEP_SIZE,
+//		SimulationOptions.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE,
+//		SimulationOptions.OPT_DEFAULT_SPECIES_INITIAL_VALUE,
+//		SimulationOptions.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS };
+//	String names[] = { "Default value:", "Value of N for N-metric",
+//		"Maximal simulation time:", "Simulation start time:",
+//		"Simulation end time:",
+//		"Maximal number of steps per time unit:",
+//		"Simulation step size:", "Default compartment size:",
+//		"Default species value:", "Default parameter value:" };
+//	String toolTips[] = { "", "", "", "", "", "", "", "", "", "" };
+//	JPanel panelDistance = new JPanel(), panelTimes = new JPanel(), panelDefaults = new JPanel();
+//	LayoutHelper lDistance = new LayoutHelper(panelDistance);
+//	LayoutHelper lTimes = new LayoutHelper(panelTimes);
+//	LayoutHelper lDefaults = new LayoutHelper(panelDefaults);
+//
+//	lTimes.add(new JLabel("Default ODE solver:"), new JPanel(), solverBox);
+//	lTimes.add(new JPanel());
+//
+//	try {
+//	    initComboBox(solverBox, SBMLsimulator.getAvailableSolvers(),
+//		SimulationOptions.SIM_ODE_SOLVER);
+//	    initComboBox(distanceBox, SBMLsimulator.getAvailableQualityMeasures(),
+//		SimulationOptions.SIM_QUALITY_DEFAULT_VALUE);
+//	} catch (Exception exc) {
+//	    GUITools.showErrorMessage(this, exc);
+//	}
+//
+//	lDistance.add(new JLabel("Default quality function:"), new JPanel(),
+//	    distanceBox);
+//	lDistance.add(new JPanel());
+//
+//	JSpinner spinner[] = new JSpinner[keys.length];
+//	for (i = 0; i < spinner.length; i++) {
+//	    spinner[i] = createJSpinner(keys[i], names[i], toolTips[i]);
+//	    if (keys[i].equals(SimulationOptions.SIM_START_TIME)) {
+//		spinner[i].setEnabled(false);
+//	    }
+//	    if (keys[i].toString().contains("QUALITY")) {
+//		addSpinner(lDistance, spinner[i], keys[i], names[i]);
+//	    } else if (keys[i].toString().startsWith("OPT_DEFAULT_")) {
+//		addSpinner(lDefaults, spinner[i], keys[i], names[i]);
+//	    } else {
+//		addSpinner(lTimes, spinner[i], keys[i], names[i]);
+//	    }
+//	}
+//
+//	panelDistance.setBorder(BorderFactory
+//		.createTitledBorder(" Quality function "));
+//	panelTimes.setBorder(BorderFactory
+//		.createTitledBorder(" Numerical integration "));
+//	panelDefaults.setBorder(BorderFactory
+//		.createTitledBorder(" Missing values "));
+//
+//	LayoutHelper lh = new LayoutHelper(this);
+//	lh.add(panelTimes, 0, 0, 2, 1, 1, 0);
+//	lh.add(panelDistance, 0, 1, 1, 1, 1, 0);
+//	lh.add(panelDefaults, 1, 1, 1, 1, 1, 0);
+//    }
 
     /**
      * Just to shorten the source code. Ugly!
