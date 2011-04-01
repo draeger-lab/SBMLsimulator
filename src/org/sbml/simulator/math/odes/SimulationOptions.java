@@ -19,7 +19,7 @@ package org.sbml.simulator.math.odes;
 
 import java.util.ResourceBundle;
 
-import org.sbml.simulator.math.QualityMeasure;
+import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.math.RSE;
 
 import de.zbit.util.ResourceManager;
@@ -97,11 +97,13 @@ public interface SimulationOptions extends KeyProvider {
      * evaluates the quality of a simulation with respect to given
      * (experimental) data.
      */
-    public static final Option<QualityMeasure> SIM_QUALITY_FUNCTION = new Option<QualityMeasure>(
+    @SuppressWarnings("rawtypes")
+	public static final Option<Class> SIM_QUALITY_FUNCTION = new Option<Class>(
 	"SIM_QUALITY_FUNCTION",
-	QualityMeasure.class,
+	Class.class,
 	"This specifies the class name of the default quality function that evaluates the quality of a simulation with respect to given (experimental) data.",
-	new RSE());
+	new Range<Class>(Class.class, SBMLsimulator.getAvailableQualityMeasureClasses()),
+	RSE.class);
     
     /**
      * The root parameter in the distance function: in case of the n-norm this
@@ -121,7 +123,7 @@ public interface SimulationOptions extends KeyProvider {
     /**
      * 
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static final OptionGroup MODEL_QUALITY = new OptionGroup(bundle
 	    .getString("SIM:0000010"), bundle.getString("SIM:0000011"),
 	SIM_QUALITY_FUNCTION, SIM_QUALITY_DEFAULT_VALUE,
@@ -177,17 +179,22 @@ public interface SimulationOptions extends KeyProvider {
 	Double.class,
 	"This is important for the graphical user interface as it defines the upper bound for the input mask for the simulation time.",
 	Double.valueOf(1E3));
+    
+    public static final ClassLoader classLoader = ClassLoader.getSystemClassLoader(); 
+    
     /**
      * This gives the class name of the default solver for ordinary differential
      * equation systems. The associated class must implement
      * {@link AbstractDESSolver} and must have a constructor without any
      * parameters.
      */
-    public static final Option<AbstractDESSolver> SIM_ODE_SOLVER = new Option<AbstractDESSolver>(
-	"SIM_ODE_SOLVER",
-	AbstractDESSolver.class,
-	"This gives the class name of the default solver for ordinary differential equation systems. The associated class must implement AbstractDESSolver and must have a constructor without any parameters.",
-	new RKEventSolver());
+    @SuppressWarnings("rawtypes")
+	public static final Option<Class> SIM_ODE_SOLVER = new Option<Class>(
+    		"Default solver",
+    		Class.class,
+    		"This gives the class name of the default solver for ordinary differential equation systems. The associated class must implement AbstractDESSolver and must have a constructor without any parameters.",
+    		new Range<Class>(Class.class, SBMLsimulator.getAvailableSolverClasses()),
+    		RKEventSolver.class);
     /**
      * The double value associated with this key must, in case of SBML equal to
      * zero. Generally, any start time would be possible. This is why this key
@@ -222,8 +229,7 @@ public interface SimulationOptions extends KeyProvider {
     /**
      * 
      */
-   
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static final OptionGroup SIM_PARAMETERS = new OptionGroup(bundle
 	    .getString("SIM:0000012"), bundle.getString("SIM:0000013"),
 	    SIM_ODE_SOLVER,SIM_MAX_TIME,SIM_START_TIME,SIM_END_TIME,SIM_MAX_STEPS_PER_UNIT_TIME,SIM_STEP_SIZE, SIM_MAX_COMPARTMENT_SIZE,SIM_MAX_PARAMETER_VALUE,SIM_MAX_SPECIES_VALUE);
