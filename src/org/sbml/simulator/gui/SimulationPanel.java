@@ -450,7 +450,7 @@ public class SimulationPanel extends JPanel implements
      * @throws IntegrationException 
      * @throws SBMLException 
      */
-    public void loadPreferences() throws IllegalArgumentException,
+	public void loadPreferences() throws IllegalArgumentException,
 	SecurityException, InstantiationException, IllegalAccessException,
 	InvocationTargetException, NoSuchMethodException, SBMLException, IntegrationException, ModelOverdeterminedException {
 
