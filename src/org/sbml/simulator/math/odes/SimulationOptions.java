@@ -190,7 +190,7 @@ public interface SimulationOptions extends KeyProvider {
      */
     @SuppressWarnings("rawtypes")
 	public static final Option<Class> SIM_ODE_SOLVER = new Option<Class>(
-    		"Default solver",
+    		"SIM_ODE_SOLVER",
     		Class.class,
     		"This gives the class name of the default solver for ordinary differential equation systems. The associated class must implement AbstractDESSolver and must have a constructor without any parameters.",
     		new Range<Class>(Class.class, SBMLsimulator.getAvailableSolverClasses()),
