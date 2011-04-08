@@ -426,6 +426,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		try {
 			GUITools.setEnabled(false, getJMenuBar(), toolBar,
 				Command.SIMULATION_START);
+			simPanel.savePreferences();
 			simPanel.simulate();
 			GUITools.setEnabled(true, getJMenuBar(), toolBar, BaseAction.FILE_SAVE,
 				Command.SIMULATION_START);
@@ -445,6 +446,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 			JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
 			simPanel.setAllEnabled(false);
 			try {
+				simPanel.savePreferences();
 				simPanel.notifyQuantitiesSelected(panel.getSelectedQuantityIds());
 				GUITools.setEnabled(false, getJMenuBar(), toolBar,
 					Command.SIMULATION_START, BaseAction.FILE_CLOSE,
