@@ -514,28 +514,33 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 				&& (e.getStateChange() == ItemEvent.SELECTED)) {
 			JComboBox comBox = (JComboBox) e.getSource();
 			try {
+				SBPreferences prefs = SBPreferences
+						.getPreferencesFor(SimulationOptions.class);
 				if (comBox.getName().equals("distfun")) {
 					QualityMeasure dist = SBMLsimulator.getAvailableQualityMeasures()[comBox
 							.getSelectedIndex()].getConstructor().newInstance();
 					if (dist instanceof NMetric) {
-						SBPreferences prefs = SBPreferences
-								.getPreferencesFor(SimulationOptions.class);
 						((NMetric) dist).setRoot(prefs
 								.getDouble(SimulationOptions.SIM_QUALITY_N_METRIC_ROOT));
 					} else if (dist instanceof RelativeNMetric) {
-						SBPreferences prefs = SBPreferences
-								.getPreferencesFor(SimulationOptions.class);
 						((RelativeNMetric) dist).setRoot(prefs
 								.getDouble(SimulationOptions.SIM_QUALITY_N_METRIC_ROOT));
 					}
 					worker.setQualityMeasure(dist);
+					prefs.put(SimulationOptions.SIM_QUALITY_FUNCTION, dist.getClass()
+							.getSimpleName());
 					if (worker.isSetSolver()) {
 						worker.setStepSize(getStepSize());
 						computeModelQuality();
 					}
 				} else if (comBox.getName().equals("solvers")) {
 					setSolver(comBox);
+					AbstractDESSolver solver = SBMLsimulator.getAvailableSolvers()[comBox
+							.getSelectedIndex()].getConstructor().newInstance();
+					prefs.put(SimulationOptions.SIM_ODE_SOLVER, solver.getClass()
+							.getSimpleName());
 				}
+				prefs.flush();
 			} catch (Exception exc) {
 				GUITools.showErrorMessage(this, exc);
 			}

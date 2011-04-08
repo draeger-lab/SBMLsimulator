@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Properties;
+import java.util.prefs.BackingStoreException;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -45,6 +46,7 @@ import org.sbml.simulator.math.QualityMeasure;
 import org.sbml.simulator.math.odes.DESSolver;
 import org.sbml.simulator.math.odes.IntegrationException;
 import org.sbml.simulator.math.odes.MultiBlockTable;
+import org.sbml.simulator.math.odes.SimulationOptions;
 
 import de.zbit.gui.GUITools;
 import de.zbit.io.CSVOptions;
@@ -529,4 +531,23 @@ public class SimulationPanel extends JPanel implements
 	    foot.setStepSize(stepSize);
 	}
     }
+
+		/**
+		 * @throws NoSuchMethodException 
+		 * @throws InvocationTargetException 
+		 * @throws IllegalAccessException 
+		 * @throws InstantiationException 
+		 * @throws SecurityException 
+		 * @throws IllegalArgumentException 
+		 * @throws BackingStoreException 
+		 * 
+		 */
+		public void savePreferences() throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, BackingStoreException {
+			SimulationToolPanel foot = getOrCreateFootPanel();
+			SBPreferences prefs = SBPreferences
+			.getPreferencesFor(SimulationOptions.class);
+			prefs.put(SimulationOptions.SIM_START_TIME,foot.getSimulationStartTime());
+			prefs.put(SimulationOptions.SIM_END_TIME,foot.getSimulationEndTime());
+			prefs.flush();
+		}
 }
