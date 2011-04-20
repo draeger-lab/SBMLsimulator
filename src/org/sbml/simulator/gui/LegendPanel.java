@@ -24,6 +24,8 @@ import java.awt.event.ActionListener;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.swing.CellEditor;
+import javax.swing.CellRendererPane;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -32,7 +34,6 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
 import org.sbml.jsbml.Model;
-import org.sbml.jsbml.NamedSBase;
 
 /**
  * Container for a {@link LegendTableModel} in a {@link JTable} and two
@@ -151,11 +152,12 @@ public class LegendPanel extends JPanel implements TableModelListener,
 		JTable tab = new JTable();
 		tab.setName("legend");
 		tab.setModel(legend);
+
 		tab.setDefaultEditor(Color.class, new ColorEditor());
 		LegendTableCellRenderer renderer = new LegendTableCellRenderer();
 		tab.setDefaultRenderer(Color.class, renderer);
-		tab.setDefaultRenderer(NamedSBase.class, renderer);
 		tab.getModel().addTableModelListener(this);
+
 		return tab;
 	}
 
