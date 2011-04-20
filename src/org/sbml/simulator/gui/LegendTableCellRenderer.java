@@ -24,8 +24,6 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
-import org.sbml.jsbml.NamedSBase;
-
 /**
  * @author Andreas Dr&auml;ger
  * @date 2010-04-07
@@ -39,7 +37,7 @@ public class LegendTableCellRenderer extends JLabel implements
 	 * Generated serial version identifier.
 	 */
 	private static final long serialVersionUID = -2028676603661740472L;
-
+	
 	/**
 	 * 
 	 */
@@ -63,13 +61,8 @@ public class LegendTableCellRenderer extends JLabel implements
 			setToolTipText("RGB value: " + newColor.getRed() + ", "
 					+ newColor.getGreen() + ", " + newColor.getBlue());
 			setBackground(newColor);
-		} else if (value instanceof NamedSBase) {
-			NamedSBase s = (NamedSBase) value;
-			setText(s.isSetName() ? s.getName() : s.getId());
-			setBackground(Color.WHITE);
-		} else {
-			setText(value.toString());
 		}
+		
 		return this;
 	}
 
