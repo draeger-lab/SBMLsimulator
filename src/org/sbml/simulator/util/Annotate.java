@@ -87,34 +87,43 @@ public class Annotate {
 			boolean foundExactHit = false;
 			String symbol = spec.getName();
 			KeggQuery query = new KeggQuery(KeggQuery.genericFind, "COMPOUND " + symbol);
-			KeggQuery query2 = new KeggQuery(KeggQuery.genericFind, "ENZYME " + symbol);
+//			KeggQuery query2 = new KeggQuery(KeggQuery.genericFind, "ENZYME " + symbol);
+//			KeggQuery query3 = new KeggQuery(KeggQuery.genericFind, "GENES " + symbol);
 			CustomObject<Object> res = fmanager.getInformation(query);
-			CustomObject<Object> res2 = fmanager.getInformation(query2);
-			if(res==null) {
-				res=res2;
-			}
+//			if(res==null) {
+//				res=fmanager.getInformation(query2);;
+//				if(res==null) {
+//					res=fmanager.getInformation(query3);
+//				}
+//			}
 			
 			if(res==null) {
 				symbol=symbol.replaceAll("_"," ").replaceAll("-"," ");
-				symbol=symbol.replaceAll("\\(.\\)","").replaceAll("\\(..\\)","").replaceAll("\\(p\\)","").replaceAll("\\(s\\)","").replaceAll("\\(r\\)","").replaceAll("\\(l\\)","").replaceAll("\\(n\\)","").replaceAll("\\(b\\)","").replaceAll("\\(PG\\)","");
-				query = new KeggQuery(KeggQuery.genericFind, "compound " + symbol);
-				query2 = new KeggQuery(KeggQuery.genericFind, "enzyme " + symbol);
+				symbol=symbol.replaceAll("\\(.\\)","").replaceAll("\\(..\\)","").replaceAll("\\(gene\\)","").replaceAll("\\(RNA\\)","").replaceAll("\\(p\\)","").replaceAll("\\(s\\)","").replaceAll("\\(r\\)","").replaceAll("\\(l\\)","").replaceAll("\\(n\\)","").replaceAll("\\(b\\)","").replaceAll("\\(PG\\)","");
+				query = new KeggQuery(KeggQuery.genericFind, "COMPOUND " + symbol);
+//				query2 = new KeggQuery(KeggQuery.genericFind, "ENZYME " + symbol);
+//				query3 = new KeggQuery(KeggQuery.genericFind, "GENES " + symbol);
 				res = fmanager.getInformation(query);
-				res2 = fmanager.getInformation(query2);
-				if(res==null) {
-					res=res2;
-				}
+//				if(res==null) {
+//					res=fmanager.getInformation(query2);;
+//					if(res==null) {
+//						res=fmanager.getInformation(query3);
+//					}
+//				}
 			}
 			
 			if(res==null) {
 				String symbol2=symbol.replaceAll("PP","-bisphosphate");
-				query = new KeggQuery(KeggQuery.genericFind, "COMPOUND " + symbol2);
-				query2 = new KeggQuery(KeggQuery.genericFind, "ENZYME " + symbol2);
+				query = new KeggQuery(KeggQuery.genericFind, "COMPOUND " + symbol);
+//				query2 = new KeggQuery(KeggQuery.genericFind, "ENZYME " + symbol);
+//				query3 = new KeggQuery(KeggQuery.genericFind, "GENES " + symbol);
 				res = fmanager.getInformation(query);
-				res2 = fmanager.getInformation(query2);
-				if(res==null) {
-					res=res2;
-				}
+//				if(res==null) {
+//					res=fmanager.getInformation(query2);;
+//					if(res==null) {
+//						res=fmanager.getInformation(query3);
+//					}
+//				}
 				if(res!=null) {
 					symbol=symbol2;
 				}
@@ -122,13 +131,16 @@ public class Annotate {
 			
 			if(res==null) {
 				String symbol2=symbol.replaceAll("PP","diphosphate");
-				query = new KeggQuery(KeggQuery.genericFind, "COMPOUND " + symbol2);
-				query2 = new KeggQuery(KeggQuery.genericFind, "ENZYME " + symbol2);
+				query = new KeggQuery(KeggQuery.genericFind, "COMPOUND " + symbol);
+//				query2 = new KeggQuery(KeggQuery.genericFind, "ENZYME " + symbol);
+//				query3 = new KeggQuery(KeggQuery.genericFind, "GENES " + symbol);
 				res = fmanager.getInformation(query);
-				res2 = fmanager.getInformation(query2);
-				if(res==null) {
-					res=res2;
-				}
+//				if(res==null) {
+//					res=fmanager.getInformation(query2);;
+//					if(res==null) {
+//						res=fmanager.getInformation(query3);
+//					}
+//				}
 				if(res!=null) {
 					symbol=symbol2;
 				}
@@ -137,13 +149,16 @@ public class Annotate {
 			
 			if(res==null) {
 				String symbol2=symbol.replaceAll("P","-phosphate");
-				query = new KeggQuery(KeggQuery.genericFind, "COMPOUND " + symbol2);
-				query2 = new KeggQuery(KeggQuery.genericFind, "ENZYME " + symbol2);
+				query = new KeggQuery(KeggQuery.genericFind, "COMPOUND " + symbol);
+//				query2 = new KeggQuery(KeggQuery.genericFind, "ENZYME " + symbol);
+//				query3 = new KeggQuery(KeggQuery.genericFind, "GENES " + symbol);
 				res = fmanager.getInformation(query);
-				res2 = fmanager.getInformation(query2);
-				if(res==null) {
-					res=res2;
-				}
+//				if(res==null) {
+//					res=fmanager.getInformation(query2);
+//					if(res==null) {
+//						res=fmanager.getInformation(query3);
+//					}
+//				}
 				if(res!=null) {
 					symbol=symbol2;
 				}
@@ -164,23 +179,25 @@ public class Annotate {
 							//System.out.println(spec.getId() + " => " + matchSplit[0]);
 							matched++;
 							foundExactHit = true;
-							
-							annotate(spec, matchSplit[0], manager);
-							
 							break;
 						}
+					}
+					if(foundExactHit) {
+						annotate(spec, matchSplit[0], manager);
+						break;
 					}
 				}
 				if (!foundExactHit) { 
 					ambigous++;
+					int i=0,j=0;
+					annotate(spec, matches[i].split(" ",2)[j], manager);
 				}
 			} else {
 				notMatched++;
-				System.out.println(symbol);
+				System.out.println(spec.getName());
 			}
 			
 		}
-		
 		InfoManagement.saveToFilesystem("kgim.dat", manager);
 		InfoManagement.saveToFilesystem("kgfc.dat", fmanager);
 		
@@ -194,7 +211,7 @@ public class Annotate {
 		
 	}
 	
-	private static void annotate(Species spec, String ko_id,
+	public static void annotate(Species spec, String ko_id,
 		KeggInfoManagement manager) {
 		//KeggInfos infos = new KeggInfos(ko_id, manager);
 		
