@@ -81,9 +81,19 @@ public class SimulationPanel extends JPanel implements
      */
     private JToolBar footPanel;
     /**
+     * Array of identifiers of those {@link Quantity}s that are the target of a
+     * value optimization.
+     */
+    private String[] selectedQuantityIds;
+    /**
      * Switch to decide whether or not to draw the foot panel.
      */
     private boolean showSettingsPanel;
+    /**
+     * Indices to more efficiently memorize the location of interesting elements
+     * in the call-back function.
+     */
+    private int simulationDataIndex, solutionIndex, runBestIndex;
     /**
      * The main tabbed pane showing plot, simulation and experimental data.
      */
@@ -91,21 +101,11 @@ public class SimulationPanel extends JPanel implements
     /**
      * 
      */
-    private SimulationWorker worker;
+    private SimulationVisualizationPanel visualizationPanel;
     /**
      * 
      */
-    private SimulationVisualizationPanel visualizationPanel;
-    /**
-     * Indices to more efficiently memorize the location of interesting elements
-     * in the call-back function.
-     */
-    private int simulationDataIndex, solutionIndex, runBestIndex;
-    /**
-     * Array of identifiers of those {@link Quantity}s that are the target of a
-     * value optimization.
-     */
-    private String[] selectedQuantityIds;
+    private SimulationWorker worker;
 
     /**
      * @param model
@@ -310,6 +310,31 @@ public class SimulationPanel extends JPanel implements
 	return showSettingsPanel;
     }
 
+    /**
+     * @throws NoSuchMethodException
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     * @throws SecurityException
+     * @throws IllegalArgumentException
+     * @throws ModelOverdeterminedException 
+     * @throws IntegrationException 
+     * @throws SBMLException 
+     */
+	public void loadPreferences() throws IllegalArgumentException,
+	SecurityException, InstantiationException, IllegalAccessException,
+	InvocationTargetException, NoSuchMethodException, SBMLException, IntegrationException, ModelOverdeterminedException {
+
+	if (visualizationPanel != null) {
+	    visualizationPanel.loadPreferences();
+	}
+	SimulationToolPanel foot = getOrCreateFootPanel();
+	foot.loadPreferences();
+	foot.setSolver();
+	removeAll();
+	init();
+    }
+
     /*
      * (non-Javadoc)
      * @see
@@ -331,6 +356,12 @@ public class SimulationPanel extends JPanel implements
 		    solution[i]);
 	    }
 	}
+    }
+
+    public boolean notifyMultiRunFinished(String[] header,
+	List<Object[]> multiRunFinalObjectData) {
+	// TODO Auto-generated method stub
+	return false;
     }
 
     /**
@@ -393,6 +424,27 @@ public class SimulationPanel extends JPanel implements
     }
 
     /**
+     * @throws NoSuchMethodException
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     * @throws SecurityException
+     * @throws IllegalArgumentException
+     * @throws BackingStoreException
+     */
+    public void savePreferences() throws IllegalArgumentException,
+	SecurityException, InstantiationException, IllegalAccessException,
+	InvocationTargetException, NoSuchMethodException, BackingStoreException {
+	SimulationToolPanel foot = getOrCreateFootPanel();
+	SBPreferences prefs = SBPreferences
+		.getPreferencesFor(SimulationOptions.class);
+	prefs.put(SimulationOptions.SIM_START_TIME, foot
+		.getSimulationStartTime());
+	prefs.put(SimulationOptions.SIM_END_TIME, foot.getSimulationEndTime());
+	prefs.flush();
+    }
+
+    /**
      * 
      */
     public void saveSimulationResults() {
@@ -439,31 +491,6 @@ public class SimulationPanel extends JPanel implements
 	SimulationToolPanel tools = getOrCreateFootPanel();
 	visualizationPanel.setExperimentData(data);
 	tools.computeModelQuality();
-    }
-
-    /**
-     * @throws NoSuchMethodException
-     * @throws InvocationTargetException
-     * @throws IllegalAccessException
-     * @throws InstantiationException
-     * @throws SecurityException
-     * @throws IllegalArgumentException
-     * @throws ModelOverdeterminedException 
-     * @throws IntegrationException 
-     * @throws SBMLException 
-     */
-	public void loadPreferences() throws IllegalArgumentException,
-	SecurityException, InstantiationException, IllegalAccessException,
-	InvocationTargetException, NoSuchMethodException, SBMLException, IntegrationException, ModelOverdeterminedException {
-
-	if (visualizationPanel != null) {
-	    visualizationPanel.loadPreferences();
-	}
-	SimulationToolPanel foot = getOrCreateFootPanel();
-	foot.loadPreferences();
-	foot.setSolver();
-	removeAll();
-	init();
     }
 
     /**
@@ -531,23 +558,4 @@ public class SimulationPanel extends JPanel implements
 	    foot.setStepSize(stepSize);
 	}
     }
-
-		/**
-		 * @throws NoSuchMethodException 
-		 * @throws InvocationTargetException 
-		 * @throws IllegalAccessException 
-		 * @throws InstantiationException 
-		 * @throws SecurityException 
-		 * @throws IllegalArgumentException 
-		 * @throws BackingStoreException 
-		 * 
-		 */
-		public void savePreferences() throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, BackingStoreException {
-			SimulationToolPanel foot = getOrCreateFootPanel();
-			SBPreferences prefs = SBPreferences
-			.getPreferencesFor(SimulationOptions.class);
-			prefs.put(SimulationOptions.SIM_START_TIME,foot.getSimulationStartTime());
-			prefs.put(SimulationOptions.SIM_END_TIME,foot.getSimulationEndTime());
-			prefs.flush();
-		}
 }
