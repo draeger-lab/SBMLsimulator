@@ -49,6 +49,16 @@ public class EventInProcessWithDelay extends EventInProcess {
 		this.values = new LinkedList<Double[]>();
 
 	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.EventInProcess#aborted()
+	 */
+	@Override
+	public void aborted() {
+		execTimes.poll();
+		executed();
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -73,6 +83,13 @@ public class EventInProcessWithDelay extends EventInProcess {
 	@Override
 	public void executed() {
 		values.poll();
+	}
+
+	/**
+	 * Call when the delay has elapsed, so the earliest execution time is
+	 * removed from the list
+	 */
+	public void runEvent() {
 		execTimes.poll();
 	}
 
