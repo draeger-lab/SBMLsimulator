@@ -2,6 +2,8 @@ package org.sbml.simulator.util;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -85,85 +87,51 @@ public class Annotate {
 			total++;
 			prog.DisplayBar();
 			boolean foundExactHit = false;
+			
 			String symbol = spec.getName();
-			KeggQuery query = new KeggQuery(KeggQuery.genericFind, "COMPOUND " + symbol);
-//			KeggQuery query2 = new KeggQuery(KeggQuery.genericFind, "ENZYME " + symbol);
-//			KeggQuery query3 = new KeggQuery(KeggQuery.genericFind, "GENES " + symbol);
-			CustomObject<Object> res = fmanager.getInformation(query);
-//			if(res==null) {
-//				res=fmanager.getInformation(query2);;
-//				if(res==null) {
-//					res=fmanager.getInformation(query3);
-//				}
-//			}
+			List<String> symbols = new LinkedList<String>();
+			symbols.add(symbol);
+			symbol=symbol.replaceAll("_"," ").replaceAll("-"," ");
+			symbols.add(symbol);
+			symbol.replaceAll("\\(.\\)","").replaceAll("\\(..\\)","").replaceAll("\\(gene\\)","").replaceAll("\\(RNA\\)","").replaceAll("\\(p\\)","").replaceAll("\\(s\\)","").replaceAll("\\(r\\)","").replaceAll("\\(l\\)","").replaceAll("\\(n\\)","").replaceAll("\\(b\\)","").replaceAll("\\(PG\\)","");
+			symbols.add(symbol);
+			symbol=symbol.replaceAll("PP","-bisphosphate");
+			symbols.add(symbol);
+			symbol=symbol.replaceAll("PP","diphosphate");
+			symbols.add(symbol);
+			symbol=symbol.replaceAll("P","-phosphate");
+			symbols.add(symbol);
+			symbol=symbol.replaceAll("Pase"," phosphatase");
+			symbols.add(symbol);
 			
-			if(res==null) {
-				symbol=symbol.replaceAll("_"," ").replaceAll("-"," ");
-				symbol=symbol.replaceAll("\\(.\\)","").replaceAll("\\(..\\)","").replaceAll("\\(gene\\)","").replaceAll("\\(RNA\\)","").replaceAll("\\(p\\)","").replaceAll("\\(s\\)","").replaceAll("\\(r\\)","").replaceAll("\\(l\\)","").replaceAll("\\(n\\)","").replaceAll("\\(b\\)","").replaceAll("\\(PG\\)","");
-				query = new KeggQuery(KeggQuery.genericFind, "COMPOUND " + symbol);
-//				query2 = new KeggQuery(KeggQuery.genericFind, "ENZYME " + symbol);
-//				query3 = new KeggQuery(KeggQuery.genericFind, "GENES " + symbol);
-				res = fmanager.getInformation(query);
-//				if(res==null) {
-//					res=fmanager.getInformation(query2);;
-//					if(res==null) {
-//						res=fmanager.getInformation(query3);
-//					}
-//				}
-			}
+			KeggQuery query = null;
 			
-			if(res==null) {
-				String symbol2=symbol.replaceAll("PP","-bisphosphate");
-				query = new KeggQuery(KeggQuery.genericFind, "COMPOUND " + symbol);
-//				query2 = new KeggQuery(KeggQuery.genericFind, "ENZYME " + symbol);
-//				query3 = new KeggQuery(KeggQuery.genericFind, "GENES " + symbol);
-				res = fmanager.getInformation(query);
-//				if(res==null) {
-//					res=fmanager.getInformation(query2);;
-//					if(res==null) {
-//						res=fmanager.getInformation(query3);
-//					}
-//				}
+			
+			CustomObject<Object> res=null;
+			String resultingSymbol=null;
+			for(String s:symbols){
+				//Species is gene or RNA
+				if(spec.getSBOTerm()==243 || spec.getSBOTerm()==278) {
+					query = new KeggQuery(KeggQuery.genericFind, "GENES " + s);
+					res = fmanager.getInformation(query);
+				}	
+				
+				//Species is not a gene and not degraded
+				else if(spec.getSBOTerm()!=291) {
+					query = new KeggQuery(KeggQuery.genericFind, "COMPOUND " + s);
+					res = fmanager.getInformation(query);
+					if(res==null) {
+						query = new KeggQuery(KeggQuery.genericFind, "ENZYME " + s);
+						res=fmanager.getInformation(query);
+					}
+				}
+				
 				if(res!=null) {
-					symbol=symbol2;
+					resultingSymbol=s;
+					break;
 				}
 			}
-			
-			if(res==null) {
-				String symbol2=symbol.replaceAll("PP","diphosphate");
-				query = new KeggQuery(KeggQuery.genericFind, "COMPOUND " + symbol);
-//				query2 = new KeggQuery(KeggQuery.genericFind, "ENZYME " + symbol);
-//				query3 = new KeggQuery(KeggQuery.genericFind, "GENES " + symbol);
-				res = fmanager.getInformation(query);
-//				if(res==null) {
-//					res=fmanager.getInformation(query2);;
-//					if(res==null) {
-//						res=fmanager.getInformation(query3);
-//					}
-//				}
-				if(res!=null) {
-					symbol=symbol2;
-				}
-			}
-			
-			
-			if(res==null) {
-				String symbol2=symbol.replaceAll("P","-phosphate");
-				query = new KeggQuery(KeggQuery.genericFind, "COMPOUND " + symbol);
-//				query2 = new KeggQuery(KeggQuery.genericFind, "ENZYME " + symbol);
-//				query3 = new KeggQuery(KeggQuery.genericFind, "GENES " + symbol);
-				res = fmanager.getInformation(query);
-//				if(res==null) {
-//					res=fmanager.getInformation(query2);
-//					if(res==null) {
-//						res=fmanager.getInformation(query3);
-//					}
-//				}
-				if(res!=null) {
-					symbol=symbol2;
-				}
-			}
-			
+				
 			
 			if (res != null && res.getObject() != null
 					&& res.getObject().toString().length() > 0) {
@@ -174,7 +142,7 @@ public class Annotate {
 					if (matchSplit.length<2) continue;
 					String[] hitSymbols = matchSplit[1].split(";");
 					for (String hitSymbol : hitSymbols) {
-						if (hitSymbol.trim().equalsIgnoreCase(symbol)) {
+						if (hitSymbol.trim().equalsIgnoreCase(resultingSymbol)) {
 							// Exact hit! ADD Miriam URNs
 							//System.out.println(spec.getId() + " => " + matchSplit[0]);
 							matched++;
