@@ -18,18 +18,18 @@ import org.sbml.jsbml.Species;
 import org.sbml.jsbml.SpeciesReference;
 
 public class processSBMLFile {
-	public static void main(String[] args) throws FileNotFoundException, XMLStreamException, SBMLException {
-		SBMLDocument doc = (new SBMLReader()).readSBML(args[0]);
+	public static void extendModel(String inputFile, String outputFile) throws FileNotFoundException, XMLStreamException, SBMLException {
+		SBMLDocument doc = (new SBMLReader()).readSBML(inputFile);
 		
 		Compartment cytosol = null;
 		for(Compartment c: doc.getModel().getListOfCompartments()) {
-			if(c.getName().contains("cytosol") || c.getName().contains("Cytosol")) {
+			if(c.getName().contains("cyto") || c.getName().contains("Cyto")) {
 				cytosol=c;
 			}
 		}
 		if(cytosol==null) {
-			cytosol = doc.getModel().createCompartment("cytosol");
-			cytosol.setName("cytosol");
+			cytosol = doc.getModel().createCompartment("cyto");
+			cytosol.setName("cyto");
 		}
 		
 		Species degraded = doc.getModel().createSpecies("emptySet", cytosol);
@@ -52,7 +52,7 @@ public class processSBMLFile {
 				s.setSBOTerm(278);
 				
 				//add cytosol RNA
-				Species cytosolRNA = doc.getModel().createSpecies(s.getId() +"_cytosol", cytosol);
+				Species cytosolRNA = doc.getModel().createSpecies(s.getId() +"_cyto", cytosol);
 				cytosolRNA.setName(s.getName());
 				cytosolRNA.setMetaId(cytosolRNA.getId());
 				cytosolRNA.setSBOTerm(278);
@@ -63,7 +63,7 @@ public class processSBMLFile {
 				}
 				
 				//add transport reaction
-				Reaction transportReaction = doc.getModel().createReaction("Transport" + counter);
+				Reaction transportReaction = doc.getModel().createReaction("re_Transport" + counter);
 				transportReaction.setName(transportReaction.getId());
 				transportReaction.addReactant(new SpeciesReference(s));
 				transportReaction.addProduct(new SpeciesReference(cytosolRNA));
@@ -76,9 +76,10 @@ public class processSBMLFile {
 				Species protein = doc.getModel().createSpecies(proteinName,cytosol);
 				protein.setName(proteinName);
 				protein.setMetaId(protein.getId());
+				System.out.println(protein);
 				
 				//add translation
-				Reaction translation = doc.getModel().createReaction("Translation" + counter);
+				Reaction translation = doc.getModel().createReaction("re_Translation" + counter);
 				translation.setName(translation.getId());
 				translation.addReactant(new SpeciesReference(degraded));
 				translation.setSBOTerm(184);
@@ -86,11 +87,12 @@ public class processSBMLFile {
 				translation.addProduct(new SpeciesReference(protein));
 				translation.addModifier(new ModifierSpeciesReference(cytosolRNA));
 				
+				
 				counter++;
 			}
 		}
 		
 		SBMLWriter w = new SBMLWriter();
-		w.write(doc, args[1]);
+		w.write(doc, outputFile);
 	}
 }
