@@ -50,9 +50,9 @@ import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.QuantityWithUnit;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBase;
-import org.sbml.jsbml.SBaseChangedEvent;
-import org.sbml.jsbml.SBaseChangedListener;
 import org.sbml.jsbml.Species;
+import org.sbml.jsbml.util.SBaseChangeEvent;
+import org.sbml.jsbml.util.SBaseChangeListener;
 import org.sbml.jsbml.util.compilers.HTMLFormula;
 import org.sbml.simulator.math.odes.SimulationOptions;
 
@@ -76,7 +76,7 @@ import de.zbit.util.prefs.SBPreferences;
  * @since 1.0
  */
 public class InteractiveScanPanel extends JPanel implements ActionListener,
-	ChangeListener, SBaseChangedListener {
+	ChangeListener, SBaseChangeListener {
 
     /**
      * @author Andreas Dr&auml;ger
@@ -488,7 +488,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
      * @seeorg.sbml.jsbml.SBaseChangedListener#stateChanged(org.sbml.jsbml.
      * SBaseChangedEvent)
      */
-    public void stateChanged(SBaseChangedEvent ev) {
+    public void stateChanged(SBaseChangeEvent ev) {
 	if (ev.getSource() instanceof QuantityWithUnit) {
 	    QuantityWithUnit q = (QuantityWithUnit) ev
 		    .getSource();
