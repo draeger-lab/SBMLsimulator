@@ -1,6 +1,6 @@
 package org.sbml.simulator.util;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,7 +18,16 @@ import org.sbml.jsbml.Species;
 import org.sbml.jsbml.SpeciesReference;
 
 public class SBMLFileExtension{
-  public static void extendModel(String inputFile, String outputFile) throws FileNotFoundException, XMLStreamException, SBMLException {
+    
+    /**
+     * 
+     * @param inputFile
+     * @param outputFile
+     * @throws XMLStreamException
+     * @throws SBMLException
+     * @throws IOException
+     */
+  public static void extendModel(String inputFile, String outputFile) throws XMLStreamException, SBMLException, IOException {
     SBMLDocument doc = (new SBMLReader()).readSBML(inputFile);
     
     Compartment cytosol = null;
