@@ -1,6 +1,5 @@
 package org.sbml.simulator.util;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,12 +50,11 @@ public class Annotate {
    * 
    * @param inputFile
    * @param outputFile
-   * @throws FileNotFoundException
    * @throws XMLStreamException
    * @throws SBMLException
+   * @throws IOException
    */
-  public static void automaticAnnotation(String inputFile, String outputFile) throws FileNotFoundException,
-    XMLStreamException, SBMLException {
+  public static void automaticAnnotation(String inputFile, String outputFile) throws XMLStreamException, SBMLException, IOException {
     SBMLDocument doc = (new SBMLReader()).readSBML(inputFile);
     
     //KeggAdaptor adap = new KeggAdaptor();

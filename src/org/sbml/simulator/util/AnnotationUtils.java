@@ -17,7 +17,6 @@
 package org.sbml.simulator.util;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -56,8 +55,7 @@ import de.zbit.util.ProgressBar;
 public class AnnotationUtils {
   
   public static void addAnnotations(String inputFile, String outputFile,
-    String annotationFile, int col, int altCol) throws FileNotFoundException,
-    XMLStreamException, SBMLException {
+    String annotationFile, int col, int altCol) throws XMLStreamException, SBMLException, IOException {
     
     SBMLDocument doc = (new SBMLReader()).readSBML(inputFile);
     
@@ -217,12 +215,12 @@ public class AnnotationUtils {
    * @param outputFile
    * @param modifierFile
    * @param annotationModifiers
-   * @throws FileNotFoundException
    * @throws XMLStreamException
+   * @throws IOException
    */
   public static void addModifiers(String inputFile, String outputFile,
     String modifierFile, String annotationModifiers)
-    throws FileNotFoundException, XMLStreamException {
+    throws XMLStreamException, IOException {
     //read species for catalyzed reactions
     SBMLDocument doc = (new SBMLReader()).readSBML(inputFile);
     
@@ -293,7 +291,15 @@ public class AnnotationUtils {
       }
     }
   }
-  public static void main(String[] args) throws FileNotFoundException, XMLStreamException, SBMLException {
+  
+  /**
+   * 
+   * @param args
+   * @throws XMLStreamException
+   * @throws SBMLException
+   * @throws IOException
+   */
+  public static void main(String[] args) throws XMLStreamException, SBMLException, IOException {
       String file1="files\\CAR_PXR_2_4.xml";
       String file2="files\\HepatoNet1.xml";
       String file3="files\\CAR_PXR_annotated";
