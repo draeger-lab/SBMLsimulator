@@ -325,7 +325,7 @@ public class AnnotationUtils {
       
       
       //extend other model 
-      processSBMLFile.extendModel(file1, file3);
+      SBMLFileExtension.extendModel(file1, file3);
       
       //annotate other model
       Annotate.automaticAnnotation(file1, file2);
