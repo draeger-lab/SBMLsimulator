@@ -1,5 +1,6 @@
 /*
- * $Id$URL: AddAnnotations.java $
+ * $Id$URL:
+ * AddAnnotations.java $
  * --------------------------------------------------------------------- This
  * file is part of SBMLsimulator, a Java-based simulator for models of
  * biochemical processes encoded in the modeling language SBML.
@@ -17,6 +18,7 @@
 package org.sbml.simulator.util;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -106,16 +108,10 @@ public class AnnotationUtils {
       e1.printStackTrace();
     }
     
-    KeggInfoManagement manager = null;
-    try {
-      manager = (KeggInfoManagement) KeggInfoManagement
-          .loadFromFilesystem("kgim.dat");
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    KeggInfoManagement manager = loadInfoManager();
     
     Object[] elements = new Object[doc.getModel().getNumSpecies()
-        + doc.getModel().getNumReactions()];
+        + doc.getModel().getNumReactions()+doc.getModel().getNumCompartments()];
     System.arraycopy(doc.getModel().getListOfSpecies().toArray(), 0, elements,
       0, doc.getModel().getNumSpecies());
     System.arraycopy(doc.getModel().getListOfReactions().toArray(), 0,
@@ -126,8 +122,6 @@ public class AnnotationUtils {
           elements, doc.getModel().getNumReactions()
               + doc.getModel().getNumSpecies(), doc.getModel()
               .getNumCompartments());
-    if (manager == null) manager = new KeggInfoManagement();
-    
     int total = 0, matched = 0, notMatched = 0;
     ProgressBar prog = new ProgressBar(elements.length);
     
@@ -161,13 +155,7 @@ public class AnnotationUtils {
       
       for (String annotation : annotations) {
         if (element instanceof Species) {
-          if ((annotation.startsWith("P")) || (annotation.startsWith("Q"))
-              || (annotation.startsWith("O"))) {
-            element.addCVTerm(new CVTerm(CVTerm.Type.BIOLOGICAL_QUALIFIER,
-              CVTerm.Qualifier.BQB_IS, "urn:miriam:uniprot:" + annotation));
-          } else {
-            Annotate.annotate((Species) element, annotation, manager);
-          }
+          annotateSpecies((Species)element,annotation,manager);
         } else if (element instanceof Reaction) {
           if (annotation.startsWith("R")) {
             element
@@ -175,16 +163,16 @@ public class AnnotationUtils {
                   CVTerm.Qualifier.BQB_IS, "urn:miriam:kegg.reaction:"
                       + annotation));
           } else if (annotation.startsWith("EC")) {
-            element.addCVTerm(new CVTerm(CVTerm.Type.BIOLOGICAL_QUALIFIER,
-              CVTerm.Qualifier.BQB_IS, "urn:miriam:ec-code:" + annotation));
+            for(String ann:annotation.split(" ")) {
+              element.addCVTerm(new CVTerm(CVTerm.Type.BIOLOGICAL_QUALIFIER,
+                CVTerm.Qualifier.BQB_IS, "urn:miriam:ec-code:" + ann));
+            }
             
           }
         } else if (element instanceof Compartment) {
           if (annotation.startsWith("GO")) {
-            element
-                .addCVTerm(new CVTerm(CVTerm.Type.BIOLOGICAL_QUALIFIER,
-                  CVTerm.Qualifier.BQB_IS, "urn:miriam:obo.go"
-                      + annotation));
+            element.addCVTerm(new CVTerm(CVTerm.Type.BIOLOGICAL_QUALIFIER,
+              CVTerm.Qualifier.BQB_IS, "urn:miriam:obo.go:" + annotation));
           }
         }
       }
@@ -216,11 +204,12 @@ public class AnnotationUtils {
    * @param modifierFile
    * @param annotationModifiers
    * @throws XMLStreamException
-   * @throws IOException
+   * @throws SBMLException 
+   * @throws IOException 
    */
   public static void addModifiers(String inputFile, String outputFile,
     String modifierFile, String annotationModifiers)
-    throws XMLStreamException, IOException {
+    throws XMLStreamException, SBMLException, IOException {
     //read species for catalyzed reactions
     SBMLDocument doc = (new SBMLReader()).readSBML(inputFile);
     
@@ -228,6 +217,7 @@ public class AnnotationUtils {
     BufferedReader reader = new BufferedReader(new FileReader(modifierFile));
     String l;
     try {
+      l = reader.readLine();
       while ((l = reader.readLine()) != null) {
         String[] s = l.split("\t");
         for (int i = 1; i < s.length; i++) {
@@ -235,8 +225,8 @@ public class AnnotationUtils {
             List<String> list = modifiers.get(s[i]);
             if (list == null) {
               list = new LinkedList<String>();
-              list.add(s[0]);
             }
+            list.add(s[0]);
             modifiers.put(s[i], list);
           }
         }
@@ -245,14 +235,37 @@ public class AnnotationUtils {
       e.printStackTrace();
     }
     
+    //read annotation of modifiers
+    Map<String, List<String>> annotationMap = new HashMap<String, List<String>>();
+    if (annotationModifiers != null) {
+      BufferedReader reader2 = new BufferedReader(new FileReader(
+        annotationModifiers));
+      try {
+        l = reader2.readLine();
+        while ((l = reader2.readLine()) != null) {
+          String[] s = l.split("\t");
+          List<String> list = annotationMap.get(s[0]);
+          for (int i = 1; i < s.length; i++) {
+            if (!s[i].equals("")) {
+              if (list == null) {
+                list = new LinkedList<String>();
+                list.add(s[i]);
+              }
+              annotationMap.put(s[0], list);
+            }
+          }
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
     //add modifiers 
     for (Object o : doc.getModel().getListOfReactions().toArray()) {
       Reaction r = (Reaction) o;
       for (int i = 0; i != r.getAnnotation().getNumCVTerms(); i++) {
         for (String ann : r.getAnnotation().getCVTerm(i)
             .filterResources("urn:miriam:ec-code:")) {
-          String annotation = ann;
-          System.out.println(annotation);
+          String annotation = ann.replaceFirst("urn:miriam:ec-code:", "");
           if (modifiers.get(annotation) != null) {
             for (String modifierID : modifiers.get(annotation)) {
               Species modifier = doc.getModel().getSpecies(modifierID);
@@ -281,8 +294,11 @@ public class AnnotationUtils {
                 modifier.setName(modifierID);
                 modifier.setMetaId(modifier.getId());
                 //TODO SBOTerms
-                //TODO annotations
-                
+                if (annotationMap.get(modifierID) != null) {
+                  for (String a : annotationMap.get(modifierID)) {
+                    annotateSpecies(modifier,a,loadInfoManager());
+                  }
+                }
               }
               r.addModifier(new ModifierSpeciesReference(modifier));
             }
@@ -290,59 +306,74 @@ public class AnnotationUtils {
         }
       }
     }
+    SBMLWriter w = new SBMLWriter();
+    w.write(doc, outputFile);
   }
   
-  /**
-   * 
-   * @param args
-   * @throws XMLStreamException
-   * @throws SBMLException
-   * @throws IOException
-   */
+  private static void annotateSpecies(Species s, String annotation,
+    KeggInfoManagement manager) {
+    if ((annotation.startsWith("P")) || (annotation.startsWith("Q"))
+        || (annotation.startsWith("O"))) {
+      s.addCVTerm(new CVTerm(CVTerm.Type.BIOLOGICAL_QUALIFIER,
+        CVTerm.Qualifier.BQB_IS, "urn:miriam:uniprot:" + annotation));
+    } else {
+      Annotate.annotate(s, annotation, manager);
+    }
+  }
+  
+  private static KeggInfoManagement loadInfoManager() {
+    KeggInfoManagement manager = null;
+    try {
+      manager = (KeggInfoManagement) KeggInfoManagement
+          .loadFromFilesystem("kgim.dat");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    if (manager == null) manager = new KeggInfoManagement();
+    return manager;
+  }
+  
   public static void main(String[] args) throws XMLStreamException, SBMLException, IOException {
-      String file1="files\\CAR_PXR_2_4.xml";
-      String file2="files\\HepatoNet1.xml";
-      String file3="files\\CAR_PXR_annotated";
-      String file4="files\\HepatoNet1_annotated";
-      
-      String annotationFile1="files\\annotations_HepatoNet1.txt";
-      String annotationFile2="files\\Reactions_HepatoNet1.txt";
-      String annotationFile3="files\\Compartments_HepatoNet1.txt";
-      
-      String annotationFile4="files\\annotations_CAR_PXR.txt";
-      String annotationFile5="files\\Compartments_CAR_PXR.txt";
-      
-      String modifierFile="files\\CAR_PXR_catalysis.txt";
-      
-      //annotate HepatoNet
-      Annotate.automaticAnnotation(file2, file4);
-      
-      //species
-      addAnnotations(file4,file4,annotationFile1,-1,-1);
-      
-      //reactions
-      addAnnotations(file4,file4,annotationFile2,5,3);
-      
-      //compartments
-      addAnnotations(file4,file4,annotationFile3,-1,-1);
-      
-      //add modifiers
-      addModifiers(file4,file4,modifierFile,annotationFile4);
-      
-      
-      //extend other model 
-      SBMLFileExtension.extendModel(file1, file3);
-      
-      //annotate other model
-      Annotate.automaticAnnotation(file1, file2);
-      
-      //species
-      addAnnotations(file3,file3,annotationFile4,-1,-1);
-      
-      //compartments
-      addAnnotations(file3,file3,annotationFile5,-1,-1);
-      
-      
-      
+    String file1 = "files\\CAR_PXR_2_4.xml";
+    String file2 = "files\\HepatoNet1.xml";
+    String file3 = "files\\CAR_PXR_annotated.xml";
+    String file4 = "files\\HepatoNet1_annotated.xml";
+    
+    String annotationFile1 = "files\\annotations_HepatoNet.txt";
+    String annotationFile2 = "files\\Reactions_HepatoNet.txt";
+    String annotationFile3 = "files\\Compartments_HepatoNet.txt";
+    
+    String annotationFile4 = "files\\annotations_CAR_PXR.txt";
+    String annotationFile5 = "files\\Compartments_CAR_PXR.txt";
+    
+    String modifierFile = "files\\CAR_PXR_catalysis.txt";
+    
+    //annotate HepatoNet
+    Annotate.automaticAnnotation(file2, file4);
+    
+    //species
+    addAnnotations(file4, file4, annotationFile1, -1, -1);
+    
+    //reactions
+    addAnnotations(file4, file4, annotationFile2, 5, 3);
+    
+    //compartments
+    addAnnotations(file4, file4, annotationFile3, -1, -1);
+    
+    //add modifiers
+    addModifiers(file4, file4, modifierFile, annotationFile4);
+    
+    //extend other model 
+    SBMLFileExtension.extendModel(file1, file3);
+    
+    //annotate other model
+    Annotate.automaticAnnotation(file3, file3);
+    
+    //species
+    addAnnotations(file3, file3, annotationFile4, -1, -1);
+    
+    //compartments
+    addAnnotations(file3, file3, annotationFile5, -1, -1);
+    
   }
 }
