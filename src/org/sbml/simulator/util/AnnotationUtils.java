@@ -333,19 +333,19 @@ public class AnnotationUtils {
   }
   
   public static void main(String[] args) throws XMLStreamException, SBMLException, IOException {
-    String file1 = "files\\CAR_PXR_2_4.xml";
-    String file2 = "files\\HepatoNet1.xml";
-    String file3 = "files\\CAR_PXR_annotated.xml";
-    String file4 = "files\\HepatoNet1_annotated.xml";
+    String file1 = "files/CAR_PXR_2_4.xml";
+    String file2 = "files/HepatoNet1.xml";
+    String file3 = "files/CAR_PXR_annotated.xml";
+    String file4 = "files/HepatoNet1_annotated.xml";
     
-    String annotationFile1 = "files\\annotations_HepatoNet.txt";
-    String annotationFile2 = "files\\Reactions_HepatoNet.txt";
-    String annotationFile3 = "files\\Compartments_HepatoNet.txt";
+    String annotationFile1 = "files/annotations_HepatoNet.txt";
+    String annotationFile2 = "files/Reactions_HepatoNet.txt";
+    String annotationFile3 = "files/Compartments_HepatoNet.txt";
     
-    String annotationFile4 = "files\\annotations_CAR_PXR.txt";
-    String annotationFile5 = "files\\Compartments_CAR_PXR.txt";
+    String annotationFile4 = "files/annotations_CAR_PXR.txt";
+    String annotationFile5 = "files/Compartments_CAR_PXR.txt";
     
-    String modifierFile = "files\\CAR_PXR_catalysis.txt";
+    String modifierFile = "files/CAR_PXR_catalysis.txt";
     
     //annotate HepatoNet
     Annotate.automaticAnnotation(file2, file4);
