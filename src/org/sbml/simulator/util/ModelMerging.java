@@ -12,7 +12,6 @@ import org.sbml.jsbml.AbstractSBase;
 import org.sbml.jsbml.Annotation;
 import org.sbml.jsbml.CVTerm;
 import org.sbml.jsbml.Compartment;
-import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
@@ -23,6 +22,13 @@ import org.sbml.jsbml.Species;
 
 public class ModelMerging {
   
+  /**
+   * 
+   * @param modelFiles
+   * @throws XMLStreamException
+   * @throws IOException
+   * @throws SBMLException
+   */
   public static void mergeModels(String[] modelFiles)
     throws XMLStreamException, IOException, SBMLException {
     if (modelFiles.length == 0) { return; }
@@ -48,23 +54,20 @@ public class ModelMerging {
       for (int n = 0; n != currentModel.getNumCompartments(); n++) {
         Compartment c = currentModel.getCompartment(n);
         List<CVTerm> cvTerms = c.getCVTerms();
-        Map<String,String> namespaces =null;
-        if(c.getAnnotation()!=null) {
-         namespaces = c.getAnnotation().getAnnotationNamespaces(); 
-        }
         c.setParentSBML(null);
         c.setLevel(level);
         c.setVersion(version);
         c.setId("C" + j + "_" + n + "_" + c.getId());
         c.setMetaId(c.getId());
-        if (cvTerms.size() != 0) {
-          Annotation a=new Annotation(cvTerms);
-          a.setAnnotationNamespaces(namespaces);
-          c.setAnnotation(a);
-        }
+        
         newDoc.getModel().addCompartment(c);
-        for (int cv = 0; cv != c.getNumCVTerms(); cv++) {
-          CVTerm current = c.getCVTerm(cv);
+        
+        if (cvTerms.size() != 0) {
+          c.setAnnotation(new Annotation());
+        }
+        
+        for (CVTerm current : cvTerms) {
+          c.addCVTerm(current);
           List<AbstractSBase> list = compartmentAnnotationMap.get(current
               .toString());
           if (list == null) {
@@ -85,12 +88,14 @@ public class ModelMerging {
         s.setVersion(version);
         s.setId("S" + j + "_" + n + "_" + s.getId());
         s.setMetaId(s.getId());
-        if (cvTerms.size() != 0) {
-          s.setAnnotation(new Annotation(cvTerms));
-        }
         newDoc.getModel().addSpecies(s);
-        for (int cv = 0; cv != s.getNumCVTerms(); cv++) {
-          CVTerm current = s.getCVTerm(cv);
+        
+        if (cvTerms.size() != 0) {
+          s.setAnnotation(new Annotation());
+        }
+        
+        for (CVTerm current : cvTerms) {
+          s.addCVTerm(current);
           List<AbstractSBase> list = speciesAnnotationMap.get(current
               .toString());
           if (list == null) {
@@ -111,12 +116,14 @@ public class ModelMerging {
         r.setVersion(version);
         r.setId("C" + j + "_" + n + "_" + r.getId());
         r.setMetaId(r.getId());
-        if (cvTerms.size() != 0) {
-          r.setAnnotation(new Annotation(cvTerms));
-        }
+        
         newDoc.getModel().addReaction(r);
-        for (int cv = 0; cv != r.getNumCVTerms(); cv++) {
-          CVTerm current = r.getCVTerm(cv);
+        if (cvTerms.size() != 0) {
+          r.setAnnotation(new Annotation());
+        }
+        
+        for (CVTerm current : cvTerms) {
+          r.addCVTerm(current);
           List<AbstractSBase> list = reactionAnnotationMap.get(current
               .toString());
           if (list == null) {
@@ -216,6 +223,7 @@ public class ModelMerging {
   
   private static boolean checkEquality(AbstractSBase abstractSBase,
     AbstractSBase abstractSBase2) {
+    
     if (abstractSBase.getSBOTerm() == abstractSBase2.getSBOTerm()) {
       if ((abstractSBase instanceof Reaction)
           && (abstractSBase2 instanceof Reaction)) {
@@ -268,13 +276,14 @@ public class ModelMerging {
         if (s1.getId().split("_")[0].equals(s2.getId().split("_")[0])) { return false; }
         if ((s1.getSBOTerm() == s2.getSBOTerm())
             && (s1.getCompartmentInstance() == s2.getCompartmentInstance())) { return true; }
-      }
-    } else if ((abstractSBase instanceof Compartment)
-        && (abstractSBase2 instanceof Compartment)) {
-      if (((Compartment) abstractSBase).getId().split("_")[0]
-          .equals(((Compartment) abstractSBase2).getId().split("_")[0])) { return false; }
-      if (abstractSBase.getSBOTerm() == abstractSBase2.getSBOTerm()) { return true;
-
+      } else if ((abstractSBase instanceof Compartment)
+          && (abstractSBase2 instanceof Compartment)) {
+        if (((Compartment) abstractSBase).getId().split("_")[0]
+            .equals(((Compartment) abstractSBase2).getId().split("_")[0])) {
+          return false;
+        } else {
+          return true;
+        }
       }
     }
     return false;
