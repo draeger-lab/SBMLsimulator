@@ -103,6 +103,7 @@ public class AnnotationUtils {
           annotationMap.put(split[0], list);
         }
       }
+      reader.close();
     } catch (IOException e1) {
       e1.printStackTrace();
     }
@@ -230,6 +231,7 @@ public class AnnotationUtils {
           }
         }
       }
+      reader.close();
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -254,6 +256,7 @@ public class AnnotationUtils {
             }
           }
         }
+        reader2.close();
       } catch (IOException e) {
         e.printStackTrace();
       }

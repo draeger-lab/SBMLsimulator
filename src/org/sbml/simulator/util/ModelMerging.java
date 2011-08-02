@@ -68,41 +68,44 @@ public class ModelMerging {
         
         for (CVTerm current : cvTerms) {
           c.addCVTerm(current);
-          List<AbstractSBase> list = compartmentAnnotationMap.get(current
-              .toString());
-          if (list == null) {
-            list = new LinkedList<AbstractSBase>();
+          
+          for (String s : current.getResources()) {
+            List<AbstractSBase> list = compartmentAnnotationMap.get(s);
+            if (list == null) {
+              list = new LinkedList<AbstractSBase>();
+            }
+            list.add(c);
+            compartmentAnnotationMap.put(s, list);
           }
-          list.add(c);
-          compartmentAnnotationMap.put(current.toString(), list);
         }
         
       }
       
       //species
       for (int n = 0; n != currentModel.getNumSpecies(); n++) {
-        Species s = currentModel.getSpecies(n);
-        List<CVTerm> cvTerms = s.getCVTerms();
-        s.setParentSBML(null);
-        s.setLevel(level);
-        s.setVersion(version);
-        s.setId("S" + j + "_" + n + "_" + s.getId());
-        s.setMetaId(s.getId());
-        newDoc.getModel().addSpecies(s);
+        Species sp = currentModel.getSpecies(n);
+        List<CVTerm> cvTerms = sp.getCVTerms();
+        sp.setParentSBML(null);
+        sp.setLevel(level);
+        sp.setVersion(version);
+        sp.setId("S" + j + "_" + n + "_" + sp.getId());
+        sp.setMetaId(sp.getId());
+        newDoc.getModel().addSpecies(sp);
         
         if (cvTerms.size() != 0) {
-          s.setAnnotation(new Annotation());
+          sp.setAnnotation(new Annotation());
         }
         
         for (CVTerm current : cvTerms) {
-          s.addCVTerm(current);
-          List<AbstractSBase> list = speciesAnnotationMap.get(current
-              .toString());
-          if (list == null) {
-            list = new LinkedList<AbstractSBase>();
+          sp.addCVTerm(current);
+          for (String s : current.getResources()) {
+            List<AbstractSBase> list = speciesAnnotationMap.get(s);
+            if (list == null) {
+              list = new LinkedList<AbstractSBase>();
+            }
+            list.add(sp);
+            speciesAnnotationMap.put(s, list);
           }
-          list.add(s);
-          speciesAnnotationMap.put(current.toString(), list);
         }
         
       }
@@ -124,15 +127,15 @@ public class ModelMerging {
         
         for (CVTerm current : cvTerms) {
           r.addCVTerm(current);
-          List<AbstractSBase> list = reactionAnnotationMap.get(current
-              .toString());
-          if (list == null) {
-            list = new LinkedList<AbstractSBase>();
+          for (String s : current.getResources()) {
+            List<AbstractSBase> list = reactionAnnotationMap.get(s);
+            if (list == null) {
+              list = new LinkedList<AbstractSBase>();
+            }
+            list.add(r);
+            reactionAnnotationMap.put(s, list);
           }
-          list.add(r);
-          reactionAnnotationMap.put(current.toString(), list);
         }
-        
       }
       
     }
