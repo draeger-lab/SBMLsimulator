@@ -22,9 +22,9 @@ import java.util.LinkedList;
 /**
  * <p>
  * This class represents a compilation of all information calculated during
- * simulation concering events. An EventInProcessWithDelay especially stands for
- * an event with delay, so it can has multiple times of execution and therefore
- * multiple arrays of values from trigger time.
+ * simulation concerning events. An EventInProcessWithDelay especially stands
+ * for an event with delay, so it can has multiple times of execution and
+ * therefore multiple arrays of values from trigger time.
  * </p>
  * 
  * @author Alexander D&ouml;rr
@@ -45,13 +45,11 @@ public class EventInProcessWithDelay extends EventInProcess {
 	 */
 	EventInProcessWithDelay(boolean fired) {
 		super(fired);
-		this.execTimes = new LinkedList<Double>();
-		this.values = new LinkedList<Double[]>();
-
 	}
-	
+
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see org.sbml.simulator.math.EventInProcess#aborted()
 	 */
 	@Override
@@ -91,26 +89,6 @@ public class EventInProcessWithDelay extends EventInProcess {
 	 */
 	public void runEvent() {
 		execTimes.poll();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.simulator.math.EventInProcess#getTime()
-	 */
-	@Override
-	public double getTime() {
-		return execTimes.peek();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.simulator.math.EventInProcess#getValues()
-	 */
-	@Override
-	public Double[] getValues() {
-		return values.peek();
 	}
 
 	/**

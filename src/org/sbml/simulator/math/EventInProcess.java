@@ -17,12 +17,14 @@
  */
 package org.sbml.simulator.math;
 
+import java.util.LinkedList;
+
 /**
  * <p>
  * This class represents a compilation of all information calculated during
- * simulation concering events. An EventInProcess especially stands for an event
- * without delay, so it can only has one time of execution and one array of
- * values from trigger time at all.
+ * simulation concerning events. An EventInProcess especially stands for an
+ * event without delay, so it can only has one time of execution and one array
+ * of values from trigger time at all.
  * </p>
  * 
  * @author Alexander D&ouml;rr
@@ -34,8 +36,8 @@ public class EventInProcess {
 
 	private boolean fired;
 	private double priority;
-	private double execTimes;
-	private Double[] values;
+	private LinkedList<Double> execTimes;
+	private LinkedList<Double[]> values;
 
 	/**
 	 * Creates a new EventInProcess with the given boolean value indicating
@@ -45,14 +47,14 @@ public class EventInProcess {
 	 */
 	EventInProcess(boolean fired) {
 		this.fired = fired;
-		this.execTimes = -1;
-		this.values = null;
+		this.execTimes = new LinkedList<Double>();
+		this.values = new LinkedList<Double[]>();
 		this.priority = Double.NEGATIVE_INFINITY;
 
 	}
 
 	/**
-	 * The event has been aborted between trigger und execution. For this class
+	 * The event has been aborted between trigger and execution. For this class
 	 * it has the same effect as the event has been executed.
 	 */
 	public void aborted() {
@@ -69,8 +71,8 @@ public class EventInProcess {
 	 * @param time
 	 */
 	public void addValues(Double[] values, double time) {
-		this.execTimes = time;
-		this.values = values;
+		this.execTimes.add(time);
+		this.values.add(values);
 
 	}
 
@@ -88,8 +90,8 @@ public class EventInProcess {
 	 * some values.
 	 */
 	public void executed() {
-		this.execTimes = -1;
-		this.values = null;
+		this.execTimes.poll();
+		this.values.poll();
 	}
 
 	/**
@@ -117,23 +119,23 @@ public class EventInProcess {
 	public Double getPriority() {
 		return priority;
 	}
-	
+
 	/**
 	 * Return the next time of execution of the associated event.
 	 * 
 	 * @return
 	 */
 	public double getTime() {
-		return execTimes;
+		return execTimes.peek();
 	}
-	
+
 	/**
 	 * Return the values used in the next execution of the associated event.
 	 * 
 	 * @return
 	 */
 	public Double[] getValues() {
-		return values;
+		return values.peek();
 	}
 
 	/**
@@ -144,4 +146,18 @@ public class EventInProcess {
 		fired = false;
 	}
 
+	/**
+	 * Checks if this event has still assignments to perform for the given point
+	 * in time
+	 * 
+	 * @param time
+	 * @return
+	 */
+	public boolean hasMoreAssignments(double time) {
+
+		if (execTimes.isEmpty()) {
+			return false;
+		}
+		return execTimes.peek() >= time;
+	}
 }
