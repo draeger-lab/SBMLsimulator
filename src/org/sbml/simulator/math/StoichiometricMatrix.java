@@ -19,12 +19,13 @@ package org.sbml.simulator.math;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 import eva2.tools.math.Jama.LUDecomposition;
 import eva2.tools.math.Jama.Matrix;
 
 /**
- * This Class represents a m x n stoichimetric matrix
+ * This Class represents a m x n stoichiometric matrix
  * 
  * @author Alexander D&ouml;rr
  * @date 2010-12-23
@@ -44,9 +45,8 @@ public class StoichiometricMatrix extends StabilityMatrix {
 	 */
 	private StabilityMatrix reducedMatrix = null;
 	/**
-	 * A (m - r) x m matrix holding the conservation realtion/moieties of this
+	 * A (m - r) x m matrix holding the conservation relations/moieties of this
 	 * matrix
-	 * 
 	 */
 	private StabilityMatrix conservationRelations = null;
 	/**
@@ -64,6 +64,11 @@ public class StoichiometricMatrix extends StabilityMatrix {
 	 * reduced stoichiometric matrix
 	 */
 	private HashSet<Integer> linearDependent;
+	/**
+	 * A linked list containing the indices of the removed rows in the same
+	 * order as they appear in the rows of the conservation relations
+	 */
+	private LinkedList<Integer> removedRows;
 	/**
 	 * The rank of this matrix
 	 */
@@ -158,12 +163,13 @@ public class StoichiometricMatrix extends StabilityMatrix {
 	 * left null space of N. This is achieved by performing an QR decomposition
 	 * as described in "Conservation analysis of large biochemical networks" by
 	 * Ravishankar Rao Vallabhajosyula and Herbert Sauro. The permutation matrix
-	 * is calculated through LU decomposition
+	 * is calculated through LU decomposition.
 	 * 
 	 */
 	private void reduceModel() {
 		StabilityMatrix stoich;
 		permutations = new HashMap<Integer, Integer>();
+		removedRows = new LinkedList<Integer>();
 
 		if (!(this.getRowDimension() > 0 && this.getColumnDimension() > 0)) {
 			System.out.println("Wrong dimensions");
@@ -203,17 +209,17 @@ public class StoichiometricMatrix extends StabilityMatrix {
 		// System.out.println("R");
 		// System.out.println(R);
 
-		StabilityMatrix Rt = new StabilityMatrix(R.copy().getArray(), R
-				.getRowDimension(), R.getColumnDimension());
+		StabilityMatrix Rt = new StabilityMatrix(R.copy().getArray(),
+				R.getRowDimension(), R.getColumnDimension());
 
 		// dividing each row its diagonal element
 		for (int i = 0; i < Rt.getRowDimension(); i++) {
 			double unity = Rt.get(i, i);
 			if (unity != 0.0) {
 				for (int j = 0; j < Rt.getColumnDimension(); j++) {
-					Rt
-							.set(i, j, (Math.round(Rt.get(i, j) / unity
-									* 10000.)) / 10000.);
+					Rt.set(i,
+							j,
+							(Math.round(Rt.get(i, j) / unity * 10000.)) / 10000.);
 				}
 			}
 		}
@@ -300,8 +306,8 @@ public class StoichiometricMatrix extends StabilityMatrix {
 	 * @return
 	 */
 	private StabilityMatrix augmentN() {
-		StabilityMatrix augmentedN = new StabilityMatrix(this
-				.getColumnDimension(), this.getColumnDimension(), 0);
+		StabilityMatrix augmentedN = new StabilityMatrix(
+				this.getColumnDimension(), this.getColumnDimension(), 0);
 
 		for (int i = 0; i < this.getRowDimension(); i++) {
 			augmentedN.setRow(i, this.getRow(i));
@@ -331,6 +337,7 @@ public class StoichiometricMatrix extends StabilityMatrix {
 				if (permutationMatrix.get(i, j) == 1.0) {
 					if (j >= rank) {
 						linearDependent.add(i);
+						removedRows.add(i);
 					}
 					permutations.put(j, i);
 					continue;
@@ -354,18 +361,17 @@ public class StoichiometricMatrix extends StabilityMatrix {
 
 	/**
 	 * This method calculates the feasible steady state fluxes of the model with
-	 * this stoichiometrix matrix, referring to Palsson also known as the null
+	 * this stoichiometric matrix, referring to Palsson also known as the null
 	 * space of N. This is achieved by performing an SVD decomposition as
 	 * described in "Systems Biology: Properties of Reconstructed Networks" by
-	 * Bernhard O. Palsson
+	 * Bernhard O. Palsson.
 	 */
 	private void calculateSteadyStateFluxes() {
 		SingularValueDecomposition svd = new SingularValueDecomposition(this);
 		int rank = svd.rank();
 
-		steadyStateFluxes = new StabilityMatrix(this.getColumnDimension(), this
-				.getColumnDimension()
-				- rank);
+		steadyStateFluxes = new StabilityMatrix(this.getColumnDimension(),
+				this.getColumnDimension() - rank);
 		Matrix V = svd.getV();
 
 		for (int i = 0; i < this.getColumnDimension() - rank; i++) {
@@ -378,7 +384,7 @@ public class StoichiometricMatrix extends StabilityMatrix {
 
 	/**
 	 * This method changes values that are as good as zero to zero due to
-	 * numerical inaccuracy
+	 * numerical inaccuracy.
 	 * 
 	 * @param matrix
 	 * @return
@@ -411,18 +417,20 @@ public class StoichiometricMatrix extends StabilityMatrix {
 	}
 
 	/**
-	 * This method returns a HashSet of integer values corresponding to the rows
-	 * of this matrix, that are removed when building the reduced stoichiometrix
-	 * matrix. Please note that the indeces correspond to the array notation,
-	 * where e.g. 0 stands for the first row in the matrix.
+	 * This method returns a linked list of integer values corresponding to the
+	 * rows of this matrix, that are removed when building the reduced
+	 * stoichiometric matrix. Please note that the indices correspond to the
+	 * array notation, where e.g. 0 stands for the first row in the matrix.
+	 * Their sequence corresponds the order of the appearance in the
+	 * conservation relations.
 	 * 
 	 * @return
 	 */
-	public HashSet<Integer> getLinearDependent() {
-		if (linearDependent == null) {
+	public LinkedList<Integer> getLinearDependent() {
+		if (removedRows == null) {
 			reduceModel();
 		}
-		return linearDependent;
+		return removedRows;
 	}
 
 }
