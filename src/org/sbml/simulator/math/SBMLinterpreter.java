@@ -523,6 +523,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 					if (!ev.getTrigger().getMath().compile(nodeInterpreter)
 							.toBoolean()) {
 						runningEvents.remove(i);
+						events[index].aborted();
 						i--;
 					} else {
 						if (ev.getPriority() != null) {
@@ -1192,8 +1193,9 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 			// execute the events chosen for execution
 			while (events.size() > 0) {
 				index = events.get(0);
-				// println(index);
-				event = model.getEvent(index);
+				event = model.getEvent(index);				
+				while (this.events[index].hasMoreAssignments(currentTime)){
+					
 				// event does not use values from trigger time
 				if (!event.getUseValuesFromTriggerTime()) {
 					for (int j = 0; j < event.getNumEventAssignments(); j++) {
@@ -1215,8 +1217,10 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 							symbolIndex = symbolHash.get(variable.getId());
 							newVal = processAssignmentVaribale(
 									variable.getId(), assignment_math);
+							this.Y[symbolIndex] = newVal;
 							assignments.add(new DESAssignment(currentTime,
 									symbolIndex, newVal));
+						
 						}
 
 					}
@@ -1240,12 +1244,14 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 							}
 						} else {
 							symbolIndex = symbolHash.get(variable.getId());
+							this.Y[symbolIndex] = newVal;
 							assignments.add(new DESAssignment(currentTime,
 									symbolIndex, newVal));
 						}
 					}
 				}
 				this.events[index].executed();
+			}
 				events.remove(0);
 			}
 
