@@ -17,8 +17,6 @@
  */
 package org.sbml.simulator.math;
 
-import java.util.LinkedList;
-
 /**
  * <p>
  * This class represents a compilation of all information calculated during
@@ -33,10 +31,7 @@ import java.util.LinkedList;
  * @since 1.0
  */
 public class EventInProcessWithDelay extends EventInProcess {
-
-	private LinkedList<Double> execTimes;
-	private LinkedList<Double[]> values;
-
+	
 	/**
 	 * Creates a new EventInProcessWithDelay with the given boolean value
 	 * indicating whether or not it can fire at time point 0d.
@@ -81,16 +76,9 @@ public class EventInProcessWithDelay extends EventInProcess {
 	@Override
 	public void executed() {
 		values.poll();
-	}
-
-	/**
-	 * Call when the delay has elapsed, so the earliest execution time is
-	 * removed from the list
-	 */
-	public void runEvent() {
 		execTimes.poll();
 	}
-
+	
 	/**
 	 * Due to the fact that events with delay can trigger multiple times before
 	 * execution, the time of execution and the corresponding values have to be
@@ -109,7 +97,7 @@ public class EventInProcessWithDelay extends EventInProcess {
 				return i;
 			}
 		}
-
+		
 		return execTimes.size();
 
 	}

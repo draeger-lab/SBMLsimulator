@@ -571,7 +571,6 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 						events[index].changePriority(priority);
 					}
 					runningEvents.add(index);
-					((EventInProcessWithDelay) events[index]).runEvent();
 					delayedEvents.remove(i);
 					i--;
 
@@ -1228,7 +1227,7 @@ public class SBMLinterpreter implements ValueHolder, EventDESystem,
 					// event uses values from trigger time -> get stored values
 					// from the HashMap
 					Double[] triggerTimeValues = this.events[index].getValues();
-
+										
 					for (int j = 0; j < event.getNumEventAssignments(); j++) {
 						assignment_math = event.getEventAssignment(j).getMath();
 						variable = event.getEventAssignment(j)

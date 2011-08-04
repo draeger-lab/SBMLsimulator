@@ -36,8 +36,8 @@ public class EventInProcess {
 
 	private boolean fired;
 	private double priority;
-	private LinkedList<Double> execTimes;
-	private LinkedList<Double[]> values;
+	protected LinkedList<Double> execTimes;
+	protected LinkedList<Double[]> values;
 
 	/**
 	 * Creates a new EventInProcess with the given boolean value indicating
@@ -154,10 +154,12 @@ public class EventInProcess {
 	 * @return
 	 */
 	public boolean hasMoreAssignments(double time) {
-
+		
 		if (execTimes.isEmpty()) {
+			
 			return false;
 		}
-		return execTimes.peek() >= time;
+		
+		return execTimes.peek() <= time;
 	}
 }
