@@ -565,9 +565,8 @@ public abstract class AbstractDESSolver implements DESSolver, EventHandler {
 			h = stepSize;			
 
 			//h = h / 10;
-			
-			//inBetweenSteps(timePoints[i - 1],	timePoints[i], h)
-			for (int j = 0; j < 10; j++) {
+
+			for (int j = 0; j <= inBetweenSteps(timePoints[i - 1],	timePoints[i], h); j++) {
 				t = computeNextState(DES, t, h, yTemp, change, yTemp, true);
 			}
 			
