@@ -42,7 +42,7 @@ public class SBMLFileExtension{
     for(Species s: doc.getModel().getListOfSpecies()) {
       speciesInModel.add(s);
     }
-    
+    //TODO SBOTerms of reactions
     int counter=0;
     for(Species s: speciesInModel) {
       if(s.getName().contains("(gene)")) {
