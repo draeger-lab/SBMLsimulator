@@ -11,14 +11,17 @@ import javax.xml.stream.XMLStreamException;
 import org.sbml.jsbml.AbstractSBase;
 import org.sbml.jsbml.Annotation;
 import org.sbml.jsbml.CVTerm;
+import org.sbml.jsbml.CVTerm.Qualifier;
 import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.Model;
+import org.sbml.jsbml.ModifierSpeciesReference;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.SBMLReader;
 import org.sbml.jsbml.SBMLWriter;
 import org.sbml.jsbml.Species;
+import org.sbml.jsbml.SpeciesReference;
 
 public class ModelMerging {
   
@@ -68,14 +71,15 @@ public class ModelMerging {
         
         for (CVTerm current : cvTerms) {
           c.addCVTerm(current);
-          
-          for (String s : current.getResources()) {
-            List<AbstractSBase> list = compartmentAnnotationMap.get(s);
-            if (list == null) {
-              list = new LinkedList<AbstractSBase>();
+          if (current.getBiologicalQualifierType().equals(Qualifier.BQB_IS)) {
+            for (String s : current.getResources()) {
+              List<AbstractSBase> list = compartmentAnnotationMap.get(s);
+              if (list == null) {
+                list = new LinkedList<AbstractSBase>();
+              }
+              list.add(c);
+              compartmentAnnotationMap.put(s, list);
             }
-            list.add(c);
-            compartmentAnnotationMap.put(s, list);
           }
         }
         
@@ -98,13 +102,16 @@ public class ModelMerging {
         
         for (CVTerm current : cvTerms) {
           sp.addCVTerm(current);
-          for (String s : current.getResources()) {
-            List<AbstractSBase> list = speciesAnnotationMap.get(s);
-            if (list == null) {
-              list = new LinkedList<AbstractSBase>();
+          if (current.getBiologicalQualifierType().equals(Qualifier.BQB_IS)) {
+            
+            for (String s : current.getResources()) {
+              List<AbstractSBase> list = speciesAnnotationMap.get(s);
+              if (list == null) {
+                list = new LinkedList<AbstractSBase>();
+              }
+              list.add(sp);
+              speciesAnnotationMap.put(s, list);
             }
-            list.add(sp);
-            speciesAnnotationMap.put(s, list);
           }
         }
         
@@ -127,13 +134,16 @@ public class ModelMerging {
         
         for (CVTerm current : cvTerms) {
           r.addCVTerm(current);
-          for (String s : current.getResources()) {
-            List<AbstractSBase> list = reactionAnnotationMap.get(s);
-            if (list == null) {
-              list = new LinkedList<AbstractSBase>();
+          if (current.getBiologicalQualifierType().equals(Qualifier.BQB_IS)) {
+            
+            for (String s : current.getResources()) {
+              List<AbstractSBase> list = reactionAnnotationMap.get(s);
+              if (list == null) {
+                list = new LinkedList<AbstractSBase>();
+              }
+              list.add(r);
+              reactionAnnotationMap.put(s, list);
             }
-            list.add(r);
-            reactionAnnotationMap.put(s, list);
           }
         }
       }
@@ -183,21 +193,20 @@ public class ModelMerging {
         && (abstractSBase2 instanceof Species)) {
       Species s1 = (Species) abstractSBase;
       Species s2 = (Species) abstractSBase2;
-      for (int i = 0; i != doc.getModel().getNumReactions(); i++) {
-        Reaction r = doc.getModel().getReaction(i);
-        for (int j = 0; j != r.getNumProducts(); j++) {
-          if (r.getProduct(j).getSpeciesInstance() == s2) {
-            r.getProduct(j).setSpecies(s1);
+      for (Reaction r : doc.getModel().getListOfReactions()) {
+        for (SpeciesReference sr : r.getListOfProducts()) {
+          if (sr.getSpeciesInstance() == s2) {
+            sr.setSpecies(s1);
           }
         }
-        for (int j = 0; j != r.getNumReactants(); j++) {
-          if (r.getReactant(j).getSpeciesInstance() == s2) {
-            r.getReactant(j).setSpecies(s1);
+        for (SpeciesReference sr : r.getListOfReactants()) {
+          if (sr.getSpeciesInstance() == s2) {
+            sr.setSpecies(s1);
           }
         }
-        for (int j = 0; j != r.getNumModifiers(); j++) {
-          if (r.getModifier(j).getSpeciesInstance() == s2) {
-            r.getModifier(j).setSpecies(s1);
+        for (ModifierSpeciesReference sr : r.getListOfModifiers()) {
+          if (sr.getSpeciesInstance() == s2) {
+            sr.setSpecies(s1);
           }
         }
       }
@@ -207,14 +216,12 @@ public class ModelMerging {
       Compartment c1 = (Compartment) abstractSBase;
       Compartment c2 = (Compartment) abstractSBase2;
       
-      for (int i = 0; i != doc.getModel().getNumSpecies(); i++) {
-        Species s = doc.getModel().getSpecies(i);
+      for (Species s : doc.getModel().getListOfSpecies()) {
         if (s.getCompartmentInstance() == c2) {
           s.setCompartment(c1);
         }
       }
-      for (int i = 0; i != doc.getModel().getNumReactions(); i++) {
-        Reaction r = doc.getModel().getReaction(i);
+      for (Reaction r : doc.getModel().getListOfReactions()) {
         if (r.getCompartmentInstance() != null
             && r.getCompartmentInstance() == c2) {
           r.setCompartment(c1);
