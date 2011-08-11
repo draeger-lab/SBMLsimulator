@@ -109,7 +109,12 @@ public class RosenbrockSolver extends AbstractDESSolver {
 
 	/** Keep track whether the thread is killed or not */
 	boolean stop;
-
+	
+	/**
+	 * 
+	 * @param size
+	 * @param stepsize
+	 */
 	/**
    * 
    */

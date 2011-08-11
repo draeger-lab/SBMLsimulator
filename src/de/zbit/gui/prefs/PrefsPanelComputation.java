@@ -20,7 +20,6 @@ package de.zbit.gui.prefs;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
-import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -29,8 +28,6 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeListener;
 
 import org.sbml.jsbml.util.StringTools;
-import org.sbml.simulator.SBMLsimulator;
-import org.sbml.simulator.gui.GUITools;
 import org.sbml.simulator.math.QualityMeasure;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.math.odes.SimulationOptions;
