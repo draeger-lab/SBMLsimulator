@@ -110,6 +110,12 @@ public class RosenbrockSolver extends AbstractDESSolver {
 	/** Keep track whether the thread is killed or not */
 	boolean stop;
 
+	/**
+   * 
+   */
+  public RosenbrockSolver() {
+      super();
+  }
 	public RosenbrockSolver(int size, double stepsize) {
 		super();
 
