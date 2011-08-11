@@ -26,7 +26,7 @@ import de.zbit.util.InfoManagement;
 import de.zbit.util.ProgressBar;
 
 /**
- * 
+ * @author Roland Keller
  * @author Clemens Wrzodek
  * @version $Rev$
  * @since 1.0

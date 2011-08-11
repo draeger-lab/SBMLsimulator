@@ -340,6 +340,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 				Class<AbstractDESSolver> c = solFun[i];
 				solver = c.getConstructor().newInstance();
 				solvers.addItem(solver.getName());
+				// TODO: Add listeners to solver.
 				if (c.getName().substring(c.getName().lastIndexOf('.') + 1)
 						.equals(name)) {
 					solvers.setSelectedIndex(i);
