@@ -11,7 +11,7 @@ public class RosenbrockSolver extends AbstractDESSolver {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private boolean includeIntermediates;
+	//private boolean includeIntermediates;
 
 	/**
 	 * Constants used to adapt the stepsize according to the error in the last
@@ -170,18 +170,11 @@ public class RosenbrockSolver extends AbstractDESSolver {
 		I = new double[numEqn][numEqn];
   }
 	
-  @Override
+	@Override
 	public AbstractDESSolver clone() {
-		return null;
+		return new RosenbrockSolver(numEqn,this.getStepSize());
 	}
-
-	/**
-	 * 
-	 * @param DES
-	 * @param initialValues
-	 * @param timePoints
-	 * @return
-	 */
+/*
 	private MultiBlockTable initResultMatrix(DESystem DES,
 			double[] initialValues, double[] timePoints) {
 		double result[][] = new double[timePoints.length][initialValues.length];
@@ -197,7 +190,6 @@ public class RosenbrockSolver extends AbstractDESSolver {
 		return data;
 	}
 
-	/*
 	public MultiBlockTable solve(DESystem DES, double[] initialValues,double timeBegin,
 			double timeEnd) throws IntegrationException {
 		if(y==null) {
@@ -553,7 +545,7 @@ public class RosenbrockSolver extends AbstractDESSolver {
             solutionIndex++;
             timePoints[solutionIndex] = t;
             System.arraycopy(y, 0, change, 0, y.length);
-            change=Mathematics.vvSub(change,y2);
+            Mathematics.vvSub(change, y2, change);
           }
         }
 
