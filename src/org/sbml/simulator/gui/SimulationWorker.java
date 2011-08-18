@@ -18,6 +18,8 @@
 package org.sbml.simulator.gui;
 
 import java.awt.Component;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
@@ -34,12 +36,69 @@ import org.sbml.simulator.math.odes.MultiBlockTable;
 
 /**
  * @author Andreas Dr&auml;ger
+ * @author Philip Stevens
+ * @author Max Zwießele
  * @date 2010-09-17
  * @version $Rev$
  * @since 1.0
  */
-public class SimulationWorker extends SwingWorker<MultiBlockTable, Object> {
+public class SimulationWorker extends SwingWorker<Void, Void> implements PropertyChangeListener{
 
+	/**
+	 * Pointer to experimental data
+	 */
+	private MultiBlockTable data;
+	/**
+	 * The currently used distance function.
+	 */
+	private QualityMeasure distance;
+	/**
+	 * 
+	 */
+	private boolean includeReactions;
+
+	/**
+	 * Pointer to a {@link Model} that is to be simulated.
+	 */
+	private Model model;
+
+	/**
+	 * 
+	 */
+	private Component parent;
+
+	/**
+	 * The integrator for the simulation
+	 */
+	private DESSolver solver;
+
+	private double stepSize;
+	private double timeEnd;
+	private double timeStart;
+	private SimulationPanel simulationPanel;
+
+	/**
+	 * constructor
+	 * @param solver2
+	 * @param model2
+	 * @param t1val
+	 * @param t2val
+	 * @param stepSize
+	 * @param includeReactions2
+	 * @param simulationPanel
+	 */
+	public SimulationWorker(DESSolver solver, Model model, double t1val,
+			double t2val, double stepSize, boolean includeReactions,
+			SimulationPanel simulationPanel) {
+		this.solver =  solver;
+		this.model = model;
+		this.timeStart = t1val;
+		this.timeEnd = t2val;
+		this.stepSize = stepSize;
+		this.includeReactions = includeReactions;
+		this.simulationPanel = simulationPanel;
+	}
+	
 	/**
 	 * 
 	 * @param model
@@ -84,54 +143,28 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object> {
 	 * @throws SBMLException
 	 * @throws IntegrationException
 	 */
-	public static MultiBlockTable solveByStepSize(DESSolver solver,
-			Model model, double t1, double t2, double stepSize,
-			boolean includeReactions, Component parent)
+	public MultiBlockTable solveByStepSize()
 			throws ModelOverdeterminedException, SBMLException,
 			IntegrationException {
+		
 		SBMLinterpreter interpreter = new SBMLinterpreter(model);
+		solver.addPropertyChangeListener(this);
 		solver.setStepSize(stepSize);
 		if (solver instanceof AbstractDESSolver) {
 			((AbstractDESSolver) solver)
 					.setIncludeIntermediates(includeReactions);
 		}
 		MultiBlockTable solution = solver.solve(interpreter, interpreter
-				.getInitialValues(), t1, t2);
+				.getInitialValues(), timeStart, timeEnd);
 		if (solver.isUnstable()) {
 			JOptionPane.showMessageDialog(parent, "Unstable!",
 					"Simulation not possible", JOptionPane.WARNING_MESSAGE);
 		}
+		solver.removePropertyChangeListener(this);
 		return solution;
 	}
 
-	/**
-	 * Pointer to experimental data
-	 */
-	private MultiBlockTable data;
-	/**
-	 * The currently used distance function.
-	 */
-	private QualityMeasure distance;
-	/**
-	 * 
-	 */
-	private boolean includeReactions;
-
-	/**
-	 * Pointer to a {@link Model} that is to be simulated.
-	 */
-	private Model model;
-
-	/**
-	 * 
-	 */
-	private Component parent;
-
-	/**
-	 * The integrator for the simulation
-	 */
-	private DESSolver solver;
-
+	
 	/**
 	 * 
 	 * @param model
@@ -142,6 +175,7 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object> {
 		}
 		this.model = model;
 	}
+
 
 	/**
 	 * 
@@ -170,8 +204,8 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object> {
 	 * @see javax.swing.SwingWorker#doInBackground()
 	 */
 	@Override
-	protected MultiBlockTable doInBackground() throws Exception {
-		// TODO Auto-generated method stub
+	protected Void doInBackground() throws Exception {
+		data = solveByStepSize();
 		return null;
 	}
 
@@ -182,7 +216,7 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object> {
 	 */
 	@Override
 	protected void done() {
-		// TODO
+		firePropertyChange("done", 0, data);
 	}
 
 	/**
@@ -298,6 +332,14 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, Object> {
 	 */
 	public boolean isSetSolver() {
 	    return solver != null;
+	}
+	
+  /*
+   * (non-Javadoc)
+   * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+   */
+	public void propertyChange(PropertyChangeEvent evt) {
+		getPropertyChangeSupport().firePropertyChange(evt);
 	}
 
 }
