@@ -81,7 +81,6 @@ public class EulerMethod extends AbstractDESSolver {
 	 * eva2.tools.math.des.AbstractDESSolver#computeChange(eva2.tools.math.des
 	 * .DESystem, double[], double, double, double[])
 	 */
-	@Override
 	public double[] computeChange(DESystem DES, double[] yPrev, double t,
 			double stepSize, double[] change) throws IntegrationException {
 		DES.getValue(t, yPrev, change);
@@ -93,7 +92,6 @@ public class EulerMethod extends AbstractDESSolver {
 	 * (non-Javadoc)
 	 * @see org.sbml.simulator.math.odes.AbstractDESSolver#clone()
 	 */
-	@Override
 	public EulerMethod clone() {
 		return new EulerMethod(this);
 	}
