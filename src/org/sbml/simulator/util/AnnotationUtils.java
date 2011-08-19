@@ -39,6 +39,7 @@ import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.SBMLReader;
 import org.sbml.jsbml.SBMLWriter;
 import org.sbml.jsbml.Species;
+import org.sbml.jsbml.CVTerm.Qualifier;
 
 import de.zbit.kegg.KeggInfoManagement;
 import de.zbit.util.InfoManagement;
@@ -56,7 +57,8 @@ import de.zbit.util.ProgressBar;
 public class AnnotationUtils {
   
   public static void addAnnotations(String inputFile, String outputFile,
-    String annotationFile, int col, int altCol) throws XMLStreamException, SBMLException, IOException {
+    String annotationFile, int col, int altCol) throws XMLStreamException,
+    SBMLException, IOException {
     
     SBMLDocument doc = (new SBMLReader()).readSBML(inputFile);
     
@@ -111,7 +113,8 @@ public class AnnotationUtils {
     KeggInfoManagement manager = loadInfoManager();
     
     Object[] elements = new Object[doc.getModel().getNumSpecies()
-        + doc.getModel().getNumReactions()+doc.getModel().getNumCompartments()];
+        + doc.getModel().getNumReactions()
+        + doc.getModel().getNumCompartments()];
     System.arraycopy(doc.getModel().getListOfSpecies().toArray(), 0, elements,
       0, doc.getModel().getNumSpecies());
     System.arraycopy(doc.getModel().getListOfReactions().toArray(), 0,
@@ -155,15 +158,49 @@ public class AnnotationUtils {
       
       for (String annotation : annotations) {
         if (element instanceof Species) {
-          annotateSpecies((Species)element,annotation,manager);
+          annotateSpecies((Species) element, annotation, manager);
         } else if (element instanceof Reaction) {
+          Reaction r = (Reaction) element;
+          
+          //identify transport reactions
+          if ((r.getNumProducts() == 1) && (r.getNumReactants() == 1)) {
+            Species product = r.getProduct(0).getSpeciesInstance();
+            Species reactant = r.getReactant(0).getSpeciesInstance();
+            Set<String> resources = new HashSet<String>();
+            if (product.getSBOTerm() == reactant.getSBOTerm()) {
+              boolean isTransport = false;
+              for (CVTerm current : reactant.getCVTerms()) {
+                if (current.getBiologicalQualifierType().equals(
+                  Qualifier.BQB_IS)) {
+                  for (String s : current.getResources()) {
+                    resources.add(s);
+                  }
+                }
+              }
+              for (CVTerm current : product.getCVTerms()) {
+                if (current.getBiologicalQualifierType().equals(
+                  Qualifier.BQB_IS)) {
+                  for (String s : current.getResources()) {
+                    if (resources.contains(s)) {
+                      isTransport = true;
+                      break;
+                    }
+                  }
+                }
+              }
+              
+              if (isTransport) {
+                r.setSBOTerm(185);
+              }
+            }
+          }
           if (annotation.startsWith("R")) {
             element
                 .addCVTerm(new CVTerm(CVTerm.Type.BIOLOGICAL_QUALIFIER,
                   CVTerm.Qualifier.BQB_IS, "urn:miriam:kegg.reaction:"
                       + annotation));
           } else if (annotation.startsWith("EC")) {
-            for(String ann:annotation.split(" ")) {
+            for (String ann : annotation.split(" ")) {
               element.addCVTerm(new CVTerm(CVTerm.Type.BIOLOGICAL_QUALIFIER,
                 CVTerm.Qualifier.BQB_IS, "urn:miriam:ec-code:" + ann));
             }
@@ -204,12 +241,12 @@ public class AnnotationUtils {
    * @param modifierFile
    * @param annotationModifiers
    * @throws XMLStreamException
-   * @throws SBMLException 
-   * @throws IOException 
+   * @throws SBMLException
+   * @throws IOException
    */
   public static void addModifiers(String inputFile, String outputFile,
-    String modifierFile, String annotationModifiers)
-    throws XMLStreamException, SBMLException, IOException {
+    String modifierFile, String annotationModifiers) throws XMLStreamException,
+    SBMLException, IOException {
     //read species for catalyzed reactions
     SBMLDocument doc = (new SBMLReader()).readSBML(inputFile);
     
@@ -298,7 +335,7 @@ public class AnnotationUtils {
                 //TODO SBOTerms
                 if (annotationMap.get(modifierID) != null) {
                   for (String a : annotationMap.get(modifierID)) {
-                    annotateSpecies(modifier,a,loadInfoManager());
+                    annotateSpecies(modifier, a, loadInfoManager());
                   }
                 }
               }
@@ -335,7 +372,8 @@ public class AnnotationUtils {
     return manager;
   }
   
-  public static void main(String[] args) throws XMLStreamException, SBMLException, IOException {
+  public static void main(String[] args) throws XMLStreamException,
+    SBMLException, IOException {
     String file1 = "files/CAR_PXR_2_4.xml";
     String file2 = "files/HepatoNet1.xml";
     String file3 = "files/CAR_PXR_annotated.xml";

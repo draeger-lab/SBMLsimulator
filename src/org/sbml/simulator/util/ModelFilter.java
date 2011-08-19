@@ -111,6 +111,8 @@ public class ModelFilter {
     determineReactionsAndSpeciesToAdd(speciesToAdd, reactionsToAdd,
       setOfAllSpecies, speciesToReaction, reactionToSpecies, strict, merge);
     
+    addImportantTransportReactions(speciesToAdd, reactionsToAdd,
+      reactionToSpecies);
     //add species and their compartments
     SBMLDocument newDoc = createFilteredSBMLDocument(speciesToAdd,
       reactionsToAdd, doc);
@@ -125,13 +127,59 @@ public class ModelFilter {
         + newDoc.getModel().getNumReactions());
   }
   
+  private static void addImportantTransportReactions(Set<Species> speciesToAdd,
+    Set<Reaction> reactionsToAdd, Map<Reaction, Set<Species>> reactionToSpecies) {
+    Set<Reaction> transportReactions = new HashSet<Reaction>();
+    Set<Reaction> transportReactionsToAdd = new HashSet<Reaction>();
+    for (Reaction r : reactionToSpecies.keySet()) {
+      if (r.getSBOTerm() == 185) {
+        transportReactions.add(r);
+      }
+    }
+    boolean reactionAdded = false;
+    while (reactionAdded) {
+      transportReactionsToAdd.clear();
+      for (Reaction r : transportReactions) {
+        boolean reactantsContained = true;
+        boolean productsContained = true;
+        
+        for (SpeciesReference sr : r.getListOfReactants()) {
+          String id = sr.getSpecies();
+          if (!speciesToAdd.contains(id)) {
+            reactantsContained = false;
+            break;
+          }
+        }
+        
+        for (SpeciesReference sr : r.getListOfProducts()) {
+          String id = sr.getSpecies();
+          if (!speciesToAdd.contains(id)) {
+            productsContained = false;
+            break;
+          }
+        }
+        if (reactantsContained || productsContained) {
+          reactionAdded = true;
+          transportReactionsToAdd.add(r);
+          speciesToAdd.addAll(reactionToSpecies.get(r));
+        }
+      }
+      if(reactionAdded) {
+        reactionsToAdd.addAll(transportReactionsToAdd);
+      }
+    }
+  }
+  
   private static void determineReactionsAndSpeciesToAdd(
     Set<Species> speciesToAdd, Set<Reaction> reactionsToAdd,
     Set<String> speciesSet, Map<Species, Set<Reaction>> speciesToReaction,
     Map<Reaction, Set<Species>> reactionToSpecies, boolean strict, boolean merge) {
     for (Reaction r : reactionToSpecies.keySet()) {
-      addInterestingReactions(r, speciesSet, reactionsToAdd, strict, merge,
-        speciesToReaction);
+      
+      if (r.getSBOTerm() != 185) {
+        addInterestingReactions(r, speciesSet, reactionsToAdd, strict, merge,
+          speciesToReaction);
+      }
     }
     for (Reaction r : reactionsToAdd) {
       speciesToAdd.addAll(reactionToSpecies.get(r));
@@ -188,6 +236,9 @@ public class ModelFilter {
     for (SpeciesReference sr : r.getListOfReactants()) {
       String id = sr.getSpecies();
       if (!speciesSet.contains(id)) {
+        if(r.getId().equals("r0112")) {
+        System.out.println(id);
+        }
         reactantsContained = false;
         break;
       }
@@ -196,6 +247,9 @@ public class ModelFilter {
     for (SpeciesReference sr : r.getListOfProducts()) {
       String id = sr.getSpecies();
       if (!speciesSet.contains(id)) {
+        if(r.getId().equals("r0112")) {
+          System.out.println(id);
+          }
         productsContained = false;
         break;
       }
@@ -235,26 +289,28 @@ public class ModelFilter {
     }
     
     for (Reaction r2 : commonInterestingReactions) {
-      List<SpeciesReference> list = new LinkedList<SpeciesReference>();
-      list.addAll(r2.getListOfReactants());
-      list.removeAll(r.getListOfProducts());
-      if (list.size() == 0) {
-        Reaction newReaction = combineReactions(r, r2);
-        
-        boolean addReaction = false;
-        if (newReaction != null) {
-          if (strict) {
-            addReaction = reactionInterestingStrict(newReaction, speciesSet);
-          } else {
-            addReaction = reactionInteresting(newReaction, speciesSet);
+      if (r2.getSBOTerm() != 185) {
+        List<SpeciesReference> list = new LinkedList<SpeciesReference>();
+        list.addAll(r2.getListOfReactants());
+        list.removeAll(r.getListOfProducts());
+        if (list.size() == 0) {
+          Reaction newReaction = combineReactions(r, r2);
+          
+          boolean addReaction = false;
+          if (newReaction != null) {
+            if (strict) {
+              addReaction = reactionInterestingStrict(newReaction, speciesSet);
+            } else {
+              addReaction = reactionInteresting(newReaction, speciesSet);
+            }
           }
-        }
-        if (addReaction) {
-          if (merge) {
-            reactionsToAdd.add(newReaction);
-          } else {
-            reactionsToAdd.add(r);
-            reactionsToAdd.add(r2);
+          if (addReaction) {
+            if (merge) {
+              reactionsToAdd.add(newReaction);
+            } else {
+              reactionsToAdd.add(r);
+              reactionsToAdd.add(r2);
+            }
           }
         }
       }
@@ -418,7 +474,7 @@ public class ModelFilter {
   public static void main(String[] args) throws XMLStreamException,
     IOException, SBMLException {
     filterModel("files/HepatoNet1_annotated.xml", "files/Hofmann.txt", 1,
-      false, "files/Small_molecules.txt", 1, true, true, false,
+      false, "files/Small_molecules.txt", 1, false, true, true,
       "files/filteredModel.xml");
   }
 }
