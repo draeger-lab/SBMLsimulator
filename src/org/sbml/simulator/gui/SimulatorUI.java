@@ -202,32 +202,12 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		}
 		switch (Command.valueOf(e.getActionCommand())) {
 		case SIMULATION_START:
-			// EventQueue.invokeLater(new Runnable(){
-			// public void run(){
-			// simulate();
-			// }
-			// });
 		  logger.log(Level.INFO, "Starting simulation");
 		  
 			GUITools.setEnabled(false, getJMenuBar(), toolBar,
 					Command.SIMULATION_START);
-//			this.statusBar.reset();
-			new Thread() {
-			  /*
-			   * (non-Javadoc)
-			   * @see java.lang.Thread#run()
-			   */
-			  @Override
-				public void run() {
-					SwingUtilities.invokeLater(new Runnable() {
-						public void run() {
-							simulate();
-						}
-					});
-
-				}
-			}.start();
-
+				// this.statusBar.reset();
+				simulate();
 			break;
 		case OPTIMIZATION:
 			SwingUtilities.invokeLater(new Runnable() {

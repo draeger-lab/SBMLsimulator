@@ -42,7 +42,7 @@ import org.sbml.simulator.math.odes.MultiBlockTable;
  * @version $Rev$
  * @since 1.0
  */
-public class SimulationWorker extends SwingWorker<Void, Void> implements PropertyChangeListener{
+public class SimulationWorker extends SwingWorker<MultiBlockTable, Void> implements PropertyChangeListener{
 
 	/**
 	 * Pointer to experimental data
@@ -75,7 +75,6 @@ public class SimulationWorker extends SwingWorker<Void, Void> implements Propert
 	private double stepSize;
 	private double timeEnd;
 	private double timeStart;
-	private SimulationPanel simulationPanel;
 
 	/**
 	 * constructor
@@ -88,15 +87,13 @@ public class SimulationWorker extends SwingWorker<Void, Void> implements Propert
 	 * @param simulationPanel
 	 */
 	public SimulationWorker(DESSolver solver, Model model, double t1val,
-			double t2val, double stepSize, boolean includeReactions,
-			SimulationPanel simulationPanel) {
+			double t2val, double stepSize, boolean includeReactions) {
 		this.solver =  solver;
 		this.model = model;
 		this.timeStart = t1val;
 		this.timeEnd = t2val;
 		this.stepSize = stepSize;
 		this.includeReactions = includeReactions;
-		this.simulationPanel = simulationPanel;
 	}
 	
 	/**
@@ -204,9 +201,9 @@ public class SimulationWorker extends SwingWorker<Void, Void> implements Propert
 	 * @see javax.swing.SwingWorker#doInBackground()
 	 */
 	@Override
-	protected Void doInBackground() throws Exception {
+	protected MultiBlockTable doInBackground() throws Exception {
 		data = solveByStepSize();
-		return null;
+		return data;
 	}
 
 	/*
