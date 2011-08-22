@@ -19,7 +19,6 @@ package org.sbml.simulator.gui;
 
 import java.awt.Color;
 import java.util.Hashtable;
-import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
 import javax.swing.table.AbstractTableModel;
@@ -201,9 +200,7 @@ public class LegendTableModel extends AbstractTableModel {
 		data[rowIndex][nsbCol] = nsb;
 
 		try {
-			data[rowIndex][unitCol] = StringUtil.toHTML(HTMLFormula.toHTML(nsb
-					.getDerivedUnitDefinition()));
-
+			data[rowIndex][unitCol] = StringUtil.toHTML(HTMLFormula.toHTML(nsb.getDerivedUnitDefinition()));
 		} catch (Exception e) {
 			data[rowIndex][unitCol] = "N/A";
 			// TODO make exception visible for the user

@@ -30,6 +30,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 
 import javax.swing.JCheckBoxMenuItem;
@@ -37,6 +39,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -56,6 +60,7 @@ import org.sbml.simulator.resources.Resource;
 import de.zbit.gui.ActionCommand;
 import de.zbit.gui.BaseFrame;
 import de.zbit.gui.GUIOptions;
+import de.zbit.gui.ProgressBarSwing;
 import de.zbit.gui.prefs.FileHistory;
 import de.zbit.io.SBFileFilter;
 import de.zbit.util.AbstractProgressBar;
@@ -77,6 +82,11 @@ import eva2.client.EvAClient;
 public class SimulatorUI extends BaseFrame implements ActionListener,
 		ItemListener, WindowListener, PropertyChangeListener {
 
+  /**
+   * 
+   */
+  private static final Logger logger = Logger.getLogger(SimulatorUI.class.getName());
+  
 	/**
 	 * Commands that can be understood by this dialog.
 	 * 
@@ -153,7 +163,6 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	public SimulatorUI() {
 		super();
 		loadPreferences();
-		// getContentPane().add(new StatusBar(), BorderLayout.SOUTH);
 		setOptimalSize();
 		GUITools.setEnabled(false, getJMenuBar(), toolBar,
 				Command.SIMULATION_START);
@@ -198,10 +207,17 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 			// simulate();
 			// }
 			// });
+		  logger.log(Level.INFO, "Starting simulation");
+		  
 			GUITools.setEnabled(false, getJMenuBar(), toolBar,
 					Command.SIMULATION_START);
-			this.statusBar.reset();
+//			this.statusBar.reset();
 			new Thread() {
+			  /*
+			   * (non-Javadoc)
+			   * @see java.lang.Thread#run()
+			   */
+			  @Override
 				public void run() {
 					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {
@@ -353,7 +369,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 			} catch (Exception exc) {
 				GUITools.showErrorMessage(this, exc);
 			} finally {
-				setStatusBarToMemoryUsage();
+				//setStatusBarToMemoryUsage();
 			}
 		}
 	}
@@ -411,7 +427,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 			} catch (Exception exc) {
 				GUITools.showErrorMessage(this, exc);
 			} finally {
-				setStatusBarToMemoryUsage();
+//				setStatusBarToMemoryUsage();
 			}
 		}
 		return null;
@@ -792,11 +808,23 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	 * method should be called after all import operations
 	 */
 	private void setStatusBarToMemoryUsage() {
-		AbstractProgressBar memoryBar = this.statusBar.showProgress();
+//		AbstractProgressBar memoryBar = this.statusBar.showProgress();
 		int use = (int) ((1f - ((float) Runtime.getRuntime().freeMemory() / (float) Runtime
 				.getRuntime().totalMemory())) * 100);
-		statusBar.log.info(String.format("Memory usage: %1$3s%%", use));
-		memoryBar.percentageChanged(use, -1, "of memory used");
+//		statusBar.log.info(String.format("Memory usage: %1$3s%%", use));
+//		memoryBar.percentageChanged(use, -1, "of memory used");
+		
+    // Create a smaller panel for the statusBar
+    Dimension panelSize = new Dimension(100, 15);
+    JPanel panel = new JPanel();
+    panel.setOpaque(false);
+    panel.setPreferredSize(panelSize);
+    JProgressBar progress = new JProgressBar(0, 100);
+    progress.setValue(use);
+    progress.setPreferredSize(new Dimension(panelSize.width, panelSize.height));
+    panel.add(progress);
+    
+	  getStatusBar().add(panel, BorderLayout.EAST);
 	}
 
 	/*
@@ -804,16 +832,19 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent evt) {
-		if (evt.getPropertyName() == "progress") {
+		if (evt.getPropertyName().equalsIgnoreCase("progress")) {
 			AbstractProgressBar memoryBar = this.statusBar.showProgress();
-			int process = (int) Math.round((Double) evt.getNewValue());
-			memoryBar.percentageChanged(process, -1, null);
-			statusBar.log.info(String.format("Simulating... %1$3s%%", process));
-		}
-		if (evt.getPropertyName() == "done") {
+      
+			// TODO: Bessere stelle finden
+      ((ProgressBarSwing)memoryBar).getProgressBar().setStringPainted(true);
+      
+			int process = (int) Math.round(((Number) evt.getNewValue()).doubleValue());
+			memoryBar.percentageChanged(process, -1, "computed");
+      //logger.log(Level.INFO, String.format("Simulating... %1$3s%%", process));
+		} else if (evt.getPropertyName().equalsIgnoreCase("done")) {
 			this.statusBar.reset();
-			setStatusBarToMemoryUsage();
-			GUITools.setEnabled(true, getJMenuBar(), toolBar,
+//			setStatusBarToMemoryUsage();
+			GUITools.setEnabled(true, getJMenuBar(), getJToolBar(),
 					BaseAction.FILE_SAVE, Command.SIMULATION_START);
 		}
 	}
