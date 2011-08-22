@@ -592,8 +592,8 @@ public class SimulationPanel extends JPanel implements
 		}
 		if ("done" == evt.getPropertyName()) {
 			MultiBlockTable data = (MultiBlockTable) evt.getNewValue();
-			if (data != null)
-				setSimulationData(data);
+			if (data != null) {
+				setSimulationData(data);}
 			firePropertyChanged(evt);
 		}
 	}
