@@ -565,7 +565,7 @@ public class SimulationPanel extends JPanel implements
 				.getComponent(0);
 		SimulationWorker worker = new SimulationWorker(foot.getSolver(), model,
 				t1val, t2val, stepSize,
-				visualizationPanel.getIncludeReactions(), this);
+				visualizationPanel.getIncludeReactions());
 		worker.addPropertyChangeListener(this);
 		worker.execute();
 
