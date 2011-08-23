@@ -212,7 +212,6 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
         Command.SIMULATION_START);
 				*/
 				// this.statusBar.reset();
-				simulate();
 			break;
 		case OPTIMIZATION:
 			SwingUtilities.invokeLater(new Runnable() {
