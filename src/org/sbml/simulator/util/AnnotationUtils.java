@@ -374,7 +374,7 @@ public class AnnotationUtils {
   
   public static void main(String[] args) throws XMLStreamException,
     SBMLException, IOException {
-    String file1 = "files/CAR_PXR_2_4.xml";
+    /*String file1 = "files/CAR_PXR_2_4.xml";
     String file2 = "files/HepatoNet1.xml";
     String file3 = "files/CAR_PXR_annotated.xml";
     String file4 = "files/HepatoNet1_annotated.xml";
@@ -414,6 +414,74 @@ public class AnnotationUtils {
     
     //compartments
     addAnnotations(file3, file3, annotationFile5, -1, -1);
+    */
+    addSBOTerms("files/Modell_Hofmann.xml","files/Modell_Hofmann.xml","files/Hofmann_SBO.txt",1);
+  }
+  
+  public static void addSBOTerms(String inputFile, String outputFile,
+    String sboFile, int col) throws XMLStreamException,
+    SBMLException, IOException {
+    
+    SBMLDocument doc = (new SBMLReader()).readSBML(inputFile);
+    
+    BufferedReader reader = new BufferedReader(new FileReader(sboFile));
+    
+    //determine columns for annotations
+    int colSBO = 1;
+    if (col > 0) {
+      colSBO = col;
+    }
+    
+    //read annotations
+    Map<String,Integer> sboMap = new HashMap<String, Integer>();
+    
+    try {
+      String line = reader.readLine();
+      while ((line = reader.readLine()) != null) {
+        
+        String[] split = line.split("\t");
+        
+        if (split.length > colSBO) {
+          int sbo = Integer.parseInt(split[colSBO].replace("SBO:", ""));
+          sboMap.put(split[0], sbo);
+        }
+      }
+      reader.close();
+    } catch (IOException e1) {
+      e1.printStackTrace();
+    }
+    
+    Object[] elements = new Object[doc.getModel().getNumSpecies()
+        + doc.getModel().getNumReactions()
+        + doc.getModel().getNumCompartments()];
+    System.arraycopy(doc.getModel().getListOfSpecies().toArray(), 0, elements,
+      0, doc.getModel().getNumSpecies());
+    System.arraycopy(doc.getModel().getListOfReactions().toArray(), 0,
+      elements, doc.getModel().getNumSpecies(), doc.getModel()
+          .getNumReactions());
+    System
+        .arraycopy(doc.getModel().getListOfCompartments().toArray(), 0,
+          elements, doc.getModel().getNumReactions()
+              + doc.getModel().getNumSpecies(), doc.getModel()
+              .getNumCompartments());
+    
+    
+    for (Object el : elements) {
+      AbstractNamedSBase element = (AbstractNamedSBase) el;
+      String symbol = element.getId();
+      
+      Integer sbo=sboMap.get(symbol);
+      
+      if(sbo!=null) {
+        element.setSBOTerm(sbo);
+      }
+      else {
+        System.out.println(symbol);
+      }
+      
+    }
+    SBMLWriter w = new SBMLWriter();
+    w.write(doc, outputFile);
     
   }
 }
