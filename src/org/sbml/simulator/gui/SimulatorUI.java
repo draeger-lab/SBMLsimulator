@@ -206,6 +206,11 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		  
 			GUITools.setEnabled(false, getJMenuBar(), toolBar,
 					Command.SIMULATION_START);
+			// this.statusBar.reset();
+			simulate();
+			/*GUITools.setEnabled(true, getJMenuBar(), toolBar,
+        Command.SIMULATION_START);
+				*/
 				// this.statusBar.reset();
 				simulate();
 			break;
@@ -778,8 +783,8 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		if (simPanel != null) {
 			// TODO Auto-generated method stub
 			// simPanel.savePlotImage();
-			// simPanel.saveSimulationResults();
-			saveModel(simPanel.getModel());
+			simPanel.saveSimulationResults();
+		  saveModel(simPanel.getModel());
 		}
 	}
 
