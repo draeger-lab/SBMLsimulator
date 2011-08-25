@@ -83,8 +83,8 @@ public class SimulationPanel extends JPanel implements
    */
   private JTable expTable, simTable;
   /**
-     * 
-     */
+   * 
+   */
   private JToolBar footPanel;
   /**
    * Array of identifiers of those {@link Quantity}s that are the target of a
@@ -338,8 +338,7 @@ public class SimulationPanel extends JPanel implements
     if (visualizationPanel != null) {
       visualizationPanel.loadPreferences();
     }
-    SimulationToolPanel foot = getOrCreateFootPanel();
-    foot.loadPreferences();
+    getOrCreateFootPanel();    
     removeAll();
     init();
   }
@@ -445,11 +444,8 @@ public class SimulationPanel extends JPanel implements
   public void savePreferences() throws IllegalArgumentException,
     SecurityException, InstantiationException, IllegalAccessException,
     InvocationTargetException, NoSuchMethodException, BackingStoreException {
-    SimulationToolPanel foot = getOrCreateFootPanel();
     SBPreferences prefs = SBPreferences
         .getPreferencesFor(SimulationOptions.class);
-    prefs.put(SimulationOptions.SIM_START_TIME, foot.getSimulationStartTime());
-    prefs.put(SimulationOptions.SIM_END_TIME, foot.getSimulationEndTime());
     prefs.flush();
   }
   
@@ -539,6 +535,9 @@ public class SimulationPanel extends JPanel implements
   public void simulate() throws Exception {
     SimulationToolPanel foot = (SimulationToolPanel) footPanel.getComponent(0);
     foot.processSimulationValues();
+
+    savePreferences();
+    
     simulationManager.simulate();
     
     if (simulationManager.getSimlationConfiguration().getStepSize() != foot
@@ -557,10 +556,10 @@ public class SimulationPanel extends JPanel implements
    * )
    */
   public void propertyChange(PropertyChangeEvent evt) {
-    if ("progress" == evt.getPropertyName()) {
+    if ("progress".equals(evt.getPropertyName())) {
       this.firePropertyChanged(evt);
     }
-    if ("done" == evt.getPropertyName()) {
+    if ("done".equals(evt.getPropertyName())) {
       MultiBlockTable data = (MultiBlockTable) evt.getNewValue();
       if (data != null) {
         setSimulationData(data);

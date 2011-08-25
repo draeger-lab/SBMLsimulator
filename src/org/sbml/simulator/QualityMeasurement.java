@@ -21,8 +21,13 @@ import java.beans.PropertyChangeListener;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.sbml.simulator.math.NMetric;
 import org.sbml.simulator.math.QualityMeasure;
+import org.sbml.simulator.math.RelativeNMetric;
 import org.sbml.simulator.math.odes.MultiBlockTable;
+import org.sbml.simulator.math.odes.SimulationOptions;
+
+import de.zbit.util.prefs.SBPreferences;
 
 /**
  * This class represents a quality measurement for the current simulation,
@@ -55,10 +60,22 @@ public class QualityMeasurement implements PropertyChangeListener {
    */
   public void propertyChange(PropertyChangeEvent evt) {
     String property = evt.getPropertyName();
+    SBPreferences prefs = SBPreferences
+        .getPreferencesFor(SimulationOptions.class);
     
-    if (property == "distance") {
-      this.distance = (QualityMeasure) evt.getNewValue();
-    } else if (property == "measurements") {
+    if ("distance".equals(property)) {
+      distance = (QualityMeasure) evt.getNewValue();
+      if (distance instanceof NMetric) {
+        ((NMetric) distance).setRoot(prefs
+            .getDouble(SimulationOptions.SIM_QUALITY_N_METRIC_ROOT));
+      } else if (distance instanceof RelativeNMetric) {
+        ((RelativeNMetric) distance).setRoot(prefs
+            .getDouble(SimulationOptions.SIM_QUALITY_N_METRIC_ROOT));
+      }
+      prefs.put(SimulationOptions.SIM_QUALITY_FUNCTION, distance.getClass()
+          .getName());
+      
+    } else if ("measurements".equals(property)) {
       if (evt.getNewValue() == null) {
         measurements.remove(evt.getOldValue());
       } else {
@@ -67,6 +84,7 @@ public class QualityMeasurement implements PropertyChangeListener {
         }
       }
     }
+    
   }
   
   /**

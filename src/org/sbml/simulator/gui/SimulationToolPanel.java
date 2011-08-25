@@ -22,7 +22,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -51,14 +50,11 @@ import org.sbml.simulator.math.NMetric;
 import org.sbml.simulator.math.QualityMeasure;
 import org.sbml.simulator.math.RelativeNMetric;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
-import org.sbml.simulator.math.odes.DESSolver;
 import org.sbml.simulator.math.odes.IntegrationException;
-import org.sbml.simulator.math.odes.MultiBlockTable;
 import org.sbml.simulator.math.odes.SimulationOptions;
 
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;
-import de.zbit.util.StringUtil;
 import de.zbit.util.ValuePair;
 import de.zbit.util.prefs.SBPreferences;
 
@@ -132,7 +128,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
   /**
    * The index of the class name of the solver to be used
    */
-  private JComboBox solvers;
+  private JComboBox solverComboBox;
   /**
    * Simulation start time
    */
@@ -158,7 +154,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 * 
 	 */
   private JSpinner startTime;
-
+  
   /**
 	 * 
 	 */
@@ -196,7 +192,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
     double integrationStepSize = spinnerStepSize;
     SBPreferences prefs = SBPreferences
         .getPreferencesFor(SimulationOptions.class);
-    solvers = createSolversComboOrSetSelectedItem(prefs.get(
+    solverComboBox = createSolversComboOrSetSelectedItem(prefs.get(
       SimulationOptions.SIM_ODE_SOLVER).toString());
     showGrid = GUITools.createJCheckBox(PlotOptions.SHOW_PLOT_GRID.getName(),
       false, PlotOptions.SHOW_PLOT_GRID, PlotOptions.SHOW_PLOT_GRID
@@ -235,7 +231,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
     settings.add("Steps:", new JSpinner(stepsModel), 4, 0, 1, 0);
     settings.add(new JPanel());
     settings.add("End time: ", endTime, 0, 2, 1, 0);
-    settings.add("ODE Solver:", solvers, 4, 2, 1, 0);
+    settings.add("ODE Solver:", solverComboBox, 4, 2, 1, 0);
     settings.add(new JPanel());
     sPanel.setBorder(BorderFactory.createTitledBorder(" Integration "));
     
@@ -244,25 +240,13 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
     Class<QualityMeasure>[] distFunctions = SBMLsimulator
         .getAvailableQualityMeasures();
     String quality[] = new String[distFunctions.length];
-    int qualityFunction = 0;
     for (int i = 0; i < distFunctions.length; i++) {
       QualityMeasure dist = distFunctions[i].getConstructor().newInstance();
       quality[i] = dist.getName();
-      if (i == qualityFunction) {
-        if (dist instanceof NMetric) {
-          ((NMetric) dist).setRoot(prefs
-              .getDouble(SimulationOptions.SIM_QUALITY_N_METRIC_ROOT));
-        } else if (dist instanceof RelativeNMetric) {
-          ((RelativeNMetric) dist).setRoot(prefs
-              .getDouble(SimulationOptions.SIM_QUALITY_N_METRIC_ROOT));
-        }
-        firePropertyChange("distance", null, dist);
-      }
     }
     qualityMeasureFunctions = new JComboBox(quality);
     qualityMeasureFunctions.setName("distfun");
     qualityMeasureFunctions.addItemListener(this);
-    qualityMeasureFunctions.setSelectedItem(qualityFunction);
     qualityMeasureField = new JFormattedTextField();
     qualityMeasureField.setEnabled(false);
     dSet.add(qualityMeasureFunctions);
@@ -296,6 +280,8 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
     
     // Main
     add(aSet.getContainer(), BorderLayout.CENTER);
+    
+    loadPreferences();
   }
   
   /**
@@ -318,40 +304,39 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
   private JComboBox createSolversComboOrSetSelectedItem(String name)
     throws IllegalArgumentException, SecurityException, InstantiationException,
     IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-    if (solvers == null) {
-      solvers = new JComboBox();
+    if (solverComboBox == null) {
+      solverComboBox = new JComboBox();
       name = name.substring(name.lastIndexOf('.') + 1);
       Class<AbstractDESSolver>[] solFun = SBMLsimulator.getAvailableSolvers();
       AbstractDESSolver solver;
       for (int i = 0; i < solFun.length; i++) {
         Class<AbstractDESSolver> c = solFun[i];
         solver = c.getConstructor().newInstance();
-        solvers.addItem(solver.getName());
-        // TODO: Add listeners to solver.
+        solverComboBox.addItem(solver.getName());
         if (c.getName().substring(c.getName().lastIndexOf('.') + 1)
             .equals(name)) {
-          solvers.setSelectedIndex(i);
+          solverComboBox.setSelectedIndex(i);
         }
       }
-      solvers.setEnabled(solvers.getItemCount() > 1);
-      if (solvers.getSelectedIndex() != solvers.getItemCount() - 1) {
-        solver = solFun[solvers.getSelectedIndex()].getConstructor()
+      solverComboBox.setEnabled(solverComboBox.getItemCount() > 1);
+      if (solverComboBox.getSelectedIndex() != solverComboBox.getItemCount() - 1) {
+        solver = solFun[solverComboBox.getSelectedIndex()].getConstructor()
             .newInstance();
       }
-      solvers.setName("solvers");
-      solvers.addItemListener(this);
+      solverComboBox.setName("solvers");
+      solverComboBox.addItemListener(this);
     } else {
       Class<AbstractDESSolver>[] solFun = SBMLsimulator.getAvailableSolvers();
-
+      
       for (int i = 0; i < solFun.length; i++) {
         Class<AbstractDESSolver> c = solFun[i];
         if (c.getName().substring(c.getName().lastIndexOf('.') + 1)
             .equals(name)) {
-          solvers.setSelectedIndex(i);
+          solverComboBox.setSelectedIndex(i);
         }
       }
     }
-    return solvers;
+    return solverComboBox;
   }
   
   /**
@@ -452,31 +437,19 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
         && (e.getStateChange() == ItemEvent.SELECTED)) {
       JComboBox comBox = (JComboBox) e.getSource();
       try {
-        SBPreferences prefs = SBPreferences
-            .getPreferencesFor(SimulationOptions.class);
+        
         if (comBox.getName().equals("distfun")) {
           QualityMeasure dist = SBMLsimulator.getAvailableQualityMeasures()[comBox
               .getSelectedIndex()].getConstructor().newInstance();
-          if (dist instanceof NMetric) {
-            ((NMetric) dist).setRoot(prefs
-                .getDouble(SimulationOptions.SIM_QUALITY_N_METRIC_ROOT));
-          } else if (dist instanceof RelativeNMetric) {
-            ((RelativeNMetric) dist).setRoot(prefs
-                .getDouble(SimulationOptions.SIM_QUALITY_N_METRIC_ROOT));
-          }
-          firePropertyChange("distance", comBox.getSelectedIndex(), dist);
-          prefs.put(SimulationOptions.SIM_QUALITY_FUNCTION, dist.getClass()
-              .getSimpleName());
+          firePropertyChange("distance", qualityMeasurement.getDistance(), dist);
           
         } else if (comBox.getName().equals("solvers")) {
           setSolver(comBox);
           AbstractDESSolver solver = SBMLsimulator.getAvailableSolvers()[comBox
               .getSelectedIndex()].getConstructor().newInstance();
-          prefs.put(SimulationOptions.SIM_ODE_SOLVER, solver.getClass()
-              .getSimpleName());
-          firePropertyChange("solver", comBox.getSelectedIndex(), solver);
+          firePropertyChange("solver", simulationConfiguration.getSolver(),
+            solver);
         }
-        prefs.flush();
       } catch (Exception exc) {
         GUITools.showErrorMessage(this, exc);
       }
@@ -543,16 +516,16 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
       qualityFunc++;
     }
     if (this.qualityMeasureFunctions != null) {
-      this.qualityMeasureFunctions.setSelectedIndex(qualityFunc);
+      qualityMeasureFunctions.setSelectedIndex(qualityFunc);
     }
     firePropertyChange("distance", null, SBMLsimulator
         .getAvailableQualityMeasures()[qualityFunc].getConstructor()
         .newInstance());
     
-    solvers = createSolversComboOrSetSelectedItem(prefsSimulation
+    solverComboBox = createSolversComboOrSetSelectedItem(prefsSimulation
         .get(SimulationOptions.SIM_ODE_SOLVER));
     firePropertyChange("solver", null,
-      SBMLsimulator.getAvailableSolvers()[solvers.getSelectedIndex()]
+      SBMLsimulator.getAvailableSolvers()[solverComboBox.getSelectedIndex()]
           .getConstructor().newInstance());
     
     double startTime = prefsSimulation
@@ -624,7 +597,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
     InstantiationException, IllegalAccessException, InvocationTargetException,
     NoSuchMethodException, SBMLException, IntegrationException,
     ModelOverdeterminedException {
-    setSolver(solvers);
+    setSolver(solverComboBox);
   }
   
   /**

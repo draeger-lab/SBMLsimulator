@@ -28,11 +28,8 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Map;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.prefs.BackingStoreException;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
@@ -55,6 +52,7 @@ import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.SimulatorOptions;
 import org.sbml.simulator.math.odes.MultiBlockTable;
+import org.sbml.simulator.math.odes.SimulationOptions;
 import org.sbml.simulator.resources.Resource;
 
 import de.zbit.gui.ActionCommand;
@@ -469,7 +467,6 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		try {
 			// GUITools.setEnabled(false, getJMenuBar(), toolBar,
 			// Command.SIMULATION_START);
-			simPanel.savePreferences();
 			simPanel.addPropertyChangedListener(this);
 			simPanel.simulate();
 			// simPanel.removePropertyChangedListener(this);
@@ -648,7 +645,15 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	 * @see de.zbit.gui.BaseFrame#exit()
 	 */
 	@Override
-	public void exit() {
+	public void exit() {	  
+    SBPreferences prefs = SBPreferences
+    .getPreferencesFor(SimulationOptions.class);    
+    try {
+      prefs.flush();
+    } catch (Exception exc) {
+      GUITools.showErrorMessage(this, exc);
+    }
+    
 		System.exit(0);
 	}
 
