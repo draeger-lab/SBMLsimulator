@@ -649,23 +649,6 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	 */
 	@Override
 	public void exit() {
-		if (simPanel != null) {
-			try {
-				Properties props = simPanel.getProperties();
-				for (Class<? extends KeyProvider> provider : getCommandLineOptions()) {
-					SBPreferences prefs = SBPreferences
-							.getPreferencesFor(provider);
-					for (Map.Entry<Object, Object> entry : props.entrySet()) {
-						if (prefs.containsKey(entry.getKey())) {
-							prefs.put(entry.getKey(), entry.getValue());
-						}
-					}
-					prefs.flush();
-				}
-			} catch (BackingStoreException exc) {
-				GUITools.showErrorMessage(this, exc);
-			}
-		}
 		System.exit(0);
 	}
 

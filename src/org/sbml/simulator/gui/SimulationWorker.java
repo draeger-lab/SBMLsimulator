@@ -17,20 +17,21 @@
  */
 package org.sbml.simulator.gui;
 
-import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
-import org.sbml.simulator.math.QualityMeasure;
 import org.sbml.simulator.math.SBMLinterpreter;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.math.odes.DESSolver;
+import org.sbml.simulator.math.odes.DESystem;
 import org.sbml.simulator.math.odes.IntegrationException;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 
@@ -42,301 +43,118 @@ import org.sbml.simulator.math.odes.MultiBlockTable;
  * @version $Rev$
  * @since 1.0
  */
-public class SimulationWorker extends SwingWorker<MultiBlockTable, Void> implements PropertyChangeListener{
+public class SimulationWorker extends SwingWorker<MultiBlockTable, MultiBlockTable> implements PropertyChangeListener{
 
-	/**
-	 * Pointer to experimental data
-	 */
-	private MultiBlockTable data;
-	/**
-	 * The currently used distance function.
-	 */
-	private QualityMeasure distance;
-	/**
-	 * 
-	 */
-	private boolean includeReactions;
+  private static final Logger logger = Logger.getLogger(SimulationWorker.class.getName());
+  
+  /**
+   * 
+   * @param solver
+   * @param system
+   * @param initialValues
+   * @param timeStart
+   * @param timeEnd
+   * @param stepSize
+   * @param includeReactions
+   * @return
+   * @throws SBMLException
+   * @throws IntegrationException
+   */
+  public static MultiBlockTable solveByStepSize(DESSolver solver, DESystem system, double[] initialValues, double timeStart,
+    double timeEnd, double stepSize, boolean includeReactions)
+      throws SBMLException,
+      IntegrationException {
+    
+    solver.setStepSize(stepSize);
+    
+    if (solver instanceof AbstractDESSolver) {
+      ((AbstractDESSolver) solver)
+          .setIncludeIntermediates(includeReactions);
+    }
+    MultiBlockTable solution = solver.solve(system, initialValues, timeStart, timeEnd);
 
-	/**
-	 * Pointer to a {@link Model} that is to be simulated.
-	 */
-	private Model model;
+    if (solver.isUnstable()) {
+      throw new IntegrationException("Simulation not possible because the model is unstable.");
+    }
+    return solution;
+  }
+  
+  /**
+   * 
+   */
+  private boolean includeReactions;
 
-	/**
-	 * 
-	 */
-	private Component parent;
+  /**
+   * 
+   */
+  private SBMLinterpreter interpreter;
+  
+  /**
+   * The integrator for the simulation
+   */
+  private DESSolver solver;
+  
+  /**
+   * Configuration for the solver.
+   */
+  private double timeStart, timeEnd, stepSize;
+  
+  
+  /**
+   * 
+   * @param solver
+   * @param model
+   * @param timeStart
+   * @param timeEnd
+   * @param stepSize
+   * @param includeReactions
+   * @throws Exception 
+   */
+  public SimulationWorker(DESSolver solver, Model model, double timeStart,
+    double timeEnd, double stepSize, boolean includeReactions) throws Exception {
+    
+    this.timeStart = timeStart;
+    this.timeEnd = timeEnd;
+    this.stepSize = stepSize;
+    this.includeReactions = includeReactions;
+    this.interpreter = new SBMLinterpreter(model);
+    this.solver = solver;
+    solver.addPropertyChangeListener(this);
+  
+  }
+  
+  /*
+   * (non-Javadoc)
+   * @see javax.swing.SwingWorker#doInBackground()
+   */
+  @Override
+  protected MultiBlockTable doInBackground() throws Exception {
+    return solveByStepSize(solver, interpreter, interpreter.getInitialValues(),
+      timeStart, timeEnd, stepSize, includeReactions);
+  }
+  
+  /* (non-Javadoc)
+   * @see javax.swing.SwingWorker#done()
+   */
+  @Override
+  protected void done() {
+    try {
+      firePropertyChange("done", null, get());
+    } catch (InterruptedException e) {
+      logger.log(Level.WARNING, e.getLocalizedMessage(),e);
+    } catch (ExecutionException e) {     
+      logger.log(Level.WARNING, e.getLocalizedMessage(),e);
+    }
+    solver.removePropertyChangeListener(this);
+  }
 
-	/**
-	 * The integrator for the simulation
-	 */
-	private DESSolver solver;
-
-	private double stepSize;
-	private double timeEnd;
-	private double timeStart;
-
-	/**
-	 * constructor
-	 * @param solver2
-	 * @param model2
-	 * @param t1val
-	 * @param t2val
-	 * @param stepSize
-	 * @param includeReactions2
-	 * @param simulationPanel
-	 */
-	public SimulationWorker(DESSolver solver, Model model, double t1val,
-			double t2val, double stepSize, boolean includeReactions) {
-		this.solver =  solver;
-		this.model = model;
-		this.timeStart = t1val;
-		this.timeEnd = t2val;
-		this.stepSize = stepSize;
-		this.includeReactions = includeReactions;
-	}
-	
-	/**
-	 * 
-	 * @param model
-	 * @param timePoints
-	 * @param stepSize
-	 * @return
-	 * @throws SBMLException
-	 * @throws IntegrationException
-	 * @throws ModelOverdeterminedException
-	 */
-	public static MultiBlockTable solveAtTimePoints(DESSolver solver,
-			Model model, double times[], double stepSize, Component parent)
-			throws SBMLException, IntegrationException,
-			ModelOverdeterminedException {
-		SBMLinterpreter interpreter = new SBMLinterpreter(model);
-		solver.setStepSize(stepSize);
-		if (solver instanceof AbstractDESSolver) {
-			((AbstractDESSolver) solver).setIncludeIntermediates(false);
-		}
-		MultiBlockTable solution = solver.solve(interpreter, interpreter
-				.getInitialValues(), times);
-		if (solver.isUnstable()) {
-			JOptionPane.showMessageDialog(parent, "Unstable!",
-					"Simulation not possible", JOptionPane.WARNING_MESSAGE);
-		}
-		return solution;
-	}
-
-	/**
-	 * 
-	 * @param solver
-	 * @param model
-	 * @param t1
-	 *            Begin time
-	 * @param t2
-	 *            End time.
-	 * @param stepSize
-	 * @param includeReactions
-	 * @param parent
-	 * @return
-	 * @throws ModelOverdeterminedException
-	 * @throws SBMLException
-	 * @throws IntegrationException
-	 */
-	public MultiBlockTable solveByStepSize()
-			throws ModelOverdeterminedException, SBMLException,
-			IntegrationException {
-		
-		SBMLinterpreter interpreter = new SBMLinterpreter(model);
-		solver.addPropertyChangeListener(this);
-		solver.setStepSize(stepSize);
-		if (solver instanceof AbstractDESSolver) {
-			((AbstractDESSolver) solver)
-					.setIncludeIntermediates(includeReactions);
-		}
-		MultiBlockTable solution = solver.solve(interpreter, interpreter
-				.getInitialValues(), timeStart, timeEnd);
-		if (solver.isUnstable()) {
-			JOptionPane.showMessageDialog(parent, "Unstable!",
-					"Simulation not possible", JOptionPane.WARNING_MESSAGE);
-		}
-		solver.removePropertyChangeListener(this);
-		return solution;
-	}
-
-	
-	/**
-	 * 
-	 * @param model
-	 */
-	public SimulationWorker(Model model) {
-		if (model == null) {
-			throw new NullPointerException("Model is null");
-		}
-		this.model = model;
-	}
-
-
-	/**
-	 * 
-	 * @return
-	 * @throws SBMLException
-	 * @throws IntegrationException
-	 * @throws ModelOverdeterminedException
-	 */
-	public double computeQuality() throws SBMLException, IntegrationException,
-			ModelOverdeterminedException {
-		return distance.distance(solveAtTimePoints(solver, model, data
-				.getTimePoints(), solver.getStepSize(), parent), data);
-	}
-	
-	/**
-	 * 
-	 * @param stepSize
-	 */
-	public void setStepSize(double stepSize) {
-		solver.setStepSize(stepSize);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.SwingWorker#doInBackground()
-	 */
-	@Override
-	protected MultiBlockTable doInBackground() throws Exception {
-		data = solveByStepSize();
-		return data;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.SwingWorker#done()
-	 */
-	@Override
-	protected void done() {
-		firePropertyChange("done", 0, data);
-	}
-
-	/**
-	 * @return the data
-	 */
-	public MultiBlockTable getData() {
-		return data;
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public DESSolver getDESSolver() {
-		return solver;
-	}
-
-	/**
-	 * @return the distance
-	 */
-	public QualityMeasure getQualityMeasure() {
-		return distance;
-	}
-
-	/**
-	 * @return the model
-	 */
-	public Model getModel() {
-		return model;
-	}
-
-	/**
-	 * @return the parent
-	 */
-	public Component getParent() {
-		return parent;
-	}
-
-	/**
-	 * @return the includeReactions
-	 */
-	public boolean isIncludeReactions() {
-		return includeReactions;
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public boolean isSetData() {
-		return data != null;
-	}
-
-	/**
-	 * @param data
-	 *            the data to set
-	 */
-	public void setData(MultiBlockTable data) {
-		this.data = data;
-	}
-
-	/**
-	 * 
-	 * @param solver
-	 */
-	public void setDESSolver(AbstractDESSolver solver) {
-		this.solver = solver;
-	}
-
-	/**
-	 * @param distance
-	 *            the distance to set
-	 */
-	public void setQualityMeasure(QualityMeasure distance) {
-		this.distance = distance;
-	}
-
-	/**
-	 * @param includeReactions
-	 *            the includeReactions to set
-	 */
-	public void setIncludeReactions(boolean includeReactions) {
-		this.includeReactions = includeReactions;
-	}
-
-	/**
-	 * @param model
-	 *            the model to set
-	 */
-	public void setModel(Model model) {
-		this.model = model;
-	}
-
-	/**
-	 * @param parent
-	 *            the parent to set
-	 */
-	public void setParent(Component parent) {
-		this.parent = parent;
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public boolean isSetModel() {
-		return model != null;
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public boolean isSetSolver() {
-	    return solver != null;
-	}
-	
   /*
    * (non-Javadoc)
    * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
    */
-	public void propertyChange(PropertyChangeEvent evt) {
-		getPropertyChangeSupport().firePropertyChange(evt);
-	}
+  public void propertyChange(PropertyChangeEvent evt) {
+    getPropertyChangeSupport().firePropertyChange(evt);
+  } 
+  
 
 }
