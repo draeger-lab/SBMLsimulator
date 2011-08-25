@@ -129,12 +129,8 @@ public class SimulationManager implements PropertyChangeListener {
   public void propertyChange(PropertyChangeEvent evt) {
     if ("progress".equals(evt.getPropertyName())) {
       this.pcs.firePropertyChange(evt);
-    }
-    if ("done".equals(evt.getPropertyName())) {
-      solution = (MultiBlockTable) evt.getNewValue();
-      if (solution != null) {
-        this.pcs.firePropertyChange("done", null, solution);
-      }
+    } else if ("done".equals(evt.getPropertyName())) {
+      this.pcs.firePropertyChange(evt);
     }
   }
   
@@ -162,6 +158,9 @@ public class SimulationManager implements PropertyChangeListener {
    */
   public void computeModelQuality() throws SBMLException, IntegrationException,
     ModelOverdeterminedException {
+    
+    distanceValues = new double[qualityMeasurement.getMeasurements().size()];
+    meanDistanceValue = 0d;
     /*
      * if (worker.isSetModel() && worker.isSetData()) {
      * worker.setStepSize(getStepSize());
@@ -170,6 +169,20 @@ public class SimulationManager implements PropertyChangeListener {
      * QUALITY_FIELD_TOOL_TIP, qualityMeasureFunctions.getSelectedItem(),
      * solvers.getSelectedItem()), 60)); }
      */
+  }
+  
+  /**
+   * @return the distanceValues
+   */
+  public double[] getDistanceValues() {
+    return distanceValues;
+  }
+  
+  /**
+   * @return the meanDistanceValue
+   */
+  public double getMeanDistanceValue() {
+    return meanDistanceValue;
   }
   
 }
