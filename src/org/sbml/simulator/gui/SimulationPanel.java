@@ -116,8 +116,8 @@ public class SimulationPanel extends JPanel implements
   private ArrayList<PropertyChangeListener> listeners;
   
   /**
-	 * The simulation manager for the current simulation.
-	 */
+   * The simulation manager for the current simulation.
+   */
   private SimulationManager simulationManager;
   
   /**
@@ -138,7 +138,7 @@ public class SimulationPanel extends JPanel implements
       try {
         if (model == null) {
           throw new NullPointerException("Model is null.");
-        }        
+        }
         simulationManager = new SimulationManager(new QualityMeasurement(),
           new SimulationConfiguration(model));
         simulationManager.addPropertyChangeListener(this);
@@ -338,7 +338,7 @@ public class SimulationPanel extends JPanel implements
     if (visualizationPanel != null) {
       visualizationPanel.loadPreferences();
     }
-    getOrCreateFootPanel();    
+    getOrCreateFootPanel();
     removeAll();
     init();
   }
@@ -364,10 +364,12 @@ public class SimulationPanel extends JPanel implements
     }
   }
   
-
   /*
    * (non-Javadoc)
-   * @see eva2.server.stat.InterfaceStatisticsListener#notifyMultiRunFinished(java.lang.String[], java.util.List)
+   * 
+   * @see
+   * eva2.server.stat.InterfaceStatisticsListener#notifyMultiRunFinished(java
+   * .lang.String[], java.util.List)
    */
   public boolean notifyMultiRunFinished(String[] header,
     List<Object[]> multiRunFinalObjectData) {
@@ -535,7 +537,7 @@ public class SimulationPanel extends JPanel implements
   public void simulate() throws Exception {
     SimulationToolPanel foot = (SimulationToolPanel) footPanel.getComponent(0);
     foot.processSimulationValues();
-
+    
     savePreferences();
     
     simulationManager.simulate();
@@ -558,8 +560,7 @@ public class SimulationPanel extends JPanel implements
   public void propertyChange(PropertyChangeEvent evt) {
     if ("progress".equals(evt.getPropertyName())) {
       this.firePropertyChanged(evt);
-    }
-    if ("done".equals(evt.getPropertyName())) {
+    } else if ("done".equals(evt.getPropertyName())) {
       MultiBlockTable data = (MultiBlockTable) evt.getNewValue();
       if (data != null) {
         setSimulationData(data);
