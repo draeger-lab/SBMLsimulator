@@ -127,10 +127,10 @@ public class SimulationManager implements PropertyChangeListener {
    * )
    */
   public void propertyChange(PropertyChangeEvent evt) {
-    if ("progress" == evt.getPropertyName()) {
+    if ("progress".equals(evt.getPropertyName())) {
       this.pcs.firePropertyChange(evt);
     }
-    if ("done" == evt.getPropertyName()) {
+    if ("done".equals(evt.getPropertyName())) {
       solution = (MultiBlockTable) evt.getNewValue();
       if (solution != null) {
         this.pcs.firePropertyChange("done", null, solution);

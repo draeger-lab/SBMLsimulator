@@ -22,6 +22,9 @@ import java.beans.PropertyChangeListener;
 
 import org.sbml.jsbml.Model;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
+import org.sbml.simulator.math.odes.SimulationOptions;
+
+import de.zbit.util.prefs.SBPreferences;
 
 /**
  * This class stores all values necessary to perform a simulation.
@@ -124,30 +127,38 @@ public class SimulationConfiguration implements PropertyChangeListener {
    */
   public void propertyChange(PropertyChangeEvent evt) {
     String property = evt.getPropertyName();
-    
-    if (property == "model") {
+    SBPreferences prefs = SBPreferences
+    .getPreferencesFor(SimulationOptions.class);
+
+    if ("model".equals(property)) {
       
-      this.model = (Model) evt.getNewValue();
+      model = (Model) evt.getNewValue();
       
-    } else if (property == "solver") {
+    } else if ("solver".equals(property)) {
       
-      this.solver = (AbstractDESSolver) evt.getNewValue();
+      solver = (AbstractDESSolver) evt.getNewValue();
+      prefs.put(SimulationOptions.SIM_ODE_SOLVER, solver.getClass()
+        .getSimpleName());      
       
-    } else if (property == "start") {
+    } else if ("start".equals(property)) {
       
-      this.start = (Double) evt.getNewValue();
+      start = (Double) evt.getNewValue();
+      prefs.put(SimulationOptions.SIM_START_TIME, start);
+     
       
-    } else if (property == "end") {
+    } else if ("end".equals(property)) {
       
-      this.end = (Double) evt.getNewValue();
+      end = (Double) evt.getNewValue();
+      prefs.put(SimulationOptions.SIM_END_TIME, end);
       
-    } else if (property == "stepSize") {
+    } else if ("stepSize".equals(property)) {
       
-      this.stepSize = (Double) evt.getNewValue();
+      stepSize = (Double) evt.getNewValue();
+      prefs.put(SimulationOptions.SIM_STEP_SIZE, stepSize);
       
-    } else if (property == "includeReactions") {
+    } else if ("includeReactions".equals(property)) {
       
-      this.includeReactions = (Boolean) evt.getNewValue();
+      includeReactions = (Boolean) evt.getNewValue();
       
     }
   }
