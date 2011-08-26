@@ -115,6 +115,11 @@ public class RosenbrockSolver extends AbstractDESSolver {
 
 	/** Keep track whether the thread is killed or not */
 	boolean stop;
+
+	/**
+	 * 
+	 */
+  private double[] timePoints;
 	
 	/**
 	 * 
@@ -144,7 +149,7 @@ public class RosenbrockSolver extends AbstractDESSolver {
 		relTol = 1E-7;
 
 		stop = false;
-
+		timePoints = new double[2]; 
 		// allocate arrays
 		y = new double[numEqn];
 		f1 = new double[numEqn];
@@ -492,9 +497,8 @@ public class RosenbrockSolver extends AbstractDESSolver {
 	  if(currentStepSize!=this.getStepSize()) {
 	    this.hMax = Math.min(currentStepSize,standardStepSize);
 	  }
-	  int points = 2;
+	  
 	  double timeEnd=time+currentStepSize;
-    double[] timePoints = new double[points]; 
     try {
       
       double localError = 0;
