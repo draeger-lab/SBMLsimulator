@@ -58,6 +58,11 @@ public class RosenbrockSolver extends AbstractDESSolver {
 	 */
 	public static final double RELMIN = 1.0E-12;
 
+	/**
+	 * 
+	 */
+  private static final double standardStepSize = 0.01;
+
 	/** maximum stepsize */
 	private double hMax;
 	/** minimum stepsize */
@@ -68,7 +73,6 @@ public class RosenbrockSolver extends AbstractDESSolver {
 	/** relative tolerance */
 	private double relTol;
 	
-	private double stepsize;
 
 	/** the current value of the independent variable */
 	private double t;
@@ -132,9 +136,10 @@ public class RosenbrockSolver extends AbstractDESSolver {
 
 	private void init(int size, double stepsize) {
     numEqn = size;
-		hMax = 0.1;
+		
 		hMin = 1E-12;
-		this.stepsize = stepsize;
+		this.setStepSize(stepsize);
+		hMax = Math.min(stepsize,0.1);
 		absTol = 1E-10;
 		relTol = 1E-7;
 
@@ -480,12 +485,15 @@ public class RosenbrockSolver extends AbstractDESSolver {
 
 	@Override
 	public double[] computeChange(DESystem DES, double[] y2, double time,
-			double stepSize, double[] change) throws IntegrationException {
+			double currentStepSize, double[] change) throws IntegrationException {
 	  if(y==null) {
       init(DES.getDESystemDimension(),this.getStepSize());
     }
+	  if(currentStepSize!=this.getStepSize()) {
+	    this.hMax = Math.min(currentStepSize,standardStepSize);
+	  }
 	  int points = 2;
-	  double timeEnd=time+stepSize;
+	  double timeEnd=time+currentStepSize;
     double[] timePoints = new double[points]; 
     try {
       
@@ -534,24 +542,22 @@ public class RosenbrockSolver extends AbstractDESSolver {
           // by
           // at least stepsize...
           if (Math.abs(timePoints[solutionIndex] - t) >= Math
-              .abs(stepsize)) {
+              .abs(currentStepSize)) {
 
             // ...we want to record the current point in the
             // solution
             // matrix and notify all pointReadyListeners of the
             // point
-            
-            
             solutionIndex++;
             timePoints[solutionIndex] = t;
-            System.arraycopy(y, 0, change, 0, y.length);
-            Mathematics.vvSub(change, y2, change);
+            
           }
         }
 
         // see if we're done
         if (t >= timeEnd) {
-          break;
+          Mathematics.vvSub(y, y2, change);
+            break;
         }
         // copy the current point into yTemp
         System.arraycopy(y, 0, yTemp, 0, numEqn);
