@@ -39,7 +39,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JToolBar;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import org.sbml.jsbml.Model;
@@ -212,11 +211,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 				// this.statusBar.reset();
 			break;
 		case OPTIMIZATION:
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					optimize();
-				}
-			});
+			optimize();
 			break;
 		case SHOW_OPTIONS:
 			// treated in {@link #itemStateChanged(ItemEvent)
@@ -496,7 +491,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 						Command.SIMULATION_START, BaseAction.FILE_CLOSE,
 						Command.OPTIMIZATION, BaseAction.EDIT_PREFERENCES);
 				SBPreferences prefs = SBPreferences
-						.getPreferencesFor(SimulatorOptions.class);
+						.getPreferencesFor(EstimationOptions.class);
 				EvA2GUIStarter.init(
 						new EstimationProblem(simPanel.getSolver(), simPanel
 								.getDistance(), model, simPanel
@@ -504,6 +499,8 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 								.getBoolean(EstimationOptions.EST_MULTI_SHOOT),
 								panel.getSelectedQuantityRanges()), this,
 						simPanel, this);
+				simPanel.setAllEnabled(true);
+				
 			} catch (Throwable exc) {
 				GUITools.showErrorMessage(this, exc);
 				simPanel.setAllEnabled(true);
