@@ -525,9 +525,13 @@ public class RosenbrockSolver extends AbstractDESSolver {
       // initial dependent values
       t = time;
       timePoints[0] = t;
-
-      y=y2.clone();
       
+      if(y.length!=y2.length) {
+        y=y2.clone();
+      }
+      else {
+        System.arraycopy(y2, 0, y, 0, y.length);
+      }
       // add the initial conditions to the solution matrix and let all
       // point
       // ready listeners know about it
