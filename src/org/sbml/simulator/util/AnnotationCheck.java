@@ -31,6 +31,7 @@ import java.util.Vector;
 import javax.xml.stream.XMLStreamException;
 
 import org.sbml.jsbml.CVTerm;
+import org.sbml.jsbml.CVTerm.Qualifier;
 import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Reaction;
@@ -39,9 +40,7 @@ import org.sbml.jsbml.SBMLReader;
 import org.sbml.jsbml.SBase;
 import org.sbml.jsbml.Species;
 import org.sbml.jsbml.SpeciesReference;
-import org.sbml.jsbml.CVTerm.Qualifier;
 import org.sbml.jsbml.util.StringTools;
-import org.sbml.tolatex.io.MIRIAMparser;
 
 /**
  * This class is intended to be analoguos to SBMLannotator but based on JSBML

@@ -23,6 +23,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -42,6 +43,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.tree.TreeNode;
 
 import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.ListOf;
@@ -52,8 +54,7 @@ import org.sbml.jsbml.QuantityWithUnit;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBase;
 import org.sbml.jsbml.Species;
-import org.sbml.jsbml.util.SBaseChangeEvent;
-import org.sbml.jsbml.util.SBaseChangeListener;
+import org.sbml.jsbml.util.TreeNodeChangeListener;
 import org.sbml.jsbml.util.compilers.HTMLFormula;
 import org.sbml.simulator.math.odes.SimulationOptions;
 
@@ -77,7 +78,7 @@ import de.zbit.util.prefs.SBPreferences;
  * @since 1.0
  */
 public class InteractiveScanPanel extends JPanel implements ActionListener,
-    ChangeListener, SBaseChangeListener {
+    ChangeListener, TreeNodeChangeListener {
   
   /**
    * @author Andreas Dr&auml;ger
@@ -367,8 +368,8 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
         Math.min(0d, value), maxValue, stepSize));
       originalValues[index] = value; // backup.
       quantities[index] = p;
-      quantities[index].addChangeListener(this);
-      list.addChangeListener(this);
+      quantities[index].addTreeNodeChangeListener(this);
+      list.addTreeNodeChangeListener(this);
       quantitiesHash.put(p.getId(), Integer.valueOf(index));
       
       spinQuantity[index].setName(p.getId());
@@ -416,11 +417,11 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
   
   /*
    * (non-Javadoc)
-   * 
-   * @see org.sbml.jsbml.SBaseChangedListener#sbaseAdded(org.sbml.jsbml.SBase)
+   * @see org.sbml.jsbml.util.TreeNodeChangeListener#nodeAdded(javax.swing.tree.TreeNode)
    */
-  public void sbaseAdded(SBase sb) {
-    if (sb instanceof QuantityWithUnit) {
+  public void nodeAdded(TreeNode node) {
+    if (node instanceof SBase) {
+    	SBase sb = (SBase) node;
       tab.removeAll();
       init(sb.getModel());
     }
@@ -428,11 +429,11 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
   
   /*
    * (non-Javadoc)
-   * 
-   * @see org.sbml.jsbml.SBaseChangedListener#sbaseRemoved(org.sbml.jsbml.SBase)
+   * @see org.sbml.jsbml.util.TreeNodeChangeListener#nodeRemoved(javax.swing.tree.TreeNode)
    */
-  public void sbaseRemoved(SBase sb) {
-    if (sb instanceof QuantityWithUnit) {
+  public void nodeRemoved(TreeNode node) {
+    if (node instanceof SBase) {
+    	SBase sb = (SBase) node;
       tab.removeAll();
       init(sb.getModel());
     }
@@ -493,13 +494,11 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
   
   /*
    * (non-Javadoc)
-   * 
-   * @seeorg.sbml.jsbml.SBaseChangedListener#stateChanged(org.sbml.jsbml.
-   * SBaseChangedEvent)
+   * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
    */
-  public void stateChanged(SBaseChangeEvent ev) {
-    if (ev.getSource() instanceof QuantityWithUnit) {
-      QuantityWithUnit q = (QuantityWithUnit) ev.getSource();
+  public void propertyChange(PropertyChangeEvent evt) {
+    if (evt.getSource() instanceof QuantityWithUnit) {
+      QuantityWithUnit q = (QuantityWithUnit) evt.getSource();
       updateQuantitySpinner(q.getId());
     }
   }
