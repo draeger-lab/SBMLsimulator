@@ -52,12 +52,13 @@ public class Resource {
 	 */
 	public static Properties readProperties(String resourceName)
 			throws IOException {
-		Properties prop = new Properties();
+		Properties prop = null;
 		Resource loader = getInstance();
 
 		byte bytes[] = loader.getBytesFromResourceLocation(resourceName);
 		if (bytes != null) {
 			ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+			prop = new Properties();
 			prop.load(bais);
 		}
 		if (prop != null) {
