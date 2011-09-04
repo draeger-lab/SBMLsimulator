@@ -241,7 +241,7 @@ public class SBMLMatrixParser {
 		double normal, half, twice;
 		double iA;
 
-		initLocalParameter(reac.getKineticLaw().getListOfParameters());
+		initLocalParameter(reac.getKineticLaw().getListOfLocalParameters());
 		initGlobalParameter(reac.getKineticLaw().getMath());
 		try {
 			sbmli = new SBMLinterpreter(model);

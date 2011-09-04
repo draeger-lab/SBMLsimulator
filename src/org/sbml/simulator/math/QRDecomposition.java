@@ -43,7 +43,12 @@ public class QRDecomposition implements java.io.Serializable {
      * ------------------------
      */
 
-    /**
+  /**
+	 * Generated serial version identifier. 
+	 */
+	private static final long serialVersionUID = -6784592321373477148L;
+
+		/**
      * Array for internal storage of decomposition.
      * 
      * @serial internal array storage.
