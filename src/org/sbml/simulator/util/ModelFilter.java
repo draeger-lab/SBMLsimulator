@@ -136,24 +136,25 @@ public class ModelFilter {
         transportReactions.add(r);
       }
     }
-    boolean reactionAdded = false;
+    boolean reactionAdded = true;
     while (reactionAdded) {
+      reactionAdded=false;
       transportReactionsToAdd.clear();
       for (Reaction r : transportReactions) {
         boolean reactantsContained = true;
         boolean productsContained = true;
         
         for (SpeciesReference sr : r.getListOfReactants()) {
-          String id = sr.getSpecies();
-          if (!speciesToAdd.contains(id)) {
+          Species sp = sr.getSpeciesInstance();
+          if (!speciesToAdd.contains(sp)) {
             reactantsContained = false;
             break;
           }
         }
         
         for (SpeciesReference sr : r.getListOfProducts()) {
-          String id = sr.getSpecies();
-          if (!speciesToAdd.contains(id)) {
+          Species sp = sr.getSpeciesInstance();
+          if (!speciesToAdd.contains(sp)) {
             productsContained = false;
             break;
           }
@@ -166,6 +167,7 @@ public class ModelFilter {
       }
       if(reactionAdded) {
         reactionsToAdd.addAll(transportReactionsToAdd);
+        transportReactions.removeAll(transportReactionsToAdd);
       }
     }
   }
