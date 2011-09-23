@@ -41,6 +41,7 @@ import org.sbml.jsbml.SBase;
 import org.sbml.jsbml.Species;
 import org.sbml.jsbml.SpeciesReference;
 import org.sbml.jsbml.util.StringTools;
+import org.sbml.tolatex.io.MIRIAMparser;
 
 /**
  * This class is intended to be analoguos to SBMLannotator but based on JSBML
