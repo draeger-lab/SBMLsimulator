@@ -39,6 +39,8 @@ import de.zbit.io.SBFileFilter;
 
 /**
  * @author Andreas Dr&auml;ger
+ * @author Max Zwie§ele
+ * @author Philip Stevens
  * @date 2010-09-08
  * @version $Rev$
  * @since 1.0
@@ -109,11 +111,10 @@ public class Plot extends ChartPanel {
 		for (int i = 0; i < plotColors.length; i++) {
 			renderer.setSeriesPaint(i, plotColors[i]);
 		}
-	
+			
 		ValueAxis yAxis = chart.getXYPlot().getRangeAxis();
 		ValueAxis xAxis = chart.getXYPlot().getDomainAxis();
 		
-		yAxis.setUpperBound(10);
 		yAxis.setLowerBound(0);
 		
 		this.setChart(chart);
