@@ -54,6 +54,7 @@ public class Plot extends ChartPanel {
 	private String xlabel;
 	private String ylabel;
 	private boolean legend, grid;
+	private JFreeChart chart;
 
 	/**
      * 
@@ -100,27 +101,31 @@ public class Plot extends ChartPanel {
 	public void plot(MultiBlockTable plotData, boolean connected,
 			boolean showLegend, boolean showGrid, Color[] plotColors,
 			String[] infos) {
-
-		JFreeChart chart = ChartFactory.createXYLineChart("", xlabel, ylabel,
-				new MultiBlockTableToTimeSeriesAdapter(plotData),
-				PlotOrientation.VERTICAL, true, true, false);
-				
-		XYPlot plot = chart.getXYPlot();
-		XYItemRenderer renderer = plot.getRenderer();
-
-		for (int i = 0; i < plotColors.length; i++) {
-			renderer.setSeriesPaint(i, plotColors[i]);
+		if(chart == null){
+			chart = ChartFactory.createXYLineChart("", xlabel, ylabel,
+					new MultiBlockTableToTimeSeriesAdapter(plotData),
+					PlotOrientation.VERTICAL, true, true, false);
+		} else {
+			chart.getXYPlot().setDataset(new MultiBlockTableToTimeSeriesAdapter(plotData));
 		}
-			
-		ValueAxis yAxis = chart.getXYPlot().getRangeAxis();
-		ValueAxis xAxis = chart.getXYPlot().getDomainAxis();
 		
-		yAxis.setLowerBound(0);
+		XYItemRenderer renderer = chart.getXYPlot().getRenderer();
+		
+		for (int i = 0; i < plotColors.length; i++) {
+			Color col = plotColors[i];
+			if(col == null){
+				renderer.setSeriesVisible(i, false);
+				renderer.setSeriesVisibleInLegend(i, false);
+			} else {
+				renderer.setSeriesVisible(i, true);
+				renderer.setSeriesVisibleInLegend(i, true);
+				renderer.setSeriesPaint(i, col);
+			}
+		}
 		
 		this.setChart(chart);
 		this.setGridVisible(showGrid);
 		this.setShowLegend(showLegend);
-
 	}
 
 	/**
@@ -203,10 +208,8 @@ public class Plot extends ChartPanel {
 	}
 
 	public void clearAll() {
-		JFreeChart chart = ChartFactory.createXYLineChart("", xlabel, ylabel,
-				new DefaultXYDataset(), PlotOrientation.VERTICAL, false, false,
-				false);
-		this.setChart(chart);
+		if(chart != null)
+			chart.getXYPlot().setDataset(new DefaultXYDataset());
 	}
 
 	public boolean checkLoggable() {
