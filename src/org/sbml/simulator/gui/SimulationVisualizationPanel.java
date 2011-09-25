@@ -263,11 +263,11 @@ public class SimulationVisualizationPanel extends JSplitPane implements
     plot = new Plot(xLab, "Value");
     // get rid of this pop-up menu.
     // TODO: maybe we can make use of this later.
-    MouseListener listeners[] = plot.getMouseListeners();
-    for (int i = listeners.length - 1; i >= 0; i--) {
-      plot.removeMouseListener(listeners[i]);
-    }
-    
+//    MouseListener listeners[] = plot.getMouseListeners();
+//    for (int i = listeners.length - 1; i >= 0; i--) {
+//      plot.removeMouseListener(listeners[i]);
+//    }
+//    
     interactiveScanPanel = new InteractiveScanPanel(model, maxCompartmentValue,
       maxSpeciesValue, maxParameterValue, paramStepSize);
     interactiveScanPanel.setBorder(BorderFactory.createLoweredBevelBorder());
