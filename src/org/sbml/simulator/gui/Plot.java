@@ -19,6 +19,7 @@ package org.sbml.simulator.gui;
 
 import java.awt.AWTException;
 import java.awt.Color;
+import java.awt.event.InputEvent;
 import java.io.File;
 import java.io.IOException;
 
@@ -105,6 +106,8 @@ public class Plot extends ChartPanel {
 			chart = ChartFactory.createXYLineChart("", xlabel, ylabel,
 					new MultiBlockTableToTimeSeriesAdapter(plotData),
 					PlotOrientation.VERTICAL, true, true, false);
+			chart.getXYPlot().setDomainPannable(true);
+			chart.getXYPlot().setRangePannable(true);
 		} else {
 			chart.getXYPlot().setDataset(new MultiBlockTableToTimeSeriesAdapter(plotData));
 		}
@@ -122,7 +125,7 @@ public class Plot extends ChartPanel {
 				renderer.setSeriesPaint(i, col);
 			}
 		}
-		
+				
 		this.setChart(chart);
 		this.setGridVisible(showGrid);
 		this.setShowLegend(showLegend);
