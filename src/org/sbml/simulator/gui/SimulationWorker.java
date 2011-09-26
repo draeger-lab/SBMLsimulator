@@ -27,7 +27,6 @@ import javax.swing.SwingWorker;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLException;
-import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.simulator.math.SBMLinterpreter;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.math.odes.DESSolver;

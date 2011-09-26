@@ -1,5 +1,5 @@
 /*
- * $Id: QualityMeasurement.java 16:09:32 draeger$ $URL: QualityMeasurement.java
+ * $Id$URL: QualityMeasurement.java
  * $ --------------------------------------------------------------------- This
  * file is part of SBMLsimulator, a Java-based simulator for models of
  * biochemical processes encoded in the modeling language SBML.
@@ -65,6 +65,7 @@ public class QualityMeasurement implements PropertyChangeListener {
     
     if ("distance".equals(property)) {
       distance = (QualityMeasure) evt.getNewValue();
+      // TODO: Consider creating a new interface that provides a setRoot method.
       if (distance instanceof NMetric) {
         ((NMetric) distance).setRoot(prefs
             .getDouble(SimulationOptions.SIM_QUALITY_N_METRIC_ROOT));
