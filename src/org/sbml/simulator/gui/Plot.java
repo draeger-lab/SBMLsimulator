@@ -55,7 +55,6 @@ public class Plot extends ChartPanel {
 	private String xlabel;
 	private String ylabel;
 	private boolean legend, grid;
-	private JFreeChart chart;
 
 	/**
      * 
@@ -102,17 +101,17 @@ public class Plot extends ChartPanel {
 	public void plot(MultiBlockTable plotData, boolean connected,
 			boolean showLegend, boolean showGrid, Color[] plotColors,
 			String[] infos) {
-		if(chart == null){
-			chart = ChartFactory.createXYLineChart("", xlabel, ylabel,
+		if(this.getChart() == null){
+			this.setChart(ChartFactory.createXYLineChart("", xlabel, ylabel,
 					new MultiBlockTableToTimeSeriesAdapter(plotData),
-					PlotOrientation.VERTICAL, true, true, false);
-			chart.getXYPlot().setDomainPannable(true);
-			chart.getXYPlot().setRangePannable(true);
+					PlotOrientation.VERTICAL, true, true, false));
+			this.getChart().getXYPlot().setDomainPannable(true);
+			this.getChart().getXYPlot().setRangePannable(true);
 		} else {
-			chart.getXYPlot().setDataset(new MultiBlockTableToTimeSeriesAdapter(plotData));
+			this.getChart().getXYPlot().setDataset(new MultiBlockTableToTimeSeriesAdapter(plotData));
 		}
 		
-		XYItemRenderer renderer = chart.getXYPlot().getRenderer();
+		XYItemRenderer renderer = this.getChart().getXYPlot().getRenderer();
 		
 		for (int i = 0; i < plotColors.length; i++) {
 			Color col = plotColors[i];
@@ -126,7 +125,6 @@ public class Plot extends ChartPanel {
 			}
 		}
 				
-		this.setChart(chart);
 		this.setGridVisible(showGrid);
 		this.setShowLegend(showLegend);
 	}
@@ -211,8 +209,8 @@ public class Plot extends ChartPanel {
 	}
 
 	public void clearAll() {
-		if(chart != null)
-			chart.getXYPlot().setDataset(new DefaultXYDataset());
+		if(this.getChart() != null)
+			this.getChart().getXYPlot().setDataset(new DefaultXYDataset());
 	}
 
 	public boolean checkLoggable() {
