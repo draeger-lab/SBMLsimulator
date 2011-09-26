@@ -71,6 +71,8 @@ public class Plot extends ChartPanel {
 		super(ChartFactory.createXYLineChart("", xname, yname,
 				new DefaultXYDataset(), PlotOrientation.VERTICAL, false, false,
 				false));
+		this.getChart().getXYPlot().setDomainPannable(true);
+		this.getChart().getXYPlot().setRangePannable(true);
 		this.xlabel = xname;
 		this.ylabel = yname;
 		this.setMouseWheelEnabled(true);
@@ -105,8 +107,6 @@ public class Plot extends ChartPanel {
 			this.setChart(ChartFactory.createXYLineChart("", xlabel, ylabel,
 					new MultiBlockTableToTimeSeriesAdapter(plotData),
 					PlotOrientation.VERTICAL, true, true, false));
-			this.getChart().getXYPlot().setDomainPannable(true);
-			this.getChart().getXYPlot().setRangePannable(true);
 		} else {
 			this.getChart().getXYPlot().setDataset(new MultiBlockTableToTimeSeriesAdapter(plotData));
 		}
