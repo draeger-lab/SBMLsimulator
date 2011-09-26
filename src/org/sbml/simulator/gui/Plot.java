@@ -115,14 +115,10 @@ public class Plot extends ChartPanel {
 		
 		for (int i = 0; i < plotColors.length; i++) {
 			Color col = plotColors[i];
-			if(col == null){
-				renderer.setSeriesVisible(i, false);
-				renderer.setSeriesVisibleInLegend(i, false);
-			} else {
-				renderer.setSeriesVisible(i, true);
-				renderer.setSeriesVisibleInLegend(i, true);
-				renderer.setSeriesPaint(i, col);
-			}
+			boolean visible = col!=null;
+			renderer.setSeriesVisible(i, visible);
+			renderer.setSeriesVisibleInLegend(i, visible);
+			renderer.setSeriesPaint(i, col);
 		}
 				
 		this.setGridVisible(showGrid);
