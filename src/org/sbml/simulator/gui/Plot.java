@@ -19,7 +19,6 @@ package org.sbml.simulator.gui;
 
 import java.awt.AWTException;
 import java.awt.Color;
-import java.awt.event.InputEvent;
 import java.io.File;
 import java.io.IOException;
 
@@ -28,10 +27,7 @@ import javax.swing.JFileChooser;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.sbml.simulator.math.odes.MultiBlockTable;
