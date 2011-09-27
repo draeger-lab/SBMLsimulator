@@ -49,6 +49,7 @@ import org.sbml.optimization.EvA2GUIStarter;
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.SBMLsimulator;
+import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 import org.sbml.simulator.math.odes.SimulationOptions;
 import org.sbml.simulator.resources.Resource;
@@ -641,15 +642,22 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	 * @see de.zbit.gui.BaseFrame#exit()
 	 */
 	@Override
-	public void exit() {	  
-    SBPreferences prefs = SBPreferences
-    .getPreferencesFor(SimulationOptions.class);    
-    try {
-      prefs.flush();
-    } catch (Exception exc) {
-      GUITools.showErrorMessage(this, exc);
+	public void exit() {
+	  StringBuilder exception = new StringBuilder();
+    for (Class<?> clazz : new Class[] { SimulationOptions.class,
+        PlotOptions.class }) {
+      SBPreferences prefs = SBPreferences
+          .getPreferencesFor((Class<? extends KeyProvider>) clazz);
+      try {
+        prefs.flush();
+      } catch (Exception exc) {
+        exception.append(exc.getLocalizedMessage());
+        exception.append('\n');
+      }
     }
-    
+    if (exception.length() > 0) {
+      GUITools.showErrorMessage(this, exception.toString());
+    }
 		System.exit(0);
 	}
 

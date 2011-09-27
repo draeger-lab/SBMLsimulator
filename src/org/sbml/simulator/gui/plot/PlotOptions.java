@@ -15,7 +15,7 @@
  * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
-package org.sbml.optimization;
+package org.sbml.simulator.gui.plot;
 
 import java.io.File;
 import java.util.ResourceBundle;
@@ -24,6 +24,7 @@ import de.zbit.io.SBFileFilter;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.Option;
+import de.zbit.util.prefs.OptionGroup;
 import de.zbit.util.prefs.Range;
 
 /**
@@ -39,6 +40,12 @@ public interface PlotOptions extends KeyProvider {
      */
     public static ResourceBundle bundle = ResourceManager
 	    .getBundle("org.sbml.simulator.locales.Simulator");
+    
+    /**
+     * 
+     */
+    public static final Option<String> BACKGROUND_COLOR = new Option<String>(
+      "BACKGROUND_COLOR", String.class, "The background color of the plog", "255,255,255");
 
     /**
      * When storing any GUI elements or other pictures into a JPEG graphics file
@@ -86,4 +93,6 @@ public interface PlotOptions extends KeyProvider {
     public static final Option<Boolean> SHOW_PLOT_TOOLTIPS = new Option<Boolean>(
 	"SHOW_PLOT_TOOLTIPS", Boolean.class, bundle.getString("SIM:0000009"),
 	Boolean.FALSE, bundle.getString("SIM:0000005"));
+    
+    public static final OptionGroup BASE_OPTIONS = new OptionGroup("Base options", "bla bla", SHOW_PLOT_GRID, SHOW_PLOT_LEGEND);
 }

@@ -15,7 +15,7 @@
  * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
-package org.sbml.simulator.gui;
+package org.sbml.simulator.gui.plot;
 
 import java.awt.AWTException;
 import java.awt.Color;

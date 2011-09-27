@@ -27,9 +27,9 @@ import java.util.logging.Logger;
 
 import javax.xml.stream.XMLStreamException;
 
-import org.sbml.optimization.PlotOptions;
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.simulator.gui.SimulatorUI;
+import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.simulator.math.QualityMeasure;
 import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.math.odes.SimulationOptions;

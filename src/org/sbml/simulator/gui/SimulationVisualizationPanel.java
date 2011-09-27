@@ -34,7 +34,8 @@ import javax.swing.event.TableModelListener;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.UnitDefinition;
-import org.sbml.optimization.PlotOptions;
+import org.sbml.simulator.gui.plot.Plot;
+import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 import org.sbml.simulator.math.odes.SimulationOptions;
 

@@ -15,12 +15,13 @@
  * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
-package org.sbml.simulator.gui;
+package org.sbml.simulator.gui.plot;
 
 import java.awt.AWTException;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.swing.JFileChooser;
 
@@ -30,13 +31,16 @@ import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
+import org.sbml.simulator.gui.GUITools;
+import org.sbml.simulator.gui.MultiBlockTableToTimeSeriesAdapter;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 
 import de.zbit.io.SBFileFilter;
+import de.zbit.util.prefs.SBPreferences;
 
 /**
  * @author Andreas Dr&auml;ger
- * @author Max Zwie§ele
+ * @author Max Zwie&szlig;ele
  * @author Philip Stevens
  * @date 2010-09-08
  * @version $Rev$
@@ -72,6 +76,13 @@ public class Plot extends ChartPanel {
 		this.xlabel = xname;
 		this.ylabel = yname;
 		this.setMouseWheelEnabled(true);
+		
+	// retrieve a user-defined preference
+    SBPreferences prefs = SBPreferences.getPreferencesFor(PlotOptions.class);
+    String[] rgb = prefs.get(PlotOptions.BACKGROUND_COLOR).split(",");
+    this.getChart().setBackgroundPaint(
+      new Color(Integer.parseInt(rgb[0]), Integer.parseInt(rgb[1]), Integer
+          .parseInt(rgb[2])));
 	}
 
 	/**
@@ -106,7 +117,7 @@ public class Plot extends ChartPanel {
 		} else {
 			this.getChart().getXYPlot().setDataset(new MultiBlockTableToTimeSeriesAdapter(plotData));
 		}
-		
+    
 		XYItemRenderer renderer = this.getChart().getXYPlot().getRenderer();
 		
 		for (int i = 0; i < plotColors.length; i++) {
