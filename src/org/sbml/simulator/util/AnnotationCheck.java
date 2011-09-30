@@ -31,7 +31,6 @@ import java.util.Vector;
 import javax.xml.stream.XMLStreamException;
 
 import org.sbml.jsbml.CVTerm;
-import org.sbml.jsbml.CVTerm.Qualifier;
 import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Reaction;
@@ -40,8 +39,8 @@ import org.sbml.jsbml.SBMLReader;
 import org.sbml.jsbml.SBase;
 import org.sbml.jsbml.Species;
 import org.sbml.jsbml.SpeciesReference;
+import org.sbml.jsbml.CVTerm.Qualifier;
 import org.sbml.jsbml.util.StringTools;
-import org.sbml.tolatex.io.MIRIAMparser;
 
 /**
  * This class is intended to be analoguos to SBMLannotator but based on JSBML
@@ -54,11 +53,6 @@ public class AnnotationCheck {
 
 	// private static KEGGPortType serv;
 	private static KEGGparser kegg;
-
-	/**
-	 * This is the link to the MIRIAM resources.
-	 */
-	private static final MIRIAMparser miriam = new MIRIAMparser();
 
 	static {
 		try {
@@ -86,9 +80,6 @@ public class AnnotationCheck {
 		Vector<String> ids = new Vector<String>();
 		for (int k = 0; k < cv.getNumResources(); k++) {
 			String identifier = cv.getResourceURI(k);
-			if (!identifier.startsWith("urn"))
-				identifier = miriam.getMiriamURI(identifier);
-			// String urls[] = miriam.getLocations(identifier);
 			if (identifier != null) {
 				if (identifier.contains(":kegg."))
 					ids.add(identifier.substring(
@@ -165,8 +156,6 @@ public class AnnotationCheck {
 				List<String> attr = cvt.getResources();
 				for (int j = 0; j < attr.size(); j++) {
 					String value = attr.get(i);
-					if (!value.startsWith("urn"))
-						value = miriam.getMiriamURI(value);
 					// Examples:
 					// urn:miriam:kegg.reaction:R00258
 					// urn:miriam:kegg.compound:C00234
