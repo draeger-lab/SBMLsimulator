@@ -17,6 +17,8 @@
  */
 package org.sbml.simulator.gui;
 
+import org.sbml.simulator.gui.plot.Plot;
+
 
 /**
  * @author Andreas Dr&auml;ger
