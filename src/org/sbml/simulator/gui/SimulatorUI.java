@@ -57,6 +57,7 @@ import org.sbml.tolatex.LaTeXOptions;
 import de.zbit.gui.ActionCommand;
 import de.zbit.gui.BaseFrame;
 import de.zbit.gui.GUIOptions;
+import de.zbit.gui.JOptionPane2;
 import de.zbit.gui.ProgressBarSwing;
 import de.zbit.gui.prefs.FileHistory;
 import de.zbit.io.SBFileFilter;
@@ -210,12 +211,19 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
         logger.info("Starting model editor");
         this.simulationTime=System.currentTimeMillis();
         try {
-          SBMLModelSplitPane split = new SBMLModelSplitPane(simPanel.getModel()
-              .getSBMLDocument(), SBPreferences.getPreferencesFor(
-            LaTeXOptions.class).getBoolean(
-            LaTeXOptions.PRINT_NAMES_IF_AVAILABLE));
+          // Cloning is necessary, because the model might be changed.
+          // If not, we want to stick with the previous version of the model.
+          SBMLDocument doc = simPanel.getModel().getSBMLDocument().clone();
+          SBMLModelSplitPane split = new SBMLModelSplitPane(doc, SBPreferences
+              .getPreferencesFor(LaTeXOptions.class).getBoolean(
+                LaTeXOptions.PRINT_NAMES_IF_AVAILABLE));
           split.setPreferredSize(new Dimension(640, 480));
-          JOptionPane.showMessageDialog(this, split);
+          if (JOptionPane2.showOptionDialog(this, split, "Model Editor",
+            JOptionPane2.OK_CANCEL_OPTION, JOptionPane2.INFORMATION_MESSAGE,
+            null, null, null, true) == JOptionPane2.OK_OPTION) {
+            simPanel = new SimulationPanel(doc.getModel());
+            validate();
+          }
         } catch (Throwable exc) {
           GUITools.showErrorMessage(this, exc);
         }
