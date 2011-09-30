@@ -159,6 +159,8 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	 */
 	private SimulationPanel simPanel;
 
+  private long simulationTime;
+
 	/**
      * 
      */
@@ -198,6 +200,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	 * @see
 	 * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
+	
   public void actionPerformed(ActionEvent e) {
     if (e.getActionCommand() == null) {
       return;
@@ -205,6 +208,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
     switch (Command.valueOf(e.getActionCommand())) {
       case EDIT_MODEL:
         logger.info("Starting model editor");
+        this.simulationTime=System.currentTimeMillis();
         try {
           SBMLModelSplitPane split = new SBMLModelSplitPane(simPanel.getModel()
               .getSBMLDocument(), SBPreferences.getPreferencesFor(
@@ -837,7 +841,9 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 			memoryBar.percentageChanged(process, -1, "computed");
       //logger.log(Level.INFO, String.format("Simulating... %1$3s%%", process));
 		} else if (evt.getPropertyName().equalsIgnoreCase("done")) {
-			this.statusBar.reset();
+		  this.simulationTime=System.currentTimeMillis()-this.simulationTime;
+		  logger.info("Simulation time: " + this.simulationTime);
+		  this.statusBar.reset();
 //			setStatusBarToMemoryUsage();
       GUITools.setEnabled(true, getJMenuBar(), getJToolBar(),
         BaseAction.FILE_SAVE, Command.EDIT_MODEL, Command.SIMULATION_START);
