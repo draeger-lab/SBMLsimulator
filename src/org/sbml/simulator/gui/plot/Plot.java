@@ -21,18 +21,31 @@ import java.awt.AWTException;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.FieldPosition;
+import java.text.NumberFormat;
+import java.text.ParsePosition;
 import java.util.Arrays;
+import java.util.Formatter;
 
 import javax.swing.JFileChooser;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.LegendItemCollection;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.editor.ChartEditor;
+import org.jfree.chart.editor.ChartEditorFactory;
+import org.jfree.chart.editor.ChartEditorManager;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
+import org.jfree.ui.HorizontalAlignment;
+import org.jfree.ui.RectangleEdge;
+import org.jfree.ui.VerticalAlignment;
+import org.sbml.jsbml.util.StringTools;
 import org.sbml.simulator.gui.GUITools;
-import org.sbml.simulator.gui.MultiBlockTableToTimeSeriesAdapter;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 
 import de.zbit.io.SBFileFilter;
@@ -69,20 +82,39 @@ public class Plot extends ChartPanel {
 	 */
 	public Plot(String xname, String yname) {
 		super(ChartFactory.createXYLineChart("", xname, yname,
-				new DefaultXYDataset(), PlotOrientation.VERTICAL, false, false,
-				false));
+				new DefaultXYDataset(), PlotOrientation.VERTICAL, true, false,
+				false), false, true, true, false, true);
+
 		this.getChart().getXYPlot().setDomainPannable(true);
 		this.getChart().getXYPlot().setRangePannable(true);
+
 		this.xlabel = xname;
 		this.ylabel = yname;
 		this.setMouseWheelEnabled(true);
-		
-	// retrieve a user-defined preference
-    SBPreferences prefs = SBPreferences.getPreferencesFor(PlotOptions.class);
-    String[] rgb = prefs.get(PlotOptions.BACKGROUND_COLOR).split(",");
-    this.getChart().setBackgroundPaint(
-      new Color(Integer.parseInt(rgb[0]), Integer.parseInt(rgb[1]), Integer
-          .parseInt(rgb[2])));
+
+		// retrieve a user-defined preference
+		SBPreferences prefs = SBPreferences
+				.getPreferencesFor(PlotOptions.class);
+		String[] rgb = prefs.get(PlotOptions.BACKGROUND_COLOR).split(",");
+
+		this.getChart()
+				.getXYPlot()
+				.setBackgroundPaint(
+						new Color(Integer.parseInt(rgb[0]), Integer
+								.parseInt(rgb[1]), Integer.parseInt(rgb[2])));
+		this.getChart().getXYPlot().setDomainGridlinePaint(Color.gray);
+		this.getChart().getXYPlot().setRangeGridlinePaint(Color.gray);
+
+		this.getChart().getLegend().setPosition(RectangleEdge.BOTTOM);
+		this.getChart().getLegend()
+				.setHorizontalAlignment(HorizontalAlignment.CENTER);
+		this.getChart().getLegend()
+				.setVerticalAlignment(VerticalAlignment.CENTER);
+
+		NumberAxis xAxis = (NumberAxis) this.getChart().getXYPlot()
+				.getDomainAxis();
+		NumberAxis yAxis = (NumberAxis) this.getChart().getXYPlot()
+				.getRangeAxis();
 	}
 
 	/**
@@ -110,24 +142,19 @@ public class Plot extends ChartPanel {
 	public void plot(MultiBlockTable plotData, boolean connected,
 			boolean showLegend, boolean showGrid, Color[] plotColors,
 			String[] infos) {
-		if(this.getChart() == null){
-			this.setChart(ChartFactory.createXYLineChart("", xlabel, ylabel,
-					new MultiBlockTableToTimeSeriesAdapter(plotData),
-					PlotOrientation.VERTICAL, true, true, false));
-		} else {
-			this.getChart().getXYPlot().setDataset(new MultiBlockTableToTimeSeriesAdapter(plotData));
-		}
-    
+		this.getChart().getXYPlot()
+				.setDataset(new MultiBlockTableToTimeSeriesAdapter(plotData));
+
 		XYItemRenderer renderer = this.getChart().getXYPlot().getRenderer();
-		
+
 		for (int i = 0; i < plotColors.length; i++) {
 			Color col = plotColors[i];
-			boolean visible = col!=null;
+			boolean visible = col != null;
 			renderer.setSeriesVisible(i, visible);
 			renderer.setSeriesVisibleInLegend(i, visible);
 			renderer.setSeriesPaint(i, col);
 		}
-				
+
 		this.setGridVisible(showGrid);
 		this.setShowLegend(showLegend);
 	}
@@ -203,7 +230,7 @@ public class Plot extends ChartPanel {
 
 	public void setShowLegend(boolean showLegend) {
 		this.legend = showLegend;
-		if(this.getChart().getLegend()!=null)
+		if (this.getChart().getLegend() != null)
 			this.getChart().getLegend().setVisible(showLegend);
 	}
 
@@ -212,7 +239,7 @@ public class Plot extends ChartPanel {
 	}
 
 	public void clearAll() {
-		if(this.getChart() != null)
+		if (this.getChart() != null)
 			this.getChart().getXYPlot().setDataset(new DefaultXYDataset());
 	}
 

@@ -153,7 +153,7 @@ public class LegendPanel extends JPanel implements TableModelListener,
 		tab.setName("legend");
 		tab.setModel(legend);
 
-		tab.setDefaultEditor(Color.class, new ColorEditor());
+		tab.setDefaultEditor(Color.class, new ColorEditor(this));
 		LegendTableCellRenderer renderer = new LegendTableCellRenderer();
 		tab.setDefaultRenderer(Color.class, renderer);
 		tab.getModel().addTableModelListener(this);

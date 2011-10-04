@@ -27,10 +27,13 @@ import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JDialog;
 import javax.swing.JTable;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.TableCellEditor;
 
 /**
  * @author Andreas Dr&auml;ger
+ * @author Philip Stevens
+ * @author Max Zwie§ele
  * @version $Rev$
  * @since 1.0
  */
@@ -60,11 +63,15 @@ public class ColorEditor extends AbstractCellEditor implements TableCellEditor,
 	 * 
 	 */
 	private JDialog dialog;
+	/**
+	 * 
+	 */
+	private LegendPanel parent;
 
 	/**
 	 * 
 	 */
-	public ColorEditor() {
+	public ColorEditor(LegendPanel parent) {
 		button = new JButton();
 		button.setActionCommand(EDIT);
 		button.addActionListener(this);
@@ -74,6 +81,9 @@ public class ColorEditor extends AbstractCellEditor implements TableCellEditor,
 		colorChooser = new JColorChooser();
 		dialog = JColorChooser.createDialog(button, "Pick a Color", true,
 				colorChooser, this, null);
+
+		// Set parent, for being able to send colorchanged events
+		this.parent = parent;
 	}
 
 	/*

@@ -81,21 +81,22 @@ import eva2.client.EvAClient;
 public class SimulatorUI extends BaseFrame implements ActionListener,
 		ItemListener, WindowListener, PropertyChangeListener {
 
-  /**
+	/**
    * 
    */
-  private static final Logger logger = Logger.getLogger(SimulatorUI.class.getName());
-  
+	private static final Logger logger = Logger.getLogger(SimulatorUI.class
+			.getName());
+
 	/**
 	 * Commands that can be understood by this dialog.
 	 * 
 	 * @author Andreas Dr&auml;ger
 	 */
 	public static enum Command implements ActionCommand {
-	  /**
-	   * Option to change the content of the model
-	   */
-	  EDIT_MODEL,
+		/**
+		 * Option to change the content of the model
+		 */
+		EDIT_MODEL,
 		/**
 		 * Starts the optimization of the model with respect to given data.
 		 */
@@ -160,7 +161,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	 */
 	private SimulationPanel simPanel;
 
-  private long simulationTime;
+	private long simulationTime;
 
 	/**
      * 
@@ -169,8 +170,8 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		super();
 		loadPreferences();
 		setOptimalSize();
-		GUITools.setEnabled(false, getJMenuBar(), toolBar,
-				Command.EDIT_MODEL, Command.SIMULATION_START);
+		GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.EDIT_MODEL,
+				Command.SIMULATION_START);
 		setStatusBarToMemoryUsage();
 	}
 
@@ -201,58 +202,64 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	 * @see
 	 * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
-	
-  public void actionPerformed(ActionEvent e) {
-    if (e.getActionCommand() == null) {
-      return;
-    }
-    switch (Command.valueOf(e.getActionCommand())) {
-      case EDIT_MODEL:
-        logger.info("Starting model editor");
-        this.simulationTime=System.currentTimeMillis();
-        try {
-          // Cloning is necessary, because the model might be changed.
-          // If not, we want to stick with the previous version of the model.
-          SBMLDocument doc = simPanel.getModel().getSBMLDocument().clone();
-          SBMLModelSplitPane split = new SBMLModelSplitPane(doc, SBPreferences
-              .getPreferencesFor(LaTeXOptions.class).getBoolean(
-                LaTeXOptions.PRINT_NAMES_IF_AVAILABLE));
-          split.setPreferredSize(new Dimension(640, 480));
-          if (JOptionPane2.showOptionDialog(this, split, "Model Editor",
-            JOptionPane2.OK_CANCEL_OPTION, JOptionPane2.INFORMATION_MESSAGE,
-            null, null, null, true) == JOptionPane2.OK_OPTION) {
-            simPanel = new SimulationPanel(doc.getModel());
-            validate();
-          }
-        } catch (Throwable exc) {
-          GUITools.showErrorMessage(this, exc);
-        }
-        break;
-      case SIMULATION_START:
-        logger.info("Starting simulation");
-        
-        GUITools.setEnabled(false, getJMenuBar(), toolBar,
-          Command.EDIT_MODEL, Command.SIMULATION_START);
-        // this.statusBar.reset();
-        simulate();
-        /*
-         * GUITools.setEnabled(true, getJMenuBar(), toolBar,
-         * Command.SIMULATION_START);
-         */
-        // this.statusBar.reset();
-        break;
-      case OPTIMIZATION:
-        optimize();
-        break;
-      case SHOW_OPTIONS:
-        // treated in {@link #itemStateChanged(ItemEvent)
-        break;
-      default:
-        JOptionPane.showMessageDialog(this, "Invalid option "
-            + e.getActionCommand(), "Warning", JOptionPane.WARNING_MESSAGE);
-        break;
-    }
-  }
+
+	public void actionPerformed(ActionEvent e) {
+		if (e.getActionCommand() == null) {
+			return;
+		}
+				
+		switch (Command.valueOf(e.getActionCommand())) {
+		case EDIT_MODEL:
+			logger.info("Starting model editor");
+			this.simulationTime = System.currentTimeMillis();
+			try {
+				// Cloning is necessary, because the model might be changed.
+				// If not, we want to stick with the previous version of the
+				// model.
+				SBMLDocument doc = simPanel.getModel().getSBMLDocument()
+						.clone();
+				SBMLModelSplitPane split = new SBMLModelSplitPane(doc,
+						SBPreferences.getPreferencesFor(LaTeXOptions.class)
+								.getBoolean(
+										LaTeXOptions.PRINT_NAMES_IF_AVAILABLE));
+				split.setPreferredSize(new Dimension(640, 480));
+				if (JOptionPane2.showOptionDialog(this, split, "Model Editor",
+						JOptionPane2.OK_CANCEL_OPTION,
+						JOptionPane2.INFORMATION_MESSAGE, null, null, null,
+						true) == JOptionPane2.OK_OPTION) {
+					simPanel = new SimulationPanel(doc.getModel());
+					validate();
+				}
+			} catch (Throwable exc) {
+				GUITools.showErrorMessage(this, exc);
+			}
+			break;
+		case SIMULATION_START:
+			logger.info("Starting simulation");
+
+			GUITools.setEnabled(false, getJMenuBar(), toolBar,
+					Command.EDIT_MODEL, Command.SIMULATION_START);
+			// this.statusBar.reset();
+			simulate();
+			/*
+			 * GUITools.setEnabled(true, getJMenuBar(), toolBar,
+			 * Command.SIMULATION_START);
+			 */
+			// this.statusBar.reset();
+			break;
+		case OPTIMIZATION:
+			optimize();
+			break;
+		case SHOW_OPTIONS:
+			// treated in {@link #itemStateChanged(ItemEvent)
+			break;
+		default:
+			JOptionPane.showMessageDialog(this,
+					"Invalid option " + e.getActionCommand(), "Warning",
+					JOptionPane.WARNING_MESSAGE);
+			break;
+		}
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -302,8 +309,8 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	 */
 	@Override
 	protected JMenuItem[] additionalEditMenuItems() {
-    JMenuItem editModel = GUITools.createJMenuItem(this, Command.EDIT_MODEL,
-      UIManager.getIcon("ICON_PENCIL_16"), 'M');
+		JMenuItem editModel = GUITools.createJMenuItem(this,
+				Command.EDIT_MODEL, UIManager.getIcon("ICON_PENCIL_16"), 'M');
 		JMenuItem simulation = GUITools.createJMenuItem(this,
 				Command.SIMULATION_START, UIManager.getIcon("ICON_GEAR_16"),
 				'S');
@@ -317,7 +324,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		}
 		item.setActionCommand(Command.SHOW_OPTIONS.toString());
 		item.addItemListener(this);
-		return new JMenuItem[] {editModel, simulation, optimization, item };
+		return new JMenuItem[] { editModel, simulation, optimization, item };
 	}
 
 	/*
@@ -378,7 +385,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 			} catch (Exception exc) {
 				GUITools.showErrorMessage(this, exc);
 			} finally {
-				//setStatusBarToMemoryUsage();
+				// setStatusBarToMemoryUsage();
 			}
 		}
 	}
@@ -423,9 +430,9 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 					getContentPane().add(simPanel, BorderLayout.CENTER);
 					setOptimalSize();
 					setTitle(getApplicationName() + " - " + file.getName());
-          GUITools.setEnabled(true, getJMenuBar(), toolBar,
-            BaseAction.FILE_SAVE, Command.EDIT_MODEL, Command.SIMULATION_START,
-            Command.SHOW_OPTIONS);
+					GUITools.setEnabled(true, getJMenuBar(), toolBar,
+							BaseAction.FILE_SAVE, Command.EDIT_MODEL,
+							Command.SIMULATION_START, Command.SHOW_OPTIONS);
 					return new File[] { file };
 				}
 				JOptionPane.showMessageDialog(
@@ -436,7 +443,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 			} catch (Exception exc) {
 				GUITools.showErrorMessage(this, exc);
 			} finally {
-//				setStatusBarToMemoryUsage();
+				// setStatusBarToMemoryUsage();
 			}
 		}
 		return null;
@@ -519,9 +526,10 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 				simPanel.savePreferences();
 				simPanel.notifyQuantitiesSelected(panel
 						.getSelectedQuantityIds());
-        GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.EDIT_MODEL,
-          Command.SIMULATION_START, BaseAction.FILE_CLOSE,
-          Command.OPTIMIZATION, BaseAction.EDIT_PREFERENCES);
+				GUITools.setEnabled(false, getJMenuBar(), toolBar,
+						Command.EDIT_MODEL, Command.SIMULATION_START,
+						BaseAction.FILE_CLOSE, Command.OPTIMIZATION,
+						BaseAction.EDIT_PREFERENCES);
 				SBPreferences prefs = SBPreferences
 						.getPreferencesFor(EstimationOptions.class);
 				EvA2GUIStarter.init(
@@ -532,7 +540,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 								panel.getSelectedQuantityRanges()), this,
 						simPanel, this);
 				simPanel.setAllEnabled(true);
-				
+
 			} catch (Throwable exc) {
 				GUITools.showErrorMessage(this, exc);
 				simPanel.setAllEnabled(true);
@@ -570,9 +578,10 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 			if ((frame.getName() != null)
 					&& (frame.getName().equals(EvAClient.class.getSimpleName()))) {
 				simPanel.setAllEnabled(true);
-        GUITools.setEnabled(true, getJMenuBar(), toolBar, BaseAction.FILE_SAVE,
-          Command.EDIT_MODEL, Command.SIMULATION_START, BaseAction.FILE_CLOSE,
-          Command.OPTIMIZATION, BaseAction.EDIT_PREFERENCES);
+				GUITools.setEnabled(true, getJMenuBar(), toolBar,
+						BaseAction.FILE_SAVE, Command.EDIT_MODEL,
+						Command.SIMULATION_START, BaseAction.FILE_CLOSE,
+						Command.OPTIMIZATION, BaseAction.EDIT_PREFERENCES);
 			}
 		}
 	}
@@ -629,9 +638,9 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		if (simPanel != null) {
 			if (simPanel.isSetExperimentalData()) {
 				simPanel.closeExperimentalData();
-        GUITools.setEnabled(false, getJMenuBar(), toolBar,
-          Command.OPTIMIZATION, BaseAction.FILE_SAVE, Command.EDIT_MODEL,
-          Command.SIMULATION_START);
+				GUITools.setEnabled(false, getJMenuBar(), toolBar,
+						Command.OPTIMIZATION, BaseAction.FILE_SAVE,
+						Command.EDIT_MODEL, Command.SIMULATION_START);
 			} else {
 				getContentPane().remove(simPanel);
 				simPanel = null;
@@ -674,21 +683,21 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	 */
 	@Override
 	public void exit() {
-	  StringBuilder exception = new StringBuilder();
-    for (Class<?> clazz : new Class[] { SimulationOptions.class,
-        PlotOptions.class }) {
-      SBPreferences prefs = SBPreferences
-          .getPreferencesFor((Class<? extends KeyProvider>) clazz);
-      try {
-        prefs.flush();
-      } catch (Exception exc) {
-        exception.append(exc.getLocalizedMessage());
-        exception.append('\n');
-      }
-    }
-    if (exception.length() > 0) {
-      GUITools.showErrorMessage(this, exception.toString());
-    }
+		StringBuilder exception = new StringBuilder();
+		for (Class<?> clazz : new Class[] { SimulationOptions.class,
+				PlotOptions.class }) {
+			SBPreferences prefs = SBPreferences
+					.getPreferencesFor((Class<? extends KeyProvider>) clazz);
+			try {
+				prefs.flush();
+			} catch (Exception exc) {
+				exception.append(exc.getLocalizedMessage());
+				exception.append('\n');
+			}
+		}
+		if (exception.length() > 0) {
+			GUITools.showErrorMessage(this, exception.toString());
+		}
 		System.exit(0);
 	}
 
@@ -806,7 +815,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 			// TODO Auto-generated method stub
 			// simPanel.savePlotImage();
 			simPanel.saveSimulationResults();
-		  saveModel(simPanel.getModel());
+			saveModel(simPanel.getModel());
 		}
 	}
 
@@ -815,46 +824,54 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	 * method should be called after all import operations
 	 */
 	private void setStatusBarToMemoryUsage() {
-//		AbstractProgressBar memoryBar = this.statusBar.showProgress();
+		// AbstractProgressBar memoryBar = this.statusBar.showProgress();
 		int use = (int) ((1f - ((float) Runtime.getRuntime().freeMemory() / (float) Runtime
 				.getRuntime().totalMemory())) * 100);
-//		statusBar.log.info(String.format("Memory usage: %1$3s%%", use));
-//		memoryBar.percentageChanged(use, -1, "of memory used");
-		
-    // Create a smaller panel for the statusBar
-    Dimension panelSize = new Dimension(100, 15);
-    JPanel panel = new JPanel();
-    panel.setOpaque(false);
-    panel.setPreferredSize(panelSize);
-    JProgressBar progress = new JProgressBar(0, 100);
-    progress.setValue(use);
-    progress.setPreferredSize(new Dimension(panelSize.width, panelSize.height));
-    panel.add(progress);
-    
-	  getStatusBar().add(panel, BorderLayout.EAST);
+		// statusBar.log.info(String.format("Memory usage: %1$3s%%", use));
+		// memoryBar.percentageChanged(use, -1, "of memory used");
+
+		// Create a smaller panel for the statusBar
+		Dimension panelSize = new Dimension(100, 15);
+		JPanel panel = new JPanel();
+		panel.setOpaque(false);
+		panel.setPreferredSize(panelSize);
+		JProgressBar progress = new JProgressBar(0, 100);
+		progress.setValue(use);
+		progress.setPreferredSize(new Dimension(panelSize.width,
+				panelSize.height));
+		panel.add(progress);
+
+		getStatusBar().add(panel, BorderLayout.EAST);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+	 * 
+	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.
+	 * PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent evt) {
 		if (evt.getPropertyName().equalsIgnoreCase("progress")) {
 			AbstractProgressBar memoryBar = this.statusBar.showProgress();
-      
+
 			// TODO: Bessere stelle finden
-      ((ProgressBarSwing)memoryBar).getProgressBar().setStringPainted(true);
-      
-			int process = (int) Math.round(((Number) evt.getNewValue()).doubleValue());
+			((ProgressBarSwing) memoryBar).getProgressBar().setStringPainted(
+					true);
+
+			int process = (int) Math.round(((Number) evt.getNewValue())
+					.doubleValue());
 			memoryBar.percentageChanged(process, -1, "computed");
-      //logger.log(Level.INFO, String.format("Simulating... %1$3s%%", process));
+			// logger.log(Level.INFO, String.format("Simulating... %1$3s%%",
+			// process));
 		} else if (evt.getPropertyName().equalsIgnoreCase("done")) {
-		  this.simulationTime=System.currentTimeMillis()-this.simulationTime;
-		  logger.info("Simulation time: " + this.simulationTime);
-		  this.statusBar.reset();
-//			setStatusBarToMemoryUsage();
-      GUITools.setEnabled(true, getJMenuBar(), getJToolBar(),
-        BaseAction.FILE_SAVE, Command.EDIT_MODEL, Command.SIMULATION_START);
+			this.simulationTime = System.currentTimeMillis()
+					- this.simulationTime;
+			logger.info("Simulation time: " + this.simulationTime);
+			this.statusBar.reset();
+			// setStatusBarToMemoryUsage();
+			GUITools.setEnabled(true, getJMenuBar(), getJToolBar(),
+					BaseAction.FILE_SAVE, Command.EDIT_MODEL,
+					Command.SIMULATION_START);
 		}
 	}
 
