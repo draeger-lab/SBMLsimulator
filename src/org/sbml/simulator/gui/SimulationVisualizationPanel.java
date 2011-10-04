@@ -349,7 +349,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
    */
   public void tableChanged(TableModelEvent e) {
     if (e.getSource() instanceof LegendTableModel) {
-      if ((e.getColumn() == LegendTableModel.getBooleanColumn())
+      if ((e.getColumn() == LegendTableModel.getBooleanColumn() || e.getColumn() == LegendTableModel.getColorColumn())
           && (e.getType() == TableModelEvent.UPDATE)) {
         plot();
       }
