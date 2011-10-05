@@ -404,7 +404,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		SBPreferences prefs = SBPreferences.getPreferencesFor(GUIOptions.class);
 		File files[] = GUITools.openFileDialog(this,
 				prefs.get(GUIOptions.OPEN_DIR).toString(), false, false,
-				JFileChooser.FILES_ONLY, SBFileFilter.createSBMLFileFilter());
+				JFileChooser.FILES_ONLY, SBFileFilter.createSBMLFileFilterList());
 		if ((files != null) && (files.length == 1)) {
 			return openModel(files[0]);
 		}
