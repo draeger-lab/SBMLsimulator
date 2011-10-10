@@ -17,6 +17,7 @@
  */
 package org.sbml.simulator.gui.plot;
 
+import java.awt.Color;
 import java.io.File;
 import java.util.ResourceBundle;
 
@@ -44,8 +45,13 @@ public interface PlotOptions extends KeyProvider {
     /**
      * 
      */
-    public static final Option<String> BACKGROUND_COLOR = new Option<String>(
-      "BACKGROUND_COLOR", String.class, "The background color of the plog", "255,255,255");
+    public static final Option<Color> PLOT_BACKGROUND = new Option<Color>(
+      "PLOT_BACKGROUND", Color.class, "The background color of the plot", Color.WHITE);
+    /**
+     * 
+     */
+    public static final Option<Color> PLOT_GRID_COLOR = new Option<Color>(
+      "PLOT_GRID_COLOR", Color.class, "The background color of the plot", Color.DARK_GRAY);
 
     /**
      * When storing any GUI elements or other pictures into a JPEG graphics file
@@ -95,4 +101,6 @@ public interface PlotOptions extends KeyProvider {
 	Boolean.FALSE, bundle.getString("SIM:0000005"));
     
     public static final OptionGroup BASE_OPTIONS = new OptionGroup("Base options", "bla bla", SHOW_PLOT_GRID, SHOW_PLOT_LEGEND);
+    public static final OptionGroup PLOT_APPEARANCE = new OptionGroup("Options for appearence of the Plot Area", "Options for appearence of the Plot Area", PLOT_BACKGROUND, PLOT_GRID_COLOR);
+
 }

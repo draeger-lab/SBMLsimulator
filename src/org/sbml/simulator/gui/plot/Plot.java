@@ -49,6 +49,7 @@ import org.sbml.simulator.gui.GUITools;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 
 import de.zbit.io.SBFileFilter;
+import de.zbit.util.prefs.Option;
 import de.zbit.util.prefs.SBPreferences;
 
 /**
@@ -91,30 +92,29 @@ public class Plot extends ChartPanel {
 		this.xlabel = xname;
 		this.ylabel = yname;
 		this.setMouseWheelEnabled(true);
-
-		// retrieve a user-defined preference
-		SBPreferences prefs = SBPreferences
-				.getPreferencesFor(PlotOptions.class);
-		String[] rgb = prefs.get(PlotOptions.BACKGROUND_COLOR).split(",");
-
-		this.getChart()
-				.getXYPlot()
-				.setBackgroundPaint(
-						new Color(Integer.parseInt(rgb[0]), Integer
-								.parseInt(rgb[1]), Integer.parseInt(rgb[2])));
-		this.getChart().getXYPlot().setDomainGridlinePaint(Color.gray);
-		this.getChart().getXYPlot().setRangeGridlinePaint(Color.gray);
-
+		
 		this.getChart().getLegend().setPosition(RectangleEdge.BOTTOM);
 		this.getChart().getLegend()
 				.setHorizontalAlignment(HorizontalAlignment.CENTER);
 		this.getChart().getLegend()
 				.setVerticalAlignment(VerticalAlignment.CENTER);
 
-		NumberAxis xAxis = (NumberAxis) this.getChart().getXYPlot()
-				.getDomainAxis();
-		NumberAxis yAxis = (NumberAxis) this.getChart().getXYPlot()
-				.getRangeAxis();
+		loadUserSettings();
+	}
+
+	private void loadUserSettings() {
+		// retrieve a user-defined preference
+		SBPreferences prefs = SBPreferences
+				.getPreferencesFor(PlotOptions.class);
+
+		this.getChart().getXYPlot().setBackgroundPaint(Option.parseOrCast(Color.class, prefs.get(PlotOptions.PLOT_BACKGROUND)));
+		
+		this.getChart().getXYPlot().setDomainGridlinePaint(Option.parseOrCast(Color.class, prefs.get(PlotOptions.PLOT_GRID_COLOR)));
+		this.getChart().getXYPlot().setRangeGridlinePaint(Option.parseOrCast(Color.class, prefs.get(PlotOptions.PLOT_GRID_COLOR)));
+		
+		this.setGridVisible(grid);
+		this.setShowLegend(legend);
+		
 	}
 
 	/**
@@ -155,8 +155,10 @@ public class Plot extends ChartPanel {
 			renderer.setSeriesPaint(i, col);
 		}
 
-		this.setGridVisible(showGrid);
-		this.setShowLegend(showLegend);
+		this.grid = showGrid;
+		this.legend = showLegend;
+		
+		this.loadUserSettings();	
 	}
 
 	/**
