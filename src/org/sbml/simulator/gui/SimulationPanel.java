@@ -47,7 +47,6 @@ import org.sbml.simulator.QualityMeasurement;
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.SimulationConfiguration;
 import org.sbml.simulator.SimulationManager;
-import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.simulator.math.QualityMeasure;
 import org.sbml.simulator.math.odes.DESSolver;
 import org.sbml.simulator.math.odes.IntegrationException;
@@ -270,7 +269,7 @@ public class SimulationPanel extends JPanel implements
       visualizationPanel.getPlot().setShowLegend(foot.getShowLegend());
       visualizationPanel.getPlot().setShowGraphToolTips(
         foot.getShowGraphToolTips());
-      visualizationPanel.setPlotToLogScale(foot.getJCheckBoxLegend());
+//      visualizationPanel.setPlotToLogScale(foot.getJCheckBoxLegend());
       
       if (tabbedPane == null) {
         JPanel simPanel = new JPanel(new BorderLayout());
@@ -419,20 +418,20 @@ public class SimulationPanel extends JPanel implements
     // System.out.println("notifyRunStopped");
   }
   
-  /**
-   * 
-   */
-  public void savePlotImage() {
-    try {
-      SBPreferences prefs = SBPreferences.getPreferencesFor(PlotOptions.class);
-      String saveDir = prefs.get(PlotOptions.PLOT_SAVE_DIR).toString();
-      float compression = prefs.getFloat(PlotOptions.JPEG_COMPRESSION_FACTOR);
-      prefs.put(PlotOptions.PLOT_SAVE_DIR, visualizationPanel.getPlot()
-          .savePlotImage(saveDir, Float.valueOf(compression)));
-    } catch (Exception exc) {
-      GUITools.showErrorMessage(this, exc);
-    }
-  }
+//  /**
+//   * 
+//   */
+//  public void savePlotImage() {
+//    try {
+//      SBPreferences prefs = SBPreferences.getPreferencesFor(PlotOptions.class);
+//      String saveDir = prefs.get(PlotOptions.PLOT_SAVE_DIR).toString();
+//      float compression = prefs.getFloat(PlotOptions.JPEG_COMPRESSION_FACTOR);
+//      prefs.put(PlotOptions.PLOT_SAVE_DIR, visualizationPanel.getPlot()
+//          .savePlotImage(saveDir, Float.valueOf(compression)));
+//    } catch (Exception exc) {
+//      GUITools.showErrorMessage(this, exc);
+//    }
+//  }
   
   /**
    * @throws NoSuchMethodException

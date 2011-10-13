@@ -17,42 +17,25 @@
  */
 package org.sbml.simulator.gui.plot;
 
-import java.awt.AWTException;
 import java.awt.Color;
-import java.io.File;
-import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.FieldPosition;
-import java.text.NumberFormat;
-import java.text.ParsePosition;
-import java.util.Arrays;
-import java.util.Formatter;
-
-import javax.swing.JFileChooser;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
-import org.jfree.chart.ChartUtilities;
-import org.jfree.chart.LegendItemCollection;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.editor.ChartEditor;
-import org.jfree.chart.editor.ChartEditorFactory;
-import org.jfree.chart.editor.ChartEditorManager;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.ui.HorizontalAlignment;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.VerticalAlignment;
-import org.sbml.jsbml.util.StringTools;
-import org.sbml.simulator.gui.GUITools;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 
-import de.zbit.io.SBFileFilter;
 import de.zbit.util.prefs.Option;
 import de.zbit.util.prefs.SBPreferences;
 
 /**
+ * This class represents the plot panel in which the calculated data will be
+ * plotted.
+ * 
  * @author Andreas Dr&auml;ger
  * @author Max Zwie&szlig;ele
  * @author Philip Stevens
@@ -66,20 +49,25 @@ public class Plot extends ChartPanel {
 	 * Generated serial version identifier.
 	 */
 	private static final long serialVersionUID = 176134486775218455L;
-	private String xlabel;
-	private String ylabel;
-	private boolean legend, grid;
+	// /**
+	// * The x/y label of the plot's axes
+	// */
+	// private String xlabel,ylabel;
 
 	/**
-     * 
-     */
+	 * Create a new empty plot panel
+	 */
 	public Plot() {
 		this("", "");
 	}
 
 	/**
+	 * Create an new empty plot panel with xlabel xname and ylabel yname.
+	 * 
 	 * @param xname
+	 *            the label of the x-axis
 	 * @param yname
+	 *            the label of the y-axis
 	 */
 	public Plot(String xname, String yname) {
 		super(ChartFactory.createXYLineChart("", xname, yname,
@@ -89,10 +77,8 @@ public class Plot extends ChartPanel {
 		this.getChart().getXYPlot().setDomainPannable(true);
 		this.getChart().getXYPlot().setRangePannable(true);
 
-		this.xlabel = xname;
-		this.ylabel = yname;
 		this.setMouseWheelEnabled(true);
-		
+
 		this.getChart().getLegend().setPosition(RectangleEdge.BOTTOM);
 		this.getChart().getLegend()
 				.setHorizontalAlignment(HorizontalAlignment.CENTER);
@@ -102,19 +88,35 @@ public class Plot extends ChartPanel {
 		loadUserSettings();
 	}
 
+	/**
+	 * Setup all predefined user settings.
+	 */
 	private void loadUserSettings() {
 		// retrieve a user-defined preference
 		SBPreferences prefs = SBPreferences
 				.getPreferencesFor(PlotOptions.class);
 
-		this.getChart().getXYPlot().setBackgroundPaint(Option.parseOrCast(Color.class, prefs.get(PlotOptions.PLOT_BACKGROUND)));
+		this.getChart()
+				.getXYPlot()
+				.setBackgroundPaint(
+						Option.parseOrCast(Color.class,
+								prefs.get(PlotOptions.PLOT_BACKGROUND_COLOR)));
+		this.getChart()
+				.getXYPlot()
+				.setDomainGridlinePaint(
+						Option.parseOrCast(Color.class,
+								prefs.get(PlotOptions.PLOT_GRID_COLOR)));
+		this.getChart()
+				.getXYPlot()
+				.setRangeGridlinePaint(
+						Option.parseOrCast(Color.class,
+								prefs.get(PlotOptions.PLOT_GRID_COLOR)));
+
+		this.getChart().setTitle(prefs.get(PlotOptions.PLOT_TITLE));
 		
-		this.getChart().getXYPlot().setDomainGridlinePaint(Option.parseOrCast(Color.class, prefs.get(PlotOptions.PLOT_GRID_COLOR)));
-		this.getChart().getXYPlot().setRangeGridlinePaint(Option.parseOrCast(Color.class, prefs.get(PlotOptions.PLOT_GRID_COLOR)));
-		
-		this.setGridVisible(grid);
-		this.setShowLegend(legend);
-		
+		this.setShowLegend(prefs.getBoolean(PlotOptions.SHOW_PLOT_LEGEND));
+		this.setGridVisible(prefs.getBoolean(PlotOptions.SHOW_PLOT_GRID));
+		this.setShowGraphToolTips(prefs.getBoolean(PlotOptions.SHOW_PLOT_TOOLTIPS));
 	}
 
 	/**
@@ -155,100 +157,138 @@ public class Plot extends ChartPanel {
 			renderer.setSeriesPaint(i, col);
 		}
 
-		this.grid = showGrid;
-		this.legend = showLegend;
-		
-		this.loadUserSettings();	
+		this.loadUserSettings();
 	}
 
+	// /**
+	// * @param saveDir
+	// * @param compression
+	// * @return The path to the directory where the user wants to save the plot
+	// * image. If no image is saved, i.e., the user canceled this action,
+	// * the same directory will be returned that has been given as an
+	// * argument.
+	// * @throws AWTException
+	// * @throws IOException
+	// */
+	// public String savePlotImage(String saveDir, float compression)
+	// throws AWTException, IOException {
+	//
+	// try {
+	// File file = GUITools.saveFileDialog(this, saveDir, false, false,
+	// JFileChooser.FILES_ONLY,
+	// SBFileFilter.createPNGFileFilter(),
+	// SBFileFilter.createJPEGFileFilter());
+	// ChartUtilities.saveChartAsJPEG(file, compression, this.getChart(),
+	// WIDTH, HEIGHT, getChartRenderingInfo());
+	// System.out.println(saveDir);
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// }
+	// // Rectangle area = getBounds();
+	// // area.setLocation(getLocationOnScreen());
+	// // BufferedImage bufferedImage = (new
+	// // Robot()).createScreenCapture(area);
+	// // File file = GUITools.saveFileDialog(this, saveDir, false, false,
+	// // JFileChooser.FILES_ONLY, SBFileFilter.createPNGFileFilter(),
+	// // SBFileFilter.createJPEGFileFilter());
+	// // if (file != null) {
+	// // saveDir = file.getParent();
+	// // if (SBFileFilter.isPNGFile(file)) {
+	// // ImageIO.write(bufferedImage, "png", file);
+	// // } else if (SBFileFilter.isJPEGFile(file)) {
+	// // FileImageOutputStream out = new FileImageOutputStream(file);
+	// // ImageWriter encoder = (ImageWriter) ImageIO
+	// // .getImageWritersByFormatName("JPEG").next();
+	// // JPEGImageWriteParam param = new JPEGImageWriteParam(null);
+	// // param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+	// // param.setCompressionQuality(compression);
+	// // encoder.setOutput(out);
+	// // encoder.write((IIOMetadata) null, new IIOImage(bufferedImage,
+	// // null, null), param);
+	// // out.close();
+	// // }
+	// // }
+	//
+	// return saveDir;
+	// }
+
 	/**
-	 * @param saveDir
-	 * @param compression
-	 * @return The path to the directory where the user wants to save the plot
-	 *         image. If no image is saved, i.e., the user canceled this action,
-	 *         the same directory will be returned that has been given as an
-	 *         argument.
-	 * @throws AWTException
-	 * @throws IOException
-	 */
-	public String savePlotImage(String saveDir, float compression)
-			throws AWTException, IOException {
-
-		try {
-			File file = GUITools.saveFileDialog(this, saveDir, false, false,
-					JFileChooser.FILES_ONLY,
-					SBFileFilter.createPNGFileFilter(),
-					SBFileFilter.createJPEGFileFilter());
-			ChartUtilities.saveChartAsJPEG(file, compression, this.getChart(),
-					WIDTH, HEIGHT, getChartRenderingInfo());
-			System.out.println(saveDir);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		// Rectangle area = getBounds();
-		// area.setLocation(getLocationOnScreen());
-		// BufferedImage bufferedImage = (new
-		// Robot()).createScreenCapture(area);
-		// File file = GUITools.saveFileDialog(this, saveDir, false, false,
-		// JFileChooser.FILES_ONLY, SBFileFilter.createPNGFileFilter(),
-		// SBFileFilter.createJPEGFileFilter());
-		// if (file != null) {
-		// saveDir = file.getParent();
-		// if (SBFileFilter.isPNGFile(file)) {
-		// ImageIO.write(bufferedImage, "png", file);
-		// } else if (SBFileFilter.isJPEGFile(file)) {
-		// FileImageOutputStream out = new FileImageOutputStream(file);
-		// ImageWriter encoder = (ImageWriter) ImageIO
-		// .getImageWritersByFormatName("JPEG").next();
-		// JPEGImageWriteParam param = new JPEGImageWriteParam(null);
-		// param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-		// param.setCompressionQuality(compression);
-		// encoder.setOutput(out);
-		// encoder.write((IIOMetadata) null, new IIOImage(bufferedImage,
-		// null, null), param);
-		// out.close();
-		// }
-		// }
-
-		return saveDir;
-	}
-
-	/**
+	 * plot given data into existing panel. All previous data will be cleared.
+	 * 
 	 * @param data
+	 *            to plot
 	 * @param connected
 	 * @param plotColors
 	 * @param infos
 	 */
 	public void plot(MultiBlockTable data, boolean connected,
 			Color[] plotColors, String[] infos) {
-		plot(data, connected, legend, grid, plotColors, infos);
+		// retrieve a user-defined preference
+				SBPreferences prefs = SBPreferences
+						.getPreferencesFor(PlotOptions.class);
+		plot(data, connected, prefs.getBoolean(PlotOptions.SHOW_PLOT_LEGEND), prefs.getBoolean(PlotOptions.SHOW_PLOT_GRID), plotColors, infos);
+		
 	}
-
+	/**
+	 * Toggle, if the grid is shown in the plot panel.
+	 * 
+	 * @param showGrid
+	 */
 	public void setGridVisible(boolean showGrid) {
-		this.grid = showGrid;
+		// retrieve a user-defined preference
 		this.getChart().getXYPlot().setDomainGridlinesVisible(showGrid);
 		this.getChart().getXYPlot().setRangeGridlinesVisible(showGrid);
 	}
 
+	/**
+	 * Toggle, if the legend is shown in the plot panel.
+	 * 
+	 * @param showLegend
+	 */
 	public void setShowLegend(boolean showLegend) {
-		this.legend = showLegend;
+		// retrieve a user-defined preference
+//		SBPreferences prefs = SBPreferences
+//				.getPreferencesFor(PlotOptions.class);
+//		prefs.put(PlotOptions.SHOW_PLOT_LEGEND, showLegend);
 		if (this.getChart().getLegend() != null)
 			this.getChart().getLegend().setVisible(showLegend);
 	}
 
+	/**
+	 * Toggle, if tooltips are shown in the graph.
+	 * 
+	 * @param showGraphToolTips
+	 */
 	public void setShowGraphToolTips(boolean showGraphToolTips) {
+		// retrieve a user-defined preference
+//		SBPreferences prefs = SBPreferences
+//				.getPreferencesFor(PlotOptions.class);
+//		prefs.put(PlotOptions.SHOW_PLOT_TOOLTIPS, showGraphToolTips);
 		this.setDisplayToolTips(showGraphToolTips);
 	}
 
+	/**
+	 * Clear all data, currently plotted by this panel.
+	 */
 	public void clearAll() {
 		if (this.getChart() != null)
 			this.getChart().getXYPlot().setDataset(new DefaultXYDataset());
 	}
 
+	/**
+	 * 
+	 * @return false
+	 */
 	public boolean checkLoggable() {
-		return false;
+		throw new UnsupportedOperationException(
+				"This plot panel has no loggin feature.");
+		// return false;
 	}
 
+	/**
+	 * 
+	 * @param selected
+	 */
 	public void toggleLog(boolean selected) {
 
 	}

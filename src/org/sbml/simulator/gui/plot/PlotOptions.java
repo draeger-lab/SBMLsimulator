@@ -45,39 +45,47 @@ public interface PlotOptions extends KeyProvider {
     /**
      * 
      */
-    public static final Option<Color> PLOT_BACKGROUND = new Option<Color>(
-      "PLOT_BACKGROUND", Color.class, "The background color of the plot", Color.WHITE);
+    public static final Option<Color> PLOT_BACKGROUND_COLOR = new Option<Color>(
+    		"PLOT_BACKGROUND_COLOR", Color.class, "The background color of the plot", Color.WHITE);
     /**
      * 
      */
     public static final Option<Color> PLOT_GRID_COLOR = new Option<Color>(
-      "PLOT_GRID_COLOR", Color.class, "The background color of the plot", Color.DARK_GRAY);
+    		"PLOT_GRID_COLOR", Color.class, "The color of the plot's grid", Color.DARK_GRAY);
+    /**
+     * 
+     */
+    public static final Option<String> PLOT_TITLE = new Option<String>(
+    		"PLOT_TITLE", String.class, "Set the title of the plot", "");
+    
 
-    /**
-     * When storing any GUI elements or other pictures into a JPEG graphics file
-     * the value associated to this key is used for the degree of compression.
-     * Expected is a float value between 0 and 1.
-     */
-    public static final Option<Float> JPEG_COMPRESSION_FACTOR = new Option<Float>(
-	"JPEG_COMPRESSION_FACTOR",
-	Float.class,
-	"When storing any GUI elements or other pictures into a JPEG graphics file the value associated to this key is used for the degree of compression. Expected is a float value between 0 and 1.",
-	new Range<Float>(Float.class, "{[0.0,1.0]}"), Float.valueOf(.7f));
-    /**
-     * This field decides whether or not by default a logarithmic scale should
-     * be applied when plotting values in a two-dimensional figure.
-     */
-    public static final Option<Boolean> PLOT_LOG_SCALE = new Option<Boolean>(
-	"PLOT_LOG_SCALE", Boolean.class, bundle.getString("SIM:0000006"),
-	Boolean.FALSE, bundle.getString("SIM:0000002"));
-    /**
-     * The default save directory for graphics files as a result of a plot.
-     */
-    public static final Option<File> PLOT_SAVE_DIR = new Option<File>(
-	"PLOT_SAVE_DIR", File.class,
-	"The default save directory for graphics files as a result of a plot.",
-	new Range<File>(File.class, SBFileFilter.createDirectoryFilter()),
-	new File(System.getProperty("user.home")));
+//    /**
+//     * When storing any GUI elements or other pictures into a JPEG graphics file
+//     * the value associated to this key is used for the degree of compression.
+//     * Expected is a float value between 0 and 1.
+//     */
+//    public static final Option<Float> JPEG_COMPRESSION_FACTOR = new Option<Float>(
+//	"JPEG_COMPRESSION_FACTOR",
+//	Float.class,
+//	"When storing any GUI elements or other pictures into a JPEG graphics file the value associated to this key is used for the degree of compression. Expected is a float value between 0 and 1.",
+//	new Range<Float>(Float.class, "{[0.0,1.0]}"), Float.valueOf(.7f));
+//    /**
+//     * This field decides whether or not by default a logarithmic scale should
+//     * be applied when plotting values in a two-dimensional figure.
+//     */
+//    public static final Option<Boolean> PLOT_LOG_SCALE = new Option<Boolean>(
+//	"PLOT_LOG_SCALE", Boolean.class, bundle.getString("SIM:0000006"),
+//	Boolean.FALSE, bundle.getString("SIM:0000002"));
+//    /**
+//     * The default save directory for graphics files as a result of a plot.
+//     */
+//    public static final Option<File> PLOT_SAVE_DIR = new Option<File>(
+//	"PLOT_SAVE_DIR", File.class,
+//	"The default save directory for graphics files as a result of a plot.",
+//	new Range<File>(File.class, SBFileFilter.createDirectoryFilter()),
+//	new File(System.getProperty("user.home")));
+    
+    
     /**
      * With this key it can be specified whether a two-dimensional plot should
      * display a grid to highlight the position of points and lines.
@@ -99,8 +107,9 @@ public interface PlotOptions extends KeyProvider {
     public static final Option<Boolean> SHOW_PLOT_TOOLTIPS = new Option<Boolean>(
 	"SHOW_PLOT_TOOLTIPS", Boolean.class, bundle.getString("SIM:0000009"),
 	Boolean.FALSE, bundle.getString("SIM:0000005"));
-    
-    public static final OptionGroup BASE_OPTIONS = new OptionGroup("Base options", "bla bla", SHOW_PLOT_GRID, SHOW_PLOT_LEGEND);
-    public static final OptionGroup PLOT_APPEARANCE = new OptionGroup("Options for appearence of the Plot Area", "Options for appearence of the Plot Area", PLOT_BACKGROUND, PLOT_GRID_COLOR);
+        
+    public static final OptionGroup TITLE_OPTIONS = new OptionGroup("Adjust the tile for the plot", "Plot title", PLOT_TITLE);
+    public static final OptionGroup BASE_OPTIONS = new OptionGroup("Plotting panel options", "Options for the visible rect of the plot panel", SHOW_PLOT_GRID, SHOW_PLOT_LEGEND, SHOW_PLOT_TOOLTIPS);
+    public static final OptionGroup PLOT_APPEARANCE = new OptionGroup("Options for appearence of the Plot Area", "Options for appearence of the Plot Area", PLOT_BACKGROUND_COLOR, PLOT_GRID_COLOR);
 
 }

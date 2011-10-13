@@ -194,8 +194,9 @@ public class LegendTableModel extends AbstractTableModel {
 	 * @param nsb
 	 * @param rowIndex
 	 */
-	private void fillData(NamedSBaseWithDerivedUnit nsb, int rowIndex) {
-		data[rowIndex][boolCol] = Boolean.TRUE;
+	private void fillData(NamedSBaseWithDerivedUnit nsb, int rowIndex,
+			boolean boolcol) {
+		data[rowIndex][boolCol] = boolcol;
 		data[rowIndex][colorCol] = indexToColor(rowIndex);
 		data[rowIndex][nsbCol] = nsb;
 
@@ -339,20 +340,20 @@ public class LegendTableModel extends AbstractTableModel {
 		data = new Object[dim][4];
 		int i, j;
 		for (i = 0; i < model.getNumCompartments(); i++) {
-			fillData(model.getCompartment(i), i);
+			fillData(model.getCompartment(i), i, false);
 		}
 		j = model.getNumCompartments();
 		for (i = 0; i < model.getNumSpecies(); i++) {
-			fillData(model.getSpecies(i), i + j);
+			fillData(model.getSpecies(i), i + j, true);
 		}
 		j = model.getNumCompartments() + model.getNumSpecies();
 		for (i = 0; i < model.getNumParameters(); i++) {
-			fillData(model.getParameter(i), i + j);
+			fillData(model.getParameter(i), i + j, false);
 		}
 		if (includeReactions) {
 			j = model.getNumSymbols();
 			for (i = 0; i < model.getNumReactions(); i++) {
-				fillData(model.getReaction(i), i + j);
+				fillData(model.getReaction(i), i + j, false);
 			}
 		}
 
