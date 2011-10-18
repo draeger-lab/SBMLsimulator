@@ -23,7 +23,8 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.data.xy.DefaultXYDataset;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.HorizontalAlignment;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.VerticalAlignment;
@@ -49,6 +50,8 @@ public class Plot extends ChartPanel {
 	 * Generated serial version identifier.
 	 */
 	private static final long serialVersionUID = 176134486775218455L;
+	private int datasetCount;
+
 	// /**
 	// * The x/y label of the plot's axes
 	// */
@@ -70,9 +73,9 @@ public class Plot extends ChartPanel {
 	 *            the label of the y-axis
 	 */
 	public Plot(String xname, String yname) {
-		super(ChartFactory.createXYLineChart("", xname, yname,
-				new DefaultXYDataset(), PlotOrientation.VERTICAL, true, false,
-				false), false, true, true, false, true);
+		super(ChartFactory.createXYLineChart("", xname, yname, null,
+				PlotOrientation.VERTICAL, true, false, false), false, true,
+				true, false, true);
 
 		this.getChart().getXYPlot().setDomainPannable(true);
 		this.getChart().getXYPlot().setRangePannable(true);
@@ -113,10 +116,18 @@ public class Plot extends ChartPanel {
 								prefs.get(PlotOptions.PLOT_GRID_COLOR)));
 
 		this.getChart().setTitle(prefs.get(PlotOptions.PLOT_TITLE));
-		
+
 		this.setShowLegend(prefs.getBoolean(PlotOptions.SHOW_PLOT_LEGEND));
 		this.setGridVisible(prefs.getBoolean(PlotOptions.SHOW_PLOT_GRID));
-		this.setShowGraphToolTips(prefs.getBoolean(PlotOptions.SHOW_PLOT_TOOLTIPS));
+		this.setShowGraphToolTips(prefs
+				.getBoolean(PlotOptions.SHOW_PLOT_TOOLTIPS));
+
+		XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) this
+				.getChart().getXYPlot().getRenderer(1);
+		if (renderer != null) {
+			renderer.setBaseLinesVisible(false);
+			renderer.setBaseShapesVisible(true);
+		}
 	}
 
 	/**
@@ -144,18 +155,31 @@ public class Plot extends ChartPanel {
 	public void plot(MultiBlockTable plotData, boolean connected,
 			boolean showLegend, boolean showGrid, Color[] plotColors,
 			String[] infos) {
-		this.getChart().getXYPlot()
-				.setDataset(new MultiBlockTableToTimeSeriesAdapter(plotData));
+		XYDataset dataset = new MultiBlockTableToTimeSeriesAdapter(plotData);
+		this.getChart().getXYPlot().setDataset(datasetCount, dataset);
 
-		XYItemRenderer renderer = this.getChart().getXYPlot().getRenderer();
-
+		XYItemRenderer renderer = this.getChart().getXYPlot()
+				.getRenderer(datasetCount);
+		XYLineAndShapeRenderer lineandshap;
+		if (renderer != null) {
+			lineandshap = (XYLineAndShapeRenderer) renderer;
+		} else {
+			lineandshap = new XYLineAndShapeRenderer();
+		}
+		lineandshap.setBaseLinesVisible(true);
+		lineandshap.setBaseShapesVisible(false);
 		for (int i = 0; i < plotColors.length; i++) {
 			Color col = plotColors[i];
 			boolean visible = col != null;
-			renderer.setSeriesVisible(i, visible);
-			renderer.setSeriesVisibleInLegend(i, visible);
-			renderer.setSeriesPaint(i, col);
+			// if(infos[i]!=null){
+			int index = i;// plotData.findColumn(infos[i])-1;
+			lineandshap.setSeriesVisible(index, visible);
+			lineandshap.setSeriesVisibleInLegend(index, visible);
+			lineandshap.setSeriesPaint(index, col);
+			// }
 		}
+
+		this.getChart().getXYPlot().setRenderer(datasetCount++, lineandshap);
 
 		this.loadUserSettings();
 	}
@@ -224,11 +248,13 @@ public class Plot extends ChartPanel {
 	public void plot(MultiBlockTable data, boolean connected,
 			Color[] plotColors, String[] infos) {
 		// retrieve a user-defined preference
-				SBPreferences prefs = SBPreferences
-						.getPreferencesFor(PlotOptions.class);
-		plot(data, connected, prefs.getBoolean(PlotOptions.SHOW_PLOT_LEGEND), prefs.getBoolean(PlotOptions.SHOW_PLOT_GRID), plotColors, infos);
-		
+		SBPreferences prefs = SBPreferences
+				.getPreferencesFor(PlotOptions.class);
+		plot(data, connected, prefs.getBoolean(PlotOptions.SHOW_PLOT_LEGEND),
+				prefs.getBoolean(PlotOptions.SHOW_PLOT_GRID), plotColors, infos);
+
 	}
+
 	/**
 	 * Toggle, if the grid is shown in the plot panel.
 	 * 
@@ -247,9 +273,9 @@ public class Plot extends ChartPanel {
 	 */
 	public void setShowLegend(boolean showLegend) {
 		// retrieve a user-defined preference
-//		SBPreferences prefs = SBPreferences
-//				.getPreferencesFor(PlotOptions.class);
-//		prefs.put(PlotOptions.SHOW_PLOT_LEGEND, showLegend);
+		// SBPreferences prefs = SBPreferences
+		// .getPreferencesFor(PlotOptions.class);
+		// prefs.put(PlotOptions.SHOW_PLOT_LEGEND, showLegend);
 		if (this.getChart().getLegend() != null)
 			this.getChart().getLegend().setVisible(showLegend);
 	}
@@ -261,9 +287,9 @@ public class Plot extends ChartPanel {
 	 */
 	public void setShowGraphToolTips(boolean showGraphToolTips) {
 		// retrieve a user-defined preference
-//		SBPreferences prefs = SBPreferences
-//				.getPreferencesFor(PlotOptions.class);
-//		prefs.put(PlotOptions.SHOW_PLOT_TOOLTIPS, showGraphToolTips);
+		// SBPreferences prefs = SBPreferences
+		// .getPreferencesFor(PlotOptions.class);
+		// prefs.put(PlotOptions.SHOW_PLOT_TOOLTIPS, showGraphToolTips);
 		this.setDisplayToolTips(showGraphToolTips);
 	}
 
@@ -271,8 +297,12 @@ public class Plot extends ChartPanel {
 	 * Clear all data, currently plotted by this panel.
 	 */
 	public void clearAll() {
-		if (this.getChart() != null)
-			this.getChart().getXYPlot().setDataset(new DefaultXYDataset());
+		if (this.getChart() != null) {
+			for (int i = 0; i < datasetCount; i++) {
+				this.getChart().getXYPlot().setDataset(i, null);
+			}
+			datasetCount = 0;
+		}
 	}
 
 	/**

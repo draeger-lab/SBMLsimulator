@@ -163,6 +163,12 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 
 	private long simulationTime;
 
+	private SimulatorUI windowListener;
+
+	private QuantitySelectionPanel panel;
+
+	private Model model;
+
 	/**
      * 
      */
@@ -207,7 +213,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		if (e.getActionCommand() == null) {
 			return;
 		}
-				
+
 		switch (Command.valueOf(e.getActionCommand())) {
 		case EDIT_MODEL:
 			logger.info("Starting model editor");
@@ -404,7 +410,8 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		SBPreferences prefs = SBPreferences.getPreferencesFor(GUIOptions.class);
 		File files[] = GUITools.openFileDialog(this,
 				prefs.get(GUIOptions.OPEN_DIR).toString(), false, false,
-				JFileChooser.FILES_ONLY, SBFileFilter.createSBMLFileFilterList());
+				JFileChooser.FILES_ONLY,
+				SBFileFilter.createSBMLFileFilterList());
 		if ((files != null) && (files.length == 1)) {
 			return openModel(files[0]);
 		}
@@ -516,8 +523,10 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
      * 
      */
 	public void optimize() {
-		Model model = simPanel.getModel().getSBMLDocument().clone().getModel();
-		QuantitySelectionPanel panel = new QuantitySelectionPanel(model);
+	  model = simPanel.getModel().getSBMLDocument().clone().getModel();
+	panel = new QuantitySelectionPanel(
+				model);
+		windowListener = this;
 		if (JOptionPane.showConfirmDialog(this, panel,
 				"Select quantities for optimization",
 				JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
@@ -530,17 +539,29 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 						Command.EDIT_MODEL, Command.SIMULATION_START,
 						BaseAction.FILE_CLOSE, Command.OPTIMIZATION,
 						BaseAction.EDIT_PREFERENCES);
-				SBPreferences prefs = SBPreferences
-						.getPreferencesFor(EstimationOptions.class);
-				EvA2GUIStarter.init(
-						new EstimationProblem(simPanel.getSolver(), simPanel
-								.getDistance(), model, simPanel
-								.getExperimentalData(), prefs
-								.getBoolean(EstimationOptions.EST_MULTI_SHOOT),
-								panel.getSelectedQuantityRanges()), this,
-						simPanel, this);
-				simPanel.setAllEnabled(true);
 
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							SBPreferences prefs = SBPreferences
+									.getPreferencesFor(EstimationOptions.class);
+							EvA2GUIStarter.init(
+									new EstimationProblem(
+											simPanel.getSolver(),
+											simPanel.getDistance(),
+											model,
+											simPanel.getExperimentalData(),
+											prefs.getBoolean(EstimationOptions.EST_MULTI_SHOOT),
+											panel.getSelectedQuantityRanges()),
+									windowListener, simPanel, windowListener);
+							simPanel.setAllEnabled(true);
+						} catch (Throwable exc) {
+							GUITools.showErrorMessage(windowListener, exc);
+							simPanel.setAllEnabled(true);
+						}
+					}
+				}).start();
 			} catch (Throwable exc) {
 				GUITools.showErrorMessage(this, exc);
 				simPanel.setAllEnabled(true);
@@ -584,6 +605,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 						Command.OPTIMIZATION, BaseAction.EDIT_PREFERENCES);
 			}
 		}
+		System.out.println("Clicked OK/Cancel");
 	}
 
 	/*

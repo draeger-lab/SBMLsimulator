@@ -81,5 +81,5 @@ public class MultiBlockTableToTimeSeriesAdapter extends AbstractXYDataset {
 	public Comparable<String> getSeriesKey(int series) {
 		return table.getColumnName(series+1);
 	}
-	
+
 }
