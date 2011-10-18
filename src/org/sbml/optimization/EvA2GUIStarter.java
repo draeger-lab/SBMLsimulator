@@ -24,9 +24,11 @@ import java.util.List;
 import eva2.client.EvAClient;
 import eva2.gui.BeanInspector;
 import eva2.gui.GenericObjectEditor;
+import eva2.server.go.enums.DETypeEnum;
 import eva2.server.go.enums.PSOTopologyEnum;
 import eva2.server.go.operators.terminators.EvaluationTerminator;
 import eva2.server.go.problems.InterfaceOptimizationProblem;
+import eva2.server.go.strategies.DifferentialEvolution;
 import eva2.server.go.strategies.ParticleSwarmOptimization;
 import eva2.server.modules.GOParameters;
 import eva2.server.stat.InterfaceStatisticsListener;
@@ -61,8 +63,10 @@ public class EvA2GUIStarter {
 		// Genetic Optimization
 		// parameterization
 
-		goParams.setOptimizer(new ParticleSwarmOptimization(50, 2.05, 2.05,
-				PSOTopologyEnum.grid, 2));
+//		goParams.setOptimizer(new ParticleSwarmOptimization(50, 2.05, 2.05,
+//				PSOTopologyEnum.grid, 2));
+		DifferentialEvolution optimizer = new DifferentialEvolution();
+		goParams.setOptimizer(optimizer);
 		goParams.setTerminator(new EvaluationTerminator(3000));
 
 		// set the initial EvA problem here
@@ -76,8 +80,7 @@ public class EvA2GUIStarter {
 		// public EvAClient(final String hostName, final Window parent, final
 		// String paramsFile, final InterfaceGOParameters goParams, final
 		// boolean autorun, final boolean noSplash, final boolean noGui) {
-		evaBP.evaClient = new EvAClient(null, parentWindow, null, goParams,
-				false, true, false); // initializes GUI in the background
+		evaBP.evaClient = new EvAClient(null, goParams, false, true, false); // initializes GUI in the background
 		// important: wait for GUI initialization before accessing any internal
 		// settings:
 		evaBP.evaClient.awaitClientInitialized(); // this returns as soon as the

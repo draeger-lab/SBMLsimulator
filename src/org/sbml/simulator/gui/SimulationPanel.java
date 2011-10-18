@@ -356,10 +356,11 @@ public class SimulationPanel extends JPanel implements
         || (currentDistance > statDoubles[runBestIndex].doubleValue())) {
       setSimulationData((MultiBlockTable) statObjects[simulationDataIndex]);
       tools.setCurrentQualityMeasure(statDoubles[runBestIndex].doubleValue());
-      double solution[] = (double[]) statObjects[solutionIndex];
+//      double solution[] = (double[]) statObjects[solutionIndex];
       for (int i = 0; i < selectedQuantityIds.length; i++) {
-        visualizationPanel.updateQuantity(selectedQuantityIds[i], solution[i]);
+        visualizationPanel.updateQuantity(selectedQuantityIds[i], statDoubles[i]);
       }
+      System.out.println("notify");
     }
   }
   
@@ -372,7 +373,7 @@ public class SimulationPanel extends JPanel implements
    */
   public boolean notifyMultiRunFinished(String[] header,
     List<Object[]> multiRunFinalObjectData) {
-    // TODO Auto-generated method stub
+    System.out.println("notify finished");
     return false;
   }
   
@@ -391,7 +392,8 @@ public class SimulationPanel extends JPanel implements
    */
   public void notifyRunStarted(int runNumber, int plannedMultiRuns,
     String[] header, String[] metaInfo) {
-    // Determine indices
+    System.out.println("run started");
+	  // Determine indices
     int i, allFound = 0;
     for (i = 0; (i < header.length) && (allFound < 3); i++) {
       if (header[i].equals(EstimationProblem.SIMULATION_DATA)) {
@@ -415,7 +417,7 @@ public class SimulationPanel extends JPanel implements
    * boolean)
    */
   public void notifyRunStopped(int runsPerformed, boolean completedLastRun) {
-    // System.out.println("notifyRunStopped");
+     System.out.println("notifyRunStopped");
   }
   
 //  /**
