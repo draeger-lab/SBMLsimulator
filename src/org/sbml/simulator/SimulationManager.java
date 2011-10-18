@@ -26,6 +26,8 @@ import org.sbml.simulator.gui.SimulationWorker;
 import org.sbml.simulator.math.odes.IntegrationException;
 import org.sbml.simulator.math.odes.MultiBlockTable;
 
+import eva2.tools.math.Mathematics;
+
 /**
  * This class stores the simulation configuration and the quality measurement
  * for a simulation including the solution and the distance values if computed.
@@ -41,6 +43,11 @@ public class SimulationManager implements PropertyChangeListener {
    * The quality measurement for current simulation.
    */
   private QualityMeasurement qualityMeasurement;
+  
+  /**
+   * The worker for the simulation.
+   */
+  private SimulationWorker simworker;
   
   /**
    * The simulation configuration for current simulation.
@@ -110,7 +117,7 @@ public class SimulationManager implements PropertyChangeListener {
    * @throws Exception
    */
   public void simulate() throws Exception {
-    SimulationWorker simworker = new SimulationWorker(simlationConfiguration
+    simworker = new SimulationWorker(simlationConfiguration
         .getSolver(), simlationConfiguration.getModel(), simlationConfiguration
         .getStart(), simlationConfiguration.getEnd(), simlationConfiguration
         .getStepSize(), simlationConfiguration.isIncludeReactions());
@@ -130,6 +137,12 @@ public class SimulationManager implements PropertyChangeListener {
     if ("progress".equals(evt.getPropertyName())) {
       this.pcs.firePropertyChange(evt);
     } else if ("done".equals(evt.getPropertyName())) {
+      solution=simworker.getSolution();
+      try {
+        computeModelQuality();
+      } catch (Exception e) {
+        e.printStackTrace();
+      } 
       this.pcs.firePropertyChange(evt);
     }
   }
@@ -161,14 +174,14 @@ public class SimulationManager implements PropertyChangeListener {
     
     distanceValues = new double[qualityMeasurement.getMeasurements().size()];
     meanDistanceValue = 0d;
-    /*
-     * if (worker.isSetModel() && worker.isSetData()) {
-     * worker.setStepSize(getStepSize());
-     * setCurrentQualityMeasure(worker.computeQuality());
-     * qualityMeasureField.setToolTipText(StringUtil.toHTML(String.format(
-     * QUALITY_FIELD_TOOL_TIP, qualityMeasureFunctions.getSelectedItem(),
-     * solvers.getSelectedItem()), 60)); }
-     */
+    
+    if (solution!=null && qualityMeasurement.getMeasurements().size()>0) {
+      for(int i=0;i!=qualityMeasurement.getMeasurements().size();i++) {
+        distanceValues[i]=qualityMeasurement.getDistance().distance(solution, qualityMeasurement.getMeasurements().get(i));
+      }
+      meanDistanceValue=Mathematics.mean(distanceValues);
+    }
+     
   }
   
   /**

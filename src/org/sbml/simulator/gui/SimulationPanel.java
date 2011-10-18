@@ -138,9 +138,11 @@ public class SimulationPanel extends JPanel implements
         if (model == null) {
           throw new NullPointerException("Model is null.");
         }
-        simulationManager = new SimulationManager(new QualityMeasurement(),
+        QualityMeasurement measurement = new QualityMeasurement();
+        simulationManager = new SimulationManager(measurement,
           new SimulationConfiguration(model));
         simulationManager.addPropertyChangeListener(this);
+        this.addPropertyChangedListener(measurement);
         visualizationPanel = new SimulationVisualizationPanel();
         loadPreferences();
       } catch (Exception exc) {
@@ -356,11 +358,10 @@ public class SimulationPanel extends JPanel implements
         || (currentDistance > statDoubles[runBestIndex].doubleValue())) {
       setSimulationData((MultiBlockTable) statObjects[simulationDataIndex]);
       tools.setCurrentQualityMeasure(statDoubles[runBestIndex].doubleValue());
-//      double solution[] = (double[]) statObjects[solutionIndex];
+      double solution[] = (double[]) statObjects[solutionIndex];
       for (int i = 0; i < selectedQuantityIds.length; i++) {
-        visualizationPanel.updateQuantity(selectedQuantityIds[i], statDoubles[i]);
+        visualizationPanel.updateQuantity(selectedQuantityIds[i], solution[i]);
       }
-      System.out.println("notify");
     }
   }
   
@@ -373,7 +374,7 @@ public class SimulationPanel extends JPanel implements
    */
   public boolean notifyMultiRunFinished(String[] header,
     List<Object[]> multiRunFinalObjectData) {
-    System.out.println("notify finished");
+    // TODO Auto-generated method stub
     return false;
   }
   
@@ -392,8 +393,7 @@ public class SimulationPanel extends JPanel implements
    */
   public void notifyRunStarted(int runNumber, int plannedMultiRuns,
     String[] header, String[] metaInfo) {
-    System.out.println("run started");
-	  // Determine indices
+    // Determine indices
     int i, allFound = 0;
     for (i = 0; (i < header.length) && (allFound < 3); i++) {
       if (header[i].equals(EstimationProblem.SIMULATION_DATA)) {
@@ -417,7 +417,7 @@ public class SimulationPanel extends JPanel implements
    * boolean)
    */
   public void notifyRunStopped(int runsPerformed, boolean completedLastRun) {
-     System.out.println("notifyRunStopped");
+    // System.out.println("notifyRunStopped");
   }
   
 //  /**
@@ -493,6 +493,8 @@ public class SimulationPanel extends JPanel implements
     expTable.setModel(data);
     tabbedPane.setEnabledAt(2, true);
     this.firePropertyChange("measurements", null, data);
+    //TODO preliminary version: property does not change for quality measurement with the call firePropertyChange()
+    simulationManager.getQualityMeasurement().propertyChange(new PropertyChangeEvent(this,"measurements",null,data));
     visualizationPanel.setExperimentData(data);
   }
   
@@ -565,6 +567,12 @@ public class SimulationPanel extends JPanel implements
       MultiBlockTable data = (MultiBlockTable) evt.getNewValue();
       if (data != null) {
         setSimulationData(data);
+      }
+      try {
+        if (simulationManager.getQualityMeasurement().getMeasurements().size()>0) {
+          getOrCreateFootPanel().setCurrentQualityMeasure(simulationManager.getMeanDistanceValue());
+        }
+      } catch (Exception e) {
       }
       firePropertyChanged(evt);
     }

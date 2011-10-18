@@ -98,6 +98,11 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, MultiBlockTab
    */
   private double timeStart, timeEnd, stepSize;
   
+  /**
+   * The solution of the simulation
+   */
+  private MultiBlockTable solution;
+  
   
   /**
    * 
@@ -128,8 +133,9 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, MultiBlockTab
    */
   @Override
   protected MultiBlockTable doInBackground() throws Exception {
-    return solveByStepSize(solver, interpreter, interpreter.getInitialValues(),
+    solution=solveByStepSize(solver, interpreter, interpreter.getInitialValues(),
       timeStart, timeEnd, stepSize, includeReactions);
+    return solution;
   }
   
   /* (non-Javadoc)
@@ -154,6 +160,14 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, MultiBlockTab
   public void propertyChange(PropertyChangeEvent evt) {
     getPropertyChangeSupport().firePropertyChange(evt);
   } 
+  
+  /**
+   * 
+   * @return
+   */
+  public MultiBlockTable getSolution() {
+    return solution;
+  }
   
 
 }
