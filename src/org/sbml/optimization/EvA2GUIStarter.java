@@ -80,7 +80,7 @@ public class EvA2GUIStarter {
 		// public EvAClient(final String hostName, final Window parent, final
 		// String paramsFile, final InterfaceGOParameters goParams, final
 		// boolean autorun, final boolean noSplash, final boolean noGui) {
-		evaBP.evaClient = new EvAClient(null, goParams, false, true, false); // initializes GUI in the background
+		evaBP.evaClient = new EvAClient(null, parentWindow,null,goParams, false, true, false); // initializes GUI in the background
 		// important: wait for GUI initialization before accessing any internal
 		// settings:
 		evaBP.evaClient.awaitClientInitialized(); // this returns as soon as the
