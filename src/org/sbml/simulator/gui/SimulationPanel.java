@@ -358,9 +358,9 @@ public class SimulationPanel extends JPanel implements
         || (currentDistance > statDoubles[runBestIndex].doubleValue())) {
       setSimulationData((MultiBlockTable) statObjects[simulationDataIndex]);
       tools.setCurrentQualityMeasure(statDoubles[runBestIndex].doubleValue());
-      double solution[] = (double[]) statObjects[solutionIndex];
+      String[] solutionString = statObjects[solutionIndex].toString().replace("{","").replace("}","").split(", ");
       for (int i = 0; i < selectedQuantityIds.length; i++) {
-        visualizationPanel.updateQuantity(selectedQuantityIds[i], solution[i]);
+        visualizationPanel.updateQuantity(selectedQuantityIds[i], Double.parseDouble(solutionString[i].replace(',', '.')));
       }
     }
   }
@@ -374,8 +374,17 @@ public class SimulationPanel extends JPanel implements
    */
   public boolean notifyMultiRunFinished(String[] header,
     List<Object[]> multiRunFinalObjectData) {
-    // TODO Auto-generated method stub
-    return false;
+    for(Object[] obj: multiRunFinalObjectData) {
+      String[] solutionString = obj[solutionIndex].toString().replace("{","").replace("}","").split(", ");
+    
+      for (int i = 0; i < selectedQuantityIds.length; i++) {
+        double currentQuantity=Double.parseDouble(solutionString[i].replace(',', '.'));
+        visualizationPanel.updateQuantity(selectedQuantityIds[i], currentQuantity);
+        System.out.println(selectedQuantityIds[i] + ": " +currentQuantity);
+      
+      }
+    }
+    return true;
   }
   
   /**
@@ -417,7 +426,7 @@ public class SimulationPanel extends JPanel implements
    * boolean)
    */
   public void notifyRunStopped(int runsPerformed, boolean completedLastRun) {
-    // System.out.println("notifyRunStopped");
+    System.out.println("notifyRunStopped");
   }
   
 //  /**
