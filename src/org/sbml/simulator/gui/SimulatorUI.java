@@ -661,8 +661,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 			if (simPanel.isSetExperimentalData()) {
 				simPanel.closeExperimentalData();
 				GUITools.setEnabled(false, getJMenuBar(), toolBar,
-						Command.OPTIMIZATION, BaseAction.FILE_SAVE,
-						Command.EDIT_MODEL, Command.SIMULATION_START);
+						Command.OPTIMIZATION, BaseAction.FILE_SAVE);
 			} else {
 				getContentPane().remove(simPanel);
 				simPanel = null;
