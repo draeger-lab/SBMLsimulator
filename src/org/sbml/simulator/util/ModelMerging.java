@@ -24,7 +24,6 @@ import org.sbml.jsbml.Species;
 import org.sbml.jsbml.SpeciesReference;
 
 public class ModelMerging {
-  
   /**
    * 
    * @param modelFiles
@@ -152,9 +151,6 @@ public class ModelMerging {
     
     //remove elements with the same annotation and SBOTerm
     
-    //compartments
-    removeDuplicateElements(newDoc, compartmentAnnotationMap);
-    
     //species
     removeDuplicateElements(newDoc, speciesAnnotationMap);
     
@@ -162,6 +158,117 @@ public class ModelMerging {
     removeDuplicateElements(newDoc, reactionAnnotationMap);
     SBMLWriter w = new SBMLWriter();
     w.write(newDoc, "files/mergedModel.xml");
+    
+  }
+  
+  /**
+   * 
+   * @param modelFiles
+   * @throws XMLStreamException
+   * @throws IOException
+   * @throws SBMLException
+   */
+  public static void mergeCompartments(String modelFile)
+    throws XMLStreamException, IOException, SBMLException {
+    
+    SBMLDocument doc = (new SBMLReader()).readSBML(modelFile);
+    
+    SBMLDocument newDoc = new SBMLDocument(doc.getLevel(), doc.getVersion());
+    newDoc.createModel("newModel");
+    
+    Map<String, List<AbstractSBase>> speciesAnnotationMap = new HashMap<String, List<AbstractSBase>>();
+    Map<String, List<AbstractSBase>> reactionAnnotationMap = new HashMap<String, List<AbstractSBase>>();
+    
+    Model model = doc.getModel();
+    Map<String, String> ids = new HashMap<String, String>();
+    
+    Compartment c = newDoc.getModel().createCompartment("compartment");
+    //species
+    for (Species sp : model.getListOfSpecies()) {
+      
+      List<CVTerm> cvTerms = sp.getCVTerms();
+      String name = sp.getName();
+      String oldId = sp.getId();
+      sp.setId("_"
+          + name.replace(",", "_").replace("(", "_").replace(")", "_")
+              .replace("-", "_").replace("+", "plus"));
+      sp.setMetaId(sp.getId());
+      sp.setCompartment(c);
+      ids.put(oldId, sp.getId());
+      newDoc.getModel().addSpecies(sp);
+      if (cvTerms.size() != 0) {
+        sp.setAnnotation(new Annotation());
+      }
+      
+      for (CVTerm current : cvTerms) {
+        sp.addCVTerm(current);
+        if (current.getBiologicalQualifierType().equals(Qualifier.BQB_IS)) {
+          
+          for (String s : current.getResources()) {
+            List<AbstractSBase> list = speciesAnnotationMap.get(s);
+            if (list == null) {
+              list = new LinkedList<AbstractSBase>();
+            }
+            list.add(sp);
+            speciesAnnotationMap.put(s, list);
+          }
+        }
+      }
+      
+    }
+    
+    //reactions
+    for (Reaction r : model.getListOfReactions()) {
+      if (r.getSBOTerm() == 185) {
+        continue;
+      }
+      
+      for (SpeciesReference sr : r.getListOfProducts()) {
+        String newSpeciesId = ids.get(sr.getSpecies());
+        sr.setSpecies(newSpeciesId);
+      }
+      for (ModifierSpeciesReference sr : r.getListOfModifiers()) {
+        String newSpeciesId = ids.get(sr.getSpecies());
+        sr.setSpecies(newSpeciesId);
+      }
+      for (SpeciesReference sr : r.getListOfReactants()) {
+        String newSpeciesId = ids.get(sr.getSpecies());
+        sr.setSpecies(newSpeciesId);
+      }
+      List<CVTerm> cvTerms = r.getCVTerms();
+      
+      newDoc.getModel().addReaction(r);
+      if (cvTerms.size() != 0) {
+        r.setAnnotation(new Annotation());
+      }
+      
+      for (CVTerm current : cvTerms) {
+        r.addCVTerm(current);
+        if (current.getBiologicalQualifierType().equals(Qualifier.BQB_IS)) {
+          
+          for (String s : current.getResources()) {
+            if (s.contains("urn:miriam:kegg.reaction")) {
+              List<AbstractSBase> list = reactionAnnotationMap.get(s);
+              if (list == null) {
+                list = new LinkedList<AbstractSBase>();
+              }
+              list.add(r);
+              reactionAnnotationMap.put(s, list);
+            }
+          }
+        }
+      }
+    }
+    
+    //remove elements with the same annotation and SBOTerm
+    
+    //species
+    removeDuplicateElements(newDoc, speciesAnnotationMap);
+    
+    //reactions
+    removeDuplicateElements(newDoc, reactionAnnotationMap);
+    SBMLWriter w = new SBMLWriter();
+    w.write(newDoc, "files/oneCompartmentModel.xml");
     
   }
   
@@ -194,13 +301,21 @@ public class ModelMerging {
       Species s1 = (Species) abstractSBase;
       Species s2 = (Species) abstractSBase2;
       for (Reaction r : doc.getModel().getListOfReactions()) {
+        
         for (SpeciesReference sr : r.getListOfProducts()) {
           if (sr.getSpeciesInstance() == s2) {
+            if (r.getId().equals("r0422")) {
+              System.out.println();
+            }
             sr.setSpecies(s1);
           }
         }
         for (SpeciesReference sr : r.getListOfReactants()) {
+          
           if (sr.getSpeciesInstance() == s2) {
+            if (r.getId().equals("r0422")) {
+              System.out.println();
+            }
             sr.setSpecies(s1);
           }
         }
@@ -239,6 +354,9 @@ public class ModelMerging {
           && (abstractSBase2 instanceof Reaction)) {
         Reaction r1 = (Reaction) abstractSBase;
         Reaction r2 = (Reaction) abstractSBase2;
+        if (r1.getId().equals("r0422") || r2.getId().equals("r0422")) {
+          System.out.println();
+        }
         if (r1.getId().split("_")[0].equals(r2.getId().split("_")[0])) { return false; }
         
         //determine compartment of reaction 1
@@ -283,7 +401,10 @@ public class ModelMerging {
           && (abstractSBase2 instanceof Species)) {
         Species s1 = (Species) abstractSBase;
         Species s2 = (Species) abstractSBase2;
-        if (s1.getId().split("_")[0].equals(s2.getId().split("_")[0])) { return false; }
+        if (!(s1.getId().startsWith("_"))
+            && (s1.getId().split("_")[0].equals(s2.getId().split("_")[0]))) { return false; }
+        if ((s1.getId().startsWith("_"))
+            && !(s1.getId().split("_")[1].equals(s2.getId().split("_")[1]))) { return false; }
         if ((s1.getSBOTerm() == s2.getSBOTerm())
             && (s1.getCompartmentInstance() == s2.getCompartmentInstance())) { return true; }
       } else if ((abstractSBase instanceof Compartment)
@@ -301,9 +422,8 @@ public class ModelMerging {
   
   public static void main(String[] args) throws XMLStreamException,
     IOException, SBMLException {
-    String[] files = { "files/CAR_PXR_annotated.xml",
-        "files/HepatoNet1_annotated.xml" };
-    mergeModels(files);
+    String file = "files/Modell_Hofmann.xml";
+    mergeCompartments(file);
   }
   
 }

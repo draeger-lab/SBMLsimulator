@@ -238,9 +238,6 @@ public class ModelFilter {
     for (SpeciesReference sr : r.getListOfReactants()) {
       String id = sr.getSpecies();
       if (!speciesSet.contains(id)) {
-        if(r.getId().equals("r0112")) {
-        System.out.println(id);
-        }
         reactantsContained = false;
         break;
       }
@@ -249,9 +246,6 @@ public class ModelFilter {
     for (SpeciesReference sr : r.getListOfProducts()) {
       String id = sr.getSpecies();
       if (!speciesSet.contains(id)) {
-        if(r.getId().equals("r0112")) {
-          System.out.println(id);
-          }
         productsContained = false;
         break;
       }
