@@ -374,7 +374,14 @@ public class AnnotationUtils {
   
   public static void main(String[] args) throws XMLStreamException,
     SBMLException, IOException {
-    /*String file1 = "files/CAR_PXR_2_4.xml";
+    
+    /*String file1="files/Modell_Hofmann.xml";
+    String file2="files/annotations_HepatoNet.txt";
+    addAnnotations(file1,file1,file2,-1,-1);
+    */
+  
+    /*
+    String file1 = "files/CAR_PXR_2_4.xml";
     String file2 = "files/HepatoNet1.xml";
     String file3 = "files/CAR_PXR_annotated.xml";
     String file4 = "files/HepatoNet1_annotated.xml";
@@ -387,6 +394,7 @@ public class AnnotationUtils {
     String annotationFile5 = "files/Compartments_CAR_PXR.txt";
     
     String modifierFile = "files/CAR_PXR_catalysis.txt";
+    
     
     //annotate HepatoNet
     Annotate.automaticAnnotation(file2, file4);
@@ -415,6 +423,10 @@ public class AnnotationUtils {
     //compartments
     addAnnotations(file3, file3, annotationFile5, -1, -1);
     */
+    
+    
+    //addSBOTerms("files/Modell_Hofmann.xml","files/Modell_Hofmann.xml","files/Hofmann_SBO.txt",1);
+    
     addSBOTerms("files/Modell_Hofmann.xml","files/Modell_Hofmann.xml","files/Hofmann_SBO.txt",1);
   }
   
@@ -475,9 +487,10 @@ public class AnnotationUtils {
       if(sbo!=null) {
         element.setSBOTerm(sbo);
       }
-      else {
-        System.out.println(symbol);
+      else if(!element.isSetAnnotation()){
+        System.out.println(element.getId());
       }
+      
       
     }
     SBMLWriter w = new SBMLWriter();
