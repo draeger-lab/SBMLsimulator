@@ -10,7 +10,7 @@ import javax.xml.stream.XMLStreamException;
 
 import org.jfree.data.statistics.Statistics;
 import org.sbml.jsbml.SBMLException;
-import org.sbml.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.MultiBlockTable;
 
 import de.zbit.io.CSVWriter;
 

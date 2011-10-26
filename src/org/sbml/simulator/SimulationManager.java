@@ -23,8 +23,8 @@ import java.beans.PropertyChangeSupport;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.simulator.gui.SimulationWorker;
-import org.sbml.simulator.math.odes.IntegrationException;
-import org.sbml.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.IntegrationException;
+import org.simulator.math.odes.MultiBlockTable;
 
 import eva2.tools.math.Mathematics;
 

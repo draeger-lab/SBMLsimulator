@@ -21,6 +21,8 @@ import java.util.ResourceBundle;
 
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.math.RSE;
+import org.simulator.math.odes.AbstractDESSolver;
+import org.simulator.math.odes.RKEventSolver;
 
 import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.KeyProvider;

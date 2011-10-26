@@ -28,7 +28,7 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.HorizontalAlignment;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.VerticalAlignment;
-import org.sbml.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.MultiBlockTable;
 
 import de.zbit.util.prefs.Option;
 import de.zbit.util.prefs.SBPreferences;

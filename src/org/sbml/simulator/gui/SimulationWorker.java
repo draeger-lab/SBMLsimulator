@@ -27,12 +27,12 @@ import javax.swing.SwingWorker;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLException;
-import org.sbml.simulator.math.SBMLinterpreter;
-import org.sbml.simulator.math.odes.AbstractDESSolver;
-import org.sbml.simulator.math.odes.DESSolver;
-import org.sbml.simulator.math.odes.DESystem;
-import org.sbml.simulator.math.odes.IntegrationException;
-import org.sbml.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.AbstractDESSolver;
+import org.simulator.math.odes.DESSolver;
+import org.simulator.math.odes.DESystem;
+import org.simulator.math.odes.IntegrationException;
+import org.simulator.math.odes.MultiBlockTable;
+import org.simulator.sbml.SBMLinterpreter;
 
 /**
  * @author Andreas Dr&auml;ger

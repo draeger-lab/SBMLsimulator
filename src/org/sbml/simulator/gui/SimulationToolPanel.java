@@ -45,9 +45,9 @@ import org.sbml.simulator.SimulationConfiguration;
 import org.sbml.simulator.SimulationManager;
 import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.simulator.math.QualityMeasure;
-import org.sbml.simulator.math.odes.AbstractDESSolver;
-import org.sbml.simulator.math.odes.IntegrationException;
 import org.sbml.simulator.math.odes.SimulationOptions;
+import org.simulator.math.odes.AbstractDESSolver;
+import org.simulator.math.odes.IntegrationException;
 
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;

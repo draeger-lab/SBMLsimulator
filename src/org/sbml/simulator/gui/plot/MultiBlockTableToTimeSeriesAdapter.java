@@ -18,7 +18,7 @@
 package org.sbml.simulator.gui.plot;
 
 import org.jfree.data.xy.AbstractXYDataset;
-import org.sbml.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.MultiBlockTable;
 
 /**
  * 

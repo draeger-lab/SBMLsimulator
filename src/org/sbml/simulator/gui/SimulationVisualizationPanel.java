@@ -36,8 +36,8 @@ import org.sbml.jsbml.Model;
 import org.sbml.jsbml.UnitDefinition;
 import org.sbml.simulator.gui.plot.Plot;
 import org.sbml.simulator.gui.plot.PlotOptions;
-import org.sbml.simulator.math.odes.MultiBlockTable;
 import org.sbml.simulator.math.odes.SimulationOptions;
+import org.simulator.math.odes.MultiBlockTable;
 
 import de.zbit.util.StringUtil;
 import de.zbit.util.prefs.SBPreferences;

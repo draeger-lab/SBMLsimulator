@@ -24,8 +24,8 @@ import java.util.List;
 import org.sbml.simulator.math.NMetric;
 import org.sbml.simulator.math.QualityMeasure;
 import org.sbml.simulator.math.RelativeNMetric;
-import org.sbml.simulator.math.odes.MultiBlockTable;
 import org.sbml.simulator.math.odes.SimulationOptions;
+import org.simulator.math.odes.MultiBlockTable;
 
 import de.zbit.util.prefs.SBPreferences;
 
