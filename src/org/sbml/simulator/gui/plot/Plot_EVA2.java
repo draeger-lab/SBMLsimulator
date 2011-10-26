@@ -34,8 +34,8 @@ import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.swing.JFileChooser;
 
-import org.sbml.simulator.math.odes.MultiBlockTable;
-import org.sbml.simulator.math.odes.MultiBlockTable.Block.Column;
+import org.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.MultiBlockTable.Block.Column;
 
 import de.zbit.gui.GUITools;
 import de.zbit.io.SBFileFilter;

@@ -20,7 +20,7 @@ package org.sbml.simulator.math;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import org.sbml.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.MultiBlockTable;
 
 /**
  * This class is the basis of various implementations of distance functions.
@@ -56,7 +56,7 @@ public abstract class QualityMeasure implements Serializable {
 	 */
 	public QualityMeasure() {
 		this.defaultValue = Double.NaN;
-		meanFunction=new ArithmeticMean();
+		meanFunction=new NoMean();
 	}
 
 	/**
@@ -66,7 +66,7 @@ public abstract class QualityMeasure implements Serializable {
 	 */
 	public QualityMeasure(double defaultValue) {
 		this.defaultValue = defaultValue;
-		meanFunction=new ArithmeticMean();
+		meanFunction=new NoMean();
 	}
 
 	/**

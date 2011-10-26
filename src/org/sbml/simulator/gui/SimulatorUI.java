@@ -49,10 +49,10 @@ import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.gui.plot.PlotOptions;
-import org.sbml.simulator.math.odes.MultiBlockTable;
 import org.sbml.simulator.math.odes.SimulationOptions;
 import org.sbml.simulator.resources.Resource;
 import org.sbml.tolatex.LaTeXOptions;
+import org.simulator.math.odes.MultiBlockTable;
 
 import de.zbit.gui.ActionCommand;
 import de.zbit.gui.BaseFrame;

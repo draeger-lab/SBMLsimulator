@@ -31,6 +31,7 @@ import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.Species;
 import org.sbml.jsbml.SpeciesReference;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
+import org.simulator.sbml.SBMLinterpreter;
 
 /**
  * This Class represents a tool to get the information needed to do a stability

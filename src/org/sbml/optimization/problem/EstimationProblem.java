@@ -23,10 +23,10 @@ import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.optimization.QuantityRange;
 import org.sbml.simulator.math.QualityMeasure;
-import org.sbml.simulator.math.SBMLinterpreter;
-import org.sbml.simulator.math.odes.AbstractDESSolver;
-import org.sbml.simulator.math.odes.DESSolver;
-import org.sbml.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.AbstractDESSolver;
+import org.simulator.math.odes.DESSolver;
+import org.simulator.math.odes.MultiBlockTable;
+import org.simulator.sbml.SBMLinterpreter;
 
 import eva2.server.go.PopulationInterface;
 import eva2.server.go.populations.Population;

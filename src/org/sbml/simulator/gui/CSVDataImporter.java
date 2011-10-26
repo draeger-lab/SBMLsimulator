@@ -27,7 +27,7 @@ import java.util.Map;
 import javax.swing.JOptionPane;
 
 import org.sbml.jsbml.Model;
-import org.sbml.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.MultiBlockTable;
 
 import de.zbit.gui.csv.CSVImporter;
 import de.zbit.io.CSVReader;

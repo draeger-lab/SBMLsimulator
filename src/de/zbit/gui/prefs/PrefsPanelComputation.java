@@ -29,8 +29,8 @@ import javax.swing.event.ChangeListener;
 
 import org.sbml.jsbml.util.StringTools;
 import org.sbml.simulator.math.QualityMeasure;
-import org.sbml.simulator.math.odes.AbstractDESSolver;
 import org.sbml.simulator.math.odes.SimulationOptions;
+import org.simulator.math.odes.AbstractDESSolver;
 
 import de.zbit.gui.LayoutHelper;
 import de.zbit.util.StringUtil;

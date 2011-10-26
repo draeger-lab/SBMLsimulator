@@ -48,9 +48,9 @@ import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.SimulationConfiguration;
 import org.sbml.simulator.SimulationManager;
 import org.sbml.simulator.math.QualityMeasure;
-import org.sbml.simulator.math.odes.DESSolver;
-import org.sbml.simulator.math.odes.IntegrationException;
-import org.sbml.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.DESSolver;
+import org.simulator.math.odes.IntegrationException;
+import org.simulator.math.odes.MultiBlockTable;
 import org.sbml.simulator.math.odes.SimulationOptions;
 
 import de.zbit.gui.GUITools;
@@ -376,7 +376,7 @@ public class SimulationPanel extends JPanel implements
     List<Object[]> multiRunFinalObjectData) {
     for(Object[] obj: multiRunFinalObjectData) {
       String[] solutionString = obj[solutionIndex].toString().replace("{","").replace("}","").split(", ");
-    
+      System.out.println("Fitness: " + this.getDistance().distance((MultiBlockTable)obj[solutionIndex+2],this.getExperimentalData()));
       for (int i = 0; i < selectedQuantityIds.length; i++) {
         double currentQuantity=Double.parseDouble(solutionString[i].replace(',', '.'));
         visualizationPanel.updateQuantity(selectedQuantityIds[i], currentQuantity);
