@@ -70,7 +70,7 @@ public class SBMLsimulator {
 	/**
 	 * The package where all ODE solvers are assumed to be located.
 	 */
-	public static final String SOLVER_PACKAGE = "org.sbml.simulator.math.odes";
+	public static final String SOLVER_PACKAGE = "org.simulator.math.odes";
 	
 	/**
 	 * The version number of this program.
