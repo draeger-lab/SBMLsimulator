@@ -376,7 +376,7 @@ public class SimulationPanel extends JPanel implements
     List<Object[]> multiRunFinalObjectData) {
     for(Object[] obj: multiRunFinalObjectData) {
       String[] solutionString = obj[solutionIndex].toString().replace("{","").replace("}","").split(", ");
-      System.out.println("Fitness: " + this.getDistance().distance((MultiBlockTable)obj[solutionIndex+2],this.getExperimentalData()));
+      System.out.println("Fitness: " + ((Double)obj[1]));
       for (int i = 0; i < selectedQuantityIds.length; i++) {
         double currentQuantity=Double.parseDouble(solutionString[i].replace(',', '.'));
         visualizationPanel.updateQuantity(selectedQuantityIds[i], currentQuantity);
@@ -621,6 +621,14 @@ public class SimulationPanel extends JPanel implements
         listener.propertyChange(evt);
       }
     }
+  }
+
+  /**
+   * 
+   */
+  public void refreshStepSize() {
+    getSolver().setStepSize(simulationManager.getSimlationConfiguration().getStepSize());
+    
   }
   
 }

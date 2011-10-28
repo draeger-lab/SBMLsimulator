@@ -546,6 +546,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 						try {
 							SBPreferences prefs = SBPreferences
 									.getPreferencesFor(EstimationOptions.class);
+							simPanel.refreshStepSize();
 							EvA2GUIStarter.init(
 									new EstimationProblem(
 											simPanel.getSolver(),
