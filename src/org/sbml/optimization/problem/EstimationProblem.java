@@ -217,7 +217,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 			quantityRanges[i].getQuantity().setValue(x[i]);
 		}
 		try {
-			interpreter.init();
+			interpreter.init(false);
 			MultiBlockTable solution = multishoot ? solver.solve(interpreter,
 					referenceData.getBlock(0), interpreter.getInitialValues())
 					: solver.solve(interpreter, interpreter.getInitialValues(),
