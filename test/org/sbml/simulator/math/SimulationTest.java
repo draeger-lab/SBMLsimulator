@@ -17,11 +17,15 @@
  */
 package org.sbml.simulator.math;
 
+import java.io.File;
+
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.xml.stax.SBMLReader;
-import org.sbml.simulator.math.odes.AbstractDESSolver;
-import org.sbml.simulator.math.odes.MultiBlockTable;
-import org.sbml.simulator.math.odes.RKEventSolver;
+import org.sbml.simulator.gui.CSVDataImporter;
+import org.simulator.math.odes.AbstractDESSolver;
+import org.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.RosenbrockSolver;
+import org.simulator.sbml.SBMLinterpreter;
 
 import eva2.gui.Plot;
 
@@ -55,21 +59,34 @@ public class SimulationTest {
 			Model model = (new SBMLReader()).readSBML(args[0]).getModel(); 
 				//sbmlIo.convert2Model(args[0]);
 			// Model model = sbmlIo.readModel(path);
-			AbstractDESSolver rk = new RKEventSolver();
+			AbstractDESSolver solver = new RosenbrockSolver();
 			SBMLinterpreter interpreter = new SBMLinterpreter(model);
 			double time = 0;
 			
-			rk.setStepSize(0.01);
-			MultiBlockTable solution = rk.solve(interpreter, interpreter
-					.getInitialValues(), time, 2);
-
-
-			// rk.solveAtTimePoints(interpreter, interpreter
-			// .getInitialValues(), timePoints)
-			//			
-
+			CSVDataImporter importer = new CSVDataImporter();
+	    MultiBlockTable experimentalData = importer.convert(model,
+	            (new File(args[1])).getAbsolutePath());
+	    
+			solver.setStepSize(0.1);
+			MultiBlockTable solution = solver.solve(interpreter, interpreter.getInitialValues(), 0, 10);
+			
+			MultiBlockTable solution1 = solver.solve(interpreter,
+        experimentalData.getBlock(0), interpreter.getInitialValues());
+      
+			System.out.println(solution.getColumn("A").toString());
+			System.out.println(solution1.getColumn("A").toString());
+			
+			MultiBlockTable solution2= solver.solve(interpreter, interpreter.getInitialValues(),
+        experimentalData.getTimePoints());
+			
+			QualityMeasure qm = new Euclidean();
+			System.out.println(qm.distance(solution, experimentalData));
+			System.out.println(qm.distance(solution1, experimentalData));
+			System.out.println(qm.distance(solution2, experimentalData));
+			
 			System.out.println(solution.getColumnCount() - 1);
-			if (rk.isUnstable()) {
+			
+			if (solver.isUnstable()) {
 				System.err.println("unstable!");
 			} else {
 				int from = model.getNumCompartments();
@@ -83,7 +100,7 @@ public class SimulationTest {
 						plot.setConnectedPoint(time, sym, j);
 
 					}
-					time += rk.getStepSize();
+					time += solver.getStepSize();
 
 				}
 			}
