@@ -235,7 +235,9 @@ public class EstimationProblem extends AbstractProblemDouble implements
 			e.printStackTrace();
 			fitness[0] = Double.POSITIVE_INFINITY;
 		}
-		return fitness.clone();
+		double fitnessClone[] = new double[fitness.length];
+		System.arraycopy(fitness, 0, fitnessClone, 0, fitness.length);
+		return fitnessClone;
 	}
 
 	/*
