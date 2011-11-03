@@ -148,9 +148,18 @@ public abstract class QualityMeasure implements Serializable {
 			expected = x;
 			x = swap;
 		}
+	  
+		MultiBlockTable left = x;
+		MultiBlockTable right = expected;
+		if(x.isSetTimePoints() && expected.isSetTimePoints()) {
+		  left = x.filter(expected.getTimePoints());
+		  right = expected.filter(x.getTimePoints());
+		}
+	  
+	  
 		ArrayList<Double> distances= new ArrayList<Double>();
-		for (int i = 0; i < x.getBlockCount(); i++) {
-			distances.addAll(getColumnDistances(x.getBlock(i), expected.getBlock(i)));
+		for (int i = 0; i < left.getBlockCount(); i++) {
+			distances.addAll(getColumnDistances(left.getBlock(i), right.getBlock(i)));
 		}
 		return meanFunction.computeMean(distances);
 	}
