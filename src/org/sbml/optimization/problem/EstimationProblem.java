@@ -17,6 +17,9 @@
  */
 package org.sbml.optimization.problem;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.SBMLException;
@@ -113,6 +116,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 */
 	private boolean multishoot;
 
+	private Map<String,Integer> idIndex;
 	/**
 	 * 
 	 */
@@ -213,14 +217,38 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 */
 	@Override
 	public double[] eval(double[] x) {
-		for (int i = 0; i < x.length; i++) {
+		
+	  if(idIndex==null) {
+		    idIndex = new HashMap<String,Integer>();
+		    String ids[] = interpreter.getIdentifiers();
+		    for (int i = 0; i < ids.length; i++) {
+		      idIndex.put(ids[i], Integer.valueOf(i));
+		    }
+		    
+		    for (int i = 0; i < x.length; i++) {
+		      idIndex.remove(quantityRanges[i].getQuantity().getId());
+		    }
+		}
+	  
+	  for (int i = 0; i < x.length; i++) {
 			quantityRanges[i].getQuantity().setValue(x[i]);
 		}
+		
 		try {
-			interpreter.init(false);
+		  interpreter.init(false);
+			
+		  double[] initialValues = interpreter.getInitialValues();
+			MultiBlockTable.Block block = referenceData.getBlock(0);
+			for (int col = 0; col < block.getColumnCount(); col++) {
+			  Integer pos = idIndex.get(block.getColumnName(col));
+			  if(pos!=null) {
+			    initialValues[pos] = block.getValueAt(0, col + 1);
+			  }
+			}
+			
 			MultiBlockTable solution = multishoot ? solver.solve(interpreter,
-					referenceData.getBlock(0), interpreter.getInitialValues())
-					: solver.solve(interpreter, interpreter.getInitialValues(),
+					referenceData.getBlock(0), initialValues)
+					: solver.solve(interpreter, initialValues,
 							referenceData.getTimePoints());
 			fitness[0] = distance.distance(solution.getBlock(0), referenceData
 					.getBlock(0));
