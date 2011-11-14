@@ -350,14 +350,20 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
       if (Double.isNaN(p.getValue())) {
         name = p.getClass().getSimpleName().toLowerCase();
         if (p instanceof Compartment) {
-          value = defaultCompartmentValue;
+          if(((Compartment)p).getSpatialDimensions()>0) {
+            value = defaultCompartmentValue;
+            p.setValue(value);
+            nans.add(p.getId());
+          }
         } else if (p instanceof Species) {
           value = defaultSpeciesValue;
+          p.setValue(value);
+          nans.add(p.getId());
         } else if (p instanceof Parameter) {
           value = defaultParameterValue;
+          p.setValue(value);
+          nans.add(p.getId());
         }
-        p.setValue(value);
-        nans.add(p.getId());
         if (!(p instanceof Species) && (list.size() > 1)) {
           name += "s";
         }
