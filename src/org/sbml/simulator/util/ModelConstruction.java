@@ -24,8 +24,9 @@ public class ModelConstruction {
  public static void modelCreation(String outputFile) throws FileNotFoundException, XMLStreamException, SBMLException {
    SBMLDocument doc= new SBMLDocument(2,4);
 
-   Model model = doc.createModel("Testmodel");
+   Model model = doc.createModel("Testmodel2");
    Compartment comp=model.createCompartment("Compartment");
+   Compartment ext=model.createCompartment("External");
    Species a = model.createSpecies("A", comp);
    Species b = model.createSpecies("B", comp);
    Species c = model.createSpecies("C", comp);
@@ -37,6 +38,11 @@ public class ModelConstruction {
    c.setSBOTerm(247);
    d.setSBOTerm(247);
    e.setSBOTerm(247);
+   
+   Species aExt = model.createSpecies("Aext", ext);
+   Species eExt = model.createSpecies("Eext", ext);
+   aExt.setSBOTerm(247);
+   eExt.setSBOTerm(247);
    
    Reaction r1=model.createReaction("Reaction1");
    Reaction r2=model.createReaction("Reaction2");
@@ -63,6 +69,17 @@ public class ModelConstruction {
    r4.addReactant(new SpeciesReference(d));
    r4.addProduct(new SpeciesReference(a));
   
+   Reaction r5=model.createReaction("Diffusion1");
+   Reaction r6=model.createReaction("Diffusion2");
+   r5.setReversible(true);
+   r6.setReversible(true);
+   
+   r5.addReactant(new SpeciesReference(a));
+   r5.addProduct(new SpeciesReference(aExt));
+   
+   r6.addReactant(new SpeciesReference(e));
+   r6.addProduct(new SpeciesReference(eExt));
+   
    SBMLWriter writer=new SBMLWriter();
    writer.write(doc, outputFile);
    
@@ -110,7 +127,7 @@ public class ModelConstruction {
  }
  
  public static void main(String[] args) throws XMLStreamException, SBMLException, IOException {
-   //modelCreation("files/testModel.xml");
-   addRandomParameters("files/testModel.xml","files/testModel.xml");
+   modelCreation("files/testModel2.xml");
+   //addRandomParameters("files/testModel.xml","files/testModel.xml");
  }
 }
