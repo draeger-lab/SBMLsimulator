@@ -23,7 +23,7 @@ import org.sbml.jsbml.Model;
 import org.sbml.jsbml.xml.stax.SBMLReader;
 import org.sbml.simulator.gui.CSVDataImporter;
 import org.simulator.math.odes.AbstractDESSolver;
-import org.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.MultiTable;
 import org.simulator.math.odes.RosenbrockSolver;
 import org.simulator.sbml.SBMLinterpreter;
 
@@ -64,19 +64,19 @@ public class SimulationTest {
 			double time = 0;
 			
 			CSVDataImporter importer = new CSVDataImporter();
-	    MultiBlockTable experimentalData = importer.convert(model,
+	    MultiTable experimentalData = importer.convert(model,
 	            (new File(args[1])).getAbsolutePath());
 	    
 			solver.setStepSize(0.1);
-			MultiBlockTable solution = solver.solve(interpreter, interpreter.getInitialValues(), 0, 10);
+			MultiTable solution = solver.solve(interpreter, interpreter.getInitialValues(), 0, 10);
 			
-			MultiBlockTable solution1 = solver.solve(interpreter,
+			MultiTable solution1 = solver.solve(interpreter,
         experimentalData.getBlock(0), interpreter.getInitialValues());
       
 			System.out.println(solution.getColumn("A").toString());
 			System.out.println(solution1.getColumn("A").toString());
 			
-			MultiBlockTable solution2= solver.solve(interpreter, interpreter.getInitialValues(),
+			MultiTable solution2= solver.solve(interpreter, interpreter.getInitialValues(),
         experimentalData.getTimePoints());
 			
 			QualityMeasure qm = new Euclidean();

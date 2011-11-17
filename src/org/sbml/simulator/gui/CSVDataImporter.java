@@ -27,7 +27,7 @@ import java.util.Map;
 import javax.swing.JOptionPane;
 
 import org.sbml.jsbml.Model;
-import org.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.MultiTable;
 
 import de.zbit.gui.csv.CSVImporter;
 import de.zbit.io.CSVReader;
@@ -64,7 +64,7 @@ public class CSVDataImporter {
 	 * @return
 	 * @throws IOException
 	 */
-	public MultiBlockTable convert(Model model, String pathname)
+	public MultiTable convert(Model model, String pathname)
 		throws IOException {
 		return convert(model, pathname, null);
 	}
@@ -76,10 +76,10 @@ public class CSVDataImporter {
 	 * @return
 	 * @throws IOException
 	 */
-	public MultiBlockTable convert(Model model, String pathname, Component parent)
+	public MultiTable convert(Model model, String pathname, Component parent)
 		throws IOException {
 		
-		MultiBlockTable data = new MultiBlockTable();
+		MultiTable data = new MultiTable();
 		String expectedHeader[] = getExpectedTableHead(model, data.getTimeName()); // According to the model: which symbols
 		
 		CSVImporter converter = new CSVImporter(null, false, pathname, false,
@@ -148,10 +148,10 @@ public class CSVDataImporter {
 	 * @return
 	 * @throws IOException
 	 */
-	public MultiBlockTable convertWithoutWindows(Model model, String pathname)
+	public MultiTable convertWithoutWindows(Model model, String pathname)
 		throws IOException {
 		
-		MultiBlockTable data = new MultiBlockTable();
+		MultiTable data = new MultiTable();
 		String expectedHeader[] = getExpectedTableHead(model, data.getTimeName()); // According to the model: which symbols
 		
 		CSVImporter converter = new CSVImporter(null, true, pathname, true, true,

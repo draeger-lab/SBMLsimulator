@@ -25,13 +25,13 @@ import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
 
+import org.apache.commons.math.ode.DerivativeException;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLException;
 import org.simulator.math.odes.AbstractDESSolver;
 import org.simulator.math.odes.DESSolver;
 import org.simulator.math.odes.DESystem;
-import org.simulator.math.odes.IntegrationException;
-import org.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.MultiTable;
 import org.simulator.sbml.SBMLinterpreter;
 
 /**
@@ -42,7 +42,7 @@ import org.simulator.sbml.SBMLinterpreter;
  * @version $Rev$
  * @since 1.0
  */
-public class SimulationWorker extends SwingWorker<MultiBlockTable, MultiBlockTable> implements PropertyChangeListener{
+public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implements PropertyChangeListener{
 
   private static final Logger logger = Logger.getLogger(SimulationWorker.class.getName());
   
@@ -59,10 +59,10 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, MultiBlockTab
    * @throws SBMLException
    * @throws IntegrationException
    */
-  public static MultiBlockTable solveByStepSize(DESSolver solver, DESystem system, double[] initialValues, double timeStart,
+  public static MultiTable solveByStepSize(DESSolver solver, DESystem system, double[] initialValues, double timeStart,
     double timeEnd, double stepSize, boolean includeReactions)
       throws SBMLException,
-      IntegrationException {
+      DerivativeException {
     
     solver.setStepSize(stepSize);
     
@@ -70,10 +70,10 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, MultiBlockTab
       ((AbstractDESSolver) solver)
           .setIncludeIntermediates(includeReactions);
     }
-    MultiBlockTable solution = solver.solve(system, initialValues, timeStart, timeEnd);
+    MultiTable solution = solver.solve(system, initialValues, timeStart, timeEnd);
 
     if (solver.isUnstable()) {
-      throw new IntegrationException("Simulation not possible because the model is unstable.");
+      throw new DerivativeException("Simulation not possible because the model is unstable.");
     }
     return solution;
   }
@@ -101,7 +101,7 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, MultiBlockTab
   /**
    * The solution of the simulation
    */
-  private MultiBlockTable solution;
+  private MultiTable solution;
   
   
   /**
@@ -132,7 +132,7 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, MultiBlockTab
    * @see javax.swing.SwingWorker#doInBackground()
    */
   @Override
-  protected MultiBlockTable doInBackground() throws Exception {
+  protected MultiTable doInBackground() throws Exception {
     solution=solveByStepSize(solver, interpreter, interpreter.getInitialValues(),
       timeStart, timeEnd, stepSize, includeReactions);
     return solution;
@@ -165,7 +165,7 @@ public class SimulationWorker extends SwingWorker<MultiBlockTable, MultiBlockTab
    * 
    * @return
    */
-  public MultiBlockTable getSolution() {
+  public MultiTable getSolution() {
     return solution;
   }
   

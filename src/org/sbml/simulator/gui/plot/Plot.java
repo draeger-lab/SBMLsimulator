@@ -28,7 +28,7 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.HorizontalAlignment;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.VerticalAlignment;
-import org.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.MultiTable;
 
 import de.zbit.util.prefs.Option;
 import de.zbit.util.prefs.SBPreferences;
@@ -152,7 +152,7 @@ public class Plot extends ChartPanel {
 	 *            This array must have the same length as the number of columns
 	 *            in the plotData field.
 	 */
-	public void plot(MultiBlockTable plotData, boolean connected,
+	public void plot(MultiTable plotData, boolean connected,
 			boolean showLegend, boolean showGrid, Color[] plotColors,
 			String[] infos) {
 		XYDataset dataset = new MultiBlockTableToTimeSeriesAdapter(plotData);
@@ -245,7 +245,7 @@ public class Plot extends ChartPanel {
 	 * @param plotColors
 	 * @param infos
 	 */
-	public void plot(MultiBlockTable data, boolean connected,
+	public void plot(MultiTable data, boolean connected,
 			Color[] plotColors, String[] infos) {
 		// retrieve a user-defined preference
 		SBPreferences prefs = SBPreferences

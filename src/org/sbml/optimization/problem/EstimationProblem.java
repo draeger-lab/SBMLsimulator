@@ -28,7 +28,7 @@ import org.sbml.optimization.QuantityRange;
 import org.sbml.simulator.math.QualityMeasure;
 import org.simulator.math.odes.AbstractDESSolver;
 import org.simulator.math.odes.DESSolver;
-import org.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.MultiTable;
 import org.simulator.sbml.SBMLinterpreter;
 
 import eva2.server.go.PopulationInterface;
@@ -50,7 +50,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	/**
 	 * 
 	 */
-	private MultiBlockTable bestPerGeneration = null;
+	private MultiTable bestPerGeneration = null;
 	/**
 	 * 
 	 */
@@ -98,7 +98,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	/**
 	 * Reference data used to judge the quality of a simulation result.
 	 */
-	private transient MultiBlockTable referenceData = null;
+	private transient MultiTable referenceData = null;
 
 	/**
 	 * An array to store the fitness of a parameter set to avoid multiple
@@ -134,7 +134,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * @throws SBMLException
 	 */
 	public EstimationProblem(DESSolver solver, QualityMeasure distance, Model model,
-			MultiBlockTable referenceData, boolean multishoot,
+			MultiTable referenceData, boolean multishoot,
 			QuantityRange... quantityRanges)
 			throws ModelOverdeterminedException, SBMLException {
 		this(solver, distance, model, referenceData, quantityRanges);
@@ -157,7 +157,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * @throws SBMLException
 	 */
 	public EstimationProblem(DESSolver solver, QualityMeasure distance, Model model,
-			MultiBlockTable referenceData, QuantityRange... quantityRanges)
+			MultiTable referenceData, QuantityRange... quantityRanges)
 			throws ModelOverdeterminedException, SBMLException {
 		super();
 		multishoot = false;
@@ -238,7 +238,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		  interpreter.init(false);
 			
 		  double[] initialValues = interpreter.getInitialValues();
-			MultiBlockTable.Block block = referenceData.getBlock(0);
+			MultiTable.Block block = referenceData.getBlock(0);
 			for (int col = 0; col < block.getColumnCount(); col++) {
 			  Integer pos = idIndex.get(block.getColumnName(col));
 			  if(pos!=null) {
@@ -246,7 +246,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 			  }
 			}
 			
-			MultiBlockTable solution = multishoot ? solver.solve(interpreter,
+			MultiTable solution = multishoot ? solver.solve(interpreter,
 					referenceData.getBlock(0), initialValues)
 					: solver.solve(interpreter, initialValues,
 							referenceData.getTimePoints());
@@ -392,7 +392,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * 
 	 * @return
 	 */
-	public MultiBlockTable getReferenceData() {
+	public MultiTable getReferenceData() {
 		return referenceData;
 	}
 
@@ -488,7 +488,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * 
 	 * @param referenceData
 	 */
-	public void setReferenceData(MultiBlockTable referenceData) {
+	public void setReferenceData(MultiTable referenceData) {
 		if ((referenceData != null) && (referenceData.getColumnCount() <= 1)) {
 			// time column */+ getModel().getNumSymbols())) {
 			throw new IllegalArgumentException(

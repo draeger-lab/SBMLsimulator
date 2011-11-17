@@ -14,7 +14,7 @@ import java.util.Set;
 import javax.xml.stream.XMLStreamException;
 
 import org.sbml.jsbml.SBMLException;
-import org.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.MultiTable;
 
 import de.zbit.io.CSVWriter;
 
@@ -94,7 +94,7 @@ public class FilterDatasets {
       
       if (data.size() > 0) {
         double[][] dataMatrix = data.toArray(new double[data.size()][]);
-        MultiBlockTable table = new MultiBlockTable(timepoints, dataMatrix,
+        MultiTable table = new MultiTable(timepoints, dataMatrix,
           identifiers);
         
         if (outputFile != null) {
@@ -149,7 +149,7 @@ public class FilterDatasets {
           timepoints[i]=timepointsList.get(i);
         }
         double[][] dataMatrix = data.toArray(new double[data.size()][]);
-        MultiBlockTable table = new MultiBlockTable(timepoints, dataMatrix,
+        MultiTable table = new MultiTable(timepoints, dataMatrix,
           newIdentifiers.toArray(new String[newIdentifiers.size()]));
         
         if (outputFile != null) {

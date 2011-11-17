@@ -35,6 +35,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.apache.commons.math.ode.DerivativeException;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.util.StringTools;
@@ -47,7 +48,6 @@ import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.simulator.math.QualityMeasure;
 import org.sbml.simulator.math.odes.SimulationOptions;
 import org.simulator.math.odes.AbstractDESSolver;
-import org.simulator.math.odes.IntegrationException;
 
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;
@@ -609,7 +609,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	public void setSolver() throws IllegalArgumentException, SecurityException,
 			InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException, SBMLException,
-			IntegrationException, ModelOverdeterminedException {
+			DerivativeException, ModelOverdeterminedException {
 		setSolver(solverComboBox);
 	}
 
@@ -629,7 +629,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	private void setSolver(JComboBox comBox) throws IllegalArgumentException,
 			SecurityException, InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException, SBMLException,
-			IntegrationException, ModelOverdeterminedException {
+			DerivativeException, ModelOverdeterminedException {
 		logger.fine(comBox.getSelectedItem() + "\t" + comBox.getSelectedIndex());
 		this.firePropertyChange("solver", simulationConfiguration.getSolver(),
 				SBMLsimulator.getAvailableSolvers()[comBox.getSelectedIndex()]

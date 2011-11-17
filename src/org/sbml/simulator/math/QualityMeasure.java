@@ -20,7 +20,7 @@ package org.sbml.simulator.math;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import org.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.MultiTable;
 
 /**
  * This class is the basis of various implementations of distance functions.
@@ -142,15 +142,15 @@ public abstract class QualityMeasure implements Serializable {
 	 * @param y
 	 * @return
 	 */
-	public double distance(MultiBlockTable x, MultiBlockTable expected) {
+	public double distance(MultiTable x, MultiTable expected) {
 		if (x.getBlockCount() > expected.getBlockCount()) {
-			MultiBlockTable swap = expected;
+			MultiTable swap = expected;
 			expected = x;
 			x = swap;
 		}
 	  
-		MultiBlockTable left = x;
-		MultiBlockTable right = expected;
+		MultiTable left = x;
+		MultiTable right = expected;
 		if(x.isSetTimePoints() && expected.isSetTimePoints()) {
 		  left = x.filter(expected.getTimePoints());
 		  right = expected.filter(x.getTimePoints());
@@ -170,7 +170,7 @@ public abstract class QualityMeasure implements Serializable {
 	 * @param y
 	 * @return
 	 */
-	public double distance(MultiBlockTable.Block x, MultiBlockTable.Block expected) {
+	public double distance(MultiTable.Block x, MultiTable.Block expected) {
 		return meanFunction.computeMean(getColumnDistances(x,expected));
 	}
 
@@ -186,9 +186,9 @@ public abstract class QualityMeasure implements Serializable {
 	 * @param y
 	 * @return
 	 */
-	public ArrayList<Double> getColumnDistances(MultiBlockTable.Block x, MultiBlockTable.Block expected) {
+	public ArrayList<Double> getColumnDistances(MultiTable.Block x, MultiTable.Block expected) {
 		if (x.getColumnCount() > expected.getColumnCount()) {
-			MultiBlockTable.Block swap = expected;
+			MultiTable.Block swap = expected;
 			expected = x;
 			x = swap;
 		}

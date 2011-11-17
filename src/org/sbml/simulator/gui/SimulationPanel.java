@@ -38,6 +38,7 @@ import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
 import javax.swing.table.TableModel;
 
+import org.apache.commons.math.ode.DerivativeException;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.SBMLException;
@@ -48,10 +49,9 @@ import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.SimulationConfiguration;
 import org.sbml.simulator.SimulationManager;
 import org.sbml.simulator.math.QualityMeasure;
-import org.simulator.math.odes.DESSolver;
-import org.simulator.math.odes.IntegrationException;
-import org.simulator.math.odes.MultiBlockTable;
 import org.sbml.simulator.math.odes.SimulationOptions;
+import org.simulator.math.odes.DESSolver;
+import org.simulator.math.odes.MultiTable;
 
 import de.zbit.gui.GUITools;
 import de.zbit.io.CSVOptions;
@@ -206,8 +206,8 @@ public class SimulationPanel extends JPanel implements
   /**
    * @return
    */
-  public MultiBlockTable getExperimentalData() {
-    return (MultiBlockTable) expTable.getModel();
+  public MultiTable getExperimentalData() {
+    return (MultiTable) expTable.getModel();
   }
   
   /**
@@ -238,8 +238,8 @@ public class SimulationPanel extends JPanel implements
   /**
    * @return
    */
-  public MultiBlockTable getSimulationResultsTable() {
-    return (MultiBlockTable) simTable.getModel();
+  public MultiTable getSimulationResultsTable() {
+    return (MultiTable) simTable.getModel();
   }
   
   /**
@@ -334,7 +334,7 @@ public class SimulationPanel extends JPanel implements
   public void loadPreferences() throws IllegalArgumentException,
     SecurityException, InstantiationException, IllegalAccessException,
     InvocationTargetException, NoSuchMethodException, SBMLException,
-    IntegrationException, ModelOverdeterminedException {
+    DerivativeException, ModelOverdeterminedException {
     
     if (visualizationPanel != null) {
       visualizationPanel.loadPreferences();
@@ -356,7 +356,7 @@ public class SimulationPanel extends JPanel implements
     double currentDistance = tools.getCurrentQuality();
     if (Double.isNaN(currentDistance)
         || (currentDistance > statDoubles[runBestIndex].doubleValue())) {
-      setSimulationData((MultiBlockTable) statObjects[simulationDataIndex]);
+      setSimulationData((MultiTable) statObjects[simulationDataIndex]);
       tools.setCurrentQualityMeasure(statDoubles[runBestIndex].doubleValue());
       String[] solutionString = statObjects[solutionIndex].toString().replace("{","").replace("}","").split(", ");
       for (int i = 0; i < selectedQuantityIds.length; i++) {
@@ -498,7 +498,7 @@ public class SimulationPanel extends JPanel implements
    * @param data
    * @throws Exception
    */
-  public void setExperimentalData(MultiBlockTable data) throws Exception {
+  public void setExperimentalData(MultiTable data) throws Exception {
     expTable.setModel(data);
     tabbedPane.setEnabledAt(2, true);
     this.firePropertyChange("measurements", null, data);
@@ -534,7 +534,7 @@ public class SimulationPanel extends JPanel implements
   /**
    * @param data
    */
-  private void setSimulationData(MultiBlockTable data) {
+  private void setSimulationData(MultiTable data) {
     data.addTableModelListener(visualizationPanel);
     visualizationPanel.setSimulationData(data);
     simTable.setModel(data);
@@ -573,7 +573,7 @@ public class SimulationPanel extends JPanel implements
     if ("progress".equals(evt.getPropertyName())) {
       this.firePropertyChanged(evt);
     } else if ("done".equals(evt.getPropertyName())) {
-      MultiBlockTable data = (MultiBlockTable) evt.getNewValue();
+      MultiTable data = (MultiTable) evt.getNewValue();
       if (data != null) {
         setSimulationData(data);
       }

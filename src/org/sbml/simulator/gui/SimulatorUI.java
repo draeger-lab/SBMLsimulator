@@ -52,7 +52,7 @@ import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.simulator.math.odes.SimulationOptions;
 import org.sbml.simulator.resources.Resource;
 import org.sbml.tolatex.LaTeXOptions;
-import org.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.MultiTable;
 
 import de.zbit.gui.ActionCommand;
 import de.zbit.gui.BaseFrame;
@@ -371,7 +371,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		if (simPanel != null) {
 			Model model = simPanel.getModel();
 			try {
-				MultiBlockTable data = importer.convert(model,
+				MultiTable data = importer.convert(model,
 						file.getAbsolutePath());
 				if (data != null) {
 					simPanel.setExperimentalData(data);
