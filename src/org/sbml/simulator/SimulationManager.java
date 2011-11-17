@@ -20,11 +20,11 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+import org.apache.commons.math.ode.DerivativeException;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.simulator.gui.SimulationWorker;
-import org.simulator.math.odes.IntegrationException;
-import org.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.MultiTable;
 
 import eva2.tools.math.Mathematics;
 
@@ -57,7 +57,7 @@ public class SimulationManager implements PropertyChangeListener {
   /**
    * The solution computed as a result of a simulation.
    */
-  private MultiBlockTable solution;
+  private MultiTable solution;
   
   /**
    * The distance values to the experimental data sets.
@@ -169,7 +169,7 @@ public class SimulationManager implements PropertyChangeListener {
    * @throws IntegrationException
    * @throws ModelOverdeterminedException
    */
-  public void computeModelQuality() throws SBMLException, IntegrationException,
+  public void computeModelQuality() throws SBMLException, DerivativeException,
     ModelOverdeterminedException {
     
     distanceValues = new double[qualityMeasurement.getMeasurements().size()];

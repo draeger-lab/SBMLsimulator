@@ -18,7 +18,7 @@
 package org.sbml.simulator.gui.plot;
 
 import org.jfree.data.xy.AbstractXYDataset;
-import org.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.MultiTable;
 
 /**
  * 
@@ -36,9 +36,9 @@ public class MultiBlockTableToTimeSeriesAdapter extends AbstractXYDataset {
   /**
    * 
    */
-  private MultiBlockTable table;
+  private MultiTable table;
 
-	public MultiBlockTableToTimeSeriesAdapter(MultiBlockTable table) {
+	public MultiBlockTableToTimeSeriesAdapter(MultiTable table) {
 		this.table = table;
 	}
 

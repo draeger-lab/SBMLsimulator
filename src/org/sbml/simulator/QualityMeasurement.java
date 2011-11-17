@@ -27,7 +27,7 @@ import org.sbml.simulator.math.QualityMeasure;
 import org.sbml.simulator.math.RelativeEuclidean;
 import org.sbml.simulator.math.RelativeNMetric;
 import org.sbml.simulator.math.odes.SimulationOptions;
-import org.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.MultiTable;
 
 import de.zbit.util.prefs.SBPreferences;
 
@@ -44,13 +44,13 @@ public class QualityMeasurement implements PropertyChangeListener {
   
   QualityMeasure distance;
   
-  List<MultiBlockTable> measurements;
+  List<MultiTable> measurements;
   
   /**
    * Creates a new quality measurement.
    */
   public QualityMeasurement() {
-    this.measurements = new LinkedList<MultiBlockTable>();
+    this.measurements = new LinkedList<MultiTable>();
   }
   
   /*
@@ -87,7 +87,7 @@ public class QualityMeasurement implements PropertyChangeListener {
         measurements.remove(evt.getOldValue());
       } else {
         if (!measurements.contains(evt.getNewValue())) {
-          measurements.add((MultiBlockTable) evt.getNewValue());
+          measurements.add((MultiTable) evt.getNewValue());
         }
       }
     }
@@ -104,7 +104,7 @@ public class QualityMeasurement implements PropertyChangeListener {
   /**
    * @return the measurements
    */
-  public List<MultiBlockTable> getMeasurements() {
+  public List<MultiTable> getMeasurements() {
     return measurements;
   }
   

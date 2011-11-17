@@ -30,7 +30,7 @@ import org.sbml.jsbml.Model;
 import org.sbml.jsbml.xml.stax.SBMLReader;
 import org.sbml.simulator.gui.CSVDataImporter;
 import org.simulator.math.odes.AbstractDESSolver;
-import org.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.MultiTable;
 import org.simulator.math.odes.RosenbrockSolver;
 import org.simulator.sbml.SBMLinterpreter;
 
@@ -96,14 +96,14 @@ public class SimulationTestAutomatic {
 				SBMLinterpreter interpreter = new SBMLinterpreter(model);
 				// get timepoints
 				CSVDataImporter csvimporter = new CSVDataImporter();
-				MultiBlockTable inputData = csvimporter.convertWithoutWindows(model, csvfile);
+				MultiTable inputData = csvimporter.convertWithoutWindows(model, csvfile);
 				
 				double[] timepoints = inputData.getTimePoints();
 
 				
 				duration=timepoints[timepoints.length-1]-timepoints[0];
 				solver.setStepSize(duration/steps);
-				MultiBlockTable solution=solver.solve(interpreter, interpreter.getInitialValues(), timepoints);
+				MultiTable solution=solver.solve(interpreter, interpreter.getInitialValues(), timepoints);
 				
 				
 				QualityMeasure distance = new Euclidean();

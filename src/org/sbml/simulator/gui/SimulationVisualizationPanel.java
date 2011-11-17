@@ -37,7 +37,7 @@ import org.sbml.jsbml.UnitDefinition;
 import org.sbml.simulator.gui.plot.Plot;
 import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.simulator.math.odes.SimulationOptions;
-import org.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.MultiTable;
 
 import de.zbit.util.StringUtil;
 import de.zbit.util.prefs.SBPreferences;
@@ -85,7 +85,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	/**
 	 * Results of simulation and experiments.
 	 */
-	private MultiBlockTable simData, experimentData;
+	private MultiTable simData, experimentData;
 
 	/**
 	 * 
@@ -106,7 +106,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	/**
 	 * @return the experimentData
 	 */
-	public MultiBlockTable getExperimentData() {
+	public MultiTable getExperimentData() {
 		return experimentData;
 	}
 
@@ -150,7 +150,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	/**
 	 * @return the simData
 	 */
-	public MultiBlockTable getSimulationData() {
+	public MultiTable getSimulationData() {
 		return simData;
 	}
 
@@ -204,7 +204,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 *            if true, everything already plotted will be removed before
 	 *            plotting.
 	 */
-	private void plot(MultiBlockTable data, boolean connected,
+	private void plot(MultiTable data, boolean connected,
 			boolean clearFirst) {
 		String name;
 		Color plotColors[] = new Color[data.getColumnCount() - 1];
@@ -226,7 +226,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 * @param data
 	 *            the experimentData to set
 	 */
-	public void setExperimentData(MultiBlockTable data) {
+	public void setExperimentData(MultiTable data) {
 		// deselect non available elements in the legend and select those that
 		// are present in the data
 		this.experimentData = data;
@@ -344,7 +344,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 * @param simData
 	 *            the simData to set
 	 */
-	public void setSimulationData(MultiBlockTable simData) {
+	public void setSimulationData(MultiTable simData) {
 		this.simData = simData;
 		this.simData.addTableModelListener(this);
 		plot();
@@ -363,8 +363,8 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 					&& (e.getType() == TableModelEvent.UPDATE)) {
 				plot();
 			}
-		} else if (e.getSource() instanceof MultiBlockTable) {
-			setSimulationData((MultiBlockTable) e.getSource());
+		} else if (e.getSource() instanceof MultiTable) {
+			setSimulationData((MultiTable) e.getSource());
 		}
 	}
 

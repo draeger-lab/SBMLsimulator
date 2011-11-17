@@ -24,8 +24,8 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import org.simulator.math.odes.MultiBlockTable;
-import org.simulator.math.odes.MultiBlockTable.Block.Column;
+import org.simulator.math.odes.MultiTable;
+import org.simulator.math.odes.MultiTable.Block.Column;
 
 
 import de.zbit.gui.GUITools;
@@ -43,14 +43,14 @@ public class Plotter implements Runnable {
 	/**
 	 * 
 	 */
-	private MultiBlockTable solution, data;
+	private MultiTable solution, data;
 	/**
 	 * 
 	 */
 	private String outFileName;
 
 	
-	public Plotter(MultiBlockTable solution, MultiBlockTable data, String outFileName) {
+	public Plotter(MultiTable solution, MultiTable data, String outFileName) {
 		this.solution = solution;
 		this.data = data;
 		this.outFileName = outFileName;

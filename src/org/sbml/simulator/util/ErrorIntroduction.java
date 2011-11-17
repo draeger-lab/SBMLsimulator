@@ -10,7 +10,7 @@ import javax.xml.stream.XMLStreamException;
 
 import org.jfree.data.statistics.Statistics;
 import org.sbml.jsbml.SBMLException;
-import org.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.MultiTable;
 
 import de.zbit.io.CSVWriter;
 
@@ -55,7 +55,7 @@ public class ErrorIntroduction {
         for (int i = 0; i != timepointsArray.length; i++) {
           timepointsArray[i] = timepoints.get(i);
         }
-        MultiBlockTable table = new MultiBlockTable(timepointsArray,
+        MultiTable table = new MultiTable(timepointsArray,
           dataMatrix, identifiers);
         
         introduceErrorHelp(table, averagePrecision, systematicErrorPercentage, baselinePercentage);
@@ -71,7 +71,7 @@ public class ErrorIntroduction {
     }
   }
   
-  private static void introduceErrorHelp(MultiBlockTable table, double averagePrecision, double systematicErrorPercentage, double averageBaselinePercentage) {
+  private static void introduceErrorHelp(MultiTable table, double averagePrecision, double systematicErrorPercentage, double averageBaselinePercentage) {
     Random random = new Random();
     
     //value uniformly distributed between 0.5 * averagePrecision and 1.5 * averagePrecision
