@@ -24,8 +24,9 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import org.sbml.simulator.math.odes.MultiBlockTable;
-import org.sbml.simulator.math.odes.MultiBlockTable.Block.Column;
+import org.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.MultiBlockTable.Block.Column;
+
 
 import de.zbit.gui.GUITools;
 

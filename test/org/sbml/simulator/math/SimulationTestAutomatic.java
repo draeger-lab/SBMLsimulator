@@ -29,10 +29,10 @@ import java.util.logging.Logger;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.xml.stax.SBMLReader;
 import org.sbml.simulator.gui.CSVDataImporter;
-import org.sbml.simulator.gui.SimulationWorker;
-import org.sbml.simulator.math.odes.AbstractDESSolver;
-import org.sbml.simulator.math.odes.HighamHall54Solver;
-import org.sbml.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.AbstractDESSolver;
+import org.simulator.math.odes.MultiBlockTable;
+import org.simulator.math.odes.RosenbrockSolver;
+import org.simulator.sbml.SBMLinterpreter;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -59,7 +59,7 @@ public class SimulationTestAutomatic {
 	 */
 	public static void main(String[] args) throws IOException {
 		String sbmlfile, csvfile, configfile;
-		for (int modelnr = 28; modelnr <= 28; modelnr++) {
+		for (int modelnr = 1; modelnr <= 400; modelnr++) {
 			System.out.println("model " + modelnr);
 
 			StringBuilder modelFile = new StringBuilder();
@@ -88,13 +88,12 @@ public class SimulationTestAutomatic {
 			 * amount:
 			 * concentration:
 			 */
-
 			try {
 				Model model = (new SBMLReader()).readSBML(sbmlfile).getModel();
 					//sbmlIo.convert2Model(sbmlfile);
 
-				AbstractDESSolver solver = new HighamHall54Solver();
-
+				AbstractDESSolver solver = new RosenbrockSolver();
+				SBMLinterpreter interpreter = new SBMLinterpreter(model);
 				// get timepoints
 				CSVDataImporter csvimporter = new CSVDataImporter();
 				MultiBlockTable inputData = csvimporter.convertWithoutWindows(model, csvfile);
@@ -103,11 +102,11 @@ public class SimulationTestAutomatic {
 
 				
 				duration=timepoints[timepoints.length-1]-timepoints[0];
-				solver.setStepSize(duration / steps);
-				MultiBlockTable solution=SimulationWorker.solveAtTimePoints(solver, model, timepoints, solver.getStepSize(), null);
+				solver.setStepSize(duration/steps);
+				MultiBlockTable solution=solver.solve(interpreter, interpreter.getInitialValues(), timepoints);
 				
 				
-				QualityMeasure distance = new RSE();
+				QualityMeasure distance = new Euclidean();
 
 				double dist=distance.distance(solution, inputData);
 				
@@ -121,17 +120,17 @@ public class SimulationTestAutomatic {
 				writer.write(String.valueOf(dist));
 				writer.close();
 				
-				
 				if(dist>0.1) {
 					logger.log(Level.INFO, "relative distance for model-" + modelnr);
 					logger.log(Level.INFO,String.valueOf(dist));
 				}
 				if (solver.isUnstable()) {
 					logger.warning("unstable!");
-				} else {
-					(new Thread(new Plotter(solution, inputData, args[1]
-							+ modelnr + "-graph.jpg"))).start();
-				}
+				} 
+//					else {
+//					(new Thread(new Plotter(solution, inputData, args[1]
+//							+ modelnr + "-graph.jpg"))).start();
+//				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
