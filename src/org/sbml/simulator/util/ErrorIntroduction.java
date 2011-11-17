@@ -120,14 +120,14 @@ public class ErrorIntroduction {
   }
   
   public static void main(String args[]) throws XMLStreamException, IOException, SBMLException {
-    for(double averagePrecision=0.0;averagePrecision<=0.05;averagePrecision+=0.01) {
-      for(double systematicErrorPercentage=0.0;systematicErrorPercentage<=5.0;systematicErrorPercentage+=1.0) {
-        for(double baselinePercentage=0.0;baselinePercentage<=5.0;baselinePercentage+=1.0) {
+    for(double averagePrecision=0.11;averagePrecision<=0.20;averagePrecision+=0.01) {
+      for(double systematicErrorPercentage=11.0;systematicErrorPercentage<=20.0;systematicErrorPercentage+=1.0) {
+        for(double baselinePercentage=11.0;baselinePercentage<=20.0;baselinePercentage+=1.0) {
           for(int repetition=1;repetition<=3;repetition++) {
             averagePrecision=Math.round(averagePrecision*100)/100.0;
             systematicErrorPercentage=Math.round(systematicErrorPercentage);
             baselinePercentage=Math.round(baselinePercentage);
-            String file="files/ " + "dataWithError_" + (int)(averagePrecision*100) + "_" + (int)systematicErrorPercentage + "_" + (int)baselinePercentage + "_" + repetition  +".csv";
+            String file="files/Testdaten/ " + "dataWithError_" + (int)(averagePrecision*100) + "_" + (int)systematicErrorPercentage + "_" + (int)baselinePercentage + "_" + repetition  +".csv";
             introduceError(args[0],file,averagePrecision,systematicErrorPercentage,baselinePercentage);
           }
         }
