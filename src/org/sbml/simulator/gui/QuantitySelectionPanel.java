@@ -343,8 +343,12 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	tabs.add(SPECIES,
 	    createQuantityPanel(model.getListOfSpecies(), curr, 1));
 	curr += model.getNumSpecies();
-	tabs.add(GLOBAL_PARAMETERS, createQuantityPanel(model
-		.getListOfParameters(), curr, 2));
+	JPanel quantityPanel = createQuantityPanel(model
+    .getListOfParameters(), curr, 2);
+    quantityPanel.setPreferredSize(new Dimension(550, 500));
+    tabs.add(GLOBAL_PARAMETERS, new JScrollPane(quantityPanel,
+      JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+      JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
 	curr += model.getNumParameters();
 	tabs.add(LOCAL_PARAMETERS, createLocalParameterTab(model));
 
@@ -493,13 +497,13 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	int curr = model.getNumSymbols();
 	for (Reaction r : model.getListOfReactions()) {
 	    if (r.isSetKineticLaw()
-		    && (r.getKineticLaw().getNumLocalParameters() > 0)) {
+		    && (r.getKineticLaw().getLocalParameterCount() > 0)) {
 		p = new JPanel();
 		p.setBorder(BorderFactory.createTitledBorder(String.format(
 		    " Reaction %s ", r.isSetName() ? r.getName() : r.getId())));
 		p.add(createQuantityPanel(r.getKineticLaw()
 			.getListOfLocalParameters(), curr, 3));
-		curr += r.getKineticLaw().getNumLocalParameters();
+		curr += r.getKineticLaw().getLocalParameterCount();
 		lh.add(p);
 	    }
 	}
@@ -512,7 +516,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
      * @param tabIndex
      * @return
      */
-    private Container createQuantityPanel(
+    private JPanel createQuantityPanel(
 	ListOf<? extends Quantity> listOfQuantities, int curr, int tabIndex) {
 	LayoutHelper lh = new LayoutHelper(new JPanel());
 	boolean isLocalParameter = false;
@@ -554,7 +558,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	    return finishContainer(lh, tabIndex, select, listOfQuantities
 		    .size());
 	}
-	return lh.getContainer();
+	return (JPanel) lh.getContainer();
     }
 
     /**
@@ -566,7 +570,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
      * @param numElements
      * @return
      */
-    private Container finishContainer(LayoutHelper lh, int buttonIndex,
+    private JPanel finishContainer(LayoutHelper lh, int buttonIndex,
 	boolean select, int numElements) {
 	Container container = lh.getContainer();
 	JScrollPane scroll = new JScrollPane(container,
@@ -585,7 +589,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		.add(createButtonPanel(buttonIndex, select), 0,
 		    lh.getRow() + 2, 5, 1);
 
-	return lh.getContainer();
+	return (JPanel) lh.getContainer();
     }
 
     /**
