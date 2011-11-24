@@ -26,7 +26,6 @@ import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Logger;
 
@@ -54,6 +53,7 @@ import org.sbml.simulator.resources.Resource;
 import org.sbml.tolatex.LaTeXOptions;
 import org.simulator.math.odes.MultiTable;
 
+import de.zbit.AppConf;
 import de.zbit.gui.ActionCommand;
 import de.zbit.gui.BaseFrame;
 import de.zbit.gui.GUIOptions;
@@ -170,36 +170,16 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	private Model model;
 
 	/**
+	 * @param appConf 
      * 
      */
-	public SimulatorUI() {
-		super();
+	public SimulatorUI(AppConf appConf) {
+		super(appConf);
 		loadPreferences();
 		setOptimalSize();
 		GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.EDIT_MODEL,
 				Command.SIMULATION_START);
 		setStatusBarToMemoryUsage();
-	}
-
-	/**
-	 * @param owner
-	 * @param model
-	 */
-	public SimulatorUI(Model model) {
-		this(model, new SimulationPanel(model));
-	}
-
-	/**
-	 * @param owner
-	 * @param model
-	 * @param simulationPanel
-	 */
-	public SimulatorUI(Model model, SimulationPanel simulationPanel) {
-		this();
-		simPanel = simulationPanel;
-		getContentPane().add(simPanel, BorderLayout.CENTER);
-		setOptimalSize();
-		setLocationRelativeTo(null);
 	}
 
 	/*
@@ -208,7 +188,6 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	 * @see
 	 * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
-
 	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand() == null) {
 			return;
@@ -298,7 +277,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 				SBMLWriter writer = new SBMLWriter();
 				writer.write(model.getSBMLDocument(), f,
 						SBMLsimulator.class.getSimpleName(),
-						SBMLsimulator.getVersionNumber());
+						getDottedVersionNumber());
 				// TODO Just for debugging:
 				writer.write(model.getSBMLDocument(), System.out);
 				prefs.put(GUIOptions.SAVE_DIR, f.getParent());
@@ -541,7 +520,10 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 						BaseAction.EDIT_PREFERENCES);
 
 				new Thread(new Runnable() {
-					@Override
+					/*
+					 * (non-Javadoc)
+					 * @see java.lang.Runnable#run()
+					 */
 					public void run() {
 						try {
 							SBPreferences prefs = SBPreferences
@@ -706,17 +688,16 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	@Override
 	public void exit() {
 		StringBuilder exception = new StringBuilder();
-		for (Class<?> clazz : new Class[] { SimulationOptions.class,
-				PlotOptions.class }) {
-			SBPreferences prefs = SBPreferences
-					.getPreferencesFor((Class<? extends KeyProvider>) clazz);
-			try {
-				prefs.flush();
-			} catch (Exception exc) {
-				exception.append(exc.getLocalizedMessage());
-				exception.append('\n');
-			}
-		}
+    for (Class<? extends KeyProvider> clazz : new Class[] {
+        SimulationOptions.class, PlotOptions.class }) {
+      SBPreferences prefs = SBPreferences.getPreferencesFor(clazz);
+      try {
+        prefs.flush();
+      } catch (Exception exc) {
+        exception.append(exc.getLocalizedMessage());
+        exception.append('\n');
+      }
+    }
 		if (exception.length() > 0) {
 			GUITools.showErrorMessage(this, exception.toString());
 		}
@@ -731,36 +712,6 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	@Override
 	public String getApplicationName() {
 		return SBMLsimulator.class.getSimpleName();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see de.zbit.gui.BaseFrame#getCommandLineOptions()
-	 */
-	@Override
-	public Class<? extends KeyProvider>[] getCommandLineOptions() {
-		return SBMLsimulator.getCommandLineOptions();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see de.zbit.gui.BaseFrame#getDottedVersionNumber()
-	 */
-	@Override
-	public String getDottedVersionNumber() {
-		return SBMLsimulator.getVersionNumber();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see de.zbit.gui.BaseFrame#getMaximalFileHistorySize()
-	 */
-	@Override
-	public short getMaximalFileHistorySize() {
-		return 10;
 	}
 
 	/*
@@ -791,20 +742,6 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	@Override
 	public URL getURLOnlineHelp() {
 		return Resource.class.getResource("html/online-help.html");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see de.zbit.gui.BaseFrame#getURLOnlineUpdate()
-	 */
-	@Override
-	public URL getURLOnlineUpdate() {
-		try {
-			return SBMLsimulator.getURLOnlineUpdate();
-		} catch (MalformedURLException exc) {
-			return null;
-		}
 	}
 
 	/*

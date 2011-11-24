@@ -299,12 +299,12 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     parameterPanel
         .setLayout(new BoxLayout(parameterPanel, BoxLayout.PAGE_AXIS));
     for (Reaction r : listOfReactions) {
-      if (r.isSetKineticLaw() && r.getKineticLaw().getNumLocalParameters() > 0) {
+      if (r.isSetKineticLaw() && r.getKineticLaw().getLocalParameterCount() > 0) {
         hasLocalParameters = true;
         JPanel panel = interactiveScanTable(r.getKineticLaw()
             .getListOfLocalParameters(), maxParameterValue, paramStepSize,
           offset);
-        offset += r.getKineticLaw().getNumLocalParameters();
+        offset += r.getKineticLaw().getLocalParameterCount();
         panel.setBorder(BorderFactory.createTitledBorder(String.format(
           " Reaction %s ", r.getId())));
         parameterPanel.add(panel);
