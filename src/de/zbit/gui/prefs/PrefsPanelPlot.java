@@ -19,17 +19,7 @@ package de.zbit.gui.prefs;
 
 import java.io.IOException;
 
-import javax.swing.BorderFactory;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-
 import org.sbml.simulator.gui.plot.PlotOptions;
-
-import de.zbit.gui.LayoutHelper;
-import de.zbit.util.prefs.Option;
 
 /**
  * For configuration of how to save images of plotted diagrams.

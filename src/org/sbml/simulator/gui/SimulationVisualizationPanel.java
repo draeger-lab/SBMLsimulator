@@ -21,7 +21,6 @@ package org.sbml.simulator.gui;
 import java.awt.Color;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.MouseListener;
 import java.util.Properties;
 
 import javax.swing.AbstractButton;

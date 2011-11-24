@@ -27,7 +27,7 @@ import org.simulator.math.odes.MultiTable;
  * @version $Rev$
  * @since 1.0
  */
-public class MultiBlockTableToTimeSeriesAdapter extends AbstractXYDataset {
+public class MultiTableToTimeSeriesAdapter extends AbstractXYDataset {
 
 	/**
    * Generated serial version identifier.
@@ -38,7 +38,11 @@ public class MultiBlockTableToTimeSeriesAdapter extends AbstractXYDataset {
    */
   private MultiTable table;
 
-	public MultiBlockTableToTimeSeriesAdapter(MultiTable table) {
+  /**
+   * 
+   * @param table
+   */
+	public MultiTableToTimeSeriesAdapter(MultiTable table) {
 		this.table = table;
 	}
 

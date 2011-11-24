@@ -155,7 +155,7 @@ public class Plot extends ChartPanel {
 	public void plot(MultiTable plotData, boolean connected,
 			boolean showLegend, boolean showGrid, Color[] plotColors,
 			String[] infos) {
-		XYDataset dataset = new MultiBlockTableToTimeSeriesAdapter(plotData);
+		XYDataset dataset = new MultiTableToTimeSeriesAdapter(plotData);
 		this.getChart().getXYPlot().setDataset(datasetCount, dataset);
 
 		XYItemRenderer renderer = this.getChart().getXYPlot()

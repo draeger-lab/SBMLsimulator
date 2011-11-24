@@ -27,13 +27,12 @@ import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JDialog;
 import javax.swing.JTable;
-import javax.swing.event.TableModelEvent;
 import javax.swing.table.TableCellEditor;
 
 /**
  * @author Andreas Dr&auml;ger
  * @author Philip Stevens
- * @author Max Zwie§ele
+ * @author Max Zwie&szlig;ele
  * @version $Rev$
  * @since 1.0
  */
