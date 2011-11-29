@@ -78,7 +78,6 @@ public class StabilityMatrix extends Matrix {
 	 */
 	public StabilityMatrix(double[][] array, int m, int n) {
 		super(array, m, n);
-
 	}
 	
 	/**
