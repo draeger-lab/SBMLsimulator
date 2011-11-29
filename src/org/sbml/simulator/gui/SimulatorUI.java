@@ -350,8 +350,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		if (simPanel != null) {
 			Model model = simPanel.getModel();
 			try {
-				MultiTable data = importer.convert(model,
-						file.getAbsolutePath());
+        MultiTable data = importer.convert(model, file.getAbsolutePath(), this);
 				if (data != null) {
 					simPanel.setExperimentalData(data);
 					GUITools.setEnabled(false, getJMenuBar(), toolBar,

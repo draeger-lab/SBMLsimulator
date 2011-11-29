@@ -33,29 +33,27 @@ import de.zbit.util.prefs.Range;
  * @since 1.0
  */
 public interface SimulatorOptions extends KeyProvider {
-    
-    /**
-     * 
-     */
-    public static final ResourceBundle bundle = ResourceManager
-	    .getBundle("org.sbml.simulator.locales.Simulator");
-
-    /**
-     * SBML input file.
-     */
-    public static final Option<File> SBML_FILE = new Option<File>("SBML_FILE",
-	File.class, "SBML input file", new Range<File>(File.class, SBFileFilter
-		.createSBMLFileFilter()), new File(System
-		.getProperty("user.dir")));
-    /**
-     * Path to a file with a time series of species/compartment/parameter
-     * values.
-     */
-    public static final Option<File> TIME_SERIES_FILE = new Option<File>(
-	"TIME_SERIES_FILE",
-	File.class,
-	"Path to a file with a time series of species/compartment/parameter values.",
-	new Range<File>(File.class, SBFileFilter.createCSVFileFilter()),
-	new File(System.getProperty("user.home")));
-    
+  
+  /**
+   * 
+   */
+  public static final ResourceBundle bundle = ResourceManager
+      .getBundle("org.sbml.simulator.locales.Simulator");
+  
+  /**
+   * SBML input file.
+   */
+  public static final Option<File> SBML_FILE = new Option<File>("SBML_FILE",
+    File.class, "SBML input file", new Range<File>(File.class, SBFileFilter
+        .createSBMLFileFilter()), new File(System.getProperty("user.dir")));
+  /**
+   * Path to a file with a time series of species/compartment/parameter values.
+   */
+  public static final Option<File> TIME_SERIES_FILE = new Option<File>(
+    "TIME_SERIES_FILE",
+    File.class,
+    "Path to a file with a time series of species/compartment/parameter values.",
+    new Range<File>(File.class, SBFileFilter.createCSVFileFilter()), new File(
+      System.getProperty("user.home")));
+  
 }

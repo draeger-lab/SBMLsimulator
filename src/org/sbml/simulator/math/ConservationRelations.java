@@ -2,6 +2,7 @@ package org.sbml.simulator.math;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -22,8 +23,8 @@ public class ConservationRelations {
 		StabilityMatrix backupLeft, backupRight;
 
 		List<Set<Integer>> listOfSetsS;
-		ArrayList<int[]> combinations = new ArrayList<int[]>();
-		ArrayList<Integer> listOfZeroRows = new ArrayList<Integer>();
+		List<int[]> combinations = new ArrayList<int[]>();
+		List<Integer> listOfZeroRows = new ArrayList<Integer>();
 
 		int j = 0, i = 0, rownum = 0;
 
@@ -52,8 +53,9 @@ public class ConservationRelations {
 						intersection.retainAll(listOfSetsS.get(k));
 						boolean isSubset = false;
 						for (int l = 0; l < listOfSetsS.size() && !isSubset; l++) {
-							if (l == k || l == i)
+							if ((l == k) || (l == i)) {
 								continue;
+							}
 							if (listOfSetsS.get(l).containsAll(intersection))
 								isSubset = true;
 						}
