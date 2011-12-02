@@ -18,6 +18,7 @@
 package org.sbml.simulator.math;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.sbml.jsbml.ASTNode;
 import org.sbml.jsbml.Compartment;
@@ -45,14 +46,33 @@ import org.simulator.sbml.SBMLinterpreter;
 public class SBMLMatrixParser {
 
 	/**
-	 * Loads the the SBML library
+	 * 
 	 */
-
 	private Model model;
-	private HashMap<String, Integer> hashReactions, hashSpecies;
+	
+	/**
+	 * 
+	 */
+	private Map<String, Integer> hashReactions, hashSpecies;
+	
+	/**
+	 * 
+	 */
 	private int numSpecies, numReactions;
-	private HashMap<String, HashMap<Integer, Integer>> sBOTerms;
+	
+	/**
+	 * 
+	 */
+	private Map<String, Map<Integer, Integer>> sBOTerms;
+	
+	/**
+	 * 
+	 */
 	private static int initvalue = 1;
+	
+	/**
+	 * 
+	 */
 	private String[] reactions, species;
 
 	/**
@@ -70,7 +90,7 @@ public class SBMLMatrixParser {
 		this.species = new String[numSpecies];
 		hashSpezies();
 		hashReactions();
-		sBOTerms = new HashMap<String, HashMap<Integer, Integer>>();
+		sBOTerms = new HashMap<String, Map<Integer, Integer>>();
 	}
 
 	/**
@@ -83,7 +103,6 @@ public class SBMLMatrixParser {
 			hashSpecies.put(model.getSpecies(i).getId(), Integer.valueOf(i));
 			species[i] = model.getSpecies(i).getId();
 		}
-
 	}
 
 	/**
@@ -96,7 +115,6 @@ public class SBMLMatrixParser {
 			hashReactions.put(model.getReaction(i).getId(), i);
 			reactions[i] = model.getReaction(i).getId();
 		}
-
 	}
 
 	/**
@@ -154,11 +172,8 @@ public class SBMLMatrixParser {
 						hashReactions.get(reac.getId()), speciesRef
 								.getStoichiometry());
 			}
-
 		}
-
 		return matrixN;
-
 	}
 
 	/**
@@ -181,9 +196,9 @@ public class SBMLMatrixParser {
 			reac = model.getReaction(n);
 			// modifier
 			losr = reac.getListOfModifiers();
-			if (losr.size() > 0)
+			if (losr.size() > 0) {
 				sBOTerms.put(reac.getId(), new HashMap<Integer, Integer>());
-
+			}
 			for (int m = 0; m < losr.size(); m++) {
 				modSpeciesRef = reac.getModifier(m);
 
@@ -197,32 +212,30 @@ public class SBMLMatrixParser {
 							.intValue(), hashReactions.get(reac.getId())
 							.intValue(), 1);
 
-					if (modSpeciesRef.getSBOTerm() == -1)
+					if (modSpeciesRef.getSBOTerm() == -1) {
 						sBOTerms.get(reac.getId()).put(Integer.valueOf(m), 21);
-
+					}
 				}
 				// inhibitor
-				else if (classification < 0 || modSpeciesRef.getSBOTerm() == 20) {
+				else if ((classification < 0) || (modSpeciesRef.getSBOTerm() == 20)) {
 					matrixW.set(hashSpecies.get(modSpeciesRef.getSpecies()),
 							hashReactions.get(reac.getId()), -1);
-					if (modSpeciesRef.getSBOTerm() == -1)
+					if (modSpeciesRef.getSBOTerm() == -1) {
 						sBOTerms.get(reac.getId()).put(Integer.valueOf(m), 20);
+					}
 				}
 				// catalyst
 				else {
 					matrixW.set(hashSpecies.get(modSpeciesRef.getSpecies()),
 							hashReactions.get(reac.getId()), 0);
-					if (modSpeciesRef.getSBOTerm() == -1)
+					if (modSpeciesRef.getSBOTerm() == -1) {
 						sBOTerms.get(reac.getId()).put(Integer.valueOf(m), 13);
 					// modSpeciesRef.setSBOTerm(13);
+					}
 				}
-
 			}
-
 		}
-
 		return matrixW;
-
 	}
 
 	/**
@@ -260,10 +273,11 @@ public class SBMLMatrixParser {
 			sbmli = new SBMLinterpreter(model);
 			twice = reac.getKineticLaw().getMath().compile(sbmli.getASTNodeInterpreter()).toDouble();
 
-			if (half < normal && normal < twice)
+			if ((half < normal) && (normal < twice)) {
 				result = 1;
-			else if (half > normal && normal > twice)
+			}	else if ((half > normal) && (normal > twice)) {
 				result = -1;
+			}
 
 			model.getSpecies(msr.getSpecies()).setInitialAmount(iA);
 
@@ -277,14 +291,15 @@ public class SBMLMatrixParser {
 	 * Adds SBOTerms to all modifiers hashed in the HashMap sBOTerms because
 	 * their SBOTerm hasn't been set yet
 	 */
-	// TODO noch n�tig?
+	// TODO still necessary?
 	private void setSBOTerms() {
-		HashMap<Integer, Integer> sBOReaction;
+		Map<Integer, Integer> sBOReaction;
 		for (String rid : sBOTerms.keySet()) {
 			sBOReaction = sBOTerms.get(rid);
-			for (Integer mid : sBOReaction.keySet())
+			for (Integer mid : sBOReaction.keySet()) {
 				model.getReaction(rid).getModifier(mid.intValue()).setSBOTerm(
 						sBOReaction.get(mid));
+			}
 		}
 	}
 
@@ -294,9 +309,9 @@ public class SBMLMatrixParser {
 	 */
 	private void initLocalParameter(ListOf<LocalParameter> lop) {
 		for (int i = 0; i < lop.size(); i++) {
-			if (!lop.get(i).isSetValue())
+			if (!lop.get(i).isSetValue()) {
 				lop.get(i).setValue(initvalue);
-
+			}
 		}
 	}
 
@@ -312,23 +327,26 @@ public class SBMLMatrixParser {
 		String nodename = new String();
 		int i;
 
-		if (astnode.isString())
+		if (astnode.isString()) {
 			nodename = astnode.getName();
+		}
 
 		for (i = 0; i < los.size() && !found; i++) {
 			if (los.get(i).getName() == nodename) {
 				found = true;
 				Species s = los.get(i);
-				if (!s.isSetInitialAmount() && !s.isSetInitialConcentration())
+				if (!s.isSetInitialAmount() && !s.isSetInitialConcentration()) {
 					los.get(i).setInitialAmount(Double.valueOf(initvalue));
+				}
 			}
 		}
 		lop = model.getListOfParameters();
 		for (i = 0; i < lop.size() && !found; i++) {
 			if (lop.get(i).getName() == nodename) {
 				found = true;
-				if (!lop.get(i).isSetValue())
+				if (!lop.get(i).isSetValue()) {
 					lop.get(i).setValue(initvalue);
+				}
 			}
 		}
 
@@ -341,12 +359,12 @@ public class SBMLMatrixParser {
 
 		}
 
-		if (astnode.getRightChild() != null)
+		if (astnode.getRightChild() != null) {
 			initGlobalParameter(astnode.getRightChild());
-
-		if (astnode.getLeftChild() != null)
+		}
+		if (astnode.getLeftChild() != null) {
 			initGlobalParameter(astnode.getLeftChild());
-
+		}
 	}
 
 }

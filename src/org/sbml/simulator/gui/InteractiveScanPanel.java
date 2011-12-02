@@ -1,19 +1,18 @@
 /*
- * $Id$ $URL:
- * https:
- * //rarepos.cs.uni-tuebingen.de/svn-path/SBMLsimulator/trunk/src/org/sbml/
- * simulator/gui/InteractiveScanPanel.java $
- * --------------------------------------------------------------------- This
- * file is part of SBMLsimulator, a Java-based simulator for models of
- * biochemical processes encoded in the modeling language SBML.
- * 
+ * $Id$
+ * $URL$
+ * ---------------------------------------------------------------------
+ * This file is part of SBMLsimulator, a Java-based simulator for models
+ * of biochemical processes encoded in the modeling language SBML.
+ *
  * Copyright (C) 2007-2011 by the University of Tuebingen, Germany.
- * 
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation. A copy of the license agreement is provided in the file
- * named "LICENSE.txt" included with this software distribution and also
- * available online as <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
+ *
+ * This library is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation. A copy of the license
+ * agreement is provided in the file named "LICENSE.txt" included with
+ * this software distribution and also available online as
+ * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
 package org.sbml.simulator.gui;
@@ -277,11 +276,11 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
    */
   public Properties getProperties() {
     Properties p = new Properties();
-    p.put(SimulationOptions.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE,
+    p.put(SimulationOptions.DEFAULT_INIT_COMPARTMENT_SIZE,
       Double.valueOf(defaultCompartmentValue));
-    p.put(SimulationOptions.OPT_DEFAULT_SPECIES_INITIAL_VALUE,
+    p.put(SimulationOptions.DEFAULT_INIT_SPECIES_VALUE,
       Double.valueOf(defaultSpeciesValue));
-    p.put(SimulationOptions.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS,
+    p.put(SimulationOptions.DEFAULT_INIT_PARAMETER_VALUE,
       Double.valueOf(defaultParameterValue));
     return p;
   }
@@ -464,17 +463,16 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
   /**
    * @param properties
    */
-  public void loadPreferences() {
-    SBPreferences prefs = SBPreferences
-        .getPreferencesFor(SimulationOptions.class);
-    defaultCompartmentValue = prefs
-        .getDouble(SimulationOptions.OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE);
-    defaultSpeciesValue = prefs
-        .getDouble(SimulationOptions.OPT_DEFAULT_SPECIES_INITIAL_VALUE);
-    defaultParameterValue = prefs
-        .getDouble(SimulationOptions.OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS);
-    
-  }
+	public void loadPreferences() {
+		SBPreferences prefs = SBPreferences
+				.getPreferencesFor(SimulationOptions.class);
+		defaultCompartmentValue = prefs
+				.getDouble(SimulationOptions.DEFAULT_INIT_COMPARTMENT_SIZE);
+		defaultSpeciesValue = prefs
+				.getDouble(SimulationOptions.DEFAULT_INIT_SPECIES_VALUE);
+		defaultParameterValue = prefs
+				.getDouble(SimulationOptions.DEFAULT_INIT_PARAMETER_VALUE);
+	}
   
   /*
    * (non-Javadoc)

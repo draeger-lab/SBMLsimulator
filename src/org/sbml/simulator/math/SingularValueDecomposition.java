@@ -17,8 +17,10 @@
  */
 package org.sbml.simulator.math;
 
+import java.io.Serializable;
+
 import eva2.tools.math.Jama.Matrix;
-import eva2.tools.math.Jama.util.*;
+import eva2.tools.math.Jama.util.Maths;
 
 /**
  * Singular Value Decomposition.
@@ -38,7 +40,7 @@ import eva2.tools.math.Jama.util.*;
  * @version $Rev$
  * @since 1.0
  */
-public class SingularValueDecomposition implements java.io.Serializable {
+public class SingularValueDecomposition implements Serializable {
 
 	/*
 	 * ------------------------ Class variables ------------------------
@@ -83,7 +85,6 @@ public class SingularValueDecomposition implements java.io.Serializable {
 	 *            Rectangular matrix
 	 * @return Structure to access U, S and V.
 	 */
-
 	public SingularValueDecomposition(Matrix Arg) {
 
 		// Derived from LINPACK code.
@@ -513,7 +514,6 @@ public class SingularValueDecomposition implements java.io.Serializable {
 	 * 
 	 * @return U
 	 */
-
 	public Matrix getU() {
 		return new Matrix(U, m, m);
 	}
@@ -523,7 +523,6 @@ public class SingularValueDecomposition implements java.io.Serializable {
 	 * 
 	 * @return V
 	 */
-
 	public Matrix getV() {
 		return new Matrix(V, n, n);
 	}
@@ -533,7 +532,6 @@ public class SingularValueDecomposition implements java.io.Serializable {
 	 * 
 	 * @return diagonal of S.
 	 */
-
 	public double[] getSingularValues() {
 		return s;
 	}
@@ -543,7 +541,6 @@ public class SingularValueDecomposition implements java.io.Serializable {
 	 * 
 	 * @return S
 	 */
-
 	public Matrix getS() {
 		Matrix X = new Matrix(m, n);
 		double[][] S = X.getArray();
@@ -564,7 +561,6 @@ public class SingularValueDecomposition implements java.io.Serializable {
 	 * 
 	 * @return max(S)
 	 */
-
 	public double norm2() {
 		return s[0];
 	}
@@ -574,7 +570,6 @@ public class SingularValueDecomposition implements java.io.Serializable {
 	 * 
 	 * @return max(S)/min(S)
 	 */
-
 	public double cond() {
 		return s[0] / s[Math.min(m, n) - 1];
 	}
@@ -584,7 +579,6 @@ public class SingularValueDecomposition implements java.io.Serializable {
 	 * 
 	 * @return Number of nonnegligible singular values.
 	 */
-
 	public int rank() {
 		double eps = Math.pow(2.0, -52.0);
 		double tol = Math.max(m, n) * s[0] * eps;

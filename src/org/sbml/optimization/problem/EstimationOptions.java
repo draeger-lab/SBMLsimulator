@@ -17,8 +17,12 @@
  */
 package org.sbml.optimization.problem;
 
+import java.util.ResourceBundle;
+
+import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.Option;
+import de.zbit.util.prefs.OptionGroup;
 
 /**
  * A collection of {@link Option}s to configure the parameter estimation
@@ -30,92 +34,102 @@ import de.zbit.util.prefs.Option;
  * @date 2011-03-23
  */
 public interface EstimationOptions extends KeyProvider {
-    /**
-     * Decide whether or not by default all compartments in a model should be
-     * considered the target of an optimization, i.e., value estimation.
-     */
-    public static final Option<Boolean> EST_ALL_COMPARTMENTS = new Option<Boolean>(
-	"EST_ALL_COMPARTMENTS",
-	Boolean.class,
-	"Decide whether or not by default all compartments in a model should be considered the target of an optimization, i.e., value estimation.",
-	Boolean.FALSE);
-    /**
-     * Decide whether or not by default all global parameters in a model should
-     * be considered the target of an optimization, i.e., value estimation.
-     */
-    public static final Option<Boolean> EST_ALL_GLOBAL_PARAMETERS = new Option<Boolean>(
-	"EST_ALL_GLOBAL_PARAMETERS",
-	Boolean.class,
-	"Decide whether or not by default all global parameters in a model should be considered the target of an optimization, i.e., value estimation.",
-	Boolean.TRUE);
-    /**
-     * Decide whether or not by default all local parameters in a model should
-     * be considered the target of an optimization, i.e., value estimation.
-     */
-    public static final Option<Boolean> EST_ALL_LOCAL_PARAMETERS = new Option<Boolean>(
-	"EST_ALL_LOCAL_PARAMETERS",
-	Boolean.class,
-	"Decide whether or not by default all local parameters in a model should be considered the target of an optimization, i.e., value estimation.",
-	Boolean.TRUE);
-    /**
-     * Decide whether or not by default all species in a model should be
-     * considered the target of an optimization, i.e., value estimation.
-     */
-    public static final Option<Boolean> EST_ALL_SPECIES = new Option<Boolean>(
-	"EST_ALL_SPECIES",
-	Boolean.class,
-	"Decide whether or not by default all species in a model should be considered the target of an optimization, i.e., value estimation.",
-	Boolean.FALSE);
-    /**
-     * The maximal value of the initialization range in a parameter estimation
-     * procedure.
-     */
-    public static final Option<Double> EST_INIT_MAX_VALUE = new Option<Double>(
-	"EST_INIT_MAX_VALUE",
-	Double.class,
-	"The maximal value of the initialization range in a parameter estimation procedure.",
-	Double.valueOf(1E1));
-    /**
-     * The minimal value of the initialization range in a parameter estimation
-     * procedure.
-     */
-    public static final Option<Double> EST_INIT_MIN_VALUE = new Option<Double>(
-	"EST_INIT_MIN_VALUE",
-	Double.class,
-	"The minimal value of the initialization range in a parameter estimation procedure.",
-	Double.valueOf(0d));
-    /**
-     * The maximal value in the absolute allowable range in a parameter
-     * estimation procedure.
-     */
-    public static final Option<Double> EST_MAX_VALUE = new Option<Double>(
-	"EST_MAX_VALUE",
-	Double.class,
-	"The maximal value in the absolute allowable range in a parameter estimation procedure.",
-	Double.valueOf(1E3));
-    /**
-     * The minimal value in the absolute allowable range in a parameter
-     * estimation procedure.
-     */
-    public static final Option<Double> EST_MIN_VALUE = new Option<Double>(
-	"EST_MIN_VALUE",
-	Double.class,
-	"The minimal value in the absolute allowable range in a parameter estimation procedure.",
-	Double.valueOf(0d));
-    /**
-     * Decide whether a model calibration should be done using multiple shoot
-     * technique. This should be the default. The other possibility is the
-     * so-called single shoot technique. This means that only one initial value
-     * is taken to integrate the ordinary differential equation system, whereas
-     * the multiple shoot technique restarts the integration in each time step
-     * given the values in this step. The aim is then to come as close as
-     * possible to the start value in the next time step. In many cases the
-     * fitness landscape becomes much more friendly when using a multiple shoot
-     * strategy.
-     */
-    public static final Option<Boolean> EST_MULTI_SHOOT = new Option<Boolean>(
-	"EST_MULTI_SHOOT",
-	Boolean.class,
-	"Decide whether a model calibration should be done using multiple shoot technique. This should be the default. The other possibility is the so-called single shoot technique. This means that only one initial value is taken to integrate the ordinary differential equation system, whereas the multiple shoot technique restarts the integration in each time step given the values in this step. The aim is then to come as close as possible to the start value in the next time step. In many cases the fitness landscape becomes much more friendly when using a multiple shoot strategy.",
-	Boolean.TRUE);
+	
+	/**
+	 * Resource bundle
+	 */
+	static ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
+	
+	/**
+	 * Decide whether or not by default all compartments in a model should be
+	 * considered the target of an optimization, i.e., value estimation.
+	 */
+	public static final Option<Boolean> EST_ALL_COMPARTMENTS = new Option<Boolean>(
+		"EST_ALL_COMPARTMENTS", Boolean.class, bundle, Boolean.FALSE);
+	
+	/**
+	 * Decide whether or not by default all global parameters in a model should be
+	 * considered the target of an optimization, i.e., value estimation.
+	 */
+	public static final Option<Boolean> EST_ALL_GLOBAL_PARAMETERS = new Option<Boolean>(
+		"EST_ALL_GLOBAL_PARAMETERS", Boolean.class, bundle, Boolean.TRUE);
+	
+	/**
+	 * Decide whether or not by default all local parameters in a model should be
+	 * considered the target of an optimization, i.e., value estimation.
+	 */
+	public static final Option<Boolean> EST_ALL_LOCAL_PARAMETERS = new Option<Boolean>(
+		"EST_ALL_LOCAL_PARAMETERS", Boolean.class, bundle, Boolean.TRUE);
+	
+	/**
+	 * Decide whether or not by default all species in a model should be
+	 * considered the target of an optimization, i.e., value estimation.
+	 */
+	public static final Option<Boolean> EST_ALL_SPECIES = new Option<Boolean>(
+		"EST_ALL_SPECIES", Boolean.class, bundle, Boolean.FALSE);
+	
+	/**
+	 * The maximal value of the initialization range in a parameter estimation
+	 * procedure.
+	 */
+	public static final Option<Double> EST_INIT_MAX_VALUE = new Option<Double>(
+		"EST_INIT_MAX_VALUE", Double.class, bundle, Double.valueOf(1E1));
+	
+	/**
+	 * The minimal value of the initialization range in a parameter estimation
+	 * procedure.
+	 */
+	public static final Option<Double> EST_INIT_MIN_VALUE = new Option<Double>(
+		"EST_INIT_MIN_VALUE", Double.class, bundle, Double.valueOf(0d));
+	
+	/**
+	 * The maximal value in the absolute allowable range in a parameter estimation
+	 * procedure.
+	 */
+	public static final Option<Double> EST_MAX_VALUE = new Option<Double>(
+		"EST_MAX_VALUE", Double.class, bundle, Double.valueOf(1E3));
+	
+	/**
+	 * The minimal value in the absolute allowable range in a parameter estimation
+	 * procedure.
+	 */
+	public static final Option<Double> EST_MIN_VALUE = new Option<Double>(
+		"EST_MIN_VALUE", Double.class, bundle, Double.valueOf(0d));
+	
+	/**
+	 * Decide whether a model calibration should be done using multiple shoot
+	 * technique. This should be the default. The other possibility is the
+	 * so-called single shoot technique. This means that only one initial value is
+	 * taken to integrate the ordinary differential equation system, whereas the
+	 * multiple shoot technique restarts the integration in each time step given
+	 * the values in this step. The aim is then to come as close as possible to
+	 * the start value in the next time step. In many cases the fitness landscape
+	 * becomes much more friendly when using a multiple shoot strategy.
+	 */
+	public static final Option<Boolean> EST_MULTI_SHOOT = new Option<Boolean>(
+		"EST_MULTI_SHOOT", Boolean.class, bundle, Boolean.TRUE);
+	
+	/**
+   * 
+   */
+	@SuppressWarnings("unchecked")
+	public static final OptionGroup<Boolean> OPTIMIZATION_TARGETS = new OptionGroup<Boolean>(
+		"OPTIMIZATION_TARGETS", bundle, EST_ALL_COMPARTMENTS,
+		EST_ALL_GLOBAL_PARAMETERS, EST_ALL_LOCAL_PARAMETERS, EST_ALL_SPECIES);
+	
+	/**
+	 * 
+	 */
+	@SuppressWarnings("unchecked")
+	public static final OptionGroup<Double> OPTIMIZATION_RANGES = new OptionGroup<Double>(
+		"OPTIMIZATION_RANGES", bundle, EST_INIT_MIN_VALUE, EST_INIT_MAX_VALUE,
+		EST_MIN_VALUE, EST_MAX_VALUE);
+	
+	/**
+	 * 
+	 */
+	@SuppressWarnings("unchecked")
+	public static final OptionGroup<Boolean> INTEGRATION_STRATEGY = new OptionGroup<Boolean>(
+		"INTEGRATION_STRATEGY", bundle, EST_MULTI_SHOOT);
+
 }

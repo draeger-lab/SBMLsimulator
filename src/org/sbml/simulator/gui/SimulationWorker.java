@@ -44,6 +44,9 @@ import org.simulator.sbml.SBMLinterpreter;
  */
 public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implements PropertyChangeListener{
 
+	/**
+	 * A {@link Logger} for this class
+	 */
   private static final Logger logger = Logger.getLogger(SimulationWorker.class.getName());
   
   /**
@@ -131,7 +134,6 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
    * (non-Javadoc)
    * @see javax.swing.SwingWorker#doInBackground()
    */
-  @Override
   protected MultiTable doInBackground() throws Exception {
     solution=solveByStepSize(solver, interpreter, interpreter.getInitialValues(),
       timeStart, timeEnd, stepSize, includeReactions);
@@ -168,6 +170,5 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
   public MultiTable getSolution() {
     return solution;
   }
-  
 
 }

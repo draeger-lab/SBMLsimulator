@@ -1,20 +1,20 @@
 /*
- * $Id: SimulationConfiguration.java 16:09:12 draeger$ $URL:
- * SimulationConfiguration.java $
- * --------------------------------------------------------------------- This
- * file is part of SBMLsimulator, a Java-based simulator for models of
- * biochemical processes encoded in the modeling language SBML.
- * 
+ * $Id$
+ * $URL$
+ * ---------------------------------------------------------------------
+ * This file is part of SBMLsimulator, a Java-based simulator for models
+ * of biochemical processes encoded in the modeling language SBML.
+ *
  * Copyright (C) 2007-2011 by the University of Tuebingen, Germany.
- * 
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation. A copy of the license agreement is provided in the file
- * named "LICENSE.txt" included with this software distribution and also
- * available online as <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
+ *
+ * This library is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation. A copy of the license
+ * agreement is provided in the file named "LICENSE.txt" included with
+ * this software distribution and also available online as
+ * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
-
 package org.sbml.simulator;
 
 import java.beans.PropertyChangeEvent;
@@ -33,7 +33,6 @@ import de.zbit.util.prefs.SBPreferences;
  * @version $Rev$
  * @since 1.0
  */
-
 public class SimulationConfiguration implements PropertyChangeListener {
   
   /**
@@ -137,14 +136,13 @@ public class SimulationConfiguration implements PropertyChangeListener {
     } else if ("solver".equals(property)) {
       
       solver = (AbstractDESSolver) evt.getNewValue();
-      prefs.put(SimulationOptions.SIM_ODE_SOLVER, solver.getClass()
+      prefs.put(SimulationOptions.ODE_SOLVER, solver.getClass()
         .getSimpleName());      
       
     } else if ("start".equals(property)) {
       
       start = (Double) evt.getNewValue();
-      prefs.put(SimulationOptions.SIM_START_TIME, start);
-     
+      prefs.put(SimulationOptions.SIM_START_TIME, start);  
       
     } else if ("end".equals(property)) {
       
@@ -157,9 +155,9 @@ public class SimulationConfiguration implements PropertyChangeListener {
       prefs.put(SimulationOptions.SIM_STEP_SIZE, stepSize);
       
     } else if ("includeReactions".equals(property)) {
-      
+
       includeReactions = (Boolean) evt.getNewValue();
-      
+
     }
   }
   

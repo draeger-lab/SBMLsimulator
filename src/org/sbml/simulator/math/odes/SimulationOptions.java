@@ -37,203 +37,126 @@ import de.zbit.util.prefs.Range;
  * @date 2011-03-23
  */
 public interface SimulationOptions extends KeyProvider {
-    
-    /**
-     * Location of the translation files for multiple language support.
-     */
-    public static final String BUNDLE_LOCATION = "org.sbml.simulator.locales.Simulator";
-    /**
-     * The bundle for the user's current language.
-     */
-    public static final ResourceBundle bundle = ResourceManager.getBundle(BUNDLE_LOCATION);
-    
-    /**
-     * If not specified the value corresponding to this argument will be used to
-     * initialize the size of compartments.
-     */
-    public static final Option<Double> OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE = new Option<Double>(
-	"OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE", Double.class, bundle
-		.getString("SIM:0000001"), new Range<Double>(Double.class,
-	    "{(0.0, 9E9]}"), Double.valueOf(1d));
-    /**
-     * If not specified the value corresponding to this argument will be used to
-     * initialize species depending on their hasOnlySubstanceUnits property as
-     * initial amount or initial concentration.
-     */
-    public static final Option<Double> OPT_DEFAULT_SPECIES_INITIAL_VALUE = new Option<Double>(
-	"OPT_DEFAULT_SPECIES_INITIAL_VALUE",
-	Double.class,
-	" If not specified the value corresponding to this argument will be used to initialize species depending on their hasOnlySubstanceUnits property as initial amount or initial concentration.",
-	new Range<Double>(Double.class, "{(0.0, 9E9]}"), Double.valueOf(1d));
-    /**
-     * The value that is set for newly created parameters.
-     */
-    public static final Option<Double> OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS = new Option<Double>(
-	"OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS", Double.class,
-	"The value that is set for newly created parameters.",
-	new Range<Double>(Double.class, "{(0.0, 9E9]}"), Double.valueOf(1d));
+	
+	/**
+	 * Location of the translation files for multiple language support.
+	 */
+	public static final String BUNDLE_LOCATION = "org.sbml.simulator.locales.Simulator";
+	
+	/**
+	 * The bundle for the user's current language.
+	 */
+	public static final ResourceBundle bundle = ResourceManager
+			.getBundle(BUNDLE_LOCATION);
+	
+	/**
+	 * If not specified the value corresponding to this argument will be used to
+	 * initialize the size of compartments.
+	 */
+	public static final Option<Double> DEFAULT_INIT_COMPARTMENT_SIZE = new Option<Double>(
+		"DEFAULT_INIT_COMPARTMENT_SIZE", Double.class, bundle, new Range<Double>(
+			Double.class, "{(0.0, 9E9]}"), Double.valueOf(1d));
 
-    /**
-     * Decide how to treat the values of compartments, species, and parameters
-     * if no initial value has been defined in the model.
-     */
-    @SuppressWarnings("unchecked")
-    public static final OptionGroup<Double> DEFAULT_VALUES = new OptionGroup<Double>(
-	"Missing values",
-	"Decide how to treat the values of compartments, species, and parameters if no initial value has been defined in the model.",
-	OPT_DEFAULT_COMPARTMENT_INITIAL_SIZE,
-	OPT_DEFAULT_SPECIES_INITIAL_VALUE, OPT_DEFAULT_VALUE_OF_NEW_PARAMETERS);  
-    
-    /**
-     * The default return value of a distance function that can be used if for
-     * some reason a distance cannot be computed.
-     */
-    public static final Option<Double> SIM_QUALITY_DEFAULT_VALUE = new Option<Double>(
-	"SIM_QUALITY_DEFAULT_VALUE",
-	Double.class,
-	"The default return value of a quality function that can be used if for some reason a quality cannot be computed.",
-	Double.valueOf(1E3));
-    
-    /**
-     * This specifies the class name of the default distance function that
-     * evaluates the quality of a simulation with respect to given
-     * (experimental) data.
-     */
-    @SuppressWarnings("rawtypes")
-	public static final Option<Class> SIM_QUALITY_FUNCTION = new Option<Class>(
-	"SIM_QUALITY_FUNCTION",
-	Class.class,
-	"This specifies the class name of the default quality function that evaluates the quality of a simulation with respect to given (experimental) data.",
-	new Range<Class>(Class.class, SBMLsimulator.getAvailableQualityMeasureClasses()),
-	RSE.class);
-    
-    /**
-     * The root parameter in the distance function: in case of the n-norm this
-     * is at the same time also the exponent. For instance, the Eulidean
-     * distance has a root value of two, whereas the Manhattan norm has a root
-     * of one. In the RSE, the default root is also two, but this value may be
-     * changed.
-     */
-    public static final Option<Double> SIM_QUALITY_N_METRIC_ROOT = new Option<Double>(
-	"SIM_QUALITY_N_METRIC_ROOT",
-	Double.class,
-	"The root parameter in the distance function for n-metrics: in case of the n-norm this is at the same time also the exponent. For instance, the Eulidean distance has a root value of two, whereas the Manhattan norm has a root of one. In the RSE, the default root is also two, but this value may be changed.",
-	Double.valueOf(3d));
-        
-   
-    
-    /**
-     * 
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static final OptionGroup MODEL_QUALITY = new OptionGroup(bundle
-	    .getString("SIM:0000010"), bundle.getString("SIM:0000011"),
-	SIM_QUALITY_FUNCTION, SIM_QUALITY_DEFAULT_VALUE,
-	SIM_QUALITY_N_METRIC_ROOT);
-    
-    
-    /**
-     * This is important for the graphical user interface as it defines the
-     * maximal possible value for compartments within the input mask. Expected
-     * is a positive double value.
-     */
-    public static final Option<Double> SIM_MAX_COMPARTMENT_SIZE = new Option<Double>(
-	"SIM_MAX_COMPARTMENT_SIZE",
-	Double.class,
-	" This is important for the graphical user interface as it defines the maximal possible value for compartments within the input mask. Expected is a positive double value.",
-	Double.valueOf(1E3));
-    /**
-     * This is important for the graphical user interface as it defines the
-     * maximal possible value for parameters within the input mask. Expected is
-     * a positive double value.
-     */
-    public static final Option<Double> SIM_MAX_PARAMETER_VALUE = new Option<Double>(
-	"SIM_MAX_PARAMETER_VALUE",
-	Double.class,
-	"This is important for the graphical user interface as it defines the maximal possible value for parameters within the input mask. Expected is a positive double value.",
-	Double.valueOf(1E3));
-    /**
-     * This is important for the graphical user interface as it defines the
-     * maximal possible value for species within the input mask. Expected is a
-     * positive double value.
-     */
-    public static final Option<Double> SIM_MAX_SPECIES_VALUE = new Option<Double>(
-	"SIM_MAX_SPECIES_VALUE",
-	Double.class,
-	"This is important for the graphical user interface as it defines the maximal possible value for species within the input mask. Expected is a positive double value.",
-	Double.valueOf(1E3));
-    /**
-     * This key tells the graphical user interface the upper bound for the input
-     * mask of how many time steps per unit time can maximally be performed when
-     * simulating a model.
-     */
-    public static final Option<Integer> SIM_MAX_STEPS_PER_UNIT_TIME = new Option<Integer>(
-	"SIM_MAX_STEPS_PER_UNIT_TIME",
-	Integer.class,
-	"This key tells the graphical user interface the upper bound for the input mask of how many time steps per unit time can maximally be performed when simulating a model.",
-	Integer.valueOf(100));
-    /**
-     * This is important for the graphical user interface as it defines the
-     * upper bound for the input mask for the simulation time.
-     */
-    public static final Option<Double> SIM_MAX_TIME = new Option<Double>(
-	"SIM_MAX_TIME",
-	Double.class,
-	"This is important for the graphical user interface as it defines the upper bound for the input mask for the simulation time.",
-	Double.valueOf(1E3));
-    
-    public static final ClassLoader classLoader = ClassLoader.getSystemClassLoader(); 
-    
-    /**
-     * This gives the class name of the default solver for ordinary differential
-     * equation systems. The associated class must implement
-     * {@link AbstractDESSolver} and must have a constructor without any
-     * parameters.
-     */
-    @SuppressWarnings("rawtypes")
-	public static final Option<Class> SIM_ODE_SOLVER = new Option<Class>(
-    		"SIM_ODE_SOLVER",
-    		Class.class,
-    		"This gives the class name of the default solver for ordinary differential equation systems. The associated class must implement AbstractDESSolver and must have a constructor without any parameters.",
-    		new Range<Class>(Class.class, SBMLsimulator.getAvailableSolverClasses()),
-    		RKEventSolver.class);
-    /**
-     * The double value associated with this key must, in case of SBML equal to
-     * zero. Generally, any start time would be possible. This is why this key
-     * exists. But SBML is defined to start its simulation at the time zero.
-     */
-    public static final Option<Double> SIM_START_TIME = new Option<Double>(
-	"SIM_START_TIME",
-	Double.class,
-	"The double value associated with this key must, in case of SBML equal to zero. Generally, any start time would be possible. This is why this key exists. But SBML is defined to start its simulation at the time zero.",
-	Double.valueOf(0d)); 
-    
-    /**
-     * With the associated non-negative double number that has to be greater
-     * than 0 when simulating SBML models, it is possible to perform a
-     * simulation.
-     */
-    public static final Option<Double> SIM_END_TIME = new Option<Double>(
-	"SIM_END_TIME",
-	Double.class,
-	"With the associated non-negative double number that has to be greater than 0 when simulating SBML models, it is possible to perform a simulation.",
-	Double.valueOf(5d));
-    /**
-     * The greater this value the longer the computation time, but the more
-     * accurate will be the result.
-     */
-    public static final Option<Double> SIM_STEP_SIZE = new Option<Double>(
-	"SIM_STEP_SIZE",
-	Double.class,
-	"The greater this value the longer the computation time, but the more accurate will be the result.",
-	Double.valueOf(.01));
-    
-    /**
-     * 
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static final OptionGroup SIM_PARAMETERS = new OptionGroup(bundle
-	    .getString("SIM:0000012"), bundle.getString("SIM:0000013"),
-	    SIM_ODE_SOLVER,SIM_MAX_TIME,SIM_START_TIME,SIM_END_TIME,SIM_MAX_STEPS_PER_UNIT_TIME,SIM_STEP_SIZE, SIM_MAX_COMPARTMENT_SIZE,SIM_MAX_PARAMETER_VALUE,SIM_MAX_SPECIES_VALUE);
-    
+	/**
+	 * 
+	 * If not specified the value corresponding to this argument will be used to
+	 * initialize species depending on their hasOnlySubstanceUnits property as
+	 * initial amount or initial concentration.
+	 */
+	public static final Option<Double> DEFAULT_INIT_SPECIES_VALUE = new Option<Double>(
+		"DEFAULT_INIT_SPECIES_VALUE", Double.class, bundle, new Range<Double>(
+			Double.class, "{(0.0, 9E9]}"), Double.valueOf(1d));
+
+	/**
+	 * The value that is set for newly created parameters.
+	 */
+	public static final Option<Double> DEFAULT_INIT_PARAMETER_VALUE = new Option<Double>(
+		"DEFAULT_INIT_PARAMETER_VALUE", Double.class, bundle, new Range<Double>(
+			Double.class, "{(0.0, 9E9]}"), Double.valueOf(1d));
+
+	/**
+	 * Decide how to treat the values of compartments, species, and parameters if
+	 * no initial value has been defined in the model.
+	 */
+	@SuppressWarnings("unchecked")
+	public static final OptionGroup<Double> DEFAULT_VALUES = new OptionGroup<Double>(
+		"DEFAULT_VALUES", bundle, DEFAULT_INIT_COMPARTMENT_SIZE,
+		DEFAULT_INIT_SPECIES_VALUE, DEFAULT_INIT_PARAMETER_VALUE);
+
+	/**
+	 * The default return value of a distance function that can be used if for
+	 * some reason a distance cannot be computed.
+	 */
+	public static final Option<Double> QUALITY_DEFAULT_VALUE = new Option<Double>(
+		"QUALITY_DEFAULT_VALUE", Double.class, bundle, Double.valueOf(1E3));
+
+	/**
+	 * This specifies the class name of the default distance function that
+	 * evaluates the quality of a simulation with respect to given (experimental)
+	 * data.
+	 */
+	@SuppressWarnings("rawtypes")
+	public static final Option<Class> QUALITY_MEASURE = new Option<Class>(
+		"QUALITY_MEASURE", Class.class, bundle, new Range<Class>(Class.class,
+			SBMLsimulator.getAvailableQualityMeasureClasses()), RSE.class);
+
+	/**
+	 * The root parameter in the distance function: in case of the n-norm this is
+	 * at the same time also the exponent. For instance, the Eulidean distance has
+	 * a root value of two, whereas the Manhattan norm has a root of one. In the
+	 * RSE, the default root is also two, but this value may be changed.
+	 */
+	public static final Option<Double> QUALITY_N_METRIC_ROOT = new Option<Double>(
+		"QUALITY_N_METRIC_ROOT", Double.class, bundle, Double.valueOf(3d));
+
+	/**
+	 * Here you can specify how to evaluate the quality of a parameter set with
+	 * respect to given experimental data.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static final OptionGroup QUALITY_MEASURES = new OptionGroup(
+		"QUALITY_MEASURES", bundle, QUALITY_MEASURE, QUALITY_DEFAULT_VALUE,
+		QUALITY_N_METRIC_ROOT);
+
+	/**
+	 * This gives the class name of the default solver for ordinary differential
+	 * equation systems. The associated class must implement
+	 * {@link AbstractDESSolver} and must have a constructor without any
+	 * parameters.
+	 */
+	@SuppressWarnings("rawtypes")
+	public static final Option<Class> ODE_SOLVER = new Option<Class>(
+		"ODE_SOLVER", Class.class, bundle, new Range<Class>(Class.class,
+			SBMLsimulator.getAvailableSolverClasses()), RKEventSolver.class);
+	
+	/**
+	 * The double value associated with this key must, in case of SBML equal to
+	 * zero. Generally, any start time would be possible. This is why this key
+	 * exists. But SBML is defined to start its simulation at the time zero.
+	 */
+	public static final Option<Double> SIM_START_TIME = new Option<Double>(
+		"SIM_START_TIME", Double.class, bundle, Double.valueOf(0d));
+	
+	/**
+	 * With the associated non-negative double number that has to be greater than
+	 * 0 when simulating SBML models, it is possible to perform a simulation.
+	 */
+	public static final Option<Double> SIM_END_TIME = new Option<Double>(
+		"SIM_END_TIME", Double.class, bundle, Double.valueOf(5d));
+	
+	/**
+	 * The greater this value the longer the computation time, but the more
+	 * accurate will be the result.
+	 */
+	public static final Option<Double> SIM_STEP_SIZE = new Option<Double>(
+		"SIM_STEP_SIZE", Double.class, bundle, Double.valueOf(.01d));
+	
+	/**
+	 * Parameters for the simulation
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static final OptionGroup SIMULATION_CONFIGURATION = new OptionGroup(
+		"SIMULATION_CONFIGURATION", bundle, ODE_SOLVER, SIM_START_TIME,
+		SIM_END_TIME, SIM_STEP_SIZE);
+
 }

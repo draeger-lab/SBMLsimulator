@@ -38,30 +38,37 @@ import javax.swing.table.TableCellEditor;
  */
 public class ColorEditor extends AbstractCellEditor implements TableCellEditor,
 		ActionListener {
+	
 	/**
 	 * 
 	 */
 	public static final String EDIT = "edit";
+	
 	/**
 	 * Generated serial version identifier.
 	 */
 	private static final long serialVersionUID = -3645125690115981580L;
+	
 	/**
 	 * 
 	 */
 	private JButton button;
+	
 	/**
 	 * 
 	 */
 	private JColorChooser colorChooser;
+	
 	/**
 	 * 
 	 */
 	private Color currentColor;
+	
 	/**
 	 * 
 	 */
 	private JDialog dialog;
+	
 	/**
 	 * 
 	 */
@@ -127,4 +134,5 @@ public class ColorEditor extends AbstractCellEditor implements TableCellEditor,
 		currentColor = (Color) value;
 		return button;
 	}
+
 }

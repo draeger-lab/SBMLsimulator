@@ -18,14 +18,17 @@
 package org.sbml.simulator.gui;
 
 import java.awt.Color;
+import java.util.AbstractList;
 import java.util.Hashtable;
 import java.util.NoSuchElementException;
 
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.NamedSBase;
 import org.sbml.jsbml.NamedSBaseWithDerivedUnit;
+import org.sbml.jsbml.SBaseWithDerivedUnit;
 import org.sbml.jsbml.util.compilers.HTMLFormula;
 
 import de.zbit.gui.ColorPalette;
@@ -147,6 +150,7 @@ public class LegendTableModel extends AbstractTableModel {
 	 * A colored button for each model component and
 	 */
 	private Object[][] data;
+	
 	/**
 	 * A mapping between the ids in the table and the corresponding row.
 	 */
@@ -168,8 +172,8 @@ public class LegendTableModel extends AbstractTableModel {
 	private Model model;
 
 	/**
-     * 
-     */
+	 * 
+	 */
 	public LegendTableModel() {
 	}
 
@@ -199,14 +203,6 @@ public class LegendTableModel extends AbstractTableModel {
 		data[rowIndex][boolCol] = boolcol;
 		data[rowIndex][colorCol] = indexToColor(rowIndex);
 		data[rowIndex][nsbCol] = nsb;
-
-		try {
-			data[rowIndex][unitCol] = StringUtil.toHTML(HTMLFormula.toHTML(nsb.getDerivedUnitDefinition()));
-		} catch (Exception e) {
-			data[rowIndex][unitCol] = "N/A";
-			// TODO make exception visible for the user
-		}
-
 		id2Row.put(nsb.getId(), Integer.valueOf(rowIndex));
 	}
 
@@ -339,6 +335,58 @@ public class LegendTableModel extends AbstractTableModel {
 		lastQueried = null;
 		data = new Object[dim][4];
 		int i, j;
+		for (i=0; i<data.length; i++) {
+			data[i][unitCol] = "";
+		}
+		SwingUtilities.invokeLater(new Runnable() {
+
+			/*
+			 * (non-Javadoc)
+			 * @see java.lang.Runnable#run()
+			 */
+			public void run() {
+				AbstractList<SBaseWithDerivedUnit> list = new AbstractList<SBaseWithDerivedUnit>() {
+					
+					/*
+					 * (non-Javadoc)
+					 * @see java.util.AbstractCollection#size()
+					 */
+					public int size() {
+						return model.getNumSymbols() + model.getNumReactions();
+					}
+					
+					/*
+					 * (non-Javadoc)
+					 * @see java.util.AbstractList#get(int)
+					 */
+					public SBaseWithDerivedUnit get(int index) {
+						if (index < model.getNumCompartments()) {
+							return model.getCompartment(index);
+						}
+						index -= model.getNumCompartments();
+						if (index < model.getNumSpecies()) {
+							return model.getSpecies(index);
+						}
+						index -= model.getNumSpecies();
+						if (index < model.getNumParameters()) {
+							return model.getParameter(index);
+						}
+						index -= model.getNumParameters();
+						return model.getReaction(index);
+					}
+				};
+				for (int rowIndex = 0; rowIndex < list.size(); rowIndex++) {
+					try {
+						data[rowIndex][unitCol] = StringUtil.toHTML(HTMLFormula.toHTML(list.get(rowIndex)
+								.getDerivedUnitDefinition()));
+					} catch (Exception e) {
+						data[rowIndex][unitCol] = "N/A";
+						// TODO make exception visible for the user
+					}
+				}
+			}
+			
+		});
 		for (i = 0; i < model.getNumCompartments(); i++) {
 			fillData(model.getCompartment(i), i, false);
 		}

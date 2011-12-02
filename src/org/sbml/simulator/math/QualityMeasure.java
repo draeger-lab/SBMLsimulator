@@ -154,8 +154,7 @@ public abstract class QualityMeasure implements Serializable {
 		if(x.isSetTimePoints() && expected.isSetTimePoints()) {
 		  left = x.filter(expected.getTimePoints());
 		  right = expected.filter(x.getTimePoints());
-		}
-	  
+		} 
 	  
 		ArrayList<Double> distances= new ArrayList<Double>();
 		for (int i = 0; i < left.getBlockCount(); i++) {
@@ -202,7 +201,6 @@ public abstract class QualityMeasure implements Serializable {
 		return distances;
 	}
 	
-	
 	/**
 	 * Returns the default value that is returned by the distance function in
 	 * cases in which the computation of the distance is not possible.
@@ -218,8 +216,7 @@ public abstract class QualityMeasure implements Serializable {
 	 */
 	public final MeanFunction getMeanFunction() {
 	    return meanFunction;
-	}
-	
+	}	
 
 	/**
 	 * The name of this distance measurement.
@@ -237,7 +234,6 @@ public abstract class QualityMeasure implements Serializable {
 	public void setDefaultValue(double defaultValue) {
 		this.defaultValue = defaultValue;
 	}
-
 	
 	/**
 	 * @param meanFunction the meanFunction to set

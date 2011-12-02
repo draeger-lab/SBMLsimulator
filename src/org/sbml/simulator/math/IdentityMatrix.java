@@ -27,12 +27,18 @@ package org.sbml.simulator.math;
  */
 public class IdentityMatrix extends StabilityMatrix {
 
-	private static final long serialVersionUID = 1L;
+	/**
+	 * Generated serial version identifier.
+	 */
+	private static final long serialVersionUID = 5386269669997716715L;
 
+	/**
+	 * 
+	 * @param m
+	 */
 	public IdentityMatrix(int m) {
 		super(m, m, 0);
 		setOne();
-
 	}
 
 	/**
@@ -40,7 +46,6 @@ public class IdentityMatrix extends StabilityMatrix {
 	 * identity matrix
 	 */
 	private void setOne() {
-
 		for (int i = 0; i < this.getColumnDimension(); i++) {
 			this.set(i, i, 1);
 		}

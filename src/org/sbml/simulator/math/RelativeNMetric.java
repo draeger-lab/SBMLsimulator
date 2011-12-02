@@ -1,6 +1,6 @@
 /*
  * $Id:  RelativeNMetric.java 17:06:20 keller$
- * $URL: RelativeNMetric.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -15,76 +15,87 @@
  * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
-
 package org.sbml.simulator.math;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ResourceBundle;
+
+import de.zbit.util.ResourceManager;
 
 
 /**
  * @author Roland Keller
  * @version $Rev$
- * @since
+ * @since 1.0
  */
 public class RelativeNMetric extends QualityMeasure {
 	
-	protected NMetric metric;
+	/**
+	 * Generated serial version identifier.
+	 */
+	private static final long serialVersionUID = 5066304615795368201L;
+	
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 5066304615795368201L;
+	private static final ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
+	
+	/**
+	 * 
+	 */
+	protected NMetric metric;
 
+	/**
+	 * 
+	 */
 	public RelativeNMetric() {
 		super();
-		metric=new NMetric();
+		metric = new NMetric();
 	}
 	
+	/**
+	 * 
+	 * @param root
+	 */
 	public RelativeNMetric(double root) {
 		super(Double.NaN);
-		metric=new NMetric(root);
+		metric = new NMetric(root);
 	}
 
+	/**
+	 * 
+	 * @param metric
+	 */
 	public RelativeNMetric(NMetric metric) {
 		super(Double.NaN);
-		this.metric=metric;
+		this.metric = metric;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.sbml.simulator.math.Distance#getName()
-	 */
-	@Override
-	public String getName() {
-		return "Relative " + metric.getName();
-	}
-
-
 	/* (non-Javadoc)
 	 * @see org.sbml.simulator.math.Distance#distance(java.lang.Iterable, java.lang.Iterable, double)
 	 */
-	@Override
 	public double distance(Iterable<? extends Number> x,
 			Iterable<? extends Number> expected, double defaultValue) {
 		double numerator=metric.distance(x, expected, defaultValue);
 		List<Double> nullVector = new LinkedList<Double>();
-		for(@SuppressWarnings("unused") Number n:expected) {
+		for(@SuppressWarnings("unused") Number n : expected) {
 			nullVector.add(0d);
 		}
 		double denominator=metric.distance(expected,nullVector,defaultValue);
-		if(denominator != 0) {
-			return numerator/denominator;
-		}
-		else {
+		if (denominator != 0) {
+			return numerator / denominator;
+		} else {
 			return numerator;
 		}
 	}
 
 	/* (non-Javadoc)
-	 * @see org.sbml.simulator.math.Distance#toString()
+	 * @see org.sbml.simulator.math.Distance#getName()
 	 */
-	@Override
-	public String toString() {
-		return getName() + " distance";
+	public String getName() {
+		return String.format("%s %s", bundle.getString("RELATIVE"),
+			metric.getName());
 	}
 
 	/**
@@ -92,6 +103,13 @@ public class RelativeNMetric extends QualityMeasure {
 	 */
 	public void setRoot(double root) {
 		metric.setRoot(root);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.math.Distance#toString()
+	 */
+	public String toString() {
+		return String.format("%s %s", getName(), bundle.getString("DISTANCE"));
 	}
 
 }

@@ -1,6 +1,6 @@
 /*
  * $Id:  ArithmeticMean.java 11:27:18 keller$
- * $URL: ArithmeticMean.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -15,9 +15,7 @@
  * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
-
 package org.sbml.simulator.math;
-
 
 import eva2.tools.math.Mathematics;
 
@@ -28,18 +26,18 @@ import eva2.tools.math.Mathematics;
  */
 public class ArithmeticMean extends MeanFunction {
 
-    /**
-     * Generated serial identifier.
-     */
-    private static final long serialVersionUID = 1738283911802695133L;
-
-    /*
-     * (non-Javadoc)
-     * @see org.sbml.simulator.math.MeanFunction#computeMean(double[])
-     */
-    @Override
-    public double computeMean(double[] distances) {
-	return Mathematics.mean(distances);
-    }
+	/**
+	 * Generated serial identifier.
+	 */
+	private static final long serialVersionUID = 1738283911802695133L;
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.sbml.simulator.math.MeanFunction#computeMean(double[])
+	 */
+	public double computeMean(double[] distances) {
+		return Mathematics.mean(distances);
+	}
 
 }

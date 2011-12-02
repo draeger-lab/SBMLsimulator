@@ -19,15 +19,7 @@ package de.zbit.gui.prefs;
 
 import java.io.IOException;
 
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
-import de.zbit.gui.LayoutHelper;
-import de.zbit.gui.prefs.FileSelector.Type;
 import de.zbit.io.CSVOptions;
-import de.zbit.io.SBFileFilter;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -36,48 +28,16 @@ import de.zbit.io.SBFileFilter;
  * @since 1.0
  */
 public class PrefsPanelParsing extends PreferencesPanelForKeyProvider {
-
-    /**
-     * Generated serial version identifier.
-     */
-    private static final long serialVersionUID = 4424293629377476108L;
-    
-    /**
-     * @throws IOException
-     */
-    public PrefsPanelParsing() throws IOException {
-	super(CSVOptions.class);
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see de.zbit.gui.prefs.PreferencesPanelForKeyProvider#init()
-     */
-    @Override
-    public void init() {
-	FileSelector chooser = new FileSelector(Type.OPEN, SBFileFilter.createCSVFileFilter());
-	chooser.setBorder(BorderFactory
-		.createTitledBorder(" Default directories for CSV files "));
-
-	JTextField tfQuoteChar = new JTextField(properties
-		.get(CSVOptions.CSV_FILES_QUOTE_CHAR));
-	tfQuoteChar.addKeyListener(this);
-	JTextField tfSeparatorChar = new JTextField(properties
-		.get(CSVOptions.CSV_FILES_SEPARATOR_CHAR));
-	tfSeparatorChar.addKeyListener(this);
-	JPanel panel = new JPanel();
-	LayoutHelper lh = new LayoutHelper(panel);
-	lh.add(new JLabel("Element separator:"), 0, 0, 1, 1, 0, 0);
-	lh.add(new JPanel(), 1, 0, 1, 1, 0, 0);
-	lh.add(tfSeparatorChar, 2, 0, 1, 1, 1, 0);
-	lh.add(new JPanel(), 0, 1, 3, 1, 1, 0);
-	lh.add(new JLabel("Comment symbol:"), 0, 2, 1, 1, 0, 0);
-	lh.add(tfQuoteChar, 2, 2, 1, 1, 1, 0);
-	panel.setBorder(BorderFactory
-		.createTitledBorder(" Separator and comment character "));
-
-	lh = new LayoutHelper(this);
-	lh.add(chooser, 0, 0, 1, 1, 1, 0);
-	lh.add(panel, 0, 1, 1, 1, 1, 0);
-    }
+	
+	/**
+	 * Generated serial version identifier.
+	 */
+	private static final long serialVersionUID = 4424293629377476108L;
+	
+	/**
+	 * @throws IOException
+	 */
+	public PrefsPanelParsing() throws IOException {
+		super(CSVOptions.class);
+	}
 }

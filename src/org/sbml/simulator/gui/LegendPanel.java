@@ -33,6 +33,8 @@ import javax.swing.event.TableModelListener;
 
 import org.sbml.jsbml.Model;
 
+import de.zbit.gui.GUITools;
+
 /**
  * Container for a {@link LegendTableModel} in a {@link JTable} and two
  * {@link JButton} instances to select or deselect all elements.

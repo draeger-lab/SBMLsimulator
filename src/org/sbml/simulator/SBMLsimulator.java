@@ -1,17 +1,18 @@
 /*
- * $Id$ $URL:
- * svn://rarepos/SBMLsimulator/trunk/src/org/sbml/simulator/SBMLsimulator.java $
- * --------------------------------------------------------------------- This
- * file is part of SBMLsimulator, a Java-based simulator for models of
- * biochemical processes encoded in the modeling language SBML.
- * 
+ * $Id$
+ * $URL$
+ * ---------------------------------------------------------------------
+ * This file is part of SBMLsimulator, a Java-based simulator for models
+ * of biochemical processes encoded in the modeling language SBML.
+ *
  * Copyright (C) 2007-2011 by the University of Tuebingen, Germany.
- * 
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation. A copy of the license agreement is provided in the file
- * named "LICENSE.txt" included with this software distribution and also
- * available online as <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
+ *
+ * This library is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation. A copy of the license
+ * agreement is provided in the file named "LICENSE.txt" included with
+ * this software distribution and also available online as
+ * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
 package org.sbml.simulator;
@@ -20,7 +21,6 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,6 +44,8 @@ import de.zbit.util.prefs.SBProperties;
 
 
 /**
+ * Start program for {@link SBMLsimulator}.
+ * 
  * @author Andreas Dr&auml;ger
  * @author Roland Keller
  * @date 2010-09-01
@@ -98,18 +100,34 @@ public class SBMLsimulator extends Launcher {
    * 
    * @return
    */
-  @SuppressWarnings("rawtypes")
-  public static List<Class> getAvailableQualityMeasureClasses() {
-    List<Class> qualityList = new LinkedList<Class>();
-    for (Class qualityMeasureClass : AVAILABLE_QUALITY_MEASURES) {
+	@SuppressWarnings("rawtypes")
+	public static List<Class> getAvailableQualityMeasureClasses() {
+		List<Class> qualityList = new ArrayList<Class>(
+			AVAILABLE_QUALITY_MEASURES.length);
+		for (Class<? extends QualityMeasure> qualityMeasureClass : AVAILABLE_QUALITY_MEASURES) {
+			try {
+				qualityList.add(qualityMeasureClass);
+			} catch (Exception e) {
+				logger.warning(e.getLocalizedMessage());
+			}
+		}
+		return qualityList;
+	}
+  
+	/**
+	 * @return
+	 */
+	public static List<String> getAvailableQualityMeasureClassNames() {
+    List<String> qualityList = new ArrayList<String>(AVAILABLE_QUALITY_MEASURES.length);
+    for (Class<?> qualityMeasureClass : AVAILABLE_QUALITY_MEASURES) {
       try {
-        qualityList.add(qualityMeasureClass);
+        qualityList.add(qualityMeasureClass.getName());
       } catch (Exception e) {
         logger.warning(e.getLocalizedMessage());
       }
     }
     return qualityList;
-  }
+	}
   
   /**
    * @return
@@ -124,14 +142,29 @@ public class SBMLsimulator extends Launcher {
    */
   @SuppressWarnings("rawtypes")
   public static List<Class> getAvailableSolverClasses() {
-    List<Class> solverList = new LinkedList<Class>();
+    List<Class> solverList = new ArrayList<Class>(AVAILABLE_SOLVERS.length);
     for (Class<AbstractDESSolver> solverClass : AVAILABLE_SOLVERS) {
       try {
         solverList.add(solverClass);
       } catch (Exception e) {
         logger.warning(e.getLocalizedMessage());
       }
-      
+    }
+    return solverList;
+  }
+  
+  /**
+   * 
+   * @return
+   */
+  public static List<String> getAvailableSolverClassNames() {
+  	List<String> solverList = new ArrayList<String>(AVAILABLE_SOLVERS.length);
+    for (Class<AbstractDESSolver> solverClass : AVAILABLE_SOLVERS) {
+      try {
+        solverList.add(solverClass.getName());
+      } catch (Exception e) {
+        logger.warning(e.getLocalizedMessage());
+      }
     }
     return solverList;
   }

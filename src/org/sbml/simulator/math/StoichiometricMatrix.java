@@ -20,6 +20,10 @@ package org.sbml.simulator.math;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 import eva2.tools.math.Jama.LUDecomposition;
 import eva2.tools.math.Jama.Matrix;
@@ -34,41 +38,57 @@ import eva2.tools.math.Jama.Matrix;
  */
 public class StoichiometricMatrix extends StabilityMatrix {
 
-	private static final long serialVersionUID = 1L;
+	/**
+	 * Generated serial version identifier.
+	 */
+	private static final long serialVersionUID = 8418337736328552077L;
+	
+	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final Logger logger = Logger.getLogger(StoichiometricMatrix.class.getName());
+	
 	/**
 	 * A m x r matrix holding the link matrix for the reduced stoichiometric
 	 * matrix of this matrix
 	 */
 	private StabilityMatrix linkMatrix = null;
+	
 	/**
 	 * A r x n matrix holding the reduced form of this matrix
 	 */
 	private StabilityMatrix reducedMatrix = null;
+	
 	/**
 	 * A (m - r) x m matrix holding the conservation relations/moieties of this
 	 * matrix
 	 */
 	private StabilityMatrix conservationRelations = null;
+	
 	/**
 	 * A n x (n - r) matrix holding the feasible steady state fluxes of this
 	 * matrix
 	 */
 	private StabilityMatrix steadyStateFluxes = null;
+	
 	/**
 	 * A HashMap containing inversion of the permutations of the metabolites due
 	 * to the LU decomposition and the algorithm
 	 */
-	private HashMap<Integer, Integer> permutations = null;
+	private Map<Integer, Integer> permutations = null;
+	
 	/**
 	 * A HashSet containing all indices of the removed rows when computing the
 	 * reduced stoichiometric matrix
 	 */
-	private HashSet<Integer> linearDependent;
+	private Set<Integer> linearDependent;
+	
 	/**
 	 * A linked list containing the indices of the removed rows in the same
 	 * order as they appear in the rows of the conservation relations
 	 */
-	private LinkedList<Integer> removedRows;
+	private List<Integer> removedRows;
+	
 	/**
 	 * The rank of this matrix
 	 */
@@ -84,7 +104,6 @@ public class StoichiometricMatrix extends StabilityMatrix {
 	 */
 	public StoichiometricMatrix(int m, int n) {
 		super(m, n);
-
 	}
 
 	/**
@@ -99,7 +118,6 @@ public class StoichiometricMatrix extends StabilityMatrix {
 	 */
 	public StoichiometricMatrix(int m, int n, int c) {
 		super(m, n, c);
-
 	}
 
 	/**
@@ -114,7 +132,6 @@ public class StoichiometricMatrix extends StabilityMatrix {
 	 */
 	public StoichiometricMatrix(double[][] array, int m, int n) {
 		super(array, m, n);
-
 	}
 
 	/**
@@ -171,8 +188,8 @@ public class StoichiometricMatrix extends StabilityMatrix {
 		permutations = new HashMap<Integer, Integer>();
 		removedRows = new LinkedList<Integer>();
 
-		if (!(this.getRowDimension() > 0 && this.getColumnDimension() > 0)) {
-			System.out.println("Wrong dimensions");
+		if (!((this.getRowDimension() > 0) && (this.getColumnDimension() > 0))) {
+			logger.fine("Wrong dimensions");
 		}
 
 		// check if matrix has to be augmented befor performing the LU
@@ -215,11 +232,9 @@ public class StoichiometricMatrix extends StabilityMatrix {
 		// dividing each row its diagonal element
 		for (int i = 0; i < Rt.getRowDimension(); i++) {
 			double unity = Rt.get(i, i);
-			if (unity != 0.0) {
+			if (unity != 0d) {
 				for (int j = 0; j < Rt.getColumnDimension(); j++) {
-					Rt.set(i,
-							j,
-							(Math.round(Rt.get(i, j) / unity * 10000.)) / 10000.);
+					Rt.set(i, j, (Math.round(Rt.get(i, j) / unity * 1E4d)) / 1E4d);
 				}
 			}
 		}
@@ -228,7 +243,7 @@ public class StoichiometricMatrix extends StabilityMatrix {
 		// Gauss-Jordan reduction to eliminate non-zero values above the
 		// diagonal
 		for (int i = Rt.getRowDimension() - 1; i >= 0; i--) {
-			if (Rt.get(i, i) == 0.0) {
+			if (Rt.get(i, i) == 0d) {
 				rank--;
 
 			} else {
@@ -267,8 +282,8 @@ public class StoichiometricMatrix extends StabilityMatrix {
 			} else {
 				column = Rt.getColumn(i);
 				for (int j = 0; j < L.getColumnDimension(); j++) {
-					if (column[j] != 0.0) {
-						value = Math.round(column[j] * 1000.) / 1000.;
+					if (column[j] != 0d) {
+						value = Math.round(column[j] * 1E3d) / 1E3d;
 						n = permutations.get(j);
 						Lo.set(l, n, -value);
 					}
@@ -311,7 +326,6 @@ public class StoichiometricMatrix extends StabilityMatrix {
 
 		for (int i = 0; i < this.getRowDimension(); i++) {
 			augmentedN.setRow(i, this.getRow(i));
-
 		}
 
 		return augmentedN;
@@ -426,7 +440,7 @@ public class StoichiometricMatrix extends StabilityMatrix {
 	 * 
 	 * @return
 	 */
-	public LinkedList<Integer> getLinearDependent() {
+	public List<Integer> getLinearDependent() {
 		if (removedRows == null) {
 			reduceModel();
 		}

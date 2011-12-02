@@ -46,11 +46,12 @@ import eva2.tools.ToolBox;
  */
 public class EstimationProblem extends AbstractProblemDouble implements
 		InterfaceAdditionalPopulationInformer, InterfaceHasInitRange {
-
+	
 	/**
 	 * 
 	 */
 	private MultiTable bestPerGeneration = null;
+	
 	/**
 	 * 
 	 */
@@ -105,18 +106,24 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * allocations
 	 */
 	private transient double[] fitness = new double[1];
+	
 	/**
 	 * To save computation time during the initialization, the initial ranges
 	 * are stored in this 2-dimensional double array when setting the
 	 * {@link QuantityRange} field.
 	 */
 	private double[][] initRanges;
+	
 	/**
 	 * Switch to decide whether or not to use a multiple shooting strategy.
 	 */
 	private boolean multishoot;
 
+	/**
+	 * 
+	 */
 	private Map<String,Integer> idIndex;
+	
 	/**
 	 * 
 	 */
@@ -205,7 +212,6 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * 
 	 * @see eva2.server.go.problems.AbstractOptimizationProblem#clone()
 	 */
-	@Override
 	public EstimationProblem clone() {
 		return new EstimationProblem(this);
 	}
@@ -215,7 +221,6 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * 
 	 * @see eva2.server.go.problems.AbstractProblemDouble#eval(double[])
 	 */
-	@Override
 	public double[] eval(double[] x) {
 		
 	  if(idIndex==null) {
@@ -282,12 +287,20 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		bestPerGenerationDist = Double.POSITIVE_INFINITY;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see eva2.server.go.problems.AbstractProblemDouble#getAdditionalDataHeader()
+	 */
 	@Override
 	public String[] getAdditionalDataHeader() {
 		String[] superHead = super.getAdditionalDataHeader();
 		return ToolBox.appendArrays(superHead, SIMULATION_DATA);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see eva2.server.go.problems.AbstractProblemDouble#getAdditionalDataInfo()
+	 */
 	@Override
 	public String[] getAdditionalDataInfo() {
 		String[] superInfo = super.getAdditionalDataInfo();
@@ -295,6 +308,10 @@ public class EstimationProblem extends AbstractProblemDouble implements
 				"Result of the best per generation model simulation");
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see eva2.server.go.problems.AbstractProblemDouble#getAdditionalDataValue(eva2.server.go.PopulationInterface)
+	 */
 	@Override
 	public Object[] getAdditionalDataValue(PopulationInterface pop) {
 		Object[] superVals = super.getAdditionalDataValue(pop);
@@ -339,7 +356,6 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * 
 	 * @see eva2.server.go.problems.AbstractProblemDouble#getProblemDimension()
 	 */
-	@Override
 	public int getProblemDimension() {
 		return isSetQuantities() ? quantityRanges.length : 0;
 	}
