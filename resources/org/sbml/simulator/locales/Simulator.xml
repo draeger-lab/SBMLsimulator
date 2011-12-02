@@ -9,6 +9,16 @@
 	   by a semicolon ";" the corresponding tool tip.
   </comment>
   
+  <!-- SimulatorOptions -->
+  
+  <entry key="TIME_SERIES_FILE">Time series data file</entry>
+  <entry key="TIME_SERIES_FILE_TOOLTIP">Path to a file with a time series of species/compartment/parameter values.</entry>
+  <entry key="SBML_FILE">SBML file</entry>
+  <entry key="SBML_FILE_TOOLTIP">Select a model in SBML format that is to be simulated.</entry>
+  <entry key="INPUT_FILES">Select input files</entry>
+  <entry key="INPUT_FILES_TOOLTIP">These options are used to select all input files for the simulation.</entry>
+  
+  
   <!-- SimulationOptions -->
   
   <entry key="SimulationOptions">Simulation options</entry>
@@ -55,14 +65,7 @@
   <entry key="OPTIMIZATION_RANGES_TOOLTIP">Define the initial and absolute ranges of all optimization targets.</entry>
   <entry key="INTEGRATION_STRATEGY">Integration strategy</entry>
   <entry key="INTEGRATION_STRATEGY_TOOLTIP">Select whether or not to apply a multiple shooting strategy.</entry>
-          
-  <!-- SimulatiorOptions -->
-  
-  <entry key="TIME_SERIES_FILE">Time series data file</entry>
-  <entry key="TIME_SERIES_FILE_TOOLTIP">Path to a file with a time series of species/compartment/parameter values.</entry>
-  <entry key="SBML_FILE">SBML file</entry>
-  <entry key="SBML_FILE_TOOLTIP">Select a model in SBML format that is to be simulated.</entry>
-  
+
   <!-- Plot -->
   
   <entry key="PLOT_BACKGROUND_COLOR">Plot background color</entry>

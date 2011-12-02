@@ -29,7 +29,6 @@ import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.simulator.gui.SimulatorUI;
 import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.simulator.math.QualityMeasure;
-import org.sbml.simulator.math.odes.SimulationOptions;
 import org.simulator.math.odes.AbstractDESSolver;
 
 import de.zbit.AppConf;
@@ -37,6 +36,7 @@ import de.zbit.Launcher;
 import de.zbit.gui.BaseFrame;
 import de.zbit.gui.GUIOptions;
 import de.zbit.io.CSVOptions;
+import de.zbit.util.LabeledObject;
 import de.zbit.util.Reflect;
 import de.zbit.util.StringUtil;
 import de.zbit.util.prefs.KeyProvider;
@@ -157,11 +157,12 @@ public class SBMLsimulator extends Launcher {
    * 
    * @return
    */
-  public static List<String> getAvailableSolverClassNames() {
-  	List<String> solverList = new ArrayList<String>(AVAILABLE_SOLVERS.length);
+  @SuppressWarnings("unchecked")
+  public static List<LabeledObject<Class>> getAvailableSolverNames() {
+    List<LabeledObject<Class>> solverList = new ArrayList<LabeledObject<Class>>(AVAILABLE_SOLVERS.length);
     for (Class<AbstractDESSolver> solverClass : AVAILABLE_SOLVERS) {
       try {
-        solverList.add(solverClass.getName());
+        solverList.add(new LabeledObject<Class>(solverClass));
       } catch (Exception e) {
         logger.warning(e.getLocalizedMessage());
       }
@@ -238,7 +239,6 @@ public class SBMLsimulator extends Launcher {
    */
   public List<Class<? extends KeyProvider>> getInteractiveOptions() {
     List<Class<? extends KeyProvider>> defAndKeys = new ArrayList<Class<? extends KeyProvider>>(5);
-    defAndKeys.add(SimulatorOptions.class);
     defAndKeys.add(SimulationOptions.class);
     defAndKeys.add(EstimationOptions.class);
     defAndKeys.add(PlotOptions.class);

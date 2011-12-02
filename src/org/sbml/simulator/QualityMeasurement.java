@@ -27,7 +27,6 @@ import org.sbml.simulator.math.NMetric;
 import org.sbml.simulator.math.QualityMeasure;
 import org.sbml.simulator.math.RelativeEuclidean;
 import org.sbml.simulator.math.RelativeNMetric;
-import org.sbml.simulator.math.odes.SimulationOptions;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.util.prefs.SBPreferences;

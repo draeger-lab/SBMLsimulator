@@ -19,7 +19,7 @@ package de.zbit.gui.prefs;
 
 import java.io.IOException;
 
-import org.sbml.simulator.math.odes.SimulationOptions;
+import org.sbml.simulator.SimulationOptions;
 
 /**
  * @author Andreas Dr&auml;ger

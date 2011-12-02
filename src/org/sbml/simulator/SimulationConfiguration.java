@@ -21,7 +21,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import org.sbml.jsbml.Model;
-import org.sbml.simulator.math.odes.SimulationOptions;
 import org.simulator.math.odes.AbstractDESSolver;
 
 import de.zbit.util.prefs.SBPreferences;
