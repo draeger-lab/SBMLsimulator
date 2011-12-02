@@ -17,6 +17,8 @@
  */
 package org.sbml.simulator.math;
 
+import org.sbml.jsbml.util.StringTools;
+
 /**
  * An implementation of the relative squared error with a default value to avoid
  * division by zero. Actually, the exponent in this error function is 2 (squared
@@ -61,9 +63,10 @@ public class RSE extends NMetric {
 	 */
 	@Override
 	public String getName() {
-		String name = "Relative Squared Error";
+		String name = super.getName();
 		if (getRoot() != 2d) {
-			name += ", exponent = " + getRoot();
+			name = String.format(
+				"%s, %s = %s", name, StringTools.toString(getRoot()));
 		}
 		return name;
 	}
@@ -77,6 +80,5 @@ public class RSE extends NMetric {
 	double overallDistance(double distance, double root, double defaultValue) {
 		return distance;
 	}
-
 
 }

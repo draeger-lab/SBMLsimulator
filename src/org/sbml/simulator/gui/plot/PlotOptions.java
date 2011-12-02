@@ -18,15 +18,12 @@
 package org.sbml.simulator.gui.plot;
 
 import java.awt.Color;
-import java.io.File;
 import java.util.ResourceBundle;
 
-import de.zbit.io.SBFileFilter;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.Option;
 import de.zbit.util.prefs.OptionGroup;
-import de.zbit.util.prefs.Range;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -35,30 +32,31 @@ import de.zbit.util.prefs.Range;
  * @date 2011-03-23
  */
 public interface PlotOptions extends KeyProvider {
-    
-    /**
-     * The resource where to obtain the names of all the options
-     */
-    public static ResourceBundle bundle = ResourceManager
-	    .getBundle("org.sbml.simulator.locales.Simulator");
-    
-    /**
+	
+	/**
+	 * The resource where to obtain the names of all the options
+	 */
+	public static ResourceBundle bundle = ResourceManager
+			.getBundle("org.sbml.simulator.locales.Simulator");
+	
+	/**
      * 
      */
-    public static final Option<Color> PLOT_BACKGROUND_COLOR = new Option<Color>(
-    		"PLOT_BACKGROUND_COLOR", Color.class, "The background color of the plot", Color.WHITE);
-    /**
+	public static final Option<Color> PLOT_BACKGROUND_COLOR = new Option<Color>(
+		"PLOT_BACKGROUND_COLOR", Color.class, bundle, Color.WHITE);
+	
+	/**
      * 
      */
-    public static final Option<Color> PLOT_GRID_COLOR = new Option<Color>(
-    		"PLOT_GRID_COLOR", Color.class, "The color of the plot's grid", Color.DARK_GRAY);
-    /**
+	public static final Option<Color> PLOT_GRID_COLOR = new Option<Color>(
+		"PLOT_GRID_COLOR", Color.class, bundle, Color.DARK_GRAY);
+	
+	/**
      * 
      */
-    public static final Option<String> PLOT_TITLE = new Option<String>(
-    		"PLOT_TITLE", String.class, "Set the title of the plot", "");
-    
-
+	public static final Option<String> PLOT_TITLE = new Option<String>(
+		"PLOT_TITLE", String.class, bundle, "");
+	
 //    /**
 //     * When storing any GUI elements or other pictures into a JPEG graphics file
 //     * the value associated to this key is used for the degree of compression.
@@ -74,8 +72,8 @@ public interface PlotOptions extends KeyProvider {
 //     * be applied when plotting values in a two-dimensional figure.
 //     */
 //    public static final Option<Boolean> PLOT_LOG_SCALE = new Option<Boolean>(
-//	"PLOT_LOG_SCALE", Boolean.class, bundle.getString("SIM:0000006"),
-//	Boolean.FALSE, bundle.getString("SIM:0000002"));
+//	"PLOT_LOG_SCALE", Boolean.class, "Select this checkbox if the y-axis should be drawn in a logarithmic scale. This is, however, only possible if all values are greater than zero.",
+//	Boolean.FALSE, "Log scale");
 //    /**
 //     * The default save directory for graphics files as a result of a plot.
 //     */
@@ -84,32 +82,47 @@ public interface PlotOptions extends KeyProvider {
 //	"The default save directory for graphics files as a result of a plot.",
 //	new Range<File>(File.class, SBFileFilter.createDirectoryFilter()),
 //	new File(System.getProperty("user.home")));
-    
-    
-    /**
-     * With this key it can be specified whether a two-dimensional plot should
-     * display a grid to highlight the position of points and lines.
-     */
-    public static final Option<Boolean> SHOW_PLOT_GRID = new Option<Boolean>(
-	"SHOW_PLOT_GRID", Boolean.class, bundle.getString("SIM:0000007"),
-	Boolean.FALSE, bundle.getString("SIM:0000003"));
+	
+	/**
+	 * With this key it can be specified whether a two-dimensional plot should
+	 * display a grid to highlight the position of points and lines.
+	 */
+	public static final Option<Boolean> SHOW_PLOT_GRID = new Option<Boolean>(
+		"SHOW_PLOT_GRID", Boolean.class, bundle, Boolean.FALSE);
+	
+	/**
+	 * Determines whether or not a legend should be shown by default when plotting
+	 * data into a two-dimensional figure.
+	 */
+	public static final Option<Boolean> SHOW_PLOT_LEGEND = new Option<Boolean>(
+		"SHOW_PLOT_LEGEND", Boolean.class, bundle, Boolean.TRUE);
+	/**
+	 * Decides whether or not plots should display tool tips next to each curve.
+	 */
+	public static final Option<Boolean> SHOW_PLOT_TOOLTIPS = new Option<Boolean>(
+		"SHOW_PLOT_TOOLTIPS", Boolean.class, bundle, Boolean.FALSE);
+	
+	/**
+   * 
+   */
+	@SuppressWarnings("unchecked")
+	public static final OptionGroup<String> TITLE_OPTIONS = new OptionGroup<String>(
+		"TITLE_OPTIONS", bundle, PLOT_TITLE);
+	
+	/**
+	 * 
+	 */
+	@SuppressWarnings("unchecked")
+	public static final OptionGroup<Boolean> BASE_OPTIONS = new OptionGroup<Boolean>(
+		"BASE_OPTIONS", bundle, SHOW_PLOT_GRID, SHOW_PLOT_LEGEND,
+		SHOW_PLOT_TOOLTIPS);
 
-    /**
-     * Determines whether or not a legend should be shown by default when
-     * plotting data into a two-dimensional figure.
-     */
-    public static final Option<Boolean> SHOW_PLOT_LEGEND = new Option<Boolean>(
-	"SHOW_PLOT_LEGEND", Boolean.class, bundle.getString("SIM:0000008"),
-	Boolean.TRUE, bundle.getString("SIM:0000004"));
-    /**
-     * Decides whether or not plots should display tool tips next to each curve.
-     */
-    public static final Option<Boolean> SHOW_PLOT_TOOLTIPS = new Option<Boolean>(
-	"SHOW_PLOT_TOOLTIPS", Boolean.class, bundle.getString("SIM:0000009"),
-	Boolean.FALSE, bundle.getString("SIM:0000005"));
-        
-    public static final OptionGroup TITLE_OPTIONS = new OptionGroup("Adjust the tile for the plot", "Plot title", PLOT_TITLE);
-    public static final OptionGroup BASE_OPTIONS = new OptionGroup("Plotting panel options", "Options for the visible rect of the plot panel", SHOW_PLOT_GRID, SHOW_PLOT_LEGEND, SHOW_PLOT_TOOLTIPS);
-    public static final OptionGroup PLOT_APPEARANCE = new OptionGroup("Options for appearence of the Plot Area", "Options for appearence of the Plot Area", PLOT_BACKGROUND_COLOR, PLOT_GRID_COLOR);
-
+	/**
+	 * 
+	 */
+	@SuppressWarnings("unchecked")
+	public static final OptionGroup<Color> PLOT_APPEARANCE = new OptionGroup<Color>(
+		"PLOT_APPEARANCE", "Options for appearence of the Plot Area",
+		PLOT_BACKGROUND_COLOR, PLOT_GRID_COLOR);
+	
 }

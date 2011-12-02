@@ -1,6 +1,6 @@
 /*
  * $Id:  RelativeManhattan.java 10:15:03 keller$
- * $URL: RelativeManhattan.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -15,13 +15,12 @@
  * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
-
 package org.sbml.simulator.math;
 
 /**
  * @author Roland Keller
  * @version $Rev$
- * @since
+ * @since 1.0
  */
 public class RelativeManhattan extends RelativeNMetric {
 
@@ -31,6 +30,9 @@ public class RelativeManhattan extends RelativeNMetric {
 	 */
 	private static final long serialVersionUID = -5446188147827736620L;
 
+	/**
+	 * 
+	 */
 	public RelativeManhattan() {
 		super(new Manhattan());
 	}

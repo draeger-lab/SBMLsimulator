@@ -9,23 +9,90 @@
 	   by a semicolon ";" the corresponding tool tip.
   </comment>
   
-  <!-- Options -->
+  <!-- SimulationOptions -->
   
-  <entry key="SIM:0000001">If not specified the value corresponding to this argument will be used to initialize the size of compartments.</entry>
-  <entry key="SIM:0000010">Model quality function</entry>
-  <entry key="SIM:0000011">Here you can specify how to evaluate the quality of a parameter set with respect to given experimental data.</entry>
+  <entry key="SimulationOptions">Simulation options</entry>
+  <entry key="DEFAULT_INIT_COMPARTMENT_SIZE">If not specified the value corresponding to this argument will be used to initialize the size of compartments.</entry>
+  <entry key="DEFAULT_INIT_SPECIES_VALUE">If not specified the value corresponding to this argument will be used to initialize species depending on their hasOnlySubstanceUnits property as initial amount or initial concentration.</entry>
+  <entry key="DEFAULT_INIT_PARAMETER_VALUE">The value that is set for newly created parameters.</entry>
+  <entry key="DEFAULT_VALUES">Missing values</entry>
+  <entry key="DEFAULT_VALUES_TOOLTIP">Decide how to treat the values of compartments, species, and parameters if no initial value has been defined in the model.</entry>
+  <entry key="QUALITY_MEASURE">This specifies the class name of the default quality function that evaluates the quality of a simulation with respect to given (experimental) data.</entry>
+  <entry key="QUALITY_DEFAULT_VALUE">The default return value of a quality function that can be used if for some reason a quality cannot be computed.</entry>
+  <entry key="QUALITY_N_METRIC_ROOT">The root parameter in the distance function for n-metrics: in case of the n-norm this is at the same time also the exponent. For instance, the Eulidean distance has a root value of two, whereas the Manhattan norm has a root of one. In the RSE, the default root is also two, but this value may be changed.</entry>
+  <entry key="QUALITY_MEASURES">Model quality function</entry>
+  <entry key="QUALITY_MEASURES_TOOLTIP">Here you can specify how to evaluate the quality of a parameter set with respect to given experimental data.</entry>
+  <entry key="ODE_SOLVER">This gives the class name of the default solver for ordinary differential equation systems. The associated class must implement AbstractDESSolver and must have a constructor without any parameters.</entry>
+  <entry key="SIM_START_TIME">The double value associated with this key must, in case of SBML equal to zero. Generally, any start time would be possible. This is why this key exists. But SBML is defined to start its simulation at the time zero.</entry>
+  <entry key="SIM_END_TIME">With the associated non-negative double number that has to be greater than 0 when simulating SBML models, it is possible to perform a simulation.</entry>
+  <entry key="SIM_STEP_SIZE">The greater this value the longer the computation time, but the more accurate will be the result.</entry>
+  <entry key="SIMULATION_CONFIGURATION">Parameters for the simulation</entry>
+  <entry key="SIMULATION_CONFIGURATION_TOOLTIP">Here you can specify parameters for the simulation of the model</entry>
+    
+  <!-- EstimationOptions -->
+    
+  <entry key="EST_ALL_COMPARTMENTS">Compartment sizes</entry>
+  <entry key="EST_ALL_COMPARTMENTS_TOOLTIP">Decide whether or not by default all compartments in a model should be considered the target of an optimization, i.e., value estimation.</entry>
+  <entry key="EST_ALL_GLOBAL_PARAMETERS">Global parameter values</entry>
+  <entry key="EST_ALL_GLOBAL_PARAMETERS_TOOLTIP">Decide whether or not by default all global parameters in a model should be considered the target of an optimization, i.e., value estimation.</entry>
+  <entry key="EST_ALL_LOCAL_PARAMETERS">Local parameter values</entry>
+  <entry key="EST_ALL_LOCAL_PARAMETERS_TOOLTIP">Decide whether or not by default all local parameters in a model should be considered the target of an optimization, i.e., value estimation.</entry>
+  <entry key="EST_ALL_SPECIES">Initial species values</entry>
+  <entry key="EST_ALL_SPECIES_TOOLTIP">Decide whether or not by default all species in a model should be considered the target of an optimization, i.e., value estimation.</entry>
+  <entry key="EST_INIT_MAX_VALUE">Upper bound of initial estimates</entry>
+  <entry key="EST_INIT_MAX_VALUE_TOOLTIP">The maximal value of the initialization range in a parameter estimation procedure.</entry>
+  <entry key="EST_INIT_MIN_VALUE">Lower bound of initial estimates</entry>
+  <entry key="EST_INIT_MIN_VALUE_TOOLTIP">The minimal value of the initialization range in a parameter estimation procedure.</entry>
+  <entry key="EST_MAX_VALUE">Upper bound for estimated values</entry>
+  <entry key="EST_MAX_VALUE_TOOLTIP">The maximal value in the absolute allowable range in a parameter estimation procedure.</entry>
+  <entry key="EST_MIN_VALUE">Lower bound for estimated values</entry>
+  <entry key="EST_MIN_VALUE_TOOLTIP">The minimal value in the absolute allowable range in a parameter estimation procedure.</entry>
+  <entry key="EST_MULTI_SHOOT">Use multiple shooting integration</entry>
+  <entry key="EST_MULTI_SHOOT_TOOLTIP">Decide whether a model calibration should be done using multiple shoot technique. This should be the default. The other possibility is the so-called single shoot technique. This means that only one initial value is taken to integrate the ordinary differential equation system, whereas the multiple shoot technique restarts the integration in each time step given the values in this step. The aim is then to come as close as possible to the start value in the next time step. In many cases the fitness landscape becomes much more friendly when using a multiple shoot strategy.</entry>
+  <entry key="OPTIMIZATION_TARGETS">Default optimization targets</entry>
+  <entry key="OPTIMIZATION_TARGETS_TOOLTIP">Select the default optimization targets.</entry>
+  <entry key="OPTIMIZATION_RANGES">Ranges of all optimization targets</entry>
+  <entry key="OPTIMIZATION_RANGES_TOOLTIP">Define the initial and absolute ranges of all optimization targets.</entry>
+  <entry key="INTEGRATION_STRATEGY">Integration strategy</entry>
+  <entry key="INTEGRATION_STRATEGY_TOOLTIP">Select whether or not to apply a multiple shooting strategy.</entry>
+          
+  <!-- SimulatiorOptions -->
+  
+  <entry key="TIME_SERIES_FILE">Time series data file</entry>
+  <entry key="TIME_SERIES_FILE_TOOLTIP">Path to a file with a time series of species/compartment/parameter values.</entry>
+  <entry key="SBML_FILE">SBML file</entry>
+  <entry key="SBML_FILE_TOOLTIP">Select a model in SBML format that is to be simulated.</entry>
   
   <!-- Plot -->
   
-  <entry key="SIM:0000002">Log scale</entry>
-  <entry key="SIM:0000003">Grid</entry>
-  <entry key="SIM:0000004">Legend</entry>
-  <entry key="SIM:0000005">Tool tips</entry>
-  <entry key="SIM:0000006">Select this checkbox if the y-axis should be drawn in a logarithmic scale. This is, however, only possible if all values are greater than zero.</entry>
-  <entry key="SIM:0000007">Decide whether or not to draw a grid in the plot area.</entry>
-  <entry key="SIM:0000008">Add or remove a legend in the plot.</entry>
-  <entry key="SIM:0000009">Let the plot display tool tips for each curve.</entry>
-  <entry key="SIM:0000012">Parameters for the simulation</entry>
-  <entry key="SIM:0000013">Here you can specify parameters for the simulation of the model</entry>
-
+  <entry key="PLOT_BACKGROUND_COLOR">Plot background color</entry>
+  <entry key="PLOT_BACKGROUND_COLOR_TOOLTIP">The background color of the plot</entry>
+  <entry key="PLOT_GRID_COLOR">Plot grid color</entry>
+  <entry key="PLOT_GRID_COLOR_TOOLTIP">The color of the plot's grid</entry>
+  <entry key="PLOT_TITLE"></entry>
+  <entry key="PLOT_TITLE_TOOLTIP">Set the title of the plot</entry>
+  <entry key="SHOW_PLOT_GRID">Grid</entry>
+  <entry key="SHOW_PLOT_GRID_TOOLTIP">Decide whether or not to draw a grid in the plot area.</entry>
+  <entry key="SHOW_PLOT_LEGEND">Legend</entry>
+  <entry key="SHOW_PLOT_LEGEND_TOOLTIP">Add or remove a legend in the plot.</entry>
+  <entry key="SHOW_PLOT_TOOLTIPS">Tool tips</entry>
+  <entry key="SHOW_PLOT_TOOLTIPS_TOOLTIP">Let the plot display tool tips for each curve.</entry>
+  <entry key="TITLE_OPTIONS">Plot title</entry>
+  <entry key="TITLE_OPTIONS_TOOLTIP">Adjust the tile for the plot</entry>
+  <entry key="BASE_OPTIONS">Plotting panel options</entry>
+  <entry key="BASE_OPTIONS_TOOLTIP">Options for the visible rect of the plot panel</entry>
+  <entry key="PLOT_APPEARANCE">Options for appearance of the Plot Area</entry>
+  <entry key="PLOT_APPEARANCE_TOOLTIP">Options for appearance of the Plot Area</entry>
+  
+  <!-- Metrics -->
+  
+  <entry key="NMetric">N-metric</entry>
+  <entry key="Euclidean">Euclidean</entry>
+  <entry key="Manhattan">Manhattan</entry>
+  <entry key="DISTANCE">distance</entry>
+  <entry key="RSE">Relative Squared Error</entry>
+  <entry key="EXPONENT">exponent</entry>
+  <entry key="Pearson">Pearson's correlation coefficient</entry>
+  <entry key="RELATIVE">Relative</entry>
+  
 </properties>

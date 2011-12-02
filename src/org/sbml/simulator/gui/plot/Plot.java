@@ -50,6 +50,10 @@ public class Plot extends ChartPanel {
 	 * Generated serial version identifier.
 	 */
 	private static final long serialVersionUID = 176134486775218455L;
+	
+	/**
+	 * 
+	 */
 	private int datasetCount;
 
 	// /**
@@ -320,7 +324,6 @@ public class Plot extends ChartPanel {
 	 * @param selected
 	 */
 	public void toggleLog(boolean selected) {
-
 	}
 
 }

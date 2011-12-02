@@ -1,6 +1,6 @@
 /*
  * $Id:  Pearson.java 09:55:58 keller$
- * $URL: Pearson.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -15,28 +15,28 @@
  * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
-
 package org.sbml.simulator.math;
 
 import java.util.Iterator;
+
+import de.zbit.util.ResourceManager;
 
 
 /**
  * @author Roland Keller
  * @version $Rev$
- * @since
+ * @since 1.0
  */
 public class Pearson extends QualityMeasure {
 
 	/**
-	 * 
+	 * Generated serial version identifier.
 	 */
 	private static final long serialVersionUID = -493779339080103217L;
 
 	/* (non-Javadoc)
 	 * @see org.sbml.simulator.math.Distance#distance(java.lang.Iterable, java.lang.Iterable, double)
 	 */
-	@Override
 	public double distance(Iterable<? extends Number> x,
 			Iterable<? extends Number> y, double defaultValue) {
 		Iterator<? extends Number> yIterator = y.iterator();
@@ -58,7 +58,6 @@ public class Pearson extends QualityMeasure {
 			sumNumerator+= (x_i-meanX)*(y_i-meanY);
 			sumXSquared+= (x_i-meanX)*(x_i-meanX);
 			sumYSquared+= (y_i-meanY)*(y_i-meanY);
-			
 		}
 		
 		double denominator=Math.sqrt(sumXSquared*sumYSquared);
@@ -73,18 +72,16 @@ public class Pearson extends QualityMeasure {
 	/* (non-Javadoc)
 	 * @see org.sbml.simulator.math.Distance#getName()
 	 */
-	@Override
 	public String getName() {
-		return "Pearson correlation coefficient";
+		return ResourceManager.getBundle("org.sbml.simulator.locales.Simulator")
+				.getString(getClass().getSimpleName());
 	}
 
 	/* (non-Javadoc)
 	 * @see org.sbml.simulator.math.Distance#toString()
 	 */
-	@Override
 	public String toString() {
 		return getName();
 	}
-
 
 }

@@ -1,6 +1,6 @@
 /*
  * $Id:  Euclidean.java 09:56:46 keller$
- * $URL: Euclidean.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -15,8 +15,8 @@
  * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
-
 package org.sbml.simulator.math;
+
 
 /**
  * @author Roland Keller
@@ -36,16 +36,5 @@ public class Euclidean extends NMetric {
 	public Euclidean() {
 		super(2d);
 	}
-	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.squeezer.math.Distance#getName()
-	 */
-	@Override
-	public String getName() {
-		return "Euclidean";
-	}
-
 
 }

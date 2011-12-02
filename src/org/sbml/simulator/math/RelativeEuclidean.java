@@ -1,6 +1,6 @@
 /*
  * $Id:  RelativeEuclidean.java 10:12:44 keller$
- * $URL: RelativeEuclidean.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -15,7 +15,6 @@
  * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
-
 package org.sbml.simulator.math;
 
 /**
@@ -26,13 +25,15 @@ package org.sbml.simulator.math;
 public class RelativeEuclidean extends RelativeNMetric {
 	
 	/**
-	 * 
+	 * Generated serial version identifier.
 	 */
 	private static final long serialVersionUID = -7488743431449082030L;
 
+	/**
+	 * 
+	 */
 	public RelativeEuclidean() {
 		super(new Euclidean());
 	}
 	
-
 }

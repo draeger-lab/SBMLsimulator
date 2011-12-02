@@ -1,6 +1,6 @@
 /*
  * $Id:  meanFunction.java 11:25:15 keller$
- * $URL: meanFunction.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -15,11 +15,11 @@
  * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
-
 package org.sbml.simulator.math;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Roland Keller
@@ -29,39 +29,39 @@ import java.util.ArrayList;
  */
 public abstract class MeanFunction implements Serializable {
 	
-    /**
-     * Generated serial identifier.
-     */
-    private static final long serialVersionUID = -7272984374334773096L;
-
-    /**
-     * @param values
-     * @return
-     */
-    public abstract double computeMean(double[] values);
-
-    /**
-     * @param values
-     * @return
-     */
-    public double computeMean(ArrayList<Double> values) {
-	double[] val = new double[values.size()];
-	for (int i = 0; i != val.length; i++) {
-	    val[i] = values.get(i);
+	/**
+	 * Generated serial identifier.
+	 */
+	private static final long serialVersionUID = -7272984374334773096L;
+	
+	/**
+	 * @param values
+	 * @return
+	 */
+	public abstract double computeMean(double... values);
+	
+	/**
+	 * @param values
+	 * @return
+	 */
+	public double computeMean(List<Double> values) {
+		double[] val = new double[values.size()];
+		for (int i = 0; i != val.length; i++) {
+			val[i] = values.get(i);
+		}
+		return computeMean(val);
 	}
-	return computeMean(val);
-    }
-
-    /**
-     * @param x
-     * @return
-     */
-    public double computeMean(Iterable<? extends Number> values) {
-	ArrayList<Double> val = new ArrayList<Double>();
-	for (Number number : values) {
-	    val.add(number.doubleValue());
+	
+	/**
+	 * @param x
+	 * @return
+	 */
+	public double computeMean(Iterable<? extends Number> values) {
+		List<Double> val = new ArrayList<Double>();
+		for (Number number : values) {
+			val.add(number.doubleValue());
+		}
+		return computeMean(val);
 	}
-	return computeMean(val);
-    }
 
 }

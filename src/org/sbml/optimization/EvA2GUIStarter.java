@@ -24,12 +24,9 @@ import java.util.List;
 import eva2.client.EvAClient;
 import eva2.gui.BeanInspector;
 import eva2.gui.GenericObjectEditor;
-import eva2.server.go.enums.DETypeEnum;
-import eva2.server.go.enums.PSOTopologyEnum;
 import eva2.server.go.operators.terminators.EvaluationTerminator;
 import eva2.server.go.problems.InterfaceOptimizationProblem;
 import eva2.server.go.strategies.DifferentialEvolution;
-import eva2.server.go.strategies.ParticleSwarmOptimization;
 import eva2.server.modules.GOParameters;
 import eva2.server.stat.InterfaceStatisticsListener;
 

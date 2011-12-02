@@ -34,12 +34,19 @@ import java.util.Properties;
  */
 public class Resource {
 
+	/**
+	 * 
+	 */
 	private static Resource resource;
 
 	static {
 		resource = new Resource();
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public static Resource getInstance() {
 		return resource;
 	}

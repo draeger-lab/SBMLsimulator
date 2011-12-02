@@ -36,7 +36,10 @@ import eva2.tools.math.Jama.Matrix;
  */
 public class StabilityMatrix extends Matrix {
 
-	private static final long serialVersionUID = 1L;
+	/**
+	 * Generated serial version identifier.
+	 */
+	private static final long serialVersionUID = -2678044872448572954L;
 
 	/**
 	 * Creates a m x n StabilityMatrix
@@ -48,7 +51,6 @@ public class StabilityMatrix extends Matrix {
 	 */
 	public StabilityMatrix(int m, int n) {
 		super(m, n);
-
 	}
 
 	/**
@@ -63,7 +65,6 @@ public class StabilityMatrix extends Matrix {
 	 */
 	public StabilityMatrix(int m, int n, int c) {
 		super(m, n, c);
-
 	}
 
 	/**
@@ -86,9 +87,7 @@ public class StabilityMatrix extends Matrix {
 	 * @return array with the eigenvalues
 	 */
 	public double[] getEigenvalues() {
-
 		return (new EigenvalueDecomposition(this)).getRealEigenvalues();
-
 	}
 
 	/**
@@ -100,9 +99,9 @@ public class StabilityMatrix extends Matrix {
 	 *            the new values of row m
 	 */
 	public void setRow(int m, double[] row) {
-		for (int i = 0; i < this.getColumnDimension(); i++)
+		for (int i = 0; i < this.getColumnDimension(); i++) {
 			this.set(m, i, row[i]);
-
+		}
 	}
 
 	/**
@@ -127,9 +126,9 @@ public class StabilityMatrix extends Matrix {
 	 *            the new values of column n
 	 */
 	public void setColumn(int n, double[] column) {
-		for (int i = 0; i < this.getRowDimension(); i++)
+		for (int i = 0; i < this.getRowDimension(); i++) {
 			this.set(i, n, column[i]);
-
+		}
 	}
 
 	/**
@@ -149,20 +148,19 @@ public class StabilityMatrix extends Matrix {
 
 		for (int row = 0; row < this.getRowDimension(); row++) {
 
-			if (row == m)
+			if (row == m) {
 				continue;
-
+			}
 			for (int column = 0; column < this.getColumnDimension(); column++) {
 
-				if (column == n)
+				if (column == n) {
 					continue;
-
+				}
 				submatrix.set(subm, subn, this.get(row, column));
 				subn++;
 			}
 			subn = 0;
 			subm++;
-
 		}
 
 		return submatrix;
@@ -180,10 +178,9 @@ public class StabilityMatrix extends Matrix {
 		StabilityMatrix submatrix = new StabilityMatrix(index + 1, index + 1);
 
 		for (int r = 0; r <= index; r++) {
-
-			for (int c = 0; c <= index; c++)
+			for (int c = 0; c <= index; c++) {
 				submatrix.set(r, c, this.get(r, c));
-
+			}
 		}
 
 		return submatrix;
@@ -248,7 +245,6 @@ public class StabilityMatrix extends Matrix {
 
 		this.setColumn(i, this.getColumn(j));
 		this.setColumn(j, columni);
-
 	}
 
 	/**
@@ -262,7 +258,6 @@ public class StabilityMatrix extends Matrix {
 
 		this.setRow(i, this.getRow(j));
 		this.setRow(j, rowi);
-
 	}
 
 	/**
@@ -276,8 +271,9 @@ public class StabilityMatrix extends Matrix {
 	public Set<Integer> getColIndecesEqual(int m, double value) {
 		HashSet<Integer> set = new HashSet<Integer>();
 		for (int i = 0; i < getColumnDimension(); i++) {
-			if (get(m, i) == value)
+			if (get(m, i) == value) {
 				set.add(i);
+			}
 		}
 
 		return set;
@@ -295,8 +291,9 @@ public class StabilityMatrix extends Matrix {
 		ArrayList<Integer> list = new ArrayList<Integer>();
 
 		for (int i = 0; i < getColumnDimension(); i++) {
-			if (get(m, i) != value)
+			if (get(m, i) != value) {
 				list.add(i);
+			}
 		}
 
 		Integer arr[] = new Integer[list.size()];
@@ -314,9 +311,9 @@ public class StabilityMatrix extends Matrix {
 		int i = 0;
 
 		while (result && i < this.getRowDimension()) {
-			if (getColIndecesEqual(i, 0).size() != this.getColumnDimension())
+			if (getColIndecesEqual(i, 0).size() != this.getColumnDimension()) {
 				result = false;
-
+			}
 			i++;
 		}
 
@@ -383,9 +380,6 @@ public class StabilityMatrix extends Matrix {
 	public StabilityMatrix times(StabilityMatrix B) {
 		return new StabilityMatrix((((Matrix) (this)).times((Matrix) B))
 				.getArray(), this.getRowDimension(), B.getColumnDimension());
-
 	}
-
-
 
 }

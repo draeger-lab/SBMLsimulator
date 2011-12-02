@@ -1,19 +1,18 @@
 /*
  * $Id$
- * $URL:
- * https://rarepos.cs.uni-tuebingen.de/svn-path/SBMLsimulator/trunk/src/org
- * /sbml/simulator/gui/SimulationVisualizationPanel.java $
- * --------------------------------------------------------------------- This
- * file is part of SBMLsimulator, a Java-based simulator for models of
- * biochemical processes encoded in the modeling language SBML.
- * 
+ * $URL$
+ * ---------------------------------------------------------------------
+ * This file is part of SBMLsimulator, a Java-based simulator for models
+ * of biochemical processes encoded in the modeling language SBML.
+ *
  * Copyright (C) 2007-2011 by the University of Tuebingen, Germany.
- * 
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation. A copy of the license agreement is provided in the file
- * named "LICENSE.txt" included with this software distribution and also
- * available online as <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
+ *
+ * This library is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation. A copy of the license
+ * agreement is provided in the file named "LICENSE.txt" included with
+ * this software distribution and also available online as
+ * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
 package org.sbml.simulator.gui;
@@ -35,11 +34,9 @@ import org.sbml.jsbml.Model;
 import org.sbml.jsbml.UnitDefinition;
 import org.sbml.simulator.gui.plot.Plot;
 import org.sbml.simulator.gui.plot.PlotOptions;
-import org.sbml.simulator.math.odes.SimulationOptions;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.util.StringUtil;
-import de.zbit.util.prefs.SBPreferences;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -73,14 +70,17 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 * Plot area
 	 */
 	private Plot plot;
+	
 	/**
 	 * 
 	 */
 	private InteractiveScanPanel interactiveScanPanel;
+	
 	/**
 	 * 
 	 */
 	private LegendPanel legendPanel;
+	
 	/**
 	 * Results of simulation and experiments.
 	 */
@@ -128,16 +128,6 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 */
 	public Properties getProperties() {
 		Properties p = new Properties();
-
-		/*
-		 * Simulation
-		 */
-		p.put(SimulationOptions.SIM_MAX_COMPARTMENT_SIZE,
-				Double.valueOf(maxCompartmentValue));
-		p.put(SimulationOptions.SIM_MAX_SPECIES_VALUE,
-				Double.valueOf(maxSpeciesValue));
-		p.put(SimulationOptions.SIM_MAX_PARAMETER_VALUE,
-				Double.valueOf(maxParameterValue));
 		/*
 		 * General settings
 		 */
@@ -309,22 +299,12 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 * @param properties
 	 */
 	public void loadPreferences() {
-		SBPreferences prefsSIM = SBPreferences
-				.getPreferencesFor(SimulationOptions.class);
-
 		if (interactiveScanPanel != null) {
 			interactiveScanPanel.loadPreferences();
 		}
-
 		maxSpinVal = 2000;
 		paramStepSize = .1d;
-
-		maxCompartmentValue = prefsSIM
-				.getDouble(SimulationOptions.SIM_MAX_COMPARTMENT_SIZE);
-		maxSpeciesValue = prefsSIM
-				.getDouble(SimulationOptions.SIM_MAX_SPECIES_VALUE);
-		maxParameterValue = prefsSIM
-				.getDouble(SimulationOptions.SIM_MAX_PARAMETER_VALUE);
+		maxCompartmentValue = maxSpeciesValue =  maxParameterValue = 1E8;
 	}
 
 	/**
@@ -388,4 +368,5 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	public void updateQuantity(String id, double value) {
 		interactiveScanPanel.updateQuantity(id, value);
 	}
+
 }

@@ -8,9 +8,14 @@
 	   and the given value consists of the actual short name and - separated
 	   by a semicolon ";" the corresponding tool tip.
   </comment>
-  <entry key="SIM:0000001">Falls nicht anders spezifiziert, wird der hier angegebene Wert dafür genutzt, um Kompartimentgrößen zu initialisieren.</entry>
-  <entry key="SIM:0000010">Bewertungsfunktion der Modellqualität</entry>
-  <entry key="SIM:0000011">Diese Einstellungen ermöglichen es, festzulegen, wie die Qualität eines Parametersatzes bezüglich gegebener experimenteller Daten zu bewerten ist.</entry>
+  
+  <!-- SimulationOptions -->
+  
+  <entry key="DEFAULT_INIT_COMPARTMENT_SIZE">Falls nicht anders spezifiziert, wird der hier angegebene Wert dafür genutzt, um Kompartimentgrößen zu initialisieren.</entry>
+  <entry key="QUALITY_MEASURES">Bewertungsfunktion der Modellqualität</entry>
+  <entry key="QUALITY_MEASURES_TOOLTIP">Diese Einstellungen ermöglichen es, festzulegen, wie die Qualität eines Parametersatzes bezüglich gegebener experimenteller Daten zu bewerten ist.</entry>
+  <entry key="SIMULATION_CONFIGURATION">Parameter für die Simulation</entry>
+  <entry key="SIMULATION_CONFIGURATION_TOOLTIP">Hier können Parameter für die Simulation eingestellt werden.</entry>
     
   <!-- Plot -->
   
@@ -22,7 +27,5 @@
   <entry key="SIM:0000007">Entscheiden Sie, ob Gitternetzlinien in das Koordinatensystem eingezeichnet werden sollen.</entry>
   <entry key="SIM:0000008">Diese Option fügt eine Legende im Koordinatensystem ein oder entfernt diese.</entry>
   <entry key="SIM:0000009">Hier kann festgelegt werden, ob an den einzelnen Kurven bzw. Punkten im Koordinatensystem Hilfstexte eingeblendet werden sollen.</entry>
-  <entry key="SIM:0000012">Parameter für die Simulation</entry>
-  <entry key="SIM:0000013">Hier können Parameter für die Simulation eingestellt werden.</entry>
-
+  
 </properties>

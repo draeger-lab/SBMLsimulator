@@ -96,7 +96,7 @@ public class SimulationTestAutomatic {
 				SBMLinterpreter interpreter = new SBMLinterpreter(model);
 				// get timepoints
 				CSVDataImporter csvimporter = new CSVDataImporter();
-				MultiTable inputData = csvimporter.convertWithoutWindows(model, csvfile);
+				MultiTable inputData = csvimporter.convert(model, csvfile);
 				
 				double[] timepoints = inputData.getTimePoints();
 

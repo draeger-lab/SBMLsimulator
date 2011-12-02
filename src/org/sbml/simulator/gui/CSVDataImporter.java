@@ -1,27 +1,27 @@
 /*
- * $Id$ $URL:
- * svn://rarepos
- * /SBMLsimulator/trunk/src/org/sbml/simulator/gui/CSVDataImporter.java $
- * --------------------------------------------------------------------- This
- * file is part of SBMLsimulator, a Java-based simulator for models of
- * biochemical processes encoded in the modeling language SBML.
- * 
+ * $Id$
+ * $URL$
+ * ---------------------------------------------------------------------
+ * This file is part of SBMLsimulator, a Java-based simulator for models
+ * of biochemical processes encoded in the modeling language SBML.
+ *
  * Copyright (C) 2007-2011 by the University of Tuebingen, Germany.
- * 
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation. A copy of the license agreement is provided in the file
- * named "LICENSE.txt" included with this software distribution and also
- * available online as <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
+ *
+ * This library is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation. A copy of the license
+ * agreement is provided in the file named "LICENSE.txt" included with
+ * this software distribution and also available online as
+ * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
 package org.sbml.simulator.gui;
 
 import java.awt.Component;
 import java.io.IOException;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -194,19 +194,34 @@ public class CSVDataImporter {
 	 * @param model
 	 * @return
 	 */
-	private List<String> gatherSymbolIds(Model model) {
-		List<String> head = new LinkedList<String>();
-		int i;
-		for (i = 0; i < model.getNumCompartments(); i++) {
-			head.add(model.getCompartment(i).getId());
-		}
-		for (i = 0; i < model.getNumSpecies(); i++) {
-			head.add(model.getSpecies(i).getId());
-		}
-		for (i = 0; i < model.getNumParameters(); i++) {
-			head.add(model.getParameter(i).getId());
-		}
-		return head;
+	private List<String> gatherSymbolIds(final Model model) {
+		return new AbstractList<String>() {
+
+			/*
+			 * (non-Javadoc)
+			 * @see java.util.AbstractList#get(int)
+			 */
+			public String get(int index) {
+				if (index < model.getNumCompartments()) {
+					return model.getCompartment(index).getId();
+				}
+				index -= model.getNumCompartments();
+				if (index < model.getNumSpecies()) {
+					return model.getSpecies(index).getId();
+				}
+				index -= model.getNumSpecies();
+				return model.getParameter(index).getId();
+			}
+
+			/*
+			 * (non-Javadoc)
+			 * @see java.util.AbstractCollection#size()
+			 */
+			public int size() {
+				return model.getNumCompartments() + model.getNumSpecies()
+						+ model.getNumParameters();
+			}
+		};
 	}
 	
 }

@@ -1,18 +1,18 @@
 /*
- * $Id$ $URL:
- * svn://rarepos
- * /SBMLsimulator/trunk/src/org/sbml/simulator/gui/SimulationToolPanel.java $
- * --------------------------------------------------------------------- This
- * file is part of SBMLsimulator, a Java-based simulator for models of
- * biochemical processes encoded in the modeling language SBML.
- * 
+ * $Id$
+ * $URL$
+ * ---------------------------------------------------------------------
+ * This file is part of SBMLsimulator, a Java-based simulator for models
+ * of biochemical processes encoded in the modeling language SBML.
+ *
  * Copyright (C) 2007-2011 by the University of Tuebingen, Germany.
- * 
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation. A copy of the license agreement is provided in the file
- * named "LICENSE.txt" included with this software distribution and also
- * available online as <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
+ *
+ * This library is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation. A copy of the license
+ * agreement is provided in the file named "LICENSE.txt" included with
+ * this software distribution and also available online as
+ * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
 package org.sbml.simulator.gui;
@@ -92,6 +92,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 * Contains all available quality measure functions.
 	 */
 	private JComboBox qualityMeasureFunctions;
+	
 	/**
 	 * Text field to display the quality of a simulation with respect to a given
 	 * data set.
@@ -105,42 +106,52 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 * Maximal allowable number of integration steps per time unit
 	 */
 	private int maxStepsPerUnit;
+	
 	/**
 	 * The maximal allowable simulation time
 	 */
 	private double maxTime;
+	
 	/**
 	 * Decides whether or not a grid should be displayed in the plot.
 	 */
 	private JCheckBox showGrid;
+	
 	/**
 	 * Decides whether or not to add a legend to the plot.
 	 */
 	private JCheckBox showLegend;
+	
 	/**
 	 * Whether or not to show tool tips in plots.
 	 */
 	private JCheckBox showToolTips;
+	
 	/**
 	 * The index of the class name of the solver to be used
 	 */
 	private JComboBox solverComboBox;
+	
 	/**
 	 * Simulation start time
 	 */
 	private SpinnerNumberModel t1;
+	
 	/**
 	 * Simulation end time
 	 */
 	private SpinnerNumberModel t2;
+	
 	/**
 	 * The spinner to change the number of integration steps.
 	 */
 	private SpinnerNumberModel stepsModel;
+	
 	/**
 	 * 
 	 */
 	private double spinnerStepSize;
+	
 	/**
 	 * 
 	 */
@@ -190,7 +201,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 		SBPreferences prefs = SBPreferences
 				.getPreferencesFor(SimulationOptions.class);
 		solverComboBox = createSolversComboOrSetSelectedItem(prefs.get(
-				SimulationOptions.SIM_ODE_SOLVER).toString());
+				SimulationOptions.ODE_SOLVER).toString());
 		showGrid = GUITools.createJCheckBox(
 				PlotOptions.SHOW_PLOT_GRID.getName(), false,
 				PlotOptions.SHOW_PLOT_GRID,
@@ -498,9 +509,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 
 		firePropertyChange("stepSize", null, spinnerStepSize);
 
-		maxTime = Math.max(
-				prefsSimulation.getDouble(SimulationOptions.SIM_MAX_TIME),
-				Math.max(getSimulationStartTime(), simEndTime));
+		maxTime = Math.max(1E8, Math.max(getSimulationStartTime(), simEndTime));
 		t1.setMinimum(Double.valueOf(0));
 		t1.setValue(Double.valueOf(getSimulationStartTime()));
 		t1.setMaximum(Double.valueOf(maxTime));
@@ -516,12 +525,11 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 		showToolTips.setSelected(prefsPlot
 				.getBoolean(PlotOptions.SHOW_PLOT_TOOLTIPS));
 
-		maxStepsPerUnit = prefsSimulation
-				.getInt(SimulationOptions.SIM_MAX_STEPS_PER_UNIT_TIME);
+		maxStepsPerUnit = (int) 1E8d;
 
 		int qualityFunc = 0;
 		String name = prefsSimulation
-				.get(SimulationOptions.SIM_QUALITY_FUNCTION);
+				.get(SimulationOptions.QUALITY_MEASURE);
 		name = name.substring(name.lastIndexOf('.') + 1);
 		while ((qualityFunc < distFun.length - 1)
 				&& !distFun[qualityFunc].getSimpleName().equals(name)) {
@@ -535,7 +543,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 						.getConstructor().newInstance());
 
 		solverComboBox = createSolversComboOrSetSelectedItem(prefsSimulation
-				.get(SimulationOptions.SIM_ODE_SOLVER));
+				.get(SimulationOptions.ODE_SOLVER));
 		firePropertyChange("solver", null,
 				SBMLsimulator.getAvailableSolvers()[solverComboBox
 						.getSelectedIndex()].getConstructor().newInstance());
@@ -671,14 +679,12 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 * submitted only once at the correct time.
 	 */
 	public void processSimulationValues() {
-
 		firePropertyChange("start", simulationConfiguration.getStart(),
 				getSimulationStartTime());
 		firePropertyChange("end", simulationConfiguration.getEnd(),
 				getSimulationEndTime());
 		firePropertyChange("stepSize", simulationConfiguration.getStepSize(),
 				getStepSize());
-
 	}
 
 }

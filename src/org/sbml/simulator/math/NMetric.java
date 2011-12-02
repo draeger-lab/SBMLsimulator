@@ -18,6 +18,9 @@
 package org.sbml.simulator.math;
 
 import java.util.Iterator;
+import java.util.ResourceBundle;
+
+import de.zbit.util.ResourceManager;
 
 
 /**
@@ -26,6 +29,7 @@ import java.util.Iterator;
  * where this distance will always be exponentiated by the value of n.
  * 
  * @author Andreas Dr&auml;ger
+ * @author Roland Keller
  * @date 2007-04-17
  * @version $Rev$
  * @since 1.0
@@ -33,9 +37,19 @@ import java.util.Iterator;
 public class NMetric extends QualityMeasure {
 
 	/**
+	 * 
+	 */
+	private static final ResourceBundle bundle = ResourceManager
+			.getBundle("org.sbml.simulator.locales.Simulator");
+	
+	/**
 	 * Generated serial identifier.
 	 */
 	private static final long serialVersionUID = -216525074796086162L;
+
+	/**
+	 * 
+	 */
 	protected double root;
 
 	/**
@@ -46,7 +60,7 @@ public class NMetric extends QualityMeasure {
 	 */
 	public NMetric() {
 		super();
-		this.root=3d;
+		this.root = 3d;
 	}
 
 	/**
@@ -62,30 +76,27 @@ public class NMetric extends QualityMeasure {
 	 */
 	public NMetric(double root) {
 		super(Double.NaN);
-		this.root=root;
+		this.root = root;
 	}
 
+	/**
+	 * 
+	 * @param x_i
+	 * @param y_i
+	 * @param root
+	 * @param defaultValue
+	 * @return
+	 */
 	double additiveTerm(double x_i, double y_i, double root, double defaultValue) {
 		return Math.pow(Math.abs(x_i - y_i), root);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.squeezer.math.Distance#getName()
-	 */
-	@Override
-	public String getName() {
-		return "N-metric";
 	}
 
 	/* (non-Javadoc)
 	 * @see org.sbml.simulator.math.Distance#distance(java.lang.Iterable, java.lang.Iterable, double)
 	 */
-	@Override
 	public double distance(Iterable<? extends Number> x,
 		Iterable<? extends Number> y, double defaultValue) {
-		if(root==0d) {
+		if(root == 0d) {
 			return defaultValue;
 		}
 		double d = 0;
@@ -105,27 +116,46 @@ public class NMetric extends QualityMeasure {
 		return overallDistance(d,root,defaultValue);
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.sbml.squeezer.math.Distance#getName()
+	 */
+	public String getName() {
+		return bundle.getString(getClass().getSimpleName());
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public double getRoot() {
+		return root;
+	}
+	
+	/**
+	 * 
+	 * @param distance
+	 * @param root
+	 * @param defaultValue
+	 * @return
+	 */
 	double overallDistance(double distance, double root, double defaultValue) {
 		return Math.pow(distance, 1d / root);
+	}
+	
+	/**
+	 * @param string
+	 */
+	public void setRoot(double root) {
+		this.root = root;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.sbml.simulator.math.Distance#toString()
 	 */
-	@Override
 	public String toString() {
-		return getName() + " distance";
-	}
-	
-	public double getRoot() {
-		return root;
-	}
-
-	/**
-	 * @param string
-	 */
-	public void setRoot(double root) {
-		this.root=root;
+		return String.format("%s %s", getName(), bundle.getString("DISTANCE"));
 	}
 
 }
