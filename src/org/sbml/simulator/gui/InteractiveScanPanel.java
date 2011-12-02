@@ -55,7 +55,7 @@ import org.sbml.jsbml.SBase;
 import org.sbml.jsbml.Species;
 import org.sbml.jsbml.util.TreeNodeChangeListener;
 import org.sbml.jsbml.util.compilers.HTMLFormula;
-import org.sbml.simulator.math.odes.SimulationOptions;
+import org.sbml.simulator.SimulationOptions;
 
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;

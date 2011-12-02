@@ -15,11 +15,10 @@
  * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
-package org.sbml.simulator.math.odes;
+package org.sbml.simulator;
 
 import java.util.ResourceBundle;
 
-import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.math.RSE;
 import org.simulator.math.odes.AbstractDESSolver;
 import org.simulator.math.odes.RKEventSolver;

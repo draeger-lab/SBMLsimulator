@@ -24,6 +24,7 @@ import de.zbit.io.SBFileFilter;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.Option;
+import de.zbit.util.prefs.OptionGroup;
 import de.zbit.util.prefs.Range;
 
 /**
@@ -47,6 +48,7 @@ public interface SimulatorOptions extends KeyProvider {
 		File.class, bundle, new Range<File>(File.class,
 			SBFileFilter.createSBMLFileFilter()), new File(
 			System.getProperty("user.dir")));
+
   /**
    * Path to a file with a time series of species/compartment/parameter values.
    */
@@ -54,5 +56,12 @@ public interface SimulatorOptions extends KeyProvider {
 		"TIME_SERIES_FILE", File.class, bundle, new Range<File>(File.class,
 			SBFileFilter.createCSVFileFilter()), new File(
 			System.getProperty("user.home")));
+  
+  /**
+   * Select input files for simulation.
+   */
+  @SuppressWarnings("unchecked")
+  public final static OptionGroup<File> INPUT_FILES = new OptionGroup<File>(
+    "INPUT_FILES", bundle, SBML_FILE, TIME_SERIES_FILE);
   
 }
