@@ -49,6 +49,7 @@ import org.sbml.simulator.SimulationConfiguration;
 import org.sbml.simulator.SimulationManager;
 import org.sbml.simulator.SimulationOptions;
 import org.sbml.simulator.math.QualityMeasure;
+import org.sbml.simulator.math.odes.IntegrationException;
 import org.simulator.math.odes.DESSolver;
 import org.simulator.math.odes.MultiTable;
 
