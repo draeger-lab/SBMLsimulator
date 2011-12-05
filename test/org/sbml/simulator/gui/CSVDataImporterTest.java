@@ -1,6 +1,6 @@
 /*
  * $Id:  CSVDataImporterTest.java 18:15:31 draeger$
- * $URL: CSVDataImporterTest.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
