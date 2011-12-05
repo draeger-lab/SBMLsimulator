@@ -22,9 +22,9 @@ import java.util.Properties;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.resources.Resource;
 import org.sbml.jsbml.xml.stax.SBMLReader;
+import org.sbml.simulator.SimulationOptions;
 import org.sbml.simulator.SimulatorOptions;
 import org.sbml.simulator.gui.SimulatorUI;
-import org.sbml.simulator.math.odes.SimulationOptions;
 
 import de.zbit.io.CSVOptions;
 import de.zbit.util.prefs.SBProperties;

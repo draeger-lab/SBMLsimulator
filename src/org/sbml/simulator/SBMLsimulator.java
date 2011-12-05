@@ -36,7 +36,6 @@ import de.zbit.Launcher;
 import de.zbit.gui.BaseFrame;
 import de.zbit.gui.GUIOptions;
 import de.zbit.io.CSVOptions;
-import de.zbit.util.LabeledObject;
 import de.zbit.util.Reflect;
 import de.zbit.util.StringUtil;
 import de.zbit.util.prefs.KeyProvider;
@@ -146,23 +145,6 @@ public class SBMLsimulator extends Launcher {
     for (Class<AbstractDESSolver> solverClass : AVAILABLE_SOLVERS) {
       try {
         solverList.add(solverClass);
-      } catch (Exception e) {
-        logger.warning(e.getLocalizedMessage());
-      }
-    }
-    return solverList;
-  }
-  
-  /**
-   * 
-   * @return
-   */
-  @SuppressWarnings("unchecked")
-  public static List<LabeledObject<Class>> getAvailableSolverNames() {
-    List<LabeledObject<Class>> solverList = new ArrayList<LabeledObject<Class>>(AVAILABLE_SOLVERS.length);
-    for (Class<AbstractDESSolver> solverClass : AVAILABLE_SOLVERS) {
-      try {
-        solverList.add(new LabeledObject<Class>(solverClass));
       } catch (Exception e) {
         logger.warning(e.getLocalizedMessage());
       }
