@@ -22,20 +22,30 @@
   <!-- SimulationOptions -->
   
   <entry key="SimulationOptions">Simulation options</entry>
-  <entry key="DEFAULT_INIT_COMPARTMENT_SIZE">If not specified the value corresponding to this argument will be used to initialize the size of compartments.</entry>
-  <entry key="DEFAULT_INIT_SPECIES_VALUE">If not specified the value corresponding to this argument will be used to initialize species depending on their hasOnlySubstanceUnits property as initial amount or initial concentration.</entry>
-  <entry key="DEFAULT_INIT_PARAMETER_VALUE">The value that is set for newly created parameters.</entry>
+  <entry key="DEFAULT_INIT_COMPARTMENT_SIZE">Initial compartment size</entry>
+  <entry key="DEFAULT_INIT_COMPARTMENT_SIZE_TOOLTIP">If not specified the value corresponding to this argument will be used to initialize the size of compartments.</entry>
+  <entry key="DEFAULT_INIT_SPECIES_VALUE">Initial species value</entry>
+  <entry key="DEFAULT_INIT_SPECIES_VALUE_TOOLTIP">If not specified the value corresponding to this argument will be used to initialize species depending on their hasOnlySubstanceUnits property as initial amount or initial concentration.</entry>
+  <entry key="DEFAULT_INIT_PARAMETER_VALUE">Initial value of parameters</entry>
+  <entry key="DEFAULT_INIT_PARAMETER_VALUE_TOOLTIP">The value that is set for newly created parameters.</entry>
   <entry key="DEFAULT_VALUES">Missing values</entry>
   <entry key="DEFAULT_VALUES_TOOLTIP">Decide how to treat the values of compartments, species, and parameters if no initial value has been defined in the model.</entry>
-  <entry key="QUALITY_MEASURE">This specifies the class name of the default quality function that evaluates the quality of a simulation with respect to given (experimental) data.</entry>
-  <entry key="QUALITY_DEFAULT_VALUE">The default return value of a quality function that can be used if for some reason a quality cannot be computed.</entry>
-  <entry key="QUALITY_N_METRIC_ROOT">The root parameter in the distance function for n-metrics: in case of the n-norm this is at the same time also the exponent. For instance, the Eulidean distance has a root value of two, whereas the Manhattan norm has a root of one. In the RSE, the default root is also two, but this value may be changed.</entry>
+  <entry key="QUALITY_MEASURE">Evaluation criteria for the model's quality</entry>
+  <entry key="QUALITY_MEASURE_TOOLTIP">This specifies the class name of the default quality function that evaluates the quality of a simulation with respect to given (experimental) data.</entry>
+  <entry key="QUALITY_DEFAULT_VALUE">Default quality value</entry>
+  <entry key="QUALITY_DEFAULT_VALUE_TOOLTIP">The default return value of a quality function that can be used if for some reason a quality cannot be computed.</entry>
+  <entry key="QUALITY_N_METRIC_ROOT">N-metric root exponent</entry>
+  <entry key="QUALITY_N_METRIC_ROOT_TOOLTIP">The root parameter in the distance function for n-metrics: in case of the n-norm this is at the same time also the exponent. For instance, the Eulidean distance has a root value of two, whereas the Manhattan norm has a root of one. In the RSE, the default root is also two, but this value may be changed.</entry>
   <entry key="QUALITY_MEASURES">Model quality function</entry>
   <entry key="QUALITY_MEASURES_TOOLTIP">Here you can specify how to evaluate the quality of a parameter set with respect to given experimental data.</entry>
-  <entry key="ODE_SOLVER">This gives the class name of the default solver for ordinary differential equation systems. The associated class must implement AbstractDESSolver and must have a constructor without any parameters.</entry>
-  <entry key="SIM_START_TIME">The double value associated with this key must, in case of SBML equal to zero. Generally, any start time would be possible. This is why this key exists. But SBML is defined to start its simulation at the time zero.</entry>
-  <entry key="SIM_END_TIME">With the associated non-negative double number that has to be greater than 0 when simulating SBML models, it is possible to perform a simulation.</entry>
-  <entry key="SIM_STEP_SIZE">The greater this value the longer the computation time, but the more accurate will be the result.</entry>
+  <entry key="ODE_SOLVER">Solver functions for ODE systems</entry>
+  <entry key="ODE_SOLVER_TOOLTIP">This gives the class name of the default solver for Ordinary Differential Equation (ODE) systems. The associated class must implement AbstractDESSolver and must have a constructor without any parameters.</entry>
+  <entry key="SIM_START_TIME">Simulation start time</entry>
+  <entry key="SIM_START_TIME_TOOLTIP">The double value associated with this key must, in case of SBML equal to zero. Generally, any start time would be possible. This is why this key exists. But SBML is defined to start its simulation at the time zero.</entry>
+  <entry key="SIM_END_TIME">Simulation end time</entry>
+  <entry key="SIM_END_TIME_TOOLTIP">With the associated non-negative double number that has to be greater than 0 when simulating SBML models, it is possible to perform a simulation.</entry>
+  <entry key="SIM_STEP_SIZE">Step size</entry>
+  <entry key="SIM_STEP_SIZE_TOOLTIP">The greater this value the longer the computation time, but the more accurate will be the result.</entry>
   <entry key="SIMULATION_CONFIGURATION">Parameters for the simulation</entry>
   <entry key="SIMULATION_CONFIGURATION_TOOLTIP">Here you can specify parameters for the simulation of the model</entry>
     
@@ -89,7 +99,7 @@
   
   <!-- Metrics -->
   
-  <entry key="NMetric">N-metric</entry>
+  <entry key="N_Metric">N-metric</entry>
   <entry key="Euclidean">Euclidean</entry>
   <entry key="Manhattan">Manhattan</entry>
   <entry key="DISTANCE">distance</entry>

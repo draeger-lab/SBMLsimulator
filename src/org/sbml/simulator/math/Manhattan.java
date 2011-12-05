@@ -23,7 +23,7 @@ package org.sbml.simulator.math;
  * @version $Rev$
  * @since
  */
-public class Manhattan extends NMetric {
+public class Manhattan extends N_Metric {
 	
 	
 	/**

@@ -34,7 +34,7 @@ import de.zbit.util.ResourceManager;
  * @version $Rev$
  * @since 1.0
  */
-public class NMetric extends QualityMeasure {
+public class N_Metric extends QualityMeasure {
 
 	/**
 	 * 
@@ -58,7 +58,7 @@ public class NMetric extends QualityMeasure {
 	 * root to another value or explicitly using the distance function where the
 	 * root must be given as an argument.
 	 */
-	public NMetric() {
+	public N_Metric() {
 		super();
 		this.root = 3d;
 	}
@@ -74,7 +74,7 @@ public class NMetric extends QualityMeasure {
 	 * 
 	 * @param root
 	 */
-	public NMetric(double root) {
+	public N_Metric(double root) {
 		super(Double.NaN);
 		this.root = root;
 	}

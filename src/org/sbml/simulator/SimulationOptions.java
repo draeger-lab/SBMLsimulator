@@ -21,7 +21,7 @@ import java.util.ResourceBundle;
 
 import org.sbml.simulator.math.RSE;
 import org.simulator.math.odes.AbstractDESSolver;
-import org.simulator.math.odes.RKEventSolver;
+import org.simulator.math.odes.RK_EventSolver;
 
 import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.KeyProvider;
@@ -126,7 +126,7 @@ public interface SimulationOptions extends KeyProvider {
 	@SuppressWarnings("rawtypes")
 	public static final Option<Class> ODE_SOLVER = new Option<Class>(
 		"ODE_SOLVER", Class.class, bundle, new Range<Class>(Class.class,
-			SBMLsimulator.getAvailableSolverClasses()), RKEventSolver.class);
+			SBMLsimulator.getAvailableSolverClasses()), RK_EventSolver.class);
 	
 	/**
 	 * The double value associated with this key must, in case of SBML equal to
