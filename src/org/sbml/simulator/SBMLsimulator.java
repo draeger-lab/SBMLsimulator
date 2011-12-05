@@ -139,7 +139,7 @@ public class SBMLsimulator extends Launcher {
    * 
    * @return
    */
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   public static List<Class> getAvailableSolverClasses() {
     List<Class> solverList = new ArrayList<Class>(AVAILABLE_SOLVERS.length);
     for (Class<AbstractDESSolver> solverClass : AVAILABLE_SOLVERS) {
@@ -224,7 +224,6 @@ public class SBMLsimulator extends Launcher {
     defAndKeys.add(SimulationOptions.class);
     defAndKeys.add(EstimationOptions.class);
     defAndKeys.add(PlotOptions.class);
-    defAndKeys.add(CSVOptions.class);
     return defAndKeys;
   }
 
