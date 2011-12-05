@@ -18,12 +18,15 @@
 package org.sbml.simulator.gui.plot;
 
 import java.awt.Color;
+import java.io.File;
 import java.util.ResourceBundle;
 
+import de.zbit.io.SBFileFilter;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.Option;
 import de.zbit.util.prefs.OptionGroup;
+import de.zbit.util.prefs.Range;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -74,14 +77,15 @@ public interface PlotOptions extends KeyProvider {
 //    public static final Option<Boolean> PLOT_LOG_SCALE = new Option<Boolean>(
 //	"PLOT_LOG_SCALE", Boolean.class, "Select this checkbox if the y-axis should be drawn in a logarithmic scale. This is, however, only possible if all values are greater than zero.",
 //	Boolean.FALSE, "Log scale");
-//    /**
-//     * The default save directory for graphics files as a result of a plot.
-//     */
-//    public static final Option<File> PLOT_SAVE_DIR = new Option<File>(
-//	"PLOT_SAVE_DIR", File.class,
-//	"The default save directory for graphics files as a result of a plot.",
-//	new Range<File>(File.class, SBFileFilter.createDirectoryFilter()),
-//	new File(System.getProperty("user.home")));
+	
+    /**
+     * The default save directory for graphics files as a result of a plot.
+     */
+    public static final Option<File> PLOT_SAVE_DIR = new Option<File>(
+	"PLOT_SAVE_DIR", File.class,
+	"The default save directory for graphics files as a result of a plot.",
+	new Range<File>(File.class, SBFileFilter.createDirectoryFilter()),
+	new File(System.getProperty("user.home")), false);
 	
 	/**
 	 * With this key it can be specified whether a two-dimensional plot should

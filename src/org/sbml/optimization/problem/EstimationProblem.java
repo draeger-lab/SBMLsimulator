@@ -280,7 +280,6 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * eva2.server.go.problems.AbstractOptimizationProblem#evaluatePopulationStart
 	 * (eva2.server.go.populations.Population)
 	 */
-	@Override
 	public void evaluatePopulationStart(Population population) {
 		super.evaluatePopulationStart(population);
 		bestPerGeneration = null;
