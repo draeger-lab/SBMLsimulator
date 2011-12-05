@@ -23,7 +23,7 @@ package org.sbml.simulator.math;
  * @version $Rev$
  * @since
  */
-public class Euclidean extends NMetric {
+public class Euclidean extends N_Metric {
 
 	/**
 	 * 

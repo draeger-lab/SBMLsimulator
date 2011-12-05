@@ -22,7 +22,7 @@ package org.sbml.simulator.math;
  * @version $Rev$
  * @since 1.0
  */
-public class RelativeManhattan extends RelativeNMetric {
+public class RelativeManhattan extends Relative_N_Metric {
 
 
 	/**

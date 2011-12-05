@@ -29,7 +29,7 @@ import de.zbit.util.ResourceManager;
  * @version $Rev$
  * @since 1.0
  */
-public class RelativeNMetric extends QualityMeasure {
+public class Relative_N_Metric extends QualityMeasure {
 	
 	/**
 	 * Generated serial version identifier.
@@ -44,30 +44,30 @@ public class RelativeNMetric extends QualityMeasure {
 	/**
 	 * 
 	 */
-	protected NMetric metric;
+	protected N_Metric metric;
 
 	/**
 	 * 
 	 */
-	public RelativeNMetric() {
+	public Relative_N_Metric() {
 		super();
-		metric = new NMetric();
+		metric = new N_Metric();
 	}
 	
 	/**
 	 * 
 	 * @param root
 	 */
-	public RelativeNMetric(double root) {
+	public Relative_N_Metric(double root) {
 		super(Double.NaN);
-		metric = new NMetric(root);
+		metric = new N_Metric(root);
 	}
 
 	/**
 	 * 
 	 * @param metric
 	 */
-	public RelativeNMetric(NMetric metric) {
+	public Relative_N_Metric(N_Metric metric) {
 		super(Double.NaN);
 		this.metric = metric;
 	}

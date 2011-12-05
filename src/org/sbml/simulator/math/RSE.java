@@ -30,7 +30,7 @@ import org.sbml.jsbml.util.StringTools;
  * @version $Rev$
  * @since 1.0
  */
-public class RSE extends NMetric {
+public class RSE extends N_Metric {
 
 	/**
 	 * Generated serial identifier.

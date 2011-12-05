@@ -43,20 +43,20 @@ public interface PlotOptions extends KeyProvider {
 			.getBundle("org.sbml.simulator.locales.Simulator");
 	
 	/**
-     * 
-     */
+	 * 
+	 */
 	public static final Option<Color> PLOT_BACKGROUND_COLOR = new Option<Color>(
 		"PLOT_BACKGROUND_COLOR", Color.class, bundle, Color.WHITE);
 	
 	/**
-     * 
-     */
+	 * 
+	 */
 	public static final Option<Color> PLOT_GRID_COLOR = new Option<Color>(
 		"PLOT_GRID_COLOR", Color.class, bundle, Color.DARK_GRAY);
 	
 	/**
-     * 
-     */
+	 * 
+	 */
 	public static final Option<String> PLOT_TITLE = new Option<String>(
 		"PLOT_TITLE", String.class, bundle, "");
 	
@@ -78,14 +78,14 @@ public interface PlotOptions extends KeyProvider {
 //	"PLOT_LOG_SCALE", Boolean.class, "Select this checkbox if the y-axis should be drawn in a logarithmic scale. This is, however, only possible if all values are greater than zero.",
 //	Boolean.FALSE, "Log scale");
 	
-    /**
-     * The default save directory for graphics files as a result of a plot.
-     */
-    public static final Option<File> PLOT_SAVE_DIR = new Option<File>(
-	"PLOT_SAVE_DIR", File.class,
-	"The default save directory for graphics files as a result of a plot.",
-	new Range<File>(File.class, SBFileFilter.createDirectoryFilter()),
-	new File(System.getProperty("user.home")), false);
+  /**
+   * The default save directory for graphics files as a result of a plot.
+   */
+  public static final Option<File> PLOT_SAVE_DIR = new Option<File>(
+    "PLOT_SAVE_DIR", File.class,
+    "The default save directory for graphics files as a result of a plot.",
+    new Range<File>(File.class, SBFileFilter.createDirectoryFilter()),
+    new File(System.getProperty("user.home")), false);
 	
 	/**
 	 * With this key it can be specified whether a two-dimensional plot should

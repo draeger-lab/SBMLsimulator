@@ -22,7 +22,7 @@ package org.sbml.simulator.math;
  * @version $Rev$
  * @since
  */
-public class RelativeEuclidean extends RelativeNMetric {
+public class RelativeEuclidean extends Relative_N_Metric {
 	
 	/**
 	 * Generated serial version identifier.

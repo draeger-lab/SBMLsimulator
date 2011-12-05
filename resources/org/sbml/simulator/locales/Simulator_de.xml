@@ -11,7 +11,7 @@
   
   <!-- SimulationOptions -->
   
-  <entry key="DEFAULT_INIT_COMPARTMENT_SIZE">Falls nicht anders spezifiziert, wird der hier angegebene Wert dafür genutzt, um Kompartimentgrößen zu initialisieren.</entry>
+  <entry key="DEFAULT_INIT_COMPARTMENT_SIZE_TOOLTIP">Falls nicht anders spezifiziert, wird der hier angegebene Wert dafür genutzt, um Kompartimentgrößen zu initialisieren.</entry>
   <entry key="QUALITY_MEASURES">Bewertungsfunktion der Modellqualität</entry>
   <entry key="QUALITY_MEASURES_TOOLTIP">Diese Einstellungen ermöglichen es, festzulegen, wie die Qualität eines Parametersatzes bezüglich gegebener experimenteller Daten zu bewerten ist.</entry>
   <entry key="SIMULATION_CONFIGURATION">Parameter für die Simulation</entry>
