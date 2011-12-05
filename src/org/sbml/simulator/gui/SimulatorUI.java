@@ -21,7 +21,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -56,7 +55,6 @@ import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.SimulationOptions;
 import org.sbml.simulator.gui.plot.PlotOptions;
-import org.sbml.simulator.resources.Resource;
 import org.sbml.tolatex.LaTeXOptions;
 import org.simulator.math.odes.MultiTable;
 
@@ -87,8 +85,8 @@ import eva2.tools.BasicResourceLoader;
  * @version $Rev$
  * @since 1.0
  */
-public class SimulatorUI extends BaseFrame implements ActionListener,
-		ItemListener, PropertyChangeListener {
+public class SimulatorUI extends BaseFrame implements ItemListener,
+    PropertyChangeListener {
 
 	/**
 	 * Commands that can be understood by this dialog.
@@ -204,95 +202,59 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 		this();
 		openModel(model);
 	}
-
-	/*
-	 * (non-Javadoc)
+	
+	/**
 	 * 
-	 * @see
-	 * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
-	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand() == null) {
-			return;
-		}
-
-		switch (Command.valueOf(e.getActionCommand())) {
-		case EDIT_MODEL:
-			logger.info("Starting model editor");
-			this.simulationTime = System.currentTimeMillis();
-			try {
-				// Cloning is necessary, because the model might be changed.
-				// If not, we want to stick with the previous version of the
-				// model.
-				SBMLDocument doc = simPanel.getModel().getSBMLDocument()
-						.clone();
-				SBMLModelSplitPane split = new SBMLModelSplitPane(doc,
-						SBPreferences.getPreferencesFor(LaTeXOptions.class)
-								.getBoolean(
-										LaTeXOptions.PRINT_NAMES_IF_AVAILABLE));
-				split.setPreferredSize(new Dimension(640, 480));
-				if (JOptionPane2.showOptionDialog(this, split, "Model Editor",
-						JOptionPane2.OK_CANCEL_OPTION,
-						JOptionPane2.INFORMATION_MESSAGE, null, null, null,
-						true) == JOptionPane2.OK_OPTION) {
-					simPanel = new SimulationPanel(doc.getModel());
-					validate();
-				}
-			} catch (Throwable exc) {
-				GUITools.showErrorMessage(this, exc);
-			}
-			break;
-		case SIMULATION_START:
-			logger.info("Starting simulation");
-			this.simulationTime = System.currentTimeMillis();
-			GUITools.setEnabled(false, getJMenuBar(), toolBar,
-					Command.EDIT_MODEL, Command.SIMULATION_START);
-			// this.statusBar.reset();
-			simulate();
-			/*
-			 * GUITools.setEnabled(true, getJMenuBar(), toolBar,
-			 * Command.SIMULATION_START);
-			 */
-			// this.statusBar.reset();
-			break;
-		case OPTIMIZATION:
-			optimize();
-			break;
-		case SHOW_OPTIONS:
-			// treated in {@link #itemStateChanged(ItemEvent)
-			break;
-		default:
-			JOptionPane.showMessageDialog(this,
-					"Invalid option " + e.getActionCommand(), "Warning",
-					JOptionPane.WARNING_MESSAGE);
-			break;
-		}
+	public void editModel() {
+	  logger.info("Starting model editor");
+    try {
+      // Cloning is necessary, because the model might be changed.
+      // If not, we want to stick with the previous version of the
+      // model.
+      SBMLDocument doc = simPanel.getModel().getSBMLDocument()
+          .clone();
+      SBMLModelSplitPane split = new SBMLModelSplitPane(doc,
+          SBPreferences.getPreferencesFor(LaTeXOptions.class)
+              .getBoolean(
+                  LaTeXOptions.PRINT_NAMES_IF_AVAILABLE));
+      split.setPreferredSize(new Dimension(640, 480));
+      if (JOptionPane2.showOptionDialog(this, split, "Model Editor",
+          JOptionPane2.OK_CANCEL_OPTION,
+          JOptionPane2.INFORMATION_MESSAGE, null, null, null,
+          true) == JOptionPane2.OK_OPTION) {
+        simPanel = new SimulationPanel(doc.getModel());
+        validate();
+      }
+    } catch (Throwable exc) {
+      GUITools.showErrorMessage(this, exc);
+    }
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrame#additionalEditMenuItems()
 	 */
 	@Override
-	protected JMenuItem[] additionalEditMenuItems() {
-		JMenuItem editModel = GUITools.createJMenuItem(this,
-				Command.EDIT_MODEL, UIManager.getIcon("ICON_PENCIL_16"), 'M');
-		JMenuItem simulation = GUITools.createJMenuItem(this,
-				Command.SIMULATION_START, UIManager.getIcon("ICON_GEAR_16"),
-				'S');
-		JMenuItem optimization = GUITools.createJMenuItem(this,
-				Command.OPTIMIZATION, getIconEvA2(), 'O');
-		optimization.setEnabled(false);
-		JCheckBoxMenuItem item = new JCheckBoxMenuItem("Show options",
-				simPanel != null ? simPanel.isShowSettingsPanel() : true);
-		if (simPanel == null) {
-			item.setEnabled(false);
-		}
-		item.setActionCommand(Command.SHOW_OPTIONS.toString());
-		item.addItemListener(this);
-		return new JMenuItem[] { editModel, simulation, optimization, item };
-	}
+  protected JMenuItem[] additionalEditMenuItems() {
+    JMenuItem editModel = GUITools.createJMenuItem(EventHandler.create(
+      ActionListener.class, this, "editModel"), Command.EDIT_MODEL, UIManager
+        .getIcon("ICON_PENCIL_16"), 'M');
+    JMenuItem simulation = GUITools.createJMenuItem(EventHandler.create(
+      ActionListener.class, this, "simulate"), Command.SIMULATION_START,
+      UIManager.getIcon("ICON_GEAR_16"), 'S');
+    JMenuItem optimization = GUITools.createJMenuItem(EventHandler.create(
+      ActionListener.class, this, "optimize"), Command.OPTIMIZATION,
+      getIconEvA2(), 'O');
+    optimization.setEnabled(false);
+    JCheckBoxMenuItem item = new JCheckBoxMenuItem("Show options",
+      simPanel != null ? simPanel.isShowSettingsPanel() : true);
+    if (simPanel == null) {
+      item.setEnabled(false);
+    }
+    item.setActionCommand(Command.SHOW_OPTIONS.toString());
+    item.addItemListener(this);
+    return new JMenuItem[] { editModel, simulation, optimization, item };
+  }
 
 	/*
 	 * (non-Javadoc)
@@ -381,7 +343,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	 * @see de.zbit.gui.BaseFrame#getURLAboutMessage()
 	 */
 	public URL getURLAboutMessage() {
-		return Resource.class.getResource("html/about.html");
+		return getClass().getResource("html/about.html");
 	}
 
 	/*
@@ -390,7 +352,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	 * @see de.zbit.gui.BaseFrame#getURLLicense()
 	 */
 	public URL getURLLicense() {
-		return Resource.class.getResource("html/License.html");
+		return getClass().getResource("html/License.html");
 	}
 
 	/*
@@ -399,7 +361,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	 * @see de.zbit.gui.BaseFrame#getURLOnlineHelp()
 	 */
 	public URL getURLOnlineHelp() {
-		return Resource.class.getResource("html/online-help.html");
+		return getClass().getResource("html/online-help.html");
 	}
 
 	/*
@@ -551,7 +513,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	/**
 	 * @param model
 	 */
-	private void openModel(Model model) {
+	public void openModel(Model model) {
 		simPanel = new SimulationPanel(model);
 		if (GUITools.contains(getContentPane(), simPanel)) {
 			getContentPane().remove(simPanel);
@@ -751,6 +713,10 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	 * 
 	 */
 	public void simulate() {
+    logger.info("Starting simulation");
+    simulationTime = System.currentTimeMillis();
+    GUITools.setEnabled(false, getJMenuBar(), toolBar,
+        Command.EDIT_MODEL, Command.SIMULATION_START);
 		try {
 			// GUITools.setEnabled(false, getJMenuBar(), toolBar,
 			// Command.SIMULATION_START);
@@ -797,7 +763,7 @@ public class SimulatorUI extends BaseFrame implements ActionListener,
 	 * @return
 	 */
 	public static ImageIcon getIconCamera() {
-		return new ImageIcon(Resource.class.getResource("img/camera_16.png"));
+		return new ImageIcon(SimulatorUI.class.getResource("img/camera_16.png"));
 	}
 	
 }

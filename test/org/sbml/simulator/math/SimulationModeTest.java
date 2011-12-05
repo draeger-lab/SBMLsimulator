@@ -104,7 +104,8 @@ public class SimulationModeTest {
 
 		Model model = (new SBMLReader()).readSBML(sbmlfile).getModel();
 		if (model != null) {
-		    SimulatorUI d = new SimulatorUI(model);
+		    SimulatorUI d = new SimulatorUI();
+		    d.openModel(model);
 		    d.setSelectedQuantities(cfg.get("variables").toString()
 			    .trim().split(", "));
 		    if (csvfile != null) {
