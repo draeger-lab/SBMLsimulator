@@ -106,7 +106,7 @@ public class SimulationTestAutomatic {
 				MultiTable solution=solver.solve(interpreter, interpreter.getInitialValues(), timepoints);
 				
 				
-				QualityMeasure distance = new Euclidean();
+				QualityMeasure distance = new EuclideanDistance();
 
 				double dist=distance.distance(solution, inputData);
 				
