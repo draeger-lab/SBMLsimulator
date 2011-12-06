@@ -100,12 +100,12 @@
   <!-- Metrics -->
   
   <entry key="N_Metric">N-metric</entry>
-  <entry key="Euclidean">Euclidean</entry>
-  <entry key="Manhattan">Manhattan</entry>
+  <entry key="EuclideanDistance">Euclidean</entry>
+  <entry key="ManhattanDistance">Manhattan</entry>
   <entry key="DISTANCE">distance</entry>
-  <entry key="RSE">Relative Squared Error</entry>
+  <entry key="RelativeSquaredError">Relative Squared Error</entry>
   <entry key="EXPONENT">exponent</entry>
-  <entry key="Pearson">Pearson's correlation coefficient</entry>
+  <entry key="PearsonCorrelation">Pearson's correlation coefficient</entry>
   <entry key="RELATIVE">Relative</entry>
   
 </properties>

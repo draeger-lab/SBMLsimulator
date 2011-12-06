@@ -79,7 +79,7 @@ public class SimulationTest {
 			MultiTable solution2= solver.solve(interpreter, interpreter.getInitialValues(),
         experimentalData.getTimePoints());
 			
-			QualityMeasure qm = new Euclidean();
+			QualityMeasure qm = new EuclideanDistance();
 			System.out.println(qm.distance(solution, experimentalData));
 			System.out.println(qm.distance(solution1, experimentalData));
 			System.out.println(qm.distance(solution2, experimentalData));
