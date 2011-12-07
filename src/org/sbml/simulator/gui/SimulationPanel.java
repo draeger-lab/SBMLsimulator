@@ -632,7 +632,6 @@ public class SimulationPanel extends JPanel implements
    */
   public void refreshStepSize() {
     getSolver().setStepSize(simulationManager.getSimlationConfiguration().getStepSize());
-    
   }
   
 }
