@@ -30,7 +30,7 @@ import org.sbml.jsbml.util.StringTools;
  * @version $Rev$
  * @since 1.0
  */
-public class RSE extends N_Metric {
+public class RelativeSquaredError extends N_Metric {
 
 	/**
 	 * Generated serial identifier.
@@ -41,7 +41,7 @@ public class RSE extends N_Metric {
 	 * Constructs a new RelativeSquaredError. Here
 	 * the root is the default value to be returned by the distance function.
 	 */
-	public RSE() {
+	public RelativeSquaredError() {
 		super(2d);
 	}
 

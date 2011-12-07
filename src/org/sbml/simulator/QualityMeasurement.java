@@ -22,10 +22,10 @@ import java.beans.PropertyChangeListener;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.sbml.simulator.math.Euclidean;
+import org.sbml.simulator.math.EuclideanDistance;
 import org.sbml.simulator.math.N_Metric;
 import org.sbml.simulator.math.QualityMeasure;
-import org.sbml.simulator.math.RelativeEuclidean;
+import org.sbml.simulator.math.RelativeEuclideanDistance;
 import org.sbml.simulator.math.Relative_N_Metric;
 import org.simulator.math.odes.MultiTable;
 
@@ -74,12 +74,12 @@ public class QualityMeasurement implements PropertyChangeListener {
       distance = (QualityMeasure) evt.getNewValue();
       // TODO: Consider creating a new interface that provides a setRoot method.
       if (distance instanceof N_Metric) {
-        if(!(distance instanceof Euclidean)) {
+        if(!(distance instanceof EuclideanDistance)) {
           ((N_Metric) distance).setRoot(prefs
               .getDouble(SimulationOptions.QUALITY_N_METRIC_ROOT));
         }
       } else if (distance instanceof Relative_N_Metric) {
-          if(!(distance instanceof RelativeEuclidean)) {
+          if(!(distance instanceof RelativeEuclideanDistance)) {
             ((Relative_N_Metric) distance).setRoot(prefs
               .getDouble(SimulationOptions.QUALITY_N_METRIC_ROOT));
           }

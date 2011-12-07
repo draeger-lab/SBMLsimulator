@@ -1,5 +1,5 @@
 /*
- * $Id:  Manhattan.java 10:02:10 keller$
+ * $Id:  RelativeManhattan.java 10:15:03 keller$
  * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
@@ -17,25 +17,24 @@
  */
 package org.sbml.simulator.math;
 
-
 /**
  * @author Roland Keller
  * @version $Rev$
- * @since
+ * @since 1.0
  */
-public class Manhattan extends N_Metric {
-	
-	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -7863697829237313786L;
+public class RelativeManhattanDistance extends Relative_N_Metric {
+
 
 	/**
 	 * 
 	 */
-	public Manhattan() {
-		super(1d);
+	private static final long serialVersionUID = -5446188147827736620L;
+
+	/**
+	 * 
+	 */
+	public RelativeManhattanDistance() {
+		super(new ManhattanDistance());
 	}
-
+	
 }
