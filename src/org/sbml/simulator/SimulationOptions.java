@@ -21,9 +21,10 @@ import java.util.ResourceBundle;
 
 import org.sbml.simulator.math.RSE;
 import org.simulator.math.odes.AbstractDESSolver;
-import org.simulator.math.odes.RK_EventSolver;
+import org.simulator.math.odes.RungeKutta_EventSolver;
 
 import de.zbit.util.ResourceManager;
+import de.zbit.util.ValuePairUncomparable;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.Option;
 import de.zbit.util.prefs.OptionGroup;
@@ -126,29 +127,33 @@ public interface SimulationOptions extends KeyProvider {
 	@SuppressWarnings("rawtypes")
 	public static final Option<Class> ODE_SOLVER = new Option<Class>(
 		"ODE_SOLVER", Class.class, bundle, new Range<Class>(Class.class,
-			SBMLsimulator.getAvailableSolverClasses()), RK_EventSolver.class);
-	
-	/**
-	 * The double value associated with this key must, in case of SBML equal to
-	 * zero. Generally, any start time would be possible. This is why this key
-	 * exists. But SBML is defined to start its simulation at the time zero.
-	 */
-	public static final Option<Double> SIM_START_TIME = new Option<Double>(
-		"SIM_START_TIME", Double.class, bundle, Double.valueOf(0d));
+			SBMLsimulator.getAvailableSolverClasses()), RungeKutta_EventSolver.class);
 	
 	/**
 	 * With the associated non-negative double number that has to be greater than
 	 * 0 when simulating SBML models, it is possible to perform a simulation.
 	 */
 	public static final Option<Double> SIM_END_TIME = new Option<Double>(
-		"SIM_END_TIME", Double.class, bundle, Double.valueOf(5d));
+		"SIM_END_TIME", Double.class, bundle, new Range<Double>(Double.class,
+			"{(0, 1E5]}"), Double.valueOf(5d));
+	
+	/**
+	 * The double value associated with this key must, in case of SBML equal to
+	 * zero. Generally, any start time would be possible. This is why this key
+	 * exists. But SBML is defined to start its simulation at the time zero.
+	 */
+	@SuppressWarnings("unchecked")
+	public static final Option<Double> SIM_START_TIME = new Option<Double>(
+		"SIM_START_TIME", Double.class, bundle, new Range<Double>(Double.class,
+			"{[0, 1E5]}"), Double.valueOf(0d));
 	
 	/**
 	 * The greater this value the longer the computation time, but the more
 	 * accurate will be the result.
 	 */
 	public static final Option<Double> SIM_STEP_SIZE = new Option<Double>(
-		"SIM_STEP_SIZE", Double.class, bundle, Double.valueOf(.01d));
+		"SIM_STEP_SIZE", Double.class, bundle, new Range<Double>(Double.class,
+			"{(0, 1E5]}"), Double.valueOf(.01d));
 	
 	/**
 	 * Parameters for the simulation
