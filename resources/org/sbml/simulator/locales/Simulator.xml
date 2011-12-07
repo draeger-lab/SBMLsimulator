@@ -108,4 +108,15 @@
   <entry key="PearsonCorrelation">Pearson's correlation coefficient</entry>
   <entry key="RELATIVE">Relative</entry>
   
+  <!-- LegendPanel -->
+  
+  <entry key="COMPARTMENTS">Compartments</entry>
+  <entry key="COMPARTMENTS_TOOLTIP">Selects all compartments for the plot.</entry>
+  <entry key="SPECIES">Species</entry>
+  <entry key="SPECIES_TOOLTIP">If this option is selected, all species of the model are plotted.</entry>
+  <entry key="PARAMETERS">Parameters</entry>
+  <entry key="PARAMETERS_TOOLTIP">With this option you can plot the changes of all global parameters in the model.</entry>
+  <entry key="REACTIONS">Reactions</entry>
+  <entry key="REACTIONS_TOOLTIP">Select this option to plot the evolution of all flux values in the model.</entry>
+  
 </properties>

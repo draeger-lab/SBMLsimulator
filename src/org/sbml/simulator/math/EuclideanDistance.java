@@ -23,7 +23,7 @@ package org.sbml.simulator.math;
  * @version $Rev$
  * @since
  */
-public class Euclidean extends N_Metric {
+public class EuclideanDistance extends N_Metric {
 
 	/**
 	 * 
@@ -33,7 +33,7 @@ public class Euclidean extends N_Metric {
 	/**
 	 * 
 	 */
-	public Euclidean() {
+	public EuclideanDistance() {
 		super(2d);
 	}
 

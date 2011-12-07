@@ -44,18 +44,17 @@ public interface SimulatorOptions extends KeyProvider {
   /**
    * SBML input file.
    */
-	public static final Option<File> SBML_FILE = new Option<File>("SBML_FILE",
-		File.class, bundle, new Range<File>(File.class,
-			SBFileFilter.createSBMLFileFilter()), new File(
-			System.getProperty("user.dir")));
+  public static final Option<File> SBML_FILE = new Option<File>("SBML_FILE",
+    File.class, bundle, new Range<File>(File.class, SBFileFilter
+        .createSBMLFileFilter()), new File(System.getProperty("user.dir")));
 
   /**
    * Path to a file with a time series of species/compartment/parameter values.
    */
   public static final Option<File> TIME_SERIES_FILE = new Option<File>(
-		"TIME_SERIES_FILE", File.class, bundle, new Range<File>(File.class,
-			SBFileFilter.createCSVFileFilter()), new File(
-			System.getProperty("user.home")));
+    "TIME_SERIES_FILE", File.class, bundle, new Range<File>(File.class,
+      SBFileFilter.createCSVFileFilter()), new File(System
+        .getProperty("user.home")));
   
   /**
    * Select input files for simulation.

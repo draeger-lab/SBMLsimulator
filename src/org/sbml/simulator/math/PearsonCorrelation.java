@@ -27,7 +27,7 @@ import de.zbit.util.ResourceManager;
  * @version $Rev$
  * @since 1.0
  */
-public class Pearson extends QualityMeasure {
+public class PearsonCorrelation extends QualityMeasure {
 
 	/**
 	 * Generated serial version identifier.

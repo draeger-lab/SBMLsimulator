@@ -22,10 +22,12 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashSet;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
@@ -33,7 +35,11 @@ import javax.swing.event.TableModelListener;
 
 import org.sbml.jsbml.Model;
 
+import de.zbit.gui.ActionCommand;
 import de.zbit.gui.GUITools;
+import de.zbit.gui.JDropDownButton;
+import de.zbit.util.ResourceManager;
+import de.zbit.util.StringUtil;
 
 /**
  * Container for a {@link LegendTableModel} in a {@link JTable} and two
@@ -48,6 +54,52 @@ public class LegendPanel extends JPanel implements TableModelListener,
 		ActionListener {
 
 	/**
+	 * 
+	 * @author Andreas Dr&auml;ger
+	 * @version $Rev$
+	 * @since 1.0
+	 */
+	public static enum SelectAll implements ActionCommand {
+	  /**
+	   * Selects all compartments for the plot.
+	   */
+    COMPARTMENTS, 
+    /**
+     * With this option you can plot the changes of all global parameters in the model.
+     */
+    PARAMETERS,
+    /**
+     * Select this option to plot the evolution of all flux values in the model.
+     */
+    REACTIONS,
+    /**
+     * If this option is selected, all species of the model are plotted.
+     */
+    SPECIES;
+
+    /* (non-Javadoc)
+     * @see de.zbit.gui.ActionCommand#getName()
+     */
+    public String getName() {
+      return bundle.getString(this.toString());
+    }
+
+    /* (non-Javadoc)
+     * @see de.zbit.gui.ActionCommand#getToolTip()
+     */
+    public String getToolTip() {
+      return bundle.getString(this.toString() + "_TOOLTIP");
+    }
+
+	}
+	
+	/**
+	 * 
+	 */
+  private static final transient ResourceBundle bundle = ResourceManager
+      .getBundle("org.sbml.simulator.locales.Simulator");
+	
+	/**
 	 * Generated serial version identifier
 	 */
 	private static final long serialVersionUID = 4018387447860613404L;
@@ -58,16 +110,21 @@ public class LegendPanel extends JPanel implements TableModelListener,
 	/**
 	 * 
 	 */
-	private Set<TableModelListener> setOfTableModelListeners;
-	/**
-	 * 
-	 */
-	private JButton selectAll, selectNone;
+	private JDropDownButton selectAll;
 	/**
 	 * 
 	 */
 	private int selectedCount;
+	/**
+	 * 
+	 */
+	private JButton selectNone;
 
+	/**
+	 * 
+	 */
+	private Set<TableModelListener> setOfTableModelListeners;
+	
 	/**
 	 * 
 	 * @param model
@@ -81,8 +138,18 @@ public class LegendPanel extends JPanel implements TableModelListener,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
 				BorderLayout.CENTER);
 		SelectionCommand command = SelectionCommand.ALL;
-		selectAll = GUITools.createButton(command.getText(), null, this,
-				command, command.getToolTip());
+		
+		JPopupMenu menu = new JPopupMenu();
+    for (SelectAll item : SelectAll.values()) {
+      menu.add(GUITools.createJMenuItem(this, item));
+    }
+		selectAll = new JDropDownButton(command.getText(), menu);
+		String tooltip = command.getToolTip();
+    if ((tooltip != null) && (tooltip.length() > 0)) {
+      selectAll.setToolTipText(StringUtil.toHTML(tooltip,
+        GUITools.TOOLTIP_LINE_LENGTH));
+    }
+    
 		command = SelectionCommand.NONE;
 		selectNone = GUITools.createButton(command.getText(), null, this,
 				command, command.getToolTip());

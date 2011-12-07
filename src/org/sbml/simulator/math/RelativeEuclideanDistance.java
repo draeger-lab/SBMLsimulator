@@ -1,5 +1,5 @@
 /*
- * $Id:  RelativeManhattan.java 10:15:03 keller$
+ * $Id:  RelativeEuclidean.java 10:12:44 keller$
  * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
@@ -20,21 +20,20 @@ package org.sbml.simulator.math;
 /**
  * @author Roland Keller
  * @version $Rev$
- * @since 1.0
+ * @since
  */
-public class RelativeManhattan extends Relative_N_Metric {
-
+public class RelativeEuclideanDistance extends Relative_N_Metric {
+	
+	/**
+	 * Generated serial version identifier.
+	 */
+	private static final long serialVersionUID = -7488743431449082030L;
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -5446188147827736620L;
-
-	/**
-	 * 
-	 */
-	public RelativeManhattan() {
-		super(new Manhattan());
+	public RelativeEuclideanDistance() {
+		super(new EuclideanDistance());
 	}
 	
 }
