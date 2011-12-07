@@ -21,6 +21,7 @@ import java.awt.Color;
 import java.util.AbstractList;
 import java.util.Hashtable;
 import java.util.NoSuchElementException;
+import java.util.ResourceBundle;
 
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
@@ -32,6 +33,7 @@ import org.sbml.jsbml.SBaseWithDerivedUnit;
 import org.sbml.jsbml.util.compilers.HTMLFormula;
 
 import de.zbit.gui.ColorPalette;
+import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
 import de.zbit.util.ValuePair;
 
@@ -48,6 +50,11 @@ public class LegendTableModel extends AbstractTableModel {
 	 */
 	private static final int boolCol = 0, colorCol = 1, nsbCol = 2,
 			unitCol = 3;
+
+	/**
+	 * 
+	 */
+	private static final transient ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
 
 	/**
 	 * Generated serial version identifier.
@@ -81,76 +88,12 @@ public class LegendTableModel extends AbstractTableModel {
 	public static int getUnitColumn() {
 		return unitCol;
 	}
-
-	/**
-	 * @param index
-	 * @return
-	 */
-	public static Color indexToColor(int index) {
-		switch (index % 27) {
-		case 0:
-			return ColorPalette.ANTHRACITE;
-		case 1:
-			return ColorPalette.SECOND_292;
-		case 2:
-			return ColorPalette.SECOND_131;
-		case 3:
-			return ColorPalette.SECOND_180;
-		case 4:
-			return ColorPalette.SECOND_3015;
-		case 5:
-			return ColorPalette.SECOND_364;
-		case 6:
-			return ColorPalette.SECOND_557;
-		case 7:
-			return ColorPalette.SECOND_653;
-		case 8:
-			return ColorPalette.SECOND_6880;
-		case 9:
-			return ColorPalette.SECOND_7490;
-		case 10:
-			return ColorPalette.SECOND_7505;
-		case 11:
-			return ColorPalette.SECOND_7508;
-		case 12:
-			return ColorPalette.SECOND_7530;
-		case 13:
-			return ColorPalette.GOLD;
-		case 14:
-			return ColorPalette.CAMINE_RED;
-		case 15:
-			return ColorPalette.CAMINE_RED_50_PERCENT;
-		case 16:
-			return ColorPalette.GOLD_50_PERCENT;
-		case 17:
-			return Color.BLACK;
-		case 18:
-			return Color.RED;
-		case 19:
-			return Color.BLUE;
-		case 20:
-			return Color.PINK;
-		case 21:
-			return Color.GREEN;
-		case 22:
-			return Color.GRAY;
-		case 23:
-			return Color.MAGENTA;
-		case 24:
-			return Color.CYAN;
-		case 25:
-			return Color.ORANGE;
-		case 26:
-			return Color.DARK_GRAY;
-		}
-		return Color.BLACK;
-	}
-
+	
 	/**
 	 * A colored button for each model component and
 	 */
 	private Object[][] data;
-	
+
 	/**
 	 * A mapping between the ids in the table and the corresponding row.
 	 */
@@ -175,6 +118,7 @@ public class LegendTableModel extends AbstractTableModel {
 	 * 
 	 */
 	public LegendTableModel() {
+	  super();
 	}
 
 	/**
@@ -201,7 +145,7 @@ public class LegendTableModel extends AbstractTableModel {
 	private void fillData(NamedSBaseWithDerivedUnit nsb, int rowIndex,
 			boolean boolcol) {
 		data[rowIndex][boolCol] = boolcol;
-		data[rowIndex][colorCol] = indexToColor(rowIndex);
+		data[rowIndex][colorCol] = ColorPalette.indexToColor(rowIndex);
 		data[rowIndex][nsbCol] = nsb;
 		id2Row.put(nsb.getId(), Integer.valueOf(rowIndex));
 	}
@@ -218,9 +162,7 @@ public class LegendTableModel extends AbstractTableModel {
 		throw new NoSuchElementException(id);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see javax.swing.table.AbstractTableModel#getColumnClass(int)
 	 */
 	@Override
@@ -228,36 +170,32 @@ public class LegendTableModel extends AbstractTableModel {
 		return getValueAt(0, c).getClass();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see javax.swing.table.TableModel#getColumnCount()
 	 */
 	public int getColumnCount() {
 		return data.length > 0 ? data[0].length : 0;
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
+	
+	/* (non-Javadoc)
 	 * @see javax.swing.table.AbstractTableModel#getColumnName(int)
 	 */
 	@Override
 	public String getColumnName(int column) {
 		switch (column) {
 		case boolCol:
-			return "Plot";
+			return bundle.getString("PLOT_COLUMN");
 		case colorCol:
-			return "Color";
+			return bundle.getString("COLOR_COLUMN");
 		case nsbCol:
-			return "Component";
+			return bundle.getString("COMPONENT_COLUMN");
 		case unitCol:
-			return "Unit";
+			return bundle.getString("UNIT_COLUMN");
 		default:
 			break;
 		}
-		throw new IndexOutOfBoundsException("Only " + getColumnCount()
-				+ " columns, no column " + column);
+    throw new IndexOutOfBoundsException(String.format(
+      bundle.getString("UNKOWN_CLUMN_EXC"), getColumnCount(), column));
 	}
 
 	/**
@@ -349,14 +287,6 @@ public class LegendTableModel extends AbstractTableModel {
 					
 					/*
 					 * (non-Javadoc)
-					 * @see java.util.AbstractCollection#size()
-					 */
-					public int size() {
-						return model.getNumSymbols() + model.getNumReactions();
-					}
-					
-					/*
-					 * (non-Javadoc)
 					 * @see java.util.AbstractList#get(int)
 					 */
 					public SBaseWithDerivedUnit get(int index) {
@@ -373,6 +303,14 @@ public class LegendTableModel extends AbstractTableModel {
 						}
 						index -= model.getNumParameters();
 						return model.getReaction(index);
+					}
+					
+					/*
+					 * (non-Javadoc)
+					 * @see java.util.AbstractCollection#size()
+					 */
+					public int size() {
+						return model.getNumSymbols() + model.getNumReactions();
 					}
 				};
 				for (int rowIndex = 0; rowIndex < list.size(); rowIndex++) {
@@ -407,19 +345,12 @@ public class LegendTableModel extends AbstractTableModel {
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see javax.swing.table.AbstractTableModel#isCellEditable(int, int)
 	 */
 	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
-
-		if (columnIndex == unitCol) {
-			return false;
-		}
-
-		return true;
+		return (columnIndex == unitCol) ? false : true;
 	}
 
 	/**
@@ -500,15 +431,13 @@ public class LegendTableModel extends AbstractTableModel {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.table.AbstractTableModel#setValueAt(java.lang.Object,
-	 * int, int)
+	/* (non-Javadoc)
+	 * @see javax.swing.table.AbstractTableModel#setValueAt(java.lang.Object, int, int)
 	 */
 	@Override
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 		data[rowIndex][columnIndex] = aValue;
 		fireTableCellUpdated(rowIndex, columnIndex);
 	}
+
 }

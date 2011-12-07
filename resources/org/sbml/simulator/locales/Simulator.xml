@@ -119,4 +119,12 @@
   <entry key="REACTIONS">Reactions</entry>
   <entry key="REACTIONS_TOOLTIP">Select this option to plot the evolution of all flux values in the model.</entry>
   
+  <!-- LegendTableModel -->
+  
+  <entry key="PLOT_COLUMN">Plot</entry>
+  <entry key="COLOR_COLUMN">Color</entry>
+  <entry key="COMPONENT_COLUMN">Component</entry>
+  <entry key="UNIT_COLUMN">Unit</entry>
+  <entry key="UNKOWN_CLUMN_EXC">Only %d columns, no column %d</entry>
+  
 </properties>
