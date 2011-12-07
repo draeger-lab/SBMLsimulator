@@ -47,6 +47,7 @@ import org.sbml.simulator.SimulationManager;
 import org.sbml.simulator.SimulationOptions;
 import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.simulator.math.QualityMeasure;
+import org.simulator.math.Mathematics;
 import org.simulator.math.odes.AbstractDESSolver;
 
 import de.zbit.gui.GUITools;
@@ -69,24 +70,10 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	private static final long serialVersionUID = -6540887561618807199L;
 
 	/**
-	 * 
+	 * A {@link Logger} for this class.
 	 */
 	private static final Logger logger = Logger
 			.getLogger(SimulationToolPanel.class.getName());
-
-	/**
-	 * Swaps a and b if a is greater then b.
-	 * 
-	 * @param a
-	 * @param b
-	 */
-	public static void swap(double a, double b) {
-		if (a > b) {
-			double swap = b;
-			b = a;
-			a = swap;
-		}
-	}
 
 	/**
 	 * Contains all available quality measure functions.
@@ -554,7 +541,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 				.getDouble(SimulationOptions.SIM_END_TIME);
 		startTime = Math.max(0, startTime);
 		if (startTime > endTime) {
-			swap(startTime, endTime);
+			Mathematics.swap(startTime, endTime);
 		}
 		firePropertyChange("start", null, startTime);
 		firePropertyChange("end", null, endTime);
