@@ -25,7 +25,10 @@ import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 import javax.swing.SwingUtilities;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 
 import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.Model;
@@ -149,8 +152,9 @@ public class LegendTableModel extends AbstractTableModel {
 	 * @param model
 	 * @param includeReactions
 	 */
-	public LegendTableModel(Model model, boolean includeReactions) {
+	public LegendTableModel(Model model, boolean includeReactions, TableModelListener listener) {
 		this();
+		addTableModelListener(listener);
 		setModel(model, includeReactions);
 	}
 
@@ -158,16 +162,16 @@ public class LegendTableModel extends AbstractTableModel {
 	 * @param nsb
 	 * @param rowIndex
 	 */
-	private void fillData(NamedSBaseWithDerivedUnit nsb, int rowIndex,
-			boolean boolcol) {
-		data[rowIndex][boolCol] = boolcol;
-		if (boolcol) {
-		  selectedCount++;
-		}
-		data[rowIndex][colorCol] = ColorPalette.indexToColor(rowIndex);
-		data[rowIndex][nsbCol] = nsb;
-		id2Row.put(nsb.getId(), Integer.valueOf(rowIndex));
-	}
+  private void fillData(NamedSBaseWithDerivedUnit nsb, int rowIndex,
+    boolean boolcol) {
+    data[rowIndex][boolCol] = boolcol;
+    if (boolcol) {
+      selectedCount++;
+    }
+    data[rowIndex][colorCol] = ColorPalette.indexToColor(rowIndex);
+    data[rowIndex][nsbCol] = nsb;
+    id2Row.put(nsb.getId(), Integer.valueOf(rowIndex));
+  }
   
   /**
    * Determines the currently specified {@link Color} for the {@link NamedSBase}
@@ -308,6 +312,27 @@ public class LegendTableModel extends AbstractTableModel {
 		for (i=0; i<data.length; i++) {
 			data[i][unitCol] = "";
 		}
+		
+		for (i = 0; i < model.getNumCompartments(); i++) {
+      fillData(model.getCompartment(i), i, false);
+    }
+    j = model.getNumCompartments();
+    for (i = 0; i < model.getNumSpecies(); i++) {
+      fillData(model.getSpecies(i), i + j, true);
+    }
+    j = model.getNumCompartments() + model.getNumSpecies();
+    for (i = 0; i < model.getNumParameters(); i++) {
+      fillData(model.getParameter(i), i + j, false);
+    }
+    if (includeReactions) {
+      j = model.getNumSymbols();
+      for (i = 0; i < model.getNumReactions(); i++) {
+        fillData(model.getReaction(i), i + j, false);
+      }
+    }
+		
+		
+		final TableModel tabMod = this;
 		SwingUtilities.invokeLater(new Runnable() {
 
 			/*
@@ -352,26 +377,13 @@ public class LegendTableModel extends AbstractTableModel {
 						logger.fine(exc.getLocalizedMessage());
 					}
 				}
+				for (TableModelListener l : getTableModelListeners()) {
+          l.tableChanged(new TableModelEvent(tabMod, 0, getRowCount() - 1,
+            getColumnUnit(), TableModelEvent.UPDATE));
+				}
 			}
 			
 		});
-		for (i = 0; i < model.getNumCompartments(); i++) {
-			fillData(model.getCompartment(i), i, false);
-		}
-		j = model.getNumCompartments();
-		for (i = 0; i < model.getNumSpecies(); i++) {
-			fillData(model.getSpecies(i), i + j, true);
-		}
-		j = model.getNumCompartments() + model.getNumSpecies();
-		for (i = 0; i < model.getNumParameters(); i++) {
-			fillData(model.getParameter(i), i + j, false);
-		}
-		if (includeReactions) {
-			j = model.getNumSymbols();
-			for (i = 0; i < model.getNumReactions(); i++) {
-				fillData(model.getReaction(i), i + j, false);
-			}
-		}
 	}
 
 	/* (non-Javadoc)

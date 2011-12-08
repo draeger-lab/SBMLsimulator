@@ -134,16 +134,30 @@ public class LegendPanel extends JPanel implements TableModelListener,
 	 */
 	private Set<TableModelListener> setOfTableModelListeners;
 	
+	public LegendPanel() {
+	  super(new BorderLayout());
+	}
+	
 	/**
 	 * 
 	 * @param model
 	 */
 	public LegendPanel(Model model, boolean includeReactions) {
-		super(new BorderLayout());
-		setOfTableModelListeners = new HashSet<TableModelListener>();
+	  this();
+	  init(model, includeReactions);
+	}
+
+	/**
+	 * 
+	 * @param model
+	 * @param includeReactions
+	 */
+	public void init(Model model, boolean includeReactions) {
+	  removeAll();
+    setOfTableModelListeners = new HashSet<TableModelListener>();
     add(new JScrollPane(createLegendTable(model, includeReactions)),
       BorderLayout.CENTER);
-		JPopupMenu menuSelect = new JPopupMenu(), menuDeselect = new JPopupMenu();
+    JPopupMenu menuSelect = new JPopupMenu(), menuDeselect = new JPopupMenu();
     for (COMPONENT item : COMPONENT.values()) {
       menuSelect.add(GUITools.createJMenuItem(this, item));
       menuDeselect.add(GUITools.createJMenuItem(this, item));
@@ -153,15 +167,15 @@ public class LegendPanel extends JPanel implements TableModelListener,
     selectAll = GUITools.createJDropDownButton(menuSelect.getName(), bundle, menuSelect);
     selectNone = GUITools.createJDropDownButton(menuDeselect.getName(), bundle, menuDeselect);
     selectAll.setPreferredSize(GUITools.getMaxPreferredSize(selectAll, selectNone));
-    selectNone.setPreferredSize(selectAll.getPreferredSize());		
-		checkSelected();
-		JPanel foot = new JPanel();
-		foot.add(selectAll);
-		foot.add(selectNone);
-		add(foot, BorderLayout.SOUTH);
-	}
+    selectNone.setPreferredSize(selectAll.getPreferredSize());    
+    checkSelected();
+    JPanel foot = new JPanel();
+    foot.add(selectAll);
+    foot.add(selectNone);
+    add(foot, BorderLayout.SOUTH);
+  }
 
-	/* (non-Javadoc)
+  /* (non-Javadoc)
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
 	public void actionPerformed(ActionEvent e) {
@@ -220,17 +234,18 @@ public class LegendPanel extends JPanel implements TableModelListener,
 	 * @return
 	 */
 	private JTable createLegendTable(Model model, boolean includeReactions) {
-		this.legend = new LegendTableModel(model, includeReactions);
+		this.legend = new LegendTableModel(model, includeReactions, this);
 		JTable tab = new JTable();
 		tab.setName("legend");
 		tab.setModel(legend);
 		tab.setDefaultEditor(Color.class, new ColorEditor(this));
 		tab.setDefaultRenderer(Color.class, new LegendTableCellRenderer());
 		tab.getModel().addTableModelListener(this);
+		tab.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
     TableColumnModel colModel = tab.getColumnModel();
     int index[] = new int[] { LegendTableModel.getColumnPlot(),
         LegendTableModel.getColumnColor(), LegendTableModel.getColumnUnit() };
-    int width[] = new int[] { 12, 10, 12 };
+    int width[] = new int[] { 80, 50, 100 };
     for (int i = 0; i < index.length; i++) {
       colModel.getColumn(index[i]).setPreferredWidth(width[i]);
     }
@@ -258,9 +273,12 @@ public class LegendPanel extends JPanel implements TableModelListener,
 	 * @seejavax.swing.event.TableModelListener#tableChanged(javax.swing.event.TableModelEvent)
 	 */
 	public void tableChanged(TableModelEvent e) {
-    if ((e.getType() == TableModelEvent.UPDATE)
-        && (e.getColumn() == LegendTableModel.getColumnPlot())) {
-      checkSelected();
+    if (e.getType() == TableModelEvent.UPDATE) {
+      if (e.getColumn() == LegendTableModel.getColumnPlot()) {
+        checkSelected();
+      } else if (e.getColumn() == LegendTableModel.getColumnUnit()) {
+        repaint();
+      }
     }
 		for (TableModelListener tml : setOfTableModelListeners) {
 			tml.tableChanged(e);

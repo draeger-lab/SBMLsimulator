@@ -154,7 +154,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	 * @return
 	 */
 	public static ImageIcon getIconCamera() {
-		return new ImageIcon(SimulatorUI.class.getResource("img/camera_16.png"));
+		return new ImageIcon(SimulatorUI.class.getResource("img/CAMERA_16.png"));
 	}
 
 	/**
@@ -219,12 +219,14 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	 */
 	@Override
   protected JMenuItem[] additionalEditMenuItems() {
+	  UIManager.put("PLAY_16", new ImageIcon(SimulatorUI.class.getResource("img/PLAY_16.png")));
+	  
     JMenuItem editModel = GUITools.createJMenuItem(EventHandler.create(
       ActionListener.class, this, "editModel"), Command.EDIT_MODEL, UIManager
         .getIcon("ICON_PENCIL_16"), 'M');
     JMenuItem simulation = GUITools.createJMenuItem(EventHandler.create(
       ActionListener.class, this, "simulate"), Command.SIMULATION_START,
-      UIManager.getIcon("ICON_GEAR_16"), 'S');
+      UIManager.getIcon("PLAY_16"), 'S'); // ICON_GEAR_16
     JMenuItem optimization = GUITools.createJMenuItem(EventHandler.create(
       ActionListener.class, this, "optimize"), Command.OPTIMIZATION,
       getIconEvA2(), 'O');
@@ -666,22 +668,16 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	 * 
 	 */
 	public void simulate() {
-    logger.info("Starting simulation");
-    simulationTime = System.currentTimeMillis();
-    GUITools.setEnabled(false, getJMenuBar(), toolBar,
+    try {
+      logger.info("Starting simulation");
+      GUITools.setEnabled(false, getJMenuBar(), getJToolBar(),
         Command.EDIT_MODEL, Command.SIMULATION_START);
-		try {
-			// GUITools.setEnabled(false, getJMenuBar(), toolBar,
-			// Command.SIMULATION_START);
-			simPanel.addPropertyChangedListener(this);
-			simPanel.simulate();
-			// simPanel.removePropertyChangedListener(this);
-			// GUITools.setEnabled(true, getJMenuBar(), toolBar,
-			// BaseAction.FILE_SAVE,
-			// Command.SIMULATION_START);
-		} catch (Exception exc) {
-			GUITools.showErrorMessage(this, exc);
-		}
+      simPanel.addPropertyChangedListener(this);
+      simulationTime = System.currentTimeMillis();
+      simPanel.simulate();
+    } catch (Exception exc) {
+      GUITools.showErrorMessage(this, exc);
+    }
 	}
 	
 	/* (non-Javadoc)
