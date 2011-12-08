@@ -41,6 +41,9 @@ import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.Species;
+import org.sbml.simulator.gui.table.ColorEditor;
+import org.sbml.simulator.gui.table.LegendTableCellRenderer;
+import org.sbml.simulator.gui.table.LegendTableModel;
 
 import de.zbit.gui.ActionCommand;
 import de.zbit.gui.GUITools;
@@ -236,37 +239,10 @@ public class LegendPanel extends JPanel implements TableModelListener,
 
 	/**
 	 * 
-	 * @param id
-	 * @return
-	 */
-	public Color getColorFor(String id) {
-		return legend.getColorFor(id);
-	}
-
-	/**
-	 * 
 	 * @return
 	 */
 	public LegendTableModel getLegendTableModel() {
 		return legend;
-	}
-
-	/**
-	 * 
-	 * @param id
-	 * @return
-	 */
-	public String getNameFor(String id) {
-		return legend.getNameFor(id);
-	}
-
-	/**
-	 * 
-	 * @param id
-	 * @return
-	 */
-	public boolean isSelected(String id) {
-		return legend.isSelected(id);
 	}
 
 	/**

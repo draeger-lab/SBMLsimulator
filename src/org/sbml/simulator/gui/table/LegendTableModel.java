@@ -15,7 +15,7 @@
  * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
-package org.sbml.simulator.gui;
+package org.sbml.simulator.gui.table;
 
 import java.awt.Color;
 import java.util.AbstractList;
@@ -168,11 +168,14 @@ public class LegendTableModel extends AbstractTableModel {
 		data[rowIndex][nsbCol] = nsb;
 		id2Row.put(nsb.getId(), Integer.valueOf(rowIndex));
 	}
-
-	/**
-	 * @param id
-	 * @return
-	 */
+  
+  /**
+   * Determines the currently specified {@link Color} for the {@link NamedSBase}
+   * with the given <code>id</code>.
+   * 
+   * @param id
+   * @return
+   */
 	public Color getColorFor(String id) {
 		int index = getRowFor(id);
 		if (index >= 0) {
@@ -226,6 +229,9 @@ public class LegendTableModel extends AbstractTableModel {
 	}
 
 	/**
+	 * Determines the name if there is any for the {@link NamedSBase} belonging to
+   * the given identifier.
+   * 
 	 * @param id
 	 * @return
 	 */
@@ -385,6 +391,9 @@ public class LegendTableModel extends AbstractTableModel {
 	}
 
 	/**
+	 * Returns <code>true</code> if the {@link NamedSBase} belonging to the given
+   * <code>id</code> is selected for being shown in the plot.
+   * 
 	 * @param id
 	 * @return
 	 */
