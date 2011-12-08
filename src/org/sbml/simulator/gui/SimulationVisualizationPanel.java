@@ -143,11 +143,8 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 		return simData;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
+	/* (non-Javadoc)
+	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
 	 */
 	public void itemStateChanged(ItemEvent e) {
 		if (e.getSource() instanceof AbstractButton) {
@@ -329,16 +326,13 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 		plot();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seejavax.swing.event.TableModelListener#tableChanged(javax.swing.event.
-	 * TableModelEvent)
+	/* (non-Javadoc)
+	 * @seejavax.swing.event.TableModelListener#tableChanged(javax.swing.event.TableModelEvent)
 	 */
 	public void tableChanged(TableModelEvent e) {
 		if (e.getSource() instanceof LegendTableModel) {
-			if ((e.getColumn() == LegendTableModel.getBooleanColumn() || e
-					.getColumn() == LegendTableModel.getColorColumn())
+			if ((e.getColumn() == LegendTableModel.getColumnPlot() || e
+					.getColumn() == LegendTableModel.getColumnColor())
 					&& (e.getType() == TableModelEvent.UPDATE)) {
 				plot();
 			}

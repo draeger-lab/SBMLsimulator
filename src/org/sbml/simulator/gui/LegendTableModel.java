@@ -22,14 +22,19 @@ import java.util.AbstractList;
 import java.util.Hashtable;
 import java.util.NoSuchElementException;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 
+import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.NamedSBase;
 import org.sbml.jsbml.NamedSBaseWithDerivedUnit;
+import org.sbml.jsbml.Parameter;
+import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBaseWithDerivedUnit;
+import org.sbml.jsbml.Species;
 import org.sbml.jsbml.util.compilers.HTMLFormula;
 
 import de.zbit.gui.ColorPalette;
@@ -50,29 +55,41 @@ public class LegendTableModel extends AbstractTableModel {
 	 */
 	private static final int boolCol = 0, colorCol = 1, nsbCol = 2,
 			unitCol = 3;
-
+	
 	/**
 	 * 
 	 */
 	private static final transient ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
 
 	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final transient Logger logger = Logger.getLogger(LegendTableModel.class.getName());
+
+	/**
 	 * Generated serial version identifier.
 	 */
 	private static final long serialVersionUID = 7360401460080111135L;
+	
+  /**
+	 * @return
+	 */
+	public static int getColumnColor() {
+		return colorCol;
+	}
 
 	/**
 	 * @return
 	 */
-	public static int getBooleanColumn() {
+	public static int getColumnPlot() {
 		return boolCol;
 	}
 
 	/**
 	 * @return
 	 */
-	public static int getColorColumn() {
-		return colorCol;
+	public static int getColumnUnit() {
+		return unitCol;
 	}
 
 	/**
@@ -83,17 +100,10 @@ public class LegendTableModel extends AbstractTableModel {
 	}
 
 	/**
-	 * @return
-	 */
-	public static int getUnitColumn() {
-		return unitCol;
-	}
-	
-	/**
 	 * A colored button for each model component and
 	 */
 	private Object[][] data;
-
+	
 	/**
 	 * A mapping between the ids in the table and the corresponding row.
 	 */
@@ -115,13 +125,19 @@ public class LegendTableModel extends AbstractTableModel {
 	private Model model;
 
 	/**
+   * The number of selected items in the table.
+   */
+  private int selectedCount;
+
+	/**
 	 * 
 	 */
 	public LegendTableModel() {
 	  super();
+	  selectedCount = 0;
 	}
 
-	/**
+  /**
 	 * @param model
 	 */
 	public LegendTableModel(Model model) {
@@ -145,6 +161,9 @@ public class LegendTableModel extends AbstractTableModel {
 	private void fillData(NamedSBaseWithDerivedUnit nsb, int rowIndex,
 			boolean boolcol) {
 		data[rowIndex][boolCol] = boolcol;
+		if (boolcol) {
+		  selectedCount++;
+		}
 		data[rowIndex][colorCol] = ColorPalette.indexToColor(rowIndex);
 		data[rowIndex][nsbCol] = nsb;
 		id2Row.put(nsb.getId(), Integer.valueOf(rowIndex));
@@ -176,7 +195,7 @@ public class LegendTableModel extends AbstractTableModel {
 	public int getColumnCount() {
 		return data.length > 0 ? data[0].length : 0;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see javax.swing.table.AbstractTableModel#getColumnName(int)
 	 */
@@ -197,7 +216,7 @@ public class LegendTableModel extends AbstractTableModel {
     throw new IndexOutOfBoundsException(String.format(
       bundle.getString("UNKOWN_CLUMN_EXC"), getColumnCount(), column));
 	}
-
+	
 	/**
 	 * @param rowIndex
 	 * @return
@@ -247,6 +266,13 @@ public class LegendTableModel extends AbstractTableModel {
 		return index;
 	}
 
+	/**
+   * @return the selectedCount the number of selected components in the model.
+   */
+  public int getSelectedCount() {
+    return selectedCount;
+  }
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -285,8 +311,7 @@ public class LegendTableModel extends AbstractTableModel {
 			public void run() {
 				AbstractList<SBaseWithDerivedUnit> list = new AbstractList<SBaseWithDerivedUnit>() {
 					
-					/*
-					 * (non-Javadoc)
+					/* (non-Javadoc)
 					 * @see java.util.AbstractList#get(int)
 					 */
 					public SBaseWithDerivedUnit get(int index) {
@@ -305,8 +330,7 @@ public class LegendTableModel extends AbstractTableModel {
 						return model.getReaction(index);
 					}
 					
-					/*
-					 * (non-Javadoc)
+					/* (non-Javadoc)
 					 * @see java.util.AbstractCollection#size()
 					 */
 					public int size() {
@@ -317,9 +341,9 @@ public class LegendTableModel extends AbstractTableModel {
 					try {
 						data[rowIndex][unitCol] = StringUtil.toHTML(HTMLFormula.toHTML(list.get(rowIndex)
 								.getDerivedUnitDefinition()));
-					} catch (Exception e) {
+					} catch (Exception exc) {
 						data[rowIndex][unitCol] = "N/A";
-						// TODO make exception visible for the user
+						logger.fine(exc.getLocalizedMessage());
 					}
 				}
 			}
@@ -342,7 +366,6 @@ public class LegendTableModel extends AbstractTableModel {
 				fillData(model.getReaction(i), i + j, false);
 			}
 		}
-
 	}
 
 	/* (non-Javadoc)
@@ -397,7 +420,43 @@ public class LegendTableModel extends AbstractTableModel {
 	 * @param selected
 	 */
 	public void setSelected(int rowIndex, boolean selected) {
-		setValueAt(Boolean.valueOf(selected), rowIndex, getBooleanColumn());
+		setValueAt(Boolean.valueOf(selected), rowIndex, getColumnPlot());
+	}
+	
+	/**
+	 * 
+	 * @param selected
+	 */
+	public void setSelected(boolean selected) {
+	  for (int i = 0; i < getRowCount(); i++) {
+	    setSelected(i, selected);
+	  }
+	}
+	
+	/**
+	 * 
+	 * @param clazz
+	 * @param selected
+	 */
+	public void setSelected(Class<? extends NamedSBase> clazz, boolean selected) {
+	  int start = 0, end = 0;
+	  if (clazz.isAssignableFrom(Reaction.class)) {
+	    start = model.getNumSymbols();
+	    end = getRowCount();
+	  } else {
+	    if (clazz.isAssignableFrom(Compartment.class)) {
+	      end = model.getNumCompartments();
+	    } else if (clazz.isAssignableFrom(Parameter.class)) {
+	      start = model.getNumCompartments() + model.getNumSpecies();
+	      end = model.getNumSymbols();
+	    } else if (clazz.isAssignableFrom(Species.class)) {
+	      end = model.getNumSymbols() - 1;
+	      start = end - model.getNumSpecies();
+	    }
+	  }
+	  for (int i = start; i < end; i++) {
+	    setSelected(i, selected);
+	  }
 	}
 
 	/**
@@ -436,8 +495,18 @@ public class LegendTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-		data[rowIndex][columnIndex] = aValue;
-		fireTableCellUpdated(rowIndex, columnIndex);
+    if (columnIndex == getColumnPlot()) {
+      boolean plot = ((Boolean) getValueAt(rowIndex, getColumnPlot()))
+          .booleanValue();
+      boolean plotNew = ((Boolean) aValue).booleanValue();
+      if (plot && !plotNew && (selectedCount > 0)) {
+        selectedCount--;
+      } else if (!plot && plotNew && (selectedCount < getRowCount())) {
+        selectedCount++;
+      }
+    }
+    data[rowIndex][columnIndex] = aValue;
+    fireTableCellUpdated(rowIndex, columnIndex);
 	}
 
 }

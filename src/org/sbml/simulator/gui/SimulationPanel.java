@@ -131,12 +131,9 @@ public class SimulationPanel extends JPanel implements
     showSettingsPanel = true;
     this.listeners = new ArrayList<PropertyChangeListener>();
     if (SBMLsimulator.getAvailableSolvers().length == 0) {
-      JOptionPane
-          .showMessageDialog(
-            this,
-            StringUtil
-                .toHTML("Could not find any solvers for differential equation systems. A simulation is therefore not possible."),
-            "No ODE solver available", JOptionPane.WARNING_MESSAGE);
+      JOptionPane.showMessageDialog(this, StringUtil.toHTML(
+        "Could not find any solvers for differential equation systems. A simulation is therefore not possible."),
+        "No ODE solver available", JOptionPane.WARNING_MESSAGE);
     } else {
       try {
         if (model == null) {
@@ -187,11 +184,8 @@ public class SimulationPanel extends JPanel implements
     return foot;
   }
   
-  /*
-   * (non-Javadoc)
-   * 
-   * @see eva2.server.stat.InterfaceStatisticsListener#finalMultiRunResults(java
-   * .lang.String[], java.util.List)
+  /* (non-Javadoc)
+   * @see eva2.server.stat.InterfaceStatisticsListener#finalMultiRunResults(java.lang.String[], java.util.List)
    */
   public void finalMultiRunResults(String[] header,
     List<Object[]> multiRunFinalObjectData) {
@@ -348,11 +342,8 @@ public class SimulationPanel extends JPanel implements
     init();
   }
   
-  /*
-   * (non-Javadoc)
-   * 
-   * @see eva2.server.stat.InterfaceStatisticsListener#notifyGenerationPerformed
-   * (java.lang.String[], java.lang.Object[], java.lang.Double[])
+  /* (non-Javadoc)
+   * @see eva2.server.stat.InterfaceStatisticsListener#notifyGenerationPerformed(java.lang.String[], java.lang.Object[], java.lang.Double[])
    */
   public void notifyGenerationPerformed(String[] header, Object[] statObjects,
     Double[] statDoubles) {
@@ -369,12 +360,8 @@ public class SimulationPanel extends JPanel implements
     }
   }
   
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * eva2.server.stat.InterfaceStatisticsListener#notifyMultiRunFinished(java
-   * .lang.String[], java.util.List)
+  /* (non-Javadoc)
+   * @see eva2.server.stat.InterfaceStatisticsListener#notifyMultiRunFinished(java.lang.String[], java.util.List)
    */
   public boolean notifyMultiRunFinished(String[] header,
     List<Object[]> multiRunFinalObjectData) {
@@ -398,11 +385,8 @@ public class SimulationPanel extends JPanel implements
     this.selectedQuantityIds = selectedQuantityIds;
   }
   
-  /*
-   * (non-Javadoc)
-   * 
-   * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStarted(int,
-   * int, java.lang.String[], java.lang.String[])
+  /* (non-Javadoc)
+   * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStarted(int, int, java.lang.String[], java.lang.String[])
    */
   public void notifyRunStarted(int runNumber, int plannedMultiRuns,
     String[] header, String[] metaInfo) {
@@ -423,11 +407,8 @@ public class SimulationPanel extends JPanel implements
     }
   }
   
-  /*
-   * (non-Javadoc)
-   * 
-   * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStopped(int,
-   * boolean)
+  /* (non-Javadoc)
+   * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStopped(int, boolean)
    */
   public void notifyRunStopped(int runsPerformed, boolean completedLastRun) {
     System.out.println("notifyRunStopped");
@@ -566,12 +547,8 @@ public class SimulationPanel extends JPanel implements
     
   }
   
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent
-   * )
+  /* (non-Javadoc)
+   * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
    */
   public void propertyChange(PropertyChangeEvent evt) {
     if ("progress".equals(evt.getPropertyName())) {
@@ -591,33 +568,24 @@ public class SimulationPanel extends JPanel implements
     }
   }
   
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.sbml.simulator.math.odes.DESSolver#addPropertyChangedListener(java
-   * .beans.PropertyChangeListener)
+  /* (non-Javadoc)
+   * @see org.sbml.simulator.math.odes.DESSolver#addPropertyChangedListener(java.beans.PropertyChangeListener)
    */
   public void addPropertyChangedListener(PropertyChangeListener listener) {
     if (!listeners.contains(listener))
       this.listeners.add(listener);
   }
   
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.sbml.simulator.math.odes.DESSolver#removePropertyChangedListener(
-   * java.beans.PropertyChangeListener)
+  /* (non-Javadoc)
+   * @see org.sbml.simulator.math.odes.DESSolver#removePropertyChangedListener(java.beans.PropertyChangeListener)
    */
   public void removePropertyChangedListener(PropertyChangeListener listener) {
     if (listeners.contains(listener))
       this.listeners.remove(listener);
   }
   
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.sbml.simulator.math.odes.DESSolver#firePropertyChanged(double,
-   * double)
+  /* (non-Javadoc)
+   * @see org.sbml.simulator.math.odes.DESSolver#firePropertyChanged(double, double)
    */
   public void firePropertyChanged(PropertyChangeEvent evt) {
     if (!this.listeners.isEmpty()) {

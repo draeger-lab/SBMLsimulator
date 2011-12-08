@@ -8,17 +8,95 @@
 	   and the given value consists of the actual short name and - separated
 	   by a semicolon ";" the corresponding tool tip.
   </comment>
+      
+  <!-- COMPONENT -->
   
-  <!-- SimulatorOptions -->
+  <entry key="ALL">All components</entry>
+  <entry key="ALL_TOOLTIP">Selects all available components for the plot.</entry>
+  <entry key="COMPARTMENTS">Compartments</entry>
+  <entry key="COMPARTMENTS_TOOLTIP">Selects all compartments for the plot.</entry>
+  <entry key="SPECIES">Species</entry>
+  <entry key="SPECIES_TOOLTIP">If this option is selected, all species of the model are plotted.</entry>
+  <entry key="PARAMETERS">Parameters</entry>
+  <entry key="PARAMETERS_TOOLTIP">With this option you can plot the changes of all global parameters in the model.</entry>
+  <entry key="REACTIONS">Reactions</entry>
+  <entry key="REACTIONS_TOOLTIP">Select this option to plot the evolution of all flux values in the model.</entry>
+  <entry key="SELECT_ALL">Select</entry>
+  <entry key="SELECT_ALL_TOOLTIP">Select the components to be shown in the plot.</entry>
+  <entry key="SELECT_NONE">Deselect</entry>
+  <entry key="SELECT_NONE_TOOLTIP">Select the components to be excluded from the plot.</entry>
   
-  <entry key="TIME_SERIES_FILE">Time series data file</entry>
-  <entry key="TIME_SERIES_FILE_TOOLTIP">Path to a file with a time series of species/compartment/parameter values.</entry>
-  <entry key="SBML_FILE">SBML file</entry>
-  <entry key="SBML_FILE_TOOLTIP">Select a model in SBML format that is to be simulated.</entry>
-  <entry key="INPUT_FILES">Select input files</entry>
-  <entry key="INPUT_FILES_TOOLTIP">These options are used to select all input files for the simulation.</entry>
+  <!-- EstimationOptions -->
+    
+  <entry key="EST_ALL_COMPARTMENTS">Compartment sizes</entry>
+  <entry key="EST_ALL_COMPARTMENTS_TOOLTIP">Decide whether or not by default all compartments in a model should be considered the target of an optimization, i.e., value estimation.</entry>
+  <entry key="EST_ALL_GLOBAL_PARAMETERS">Global parameter values</entry>
+  <entry key="EST_ALL_GLOBAL_PARAMETERS_TOOLTIP">Decide whether or not by default all global parameters in a model should be considered the target of an optimization, i.e., value estimation.</entry>
+  <entry key="EST_ALL_LOCAL_PARAMETERS">Local parameter values</entry>
+  <entry key="EST_ALL_LOCAL_PARAMETERS_TOOLTIP">Decide whether or not by default all local parameters in a model should be considered the target of an optimization, i.e., value estimation.</entry>
+  <entry key="EST_ALL_SPECIES">Initial species values</entry>
+  <entry key="EST_ALL_SPECIES_TOOLTIP">Decide whether or not by default all species in a model should be considered the target of an optimization, i.e., value estimation.</entry>
+  <entry key="EST_INIT_MAX_VALUE">Upper bound of initial estimates</entry>
+  <entry key="EST_INIT_MAX_VALUE_TOOLTIP">The maximal value of the initialization range in a parameter estimation procedure.</entry>
+  <entry key="EST_INIT_MIN_VALUE">Lower bound of initial estimates</entry>
+  <entry key="EST_INIT_MIN_VALUE_TOOLTIP">The minimal value of the initialization range in a parameter estimation procedure.</entry>
+  <entry key="EST_MAX_VALUE">Upper bound for estimated values</entry>
+  <entry key="EST_MAX_VALUE_TOOLTIP">The maximal value in the absolute allowable range in a parameter estimation procedure.</entry>
+  <entry key="EST_MIN_VALUE">Lower bound for estimated values</entry>
+  <entry key="EST_MIN_VALUE_TOOLTIP">The minimal value in the absolute allowable range in a parameter estimation procedure.</entry>
+  <entry key="EST_MULTI_SHOOT">Use multiple shooting integration</entry>
+  <entry key="EST_MULTI_SHOOT_TOOLTIP">Decide whether a model calibration should be done using multiple shoot technique. This should be the default. The other possibility is the so-called single shoot technique. This means that only one initial value is taken to integrate the ordinary differential equation system, whereas the multiple shoot technique restarts the integration in each time step given the values in this step. The aim is then to come as close as possible to the start value in the next time step. In many cases the fitness landscape becomes much more friendly when using a multiple shoot strategy.</entry>
+  <entry key="OPTIMIZATION_TARGETS">Default optimization targets</entry>
+  <entry key="OPTIMIZATION_TARGETS_TOOLTIP">Select the default optimization targets.</entry>
+  <entry key="OPTIMIZATION_RANGES">Ranges of all optimization targets</entry>
+  <entry key="OPTIMIZATION_RANGES_TOOLTIP">Define the initial and absolute ranges of all optimization targets.</entry>
+  <entry key="INTEGRATION_STRATEGY">Integration strategy</entry>
+  <entry key="INTEGRATION_STRATEGY_TOOLTIP">Select whether or not to apply a multiple shooting strategy.</entry>
   
+  <!-- LegendTableCellRenderer -->
   
+  <entry key="RGB_TOOLTIP">Red = %d, Green = %d, Blue = %d</entry>
+  
+  <!-- LegendTableModel -->
+  
+  <entry key="PLOT_COLUMN">Plot</entry>
+  <entry key="COLOR_COLUMN">Color</entry>
+  <entry key="COMPONENT_COLUMN">Component</entry>
+  <entry key="UNIT_COLUMN">Unit</entry>
+  <entry key="UNKOWN_CLUMN_EXC">Only %d columns, no column %d</entry>
+    
+  <!-- Metrics -->
+  
+  <entry key="N_Metric">N-metric</entry>
+  <entry key="EuclideanDistance">Euclidean</entry>
+  <entry key="ManhattanDistance">Manhattan</entry>
+  <entry key="DISTANCE">distance</entry>
+  <entry key="RelativeSquaredError">Relative Squared Error</entry>
+  <entry key="EXPONENT">exponent</entry>
+  <entry key="PearsonCorrelation">Pearson's correlation coefficient</entry>
+  <entry key="RELATIVE">Relative</entry>
+  
+  <!-- Plot -->
+  
+  <entry key="PLOT_BACKGROUND_COLOR">Plot background color</entry>
+  <entry key="PLOT_BACKGROUND_COLOR_TOOLTIP">The background color of the plot</entry>
+  <entry key="PLOT_GRID_COLOR">Plot grid color</entry>
+  <entry key="PLOT_GRID_COLOR_TOOLTIP">The color of the plot's grid</entry>
+  <entry key="PLOT_TITLE"></entry>
+  <entry key="PLOT_TITLE_TOOLTIP">Set the title of the plot</entry>
+  <entry key="SHOW_PLOT_GRID">Grid</entry>
+  <entry key="SHOW_PLOT_GRID_TOOLTIP">Decide whether or not to draw a grid in the plot area.</entry>
+  <entry key="SHOW_PLOT_LEGEND">Legend</entry>
+  <entry key="SHOW_PLOT_LEGEND_TOOLTIP">Add or remove a legend in the plot.</entry>
+  <entry key="SHOW_PLOT_TOOLTIPS">Tool tips</entry>
+  <entry key="SHOW_PLOT_TOOLTIPS_TOOLTIP">Let the plot display tool tips for each curve.</entry>
+  <entry key="TITLE_OPTIONS">Plot title</entry>
+  <entry key="TITLE_OPTIONS_TOOLTIP">Adjust the tile for the plot</entry>
+  <entry key="BASE_OPTIONS">Plotting panel options</entry>
+  <entry key="BASE_OPTIONS_TOOLTIP">Options for the visible rect of the plot panel</entry>
+  <entry key="PLOT_APPEARANCE">Options for appearance of the Plot Area</entry>
+  <entry key="PLOT_APPEARANCE_TOOLTIP">Options for appearance of the Plot Area</entry>
+    
   <!-- SimulationOptions -->
   
   <entry key="SimulationOptions">Simulation options</entry>
@@ -49,82 +127,22 @@
   <entry key="SIMULATION_CONFIGURATION">Parameters for the simulation</entry>
   <entry key="SIMULATION_CONFIGURATION_TOOLTIP">Here you can specify parameters for the simulation of the model</entry>
     
-  <!-- EstimationOptions -->
-    
-  <entry key="EST_ALL_COMPARTMENTS">Compartment sizes</entry>
-  <entry key="EST_ALL_COMPARTMENTS_TOOLTIP">Decide whether or not by default all compartments in a model should be considered the target of an optimization, i.e., value estimation.</entry>
-  <entry key="EST_ALL_GLOBAL_PARAMETERS">Global parameter values</entry>
-  <entry key="EST_ALL_GLOBAL_PARAMETERS_TOOLTIP">Decide whether or not by default all global parameters in a model should be considered the target of an optimization, i.e., value estimation.</entry>
-  <entry key="EST_ALL_LOCAL_PARAMETERS">Local parameter values</entry>
-  <entry key="EST_ALL_LOCAL_PARAMETERS_TOOLTIP">Decide whether or not by default all local parameters in a model should be considered the target of an optimization, i.e., value estimation.</entry>
-  <entry key="EST_ALL_SPECIES">Initial species values</entry>
-  <entry key="EST_ALL_SPECIES_TOOLTIP">Decide whether or not by default all species in a model should be considered the target of an optimization, i.e., value estimation.</entry>
-  <entry key="EST_INIT_MAX_VALUE">Upper bound of initial estimates</entry>
-  <entry key="EST_INIT_MAX_VALUE_TOOLTIP">The maximal value of the initialization range in a parameter estimation procedure.</entry>
-  <entry key="EST_INIT_MIN_VALUE">Lower bound of initial estimates</entry>
-  <entry key="EST_INIT_MIN_VALUE_TOOLTIP">The minimal value of the initialization range in a parameter estimation procedure.</entry>
-  <entry key="EST_MAX_VALUE">Upper bound for estimated values</entry>
-  <entry key="EST_MAX_VALUE_TOOLTIP">The maximal value in the absolute allowable range in a parameter estimation procedure.</entry>
-  <entry key="EST_MIN_VALUE">Lower bound for estimated values</entry>
-  <entry key="EST_MIN_VALUE_TOOLTIP">The minimal value in the absolute allowable range in a parameter estimation procedure.</entry>
-  <entry key="EST_MULTI_SHOOT">Use multiple shooting integration</entry>
-  <entry key="EST_MULTI_SHOOT_TOOLTIP">Decide whether a model calibration should be done using multiple shoot technique. This should be the default. The other possibility is the so-called single shoot technique. This means that only one initial value is taken to integrate the ordinary differential equation system, whereas the multiple shoot technique restarts the integration in each time step given the values in this step. The aim is then to come as close as possible to the start value in the next time step. In many cases the fitness landscape becomes much more friendly when using a multiple shoot strategy.</entry>
-  <entry key="OPTIMIZATION_TARGETS">Default optimization targets</entry>
-  <entry key="OPTIMIZATION_TARGETS_TOOLTIP">Select the default optimization targets.</entry>
-  <entry key="OPTIMIZATION_RANGES">Ranges of all optimization targets</entry>
-  <entry key="OPTIMIZATION_RANGES_TOOLTIP">Define the initial and absolute ranges of all optimization targets.</entry>
-  <entry key="INTEGRATION_STRATEGY">Integration strategy</entry>
-  <entry key="INTEGRATION_STRATEGY_TOOLTIP">Select whether or not to apply a multiple shooting strategy.</entry>
-
-  <!-- Plot -->
+  <!-- SimulatorOptions -->
   
-  <entry key="PLOT_BACKGROUND_COLOR">Plot background color</entry>
-  <entry key="PLOT_BACKGROUND_COLOR_TOOLTIP">The background color of the plot</entry>
-  <entry key="PLOT_GRID_COLOR">Plot grid color</entry>
-  <entry key="PLOT_GRID_COLOR_TOOLTIP">The color of the plot's grid</entry>
-  <entry key="PLOT_TITLE"></entry>
-  <entry key="PLOT_TITLE_TOOLTIP">Set the title of the plot</entry>
-  <entry key="SHOW_PLOT_GRID">Grid</entry>
-  <entry key="SHOW_PLOT_GRID_TOOLTIP">Decide whether or not to draw a grid in the plot area.</entry>
-  <entry key="SHOW_PLOT_LEGEND">Legend</entry>
-  <entry key="SHOW_PLOT_LEGEND_TOOLTIP">Add or remove a legend in the plot.</entry>
-  <entry key="SHOW_PLOT_TOOLTIPS">Tool tips</entry>
-  <entry key="SHOW_PLOT_TOOLTIPS_TOOLTIP">Let the plot display tool tips for each curve.</entry>
-  <entry key="TITLE_OPTIONS">Plot title</entry>
-  <entry key="TITLE_OPTIONS_TOOLTIP">Adjust the tile for the plot</entry>
-  <entry key="BASE_OPTIONS">Plotting panel options</entry>
-  <entry key="BASE_OPTIONS_TOOLTIP">Options for the visible rect of the plot panel</entry>
-  <entry key="PLOT_APPEARANCE">Options for appearance of the Plot Area</entry>
-  <entry key="PLOT_APPEARANCE_TOOLTIP">Options for appearance of the Plot Area</entry>
+  <entry key="TIME_SERIES_FILE">Time series data file</entry>
+  <entry key="TIME_SERIES_FILE_TOOLTIP">Path to a file with a time series of species/compartment/parameter values.</entry>
+  <entry key="SBML_FILE">SBML file</entry>
+  <entry key="SBML_FILE_TOOLTIP">Select a model in SBML format that is to be simulated.</entry>
+  <entry key="INPUT_FILES">Select input files</entry>
+  <entry key="INPUT_FILES_TOOLTIP">These options are used to select all input files for the simulation.</entry>
   
-  <!-- Metrics -->
+  <!-- SimulatorUI -->
   
-  <entry key="N_Metric">N-metric</entry>
-  <entry key="EuclideanDistance">Euclidean</entry>
-  <entry key="ManhattanDistance">Manhattan</entry>
-  <entry key="DISTANCE">distance</entry>
-  <entry key="RelativeSquaredError">Relative Squared Error</entry>
-  <entry key="EXPONENT">exponent</entry>
-  <entry key="PearsonCorrelation">Pearson's correlation coefficient</entry>
-  <entry key="RELATIVE">Relative</entry>
-  
-  <!-- LegendPanel -->
-  
-  <entry key="COMPARTMENTS">Compartments</entry>
-  <entry key="COMPARTMENTS_TOOLTIP">Selects all compartments for the plot.</entry>
-  <entry key="SPECIES">Species</entry>
-  <entry key="SPECIES_TOOLTIP">If this option is selected, all species of the model are plotted.</entry>
-  <entry key="PARAMETERS">Parameters</entry>
-  <entry key="PARAMETERS_TOOLTIP">With this option you can plot the changes of all global parameters in the model.</entry>
-  <entry key="REACTIONS">Reactions</entry>
-  <entry key="REACTIONS_TOOLTIP">Select this option to plot the evolution of all flux values in the model.</entry>
-  
-  <!-- LegendTableModel -->
-  
-  <entry key="PLOT_COLUMN">Plot</entry>
-  <entry key="COLOR_COLUMN">Color</entry>
-  <entry key="COMPONENT_COLUMN">Component</entry>
-  <entry key="UNIT_COLUMN">Unit</entry>
-  <entry key="UNKOWN_CLUMN_EXC">Only %d columns, no column %d</entry>
+  <entry key="OPTIMIZATION">Optimization</entry>
+  <entry key="OPTIMIZATION_TOOLTIP">Launch the optimization of the quantities in the current model, i.e., fits the model to given experimental data.</entry>
+  <entry key="SHOW_OPTIONS">Show options</entry>
+  <entry key="SHOW_OPTIONS_TOOLTIP">Decide whether or not to display the options.</entry>
+  <entry key="SIMULATION_START">Start simulation</entry>
+  <entry key="SIMULATION_START_TOOLTIP">Performs a dynamic simulation run with the current settings.</entry>
   
 </properties>

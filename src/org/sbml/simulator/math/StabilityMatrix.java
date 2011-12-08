@@ -81,7 +81,24 @@ public class StabilityMatrix extends Matrix {
 		super(array, m, n);
 	}
 	
-	/**
+	/* (non-Javadoc)
+   * @see eva2.tools.math.Jama.Matrix#transpose()
+   */
+  @Override
+  public StabilityMatrix transpose() {
+    int m=this.getRowDimension();
+    int n= this.getColumnDimension();
+    StabilityMatrix X = new StabilityMatrix(n,m);
+    double[][] C = X.getArray();
+    for (int i = 0; i < m; i++) {
+       for (int j = 0; j < n; j++) {
+          C[j][i] = this.get(i, j);
+       }
+    }
+    return X;
+  }
+
+  /**
 	 * Returns the real part of the eigenvalues of this matrix
 	 * 
 	 * @return array with the eigenvalues
