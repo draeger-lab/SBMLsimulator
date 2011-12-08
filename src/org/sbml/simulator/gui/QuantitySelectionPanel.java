@@ -25,6 +25,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.LinkedList;
+import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -47,8 +48,10 @@ import org.sbml.jsbml.util.StringTools;
 import org.sbml.jsbml.util.compilers.HTMLFormula;
 import org.sbml.optimization.QuantityRange;
 
+import de.zbit.gui.ActionCommand;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;
+import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
 import de.zbit.util.ValuePair;
 
@@ -59,6 +62,42 @@ import de.zbit.util.ValuePair;
  * @since 1.0
  */
 public class QuantitySelectionPanel extends JPanel implements ActionListener {
+  
+  /**
+   * 
+   */
+  private static final transient ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
+  
+  /**
+   * @author Andreas Dr&auml;ger
+   * @date 2010-09-08
+   * @version $Rev$
+   * @since 1.0
+   */
+  public static enum SelectionCommand implements ActionCommand {
+    /**
+     * Action to select all elements of one group
+     */
+    OPTIMIZE_ALL,
+    /**
+     * Action to deselect all elements of one group
+     */
+    OPTIMIZE_NONE;
+
+    /* (non-Javadoc)
+     * @see de.zbit.gui.ActionCommand#getName()
+     */
+    public String getName() {
+      return bundle.getString(toString());
+    }
+
+    /* (non-Javadoc)
+     * @see de.zbit.gui.ActionCommand#getToolTip()
+     */
+    public String getToolTip() {
+      return bundle.getString(toString() + "_TOOLTIP");
+    }
+  }
 	
 	/**
 	 * A data structure that contains all necessary information for one
@@ -78,18 +117,18 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		private static final long serialVersionUID = -1190252378673523294L;
 		
 		/**
-	 * 
-	 */
+		 * 
+		 */
 		private Quantity quantity;
 		
 		/**
-	 * 
-	 */
+		 * 
+		 */
 		private JCheckBox checkbox;
 		
 		/**
-	 * 
-	 */
+		 * 
+		 */
 		private JSpinner minSpinner, maxSpinner, minInitSpinner, maxInitSpinner;
 		
 		/**
@@ -443,12 +482,12 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		boolean select;
 		Dimension d = (Dimension) button.getPreferredSize().clone();
 		switch (SelectionCommand.valueOf(e.getActionCommand())) {
-			case ALL:
+			case OPTIMIZE_ALL:
 				select = true;
 				selectAllButtons[i].setEnabled(false);
 				deselectAllButtons[i].setEnabled(true);
 				break;
-			case NONE:
+			case OPTIMIZE_NONE:
 				select = false;
 				selectAllButtons[i].setEnabled(true);
 				deselectAllButtons[i].setEnabled(false);
@@ -473,11 +512,11 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	 */
 	private Component createButtonPanel(int buttonIndex, boolean select) {
 		JButton selectAllButton = GUITools.createButton(
-			SelectionCommand.ALL.getText(), null, this, SelectionCommand.ALL,
-			SelectionCommand.ALL.getToolTip());
+			SelectionCommand.OPTIMIZE_ALL.getName(), null, this, SelectionCommand.OPTIMIZE_ALL,
+			SelectionCommand.OPTIMIZE_ALL.getToolTip());
 		JButton deselectAllButton = GUITools.createButton(
-			SelectionCommand.NONE.getText(), null, this, SelectionCommand.NONE,
-			SelectionCommand.NONE.getToolTip());
+			SelectionCommand.OPTIMIZE_NONE.getName(), null, this, SelectionCommand.OPTIMIZE_NONE,
+			SelectionCommand.OPTIMIZE_NONE.getToolTip());
 		selectAllButton.setEnabled(!select);
 		deselectAllButton.setEnabled(select);
 		selectAllButton.setPreferredSize(deselectAllButton.getPreferredSize());
@@ -534,8 +573,8 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		for (Quantity q : listOfQuantities) {
 			isLocalParameter |= q instanceof LocalParameter;
 			select = isLocalParameter || (q instanceof Parameter);
-			JCheckBox chck = new JCheckBox(q.isSetName() ? q.getName() : q.getId(),
-				select);
+      JCheckBox chck = new JCheckBox(StringUtil.toHTML(q.isSetName() ? q
+          .getName() : q.getId(), 25), select);
 			
 			// Initialization
 			JSpinner minInit = new JSpinner(new SpinnerNumberModel(initMinValue,

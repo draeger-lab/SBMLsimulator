@@ -34,6 +34,7 @@ import org.sbml.jsbml.Model;
 import org.sbml.jsbml.UnitDefinition;
 import org.sbml.simulator.gui.plot.Plot;
 import org.sbml.simulator.gui.plot.PlotOptions;
+import org.sbml.simulator.gui.table.LegendTableModel;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.util.StringUtil;
@@ -197,9 +198,10 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 		String infos[] = new String[data.getColumnCount() - 1];
 		for (int i = 0; i < data.getColumnCount() - 1; i++) {
 			name = data.getColumnName(i + 1);
-			if (legendPanel.isSelected(name)) {
-				plotColors[i] = legendPanel.getColorFor(name);
-				infos[i] = legendPanel.getNameFor(name);
+			LegendTableModel tableModel = legendPanel.getLegendTableModel();
+			if (tableModel.isSelected(name)) {
+				plotColors[i] = tableModel.getColorFor(name);
+				infos[i] = tableModel.getNameFor(name);
 			}
 		}
 		if (clearFirst) {
