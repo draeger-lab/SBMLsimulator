@@ -96,6 +96,13 @@
   <entry key="BASE_OPTIONS_TOOLTIP">Options for the visible rect of the plot panel</entry>
   <entry key="PLOT_APPEARANCE">Options for appearance of the Plot Area</entry>
   <entry key="PLOT_APPEARANCE_TOOLTIP">Options for appearance of the Plot Area</entry>
+  
+  <!-- SelectionCommand -->
+  
+  <entry key="OPTIMIZE_ALL">Select all</entry>
+  <entry key="OPTIMIZE_ALL_TOOLTIP">With this button you can easily select all elements on this panel</entry>
+  <entry key="OPTIMIZE_NONE">Select none</entry>
+  <entry key="OPTIMIZE_NONE_TOOLTIP">With this button you can easily deselect all elements on this panel.</entry>
     
   <!-- SimulationOptions -->
   
