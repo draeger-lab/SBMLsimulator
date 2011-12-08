@@ -19,10 +19,13 @@ package org.sbml.simulator.gui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.util.ResourceBundle;
 
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
+
+import de.zbit.util.ResourceManager;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -33,6 +36,12 @@ import javax.swing.table.TableCellRenderer;
 public class LegendTableCellRenderer extends JLabel implements
 		TableCellRenderer {
 
+  /**
+   * The resource bundle to be used to display texts to a user.
+   */
+  private static final transient ResourceBundle bundle = ResourceManager
+      .getBundle("org.sbml.simulator.locales.Simulator");
+  
 	/**
 	 * Generated serial version identifier.
 	 */
@@ -46,21 +55,18 @@ public class LegendTableCellRenderer extends JLabel implements
 		setOpaque(true);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * javax.swing.table.TableCellRenderer#getTableCellRendererComponent(javax
-	 * .swing.JTable, java.lang.Object, boolean, boolean, int, int)
+	/* (non-Javadoc)
+	 * @see javax.swing.table.TableCellRenderer#getTableCellRendererComponent(javax.swing.JTable, java.lang.Object, boolean, boolean, int, int)
 	 */
 	public Component getTableCellRendererComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus, int row, int column) {
 		setBackground(Color.WHITE);
 		if (value instanceof Color) {
 			Color newColor = (Color) value;
-			setToolTipText("RGB value: " + newColor.getRed() + ", "
-					+ newColor.getGreen() + ", " + newColor.getBlue());
+      setToolTipText(String.format(bundle.getString("RGB_TOOLTIP"), newColor
+          .getRed(), newColor.getGreen(), newColor.getBlue()));
 			setBackground(newColor);
+			setForeground(newColor);
 		}
 		
 		return this;

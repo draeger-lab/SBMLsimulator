@@ -31,6 +31,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.net.URL;
+import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
@@ -46,15 +47,13 @@ import javax.swing.UIManager;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLDocument;
+import org.sbml.jsbml.SBMLReader;
+import org.sbml.jsbml.SBMLWriter;
 import org.sbml.jsbml.util.StringTools;
-import org.sbml.jsbml.xml.stax.SBMLReader;
-import org.sbml.jsbml.xml.stax.SBMLWriter;
 import org.sbml.optimization.EvA2GUIStarter;
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.SBMLsimulator;
-import org.sbml.simulator.SimulationOptions;
-import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.tolatex.LaTeXOptions;
 import org.simulator.math.odes.MultiTable;
 
@@ -68,8 +67,8 @@ import de.zbit.gui.ProgressBarSwing;
 import de.zbit.io.SBFileFilter;
 import de.zbit.sbml.gui.SBMLModelSplitPane;
 import de.zbit.util.AbstractProgressBar;
+import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
-import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.SBPreferences;
 import eva2.EvAInfo;
 import eva2.client.EvAClient;
@@ -87,8 +86,8 @@ import eva2.tools.BasicResourceLoader;
  */
 public class SimulatorUI extends BaseFrame implements ItemListener,
     PropertyChangeListener {
-
-	/**
+  
+  /**
 	 * Commands that can be understood by this dialog.
 	 * 
 	 * @author Andreas Dr&auml;ger
@@ -111,49 +110,37 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 		 */
 		SIMULATION_START;
 
-		/*
-		 * (non-Javadoc)
-		 * 
+		/* (non-Javadoc)
 		 * @see de.zbit.gui.ActionCommand#getName()
 		 */
-		public String getName() {
-			switch (this) {
-			case OPTIMIZATION:
-				return "Optimization";
-			case SHOW_OPTIONS:
-				return "Show options";
-			case SIMULATION_START:
-				return "Start simulation";
-			default:
-				return StringUtil.firstLetterUpperCase(toString().replace('_',
-						' '));
-			}
-		}
+    public String getName() {
+      String elem = toString();
+      if (bundle.containsKey(elem)) {
+        return bundle.getString(elem);
+      }
+      return StringUtil.firstLetterUpperCase(elem.replace('_', ' '));
+    }
 
-		/*
-		 * (non-Javadoc)
-		 * 
+		/* (non-Javadoc)
 		 * @see de.zbit.gui.ActionCommand#getToolTip()
 		 */
-		public String getToolTip() {
-			switch (this) {
-			case OPTIMIZATION:
-				return "Launches the optimization of the quantities in the current model.";
-				// "Starts the optimization of the model with respect to given experimental data."
-			case SHOW_OPTIONS:
-				return "Decide whether or not to display the options.";
-			case SIMULATION_START:
-				return "Starts the dynamic simulation.";
-				// "Perform a simulation run with the current settings."
-			default:
-				return StringUtil.firstLetterUpperCase(toString().replace('_',
-						' '));
-			}
-		}
+    public String getToolTip() {
+      String elem = toString() + "_TOOLTIP";
+      if (bundle.containsKey(elem)) {
+        return bundle.getString(elem);
+      }
+      return StringUtil.firstLetterUpperCase(toString().replace('_', ' '));
+    }
 	}
 
 	/**
-   * 
+   * The resource bundle to be used to display texts to a user.
+   */
+  private static final transient ResourceBundle bundle = ResourceManager
+      .getBundle("org.sbml.simulator.locales.Simulator");
+
+	/**
+   * A {@link Logger} for this class.
    */
 	private static final Logger logger = Logger.getLogger(SimulatorUI.class
 			.getName());
@@ -163,15 +150,40 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	 */
 	private static final long serialVersionUID = -5289766427756813972L;
 
+	/**
+	 * @return
+	 */
+	public static ImageIcon getIconCamera() {
+		return new ImageIcon(SimulatorUI.class.getResource("img/camera_16.png"));
+	}
+
+	/**
+	 * @return
+	 */
+	public static ImageIcon getIconEvA2() {
+		BasicResourceLoader rl = BasicResourceLoader.instance();
+		byte[] bytes = rl.getBytesFromResourceLocation(EvAInfo.iconLocation, true);
+		return new ImageIcon(Toolkit.getDefaultToolkit().createImage(bytes));
+	}
+
+	/**
+	 * 
+	 */
 	private Model model;
 
+	/**
+	 * 
+	 */
 	private QuantitySelectionPanel panel;
 
 	/**
 	 * GUI element that lets the user run the simulation.
 	 */
 	private SimulationPanel simPanel;
-
+	
+	/**
+	 * 
+	 */
 	private long simulationTime;
 
 	/**
@@ -188,7 +200,6 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	public SimulatorUI(AppConf appConf) {
 		super(appConf);
 		loadPreferences();
-		setOptimalSize();
 		GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.EDIT_MODEL,
 				Command.SIMULATION_START);
 		setStatusBarToMemoryUsage();
@@ -202,7 +213,80 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 		this();
 		openModel(model);
 	}
-	
+
+	/* (non-Javadoc)
+	 * @see de.zbit.gui.BaseFrame#additionalEditMenuItems()
+	 */
+	@Override
+  protected JMenuItem[] additionalEditMenuItems() {
+    JMenuItem editModel = GUITools.createJMenuItem(EventHandler.create(
+      ActionListener.class, this, "editModel"), Command.EDIT_MODEL, UIManager
+        .getIcon("ICON_PENCIL_16"), 'M');
+    JMenuItem simulation = GUITools.createJMenuItem(EventHandler.create(
+      ActionListener.class, this, "simulate"), Command.SIMULATION_START,
+      UIManager.getIcon("ICON_GEAR_16"), 'S');
+    JMenuItem optimization = GUITools.createJMenuItem(EventHandler.create(
+      ActionListener.class, this, "optimize"), Command.OPTIMIZATION,
+      getIconEvA2(), 'O');
+    optimization.setEnabled(false);
+    JCheckBoxMenuItem item = new JCheckBoxMenuItem("Show options",
+      simPanel != null ? simPanel.isShowSettingsPanel() : true);
+    if (simPanel == null) {
+      item.setEnabled(false);
+    }
+    item.setActionCommand(Command.SHOW_OPTIONS.toString());
+    item.addItemListener(this);
+    return new JMenuItem[] { editModel, simulation, optimization, item };
+  }
+
+	/* (non-Javadoc)
+	 * @see de.zbit.gui.BaseFrame#closeFile()
+	 */
+	public boolean closeFile() {
+	  boolean retVal = false;
+		if (simPanel != null) {
+			if (simPanel.isSetExperimentalData()) {
+				simPanel.closeExperimentalData();
+				GUITools.setEnabled(false, getJMenuBar(), toolBar,
+						Command.OPTIMIZATION, BaseAction.FILE_SAVE);
+			} else {
+				getContentPane().remove(simPanel);
+				simPanel = null;
+				GUITools.setEnabled(false, getJMenuBar(), toolBar,
+						BaseAction.FILE_CLOSE, BaseAction.FILE_SAVE,
+						Command.EDIT_MODEL, Command.SIMULATION_START);
+				setTitle(getApplicationName());
+			}
+			GUITools.setEnabled(true, getJMenuBar(), toolBar,
+					BaseAction.FILE_OPEN);
+			retVal = true;
+		}
+		if (simPanel == null) {
+			GUITools.setEnabled(false, getJMenuBar(), toolBar,
+					Command.SHOW_OPTIONS, BaseAction.FILE_SAVE);
+			retVal = true;
+		}
+		if (retVal) {
+		  repaint();
+		}
+		return retVal;
+	}
+
+	/* (non-Javadoc)
+	 * @see de.zbit.gui.BaseFrame#createJToolBar()
+	 */
+	protected JToolBar createJToolBar() {
+		return createDefaultToolBar();
+	}
+
+	/* (non-Javadoc)
+	 * @see de.zbit.gui.BaseFrame#createMainComponent()
+	 */
+	protected Component createMainComponent() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	/**
 	 * 
 	 */
@@ -232,104 +316,6 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	}
 
 	/* (non-Javadoc)
-	 * @see de.zbit.gui.BaseFrame#additionalEditMenuItems()
-	 */
-	@Override
-  protected JMenuItem[] additionalEditMenuItems() {
-    JMenuItem editModel = GUITools.createJMenuItem(EventHandler.create(
-      ActionListener.class, this, "editModel"), Command.EDIT_MODEL, UIManager
-        .getIcon("ICON_PENCIL_16"), 'M');
-    JMenuItem simulation = GUITools.createJMenuItem(EventHandler.create(
-      ActionListener.class, this, "simulate"), Command.SIMULATION_START,
-      UIManager.getIcon("ICON_GEAR_16"), 'S');
-    JMenuItem optimization = GUITools.createJMenuItem(EventHandler.create(
-      ActionListener.class, this, "optimize"), Command.OPTIMIZATION,
-      getIconEvA2(), 'O');
-    optimization.setEnabled(false);
-    JCheckBoxMenuItem item = new JCheckBoxMenuItem("Show options",
-      simPanel != null ? simPanel.isShowSettingsPanel() : true);
-    if (simPanel == null) {
-      item.setEnabled(false);
-    }
-    item.setActionCommand(Command.SHOW_OPTIONS.toString());
-    item.addItemListener(this);
-    return new JMenuItem[] { editModel, simulation, optimization, item };
-  }
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see de.zbit.gui.BaseFrame#closeFile()
-	 */
-	@Override
-	public boolean closeFile() {
-		if (simPanel != null) {
-			if (simPanel.isSetExperimentalData()) {
-				simPanel.closeExperimentalData();
-				GUITools.setEnabled(false, getJMenuBar(), toolBar,
-						Command.OPTIMIZATION, BaseAction.FILE_SAVE);
-			} else {
-				getContentPane().remove(simPanel);
-				simPanel = null;
-				GUITools.setEnabled(false, getJMenuBar(), toolBar,
-						BaseAction.FILE_CLOSE, BaseAction.FILE_SAVE,
-						Command.EDIT_MODEL, Command.SIMULATION_START);
-				setOptimalSize();
-				setTitle(getApplicationName());
-			}
-			GUITools.setEnabled(true, getJMenuBar(), toolBar,
-					BaseAction.FILE_OPEN);
-		}
-		if (simPanel == null) {
-			GUITools.setEnabled(false, getJMenuBar(), toolBar,
-					Command.SHOW_OPTIONS, BaseAction.FILE_SAVE);
-		}
-		return false;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see de.zbit.gui.BaseFrame#createJToolBar()
-	 */
-	@Override
-	protected JToolBar createJToolBar() {
-		return createDefaultToolBar();
-	}
-
-	@Override
-	protected Component createMainComponent() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see de.zbit.gui.BaseFrame#exit()
-	 */
-	@Override
-	public void exit() {
-		StringBuilder exception = new StringBuilder();
-    for (Class<? extends KeyProvider> clazz : new Class[] {
-        SimulationOptions.class, PlotOptions.class }) {
-      SBPreferences prefs = SBPreferences.getPreferencesFor(clazz);
-      try {
-        prefs.flush();
-      } catch (Exception exc) {
-        exception.append(exc.getLocalizedMessage());
-        exception.append('\n');
-      }
-    }
-		if (exception.length() > 0) {
-			GUITools.showErrorMessage(this, exception.toString());
-		}
-		dispose();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see de.zbit.gui.BaseFrame#getApplicationName()
 	 */
 	@Override
@@ -337,38 +323,29 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 		return SBMLsimulator.class.getSimpleName();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrame#getURLAboutMessage()
 	 */
 	public URL getURLAboutMessage() {
 		return getClass().getResource("html/about.html");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrame#getURLLicense()
 	 */
 	public URL getURLLicense() {
 		return getClass().getResource("html/License.html");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrame#getURLOnlineHelp()
 	 */
 	public URL getURLOnlineHelp() {
 		return getClass().getResource("html/online-help.html");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
+	/* (non-Javadoc)
+	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
 	 */
 	public void itemStateChanged(ItemEvent e) {
 		if (e.getSource() instanceof JCheckBoxMenuItem) {
@@ -388,6 +365,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 		if (simPanel != null) {
 			try {
 				simPanel.loadPreferences();
+				validate();
 			} catch (Exception exc) {
 				GUITools.showErrorMessage(this, exc);
 			}
@@ -446,9 +424,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 		openExperimentalData(new File(path));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrame#openFile(java.io.File[])
 	 */
 	protected File[] openFile(File... files) {
@@ -484,29 +460,23 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	 * @param file
 	 */
 	public File[] openModel(File file) {
-		if (file != null) {
-			try {
-				SBMLReader reader = new SBMLReader();
-				SBMLDocument doc = reader.readSBML(file);
-				if ((doc != null) && (doc.isSetModel())) {
-					SBPreferences prefs = SBPreferences
-							.getPreferencesFor(GUIOptions.class);
-					prefs.put(GUIOptions.OPEN_DIR, file.getParent());
-					openModel(doc.getModel());
-					setTitle(getApplicationName() + " - " + file.getName());
-					return new File[] { file };
-				}
-				JOptionPane.showMessageDialog(
-						this,
-						StringUtil.toHTML(
-								"Could not open model "
-										+ file.getAbsolutePath(), 60));
-			} catch (Exception exc) {
-				GUITools.showErrorMessage(this, exc);
-			} finally {
-				// setStatusBarToMemoryUsage();
-			}
-		}
+    try {
+      SBMLDocument doc = SBMLReader.read(file);
+      if ((doc != null) && (doc.isSetModel())) {
+        SBPreferences prefs = SBPreferences.getPreferencesFor(GUIOptions.class);
+        prefs.put(GUIOptions.OPEN_DIR, file.getParent());
+        setTitle(getApplicationName() + " - " + file.getName());
+        openModel(doc.getModel());
+        return new File[] { file };
+      }
+      JOptionPane.showMessageDialog(this, StringUtil.toHTML(
+        "Could not open model " + file.getAbsolutePath(),
+        GUITools.TOOLTIP_LINE_LENGTH));
+    } catch (Exception exc) {
+      GUITools.showErrorMessage(this, exc);
+    } finally {
+      // setStatusBarToMemoryUsage();
+    }
 		return null;
 	}
 
@@ -514,12 +484,16 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	 * @param model
 	 */
 	public void openModel(Model model) {
+    if (model.isSetName() || model.isSetId()) {
+      setTitle(getApplicationName() + " - "
+          + (model.isSetName() ? model.getName() : model.getId()));
+    }
 		simPanel = new SimulationPanel(model);
 		if (GUITools.contains(getContentPane(), simPanel)) {
 			getContentPane().remove(simPanel);
 		}
 		getContentPane().add(simPanel, BorderLayout.CENTER);
-		setOptimalSize();
+		validate();
 		GUITools.setEnabled(true, getJMenuBar(), toolBar,
 			BaseAction.FILE_SAVE, Command.EDIT_MODEL,
 			Command.SIMULATION_START, Command.SHOW_OPTIONS);
@@ -575,9 +549,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrame#preferences()
 	 */
 	@Override
@@ -593,9 +565,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 		return status;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.
 	 * PropertyChangeEvent)
 	 */
@@ -625,9 +595,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrame#saveFile()
 	 */
 	public void saveFile() {
@@ -659,21 +627,6 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 			} catch (Exception exc) {
 				GUITools.showErrorMessage(this, exc);
 			}
-		}
-	}
-
-	/**
-	 * Resizes this {@link JFrame} to an appropriate size.
-	 */
-	private void setOptimalSize() {
-		pack();
-		setMinimumSize(new Dimension(640, 480));
-		int maxSize = 700;
-		if (getWidth() > 1.5d * maxSize) {
-			this.setSize((int) Math.round(1.5d * maxSize), getHeight());
-		}
-		if (getHeight() > maxSize) {
-			this.setSize(getWidth(), maxSize);
 		}
 	}
 
@@ -730,9 +683,8 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 			GUITools.showErrorMessage(this, exc);
 		}
 	}
-
-	/*
-	 * (non-Javadoc)
+	
+	/* (non-Javadoc)
 	 * @see java.awt.event.WindowListener#windowClosing(java.awt.event.WindowEvent)
 	 */
 	public void windowClosing(WindowEvent e) {
@@ -748,22 +700,6 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 			}
 		}
 		logger.finer("Clicked OK/Cancel");
-	}
-
-	/**
-	 * @return
-	 */
-	public static ImageIcon getIconEvA2() {
-		BasicResourceLoader rl = BasicResourceLoader.instance();
-		byte[] bytes = rl.getBytesFromResourceLocation(EvAInfo.iconLocation, true);
-		return new ImageIcon(Toolkit.getDefaultToolkit().createImage(bytes));
-	}
-	
-	/**
-	 * @return
-	 */
-	public static ImageIcon getIconCamera() {
-		return new ImageIcon(SimulatorUI.class.getResource("img/camera_16.png"));
 	}
 	
 }

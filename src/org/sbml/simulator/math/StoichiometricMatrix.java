@@ -383,7 +383,7 @@ public class StoichiometricMatrix extends StabilityMatrix {
 	private void calculateSteadyStateFluxes() {
 		SingularValueDecomposition svd = new SingularValueDecomposition(this);
 		int rank = svd.rank();
-
+        
 		steadyStateFluxes = new StabilityMatrix(this.getColumnDimension(),
 				this.getColumnDimension() - rank);
 		Matrix V = svd.getV();

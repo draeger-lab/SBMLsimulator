@@ -19,13 +19,20 @@
     
   <!-- Plot -->
   
-  <entry key="SIM:0000002">Log-Skala</entry>
-  <entry key="SIM:0000003">Gitter</entry>
-  <entry key="SIM:0000004">Legende</entry>
-  <entry key="SIM:0000005">Hilfstexte</entry>
-  <entry key="SIM:0000006">Klicken Sie hier, wenn die Ordinatenaxe in a logarithmischen Skala gezeichnet werden soll. Dies ist jedoch nur dann möglich, wenn ausschließlich Werte größer null vorkommen.</entry>
-  <entry key="SIM:0000007">Entscheiden Sie, ob Gitternetzlinien in das Koordinatensystem eingezeichnet werden sollen.</entry>
-  <entry key="SIM:0000008">Diese Option fügt eine Legende im Koordinatensystem ein oder entfernt diese.</entry>
-  <entry key="SIM:0000009">Hier kann festgelegt werden, ob an den einzelnen Kurven bzw. Punkten im Koordinatensystem Hilfstexte eingeblendet werden sollen.</entry>
+  <entry key="SHOW_PLOT_GRID">Gitter</entry>
+  <entry key="SHOW_PLOT_GRID_TOOLTIP">Entscheiden Sie, ob Gitternetzlinien in das Koordinatensystem eingezeichnet werden sollen.</entry>
+  <entry key="SHOW_PLOT_LEGEND">Legende</entry>
+  <entry key="SHOW_PLOT_LEGEND_TOOLTIP">Diese Option fügt eine Legende im Koordinatensystem ein oder entfernt diese.</entry>
+  <entry key="SHOW_PLOT_TOOLTIPS">Hilfstexte</entry>
+  <entry key="SHOW_PLOT_TOOLTIPS_TOOLTIP">Hier kann festgelegt werden, ob an den einzelnen Kurven bzw. Punkten im Koordinatensystem Hilfstexte eingeblendet werden sollen.</entry>
+  
+    
+  <!-- LegendTableModel -->
+  
+  <entry key="PLOT_COLUMN">Darstellen</entry>
+  <entry key="COLOR_COLUMN">Farbe</entry>
+  <entry key="COMPONENT_COLUMN">Komponente</entry>
+  <entry key="UNIT_COLUMN">Einheit</entry>
+  <entry key="UNKOWN_CLUMN_EXC">Es gibt lediglich %d Spalten, also keine Spalte %d.</entry>
   
 </properties>
