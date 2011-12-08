@@ -56,6 +56,9 @@ import de.zbit.util.StringUtil;
 import de.zbit.util.ValuePair;
 
 /**
+ * With this element the user can decide which model components should be
+ * estimated in an optimization run.
+ * 
  * @author Andreas Dr&auml;ger
  * @date 2010-09-08
  * @version $Rev$

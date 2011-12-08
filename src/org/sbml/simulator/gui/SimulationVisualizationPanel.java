@@ -27,6 +27,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
@@ -244,7 +245,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	/**
 	 * @param model
 	 */
-	public void setModel(Model model) {
+	public void setModel(final Model model) {
 		if (leftComponent != null) {
 			remove(leftComponent);
 		}
@@ -269,9 +270,18 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 				paramStepSize);
 		interactiveScanPanel
 				.setBorder(BorderFactory.createLoweredBevelBorder());
-		legendPanel = new LegendPanel(model, includeReactions);
-		legendPanel.addTableModelListener(this);
-		legendPanel.setBorder(BorderFactory.createLoweredBevelBorder());
+		final LegendPanel legendPanel = new LegendPanel();
+		final TableModelListener listener = this;
+		SwingUtilities.invokeLater(new Runnable() {
+		  /* (non-Javadoc)
+		   * @see java.lang.Runnable#run()
+		   */
+      public void run() {
+        legendPanel.init(model, includeReactions);
+        legendPanel.addTableModelListener(listener);
+        legendPanel.setBorder(BorderFactory.createLoweredBevelBorder());
+      }
+    });
 		JSplitPane topDown = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true,
 				legendPanel, interactiveScanPanel);
 		topDown.setDividerLocation(topDown.getDividerLocation() + 200);

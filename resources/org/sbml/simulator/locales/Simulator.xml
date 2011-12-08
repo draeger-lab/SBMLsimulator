@@ -26,6 +26,13 @@
   <entry key="SELECT_NONE">Deselect</entry>
   <entry key="SELECT_NONE_TOOLTIP">Select the components to be excluded from the plot.</entry>
   
+  <!-- CSVDataImporter -->
+  
+  <entry key="FILE_NOT_CORRECTLY_FORMATTED">Unreadable file</entry>
+  <entry key="FILE_NOT_CORRECTLY_FORMATTED_TOOLTIP">Cannot read this format, because no column identifiers are provided.</entry>
+  <entry key="ADDITIONAL_COLUMNS_ARE_IGNORED">Some elements are ignored</entry>
+  <entry key="ADDITIONAL_COLUMNS_ARE_IGNORED_TOOLTIP">The data file contains some elements that do not have a counterpart in the given model. These elements will not occur in the plot and are ignored in the analysis.</entry>
+  
   <!-- EstimationOptions -->
     
   <entry key="EST_ALL_COMPARTMENTS">Compartment sizes</entry>

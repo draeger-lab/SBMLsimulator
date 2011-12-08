@@ -38,10 +38,7 @@ import de.zbit.gui.GUIOptions;
 import de.zbit.io.CSVOptions;
 import de.zbit.util.Reflect;
 import de.zbit.util.StringUtil;
-import de.zbit.util.ValuePairUncomparable;
 import de.zbit.util.prefs.KeyProvider;
-import de.zbit.util.prefs.Option;
-import de.zbit.util.prefs.Range;
 import de.zbit.util.prefs.SBProperties;
 
 

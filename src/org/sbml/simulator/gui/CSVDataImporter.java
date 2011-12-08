@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
@@ -34,9 +35,13 @@ import org.simulator.math.odes.MultiTable;
 import de.zbit.gui.csv.CSVImporterV2;
 import de.zbit.gui.csv.ExpectedColumn;
 import de.zbit.io.CSVReader;
+import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
 
 /**
+ * This class facilitates reading comma-separated files and translates the
+ * result into a {@link MultiTable} for further processing.
+ * 
  * @author Andreas Dr&auml;ger
  * @author Roland Keller
  * @date 2010-09-03
@@ -50,15 +55,11 @@ public class CSVDataImporter {
    */
   private static final transient Logger logger = Logger.getLogger(CSVDataImporter.class.getName());
   
-	/**
-	 * 
-	 */
-	private static final String FILE_NOT_CORRECTLY_FORMATTED = "Cannot read this format, because no column identifiers are provided.";
-	
-	/**
-	 * 
-	 */
-	private static final String ADDITIONAL_COLUMNS_ARE_IGNORED = "The data file contains some elements that do not have a counterpart in the given model. These elements will not occur in the plot and are ignored in the analysis.";
+  /**
+   * 
+   */
+  private static final transient ResourceBundle bundle = ResourceManager
+      .getBundle("org.sbml.simulator.locales.Simulator");
 	
 	/**
 	 * 
@@ -116,9 +117,10 @@ public class CSVDataImporter {
           reader.getHeader().length - 1)];
         
         if (newHead.length > expectedHeader.length) {
-          String message = ADDITIONAL_COLUMNS_ARE_IGNORED;
-          JOptionPane.showMessageDialog(parent, StringUtil.toHTML(message, 40),
-            "Some elements are ignored", JOptionPane.INFORMATION_MESSAGE);
+          JOptionPane.showMessageDialog(parent, StringUtil.toHTML(bundle
+              .getString("ADDITIONAL_COLUMNS_ARE_IGNORED_TOOLTIP"), 40), bundle
+              .getString("ADDITIONAL_COLUMNS_ARE_IGNORED"),
+            JOptionPane.INFORMATION_MESSAGE);
         }
         
         i = 0;
@@ -152,11 +154,12 @@ public class CSVDataImporter {
         return data;
       } else {
         if (parent != null) {
-          JOptionPane.showMessageDialog(parent, StringUtil
-              .toHTML(FILE_NOT_CORRECTLY_FORMATTED), "Unreadable file",
+          JOptionPane.showMessageDialog(parent, StringUtil.toHTML(bundle
+              .getString("FILE_NOT_CORRECTLY_FORMATTED_TOOLTIP")), bundle
+              .getString("FILE_NOT_CORRECTLY_FORMATTED"),
             JOptionPane.WARNING_MESSAGE);
         } else {
-          logger.fine(FILE_NOT_CORRECTLY_FORMATTED);
+          logger.fine(bundle.getString("FILE_NOT_CORRECTLY_FORMATTED_TOOLTIP"));
         }
       }
     }

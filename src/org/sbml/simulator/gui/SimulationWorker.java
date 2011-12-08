@@ -126,16 +126,16 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
     this.includeReactions = includeReactions;
     this.interpreter = new SBMLinterpreter(model);
     this.solver = solver;
+    this.solver.setIncludeIntermediates(true);
     solver.addPropertyChangeListener(this);
-  
+    
   }
   
-  /*
-   * (non-Javadoc)
+  /* (non-Javadoc)
    * @see javax.swing.SwingWorker#doInBackground()
    */
   protected MultiTable doInBackground() throws Exception {
-    solution=solveByStepSize(solver, interpreter, interpreter.getInitialValues(),
+    solution = solveByStepSize(solver, interpreter, interpreter.getInitialValues(),
       timeStart, timeEnd, stepSize, includeReactions);
     return solution;
   }

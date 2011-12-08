@@ -35,6 +35,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import org.apache.commons.math.ode.DerivativeException;
@@ -277,18 +279,14 @@ public class SimulationPanel extends JPanel implements
         simTable = new JTable();
         simTable.setDefaultRenderer(Double.class, new DecimalCellRenderer(10,
           4, SwingConstants.RIGHT));
-        simPanel.add(new JScrollPane(simTable,
-          JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-          JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
+        simPanel.add(new JScrollPane(simTable), BorderLayout.CENTER);
         simTable.getModel().addTableModelListener(visualizationPanel);
         
         JPanel expPanel = new JPanel(new BorderLayout());
         expTable = new JTable();
         expTable.setDefaultRenderer(Double.class, new DecimalCellRenderer(10,
           4, SwingConstants.RIGHT));
-        expPanel.add(new JScrollPane(expTable,
-          JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-          JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
+        expPanel.add(new JScrollPane(expTable), BorderLayout.CENTER);
         expTable.getModel().addTableModelListener(visualizationPanel);
         
         tabbedPane = new JTabbedPane();
@@ -442,8 +440,7 @@ public class SimulationPanel extends JPanel implements
   public void savePreferences() throws IllegalArgumentException,
     SecurityException, InstantiationException, IllegalAccessException,
     InvocationTargetException, NoSuchMethodException, BackingStoreException {
-    SBPreferences prefs = SBPreferences
-        .getPreferencesFor(SimulationOptions.class);
+    SBPreferences prefs = SBPreferences.getPreferencesFor(SimulationOptions.class);
     prefs.flush();
   }
   
@@ -524,6 +521,14 @@ public class SimulationPanel extends JPanel implements
     data.addTableModelListener(visualizationPanel);
     visualizationPanel.setSimulationData(data);
     simTable.setModel(data);
+    simTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+    TableColumnModel tabColMod = simTable.getColumnModel();
+    TableColumn col;
+    for (int i = 0; i < simTable.getColumnCount(); i++) {
+      col = tabColMod.getColumn(i);
+      col.setPreferredWidth(100);
+      col.setMinWidth(100);
+    }
     tabbedPane.setEnabledAt(1, true);
   }
   
@@ -573,8 +578,9 @@ public class SimulationPanel extends JPanel implements
    * @see org.sbml.simulator.math.odes.DESSolver#addPropertyChangedListener(java.beans.PropertyChangeListener)
    */
   public void addPropertyChangedListener(PropertyChangeListener listener) {
-    if (!listeners.contains(listener))
+    if (!listeners.contains(listener)) {
       this.listeners.add(listener);
+    }
   }
   
   /* (non-Javadoc)

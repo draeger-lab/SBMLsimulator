@@ -642,18 +642,13 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 				((Number) t2.getValue()).doubleValue(), stepSize)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * 
-	 * javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent
-	 * )
+	/* (non-Javadoc)
+	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
 	 */
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() instanceof JSpinner) {
 			JSpinner spin = (JSpinner) e.getSource();
-			if (spin.getName() != null && spin.getName().equals("t2")) {
+			if ((spin.getName() != null) && spin.getName().equals("t2")) {
 				// do nothing.
 			}
 		}
@@ -661,7 +656,7 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 
 	/**
 	 * Broadcasts the current values of start, end and step size of a simulation
-	 * e.g. in order to submit them to the simulation configuration. This method
+	 * e.g., in order to submit them to the simulation configuration. This method
 	 * should be called before starting a simulation so the values will be
 	 * submitted only once at the correct time.
 	 */
