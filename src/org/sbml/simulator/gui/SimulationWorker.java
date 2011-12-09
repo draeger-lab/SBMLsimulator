@@ -19,6 +19,7 @@ package org.sbml.simulator.gui;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,13 +27,14 @@ import java.util.logging.Logger;
 import javax.swing.SwingWorker;
 
 import org.apache.commons.math.ode.DerivativeException;
-import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLException;
-import org.simulator.math.odes.AbstractDESSolver;
+import org.sbml.simulator.SimulationConfiguration;
 import org.simulator.math.odes.DESSolver;
 import org.simulator.math.odes.DESystem;
 import org.simulator.math.odes.MultiTable;
 import org.simulator.sbml.SBMLinterpreter;
+
+import de.zbit.util.ResourceManager;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -45,6 +47,11 @@ import org.simulator.sbml.SBMLinterpreter;
 public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implements PropertyChangeListener{
 
 	/**
+   * The {@link ResourceBundle} for localization.
+   */
+  private static final ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
+  
+  /**
 	 * A {@link Logger} for this class
 	 */
   private static final Logger logger = Logger.getLogger(SimulationWorker.class.getName());
@@ -68,38 +75,19 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
       DerivativeException {
     
     solver.setStepSize(stepSize);
-    
-    if (solver instanceof AbstractDESSolver) {
-      ((AbstractDESSolver) solver)
-          .setIncludeIntermediates(includeReactions);
-    }
+    solver.setIncludeIntermediates(includeReactions);
     MultiTable solution = solver.solve(system, initialValues, timeStart, timeEnd);
 
     if (solver.isUnstable()) {
-      throw new DerivativeException("Simulation not possible because the model is unstable.");
+      throw new DerivativeException(bundle.getString("MODEL_UNSTABLE_EXCEPTION"));
     }
     return solution;
   }
-  
-  /**
-   * 
-   */
-  private boolean includeReactions;
 
   /**
-   * 
+   * The configuration for the simulation.
    */
-  private SBMLinterpreter interpreter;
-  
-  /**
-   * The integrator for the simulation
-   */
-  private DESSolver solver;
-  
-  /**
-   * Configuration for the solver.
-   */
-  private double timeStart, timeEnd, stepSize;
+  private SimulationConfiguration configuration;
   
   /**
    * The solution of the simulation
@@ -117,27 +105,19 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
    * @param includeReactions
    * @throws Exception 
    */
-  public SimulationWorker(DESSolver solver, Model model, double timeStart,
-    double timeEnd, double stepSize, boolean includeReactions) throws Exception {
-    
-    this.timeStart = timeStart;
-    this.timeEnd = timeEnd;
-    this.stepSize = stepSize;
-    this.includeReactions = includeReactions;
-    this.interpreter = new SBMLinterpreter(model);
-    this.solver = solver;
-    this.solver.setIncludeIntermediates(true);
-    solver.addPropertyChangeListener(this);
-    
+  public SimulationWorker(SimulationConfiguration configuration) throws Exception {
+    this.configuration = configuration;
+    this.configuration.getSolver().addPropertyChangeListener(this);
   }
   
   /* (non-Javadoc)
    * @see javax.swing.SwingWorker#doInBackground()
    */
   protected MultiTable doInBackground() throws Exception {
-    solution = solveByStepSize(solver, interpreter, interpreter.getInitialValues(),
-      timeStart, timeEnd, stepSize, includeReactions);
-    return solution;
+    SBMLinterpreter interpreter = new SBMLinterpreter(configuration.getModel());
+    return solveByStepSize(configuration.getSolver(), interpreter, interpreter
+        .getInitialValues(), configuration.getStart(), configuration.getEnd(),
+      configuration.getStepSize(), configuration.isIncludeReactions());
   }
   
   /* (non-Javadoc)
@@ -152,23 +132,22 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
     } catch (ExecutionException e) {     
       logger.log(Level.WARNING, e.getLocalizedMessage(),e);
     }
-    solver.removePropertyChangeListener(this);
+    configuration.getSolver().removePropertyChangeListener(this);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-   */
-  public void propertyChange(PropertyChangeEvent evt) {
-    getPropertyChangeSupport().firePropertyChange(evt);
-  } 
-  
   /**
    * 
    * @return
    */
   public MultiTable getSolution() {
     return solution;
+  } 
+  
+  /* (non-Javadoc)
+   * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+   */
+  public void propertyChange(PropertyChangeEvent evt) {
+    getPropertyChangeSupport().firePropertyChange(evt);
   }
 
 }

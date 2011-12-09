@@ -20,23 +20,22 @@ package org.sbml.simulator.gui.table;
 import java.awt.Color;
 import java.util.AbstractList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
-import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableModel;
 
+import org.sbml.jsbml.CallableSBase;
 import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.NamedSBase;
 import org.sbml.jsbml.NamedSBaseWithDerivedUnit;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.Reaction;
-import org.sbml.jsbml.SBaseWithDerivedUnit;
 import org.sbml.jsbml.Species;
 import org.sbml.jsbml.util.compilers.HTMLFormula;
 
@@ -54,11 +53,59 @@ import de.zbit.util.ValuePair;
 public class LegendTableModel extends AbstractTableModel {
 
 	/**
+	 * 
+	 * @author Andreas Dr&auml;ger
+	 * @version $Rev$
+	 * @since 1.0
+	 */
+	private static class ListOfCallableSBase extends AbstractList<CallableSBase> {
+	  
+	  /**
+	   * 
+	   */
+	  private Model model;
+	  
+	  /**
+	   * 
+	   * @param model
+	   */
+	  public ListOfCallableSBase(Model model) {
+	    this.model = model;
+	  }
+	  
+	  /* (non-Javadoc)
+     * @see java.util.AbstractList#get(int)
+     */
+    public CallableSBase get(int index) {
+      if (index < model.getNumCompartments()) {
+        return model.getCompartment(index);
+      }
+      index -= model.getNumCompartments();
+      if (index < model.getNumSpecies()) {
+        return model.getSpecies(index);
+      }
+      index -= model.getNumSpecies();
+      if (index < model.getNumParameters()) {
+        return model.getParameter(index);
+      }
+      index -= model.getNumParameters();
+      return model.getReaction(index);
+    }
+    
+    /* (non-Javadoc)
+     * @see java.util.AbstractCollection#size()
+     */
+    public int size() {
+      return model.getNumSymbols() + model.getNumReactions();
+    }
+	}
+	
+	/**
 	 * Column indices for the content
 	 */
 	private static final int boolCol = 0, colorCol = 1, nsbCol = 2,
 			unitCol = 3;
-	
+
 	/**
 	 * 
 	 */
@@ -68,13 +115,13 @@ public class LegendTableModel extends AbstractTableModel {
 	 * A {@link Logger} for this class.
 	 */
 	private static final transient Logger logger = Logger.getLogger(LegendTableModel.class.getName());
-
-	/**
+	
+  /**
 	 * Generated serial version identifier.
 	 */
 	private static final long serialVersionUID = 7360401460080111135L;
-	
-  /**
+
+	/**
 	 * @return
 	 */
 	public static int getColumnColor() {
@@ -101,12 +148,12 @@ public class LegendTableModel extends AbstractTableModel {
 	public static int getNamedSBaseColumn() {
 		return nsbCol;
 	}
-
+	
 	/**
 	 * A colored button for each model component and
 	 */
 	private Object[][] data;
-	
+
 	/**
 	 * A mapping between the ids in the table and the corresponding row.
 	 */
@@ -122,12 +169,14 @@ public class LegendTableModel extends AbstractTableModel {
 	 */
 	private ValuePair<String, Integer> lastQueried;
 
+	private List<CallableSBase> listOfCallableSBase;
+
 	/**
 	 * Pointer to the model
 	 */
 	private Model model;
 
-	/**
+  /**
    * The number of selected items in the table.
    */
   private int selectedCount;
@@ -140,15 +189,15 @@ public class LegendTableModel extends AbstractTableModel {
 	  selectedCount = 0;
 	}
 
-  /**
+	/**
 	 * @param model
 	 */
 	public LegendTableModel(Model model) {
 		this();
 		setModel(model);
 	}
-
-	/**
+  
+  /**
 	 * @param model
 	 * @param includeReactions
 	 */
@@ -172,8 +221,8 @@ public class LegendTableModel extends AbstractTableModel {
     data[rowIndex][nsbCol] = nsb;
     id2Row.put(nsb.getId(), Integer.valueOf(rowIndex));
   }
-  
-  /**
+
+	/**
    * Determines the currently specified {@link Color} for the {@link NamedSBase}
    * with the given <code>id</code>.
    * 
@@ -195,7 +244,7 @@ public class LegendTableModel extends AbstractTableModel {
 	public Class<?> getColumnClass(int c) {
 		return getValueAt(0, c).getClass();
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see javax.swing.table.TableModel#getColumnCount()
 	 */
@@ -223,7 +272,7 @@ public class LegendTableModel extends AbstractTableModel {
     throw new IndexOutOfBoundsException(String.format(
       bundle.getString("UNKOWN_CLUMN_EXC"), getColumnCount(), column));
 	}
-	
+
 	/**
 	 * @param rowIndex
 	 * @return
@@ -282,7 +331,7 @@ public class LegendTableModel extends AbstractTableModel {
   public int getSelectedCount() {
     return selectedCount;
   }
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -330,60 +379,6 @@ public class LegendTableModel extends AbstractTableModel {
         fillData(model.getReaction(i), i + j, false);
       }
     }
-		
-		
-		final TableModel tabMod = this;
-		SwingUtilities.invokeLater(new Runnable() {
-
-			/*
-			 * (non-Javadoc)
-			 * @see java.lang.Runnable#run()
-			 */
-			public void run() {
-				AbstractList<SBaseWithDerivedUnit> list = new AbstractList<SBaseWithDerivedUnit>() {
-					
-					/* (non-Javadoc)
-					 * @see java.util.AbstractList#get(int)
-					 */
-					public SBaseWithDerivedUnit get(int index) {
-						if (index < model.getNumCompartments()) {
-							return model.getCompartment(index);
-						}
-						index -= model.getNumCompartments();
-						if (index < model.getNumSpecies()) {
-							return model.getSpecies(index);
-						}
-						index -= model.getNumSpecies();
-						if (index < model.getNumParameters()) {
-							return model.getParameter(index);
-						}
-						index -= model.getNumParameters();
-						return model.getReaction(index);
-					}
-					
-					/* (non-Javadoc)
-					 * @see java.util.AbstractCollection#size()
-					 */
-					public int size() {
-						return model.getNumSymbols() + model.getNumReactions();
-					}
-				};
-				for (int rowIndex = 0; rowIndex < list.size(); rowIndex++) {
-					try {
-						data[rowIndex][unitCol] = StringUtil.toHTML(HTMLFormula.toHTML(list.get(rowIndex)
-								.getDerivedUnitDefinition()));
-					} catch (Exception exc) {
-						data[rowIndex][unitCol] = "N/A";
-						logger.fine(exc.getLocalizedMessage());
-					}
-				}
-				for (TableModelListener l : getTableModelListeners()) {
-          l.tableChanged(new TableModelEvent(tabMod, 0, getRowCount() - 1,
-            getColumnUnit(), TableModelEvent.UPDATE));
-				}
-			}
-			
-		});
 	}
 
 	/* (non-Javadoc)
@@ -416,7 +411,7 @@ public class LegendTableModel extends AbstractTableModel {
 		}
 		return false;
 	}
-
+	
 	/**
 	 * @param model
 	 */
@@ -431,17 +426,8 @@ public class LegendTableModel extends AbstractTableModel {
 	public void setModel(Model model, boolean includeReactions) {
 		this.includeReactions = includeReactions;
 		this.model = model;
+		this.listOfCallableSBase = new ListOfCallableSBase(model);
 		init();
-	}
-
-	/**
-	 * Changes the selection status for the {@link NamedSBase} in the given row.
-	 * 
-	 * @param rowIndex
-	 * @param selected
-	 */
-	public void setSelected(int rowIndex, boolean selected) {
-		setValueAt(Boolean.valueOf(selected), rowIndex, getColumnPlot());
 	}
 	
 	/**
@@ -453,7 +439,7 @@ public class LegendTableModel extends AbstractTableModel {
 	    setSelected(i, selected);
 	  }
 	}
-	
+
 	/**
 	 * 
 	 * @param clazz
@@ -471,15 +457,25 @@ public class LegendTableModel extends AbstractTableModel {
 	      start = model.getNumCompartments() + model.getNumSpecies();
 	      end = model.getNumSymbols();
 	    } else if (clazz.isAssignableFrom(Species.class)) {
-	      end = model.getNumSymbols() - 1;
-	      start = end - model.getNumSpecies();
+	      start = model.getNumCompartments();
+	      end = start + model.getNumSpecies();
 	    }
 	  }
 	  for (int i = start; i < end; i++) {
 	    setSelected(i, selected);
 	  }
 	}
-
+	
+	/**
+	 * Changes the selection status for the {@link NamedSBase} in the given row.
+	 * 
+	 * @param rowIndex
+	 * @param selected
+	 */
+	public void setSelected(int rowIndex, boolean selected) {
+		setValueAt(Boolean.valueOf(selected), rowIndex, getColumnPlot());
+	}
+	
 	/**
 	 * Changes the selection status for the {@link NamedSBase} with the given
 	 * identifier.
@@ -528,6 +524,25 @@ public class LegendTableModel extends AbstractTableModel {
     }
     data[rowIndex][columnIndex] = aValue;
     fireTableCellUpdated(rowIndex, columnIndex);
+	}
+
+	/**
+	 * 
+	 */
+	public void updateOrDeriveUnits() {
+	  for (int rowIndex = 0; rowIndex < listOfCallableSBase.size(); rowIndex++) {
+      try {
+        data[rowIndex][unitCol] = StringUtil.toHTML(HTMLFormula.toHTML(listOfCallableSBase.get(rowIndex)
+            .getDerivedUnitDefinition()));
+      } catch (Exception exc) {
+        data[rowIndex][unitCol] = "N/A";
+        logger.fine(exc.getLocalizedMessage());
+      }
+    }
+    for (TableModelListener l : getTableModelListeners()) {
+      l.tableChanged(new TableModelEvent(this, 0, getRowCount() - 1,
+        getColumnUnit(), TableModelEvent.UPDATE));
+    }
 	}
 
 }

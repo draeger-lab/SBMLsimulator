@@ -568,8 +568,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	}
 
 	/* (non-Javadoc)
-	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.
-	 * PropertyChangeEvent)
+	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent evt) {
 		if (evt.getPropertyName().equalsIgnoreCase("progress")) {
@@ -619,12 +618,9 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 				SBFileFilter.createSBMLFileFilter());
 		if (f != null) {
 			try {
-				SBMLWriter writer = new SBMLWriter();
-				writer.write(model.getSBMLDocument(), f,
+			  SBMLWriter.write(model.getSBMLDocument(), f,
 						SBMLsimulator.class.getSimpleName(),
 						getDottedVersionNumber());
-				// TODO Just for debugging:
-				writer.write(model.getSBMLDocument(), System.out);
 				prefs.put(GUIOptions.SAVE_DIR, f.getParent());
 			} catch (Exception exc) {
 				GUITools.showErrorMessage(this, exc);

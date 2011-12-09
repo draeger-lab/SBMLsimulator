@@ -19,7 +19,7 @@
   <entry key="SPECIES_TOOLTIP">If this option is selected, all species of the model are plotted.</entry>
   <entry key="PARAMETERS">Parameters</entry>
   <entry key="PARAMETERS_TOOLTIP">With this option you can plot the changes of all global parameters in the model.</entry>
-  <entry key="REACTIONS">Reactions</entry>
+  <entry key="REACTIONS">Fluxes</entry>
   <entry key="REACTIONS_TOOLTIP">Select this option to plot the evolution of all flux values in the model.</entry>
   <entry key="SELECT_ALL">Select</entry>
   <entry key="SELECT_ALL_TOOLTIP">Select the components to be shown in the plot.</entry>
@@ -141,6 +141,10 @@
   <entry key="SIMULATION_CONFIGURATION">Parameters for the simulation</entry>
   <entry key="SIMULATION_CONFIGURATION_TOOLTIP">Here you can specify parameters for the simulation of the model</entry>
     
+  <!-- SimulationWorker -->
+  
+  <entry key="MODEL_UNSTABLE_EXCEPTION">Simulation not possible because the model is unstable.</entry>
+  
   <!-- SimulatorOptions -->
   
   <entry key="TIME_SERIES_FILE">Time series data file</entry>

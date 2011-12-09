@@ -35,6 +35,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
@@ -261,8 +262,8 @@ public class SimulationPanel extends JPanel implements
       if (visualizationPanel == null) {
         visualizationPanel = new SimulationVisualizationPanel();
       }
-      visualizationPanel.setModel(this.simulationManager
-          .getSimlationConfiguration().getModel());
+      visualizationPanel.setModel(simulationManager.getSimlationConfiguration()
+          .getModel());
       SimulationToolPanel foot = getOrCreateFootPanel();
       foot.addItemListener(visualizationPanel);
       if (showSettingsPanel) {

@@ -19,9 +19,11 @@ package org.sbml.simulator;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.logging.Logger;
 
 import org.sbml.jsbml.Model;
 import org.simulator.math.odes.AbstractDESSolver;
+import org.simulator.math.odes.DESSolver;
 
 import de.zbit.util.prefs.SBPreferences;
 
@@ -35,6 +37,11 @@ import de.zbit.util.prefs.SBPreferences;
 public class SimulationConfiguration implements PropertyChangeListener {
   
   /**
+   * A {@link Logger} for this class.
+   */
+  private static final transient Logger logger = Logger.getLogger(SimulationConfiguration.class.getName());
+    
+  /**
    * The model for the current simulation.
    */
   private Model model;
@@ -42,7 +49,7 @@ public class SimulationConfiguration implements PropertyChangeListener {
   /**
    * The solver for the current simulation.
    */
-  private AbstractDESSolver solver;
+  private DESSolver solver;
   
   /**
    * The start time for the current simulation.
@@ -66,12 +73,39 @@ public class SimulationConfiguration implements PropertyChangeListener {
   
   /**
    * Creates a new simulation configuration for the simulation of the given
-   * model.
+   * {@link Model}.
    * 
    * @param model
    */
   public SimulationConfiguration(Model model) {
     this.model = model;
+    this.start = 0d;
+    this.end = 0d;
+    this.stepSize = 0d;
+    this.includeReactions = true;
+    this.solver = null;
+  }
+  
+  /**
+   * Convenient constructor that creates a fully specified
+   * {@link SimulationConfiguration} for the given {@link Model} including all
+   * other features.
+   * 
+   * @param model
+   * @param solver
+   * @param timeStart
+   * @param timeEnd
+   * @param stepSize
+   * @param includeReactions
+   */
+  public SimulationConfiguration(Model model, DESSolver solver,
+    double timeStart, double timeEnd, double stepSize, boolean includeReactions) {
+    this(model);
+    this.solver = solver;
+    this.start = timeStart;
+    this.end = timeEnd;
+    this.stepSize = stepSize;
+    this.includeReactions = includeReactions;
   }
   
   /**
@@ -84,7 +118,7 @@ public class SimulationConfiguration implements PropertyChangeListener {
   /**
    * @return the solver
    */
-  public AbstractDESSolver getSolver() {
+  public DESSolver getSolver() {
     return solver;
   }
   
@@ -116,12 +150,8 @@ public class SimulationConfiguration implements PropertyChangeListener {
     return includeReactions;
   }
   
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent
-   * )
+  /* (non-Javadoc)
+   * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
    */
   public void propertyChange(PropertyChangeEvent evt) {
     String property = evt.getPropertyName();

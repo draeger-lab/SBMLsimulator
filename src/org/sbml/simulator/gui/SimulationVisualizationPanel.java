@@ -38,6 +38,8 @@ import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.simulator.gui.table.LegendTableModel;
 import org.simulator.math.odes.MultiTable;
 
+import sun.swing.SwingUtilities2;
+
 import de.zbit.util.StringUtil;
 
 /**
@@ -94,14 +96,6 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	public SimulationVisualizationPanel() {
 		super(HORIZONTAL_SPLIT, true);
 		includeReactions = true;
-	}
-
-	/**
-	 * @param model
-	 */
-	public SimulationVisualizationPanel(Model model) {
-		this();
-		setModel(model);
 	}
 
 	/**
@@ -245,7 +239,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	/**
 	 * @param model
 	 */
-	public void setModel(final Model model) {
+	public void setModel(Model model) {
 		if (leftComponent != null) {
 			remove(leftComponent);
 		}
@@ -270,24 +264,23 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 				paramStepSize);
 		interactiveScanPanel
 				.setBorder(BorderFactory.createLoweredBevelBorder());
-		final LegendPanel legendPanel = new LegendPanel();
-		final TableModelListener listener = this;
-		SwingUtilities.invokeLater(new Runnable() {
-		  /* (non-Javadoc)
-		   * @see java.lang.Runnable#run()
-		   */
+		legendPanel = new LegendPanel(model, includeReactions);
+    legendPanel.addTableModelListener(this);
+    legendPanel.setBorder(BorderFactory.createLoweredBevelBorder());
+    JSplitPane topDown = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true,
+      legendPanel, interactiveScanPanel);
+    topDown.setDividerLocation(topDown.getDividerLocation() + 200);
+    setLeftComponent(topDown);
+    setRightComponent(plot);
+    setDividerLocation(topDown.getDividerLocation() + 200);
+    SwingUtilities.invokeLater(new Runnable() {
+      /* (non-Javadoc)
+       * @see java.lang.Runnable#run()
+       */
       public void run() {
-        legendPanel.init(model, includeReactions);
-        legendPanel.addTableModelListener(listener);
-        legendPanel.setBorder(BorderFactory.createLoweredBevelBorder());
+        legendPanel.updateOrDeriveUnits(); 
       }
     });
-		JSplitPane topDown = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true,
-				legendPanel, interactiveScanPanel);
-		topDown.setDividerLocation(topDown.getDividerLocation() + 200);
-		setLeftComponent(topDown);
-		setRightComponent(plot);
-		setDividerLocation(topDown.getDividerLocation() + 200);
 	}
 
 	/**

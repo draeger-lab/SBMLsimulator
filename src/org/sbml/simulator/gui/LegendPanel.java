@@ -32,6 +32,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumnModel;
@@ -121,39 +122,28 @@ public class LegendPanel extends JPanel implements TableModelListener,
 	 * Generated serial version identifier
 	 */
 	private static final long serialVersionUID = 4018387447860613404L;
+	
 	/**
 	 * 
 	 */
 	private LegendTableModel legend;
+	
 	/**
 	 * 
 	 */
 	private JDropDownButton selectAll, selectNone;
+	
 	/**
 	 * 
 	 */
 	private Set<TableModelListener> setOfTableModelListeners;
-	
-	public LegendPanel() {
-	  super(new BorderLayout());
-	}
-	
+		
 	/**
 	 * 
 	 * @param model
 	 */
 	public LegendPanel(Model model, boolean includeReactions) {
-	  this();
-	  init(model, includeReactions);
-	}
-
-	/**
-	 * 
-	 * @param model
-	 * @param includeReactions
-	 */
-	public void init(Model model, boolean includeReactions) {
-	  removeAll();
+	  super(new BorderLayout());
     setOfTableModelListeners = new HashSet<TableModelListener>();
     add(new JScrollPane(createLegendTable(model, includeReactions)),
       BorderLayout.CENTER);
@@ -241,7 +231,7 @@ public class LegendPanel extends JPanel implements TableModelListener,
 		tab.setDefaultEditor(Color.class, new ColorEditor(this));
 		tab.setDefaultRenderer(Color.class, new LegendTableCellRenderer());
 		tab.getModel().addTableModelListener(this);
-		tab.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+    //		tab.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
     TableColumnModel colModel = tab.getColumnModel();
     int index[] = new int[] { LegendTableModel.getColumnPlot(),
         LegendTableModel.getColumnColor(), LegendTableModel.getColumnUnit() };
@@ -259,6 +249,20 @@ public class LegendPanel extends JPanel implements TableModelListener,
 	public LegendTableModel getLegendTableModel() {
 		return legend;
 	}
+	
+	/**
+	 * 
+	 */
+  public void updateOrDeriveUnits() {
+    SwingUtilities.invokeLater(new Runnable() {
+      /* (non-Javadoc)
+       * @see java.lang.Runnable#run()
+       */
+      public void run() {
+        legend.updateOrDeriveUnits();
+      }
+    });
+  }
 
 	/**
 	 * 
