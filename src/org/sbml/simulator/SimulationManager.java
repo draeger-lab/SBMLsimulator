@@ -112,10 +112,7 @@ public class SimulationManager implements PropertyChangeListener {
    * @throws Exception
    */
   public void simulate() throws Exception {
-    simworker = new SimulationWorker(simlationConfiguration
-        .getSolver(), simlationConfiguration.getModel(), simlationConfiguration
-        .getStart(), simlationConfiguration.getEnd(), simlationConfiguration
-        .getStepSize(), simlationConfiguration.isIncludeReactions());
+    simworker = new SimulationWorker(simlationConfiguration);
     simworker.addPropertyChangeListener(this);
     simworker.execute();
   }

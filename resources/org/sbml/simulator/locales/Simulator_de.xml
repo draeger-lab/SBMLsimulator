@@ -9,6 +9,16 @@
 	   by a semicolon ";" the corresponding tool tip.
   </comment>
   
+  <!-- COMPONENT -->
+  
+  <entry key="ALL">Alle Komponenten</entry>
+  <entry key="COMPARTMENTS">Kompartimente</entry>
+  <entry key="SPECIES">Spezies</entry>
+  <entry key="PARAMETERS">Parameter</entry>
+  <entry key="REACTIONS">Flüsse</entry>
+  <entry key="SELECT_ALL">Auswählen</entry>
+  <entry key="SELECT_NONE">Abwählen</entry>
+  
   <!-- SimulationOptions -->
   
   <entry key="DEFAULT_INIT_COMPARTMENT_SIZE_TOOLTIP">Falls nicht anders spezifiziert, wird der hier angegebene Wert dafür genutzt, um Kompartimentgrößen zu initialisieren.</entry>
