@@ -115,9 +115,10 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
    */
   protected MultiTable doInBackground() throws Exception {
     SBMLinterpreter interpreter = new SBMLinterpreter(configuration.getModel());
-    return solveByStepSize(configuration.getSolver(), interpreter, interpreter
+    solution = solveByStepSize(configuration.getSolver(), interpreter, interpreter
         .getInitialValues(), configuration.getStart(), configuration.getEnd(),
       configuration.getStepSize(), configuration.isIncludeReactions());
+    return solution;
   }
   
   /* (non-Javadoc)
