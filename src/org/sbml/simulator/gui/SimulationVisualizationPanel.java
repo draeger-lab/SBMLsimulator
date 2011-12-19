@@ -38,8 +38,6 @@ import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.simulator.gui.table.LegendTableModel;
 import org.simulator.math.odes.MultiTable;
 
-import sun.swing.SwingUtilities2;
-
 import de.zbit.util.StringUtil;
 
 /**

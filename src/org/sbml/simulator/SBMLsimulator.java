@@ -189,6 +189,11 @@ public class SBMLsimulator extends Launcher {
         getVersionNumber()));
     } else {
       // TODO: implement command line mode!
+      /*
+       * Two ways: 
+       * 1. Just a simple simulation with results in CSV format
+       * 2. Optimization of the model
+       */
     }
   }
 

@@ -131,5 +131,9 @@ public interface EstimationOptions extends KeyProvider {
 	@SuppressWarnings("unchecked")
 	public static final OptionGroup<Boolean> INTEGRATION_STRATEGY = new OptionGroup<Boolean>(
 		"INTEGRATION_STRATEGY", bundle, EST_MULTI_SHOOT);
+	
+	/*
+	 * TODO: Select Optimization algorithm and Termination criterion and SBML-output file
+	 */
 
 }
