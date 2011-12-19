@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="javadoc">
+    <target name="javadoc">
+    	<input
+    	    message="Please enter path to UmlGraph.jar:"
+    	    addproperty="jar.path$"
+    	    defaultvalue="${basedir}/UMLGraph-5.4/lib/UmlGraph.jar"
+    	/>
+    	<input
+    	    message="Please enter path to save the graph.dot:"
+    	    addproperty="output.path"
+    	    defaultvalue="${basedir}/doc/UMLGraph"
+    	/>    	
+     <javadoc 
+     	   access="protected" 
+     	   additionalparam="-d ${output.path} -enumerations -operations"
+     	   classpath="lib/EvA2Base.jar:../SysBio/lib/commons-discovery.jar:lib/commons-math-2.2.jar:lib/jsbml-0.8-rc1-with-dependencies.jar:../SysBio/lib/jaxrpc.jar:../SysBio/lib/commons-cli-1.1.jar:lib/jfreechart-1.0.13.jar:../SBMLsimulatorCore/bin:../SBMLsimulatorCore/lib/commons-math-2.2.jar:../SysBio/lib/wsdl4j.jar:lib/SBML2LaTeX-0.9.9_slim.jar:../SysBio/lib/axis.jar:../SysBio/lib/WSDbfetch.jar:../SysBio/bin:../SysBio/lib/commons-logging.jar:lib/jcommon-1.0.16.jar"
+     	   packagenames="org.sbml.optimization.problem,org.sbml.simulator.math,org.sbml.optimization,org.sbml.simulator.gui.table,org.sbml.simulator.gui.plot"
+     	   sourcefiles="src/org/sbml/simulator/gui/LegendPanel.java,src/org/sbml/simulator/gui/InteractiveScanPanel.java,src/org/sbml/simulator/gui/SimulationToolPanel.java,src/org/sbml/simulator/gui/QuantitySelectionPanel.java,src/org/sbml/simulator/SimulationManager.java,src/org/sbml/simulator/SimulationConfiguration.java,test/org/sbml/simulator/gui/CSVDataImporterTest.java,src/org/sbml/simulator/gui/CSVDataImporter.java,src/org/sbml/simulator/gui/SimulatorUI.java,src/org/sbml/simulator/gui/SimulationWorker.java,src/org/sbml/simulator/SimulationOptions.java,src/org/sbml/simulator/gui/SimulationPanel.java,src/org/sbml/simulator/gui/SimulationVisualizationPanel.java,src/org/sbml/simulator/QualityMeasurement.java,src/org/sbml/simulator/SBMLsimulator.java,test/org/sbml/simulator/gui/ToolPanel.java,src/org/sbml/simulator/SimulatorOptions.java"
+     	   sourcepath="src:test:resources">
+       <doclet name="org.umlgraph.doclet.UmlGraph" path="${jar.path}"/>
+    </javadoc>
+  </target>
+</project>

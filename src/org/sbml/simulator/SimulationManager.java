@@ -128,7 +128,7 @@ public class SimulationManager implements PropertyChangeListener {
     if ("progress".equals(evt.getPropertyName())) {
       this.pcs.firePropertyChange(evt);
     } else if ("done".equals(evt.getPropertyName())) {
-      solution=simworker.getSolution();
+      solution = simworker.getSolution();
       try {
         computeModelQuality();
       } catch (Exception e) {
