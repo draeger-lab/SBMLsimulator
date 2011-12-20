@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.math.ode.ODEIntegrator;
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.simulator.gui.SimulatorUI;
 import org.sbml.simulator.gui.plot.PlotOptions;
@@ -39,8 +40,8 @@ import de.zbit.io.CSVOptions;
 import de.zbit.util.Reflect;
 import de.zbit.util.StringUtil;
 import de.zbit.util.prefs.KeyProvider;
+import de.zbit.util.prefs.SBPreferences;
 import de.zbit.util.prefs.SBProperties;
-
 
 /**
  * Start program for {@link SBMLsimulator}.
@@ -53,56 +54,59 @@ import de.zbit.util.prefs.SBProperties;
  */
 public class SBMLsimulator extends Launcher {
 
-  /**
-   * Generated serial version identifier.
-   */
-  private static final long serialVersionUID = -6519145035944241806L;
-  
-  /**
-   * The logger for this class.
-   */
-  public static final transient Logger logger = Logger.getLogger(SBMLsimulator.class
-      .getName());
-  
-  /**
-   * The possible location of this class in a jar file if used in plug-in mode.
-   */
-  public static final String JAR_LOCATION = "plugin" + StringUtil.fileSeparator();
-    
-  /**
-   * The package where all mathematical functions, in particular distance
-   * functions, are located.
-   */
-  public static final String MATH_PACKAGE = "org.sbml.simulator.math";
-  
-  /**
-   * The package where all ODE solvers are assumed to be located.
-   */
-  public static final String SOLVER_PACKAGE = "org.simulator.math.odes";
-  
-  /**
-   * An array of all available implementations of distance functions to judge
-   * the quality of a simulation based on parameter and initial value settings.
-   */
-  private static final Class<QualityMeasure> AVAILABLE_QUALITY_MEASURES[] = Reflect
-      .getAllClassesInPackage(MATH_PACKAGE, true, true, QualityMeasure.class,
-        JAR_LOCATION, true);
+	/**
+	 * Generated serial version identifier.
+	 */
+	private static final long serialVersionUID = -6519145035944241806L;
 
-  /**
-   * An array of all available ordinary differential equation solvers.
-   */
-  private static final Class<AbstractDESSolver> AVAILABLE_SOLVERS[] = Reflect
-      .getAllClassesInPackage(SOLVER_PACKAGE, true, true,
-        AbstractDESSolver.class, JAR_LOCATION, true);
-  
-  /**
-   * 
-   * @return
-   */
+	/**
+	 * The logger for this class.
+	 */
+	public static final transient Logger logger = Logger
+			.getLogger(SBMLsimulator.class.getName());
+
+	/**
+	 * The possible location of this class in a jar file if used in plug-in
+	 * mode.
+	 */
+	public static final String JAR_LOCATION = "plugin"
+			+ StringUtil.fileSeparator();
+
+	/**
+	 * The package where all mathematical functions, in particular distance
+	 * functions, are located.
+	 */
+	public static final String MATH_PACKAGE = "org.sbml.simulator.math";
+
+	/**
+	 * The package where all ODE solvers are assumed to be located.
+	 */
+	public static final String SOLVER_PACKAGE = "org.simulator.math.odes";
+
+	/**
+	 * An array of all available implementations of distance functions to judge
+	 * the quality of a simulation based on parameter and initial value
+	 * settings.
+	 */
+	private static final Class<QualityMeasure> AVAILABLE_QUALITY_MEASURES[] = Reflect
+			.getAllClassesInPackage(MATH_PACKAGE, true, true,
+					QualityMeasure.class, JAR_LOCATION, true);
+
+	/**
+	 * An array of all available ordinary differential equation solvers.
+	 */
+	private static final Class<AbstractDESSolver> AVAILABLE_SOLVERS[] = Reflect
+			.getAllClassesInPackage(SOLVER_PACKAGE, true, true,
+					AbstractDESSolver.class, JAR_LOCATION, true);
+
+	/**
+	 * 
+	 * @return
+	 */
 	@SuppressWarnings("rawtypes")
 	public static List<Class> getAvailableQualityMeasureClasses() {
 		List<Class> qualityList = new ArrayList<Class>(
-			AVAILABLE_QUALITY_MEASURES.length);
+				AVAILABLE_QUALITY_MEASURES.length);
 		for (Class<? extends QualityMeasure> qualityMeasureClass : AVAILABLE_QUALITY_MEASURES) {
 			try {
 				qualityList.add(qualityMeasureClass);
@@ -112,210 +116,264 @@ public class SBMLsimulator extends Launcher {
 		}
 		return qualityList;
 	}
-  
+
 	/**
 	 * @return
 	 */
 	public static List<String> getAvailableQualityMeasureClassNames() {
-    List<String> qualityList = new ArrayList<String>(AVAILABLE_QUALITY_MEASURES.length);
-    for (Class<?> qualityMeasureClass : AVAILABLE_QUALITY_MEASURES) {
-      try {
-        qualityList.add(qualityMeasureClass.getName());
-      } catch (Exception e) {
-        logger.warning(e.getLocalizedMessage());
-      }
-    }
-    return qualityList;
+		List<String> qualityList = new ArrayList<String>(
+				AVAILABLE_QUALITY_MEASURES.length);
+		for (Class<?> qualityMeasureClass : AVAILABLE_QUALITY_MEASURES) {
+			try {
+				qualityList.add(qualityMeasureClass.getName());
+			} catch (Exception e) {
+				logger.warning(e.getLocalizedMessage());
+			}
+		}
+		return qualityList;
 	}
-  
-  /**
-   * @return
-   */
-  public static final Class<QualityMeasure>[] getAvailableQualityMeasures() {
-    return AVAILABLE_QUALITY_MEASURES;
-  }
-  
-  /**
-   * 
-   * @return
-   */
-  @SuppressWarnings({ "rawtypes", "unchecked" })
-  public static List<Class> getAvailableSolverClasses() {
-    List<Class> solverList = new ArrayList<Class>(AVAILABLE_SOLVERS.length);
-    for (Class<AbstractDESSolver> solverClass : AVAILABLE_SOLVERS) {
-      try {
-        solverList.add(solverClass);
-      } catch (Exception e) {
-        logger.warning(e.getLocalizedMessage());
-      }
-    }
-    return solverList;
-  }
-  
-  /**
-   * 
-   * @return
-   */
-  public static Class<AbstractDESSolver>[] getAvailableSolvers() {
-    return AVAILABLE_SOLVERS;
-  }
-  
-  /**
-   * 
-   * @param args
-   */
-  public SBMLsimulator(String[] args) {
-    super(args);
-  }
 
-  /*
-   * (non-Javadoc)
-   * @see de.zbit.Launcher#commandLineMode(de.zbit.AppConf)
-   */
-  public void commandLineMode(AppConf appConf) {
-    String openFile = null;
-    SBProperties props = appConf.getCmdArgs();
-    if (props.containsKey(SimulatorOptions.SBML_FILE)) {
-      openFile = props.get(SimulatorOptions.SBML_FILE).toString();
-    }
-    String timeSeriesFile = null;
-    if (props.containsKey(SimulatorOptions.TIME_SERIES_FILE)) {
-      timeSeriesFile = props.get(SimulatorOptions.TIME_SERIES_FILE).toString();
-    }
-    if ((openFile == null) || (timeSeriesFile == null)) {
-      logger.fine(String.format(
-        getResources().getString("INCOMPLETE_CMD_ARG_LIST"),
-        getAppName(),
-        getVersionNumber()));
-    } else {
-      // TODO: implement command line mode!
-      /*
-       * Two ways: 
-       * 1. Just a simple simulation with results in CSV format
-       * 2. Optimization of the model
-       */
-    }
-  }
+	/**
+	 * @return
+	 */
+	public static final Class<QualityMeasure>[] getAvailableQualityMeasures() {
+		return AVAILABLE_QUALITY_MEASURES;
+	}
 
-  /*
-   * (non-Javadoc)
-   * @see de.zbit.Launcher#getAppName()
-   */
-  public String getAppName() {
-    return getClass().getSimpleName();
-  }
+	/**
+	 * 
+	 * @return
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static List<Class> getAvailableSolverClasses() {
+		List<Class> solverList = new ArrayList<Class>(AVAILABLE_SOLVERS.length);
+		for (Class<AbstractDESSolver> solverClass : AVAILABLE_SOLVERS) {
+			try {
+				solverList.add(solverClass);
+			} catch (Exception e) {
+				logger.warning(e.getLocalizedMessage());
+			}
+		}
+		return solverList;
+	}
 
-  /*
-   * (non-Javadoc)
-   * @see de.zbit.Launcher#getCmdLineOptions()
-   */
-  public List<Class<? extends KeyProvider>> getCmdLineOptions() {
-    List<Class<? extends KeyProvider>> defAndKeys = new ArrayList<Class<? extends KeyProvider>>(6);
-    defAndKeys.add(SimulatorOptions.class);
-    defAndKeys.add(SimulationOptions.class);
-    defAndKeys.add(EstimationOptions.class);
-    defAndKeys.add(GUIOptions.class);
-    defAndKeys.add(PlotOptions.class);
-    defAndKeys.add(CSVOptions.class); 
-    return defAndKeys;
-  }
+	/**
+	 * 
+	 * @return
+	 */
+	public static Class<AbstractDESSolver>[] getAvailableSolvers() {
+		return AVAILABLE_SOLVERS;
+	}
 
-  /*
-   * (non-Javadoc)
-   * @see de.zbit.Launcher#getInteractiveOptions()
-   */
-  public List<Class<? extends KeyProvider>> getInteractiveOptions() {
-    List<Class<? extends KeyProvider>> defAndKeys = new ArrayList<Class<? extends KeyProvider>>(5);
-    defAndKeys.add(SimulationOptions.class);
-    defAndKeys.add(EstimationOptions.class);
-    defAndKeys.add(PlotOptions.class);
-    return defAndKeys;
-  }
+	/**
+	 * 
+	 * @param args
+	 */
+	public static void main(String args[]) {
+		new SBMLsimulator(args);
+	}
 
-  /*
-   * (non-Javadoc)
-   * @see de.zbit.Launcher#getLogPackages()
-   */
-  public String[] getLogPackages() {
-    return new String[] { "de.zbit", "org.sbml", "org.simulator", "eva" };
-  }
+	/**
+	 * 
+	 * @param args
+	 */
+	public SBMLsimulator(String[] args) {
+		super(args);
+	}
 
-  /*
-   * (non-Javadoc)
-   * @see de.zbit.Launcher#getURLOnlineUpdate()
-   */
-  public URL getURLOnlineUpdate() {
-    URL url = null;
-    try {
-      url = new URL("http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/downloads/");
-    } catch (MalformedURLException exc) {
-      logger.log(Level.FINER, exc.getLocalizedMessage(), exc);
-    }
-    return url;
-  }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.zbit.Launcher#commandLineMode(de.zbit.AppConf)
+	 */
+	public void commandLineMode(AppConf appConf) {
+		String openFile = null;
+		SBProperties props = appConf.getCmdArgs();
+		if (props.containsKey(SimulatorOptions.SBML_INPUT_FILE)) {
+			openFile = props.get(SimulatorOptions.SBML_INPUT_FILE).toString();
+		}
+		String timeSeriesFile = null;
+		if (props.containsKey(SimulatorOptions.TIME_SERIES_FILE)) {
+			timeSeriesFile = props.get(SimulatorOptions.TIME_SERIES_FILE)
+					.toString();
+		}
 
-  /*
-   * (non-Javadoc)
-   * @see de.zbit.Launcher#getURLlicenseFile()
-   */
-  public URL getURLlicenseFile() {
-    URL url = null;
-    try {
-      url = new URL("http://www.gnu.org/licenses/lgpl-3.0-standalone.html");
-    } catch (MalformedURLException exc) {
-      logger.log(Level.FINER, exc.getLocalizedMessage(), exc);
-    }
-    return url;
-  }
+		// TODO: implement command line mode!
+		/*
+		 * Two ways: 1. Just a simple simulation with results in CSV format 2.
+		 * Optimization of the model
+		 */
+		if ((openFile != null) && (timeSeriesFile != null)) {
+			performOptimization(openFile, timeSeriesFile, props);
+		} else if (openFile != null) {
+			performSimulation(openFile, props);
+		} else {
+			logger.fine(String.format(
+					getResources().getString("INCOMPLETE_CMD_ARG_LIST"),
+					getAppName(), getVersionNumber()));
 
-  /*
-   * (non-Javadoc)
-   * @see de.zbit.Launcher#getVersionNumber()
-   */
-  public String getVersionNumber() {
-    return "0.9.0";
-  }
+		}
+	}
 
-  /*
-   * (non-Javadoc)
-   * @see de.zbit.Launcher#getYearOfProgramRelease()
-   */
-  public short getYearOfProgramRelease() {
-    return (short) 2011;
-  }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.zbit.Launcher#getAppName()
+	 */
+	public String getAppName() {
+		return getClass().getSimpleName();
+	}
 
-  /*
-   * (non-Javadoc)
-   * @see de.zbit.Launcher#getYearWhenProjectWasStarted()
-   */
-  public short getYearWhenProjectWasStarted() {
-    return 2007;
-  }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.zbit.Launcher#getCmdLineOptions()
+	 */
+	public List<Class<? extends KeyProvider>> getCmdLineOptions() {
+		List<Class<? extends KeyProvider>> defAndKeys = new ArrayList<Class<? extends KeyProvider>>(
+				6);
+		defAndKeys.add(SimulatorOptions.class);
+		defAndKeys.add(SimulationOptions.class);
+		defAndKeys.add(EstimationOptions.class);
+		defAndKeys.add(GUIOptions.class);
+		defAndKeys.add(PlotOptions.class);
+		defAndKeys.add(CSVOptions.class);
+		return defAndKeys;
+	}
 
-  /*
-   * (non-Javadoc)
-   * @see de.zbit.Launcher#initGUI(de.zbit.AppConf)
-   */
-  public BaseFrame initGUI(AppConf appConf) {
-    SimulatorUI simulatorUI = new SimulatorUI(appConf);
-    SBProperties props = appConf.getCmdArgs();
-    if (props.containsKey(SimulatorOptions.SBML_FILE)) {
-      simulatorUI.openModel(new File(props.get(SimulatorOptions.SBML_FILE)
-          .toString()));
-      if (props.containsKey(SimulatorOptions.TIME_SERIES_FILE)) {
-        simulatorUI.openExperimentalData(new File(props.get(
-          SimulatorOptions.TIME_SERIES_FILE).toString()));
-      }
-    }
-    return simulatorUI;
-  }
-  
-  /**
-   * 
-   * @param args
-   */
-  public static void main(String args[]) {
-    new SBMLsimulator(args);
-  }
-	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.zbit.Launcher#getInteractiveOptions()
+	 */
+	public List<Class<? extends KeyProvider>> getInteractiveOptions() {
+		List<Class<? extends KeyProvider>> defAndKeys = new ArrayList<Class<? extends KeyProvider>>(
+				5);
+		defAndKeys.add(SimulationOptions.class);
+		defAndKeys.add(EstimationOptions.class);
+		defAndKeys.add(PlotOptions.class);
+		return defAndKeys;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.zbit.Launcher#getLogPackages()
+	 */
+	public String[] getLogPackages() {
+		return new String[] { "de.zbit", "org.sbml", "org.simulator", "eva" };
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.zbit.Launcher#getURLlicenseFile()
+	 */
+	public URL getURLlicenseFile() {
+		URL url = null;
+		try {
+			url = new URL(
+					"http://www.gnu.org/licenses/lgpl-3.0-standalone.html");
+		} catch (MalformedURLException exc) {
+			logger.log(Level.FINER, exc.getLocalizedMessage(), exc);
+		}
+		return url;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.zbit.Launcher#getURLOnlineUpdate()
+	 */
+	public URL getURLOnlineUpdate() {
+		URL url = null;
+		try {
+			url = new URL(
+					"http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/downloads/");
+		} catch (MalformedURLException exc) {
+			logger.log(Level.FINER, exc.getLocalizedMessage(), exc);
+		}
+		return url;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.zbit.Launcher#getVersionNumber()
+	 */
+	public String getVersionNumber() {
+		return "0.9.0";
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.zbit.Launcher#getYearOfProgramRelease()
+	 */
+	public short getYearOfProgramRelease() {
+		return (short) 2011;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.zbit.Launcher#getYearWhenProjectWasStarted()
+	 */
+	public short getYearWhenProjectWasStarted() {
+		return 2007;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.zbit.Launcher#initGUI(de.zbit.AppConf)
+	 */
+	public BaseFrame initGUI(AppConf appConf) {
+		SimulatorUI simulatorUI = new SimulatorUI(appConf);
+		SBProperties props = appConf.getCmdArgs();
+		if (props.containsKey(SimulatorOptions.SBML_INPUT_FILE)) {
+			simulatorUI.openModel(new File(props.get(
+					SimulatorOptions.SBML_INPUT_FILE).toString()));
+			if (props.containsKey(SimulatorOptions.TIME_SERIES_FILE)) {
+				simulatorUI.openExperimentalData(new File(props.get(
+						SimulatorOptions.TIME_SERIES_FILE).toString()));
+			}
+		}
+		return simulatorUI;
+	}
+
+	private void performOptimization(String openFile, String timeSeriesFile,
+			SBProperties props) {
+		String outSBMLFile;
+		if (props.containsKey(EstimationOptions.SBML_OUTPUT_FILE)) {
+			outSBMLFile = props.get(EstimationOptions.SBML_OUTPUT_FILE)
+					.toString();
+		} else {
+			outSBMLFile = openFile.substring(0, openFile.lastIndexOf('.'))
+					+ "_optimized.xml";
+		}
+		
+		SBPreferences prefs = SBPreferences.getPreferencesFor(EstimationOptions.class);
+		
+
+	}
+
+	private void performSimulation(String openFile, SBProperties props) {
+		String outCSVFile;
+		if (props.containsKey(SimulatorOptions.SIMULATION_OUTPUT_FILE)) {
+			outCSVFile = props.get(SimulatorOptions.SIMULATION_OUTPUT_FILE)
+					.toString();
+		} else {
+			outCSVFile = openFile.substring(0, openFile.lastIndexOf('.'))
+					+ "_simulated.csv";
+		}
+		
+		SBPreferences prefs = SBPreferences.getPreferencesFor(SimulationOptions.class);
+		
+		
+		
+		
+
+	}
+
 }

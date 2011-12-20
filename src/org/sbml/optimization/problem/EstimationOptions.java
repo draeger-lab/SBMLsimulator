@@ -17,12 +17,15 @@
  */
 package org.sbml.optimization.problem;
 
+import java.io.File;
 import java.util.ResourceBundle;
 
+import de.zbit.io.SBFileFilter;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.Option;
 import de.zbit.util.prefs.OptionGroup;
+import de.zbit.util.prefs.Range;
 
 /**
  * A collection of {@link Option}s to configure the parameter estimation
@@ -131,6 +134,14 @@ public interface EstimationOptions extends KeyProvider {
 	@SuppressWarnings("unchecked")
 	public static final OptionGroup<Boolean> INTEGRATION_STRATEGY = new OptionGroup<Boolean>(
 		"INTEGRATION_STRATEGY", bundle, EST_MULTI_SHOOT);
+	
+	/**
+	 * SBML output file.
+	 */
+	public static final Option<File> SBML_OUTPUT_FILE = new Option<File>(
+			"SBML_OUTPUT_FILE", File.class, bundle, new Range<File>(File.class,
+					SBFileFilter.createSBMLFileFilter()), new File(
+					System.getProperty("user.dir")));
 	
 	/*
 	 * TODO: Select Optimization algorithm and Termination criterion and SBML-output file
