@@ -34,33 +34,42 @@ import de.zbit.util.prefs.Range;
  * @since 1.0
  */
 public interface SimulatorOptions extends KeyProvider {
-  
-  /**
+
+	/**
    * 
    */
-  public static final ResourceBundle bundle = ResourceManager
-      .getBundle("org.sbml.simulator.locales.Simulator");
-  
-  /**
-   * SBML input file.
-   */
-  public static final Option<File> SBML_FILE = new Option<File>("SBML_FILE",
-    File.class, bundle, new Range<File>(File.class, SBFileFilter
-        .createSBMLFileFilter()), new File(System.getProperty("user.dir")));
+	public static final ResourceBundle bundle = ResourceManager
+			.getBundle("org.sbml.simulator.locales.Simulator");
 
-  /**
-   * Path to a file with a time series of species/compartment/parameter values.
-   */
-  public static final Option<File> TIME_SERIES_FILE = new Option<File>(
-    "TIME_SERIES_FILE", File.class, bundle, new Range<File>(File.class,
-      SBFileFilter.createCSVFileFilter()), new File(System
-        .getProperty("user.home")));
-  
-  /**
-   * Select input files for simulation.
-   */
-  @SuppressWarnings("unchecked")
-  public final static OptionGroup<File> INPUT_FILES = new OptionGroup<File>(
-    "INPUT_FILES", bundle, SBML_FILE, TIME_SERIES_FILE);
-  
+	/**
+	 * SBML input file.
+	 */
+	public static final Option<File> SBML_INPUT_FILE = new Option<File>(
+			"SBML_INPUT_FILE", File.class, bundle, new Range<File>(File.class,
+					SBFileFilter.createSBMLFileFilter()), new File(
+					System.getProperty("user.dir")));
+	
+	/**
+	 * Path to a file with a time series of species/compartment/parameter
+	 * values.
+	 */
+	public static final Option<File> TIME_SERIES_FILE = new Option<File>(
+			"TIME_SERIES_FILE", File.class, bundle, new Range<File>(File.class,
+					SBFileFilter.createCSVFileFilter()), new File(
+					System.getProperty("user.home")));
+	
+	/**
+	 * Output of a simulation.
+	 */
+	public static final Option<File> SIMULATION_OUTPUT_FILE = new Option<File>(
+			"SIMULATION_OUTPUT_FILE", File.class, bundle, new Range<File>(File.class,
+					SBFileFilter.createCSVFileFilter()), new File(
+					System.getProperty("user.home")));
+
+	/**
+	 * Select input files for simulation.
+	 */
+	@SuppressWarnings("unchecked")
+	public final static OptionGroup<File> INPUT_FILES = new OptionGroup<File>(
+			"INPUT_FILES", bundle, SBML_INPUT_FILE, TIME_SERIES_FILE);
 }
