@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.simulator.gui.SimulatorUI;
 import org.sbml.simulator.gui.plot.PlotOptions;
@@ -195,15 +196,13 @@ public class SBMLsimulator extends Launcher {
 					.toString();
 		}
 
-		// TODO: implement command line mode!
-		/*
-		 * Two ways: 1. Just a simple simulation with results in CSV format 2.
-		 * Optimization of the model
-		 */
-		if ((openFile != null) && (timeSeriesFile != null)) {
-			performOptimization(openFile, timeSeriesFile, props);
-		} else if (openFile != null) {
-			performSimulation(openFile, props);
+		if (openFile != null) {
+			CommandLineManager commandLineManager = new CommandLineManager(openFile, timeSeriesFile, appConf);
+			try {
+				commandLineManager.perform();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		} else {
 			logger.fine(String.format(
 					getResources().getString("INCOMPLETE_CMD_ARG_LIST"),
