@@ -73,8 +73,6 @@ public class SimulationTest {
 			MultiTable solution1 = solver.solve(interpreter,
         experimentalData.getBlock(0), interpreter.getInitialValues());
       
-			System.out.println(solution.getColumn("A").toString());
-			System.out.println(solution1.getColumn("A").toString());
 			
 			MultiTable solution2= solver.solve(interpreter, interpreter.getInitialValues(),
         experimentalData.getTimePoints());
