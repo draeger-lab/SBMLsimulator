@@ -126,7 +126,6 @@ public interface PlotOptions extends KeyProvider {
 	 */
 	@SuppressWarnings("unchecked")
 	public static final OptionGroup<Color> PLOT_APPEARANCE = new OptionGroup<Color>(
-		"PLOT_APPEARANCE", "Options for appearence of the Plot Area",
-		PLOT_BACKGROUND_COLOR, PLOT_GRID_COLOR);
+			"PLOT_APPEARANCE", bundle, PLOT_BACKGROUND_COLOR, PLOT_GRID_COLOR);
 	
 }

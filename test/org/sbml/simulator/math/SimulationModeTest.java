@@ -83,7 +83,7 @@ public class SimulationModeTest {
 		csvfile = path + "-results.csv";
 		configfile = path + "-settings.txt";
 
-		settings.put(SimulatorOptions.SBML_FILE, sbmlfile);
+		settings.put(SimulatorOptions.SBML_INPUT_FILE, sbmlfile);
 		settings.put(CSVOptions.CSV_FILE, csvfile);
 
 		Properties cfg = Resource.readProperties(configfile);
