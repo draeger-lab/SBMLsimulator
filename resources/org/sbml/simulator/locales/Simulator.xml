@@ -100,9 +100,9 @@
   <entry key="TITLE_OPTIONS">Plot title</entry>
   <entry key="TITLE_OPTIONS_TOOLTIP">Adjust the tile for the plot</entry>
   <entry key="BASE_OPTIONS">Plotting panel options</entry>
-  <entry key="BASE_OPTIONS_TOOLTIP">Options for the visible rect of the plot panel</entry>
-  <entry key="PLOT_APPEARANCE">Options for appearance of the Plot Area</entry>
-  <entry key="PLOT_APPEARANCE_TOOLTIP">Options for appearance of the Plot Area</entry>
+  <entry key="BASE_OPTIONS_TOOLTIP">Options for the visible rectangle of the plot panel</entry>
+  <entry key="PLOT_APPEARANCE">Options for appearance of the plot area</entry>
+  <entry key="PLOT_APPEARANCE_TOOLTIP">Options for appearance of the plot area</entry>
   
   <!-- SelectionCommand -->
   

@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.math.ode.ODEIntegrator;
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.simulator.gui.SimulatorUI;
 import org.sbml.simulator.gui.plot.PlotOptions;
@@ -181,9 +180,7 @@ public class SBMLsimulator extends Launcher {
 		super(args);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#commandLineMode(de.zbit.AppConf)
 	 */
 	public void commandLineMode(AppConf appConf) {
@@ -215,23 +212,18 @@ public class SBMLsimulator extends Launcher {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#getAppName()
 	 */
 	public String getAppName() {
 		return getClass().getSimpleName();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#getCmdLineOptions()
 	 */
 	public List<Class<? extends KeyProvider>> getCmdLineOptions() {
-		List<Class<? extends KeyProvider>> defAndKeys = new ArrayList<Class<? extends KeyProvider>>(
-				6);
+		List<Class<? extends KeyProvider>> defAndKeys = new ArrayList<Class<? extends KeyProvider>>(6);
 		defAndKeys.add(SimulatorOptions.class);
 		defAndKeys.add(SimulationOptions.class);
 		defAndKeys.add(EstimationOptions.class);
@@ -241,9 +233,7 @@ public class SBMLsimulator extends Launcher {
 		return defAndKeys;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#getInteractiveOptions()
 	 */
 	public List<Class<? extends KeyProvider>> getInteractiveOptions() {
@@ -255,18 +245,14 @@ public class SBMLsimulator extends Launcher {
 		return defAndKeys;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#getLogPackages()
 	 */
 	public String[] getLogPackages() {
 		return new String[] { "de.zbit", "org.sbml", "org.simulator", "eva" };
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#getURLlicenseFile()
 	 */
 	public URL getURLlicenseFile() {
@@ -280,9 +266,7 @@ public class SBMLsimulator extends Launcher {
 		return url;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#getURLOnlineUpdate()
 	 */
 	public URL getURLOnlineUpdate() {
@@ -296,36 +280,28 @@ public class SBMLsimulator extends Launcher {
 		return url;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#getVersionNumber()
 	 */
 	public String getVersionNumber() {
 		return "0.9.0";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#getYearOfProgramRelease()
 	 */
 	public short getYearOfProgramRelease() {
 		return (short) 2011;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#getYearWhenProjectWasStarted()
 	 */
 	public short getYearWhenProjectWasStarted() {
 		return 2007;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#initGUI(de.zbit.AppConf)
 	 */
 	public BaseFrame initGUI(AppConf appConf) {
@@ -342,6 +318,12 @@ public class SBMLsimulator extends Launcher {
 		return simulatorUI;
 	}
 
+	/**
+	 * 
+	 * @param openFile
+	 * @param timeSeriesFile
+	 * @param props
+	 */
 	private void performOptimization(String openFile, String timeSeriesFile,
 			SBProperties props) {
 		String outSBMLFile;
@@ -352,12 +334,14 @@ public class SBMLsimulator extends Launcher {
 			outSBMLFile = openFile.substring(0, openFile.lastIndexOf('.'))
 					+ "_optimized.xml";
 		}
-		
 		SBPreferences prefs = SBPreferences.getPreferencesFor(EstimationOptions.class);
-		
-
 	}
 
+	/**
+	 * 
+	 * @param openFile
+	 * @param props
+	 */
 	private void performSimulation(String openFile, SBProperties props) {
 		String outCSVFile;
 		if (props.containsKey(SimulatorOptions.SIMULATION_OUTPUT_FILE)) {
@@ -367,13 +351,7 @@ public class SBMLsimulator extends Launcher {
 			outCSVFile = openFile.substring(0, openFile.lastIndexOf('.'))
 					+ "_simulated.csv";
 		}
-		
 		SBPreferences prefs = SBPreferences.getPreferencesFor(SimulationOptions.class);
-		
-		
-		
-		
-
 	}
 
 }
