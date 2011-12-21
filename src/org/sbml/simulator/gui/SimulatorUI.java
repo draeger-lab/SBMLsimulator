@@ -250,12 +250,12 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 			if (simPanel.isSetExperimentalData()) {
 				simPanel.closeExperimentalData();
 				GUITools.setEnabled(false, getJMenuBar(), toolBar,
-						Command.OPTIMIZATION, BaseAction.FILE_SAVE);
+						Command.OPTIMIZATION, BaseAction.FILE_SAVE_AS);
 			} else {
 				getContentPane().remove(simPanel);
 				simPanel = null;
 				GUITools.setEnabled(false, getJMenuBar(), toolBar,
-						BaseAction.FILE_CLOSE, BaseAction.FILE_SAVE,
+						BaseAction.FILE_CLOSE, BaseAction.FILE_SAVE_AS,
 						Command.EDIT_MODEL, Command.SIMULATION_START);
 				setTitle(getApplicationName());
 			}
@@ -265,7 +265,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 		}
 		if (simPanel == null) {
 			GUITools.setEnabled(false, getJMenuBar(), toolBar,
-					Command.SHOW_OPTIONS, BaseAction.FILE_SAVE);
+					Command.SHOW_OPTIONS, BaseAction.FILE_SAVE_AS);
 			retVal = true;
 		}
 		if (retVal) {
@@ -497,7 +497,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 		getContentPane().add(simPanel, BorderLayout.CENTER);
 		validate();
 		GUITools.setEnabled(true, getJMenuBar(), toolBar,
-			BaseAction.FILE_SAVE, Command.EDIT_MODEL,
+			BaseAction.FILE_SAVE_AS, Command.EDIT_MODEL,
 			Command.SIMULATION_START, Command.SHOW_OPTIONS);
 	}
 
@@ -591,7 +591,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 			this.statusBar.reset();
 			// setStatusBarToMemoryUsage();
 			GUITools.setEnabled(true, getJMenuBar(), getJToolBar(),
-					BaseAction.FILE_SAVE, Command.EDIT_MODEL,
+					BaseAction.FILE_SAVE_AS, Command.EDIT_MODEL,
 					Command.SIMULATION_START);
 		}
 	}
@@ -686,7 +686,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 					&& (frame.getName().equals(EvAClient.class.getSimpleName()))) {
 				simPanel.setAllEnabled(true);
 				GUITools.setEnabled(true, getJMenuBar(), toolBar,
-						BaseAction.FILE_SAVE, Command.EDIT_MODEL,
+						BaseAction.FILE_SAVE_AS, Command.EDIT_MODEL,
 						Command.SIMULATION_START, BaseAction.FILE_CLOSE,
 						Command.OPTIMIZATION, BaseAction.EDIT_PREFERENCES);
 			}
