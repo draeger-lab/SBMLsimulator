@@ -147,12 +147,16 @@
   
   <!-- SimulatorOptions -->
   
-  <entry key="TIME_SERIES_FILE">Time series data file</entry>
-  <entry key="TIME_SERIES_FILE_TOOLTIP">Path to a file with a time series of species/compartment/parameter values.</entry>
-  <entry key="SBML_FILE">SBML file</entry>
-  <entry key="SBML_FILE_TOOLTIP">Select a model in SBML format that is to be simulated.</entry>
   <entry key="INPUT_FILES">Select input files</entry>
   <entry key="INPUT_FILES_TOOLTIP">These options are used to select all input files for the simulation.</entry>
+  <entry key="SBML_INPUT_FILE">SBML input file</entry>
+  <entry key="SBML_INPUT_FILE_TOOLTIP">Select a model in SBML format that is to be simulated.</entry>
+  <entry key="SBML_OUTPUT_FILE">SBML output file</entry>
+  <entry key="SBML_OUTPUT_FILE_TOOLTIP">Select a file where to store the model in SBML format after parameter optimization.</entry>
+  <entry key="SIMULATION_OUTPUT_FILE">Simulation output file</entry>
+  <entry key="SIMULATION_OUTPUT_FILE_TOOLTIP">Select a file where to store the results of a simulation.</entry>
+  <entry key="TIME_SERIES_FILE">Time series data file</entry>
+  <entry key="TIME_SERIES_FILE_TOOLTIP">Path to a file with a time series of species/compartment/parameter values.</entry>
   
   <!-- SimulatorUI -->
   
