@@ -1,3 +1,20 @@
+/*
+ * $Id$
+ * $URL$
+ * ---------------------------------------------------------------------
+ * This file is part of SBMLsimulator, a Java-based simulator for models
+ * of biochemical processes encoded in the modeling language SBML.
+ *
+ * Copyright (C) 2007-2011 by the University of Tuebingen, Germany.
+ *
+ * This library is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation. A copy of the license
+ * agreement is provided in the file named "LICENSE.txt" included with
+ * this software distribution and also available online as
+ * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
+ * ---------------------------------------------------------------------
+ */
 package org.sbml.simulator;
 
 import java.beans.PropertyChangeEvent;
@@ -41,7 +58,9 @@ public class CommandLineManager implements PropertyChangeListener {
 		loadPreferences();
 	}
 
-	@Override
+	/* (non-Javadoc)
+	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+	 */
 	public void propertyChange(PropertyChangeEvent evt) {
 		if ("progress".equals(evt.getPropertyName())) {
 		} else if ("done".equals(evt.getPropertyName())) {
@@ -55,6 +74,10 @@ public class CommandLineManager implements PropertyChangeListener {
 
 	}
 
+	/**
+	 * 
+	 * @param data
+	 */
 	private void processResult(MultiTable data) {
 		SBProperties props = appConf.getCmdArgs();
 		FileWriter filewriter;
@@ -104,6 +127,9 @@ public class CommandLineManager implements PropertyChangeListener {
 
 	}
 
+	/**
+	 * 
+	 */
 	private void loadPreferences() {
 		AbstractDESSolver solver;
 		SBPreferences prefs = SBPreferences
@@ -161,6 +187,10 @@ public class CommandLineManager implements PropertyChangeListener {
 		simulationManager.simulate();
 	}
 
+	/**
+	 * 
+	 * @throws Exception
+	 */
 	public void perform() throws Exception {
 		simulate();
 	}

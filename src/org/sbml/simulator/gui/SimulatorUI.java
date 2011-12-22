@@ -87,7 +87,7 @@ import eva2.tools.BasicResourceLoader;
 public class SimulatorUI extends BaseFrame implements ItemListener,
     PropertyChangeListener {
   
-  /**
+	/**
 	 * Commands that can be understood by this dialog.
 	 * 
 	 * @author Andreas Dr&auml;ger
@@ -110,27 +110,32 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 		 */
 		SIMULATION_START;
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
+		 * 
 		 * @see de.zbit.gui.ActionCommand#getName()
 		 */
-    public String getName() {
-      String elem = toString();
-      if (bundle.containsKey(elem)) {
-        return bundle.getString(elem);
-      }
-      return StringUtil.firstLetterUpperCase(elem.replace('_', ' '));
-    }
+		public String getName() {
+			String elem = toString();
+			if (bundle.containsKey(elem)) {
+				return bundle.getString(elem);
+			}
+			return StringUtil.firstLetterUpperCase(elem.replace('_', ' '));
+		}
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
+		 * 
 		 * @see de.zbit.gui.ActionCommand#getToolTip()
 		 */
-    public String getToolTip() {
-      String elem = toString() + "_TOOLTIP";
-      if (bundle.containsKey(elem)) {
-        return bundle.getString(elem);
-      }
-      return StringUtil.firstLetterUpperCase(toString().replace('_', ' '));
-    }
+		public String getToolTip() {
+			String elem = toString() + "_TOOLTIP";
+			if (bundle.containsKey(elem)) {
+				return bundle.getString(elem);
+			}
+			return StringUtil
+					.firstLetterUpperCase(toString().replace('_', ' '));
+		}
 	}
 
 	/**
@@ -218,28 +223,27 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	 * @see de.zbit.gui.BaseFrame#additionalEditMenuItems()
 	 */
 	@Override
-  protected JMenuItem[] additionalEditMenuItems() {
-	  UIManager.put("PLAY_16", new ImageIcon(SimulatorUI.class.getResource("img/PLAY_16.png")));
-	  
-    JMenuItem editModel = GUITools.createJMenuItem(EventHandler.create(
-      ActionListener.class, this, "editModel"), Command.EDIT_MODEL, UIManager
-        .getIcon("ICON_PENCIL_16"), 'M');
-    JMenuItem simulation = GUITools.createJMenuItem(EventHandler.create(
-      ActionListener.class, this, "simulate"), Command.SIMULATION_START,
-      UIManager.getIcon("PLAY_16"), 'S'); // ICON_GEAR_16
-    JMenuItem optimization = GUITools.createJMenuItem(EventHandler.create(
-      ActionListener.class, this, "optimize"), Command.OPTIMIZATION,
-      getIconEvA2(), 'O');
-    optimization.setEnabled(false);
-    JCheckBoxMenuItem item = new JCheckBoxMenuItem("Show options",
-      simPanel != null ? simPanel.isShowSettingsPanel() : true);
-    if (simPanel == null) {
-      item.setEnabled(false);
-    }
-    item.setActionCommand(Command.SHOW_OPTIONS.toString());
-    item.addItemListener(this);
-    return new JMenuItem[] { editModel, simulation, optimization, item };
-  }
+	protected JMenuItem[] additionalEditMenuItems() {
+		UIManager.put("PLAY_16", new ImageIcon(SimulatorUI.class.getResource("img/PLAY_16.png")));
+		JMenuItem editModel = GUITools.createJMenuItem(
+				EventHandler.create(ActionListener.class, this, "editModel"),
+				Command.EDIT_MODEL, UIManager.getIcon("ICON_PENCIL_16"), 'M');
+		JMenuItem simulation = GUITools.createJMenuItem(
+				EventHandler.create(ActionListener.class, this, "simulate"),
+				Command.SIMULATION_START, UIManager.getIcon("PLAY_16"), 'S');
+		JMenuItem optimization = GUITools.createJMenuItem(
+				EventHandler.create(ActionListener.class, this, "optimize"),
+				Command.OPTIMIZATION, getIconEvA2(), 'O');
+		optimization.setEnabled(false);
+		JCheckBoxMenuItem item = new JCheckBoxMenuItem("Show options",
+				simPanel != null ? simPanel.isShowSettingsPanel() : true);
+		if (simPanel == null) {
+			item.setEnabled(false);
+		}
+		item.setActionCommand(Command.SHOW_OPTIONS.toString());
+		item.addItemListener(this);
+		return new JMenuItem[] { editModel, simulation, optimization, item };
+	}
 
 	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrame#closeFile()
@@ -293,36 +297,25 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	 * 
 	 */
 	public void editModel() {
-	  logger.info("Starting model editor");
-    try {
-      // Cloning is necessary, because the model might be changed.
-      // If not, we want to stick with the previous version of the
-      // model.
-      SBMLDocument doc = simPanel.getModel().getSBMLDocument()
-          .clone();
-      SBMLModelSplitPane split = new SBMLModelSplitPane(doc,
-          SBPreferences.getPreferencesFor(LaTeXOptions.class)
-              .getBoolean(
-                  LaTeXOptions.PRINT_NAMES_IF_AVAILABLE));
-      split.setPreferredSize(new Dimension(640, 480));
-      if (JOptionPane2.showOptionDialog(this, split, "Model Editor",
-          JOptionPane2.OK_CANCEL_OPTION,
-          JOptionPane2.INFORMATION_MESSAGE, null, null, null,
-          true) == JOptionPane2.OK_OPTION) {
-        simPanel = new SimulationPanel(doc.getModel());
-        validate();
-      }
-    } catch (Throwable exc) {
-      GUITools.showErrorMessage(this, exc);
-    }
-	}
-
-	/* (non-Javadoc)
-	 * @see de.zbit.gui.BaseFrame#getApplicationName()
-	 */
-	@Override
-	public String getApplicationName() {
-		return SBMLsimulator.class.getSimpleName();
+		logger.info("Starting model editor");
+		try {
+			// Cloning is necessary, because the model might be changed.
+			// If not, we want to stick with the previous version of the
+			// model.
+			SBMLDocument doc = simPanel.getModel().getSBMLDocument().clone();
+			SBMLModelSplitPane split = new SBMLModelSplitPane(doc,
+					SBPreferences.getPreferencesFor(LaTeXOptions.class)
+							.getBoolean(LaTeXOptions.PRINT_NAMES_IF_AVAILABLE));
+			split.setPreferredSize(new Dimension(640, 480));
+			if (JOptionPane2.showOptionDialog(this, split, "Model Editor",
+					JOptionPane2.OK_CANCEL_OPTION,
+					JOptionPane2.INFORMATION_MESSAGE, null, null, null, true) == JOptionPane2.OK_OPTION) {
+				simPanel = new SimulationPanel(doc.getModel());
+				validate();
+			}
+		} catch (Throwable exc) {
+			GUITools.showErrorMessage(this, exc);
+		}
 	}
 
 	/* (non-Javadoc)
