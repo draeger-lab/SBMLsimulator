@@ -34,8 +34,30 @@ import de.zbit.util.prefs.SBPreferences;
 /**
  * This class represents a quality measurement for the current simulation,
  * including a distance function and one or more experimental data sets.
+ * <p>
+ * This class may listen to changes in some user interface (whether it is a
+ * graphical or a command line interface). In order to avoid cyclic changes of
+ * its {@link QualityMeasure}, there is no set method for this property. If a
+ * {@link QualityMeasurement} receives a {@link PropertyChangeEvent}, it reacts
+ * to the following kinds of property names:
+ * <table>
+ * <tr>
+ * <th>Property</th>
+ * <th>Expectation</th>
+ * <tr>
+ * <tr>
+ * <td><code>distance</code></td>
+ * <td>change of the {@link QualityMeasure}</td>
+ * </tr>
+ * <tr>
+ * <td><code>measurements</code></td>
+ * <td>adding/removing an experimental data set</td>
+ * </tr>
+ * </table>
+ * </p>
  * 
  * @author Alexander D&ouml;rr
+ * @author Andreas Dr&auml;ger
  * @version $Rev$
  * @since 1.0
  */
@@ -52,18 +74,27 @@ public class QualityMeasurement implements PropertyChangeListener {
   List<MultiTable> measurements;
   
   /**
-   * Creates a new quality measurement.
-   */
+	 * Creates a new quality measurement. A {@link QualityMeasure} can only be set
+	 * using property changes.
+	 */
   public QualityMeasurement() {
     this.measurements = new LinkedList<MultiTable>();
+    this.distance = null;
   }
   
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent
-   * )
+  /**
+	 * Creates a new {@link QualityMeasurement} with the given initial
+	 * {@link QualityMeasure} as its distance function.
+	 * 
+	 * @param quality
+	 */
+  public QualityMeasurement(QualityMeasure quality) {
+  	this();
+  	this.distance = quality;
+  }
+  
+  /* (non-Javadoc)
+   * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
    */
   public void propertyChange(PropertyChangeEvent evt) {
     String property = evt.getPropertyName();

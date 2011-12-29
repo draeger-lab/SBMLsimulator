@@ -39,11 +39,8 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
-import org.apache.commons.math.ode.DerivativeException;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Quantity;
-import org.sbml.jsbml.SBMLException;
-import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.QualityMeasurement;
 import org.sbml.simulator.SBMLsimulator;
@@ -90,6 +87,11 @@ public class SimulationPanel extends JPanel implements
   private JToolBar footPanel;
   
   /**
+	 * 
+	 */
+  private List<PropertyChangeListener> listeners;
+  
+  /**
    * Array of identifiers of those {@link Quantity}s that are the target of a
    * value optimization.
    */
@@ -107,6 +109,11 @@ public class SimulationPanel extends JPanel implements
   private int simulationDataIndex, solutionIndex, runBestIndex;
   
   /**
+   * The simulation manager for the current simulation.
+   */
+  private SimulationManager simulationManager;
+  
+  /**
    * The main tabbed pane showing plot, simulation and experimental data.
    */
   private JTabbedPane tabbedPane;
@@ -115,16 +122,6 @@ public class SimulationPanel extends JPanel implements
 	 * 
 	 */
   private SimulationVisualizationPanel visualizationPanel;
-  
-  /**
-	 * 
-	 */
-  private ArrayList<PropertyChangeListener> listeners;
-  
-  /**
-   * The simulation manager for the current simulation.
-   */
-  private SimulationManager simulationManager;
   
   /**
    * @param model
@@ -142,16 +139,37 @@ public class SimulationPanel extends JPanel implements
         if (model == null) {
           throw new NullPointerException("Model is null.");
         }
-        QualityMeasurement measurement = new QualityMeasurement();
+        SBPreferences prefs = SBPreferences.getPreferencesFor(SimulationOptions.class);
+        String clazz = prefs.get(SimulationOptions.ODE_SOLVER);
+//        clazz = "org.simulator.math.odes.AdamsBashforthSolver";
+        DESSolver solver = (DESSolver) Class.forName(clazz.substring(clazz.indexOf(' ') + 1)).newInstance();
+        double timeStart = prefs.getDouble(SimulationOptions.SIM_START_TIME);
+        double timeEnd = prefs.getDouble(SimulationOptions.SIM_END_TIME);
+        double stepSize = prefs.getDouble(SimulationOptions.SIM_STEP_SIZE);
+        boolean includeReactions = true;
+        clazz = prefs.get(SimulationOptions.QUALITY_MEASURE);
+        // TODO: It seems here is a bug...
+//        clazz = "org.sbml.simulator.math.RelativeSquaredError";
+        QualityMeasure quality = (QualityMeasure) Class.forName(clazz.substring(clazz.indexOf(' ') + 1)).newInstance();
+        QualityMeasurement measurement = new QualityMeasurement(quality);
         simulationManager = new SimulationManager(measurement,
-          new SimulationConfiguration(model));
+          new SimulationConfiguration(model, solver, timeStart, timeEnd, stepSize, includeReactions));
         simulationManager.addPropertyChangeListener(this);
         this.addPropertyChangedListener(measurement);
         visualizationPanel = new SimulationVisualizationPanel();
-        loadPreferences();
-      } catch (Exception exc) {
+        init();
+      } catch (Throwable exc) {
         GUITools.showErrorMessage(this, exc);
       }
+    }
+  }
+  
+  /* (non-Javadoc)
+   * @see org.sbml.simulator.math.odes.DESSolver#addPropertyChangedListener(java.beans.PropertyChangeListener)
+   */
+  public void addPropertyChangedListener(PropertyChangeListener listener) {
+    if (!listeners.contains(listener)) {
+      this.listeners.add(listener);
     }
   }
   
@@ -171,16 +189,8 @@ public class SimulationPanel extends JPanel implements
   
   /**
    * @return
-   * @throws NoSuchMethodException
-   * @throws InvocationTargetException
-   * @throws IllegalAccessException
-   * @throws InstantiationException
-   * @throws SecurityException
-   * @throws IllegalArgumentException
    */
-  private SimulationToolPanel createFootPanel()
-    throws IllegalArgumentException, SecurityException, InstantiationException,
-    IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+  private SimulationToolPanel createFootPanel() {
     footPanel = new JToolBar("Integration toolbox");
     SimulationToolPanel foot = new SimulationToolPanel(simulationManager);
     footPanel.add(foot);
@@ -194,6 +204,17 @@ public class SimulationPanel extends JPanel implements
     List<Object[]> multiRunFinalObjectData) {
     // TODO Auto-generated method stub
     System.out.println("finalMultiRunResults");
+  }
+  
+  /* (non-Javadoc)
+   * @see org.sbml.simulator.math.odes.DESSolver#firePropertyChanged(double, double)
+   */
+  public void firePropertyChanged(PropertyChangeEvent evt) {
+    if (!this.listeners.isEmpty()) {
+      for (PropertyChangeListener listener : this.listeners) {
+        listener.propertyChange(evt);
+      }
+    }
   }
   
   /**
@@ -220,27 +241,19 @@ public class SimulationPanel extends JPanel implements
   
   /**
    * @return
-   * @throws IllegalArgumentException
-   * @throws SecurityException
-   * @throws InstantiationException
-   * @throws IllegalAccessException
-   * @throws InvocationTargetException
-   * @throws NoSuchMethodException
    */
-  private SimulationToolPanel getOrCreateFootPanel()
-    throws IllegalArgumentException, SecurityException, InstantiationException,
-    IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-    if (footPanel == null) {
-      return createFootPanel();
-    }
-    return (SimulationToolPanel) footPanel.getComponent(0);
+  public MultiTable getSimulationResultsTable() {
+    return (MultiTable) simTable.getModel();
   }
   
   /**
    * @return
    */
-  public MultiTable getSimulationResultsTable() {
-    return (MultiTable) simTable.getModel();
+  public SimulationToolPanel getSimulationToolPanel() {
+    if (footPanel == null) {
+      return createFootPanel();
+    }
+    return (SimulationToolPanel) footPanel.getComponent(0);
   }
   
   /**
@@ -263,7 +276,7 @@ public class SimulationPanel extends JPanel implements
       }
       visualizationPanel.setModel(simulationManager.getSimlationConfiguration()
           .getModel());
-      SimulationToolPanel foot = getOrCreateFootPanel();
+      SimulationToolPanel foot = getSimulationToolPanel();
       foot.addItemListener(visualizationPanel);
       if (showSettingsPanel) {
         add(footPanel, BorderLayout.SOUTH);
@@ -318,27 +331,16 @@ public class SimulationPanel extends JPanel implements
   }
   
   /**
-   * @throws NoSuchMethodException
-   * @throws InvocationTargetException
-   * @throws IllegalAccessException
-   * @throws InstantiationException
-   * @throws SecurityException
-   * @throws IllegalArgumentException
-   * @throws ModelOverdeterminedException
-   * @throws IntegrationException
-   * @throws SBMLException
+   * 
    */
-  public void loadPreferences() throws IllegalArgumentException,
-    SecurityException, InstantiationException, IllegalAccessException,
-    InvocationTargetException, NoSuchMethodException, SBMLException,
-    DerivativeException, ModelOverdeterminedException {
-    
+  public void loadPreferences() {
     if (visualizationPanel != null) {
       visualizationPanel.loadPreferences();
     }
-    getOrCreateFootPanel();
     removeAll();
+    this.footPanel = null;
     init();
+    validate();
   }
   
   /* (non-Javadoc)
@@ -351,7 +353,8 @@ public class SimulationPanel extends JPanel implements
     if (Double.isNaN(currentDistance)
         || (currentDistance > statDoubles[runBestIndex].doubleValue())) {
       setSimulationData((MultiTable) statObjects[simulationDataIndex]);
-      tools.setCurrentQualityMeasure(statDoubles[runBestIndex].doubleValue());
+			firePropertyChange("quality", getSimulationToolPanel().getCurrentQuality(),
+				statDoubles[runBestIndex].doubleValue());
       String[] solutionString = statObjects[solutionIndex].toString().replace("{","").replace("}","").split(", ");
       for (int i = 0; i < selectedQuantityIds.length; i++) {
         visualizationPanel.updateQuantity(selectedQuantityIds[i], Double.parseDouble(solutionString[i].replace(',', '.')));
@@ -413,33 +416,47 @@ public class SimulationPanel extends JPanel implements
     System.out.println("notifyRunStopped");
   }
   
-//  /**
-//   * 
-//   */
-//  public void savePlotImage() {
-//    try {
-//      SBPreferences prefs = SBPreferences.getPreferencesFor(PlotOptions.class);
-//      String saveDir = prefs.get(PlotOptions.PLOT_SAVE_DIR).toString();
-//      float compression = prefs.getFloat(PlotOptions.JPEG_COMPRESSION_FACTOR);
-//      prefs.put(PlotOptions.PLOT_SAVE_DIR, visualizationPanel.getPlot()
-//          .savePlotImage(saveDir, Float.valueOf(compression)));
-//    } catch (Exception exc) {
-//      GUITools.showErrorMessage(this, exc);
-//    }
-//  }
+  /* (non-Javadoc)
+   * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+   */
+  public void propertyChange(PropertyChangeEvent evt) {
+    if ("progress".equals(evt.getPropertyName())) {
+      this.firePropertyChanged(evt);
+    } else if ("done".equals(evt.getPropertyName())) {
+      MultiTable data = (MultiTable) evt.getNewValue();
+      if (data != null) {
+        setSimulationData(data);
+      }
+      try {
+				if (simulationManager.getQualityMeasurement().getMeasurements().size() > 0) {
+					firePropertyChange("quality", getSimulationToolPanel()
+							.getCurrentQuality(), simulationManager.getMeanDistanceValue());
+				}
+      } catch (Exception e) {
+      }
+      firePropertyChanged(evt);
+    }
+  }
   
   /**
-   * @throws NoSuchMethodException
-   * @throws InvocationTargetException
-   * @throws IllegalAccessException
-   * @throws InstantiationException
-   * @throws SecurityException
-   * @throws IllegalArgumentException
-   * @throws BackingStoreException
+   * 
    */
-  public void savePreferences() throws IllegalArgumentException,
-    SecurityException, InstantiationException, IllegalAccessException,
-    InvocationTargetException, NoSuchMethodException, BackingStoreException {
+  public void refreshStepSize() {
+    getSolver().setStepSize(simulationManager.getSimlationConfiguration().getStepSize());
+  }
+  
+  /* (non-Javadoc)
+   * @see org.sbml.simulator.math.odes.DESSolver#removePropertyChangedListener(java.beans.PropertyChangeListener)
+   */
+  public void removePropertyChangedListener(PropertyChangeListener listener) {
+    if (listeners.contains(listener))
+      this.listeners.remove(listener);
+  }
+  
+  /**
+   * @throws BackingStoreException 
+   */
+  public void savePreferences() throws BackingStoreException {
     SBPreferences prefs = SBPreferences.getPreferencesFor(SimulationOptions.class);
     prefs.flush();
   }
@@ -531,82 +548,15 @@ public class SimulationPanel extends JPanel implements
     }
     tabbedPane.setEnabledAt(1, true);
   }
-  
+
   /**
    * Conducts the simulation.
    * 
    * @throws Exception
    */
   public void simulate() throws Exception {
-    SimulationToolPanel foot = (SimulationToolPanel) footPanel.getComponent(0);
-    foot.processSimulationValues();
-    
     savePreferences();
-    
     simulationManager.simulate();
-    
-    if (simulationManager.getSimlationConfiguration().getStepSize() != foot
-        .getStepSize()) {
-      foot.setStepSize(simulationManager.getSimlationConfiguration()
-          .getStepSize());
-    }
-    
-  }
-  
-  /* (non-Javadoc)
-   * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-   */
-  public void propertyChange(PropertyChangeEvent evt) {
-    if ("progress".equals(evt.getPropertyName())) {
-      this.firePropertyChanged(evt);
-    } else if ("done".equals(evt.getPropertyName())) {
-      MultiTable data = (MultiTable) evt.getNewValue();
-      if (data != null) {
-        setSimulationData(data);
-      }
-      try {
-        if (simulationManager.getQualityMeasurement().getMeasurements().size()>0) {
-          getOrCreateFootPanel().setCurrentQualityMeasure(simulationManager.getMeanDistanceValue());
-        }
-      } catch (Exception e) {
-      }
-      firePropertyChanged(evt);
-    }
-  }
-  
-  /* (non-Javadoc)
-   * @see org.sbml.simulator.math.odes.DESSolver#addPropertyChangedListener(java.beans.PropertyChangeListener)
-   */
-  public void addPropertyChangedListener(PropertyChangeListener listener) {
-    if (!listeners.contains(listener)) {
-      this.listeners.add(listener);
-    }
-  }
-  
-  /* (non-Javadoc)
-   * @see org.sbml.simulator.math.odes.DESSolver#removePropertyChangedListener(java.beans.PropertyChangeListener)
-   */
-  public void removePropertyChangedListener(PropertyChangeListener listener) {
-    if (listeners.contains(listener))
-      this.listeners.remove(listener);
-  }
-  
-  /* (non-Javadoc)
-   * @see org.sbml.simulator.math.odes.DESSolver#firePropertyChanged(double, double)
-   */
-  public void firePropertyChanged(PropertyChangeEvent evt) {
-    if (!this.listeners.isEmpty()) {
-      for (PropertyChangeListener listener : this.listeners) {
-        listener.propertyChange(evt);
-      }
-    }
-  }
-
-  /**
-   * 
-   */
-  public void refreshStepSize() {
-    getSolver().setStepSize(simulationManager.getSimlationConfiguration().getStepSize());
   }
   
 }

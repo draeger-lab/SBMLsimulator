@@ -60,6 +60,11 @@
   <entry key="INTEGRATION_STRATEGY">Integration strategy</entry>
   <entry key="INTEGRATION_STRATEGY_TOOLTIP">Select whether or not to apply a multiple shooting strategy.</entry>
   
+  <!-- InteractiveScanPanel -->
+  
+  <entry key="RESET">Reset</entry>
+  <entry key="RESET_TOOLTIP">Sets all values to the original values from the model. However, previously undefined values will be set to the default values.</entry>
+  
   <!-- LegendTableCellRenderer -->
   
   <entry key="RGB_TOOLTIP">Red = %d, Green = %d, Blue = %d</entry>
@@ -132,15 +137,20 @@
   <entry key="QUALITY_MEASURES_TOOLTIP">Here you can specify how to evaluate the quality of a parameter set with respect to given experimental data.</entry>
   <entry key="ODE_SOLVER">Solver functions for ODE systems</entry>
   <entry key="ODE_SOLVER_TOOLTIP">This gives the class name of the default solver for Ordinary Differential Equation (ODE) systems. The associated class must implement AbstractDESSolver and must have a constructor without any parameters.</entry>
-  <entry key="SIM_START_TIME">Simulation start time</entry>
+  <entry key="SIM_START_TIME">Start time</entry>
   <entry key="SIM_START_TIME_TOOLTIP">The double value associated with this key must, in case of SBML equal to zero. Generally, any start time would be possible. This is why this key exists. But SBML is defined to start its simulation at the time zero.</entry>
-  <entry key="SIM_END_TIME">Simulation end time</entry>
+  <entry key="SIM_END_TIME">End time</entry>
   <entry key="SIM_END_TIME_TOOLTIP">With the associated non-negative double number that has to be greater than 0 when simulating SBML models, it is possible to perform a simulation.</entry>
   <entry key="SIM_STEP_SIZE">Step size</entry>
   <entry key="SIM_STEP_SIZE_TOOLTIP">The greater this value the longer the computation time, but the more accurate will be the result.</entry>
   <entry key="SIMULATION_CONFIGURATION">Parameters for the simulation</entry>
   <entry key="SIMULATION_CONFIGURATION_TOOLTIP">Here you can specify parameters for the simulation of the model</entry>
     
+  <!-- SimulationToolPanel -->
+  
+  <entry key="STEP_COUNT">Number of steps</entry>
+  <entry key="STEP_COUNT_TOOLTIP">The number of time points between the start and the end time of the simulation at which the numerical integration routine should solve the differential equation system. The number of integration steps determines the step size of the integration that equally divides the entire time interval into smaller sub-intervals.</entry>
+  
   <!-- SimulationWorker -->
   
   <entry key="MODEL_UNSTABLE_EXCEPTION">Simulation not possible because the model is unstable.</entry>
@@ -160,6 +170,8 @@
   
   <!-- SimulatorUI -->
   
+  <entry key="FILE_CLOSE">Close model;Closes the currently selected model and all experimental data sets that may be associated with the model.</entry>
+  <entry key="FILE_OPEN">Open model;Open a model in SBML format for simulation or parameter optimization.</entry>
   <entry key="OPTIMIZATION">Optimization</entry>
   <entry key="OPTIMIZATION_TOOLTIP">Launch the optimization of the quantities in the current model, i.e., fits the model to given experimental data.</entry>
   <entry key="SHOW_OPTIONS">Show options</entry>

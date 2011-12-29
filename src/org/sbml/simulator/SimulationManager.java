@@ -20,6 +20,8 @@ package org.sbml.simulator;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.math.ode.DerivativeException;
 import org.sbml.jsbml.SBMLException;
@@ -38,6 +40,11 @@ import eva2.tools.math.Mathematics;
  * @since 1.0
  */
 public class SimulationManager implements PropertyChangeListener {
+	
+	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final transient Logger logger = Logger.getLogger(SimulationManager.class.getName());
   
   /**
    * The quality measurement for current simulation.
@@ -117,11 +124,8 @@ public class SimulationManager implements PropertyChangeListener {
     simworker.execute();
   }
   
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent
+  /* (non-Javadoc)
+   * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent
    * )
    */
   public void propertyChange(PropertyChangeEvent evt) {
@@ -132,8 +136,8 @@ public class SimulationManager implements PropertyChangeListener {
       try {
         computeModelQuality();
       } catch (Exception e) {
-        e.printStackTrace();
-      } 
+        logger.log(Level.WARNING, e.getLocalizedMessage());
+      }
       this.pcs.firePropertyChange(evt);
     }
   }
