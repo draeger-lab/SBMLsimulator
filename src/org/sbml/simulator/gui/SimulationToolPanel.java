@@ -18,12 +18,16 @@
 package org.sbml.simulator.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.lang.reflect.InvocationTargetException;
+import java.beans.PropertyChangeEvent;
 import java.util.HashSet;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.prefs.PreferenceChangeEvent;
+import java.util.prefs.PreferenceChangeListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
@@ -35,11 +39,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.apache.commons.math.ode.DerivativeException;
-import org.sbml.jsbml.Model;
-import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.util.StringTools;
-import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.simulator.QualityMeasurement;
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.SimulationConfiguration;
@@ -47,241 +47,98 @@ import org.sbml.simulator.SimulationManager;
 import org.sbml.simulator.SimulationOptions;
 import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.simulator.math.QualityMeasure;
-import org.simulator.math.Mathematics;
 import org.simulator.math.odes.AbstractDESSolver;
 
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;
+import de.zbit.util.ResourceManager;
 import de.zbit.util.ValuePair;
+import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.SBPreferences;
 
 /**
+ * A simple tool panel that contains a minimum of options that help users to
+ * influence the way how a simulation is performed.
+ * 
  * @author Andreas Dr&auml;ger
  * @date 2010-09-16
  * @version $Rev$
  * @since 1.0
  */
 public class SimulationToolPanel extends JPanel implements ItemListener,
-		ChangeListener {
+		ChangeListener, PreferenceChangeListener {
+
+	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final transient Logger logger = Logger.getLogger(SimulationToolPanel.class.getName());
 
 	/**
 	 * Generated serial version identifier.
 	 */
 	private static final long serialVersionUID = -6540887561618807199L;
 
-	/**
-	 * A {@link Logger} for this class.
-	 */
-	private static final Logger logger = Logger
-			.getLogger(SimulationToolPanel.class.getName());
-
-	/**
-	 * Contains all available quality measure functions.
-	 */
-	private JComboBox qualityMeasureFunctions;
-	
-	/**
+/**
 	 * Text field to display the quality of a simulation with respect to a given
 	 * data set.
 	 */
 	private JFormattedTextField qualityMeasureField;
-//	/**
-//	 * Whether or not to plot in a logarithmic scale.
-//	 */
-//	private JCheckBox logScale;
-	/**
-	 * Maximal allowable number of integration steps per time unit
-	 */
-	private int maxStepsPerUnit;
 	
 	/**
-	 * The maximal allowable simulation time
+	 * Contains all available quality measure functions and ODE solvers.
 	 */
-	private double maxTime;
-	
-	/**
-	 * Decides whether or not a grid should be displayed in the plot.
-	 */
-	private JCheckBox showGrid;
-	
-	/**
-	 * Decides whether or not to add a legend to the plot.
-	 */
-	private JCheckBox showLegend;
-	
-	/**
-	 * Whether or not to show tool tips in plots.
-	 */
-	private JCheckBox showToolTips;
-	
-	/**
-	 * The index of the class name of the solver to be used
-	 */
-	private JComboBox solverComboBox;
-	
-	/**
-	 * Simulation start time
-	 */
-	private SpinnerNumberModel t1;
-	
-	/**
-	 * Simulation end time
-	 */
-	private SpinnerNumberModel t2;
-	
-	/**
-	 * The spinner to change the number of integration steps.
-	 */
-	private SpinnerNumberModel stepsModel;
+	private JComboBox qualityMeasureFunctions, solverComboBox;
 	
 	/**
 	 * 
 	 */
-	private double spinnerStepSize;
+	private QualityMeasurement qualityMeasurement;
 	
 	/**
 	 * 
 	 */
 	private Set<ItemListener> setOfItemListeners;
-
+	
+	/**
+	 * Decides whether or not a grid, a legend, or tool tips should be displayed
+	 * in the plot.
+	 */
+	private JCheckBox showGrid, showLegend, showToolTips;
+	
+	/**
+	 * 
+	 */
+	private SimulationConfiguration simulationConfiguration;
+	
 	/**
 	 * 
 	 */
 	private JSpinner startTime;
 
 	/**
-	 * 
+	 * Simulation start and end time as well as the number of integration steps
 	 */
-	private SimulationConfiguration simulationConfiguration;
-
-	/**
-	 * 
-	 */
-	private QualityMeasurement qualityMeasurement;
+	private SpinnerNumberModel t1, t2, stepsModel;
 
 	/**
 	 * @param worker
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws NoSuchMethodException
 	 */
-	public SimulationToolPanel(SimulationManager simulationManager)
-			throws IllegalArgumentException, SecurityException,
-			InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException {
+	public SimulationToolPanel(SimulationManager simulationManager) {
 		super(new BorderLayout());
-		simulationConfiguration = simulationManager.getSimlationConfiguration();
-		qualityMeasurement = simulationManager.getQualityMeasurement();
+		
+		// Set basic properties;
+		this.simulationConfiguration = simulationManager.getSimlationConfiguration();
+		this.qualityMeasurement = simulationManager.getQualityMeasurement();
 		this.addPropertyChangeListener(simulationConfiguration);
 		this.addPropertyChangeListener(qualityMeasurement);
-
 		this.setOfItemListeners = new HashSet<ItemListener>();
-		spinnerStepSize = .01d;
-		maxTime = 1E5;
-		t1 = new SpinnerNumberModel(0d, 0d, maxTime, spinnerStepSize);
-		t2 = new SpinnerNumberModel(1d, 0d, maxTime, spinnerStepSize);
-		maxStepsPerUnit = 1000;
-		double integrationStepSize = spinnerStepSize;
-		SBPreferences prefs = SBPreferences
-				.getPreferencesFor(SimulationOptions.class);
-		solverComboBox = createSolversComboOrSetSelectedItem(prefs.get(
-				SimulationOptions.ODE_SOLVER).toString());
-		showGrid = GUITools.createJCheckBox(
-				PlotOptions.SHOW_PLOT_GRID.getName(), false,
-				PlotOptions.SHOW_PLOT_GRID,
-				PlotOptions.SHOW_PLOT_GRID.getToolTip(), this);
-		// logScale =
-		// GUITools.createJCheckBox(PlotOptions.PLOT_LOG_SCALE.getName(),
-		// false, PlotOptions.PLOT_LOG_SCALE, PlotOptions.PLOT_LOG_SCALE
-		// .getToolTip(), this);
-		showLegend = GUITools.createJCheckBox(
-				PlotOptions.SHOW_PLOT_LEGEND.getName(), true,
-				PlotOptions.SHOW_PLOT_LEGEND,
-				PlotOptions.SHOW_PLOT_LEGEND.getToolTip(), this);
-		showToolTips = GUITools.createJCheckBox(
-				PlotOptions.SHOW_PLOT_TOOLTIPS.getName(), true,
-				PlotOptions.SHOW_PLOT_TOOLTIPS,
-				PlotOptions.SHOW_PLOT_TOOLTIPS.getToolTip(), this);
 
-		// Settings
-		startTime = new JSpinner(t1);
-		startTime.addChangeListener(this);
-		startTime.setName("t1");
-		startTime.setEnabled(false);
-		JSpinner endTime = new JSpinner(t2);
-		endTime.addChangeListener(this);
-		endTime.setName("t2");
-		double t1val = ((Double) t1.getValue()).doubleValue();
-		double t2val = ((Double) t2.getValue()).doubleValue();
-		int val = numSteps(t1val, t2val, integrationStepSize);
-		int min = 1;
-		int max = (int) Math.round((t2val - t1val) * maxStepsPerUnit);
-		int steps = 1;
-		val = Math.max(min, val);
-		max = Math.max(max, val);
-		stepsModel = new SpinnerNumberModel(val, min, max, steps);
-		JPanel sPanel = new JPanel();
-		LayoutHelper settings = new LayoutHelper(sPanel);
-		settings.add("Start time:", startTime, 0, 0, 1, 0);
-		settings.add(new JPanel(), 3, 0, 1, 1, 0, 0);
-		settings.add("Steps:", new JSpinner(stepsModel), 4, 0, 1, 0);
-		settings.add(new JPanel());
-		settings.add("End time: ", endTime, 0, 2, 1, 0);
-		settings.add("ODE Solver:", solverComboBox, 4, 2, 1, 0);
-		settings.add(new JPanel());
-		sPanel.setBorder(BorderFactory.createTitledBorder(" Integration "));
-
-		JPanel dPanel = new JPanel();
-		LayoutHelper dSet = new LayoutHelper(dPanel);
-		Class<QualityMeasure>[] distFunctions = SBMLsimulator
-				.getAvailableQualityMeasures();
-		String quality[] = new String[distFunctions.length];
-		for (int i = 0; i < distFunctions.length; i++) {
-			QualityMeasure dist = distFunctions[i].getConstructor()
-					.newInstance();
-			quality[i] = dist.getName();
-		}
-		qualityMeasureFunctions = new JComboBox(quality);
-		qualityMeasureFunctions.setName("distfun");
-		qualityMeasureFunctions.addItemListener(this);
-		qualityMeasureField = new JFormattedTextField();
-		qualityMeasureField.setEnabled(false);
-		dSet.add(qualityMeasureFunctions);
-		dSet.add(new JPanel());
-		dSet.add(qualityMeasureField);
-		dPanel.setBorder(BorderFactory
-				.createTitledBorder(" Model quality measure "));
-
-		JPanel pPanel = new JPanel();
-		LayoutHelper pSet = new LayoutHelper(pPanel);
-		// JButton cameraButton = new JButton(org.sbml.simulator.gui.GUITools
-		// .getIconCamera());
-		// JButton saveButton = new JButton(UIManager.getIcon("ICON_SAVE_16"));
-		// // cameraButton.addActionListener(EventHandler.create(
-		// ActionListener.class, this, "openFileAndLogHistory"));
-		// TODO
-		pSet.add(showGrid, 0, 0, 1, 1, 0, 0);
-//		pSet.add(new JPanel(), 1, 0, 1, 1, 0, 0);
-//		pSet.add(logScale, 2, 0, 1, 1, 0, 0);
-		pSet.add(showLegend, 0, 1, 1, 1, 0, 0);
-		pSet.add(showToolTips, 0, 2, 1, 1, 0, 0);
-//		pSet.add(new JPanel(), 3, 0, 1, 1, 0, 0);
-		// pSet.add(cameraButton, 4, 0, 1, 1, 0, 0);
-		// pSet.add(saveButton, 4, 1, 1, 1, 0, 0);
-		pPanel.setBorder(BorderFactory.createTitledBorder(" Plot "));
-
+		// Create content:
 		LayoutHelper aSet = new LayoutHelper(new JPanel());
-		aSet.add(sPanel, 0, 0, 1, 1, 1, 0);
-		aSet.add(dPanel, 1, 0, 1, 1, 0, 0);
-		aSet.add(pPanel, 2, 0, 1, 1, 0, 0);
-
-		// Main
-		add(aSet.getContainer(), BorderLayout.CENTER);
-
-		loadPreferences();
+		aSet.add(createIntegrationPanel(), 0, 0, 1, 1, 1, 0);
+		aSet.add(createQualityPanel(), 1, 0, 1, 1, 0, 0);
+		aSet.add(createPlotPanel(), 2, 0, 1, 1, 0, 0);
+		this.add(aSet.getContainer(), BorderLayout.CENTER);
 	}
 
 	/**
@@ -292,52 +149,131 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	}
 
 	/**
+	 * 
+	 * @return
+	 */
+	private Component createIntegrationPanel() {
+		double maxTime = 1E5d, spinnerStepSize = .01d;
+		double t1val = simulationConfiguration.getStart();
+		double t2val = simulationConfiguration.getEnd();
+		
+		t1 = new SpinnerNumberModel(t1val, 0d, Math.max(t1val, maxTime), spinnerStepSize);
+		t2 = new SpinnerNumberModel(t2val, 0d, Math.max(t2val, maxTime), spinnerStepSize);
+		startTime = new JSpinner(t1);
+		startTime.setName(SimulationOptions.SIM_START_TIME.toString());
+		startTime.setEnabled(false);
+		startTime.setToolTipText(SimulationOptions.SIM_START_TIME.getDescription());
+		startTime.addChangeListener(this);
+		JSpinner endTime = new JSpinner(t2);
+		endTime.setName(SimulationOptions.SIM_END_TIME.toString());
+		endTime.setToolTipText(SimulationOptions.SIM_END_TIME.getDescription());
+		endTime.addChangeListener(this);
+
+		int maxStepsPerUnit = 1000;
+		int val = numSteps(t1val, t2val, spinnerStepSize);
+		int min = 1, max = (int) Math.round((t2val - t1val) * maxStepsPerUnit);
+		int steps = 1;
+		
+		val = Math.max(min, val);
+		max = Math.max(max, val);
+		ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
+		stepsModel = new SpinnerNumberModel(val, min, max, steps);
+		JSpinner stepsSpin = new JSpinner(stepsModel);
+		stepsSpin.setName("stepCount");
+		stepsSpin.setToolTipText(bundle.getString("STEP_COUNT_TOOLTIP"));
+		stepsSpin.addChangeListener(this);
+		JPanel sPanel = new JPanel();
+		LayoutHelper settings = new LayoutHelper(sPanel);
+
+		settings.add(SimulationOptions.SIM_START_TIME.getDisplayName(), startTime, 0, 0, 1, 0);
+		settings.add(new JPanel(), 3, 0, 1, 1, 0, 0);
+		settings.add(bundle.getString("STEP_COUNT"), stepsSpin, 4, 0, 1, 0);
+		settings.add(new JPanel());
+		settings.add(SimulationOptions.SIM_END_TIME.getDisplayName(), endTime, 0, 2, 1, 0);
+		settings.add(SimulationOptions.ODE_SOLVER.getDisplayName(),
+			createSolversComboOrSetSelectedItem(simulationConfiguration.getSolver()
+					.getClass().getSimpleName()), 4, 2, 1, 0);
+		settings.add(new JPanel());
+		sPanel.setBorder(BorderFactory.createTitledBorder(
+			' ' + SimulationOptions.SIMULATION_CONFIGURATION.getName() + ' '));
+		return sPanel;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	private Component createPlotPanel() {
+		SBPreferences prefs = SBPreferences.getPreferencesFor(PlotOptions.class);
+		JPanel pPanel = new JPanel();
+		LayoutHelper pSet = new LayoutHelper(pPanel);
+		this.showGrid = GUITools.createJCheckBox(
+			PlotOptions.SHOW_PLOT_GRID, prefs, this);
+		this.showLegend = GUITools.createJCheckBox(
+			PlotOptions.SHOW_PLOT_LEGEND, prefs, this);
+		this.showToolTips = GUITools.createJCheckBox(
+			PlotOptions.SHOW_PLOT_TOOLTIPS, prefs, this);
+		pSet.add(showGrid, 0, 0, 1, 1, 0, 0);
+		pSet.add(showLegend, 0, 1, 1, 1, 0, 0);
+		pSet.add(showToolTips, 0, 2, 1, 1, 0, 0);
+		pPanel.setBorder(BorderFactory
+				.createTitledBorder(' ' + PlotOptions.PLOT_APPEARANCE.getName() + ' '));
+		return pPanel;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	private Component createQualityPanel() {
+		JPanel dPanel = new JPanel();
+		LayoutHelper dSet = new LayoutHelper(dPanel);
+		Class<QualityMeasure>[] distFunctions = SBMLsimulator
+				.getAvailableQualityMeasures();
+		String quality[] = new String[distFunctions.length];
+		for (int i = 0; i < distFunctions.length; i++) {
+			quality[i] = KeyProvider.Tools.createTitle(distFunctions[i]);
+		}
+		qualityMeasureFunctions = new JComboBox(quality);
+		qualityMeasureFunctions.setSelectedIndex(searchSelectedItem(distFunctions,
+			qualityMeasurement.getDistance().getClass().getSimpleName()));
+		qualityMeasureFunctions.setName(SimulationOptions.QUALITY_MEASURE.toString());
+		qualityMeasureFunctions.setToolTipText(SimulationOptions.QUALITY_MEASURE.getDescription());
+		qualityMeasureFunctions.addItemListener(this);
+		qualityMeasureField = new JFormattedTextField();
+		qualityMeasureField.setEnabled(false);
+		dSet.add(qualityMeasureFunctions);
+		dSet.add(new JPanel());
+		dSet.add(qualityMeasureField);
+		dPanel.setBorder(BorderFactory.createTitledBorder(
+			' ' + SimulationOptions.QUALITY_MEASURES.getName() + ' '));
+		return dPanel;
+	}
+
+	/**
 	 * @param name
 	 * @return
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws NoSuchMethodException
 	 */
-	private JComboBox createSolversComboOrSetSelectedItem(String name)
-			throws IllegalArgumentException, SecurityException,
-			InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException {
+	private JComboBox createSolversComboOrSetSelectedItem(String name) {
+		Class<AbstractDESSolver> solFun[] = SBMLsimulator.getAvailableSolvers();
 		if (solverComboBox == null) {
 			solverComboBox = new JComboBox();
 			name = name.substring(name.lastIndexOf('.') + 1);
-			Class<AbstractDESSolver>[] solFun = SBMLsimulator
-					.getAvailableSolvers();
-			AbstractDESSolver solver;
 			for (int i = 0; i < solFun.length; i++) {
 				Class<AbstractDESSolver> c = solFun[i];
-				solver = c.getConstructor().newInstance();
-				solverComboBox.addItem(solver.getName());
-				if (c.getName().substring(c.getName().lastIndexOf('.') + 1)
-						.equals(name)) {
+				solverComboBox.addItem(KeyProvider.Tools.createTitle(c));
+				if (c.getSimpleName().equals(name)) {
 					solverComboBox.setSelectedIndex(i);
 				}
 			}
 			solverComboBox.setEnabled(solverComboBox.getItemCount() > 1);
-			if (solverComboBox.getSelectedIndex() != solverComboBox
-					.getItemCount() - 1) {
-				solver = solFun[solverComboBox.getSelectedIndex()]
-						.getConstructor().newInstance();
-			}
 			solverComboBox.setName("solvers");
+			solverComboBox.setToolTipText(SimulationOptions.ODE_SOLVER.getDescription());
 			solverComboBox.addItemListener(this);
 		} else {
-			Class<AbstractDESSolver>[] solFun = SBMLsimulator
-					.getAvailableSolvers();
-
-			for (int i = 0; i < solFun.length; i++) {
-				Class<AbstractDESSolver> c = solFun[i];
-				if (c.getName().substring(c.getName().lastIndexOf('.') + 1)
-						.equals(name)) {
-					solverComboBox.setSelectedIndex(i);
-				}
+			int idx = searchSelectedItem(solFun, name);
+			if ((0 < idx) && (idx < solverComboBox.getItemCount())) {
+				solverComboBox.setSelectedIndex(idx);
 			}
 		}
 		return solverComboBox;
@@ -359,22 +295,15 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	/**
 	 * @return
 	 */
-	public QualityMeasure getQualityMeasure() {
-		return qualityMeasurement.getDistance();
+	public double getNumIntegrationSteps() {
+		return stepsModel.getNumber().doubleValue();
 	}
-
-//	/**
-//	 * @return
-//	 */
-//	public JCheckBox getJCheckBoxLegend() {
-//		return logScale;
-//	}
 
 	/**
 	 * @return
 	 */
-	public double getNumIntegrationSteps() {
-		return stepsModel.getNumber().doubleValue();
+	public QualityMeasure getQualityMeasure() {
+		return qualityMeasurement.getDistance();
 	}
 
 	/**
@@ -431,11 +360,8 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 				/ getNumIntegrationSteps();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
+	/* (non-Javadoc)
+	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
 	 */
 	public void itemStateChanged(ItemEvent e) {
 		if ((e.getSource() instanceof JComboBox)
@@ -443,20 +369,19 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 			JComboBox comBox = (JComboBox) e.getSource();
 			try {
 
-				if (comBox.getName().equals("distfun")) {
+				if (comBox.getName().equals(SimulationOptions.QUALITY_MEASURE.toString())) {
 					QualityMeasure dist = SBMLsimulator
 							.getAvailableQualityMeasures()[comBox
 							.getSelectedIndex()].getConstructor().newInstance();
 					firePropertyChange("distance",
 							qualityMeasurement.getDistance(), dist);
 
-				} else if (comBox.getName().equals("solvers")) {
-					setSolver(comBox);
-					AbstractDESSolver solver = SBMLsimulator
-							.getAvailableSolvers()[comBox.getSelectedIndex()]
-							.getConstructor().newInstance();
-					firePropertyChange("solver",
-							simulationConfiguration.getSolver(), solver);
+				} else if (comBox.getName().equals(SimulationOptions.ODE_SOLVER.toString())) {
+					logger.fine(comBox.getSelectedItem() + "\t"
+							+ comBox.getSelectedIndex());
+					firePropertyChange("solver", simulationConfiguration.getSolver(),
+						SBMLsimulator.getAvailableSolvers()[comBox.getSelectedIndex()]
+								.getConstructor().newInstance());
 				}
 			} catch (Exception exc) {
 				GUITools.showErrorMessage(this, exc);
@@ -469,85 +394,6 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	}
 
 	/**
-	 * @throws NoSuchMethodException
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws InstantiationException
-	 * @throws SecurityException
-	 * @throws IllegalArgumentException
-	 */
-	public void loadPreferences() throws IllegalArgumentException,
-			SecurityException, InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException {
-
-		SBPreferences prefsSimulation = SBPreferences
-				.getPreferencesFor(SimulationOptions.class);
-		SBPreferences prefsPlot = SBPreferences
-				.getPreferencesFor(PlotOptions.class);
-		/*
-		 * Solver and distance.
-		 */
-		double simEndTime = prefsSimulation
-				.getDouble(SimulationOptions.SIM_END_TIME);
-		spinnerStepSize = prefsSimulation
-				.getDouble(SimulationOptions.SIM_STEP_SIZE);
-		Class<QualityMeasure>[] distFun = SBMLsimulator
-				.getAvailableQualityMeasures();
-
-		firePropertyChange("stepSize", null, spinnerStepSize);
-
-		maxTime = Math.max(1E8, Math.max(getSimulationStartTime(), simEndTime));
-		t1.setMinimum(Double.valueOf(0));
-		t1.setValue(Double.valueOf(getSimulationStartTime()));
-		t1.setMaximum(Double.valueOf(maxTime));
-		t1.setStepSize(Double.valueOf(spinnerStepSize));
-		t2.setMinimum(Double.valueOf(getSimulationStartTime()));
-		t2.setValue(Double.valueOf(simEndTime));
-		t2.setMaximum(Double.valueOf(maxTime));
-		t2.setStepSize(Double.valueOf(spinnerStepSize));
-		showGrid.setSelected(prefsPlot.getBoolean(PlotOptions.SHOW_PLOT_GRID));
-		// logScale.setSelected(prefsPlot.getBoolean(PlotOptions.PLOT_LOG_SCALE));
-		showLegend.setSelected(prefsPlot
-				.getBoolean(PlotOptions.SHOW_PLOT_LEGEND));
-		showToolTips.setSelected(prefsPlot
-				.getBoolean(PlotOptions.SHOW_PLOT_TOOLTIPS));
-
-		maxStepsPerUnit = (int) 1E8d;
-
-		int qualityFunc = 0;
-		String name = prefsSimulation
-				.get(SimulationOptions.QUALITY_MEASURE);
-		name = name.substring(name.lastIndexOf('.') + 1);
-		while ((qualityFunc < distFun.length - 1)
-				&& !distFun[qualityFunc].getSimpleName().equals(name)) {
-			qualityFunc++;
-		}
-		if (this.qualityMeasureFunctions != null) {
-			qualityMeasureFunctions.setSelectedIndex(qualityFunc);
-		}
-		firePropertyChange("distance", null,
-				SBMLsimulator.getAvailableQualityMeasures()[qualityFunc]
-						.getConstructor().newInstance());
-
-		solverComboBox = createSolversComboOrSetSelectedItem(prefsSimulation
-				.get(SimulationOptions.ODE_SOLVER));
-		firePropertyChange("solver", null,
-				SBMLsimulator.getAvailableSolvers()[solverComboBox
-						.getSelectedIndex()].getConstructor().newInstance());
-
-		double startTime = prefsSimulation
-				.getDouble(SimulationOptions.SIM_START_TIME);
-		double endTime = prefsSimulation
-				.getDouble(SimulationOptions.SIM_END_TIME);
-		startTime = Math.max(0, startTime);
-		if (startTime > endTime) {
-			Mathematics.swap(startTime, endTime);
-		}
-		firePropertyChange("start", null, startTime);
-		firePropertyChange("end", null, endTime);
-	}
-
-	/**
 	 * @param t1
 	 * @param t2
 	 * @param stepSize
@@ -555,6 +401,69 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 */
 	private int numSteps(double t1, double t2, double stepSize) {
 		return (int) Math.round((t2 - t1) / stepSize);
+	}
+
+	/* (non-Javadoc)
+	 * @see java.util.prefs.PreferenceChangeListener#preferenceChange(java.util.prefs.PreferenceChangeEvent)
+	 */
+	public void preferenceChange(PreferenceChangeEvent evt) {
+		String key = evt.getKey();
+		if (key.equals(SimulationOptions.SIM_START_TIME.toString())) {
+			t1.setValue(Double.valueOf(evt.getNewValue()));
+		} else if (key.equals(SimulationOptions.SIM_END_TIME.toString())) {
+			t2.setValue(Double.valueOf(evt.getNewValue()));
+		} else if (key.equals(SimulationOptions.SIM_STEP_SIZE.toString())) {
+			setStepSize(Double.parseDouble(evt.getNewValue()));
+		} else if (key.equals(SimulationOptions.ODE_SOLVER.toString())) {
+			solverComboBox.setSelectedIndex(searchSelectedItem(
+				SBMLsimulator.getAvailableSolvers(), evt.getNewValue()));
+		} else if (key.equals(SimulationOptions.QUALITY_MEASURE.toString())) {
+			qualityMeasureFunctions.setSelectedIndex(searchSelectedItem(
+				SBMLsimulator.getAvailableQualityMeasures(), evt.getNewValue()));
+		} else if (key.equals(PlotOptions.SHOW_PLOT_GRID.toString())) {
+			showGrid.setSelected(Boolean.parseBoolean(evt.getNewValue()));
+		} else if (key.equals(PlotOptions.SHOW_PLOT_LEGEND.toString())) {
+			showLegend.setSelected(Boolean.parseBoolean(evt.getNewValue()));
+		} else if (key.equals(PlotOptions.SHOW_PLOT_TOOLTIPS.toString())) {
+			showToolTips.setSelected(Boolean.parseBoolean(evt.getNewValue()));
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+	 */
+	public void propertyChange(PropertyChangeEvent pEvt) {
+		System.out.println(pEvt);
+		if (pEvt.getPropertyName().equals("quality") && (!pEvt.getNewValue().equals(pEvt.getOldValue()))) {
+			qualityMeasureField.setValue(pEvt.getNewValue());
+			qualityMeasureField.setText(StringTools.toString(Double.valueOf(pEvt
+					.getNewValue().toString()).doubleValue()));
+			// distField.setValue(Double.valueOf(value));
+			if (!qualityMeasureField.isEnabled()) {
+				qualityMeasureField.setEditable(false);
+				qualityMeasureField.setEnabled(true);
+				qualityMeasureField.setAlignmentX(RIGHT_ALIGNMENT);
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @param items
+	 * @param name
+	 * @return
+	 */
+	private <T> int searchSelectedItem(Class<T> items[], String name) {
+		if (name.contains(" ")) {
+			name = name.substring(name.indexOf(' ') + 1);
+		}
+		for (int i = 0; i < items.length; i++) {
+			Class<T> c = items[i];
+			if (c.getName().equals(name) || c.getSimpleName().equals(name)) {
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	/**
@@ -571,75 +480,14 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	}
 
 	/**
-	 * Allows external methods do manipulate the distance field.
-	 * 
-	 * @param value
-	 *            The new distance value. This should be in accordance with the
-	 *            currently selected {@link QualityMeasure} function and also
-	 *            integration method. Furthermore, it should also belong to the
-	 *            correct {@link Model} and data set.
-	 */
-	void setCurrentQualityMeasure(double value) {
-		qualityMeasureField.setValue(value);
-		qualityMeasureField.setText(StringTools.toString(value));
-		// distField.setValue(Double.valueOf(value));
-		if (!qualityMeasureField.isEnabled()) {
-			qualityMeasureField.setEditable(false);
-			qualityMeasureField.setEnabled(true);
-			qualityMeasureField.setAlignmentX(RIGHT_ALIGNMENT);
-		}
-	}
-
-	/**
-	 * @throws ModelOverdeterminedException
-	 * @throws IntegrationException
-	 * @throws SBMLException
-	 * @throws NoSuchMethodException
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws InstantiationException
-	 * @throws SecurityException
-	 * @throws IllegalArgumentException
-	 */
-	public void setSolver() throws IllegalArgumentException, SecurityException,
-			InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException, SBMLException,
-			DerivativeException, ModelOverdeterminedException {
-		setSolver(solverComboBox);
-	}
-
-	/**
-	 * 
-	 * @param comBox
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws NoSuchMethodException
-	 * @throws SBMLException
-	 * @throws IntegrationException
-	 * @throws ModelOverdeterminedException
-	 */
-	private void setSolver(JComboBox comBox) throws IllegalArgumentException,
-			SecurityException, InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException, SBMLException,
-			DerivativeException, ModelOverdeterminedException {
-		logger.fine(comBox.getSelectedItem() + "\t" + comBox.getSelectedIndex());
-		this.firePropertyChange("solver", simulationConfiguration.getSolver(),
-				SBMLsimulator.getAvailableSolvers()[comBox.getSelectedIndex()]
-						.getConstructor().newInstance());
-	}
-
-	/**
 	 * @param stepSize
 	 */
 	public void setStepSize(double stepSize) {
-		this.firePropertyChange("stepSize",
-				simulationConfiguration.getStepSize(), stepSize);
 		this.stepsModel.setValue(Integer.valueOf(numSteps(
 				((Number) t1.getValue()).doubleValue(),
 				((Number) t2.getValue()).doubleValue(), stepSize)));
+		this.firePropertyChange("stepSize",
+			simulationConfiguration.getStepSize(), stepSize);
 	}
 
 	/* (non-Javadoc)
@@ -647,26 +495,24 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 */
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() instanceof JSpinner) {
-			JSpinner spin = (JSpinner) e.getSource();
-			if ((spin.getName() != null) && spin.getName().equals("t2")) {
-				// do nothing.
+			String name = ((JSpinner) e.getSource()).getName();
+			if (name != null) {
+				boolean diffStepSize = false;
+				if (name.equals(SimulationOptions.SIM_START_TIME.toString())) {
+					diffStepSize = true;
+					firePropertyChange(name, simulationConfiguration.getStart(),
+						getSimulationStartTime());
+				} else if (name.equals(SimulationOptions.SIM_END_TIME.toString())) {
+					diffStepSize = true;
+					firePropertyChange(name, simulationConfiguration.getEnd(),
+						getSimulationEndTime());
+				}
+				if (diffStepSize || name.equals("stepCount")) {
+					firePropertyChange("stepSize", simulationConfiguration.getStepSize(),
+						getStepSize());
+				}
 			}
 		}
-	}
-
-	/**
-	 * Broadcasts the current values of start, end and step size of a simulation
-	 * e.g., in order to submit them to the simulation configuration. This method
-	 * should be called before starting a simulation so the values will be
-	 * submitted only once at the correct time.
-	 */
-	public void processSimulationValues() {
-		firePropertyChange("start", simulationConfiguration.getStart(),
-				getSimulationStartTime());
-		firePropertyChange("end", simulationConfiguration.getEnd(),
-				getSimulationEndTime());
-		firePropertyChange("stepSize", simulationConfiguration.getStepSize(),
-				getStepSize());
 	}
 
 }

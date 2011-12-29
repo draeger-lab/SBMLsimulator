@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
@@ -57,8 +58,10 @@ import org.sbml.jsbml.util.TreeNodeChangeListener;
 import org.sbml.jsbml.util.compilers.HTMLFormula;
 import org.sbml.simulator.SimulationOptions;
 
+import de.zbit.gui.ActionCommand;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;
+import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
 import de.zbit.util.prefs.SBPreferences;
 
@@ -78,16 +81,33 @@ import de.zbit.util.prefs.SBPreferences;
  */
 public class InteractiveScanPanel extends JPanel implements ActionListener,
     ChangeListener, TreeNodeChangeListener {
+	
+	private static final ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
   
   /**
    * @author Andreas Dr&auml;ger
    * @date 2010-09-17
    */
-  public enum Command {
+  public enum Command implements ActionCommand {
     /**
      * Resets all values to those defined in the model.
      */
-    RESET
+    RESET;
+
+    /* (non-Javadoc)
+     * @see de.zbit.gui.ActionCommand#getName()
+     */
+		public String getName() {
+			return bundle.getString(toString());
+		}
+
+		/* (non-Javadoc)
+		 * @see de.zbit.gui.ActionCommand#getToolTip()
+		 */
+		public String getToolTip() {
+			return bundle.getString(toString() + "_TOOLTIP");
+		}
+    
   }
   
   /**
@@ -119,10 +139,6 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
 	 * 
 	 */
   private boolean hasLocalParameters;
-  /**
-	 * 
-	 */
-  private static final String BUTTON_TOOL_TIP = "Sets all values to the original values from the model. However, previously undefined values will be set to the default values.";
   /**
 	 * 
 	 */
@@ -159,8 +175,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     init(model);
     
     JPanel foot = new JPanel();
-    buttonReset = GUITools.createButton("Reset", null, this, Command.RESET,
-      BUTTON_TOOL_TIP);
+    buttonReset = GUITools.createJButton(this, Command.RESET);
     buttonReset.setEnabled(false);
     foot.add(buttonReset);
     
@@ -420,8 +435,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     return setOfChangeListeners.remove(cl);
   }
   
-  /*
-   * (non-Javadoc)
+  /* (non-Javadoc)
    * @see org.sbml.jsbml.util.TreeNodeChangeListener#nodeAdded(javax.swing.tree.TreeNode)
    */
   public void nodeAdded(TreeNode node) {
@@ -432,8 +446,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     }
   }
   
-  /*
-   * (non-Javadoc)
+  /* (non-Javadoc)
    * @see org.sbml.jsbml.util.TreeNodeChangeListener#nodeRemoved(javax.swing.tree.TreeNode)
    */
   public void nodeRemoved(TreeNode node) {
@@ -472,15 +485,11 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
 				.getDouble(SimulationOptions.DEFAULT_INIT_SPECIES_VALUE);
 		defaultParameterValue = prefs
 				.getDouble(SimulationOptions.DEFAULT_INIT_PARAMETER_VALUE);
+		updateUI();
 	}
   
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * 
-   * javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent
-   * )
+  /* (non-Javadoc)
+   * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
    */
   public void stateChanged(ChangeEvent e) {
     if (e.getSource() instanceof JSpinner) {
@@ -496,8 +505,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     }
   }
   
-  /*
-   * (non-Javadoc)
+  /* (non-Javadoc)
    * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
    */
   public void propertyChange(PropertyChangeEvent evt) {

@@ -31,6 +31,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
@@ -79,7 +81,7 @@ import eva2.tools.BasicResourceLoader;
  * 
  * @author Andreas Dr&auml;ger
  * @author Philip Stevens
- * @author Max Zwießele
+ * @author Max Zwie&szlig;ele
  * @date 2010-04-15
  * @version $Rev$
  * @since 1.0
@@ -110,9 +112,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 		 */
 		SIMULATION_START;
 
-		/*
-		 * (non-Javadoc)
-		 * 
+		/* (non-Javadoc)
 		 * @see de.zbit.gui.ActionCommand#getName()
 		 */
 		public String getName() {
@@ -123,9 +123,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 			return StringUtil.firstLetterUpperCase(elem.replace('_', ' '));
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
+		/* (non-Javadoc)
 		 * @see de.zbit.gui.ActionCommand#getToolTip()
 		 */
 		public String getToolTip() {
@@ -155,20 +153,10 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	 */
 	private static final long serialVersionUID = -5289766427756813972L;
 
-	/**
-	 * @return
-	 */
-	public static ImageIcon getIconCamera() {
-		return new ImageIcon(SimulatorUI.class.getResource("img/CAMERA_16.png"));
-	}
-
-	/**
-	 * @return
-	 */
-	public static ImageIcon getIconEvA2() {
+	static {
 		BasicResourceLoader rl = BasicResourceLoader.instance();
 		byte[] bytes = rl.getBytesFromResourceLocation(EvAInfo.iconLocation, true);
-		return new ImageIcon(Toolkit.getDefaultToolkit().createImage(bytes));
+		UIManager.put("ICON_EVA2", new ImageIcon(Toolkit.getDefaultToolkit().createImage(bytes)));
 	}
 
 	/**
@@ -198,25 +186,26 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 		this((AppConf) null);
 	}
 	
+	/* (non-Javadoc)
+	 * @see de.zbit.gui.BaseFrame#getAlternativeBaseActionNames()
+	 */
+	@Override
+	protected Map<BaseAction, String> getAlternativeBaseActionNames() {
+		Map<BaseAction, String> nameMap = new HashMap<BaseFrame.BaseAction, String>();
+		nameMap.put(BaseAction.FILE_OPEN, bundle.getString(BaseAction.FILE_OPEN.toString()));
+		nameMap.put(BaseAction.FILE_CLOSE, bundle.getString(BaseAction.FILE_CLOSE.toString()));
+		return nameMap;
+	}
+
 	/**
 	 * 
 	 * @param appConf
 	 */
 	public SimulatorUI(AppConf appConf) {
 		super(appConf);
-		loadPreferences();
 		GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.EDIT_MODEL,
 				Command.SIMULATION_START);
 		setStatusBarToMemoryUsage();
-	}
-
-	/**
-	 * 
-	 * @param model
-	 */
-	public SimulatorUI(Model model) {
-		this();
-		openModel(model);
 	}
 
 	/* (non-Javadoc)
@@ -224,6 +213,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	 */
 	@Override
 	protected JMenuItem[] additionalEditMenuItems() {
+		// new ImageIcon(SimulatorUI.class.getResource("img/CAMERA_16.png"))
 		UIManager.put("PLAY_16", new ImageIcon(SimulatorUI.class.getResource("img/PLAY_16.png")));
 		JMenuItem editModel = GUITools.createJMenuItem(
 				EventHandler.create(ActionListener.class, this, "editModel"),
@@ -233,7 +223,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 				Command.SIMULATION_START, UIManager.getIcon("PLAY_16"), 'S');
 		JMenuItem optimization = GUITools.createJMenuItem(
 				EventHandler.create(ActionListener.class, this, "optimize"),
-				Command.OPTIMIZATION, getIconEvA2(), 'O');
+				Command.OPTIMIZATION, UIManager.getIcon("ICON_EVA2"), 'O');
 		optimization.setEnabled(false);
 		JCheckBoxMenuItem item = new JCheckBoxMenuItem("Show options",
 				simPanel != null ? simPanel.isShowSettingsPanel() : true);
@@ -289,7 +279,6 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	 * @see de.zbit.gui.BaseFrame#createMainComponent()
 	 */
 	protected Component createMainComponent() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -310,7 +299,9 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 			if (JOptionPane2.showOptionDialog(this, split, "Model Editor",
 					JOptionPane2.OK_CANCEL_OPTION,
 					JOptionPane2.INFORMATION_MESSAGE, null, null, null, true) == JOptionPane2.OK_OPTION) {
+		    // TODO: remove older Pref Listeners!
 				simPanel = new SimulationPanel(doc.getModel());
+				addPreferenceChangeListener(simPanel.getSimulationToolPanel());
 				validate();
 			}
 		} catch (Throwable exc) {
@@ -349,20 +340,6 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 					&& (item.getActionCommand().equals(Command.SHOW_OPTIONS
 							.toString()))) {
 				simPanel.setShowSettingsPanel(item.isSelected());
-			}
-		}
-	}
-
-	/**
-	 * 
-	 */
-	public void loadPreferences() {
-		if (simPanel != null) {
-			try {
-				simPanel.loadPreferences();
-				validate();
-			} catch (Exception exc) {
-				GUITools.showErrorMessage(this, exc);
 			}
 		}
 	}
@@ -483,6 +460,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
       setTitle(getApplicationName() + " - "
           + (model.isSetName() ? model.getName() : model.getId()));
     }
+    // TODO: remove older Pref Listeners!
 		simPanel = new SimulationPanel(model);
 		if (GUITools.contains(getContentPane(), simPanel)) {
 			getContentPane().remove(simPanel);
@@ -492,6 +470,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 		GUITools.setEnabled(true, getJMenuBar(), toolBar,
 			BaseAction.FILE_SAVE_AS, Command.EDIT_MODEL,
 			Command.SIMULATION_START, Command.SHOW_OPTIONS);
+		addPreferenceChangeListener(simPanel.getSimulationToolPanel());
 	}
 
 	/**
@@ -542,22 +521,6 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 				simPanel.setAllEnabled(true);
 			}
 		}
-	}
-
-	/* (non-Javadoc)
-	 * @see de.zbit.gui.BaseFrame#preferences()
-	 */
-	@Override
-	public boolean preferences() {
-		boolean status = super.preferences();
-		if (status && (simPanel != null)) {
-			try {
-				simPanel.loadPreferences();
-			} catch (Exception exc) {
-				GUITools.showErrorMessage(this, exc);
-			}
-		}
-		return status;
 	}
 
 	/* (non-Javadoc)

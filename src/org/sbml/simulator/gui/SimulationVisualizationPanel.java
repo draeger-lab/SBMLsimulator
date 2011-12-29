@@ -305,6 +305,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 		maxSpinVal = 2000;
 		paramStepSize = .1d;
 		maxCompartmentValue = maxSpeciesValue =  maxParameterValue = 1E8;
+		updateUI();
 	}
 
 	/**
