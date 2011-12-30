@@ -66,12 +66,12 @@ public class QualityMeasurement implements PropertyChangeListener {
 	/**
 	 * 
 	 */
-  QualityMeasure distance;
+  private QualityMeasure distance;
   
   /**
    * 
    */
-  List<MultiTable> measurements;
+  private List<MultiTable> measurements;
   
   /**
 	 * Creates a new quality measurement. A {@link QualityMeasure} can only be set
@@ -101,7 +101,7 @@ public class QualityMeasurement implements PropertyChangeListener {
     SBPreferences prefs = SBPreferences
         .getPreferencesFor(SimulationOptions.class);
     
-    if ("distance".equals(property)) {
+    if (SimulationOptions.QUALITY_MEASURE.toString().equals(property)) {
       distance = (QualityMeasure) evt.getNewValue();
       // TODO: Consider creating a new interface that provides a setRoot method.
       if (distance instanceof N_Metric) {

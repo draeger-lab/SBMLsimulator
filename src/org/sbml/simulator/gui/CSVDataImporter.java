@@ -200,8 +200,7 @@ public class CSVDataImporter {
 	private List<String> gatherSymbolIds(final Model model) {
 		return new AbstractList<String>() {
 
-			/*
-			 * (non-Javadoc)
+			/* (non-Javadoc)
 			 * @see java.util.AbstractList#get(int)
 			 */
 			public String get(int index) {
@@ -216,8 +215,7 @@ public class CSVDataImporter {
 				return model.getParameter(index).getId();
 			}
 
-			/*
-			 * (non-Javadoc)
+			/* (non-Javadoc)
 			 * @see java.util.AbstractCollection#size()
 			 */
 			public int size() {

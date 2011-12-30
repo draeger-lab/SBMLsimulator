@@ -116,9 +116,7 @@ public class N_Metric extends QualityMeasure {
 		return overallDistance(d,root,defaultValue);
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see org.sbml.squeezer.math.Distance#getName()
 	 */
 	public String getName() {

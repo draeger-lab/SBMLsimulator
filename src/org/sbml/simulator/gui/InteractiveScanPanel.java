@@ -24,11 +24,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 import java.util.ResourceBundle;
-import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -82,6 +81,9 @@ import de.zbit.util.prefs.SBPreferences;
 public class InteractiveScanPanel extends JPanel implements ActionListener,
     ChangeListener, TreeNodeChangeListener {
 	
+	/**
+	 * Supports localization of the application.
+	 */
 	private static final ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
   
   /**
@@ -121,7 +123,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
   /**
 	 * 
 	 */
-  private Set<ChangeListener> setOfChangeListeners;
+  private List<ChangeListener> listOfChangeListeners;
   /**
    * Default values
    */
@@ -169,7 +171,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     this.maxCompartmentValue = maxCompartmentValue;
     this.maxParameterValue = maxParameterValue;
     this.maxSpeciesValue = maxSpeciesValue;
-    this.setOfChangeListeners = new HashSet<ChangeListener>();
+    this.listOfChangeListeners = new LinkedList<ChangeListener>();
     // create layout
     tab = new JTabbedPane();
     init(model);
@@ -196,27 +198,27 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
       this.quantitiesHash = new HashMap<String, Integer>();
       this.hasLocalParameters = false;
       this.tab.add(
-        "Compartments",
+        bundle.getString("COMPARTMENTS"),
         interactiveScanScrollPane(model.getListOfCompartments(),
           maxCompartmentValue, paramStepSize, offset));
       offset += model.getNumCompartments();
       tab.setEnabledAt(0, model.getNumCompartments() > 0);
       
       tab.add(
-        "Species",
+        bundle.getString("SPECIES"),
         interactiveScanScrollPane(model.getListOfSpecies(), maxParameterValue,
           paramStepSize, offset));
       offset += model.getNumSpecies();
       tab.setEnabledAt(1, model.getNumSpecies() > 0);
       
       tab.add(
-        "Global Parameters",
+        bundle.getString("GLOBAL_PARAMETERS"),
         interactiveScanScrollPane(model.getListOfParameters(), maxSpeciesValue,
           paramStepSize, offset));
       tab.setEnabledAt(2, model.getNumParameters() > 0);
       
       tab.add(
-        "Local Parameters",
+        bundle.getString("LOCAL_PARAMETERS"),
         new JScrollPane(interactiveScanLocalParameters(maxParameterValue,
           paramStepSize, model.getNumSymbols(), model.getListOfReactions()),
           JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -230,11 +232,8 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     }
   }
   
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+  /* (non-Javadoc)
+   * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
    */
   public void actionPerformed(ActionEvent e) {
     if ((e.getActionCommand() != null)
@@ -251,7 +250,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
    * @return
    */
   public boolean addChangeListener(ChangeListener cl) {
-    return setOfChangeListeners.add(cl);
+    return listOfChangeListeners.add(cl);
   }
   
   /**
@@ -337,9 +336,8 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
   private JScrollPane interactiveScanScrollPane(
     ListOf<? extends QuantityWithUnit> list, double maxValue, double stepSize,
     int offset) {
-    return new JScrollPane(interactiveScanTable(list, maxValue, stepSize,
-      offset), JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-      JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		return new JScrollPane(interactiveScanTable(list, maxValue, stepSize,
+			offset));
   }
   
   /**
@@ -404,26 +402,23 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     lh.add(new JPanel(), 3, 0, 1, 1, 0, 0);
     if (nans.size() > 0) {
       String l = nans.toString().substring(1);
-      String msg = String
-          .format(
-            "Undefined value%s for the %s %s ha%s been replaced by its default value %.3f.",
-            nans.size() > 1 ? "s" : "", name, l.substring(0, l.length() - 1),
-            nans.size() > 1 ? "ve" : "s", value);
-      JEditorPane label = new JEditorPane("text/html", StringUtil.toHTML(msg,
-        80));
+			JEditorPane label = new JEditorPane("text/html", StringUtil.toHTML(String
+					.format(bundle.getString("REPLACEMENT_OF_UNDEFINED_VALUES"),
+						bundle.getString(nans.size() > 1 ? "VALUES" : "VALUE"), name,
+						l.substring(0, l.length() - 1),
+						bundle.getString(nans.size() > 1 ? "HAVE" : "HAS"), value), 80));
       label.setEditable(false);
       Component component;
       if (nans.size() > 20) {
-        component = new JScrollPane(label,
-          JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-          JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        component = new JScrollPane(label);
         label.setPreferredSize(new Dimension(450, 450));
       } else {
         component = label;
       }
       JOptionPane.showMessageDialog(this, component,
-        "Replacing undefined values", JOptionPane.INFORMATION_MESSAGE);
+        bundle.getString("REPLACING_UNDEFINED_VALUES"), JOptionPane.INFORMATION_MESSAGE);
     }
+    panel.setOpaque(true);
     return panel;
   }
   
@@ -432,7 +427,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
    * @return
    */
   public boolean removeChangeListener(ChangeListener cl) {
-    return setOfChangeListeners.remove(cl);
+    return listOfChangeListeners.remove(cl);
   }
   
   /* (non-Javadoc)
@@ -500,7 +495,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     } else {
       checkButton();
     }
-    for (ChangeListener cl : setOfChangeListeners) {
+    for (ChangeListener cl : listOfChangeListeners) {
       cl.stateChanged(e);
     }
   }
