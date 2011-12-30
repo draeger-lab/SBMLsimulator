@@ -21,6 +21,7 @@ import java.awt.Color;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -38,6 +39,7 @@ import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.simulator.gui.table.LegendTableModel;
 import org.simulator.math.odes.MultiTable;
 
+import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
 
 /**
@@ -49,40 +51,42 @@ import de.zbit.util.StringUtil;
 public class SimulationVisualizationPanel extends JSplitPane implements
 		ItemListener, TableModelListener {
 
+	private static final transient ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
+
 	/**
 	 * Generated serial version identifier.
 	 */
 	private static final long serialVersionUID = 2102296020675377066L;
-
 	/**
 	 * Switches inclusion of reactions in the plot on or off.
 	 */
 	private boolean includeReactions;
 	/**
-	 * The step size for the spinner in the interactive parameter scan. and the
-	 * maximal value for {@link JSpinner}s.
-	 */
-	private double maxSpinVal = 1E10, paramStepSize = 0.01d;
-	/**
-	 * The maximal allowable values.
-	 */
-	private double maxCompartmentValue = maxSpinVal,
-			maxParameterValue = maxSpinVal, maxSpeciesValue = maxSpinVal;
-	/**
-	 * Plot area
-	 */
-	private Plot plot;
-	
-	/**
 	 * 
 	 */
 	private InteractiveScanPanel interactiveScanPanel;
-	
 	/**
 	 * 
 	 */
 	private LegendPanel legendPanel;
 	
+	/**
+	 * The step size for the spinner in the interactive parameter scan. and the
+	 * maximal value for {@link JSpinner}s.
+	 */
+	private double maxSpinVal = 1E10d, paramStepSize = 0.01d;
+	
+	/**
+	 * The maximal allowable values.
+	 */
+	private double maxCompartmentValue = maxSpinVal,
+			maxParameterValue = maxSpinVal, maxSpeciesValue = maxSpinVal;
+	
+	/**
+	 * Plot area
+	 */
+	private Plot plot;
+
 	/**
 	 * Results of simulation and experiments.
 	 */
@@ -163,6 +167,19 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	}
 
 	/**
+	 * @param properties
+	 */
+	public void loadPreferences() {
+		if (interactiveScanPanel != null) {
+			interactiveScanPanel.loadPreferences();
+		}
+		maxSpinVal = 2000;
+		paramStepSize = .1d;
+		maxCompartmentValue = maxSpeciesValue =  maxParameterValue = 1E8;
+		updateUI();
+	}
+
+	/**
 	 * 
 	 */
 	public void plot() {
@@ -226,7 +243,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	public void setIncludeReactions(boolean includeReactions) {
 		this.includeReactions = includeReactions;
 	}
-
+	
 	/**
 	 * @param enabled
 	 */
@@ -245,11 +262,13 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 			remove(rightComponent);
 		}
 		UnitDefinition timeUnits = model.getTimeUnitsInstance();
-		String xLab = "Time";
-		if (timeUnits != null) {
-			xLab += " in " + UnitDefinition.printUnits(timeUnits, true);
+		if (timeUnits == null) {
+			timeUnits = new UnitDefinition(model.getLevel(), model.getVersion());
 		}
-		plot = new Plot(xLab, "Value");
+		plot = new Plot(String.format(bundle.getString("X_AXIS_LABEL"),
+			UnitDefinition.printUnits(timeUnits, true).replace('*', '\u00B7')),
+			bundle.getString("Y_AXIS_LABEL"));
+		plot.setBorder(BorderFactory.createLoweredBevelBorder());
 		// get rid of this pop-up menu.
 		// TODO: maybe we can make use of this later.
 		// MouseListener listeners[] = plot.getMouseListeners();
@@ -288,24 +307,11 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 		if (button.isSelected() && !plot.checkLoggable()) {
 			button.setSelected(false);
 			button.setEnabled(false);
-			String msg = "Cannot change to logarithmic scale because at least one value on the y-axis is not greater than zero.";
-			JOptionPane.showMessageDialog(this, StringUtil.toHTML(msg, 40),
-					"Warning", JOptionPane.WARNING_MESSAGE);
+			JOptionPane.showMessageDialog(this, StringUtil.toHTML(
+				bundle.getString("NO_LOGARITHMIC_SCALE_POSSIBLE"), 40), bundle
+					.getString("WARNING"), JOptionPane.WARNING_MESSAGE);
 		}
 		plot.toggleLog(button.isSelected());
-	}
-
-	/**
-	 * @param properties
-	 */
-	public void loadPreferences() {
-		if (interactiveScanPanel != null) {
-			interactiveScanPanel.loadPreferences();
-		}
-		maxSpinVal = 2000;
-		paramStepSize = .1d;
-		maxCompartmentValue = maxSpeciesValue =  maxParameterValue = 1E8;
-		updateUI();
 	}
 
 	/**

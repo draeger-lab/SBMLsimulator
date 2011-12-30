@@ -64,6 +64,14 @@
   
   <entry key="RESET">Reset</entry>
   <entry key="RESET_TOOLTIP">Sets all values to the original values from the model. However, previously undefined values will be set to the default values.</entry>
+  <entry key="GLOBAL_PARAMETERS">Global Parameters</entry>
+  <entry key="LOCAL_PARAMETERS">Local Parameters</entry>
+  <entry key="REPLACEMENT_OF_UNDEFINED_VALUES">Undefined %s for the %s %s %s been replaced by its default value %.3f.</entry>
+  <entry key="VALUE">value</entry>
+  <entry key="VALUES">values</entry>
+  <entry key="HAVE">have</entry>
+  <entry key="HAS">has</entry>
+  <entry key="REPLACING_UNDEFINED_VALUES">Replacing undefined values</entry>
   
   <!-- LegendTableCellRenderer -->
   
@@ -106,7 +114,7 @@
   <entry key="TITLE_OPTIONS_TOOLTIP">Adjust the tile for the plot</entry>
   <entry key="BASE_OPTIONS">Plotting panel options</entry>
   <entry key="BASE_OPTIONS_TOOLTIP">Options for the visible rectangle of the plot panel</entry>
-  <entry key="PLOT_APPEARANCE">Options for appearance of the plot area</entry>
+  <entry key="PLOT_APPEARANCE">Appearance of the plot</entry>
   <entry key="PLOT_APPEARANCE_TOOLTIP">Options for appearance of the plot area</entry>
   
   <!-- SelectionCommand -->
@@ -135,7 +143,7 @@
   <entry key="QUALITY_N_METRIC_ROOT_TOOLTIP">The root parameter in the distance function for n-metrics: in case of the n-norm this is at the same time also the exponent. For instance, the Eulidean distance has a root value of two, whereas the Manhattan norm has a root of one. In the RSE, the default root is also two, but this value may be changed.</entry>
   <entry key="QUALITY_MEASURES">Model quality function</entry>
   <entry key="QUALITY_MEASURES_TOOLTIP">Here you can specify how to evaluate the quality of a parameter set with respect to given experimental data.</entry>
-  <entry key="ODE_SOLVER">Solver functions for ODE systems</entry>
+  <entry key="ODE_SOLVER">Differential equation solver</entry>
   <entry key="ODE_SOLVER_TOOLTIP">This gives the class name of the default solver for Ordinary Differential Equation (ODE) systems. The associated class must implement AbstractDESSolver and must have a constructor without any parameters.</entry>
   <entry key="SIM_START_TIME">Start time</entry>
   <entry key="SIM_START_TIME_TOOLTIP">The double value associated with this key must, in case of SBML equal to zero. Generally, any start time would be possible. This is why this key exists. But SBML is defined to start its simulation at the time zero.</entry>
@@ -143,13 +151,32 @@
   <entry key="SIM_END_TIME_TOOLTIP">With the associated non-negative double number that has to be greater than 0 when simulating SBML models, it is possible to perform a simulation.</entry>
   <entry key="SIM_STEP_SIZE">Step size</entry>
   <entry key="SIM_STEP_SIZE_TOOLTIP">The greater this value the longer the computation time, but the more accurate will be the result.</entry>
-  <entry key="SIMULATION_CONFIGURATION">Parameters for the simulation</entry>
+  <entry key="SIMULATION_CONFIGURATION">Settings for the simulation</entry>
   <entry key="SIMULATION_CONFIGURATION_TOOLTIP">Here you can specify parameters for the simulation of the model</entry>
     
+  <!-- SimulationPanel -->
+  
+  <entry key="NO_ODE_SOLVERS_AVAILABLE_MESSAGE">Could not find any solvers for differential equation systems. A simulation is therefore not possible.</entry>
+  <entry key="NO_ODE_SOLVERS_AVAILABLE">No ODE solver available</entry>
+  <entry key="NULL_MODEL">Model is null.</entry>
+  <entry key="INTEGRATION_TOOLBOX">Integration tool box</entry>
+  <entry key="TAB_SIMULATION">Simulation</entry>
+  <entry key="TAB_IN_SILICO_DATA">Computed data</entry>
+  <entry key="TAB_EXPERIMENTAL_DATA">Experimental data</entry>
+  <entry key="NO_SIMULATION_PERFORMED">No simulation has been performed yet. Please run the simulation first.</entry>
+  
   <!-- SimulationToolPanel -->
   
   <entry key="STEP_COUNT">Number of steps</entry>
   <entry key="STEP_COUNT_TOOLTIP">The number of time points between the start and the end time of the simulation at which the numerical integration routine should solve the differential equation system. The number of integration steps determines the step size of the integration that equally divides the entire time interval into smaller sub-intervals.</entry>
+  <entry key="PLOT_SETTINGS">Plot settings</entry>
+  
+  <!-- SimulationVisualizationPanel -->
+  
+  <entry key="X_AXIS_LABEL">Time in %s</entry>
+  <entry key="Y_AXIS_LABEL">Value</entry>
+  <entry key="NO_LOGARITHMIC_SCALE_POSSIBLE">Cannot change to logarithmic scale because at least one value on the y-axis is not greater than zero.</entry>
+  <entry key="WARNING">Warning</entry>
   
   <!-- SimulationWorker -->
   

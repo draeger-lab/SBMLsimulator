@@ -24,6 +24,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -54,6 +56,7 @@ import de.zbit.gui.GUITools;
 import de.zbit.io.CSVOptions;
 import de.zbit.io.CSVWriter;
 import de.zbit.io.SBFileFilter;
+import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
 import de.zbit.util.prefs.SBPreferences;
 import eva2.server.go.problems.AbstractOptimizationProblem;
@@ -73,6 +76,15 @@ public class SimulationPanel extends JPanel implements
    * Generated serial version identifier
    */
   private static final long serialVersionUID = -7278034514446047207L;
+  
+  /**
+   * Support for localization.
+   */
+  private static final transient ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
+  /**
+   * A {@link Logger} for this class.
+   */
+  private static final transient Logger logger = Logger.getLogger(SimulationPanel.class.getName());
   
   /**
    * Table for experimental data, the legend, and the simulation data.
@@ -130,12 +142,12 @@ public class SimulationPanel extends JPanel implements
     this.listeners = new ArrayList<PropertyChangeListener>();
     if (SBMLsimulator.getAvailableSolvers().length == 0) {
       JOptionPane.showMessageDialog(this, StringUtil.toHTML(
-        "Could not find any solvers for differential equation systems. A simulation is therefore not possible."),
-        "No ODE solver available", JOptionPane.WARNING_MESSAGE);
+        bundle.getString("NO_ODE_SOLVERS_AVAILABLE_MESSAGE")),
+        bundle.getString("NO_ODE_SOLVERS_AVAILABLE"), JOptionPane.WARNING_MESSAGE);
     } else {
       try {
         if (model == null) {
-          throw new NullPointerException("Model is null.");
+          throw new NullPointerException(bundle.getString("NULL_MODEL"));
         }
         SBPreferences prefs = SBPreferences.getPreferencesFor(SimulationOptions.class);
         String clazz = prefs.get(SimulationOptions.ODE_SOLVER);
@@ -186,7 +198,7 @@ public class SimulationPanel extends JPanel implements
    * @return
    */
   private SimulationToolPanel createFootPanel() {
-    footPanel = new JToolBar("Integration toolbox");
+    footPanel = new JToolBar(bundle.getString("INTEGRATION_TOOLBOX"));
     SimulationToolPanel foot = new SimulationToolPanel(simulationManager);
     footPanel.add(foot);
     return foot;
@@ -198,7 +210,7 @@ public class SimulationPanel extends JPanel implements
   public void finalMultiRunResults(String[] header,
     List<Object[]> multiRunFinalObjectData) {
     // TODO Auto-generated method stub
-    System.out.println("finalMultiRunResults");
+    logger.fine("finalMultiRunResults");
   }
   
   /* (non-Javadoc)
@@ -298,9 +310,9 @@ public class SimulationPanel extends JPanel implements
         expTable.getModel().addTableModelListener(visualizationPanel);
         
         tabbedPane = new JTabbedPane();
-        tabbedPane.add("Plot ", visualizationPanel);
-        tabbedPane.add("Simulated data", simPanel);
-        tabbedPane.add("Experimental data", expPanel);
+        tabbedPane.add(bundle.getString("TAB_SIMULATION"), visualizationPanel);
+        tabbedPane.add(bundle.getString("TAB_IN_SILICO_DATA"), simPanel);
+        tabbedPane.add(bundle.getString("TAB_EXPERIMENTAL_DATA"), expPanel);
         tabbedPane.setEnabledAt(0, true);
         tabbedPane.setEnabledAt(1, false);
         tabbedPane.setEnabledAt(2, false);
@@ -364,7 +376,7 @@ public class SimulationPanel extends JPanel implements
     List<Object[]> multiRunFinalObjectData) {
     for(Object[] obj: multiRunFinalObjectData) {
       String[] solutionString = obj[solutionIndex].toString().replace("{","").replace("}","").split(", ");
-      System.out.println("Fitness: " + ((Double)obj[1]));
+      logger.fine("Fitness: " + ((Double) obj[1]));
       for (int i = 0; i < selectedQuantityIds.length; i++) {
         double currentQuantity=Double.parseDouble(solutionString[i].replace(',', '.'));
         visualizationPanel.updateQuantity(selectedQuantityIds[i], currentQuantity);
@@ -408,7 +420,7 @@ public class SimulationPanel extends JPanel implements
    * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStopped(int, boolean)
    */
   public void notifyRunStopped(int runsPerformed, boolean completedLastRun) {
-    System.out.println("notifyRunStopped");
+    logger.fine("notifyRunStopped");
   }
   
   /* (non-Javadoc)
@@ -465,13 +477,13 @@ public class SimulationPanel extends JPanel implements
           prefs.put(CSVOptions.CSV_FILES_SAVE_DIR, out.getParent());
         }
       } else {
-        String msg = "No simulation has been performed yet. Please run the simulation first.";
-        JOptionPane.showMessageDialog(this, StringUtil.toHTML(msg, 40));
-      }
-    } catch (IOException exc) {
-      GUITools.showErrorMessage(this, exc);
-    }
-  }
+        JOptionPane.showMessageDialog(this,
+					StringUtil.toHTML(bundle.getString("NO_SIMULATION_PERFORMED"), 40));
+			}
+		} catch (IOException exc) {
+			GUITools.showErrorMessage(this, exc);
+		}
+	}
   
   /**
    * @param enabled
@@ -487,10 +499,11 @@ public class SimulationPanel extends JPanel implements
    */
   public void setExperimentalData(MultiTable data) throws Exception {
     expTable.setModel(data);
+    expTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
     tabbedPane.setEnabledAt(2, true);
     this.firePropertyChange("measurements", null, data);
     //TODO preliminary version: property does not change for quality measurement with the call firePropertyChange()
-    simulationManager.getQualityMeasurement().propertyChange(new PropertyChangeEvent(this,"measurements",null,data));
+    simulationManager.getQualityMeasurement().propertyChange(new PropertyChangeEvent(this, "measurements", null, data));
     visualizationPanel.setExperimentData(data);
   }
   

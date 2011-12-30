@@ -154,40 +154,40 @@ public class SimulationConfiguration implements PropertyChangeListener {
    * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
    */
   public void propertyChange(PropertyChangeEvent evt) {
-    String property = evt.getPropertyName();
-    SBPreferences prefs = SBPreferences
-    .getPreferencesFor(SimulationOptions.class);
+		String property = evt.getPropertyName();
+		SBPreferences prefs = SBPreferences
+				.getPreferencesFor(SimulationOptions.class);
+		logger.finest(evt.getPropertyName() + "\t" + evt.getNewValue());
 
-    if ("model".equals(property)) {
-      
-      model = (Model) evt.getNewValue();
-      
-    } else if ("solver".equals(property)) {
-      
-      solver = (AbstractDESSolver) evt.getNewValue();
-      prefs.put(SimulationOptions.ODE_SOLVER, solver.getClass()
-        .getSimpleName());      
-      
-    } else if ("start".equals(property)) {
-      
-      start = (Double) evt.getNewValue();
-      prefs.put(SimulationOptions.SIM_START_TIME, start);  
-      
-    } else if ("end".equals(property)) {
-      
-      end = (Double) evt.getNewValue();
-      prefs.put(SimulationOptions.SIM_END_TIME, end);
-      
-    } else if ("stepSize".equals(property)) {
-      
-      stepSize = (Double) evt.getNewValue();
-      prefs.put(SimulationOptions.SIM_STEP_SIZE, stepSize);
-      
-    } else if ("includeReactions".equals(property)) {
-
-      includeReactions = (Boolean) evt.getNewValue();
-
-    }
-  }
+		if ("model".equals(property)) {
+			
+			model = (Model) evt.getNewValue();
+			
+		} else if (SimulationOptions.ODE_SOLVER.toString().equals(property)) {
+			
+			solver = (AbstractDESSolver) evt.getNewValue();
+			prefs.put(SimulationOptions.ODE_SOLVER, solver.getClass().getName());
+			
+		} else if (SimulationOptions.SIM_START_TIME.toString().equals(property)) {
+			
+			start = (Double) evt.getNewValue();
+			prefs.put(SimulationOptions.SIM_START_TIME, start);
+			
+		} else if (SimulationOptions.SIM_END_TIME.toString().equals(property)) {
+			
+			end = (Double) evt.getNewValue();
+			prefs.put(SimulationOptions.SIM_END_TIME, end);
+			
+		} else if (SimulationOptions.SIM_STEP_SIZE.toString().equals(property)) {
+			
+			stepSize = (Double) evt.getNewValue();
+			prefs.put(SimulationOptions.SIM_STEP_SIZE, stepSize);
+			
+		} else if ("includeReactions".equals(property)) {
+			
+			includeReactions = (Boolean) evt.getNewValue();
+			
+		}
+	}
   
 }

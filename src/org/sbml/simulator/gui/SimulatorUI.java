@@ -205,7 +205,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 		super(appConf);
 		GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.EDIT_MODEL,
 				Command.SIMULATION_START);
-		setStatusBarToMemoryUsage();
+//		setStatusBarToMemoryUsage();
 	}
 
 	/* (non-Javadoc)
@@ -574,7 +574,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 		if (f != null) {
 			try {
 			  SBMLWriter.write(model.getSBMLDocument(), f,
-						SBMLsimulator.class.getSimpleName(),
+						getApplicationName(),
 						getDottedVersionNumber());
 				prefs.put(GUIOptions.SAVE_DIR, f.getParent());
 			} catch (Exception exc) {
