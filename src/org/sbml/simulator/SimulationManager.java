@@ -125,8 +125,7 @@ public class SimulationManager implements PropertyChangeListener {
   }
   
   /* (non-Javadoc)
-   * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent
-   * )
+   * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
    */
   public void propertyChange(PropertyChangeEvent evt) {
     if ("progress".equals(evt.getPropertyName())) {

@@ -484,7 +484,6 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 			JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
 			simPanel.setAllEnabled(false);
 			try {
-				simPanel.savePreferences();
 				simPanel.notifyQuantitiesSelected(panel.getSelectedQuantityIds());
 				GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.EDIT_MODEL,
 					Command.SIMULATION_START, BaseAction.FILE_CLOSE,
