@@ -56,7 +56,6 @@ import org.sbml.optimization.EvA2GUIStarter;
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.SBMLsimulator;
-import org.sbml.tolatex.LaTeXOptions;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.AppConf;
@@ -64,10 +63,8 @@ import de.zbit.gui.ActionCommand;
 import de.zbit.gui.BaseFrame;
 import de.zbit.gui.GUIOptions;
 import de.zbit.gui.GUITools;
-import de.zbit.gui.JOptionPane2;
 import de.zbit.gui.ProgressBarSwing;
 import de.zbit.io.SBFileFilter;
-import de.zbit.sbml.gui.SBMLModelSplitPane;
 import de.zbit.util.AbstractProgressBar;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
@@ -95,10 +92,6 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	 * @author Andreas Dr&auml;ger
 	 */
 	public static enum Command implements ActionCommand {
-		/**
-		 * Option to change the content of the model
-		 */
-		EDIT_MODEL,
 		/**
 		 * Starts the optimization of the model with respect to given data.
 		 */
@@ -203,8 +196,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	 */
 	public SimulatorUI(AppConf appConf) {
 		super(appConf);
-		GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.EDIT_MODEL,
-				Command.SIMULATION_START);
+		GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.SIMULATION_START);
 //		setStatusBarToMemoryUsage();
 	}
 
@@ -215,9 +207,6 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	protected JMenuItem[] additionalEditMenuItems() {
 		// new ImageIcon(SimulatorUI.class.getResource("img/CAMERA_16.png"))
 		UIManager.put("PLAY_16", new ImageIcon(SimulatorUI.class.getResource("img/PLAY_16.png")));
-		JMenuItem editModel = GUITools.createJMenuItem(
-				EventHandler.create(ActionListener.class, this, "editModel"),
-				Command.EDIT_MODEL, UIManager.getIcon("ICON_PENCIL_16"), 'M');
 		JMenuItem simulation = GUITools.createJMenuItem(
 				EventHandler.create(ActionListener.class, this, "simulate"),
 				Command.SIMULATION_START, UIManager.getIcon("PLAY_16"), 'S');
@@ -232,7 +221,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 		}
 		item.setActionCommand(Command.SHOW_OPTIONS.toString());
 		item.addItemListener(this);
-		return new JMenuItem[] { editModel, simulation, optimization, item };
+		return new JMenuItem[] { simulation, optimization, item };
 	}
 
 	/* (non-Javadoc)
@@ -250,7 +239,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 				simPanel = null;
 				GUITools.setEnabled(false, getJMenuBar(), toolBar,
 						BaseAction.FILE_CLOSE, BaseAction.FILE_SAVE_AS,
-						Command.EDIT_MODEL, Command.SIMULATION_START);
+						Command.SIMULATION_START);
 				setTitle(getApplicationName());
 			}
 			GUITools.setEnabled(true, getJMenuBar(), toolBar,
@@ -280,33 +269,6 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	 */
 	protected Component createMainComponent() {
 		return null;
-	}
-
-	/**
-	 * 
-	 */
-	public void editModel() {
-		logger.info("Starting model editor");
-		try {
-			// Cloning is necessary, because the model might be changed.
-			// If not, we want to stick with the previous version of the
-			// model.
-			SBMLDocument doc = simPanel.getModel().getSBMLDocument().clone();
-			SBMLModelSplitPane split = new SBMLModelSplitPane(doc,
-					SBPreferences.getPreferencesFor(LaTeXOptions.class)
-							.getBoolean(LaTeXOptions.PRINT_NAMES_IF_AVAILABLE));
-			split.setPreferredSize(new Dimension(640, 480));
-			if (JOptionPane2.showOptionDialog(this, split, "Model Editor",
-					JOptionPane2.OK_CANCEL_OPTION,
-					JOptionPane2.INFORMATION_MESSAGE, null, null, null, true) == JOptionPane2.OK_OPTION) {
-		    // TODO: remove older Pref Listeners!
-				simPanel = new SimulationPanel(doc.getModel());
-				addPreferenceChangeListener(simPanel.getSimulationToolPanel());
-				validate();
-			}
-		} catch (Throwable exc) {
-			GUITools.showErrorMessage(this, exc);
-		}
 	}
 
 	/* (non-Javadoc)
@@ -467,8 +429,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 		}
 		getContentPane().add(simPanel, BorderLayout.CENTER);
 		validate();
-		GUITools.setEnabled(true, getJMenuBar(), toolBar,
-			BaseAction.FILE_SAVE_AS, Command.EDIT_MODEL,
+		GUITools.setEnabled(true, getJMenuBar(), toolBar, BaseAction.FILE_SAVE_AS,
 			Command.SIMULATION_START, Command.SHOW_OPTIONS);
 		addPreferenceChangeListener(simPanel.getSimulationToolPanel());
 	}
@@ -485,7 +446,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 			simPanel.setAllEnabled(false);
 			try {
 				simPanel.notifyQuantitiesSelected(panel.getSelectedQuantityIds());
-				GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.EDIT_MODEL,
+				GUITools.setEnabled(false, getJMenuBar(), toolBar,
 					Command.SIMULATION_START, BaseAction.FILE_CLOSE,
 					Command.OPTIMIZATION, BaseAction.EDIT_PREFERENCES);
 				// windowClosing
@@ -546,8 +507,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 			this.statusBar.reset();
 			// setStatusBarToMemoryUsage();
 			GUITools.setEnabled(true, getJMenuBar(), getJToolBar(),
-					BaseAction.FILE_SAVE_AS, Command.EDIT_MODEL,
-					Command.SIMULATION_START);
+					BaseAction.FILE_SAVE_AS, Command.SIMULATION_START);
 		}
 	}
 
@@ -621,8 +581,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	public void simulate() {
     try {
       logger.info("Starting simulation");
-      GUITools.setEnabled(false, getJMenuBar(), getJToolBar(),
-        Command.EDIT_MODEL, Command.SIMULATION_START);
+      GUITools.setEnabled(false, getJMenuBar(), getJToolBar(), Command.SIMULATION_START);
       simPanel.addPropertyChangedListener(this);
       simulationTime = System.currentTimeMillis();
       simPanel.simulate();
@@ -641,8 +600,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 					&& (frame.getName().equals(EvAClient.class.getSimpleName()))) {
 				simPanel.setAllEnabled(true);
 				GUITools.setEnabled(true, getJMenuBar(), toolBar,
-						BaseAction.FILE_SAVE_AS, Command.EDIT_MODEL,
-						Command.SIMULATION_START, BaseAction.FILE_CLOSE,
+						BaseAction.FILE_SAVE_AS, Command.SIMULATION_START, BaseAction.FILE_CLOSE,
 						Command.OPTIMIZATION, BaseAction.EDIT_PREFERENCES);
 			}
 		}

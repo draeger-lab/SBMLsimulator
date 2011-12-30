@@ -40,7 +40,7 @@ import de.zbit.util.prefs.SBProperties;
  * @since 1.0
  */
 
-public class CommandLineManager implements PropertyChangeListener {
+public class CommandLineManager implements PropertyChangeListener, Runnable {
 
 	/**
 	 * The simulation manager for the current simulation.
@@ -187,12 +187,15 @@ public class CommandLineManager implements PropertyChangeListener {
 		simulationManager.simulate();
 	}
 
-	/**
-	 * 
-	 * @throws Exception
+	/* (non-Javadoc)
+	 * @see java.lang.Runnable#run()
 	 */
-	public void perform() throws Exception {
-		simulate();
+	public void run() {
+		try {
+			simulate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 }

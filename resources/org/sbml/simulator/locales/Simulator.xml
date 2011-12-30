@@ -163,6 +163,7 @@
   <entry key="TAB_SIMULATION">Simulation</entry>
   <entry key="TAB_IN_SILICO_DATA">Computed data</entry>
   <entry key="TAB_EXPERIMENTAL_DATA">Experimental data</entry>
+  <entry key="TAB_MODEL_VIEW">Model</entry>
   <entry key="NO_SIMULATION_PERFORMED">No simulation has been performed yet. Please run the simulation first.</entry>
   
   <!-- SimulationToolPanel -->

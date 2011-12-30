@@ -142,7 +142,7 @@ public class SBMLsimulator extends Launcher {
 	 * 
 	 * @return
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings("rawtypes")
 	public static List<Class> getAvailableSolverClasses() {
 		List<Class> solverList = new ArrayList<Class>(AVAILABLE_SOLVERS.length);
 		for (Class<AbstractDESSolver> solverClass : AVAILABLE_SOLVERS) {
@@ -195,12 +195,9 @@ public class SBMLsimulator extends Launcher {
 		}
 
 		if (openFile != null) {
-			CommandLineManager commandLineManager = new CommandLineManager(openFile, timeSeriesFile, appConf);
-			try {
-				commandLineManager.perform();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			CommandLineManager commandLineManager = new CommandLineManager(openFile,
+				timeSeriesFile, appConf);
+			commandLineManager.run();
 		} else {
 			logger.fine(String.format(
 					getResources().getString("INCOMPLETE_CMD_ARG_LIST"),

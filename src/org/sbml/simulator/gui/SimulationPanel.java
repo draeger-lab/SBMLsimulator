@@ -56,6 +56,7 @@ import de.zbit.gui.GUITools;
 import de.zbit.io.CSVOptions;
 import de.zbit.io.CSVWriter;
 import de.zbit.io.SBFileFilter;
+import de.zbit.sbml.gui.SBMLModelSplitPane;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
 import de.zbit.util.prefs.SBPreferences;
@@ -313,9 +314,13 @@ public class SimulationPanel extends JPanel implements
         tabbedPane.add(bundle.getString("TAB_SIMULATION"), visualizationPanel);
         tabbedPane.add(bundle.getString("TAB_IN_SILICO_DATA"), simPanel);
         tabbedPane.add(bundle.getString("TAB_EXPERIMENTAL_DATA"), expPanel);
+				tabbedPane.add(bundle.getString("TAB_MODEL_VIEW"),
+					new SBMLModelSplitPane(simulationManager.getSimlationConfiguration()
+							.getModel().getSBMLDocument(), true));
         tabbedPane.setEnabledAt(0, true);
         tabbedPane.setEnabledAt(1, false);
         tabbedPane.setEnabledAt(2, false);
+        tabbedPane.setEnabledAt(3, true);
       }
       add(tabbedPane, BorderLayout.CENTER);
     } catch (Exception exc) {
