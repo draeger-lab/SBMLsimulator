@@ -22,10 +22,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.prefs.BackingStoreException;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -141,15 +139,12 @@ public class SimulationPanel extends JPanel implements
         }
         SBPreferences prefs = SBPreferences.getPreferencesFor(SimulationOptions.class);
         String clazz = prefs.get(SimulationOptions.ODE_SOLVER);
-//        clazz = "org.simulator.math.odes.AdamsBashforthSolver";
         DESSolver solver = (DESSolver) Class.forName(clazz.substring(clazz.indexOf(' ') + 1)).newInstance();
         double timeStart = prefs.getDouble(SimulationOptions.SIM_START_TIME);
         double timeEnd = prefs.getDouble(SimulationOptions.SIM_END_TIME);
         double stepSize = prefs.getDouble(SimulationOptions.SIM_STEP_SIZE);
         boolean includeReactions = true;
         clazz = prefs.get(SimulationOptions.QUALITY_MEASURE);
-        // TODO: It seems here is a bug...
-//        clazz = "org.sbml.simulator.math.RelativeSquaredError";
         QualityMeasure quality = (QualityMeasure) Class.forName(clazz.substring(clazz.indexOf(' ') + 1)).newInstance();
         QualityMeasurement measurement = new QualityMeasurement(quality);
         simulationManager = new SimulationManager(measurement,
@@ -454,14 +449,6 @@ public class SimulationPanel extends JPanel implements
   }
   
   /**
-   * @throws BackingStoreException 
-   */
-  public void savePreferences() throws BackingStoreException {
-    SBPreferences prefs = SBPreferences.getPreferencesFor(SimulationOptions.class);
-    prefs.flush();
-  }
-  
-  /**
    * 
    */
   public void saveSimulationResults() {
@@ -555,7 +542,6 @@ public class SimulationPanel extends JPanel implements
    * @throws Exception
    */
   public void simulate() throws Exception {
-    savePreferences();
     simulationManager.simulate();
   }
   

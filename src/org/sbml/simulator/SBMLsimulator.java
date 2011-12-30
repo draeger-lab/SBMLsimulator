@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.simulator.gui.SimulatorUI;
 import org.sbml.simulator.gui.plot.PlotOptions;
@@ -85,19 +84,18 @@ public class SBMLsimulator extends Launcher {
 
 	/**
 	 * An array of all available implementations of distance functions to judge
-	 * the quality of a simulation based on parameter and initial value
-	 * settings.
+	 * the quality of a simulation based on parameter and initial value settings.
 	 */
 	private static final Class<QualityMeasure> AVAILABLE_QUALITY_MEASURES[] = Reflect
-			.getAllClassesInPackage(MATH_PACKAGE, true, true,
-					QualityMeasure.class, JAR_LOCATION, true);
-
+			.getAllClassesInPackage(MATH_PACKAGE, true, true, QualityMeasure.class,
+				JAR_LOCATION, true);
+	
 	/**
 	 * An array of all available ordinary differential equation solvers.
 	 */
 	private static final Class<AbstractDESSolver> AVAILABLE_SOLVERS[] = Reflect
 			.getAllClassesInPackage(SOLVER_PACKAGE, true, true,
-					AbstractDESSolver.class, JAR_LOCATION, true);
+				AbstractDESSolver.class, JAR_LOCATION, true);
 
 	/**
 	 * 
