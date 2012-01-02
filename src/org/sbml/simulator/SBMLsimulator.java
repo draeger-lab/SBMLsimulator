@@ -302,11 +302,11 @@ public class SBMLsimulator extends Launcher {
 		SimulatorUI simulatorUI = new SimulatorUI(appConf);
 		SBProperties props = appConf.getCmdArgs();
 		if (props.containsKey(SimulatorOptions.SBML_INPUT_FILE)) {
-			simulatorUI.openModel(new File(props.get(
-					SimulatorOptions.SBML_INPUT_FILE).toString()));
+			simulatorUI.open(new File(props.get(SimulatorOptions.SBML_INPUT_FILE)
+					.toString()));
 			if (props.containsKey(SimulatorOptions.TIME_SERIES_FILE)) {
-				simulatorUI.openExperimentalData(new File(props.get(
-						SimulatorOptions.TIME_SERIES_FILE).toString()));
+				simulatorUI.open(new File(props.get(SimulatorOptions.TIME_SERIES_FILE)
+						.toString()));
 			}
 		}
 		return simulatorUI;
