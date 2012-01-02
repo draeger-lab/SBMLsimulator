@@ -31,7 +31,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
@@ -40,6 +42,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -68,6 +71,7 @@ import de.zbit.io.SBFileFilter;
 import de.zbit.util.AbstractProgressBar;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
+import de.zbit.util.ValuePairUncomparable;
 import de.zbit.util.prefs.SBPreferences;
 import eva2.EvAInfo;
 import eva2.client.EvAClient;
@@ -92,6 +96,10 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	 * @author Andreas Dr&auml;ger
 	 */
 	public static enum Command implements ActionCommand {
+		/**
+		 * Open experimental data.
+		 */
+		OPEN_DATA,
 		/**
 		 * Starts the optimization of the model with respect to given data.
 		 */
@@ -199,6 +207,27 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 		GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.SIMULATION_START);
 //		setStatusBarToMemoryUsage();
 	}
+	
+	
+
+	/* (non-Javadoc)
+	 * @see de.zbit.gui.BaseFrame#createFileMenu(boolean)
+	 */
+	@Override
+	protected JMenu createFileMenu(boolean loadDefaultFileMenuEntries) {
+		JMenu fileMenu = super.createFileMenu(loadDefaultFileMenuEntries);
+		JMenuItem openFile = (JMenuItem) GUITools.find(fileMenu, BaseAction.FILE_OPEN);
+		JMenuItem openData = GUITools.createJMenuItem(EventHandler.create(ActionListener.class, this,
+				"openFileAndLogHistory"), Command.OPEN_DATA);
+		openData.setEnabled(false);
+		fileMenu.remove(openFile);
+		JMenu openMenu = GUITools.createJMenu("Open", "open tooltip", openFile, openData);
+		openMenu.setIcon(openFile.getIcon());
+		openMenu.setMnemonic(openFile.getMnemonic());
+		openFile.setIcon(null);
+		fileMenu.add(openMenu, 0);
+		return fileMenu;
+	}
 
 	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrame#additionalEditMenuItems()
@@ -228,33 +257,26 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	 * @see de.zbit.gui.BaseFrame#closeFile()
 	 */
 	public boolean closeFile() {
-	  boolean retVal = false;
 		if (simPanel != null) {
-			if (simPanel.isSetExperimentalData()) {
-				simPanel.closeExperimentalData();
-				GUITools.setEnabled(false, getJMenuBar(), toolBar,
-						Command.OPTIMIZATION, BaseAction.FILE_SAVE_AS);
-			} else {
-				getContentPane().remove(simPanel);
+			if (GUITools.showQuestionMessage(this, "Close current model and all data without saving?",
+				"Closing model", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+				listOfPrefChangeListeners.remove(simPanel.getSimulationToolPanel());
+				if (GUITools.contains(getContentPane(), simPanel)) {
+					getContentPane().remove(simPanel);
+				}
 				simPanel = null;
-				GUITools.setEnabled(false, getJMenuBar(), toolBar,
-						BaseAction.FILE_CLOSE, BaseAction.FILE_SAVE_AS,
-						Command.SIMULATION_START);
 				setTitle(getApplicationName());
+				GUITools.swapAccelerator(getJMenuBar(), BaseAction.FILE_OPEN ,Command.OPEN_DATA);
+				GUITools.setEnabled(false, getJMenuBar(), toolBar,
+					BaseAction.FILE_CLOSE, BaseAction.FILE_SAVE_AS,
+					Command.SIMULATION_START, Command.SHOW_OPTIONS, Command.OPEN_DATA,
+					Command.OPTIMIZATION);
+				GUITools.setEnabled(true, getJMenuBar(), toolBar, BaseAction.FILE_OPEN);
+				repaint();
+				return true;
 			}
-			GUITools.setEnabled(true, getJMenuBar(), toolBar,
-					BaseAction.FILE_OPEN);
-			retVal = true;
 		}
-		if (simPanel == null) {
-			GUITools.setEnabled(false, getJMenuBar(), toolBar,
-					Command.SHOW_OPTIONS, BaseAction.FILE_SAVE_AS);
-			retVal = true;
-		}
-		if (retVal) {
-		  repaint();
-		}
-		return retVal;
+		return false;
 	}
 
 	/* (non-Javadoc)
@@ -306,132 +328,131 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 		}
 	}
 
-	/**
-	 * 
-	 */
-	public void openExperimentalData() {
-		SBPreferences prefs = SBPreferences.getPreferencesFor(GUIOptions.class);
-		JFileChooser chooser = GUITools.createJFileChooser(
-				prefs.get(GUIOptions.OPEN_DIR).toString(), false, false,
-				JFileChooser.FILES_ONLY, SBFileFilter.createCSVFileFilter());
-		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-			openExperimentalData(chooser.getSelectedFile());
-		}
-	}
-
-	/**
-	 * @param file
-	 */
-	public void openExperimentalData(File file) {
-		CSVDataImporter importer = new CSVDataImporter();
-		if (simPanel != null) {
-			Model model = simPanel.getModel();
-			try {
-        MultiTable data = importer.convert(model, file.getAbsolutePath(), this);
-				if (data != null) {
-					simPanel.setExperimentalData(data);
-					GUITools.setEnabled(false, getJMenuBar(), toolBar,
-							BaseAction.FILE_OPEN);
-					// Optimization should not be available if there is nothing
-					// to
-					// optimize.
-					GUITools.setEnabled(
-							model.getNumQuantities()
-									- model.getNumSpeciesReferences() > 0,
-							getJMenuBar(), toolBar, Command.OPTIMIZATION);
-				}
-				SBPreferences prefs = SBPreferences
-						.getPreferencesFor(GUIOptions.class);
-				prefs.put(GUIOptions.OPEN_DIR, file.getParent());
-			} catch (Exception exc) {
-				GUITools.showErrorMessage(this, exc);
-			} finally {
-				// setStatusBarToMemoryUsage();
-			}
-		}
-	}
-
-	/**
-	 * @param path
-	 */
-	public void openExperimentalData(String path) {
-		openExperimentalData(new File(path));
-	}
-
 	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrame#openFile(java.io.File[])
 	 */
 	protected File[] openFile(File... files) {
-		if (simPanel == null) {
-			if ((files != null) && (files.length > 0)) {
-				return openModel(files[0]);
-			} else {
-				return openModel();
+		File[] modelFiles = null;
+		File[] dataFiles = null;
+		
+		/*
+		 * Investigate the given files or let the user open a model and some data:
+		 */
+		if ((files != null) && (files.length > 0)) {
+			// Files are given to this method
+			ValuePairUncomparable<List<File>, List<File>> vp = SBFileFilter.createSBMLFileFilter().separate(files);
+			modelFiles = vp.getA().toArray(new File[0]);
+			if (vp.getB().size() > 0) {
+				vp = SBFileFilter.createCSVFileFilter().separate(vp.getB().toArray(new File[0]));
+				if (vp.getA().size() > 0) {
+					dataFiles = vp.getA().toArray(new File[0]);
+				}
+				if (vp.getB().size() > 0) {
+					JOptionPane.showMessageDialog(this,
+						"Could not open the files " + vp.getB(),
+						"Could not open all files", JOptionPane.WARNING_MESSAGE);
+				}
 			}
 		} else {
-			openExperimentalData();
+			// TODO: also allow ZIP or other archives...
+			// No files are given, we have to let the user open a file.
+			SBPreferences prefs = SBPreferences.getPreferencesFor(getClass());
+			if (simPanel == null) { 
+				// Open a model
+				modelFiles = GUITools.openFileDialog(this,
+					prefs.get(GUIOptions.OPEN_DIR).toString(), false, false,
+					JFileChooser.FILES_ONLY, SBFileFilter.createSBMLFileFilterList());
+			} else { 
+				// Open (experimental) data files
+				dataFiles = GUITools.openFileDialog(this,
+					prefs.get(GUIOptions.OPEN_DIR), true, false, JFileChooser.FILES_ONLY,
+					SBFileFilter.createCSVFileFilter());
+			}
 		}
-		return null;
-	}
+		
+		/*
+		 * Update the graphical user interface given some files (model and maybe data).
+		 */
+		
+		// First the model(s):
+		if ((modelFiles != null) && (modelFiles.length > 0)) {
+			try {
+				SBMLDocument doc = SBMLReader.read(modelFiles[0]);
+				if ((doc != null) && (doc.isSetModel())) {
+					
+					if ((simPanel != null) && !closeFile()) {
+						return null;
+					}
+					
+					Model model = doc.getModel();
+					simPanel = new SimulationPanel(model);
+					getContentPane().add(simPanel, BorderLayout.CENTER);
+					addPreferenceChangeListener(simPanel.getSimulationToolPanel());
+					
+					GUITools.swapAccelerator(getJMenuBar(), BaseAction.FILE_OPEN ,Command.OPEN_DATA);
+					GUITools.setEnabled(false, getJMenuBar(), BaseAction.FILE_OPEN);
+					GUITools.setEnabled(true, getJMenuBar(), toolBar,
+						BaseAction.FILE_SAVE_AS, Command.SIMULATION_START,
+						Command.SHOW_OPTIONS, Command.OPEN_DATA);
+					setTitle(String.format("%s - %s", getApplicationName(),
+						model.isSetName() ? model.getName() : modelFiles[0].getName()));
+					
+				} else {
+					JOptionPane.showMessageDialog(this, StringUtil.toHTML(
+						"Could not open model " + modelFiles[0].getAbsolutePath(),
+						GUITools.TOOLTIP_LINE_LENGTH));
+				}
+			} catch (Exception exc) {
+				GUITools.showErrorMessage(this, exc);
+			}
+			
+			if (modelFiles.length > 1) {
+				JOptionPane.showMessageDialog(this,
+					"Can only open one model, rejecting " + Arrays.toString(modelFiles),
+					"Only one model", JOptionPane.WARNING_MESSAGE);
+			}
+		}
+		
+		// Second: the data
+		if ((dataFiles != null) && (dataFiles.length > 0)) {
+			if (simPanel != null) {
+				Model model = simPanel.getModel();
+				CSVDataImporter importer = new CSVDataImporter();
+				try {
+	        MultiTable data = importer.convert(model, dataFiles[0].getAbsolutePath(), this);
+					if (data != null) {
+						simPanel.setExperimentalData(data);
+						// Optimization should not be available if there is nothing to optimize.
+						GUITools.setEnabled(
+								model.getNumQuantities() - model.getNumSpeciesReferences() > 0,
+								getJMenuBar(), toolBar, Command.OPTIMIZATION);
+					}
+//				TODO: Use	CSVOptions.
+					SBPreferences prefs = SBPreferences
+							.getPreferencesFor(GUIOptions.class);
+					prefs.put(GUIOptions.OPEN_DIR, dataFiles[0].getParent());
+				} catch (Exception exc) {
+					GUITools.showErrorMessage(this, exc);
+				}
+			} else {
+				// reject data files
+				JOptionPane.showMessageDialog(this,
+					"Cannot open data if no model has been opened.",
+					"Unable to open data", JOptionPane.WARNING_MESSAGE);
+			}
+		}
 
-	/**
-	 * 
-	 * @return
-	 */
-	public File[] openModel() {
-		SBPreferences prefs = SBPreferences.getPreferencesFor(GUIOptions.class);
-		File files[] = GUITools.openFileDialog(this,
-				prefs.get(GUIOptions.OPEN_DIR).toString(), false, false,
-				JFileChooser.FILES_ONLY,
-				SBFileFilter.createSBMLFileFilterList());
-		if ((files != null) && (files.length == 1)) {
-			return openModel(files[0]);
-		}
-		return null;
+		// setStatusBarToMemoryUsage();
+		validate();
+		
+		return modelFiles;
 	}
 
 	/**
 	 * @param file
 	 */
-	public File[] openModel(File file) {
-    try {
-      SBMLDocument doc = SBMLReader.read(file);
-      if ((doc != null) && (doc.isSetModel())) {
-        SBPreferences prefs = SBPreferences.getPreferencesFor(GUIOptions.class);
-        prefs.put(GUIOptions.OPEN_DIR, file.getParent());
-        setTitle(getApplicationName() + " - " + file.getName());
-        openModel(doc.getModel());
-        return new File[] { file };
-      }
-      JOptionPane.showMessageDialog(this, StringUtil.toHTML(
-        "Could not open model " + file.getAbsolutePath(),
-        GUITools.TOOLTIP_LINE_LENGTH));
-    } catch (Exception exc) {
-      GUITools.showErrorMessage(this, exc);
-    } finally {
-      // setStatusBarToMemoryUsage();
-    }
-		return null;
-	}
-
-	/**
-	 * @param model
-	 */
-	public void openModel(Model model) {
-    if (model.isSetName() || model.isSetId()) {
-      setTitle(getApplicationName() + " - "
-          + (model.isSetName() ? model.getName() : model.getId()));
-    }
-    // TODO: remove older Pref Listeners!
-		simPanel = new SimulationPanel(model);
-		if (GUITools.contains(getContentPane(), simPanel)) {
-			getContentPane().remove(simPanel);
-		}
-		getContentPane().add(simPanel, BorderLayout.CENTER);
-		validate();
-		GUITools.setEnabled(true, getJMenuBar(), toolBar, BaseAction.FILE_SAVE_AS,
-			Command.SIMULATION_START, Command.SHOW_OPTIONS);
-		addPreferenceChangeListener(simPanel.getSimulationToolPanel());
+	public File[] open(File... files) {
+    return openFileAndLogHistory(files);
 	}
 
 	/**

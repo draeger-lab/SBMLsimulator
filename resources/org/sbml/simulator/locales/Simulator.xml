@@ -200,6 +200,8 @@
   
   <entry key="FILE_CLOSE">Close model;Closes the currently selected model and all experimental data sets that may be associated with the model.</entry>
   <entry key="FILE_OPEN">Open model;Open a model in SBML format for simulation or parameter optimization.</entry>
+  <entry key="OPEN_DATA">Load experimental data</entry>
+  <entry key="OPEN_DATA_TOOLTIP">Open one ore multiple experimental data sets.</entry>
   <entry key="OPTIMIZATION">Optimization</entry>
   <entry key="OPTIMIZATION_TOOLTIP">Launch the optimization of the quantities in the current model, i.e., fits the model to given experimental data.</entry>
   <entry key="SHOW_OPTIONS">Show options</entry>

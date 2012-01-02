@@ -17,11 +17,10 @@
  */
 package org.sbml.simulator.math;
 
+import java.io.File;
 import java.util.Properties;
 
-import org.sbml.jsbml.Model;
 import org.sbml.jsbml.resources.Resource;
-import org.sbml.jsbml.xml.stax.SBMLReader;
 import org.sbml.simulator.SimulationOptions;
 import org.sbml.simulator.SimulatorOptions;
 import org.sbml.simulator.gui.SimulatorUI;
@@ -54,7 +53,7 @@ public class SimulationModeTest {
 
     public SimulationModeTest(String testCasesDir) {
 
-	String sbmlfile, csvfile, configfile;
+	String sbmlFile, csvfile, configfile;
 	if (!testCasesDir.endsWith("/")) {
 	    testCasesDir += "/";
 	}
@@ -79,11 +78,11 @@ public class SimulationModeTest {
 		modelFile.append(path);
 		modelFile.insert(0, testCasesDir);
 		path = modelFile.toString();
-		sbmlfile = path + "-sbml-l2v4.xml";
+		sbmlFile = path + "-sbml-l2v4.xml";
 		csvfile = path + "-results.csv";
 		configfile = path + "-settings.txt";
 
-		settings.put(SimulatorOptions.SBML_INPUT_FILE, sbmlfile);
+		settings.put(SimulatorOptions.SBML_INPUT_FILE, sbmlFile);
 		settings.put(CSVOptions.CSV_FILE, csvfile);
 
 		Properties cfg = Resource.readProperties(configfile);
@@ -100,19 +99,18 @@ public class SimulationModeTest {
 		settings.put(SimulationOptions.SIM_STEP_SIZE, Double
 			.valueOf(stepsize));
 
-		// sbmlIo.convert2Model(sbmlfile);
+		// sbmlIo.convert2Model(sbmlFile);
 
-		Model model = (new SBMLReader()).readSBML(sbmlfile).getModel();
-		if (model != null) {
-		    SimulatorUI d = new SimulatorUI();
-		    d.openModel(model);
-		    d.setSelectedQuantities(cfg.get("variables").toString()
+		if (sbmlFile != null) {
+		  SimulatorUI d = new SimulatorUI();
+		  d.open(new File(sbmlFile));
+		  d.setSelectedQuantities(cfg.get("variables").toString()
 			    .trim().split(", "));
-		    if (csvfile != null) {
-			d.openExperimentalData(csvfile);
-		    }
-		    d.simulate();
-		    d.setVisible(true);
+		  if (csvfile != null) {
+			  d.open(new File(csvfile));
+		  }
+		  d.simulate();
+		  d.setVisible(true);
 		}
 
 	    } catch (Exception e) {
