@@ -28,6 +28,7 @@ import javax.swing.SwingWorker;
 
 import org.apache.commons.math.ode.DerivativeException;
 import org.sbml.jsbml.SBMLException;
+import org.sbml.jsbml.util.StringTools;
 import org.sbml.simulator.SimulationConfiguration;
 import org.simulator.math.odes.DESSolver;
 import org.simulator.math.odes.DESystem;
@@ -35,6 +36,7 @@ import org.simulator.math.odes.MultiTable;
 import org.simulator.sbml.SBMLinterpreter;
 
 import de.zbit.util.ResourceManager;
+import de.zbit.util.Timer;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -108,12 +110,19 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
   public SimulationWorker(SimulationConfiguration configuration) throws Exception {
     this.configuration = configuration;
     this.configuration.getSolver().addPropertyChangeListener(this);
+    this.timer = new Timer();
   }
+  
+  /**
+   * 
+   */
+  private Timer timer;
   
   /* (non-Javadoc)
    * @see javax.swing.SwingWorker#doInBackground()
    */
   protected MultiTable doInBackground() throws Exception {
+  	timer.reset();
     SBMLinterpreter interpreter = new SBMLinterpreter(configuration.getModel());
     solution = solveByStepSize(configuration.getSolver(), interpreter, interpreter
         .getInitialValues(), configuration.getStart(), configuration.getEnd(),
@@ -126,14 +135,16 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
    */
   @Override
   protected void done() {
+  	double time = timer.getAndReset(false);
     try {
       firePropertyChange("done", null, get());
     } catch (InterruptedException e) {
-      logger.log(Level.WARNING, e.getLocalizedMessage(),e);
+      logger.log(Level.WARNING, e.getLocalizedMessage(), e);
     } catch (ExecutionException e) {     
-      logger.log(Level.WARNING, e.getLocalizedMessage(),e);
+      logger.log(Level.WARNING, e.getLocalizedMessage(), e);
     }
     configuration.getSolver().removePropertyChangeListener(this);
+  	logger.info(String.format("Simulation time: %s s", StringTools.toString(time)));
   }
 
   /**

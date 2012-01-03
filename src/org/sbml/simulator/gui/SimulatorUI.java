@@ -54,7 +54,6 @@ import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
 import org.sbml.jsbml.SBMLWriter;
-import org.sbml.jsbml.util.StringTools;
 import org.sbml.optimization.EvA2GUIStarter;
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.optimization.problem.EstimationProblem;
@@ -67,8 +66,10 @@ import de.zbit.gui.BaseFrame;
 import de.zbit.gui.GUIOptions;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.ProgressBarSwing;
+import de.zbit.io.CSVOptions;
 import de.zbit.io.SBFileFilter;
 import de.zbit.util.AbstractProgressBar;
+import de.zbit.util.FileTools;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
 import de.zbit.util.ValuePairUncomparable;
@@ -87,8 +88,8 @@ import eva2.tools.BasicResourceLoader;
  * @version $Rev$
  * @since 1.0
  */
-public class SimulatorUI extends BaseFrame implements ItemListener,
-    PropertyChangeListener {
+public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
+		PropertyChangeListener {
   
 	/**
 	 * Commands that can be understood by this dialog.
@@ -146,8 +147,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	/**
    * A {@link Logger} for this class.
    */
-	private static final Logger logger = Logger.getLogger(SimulatorUI.class
-			.getName());
+	private static final Logger logger = Logger.getLogger(SimulatorUI.class.getName());
 
 	/**
 	 * Generated serial version identifier
@@ -161,24 +161,9 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	}
 
 	/**
-	 * 
-	 */
-	private Model model;
-
-	/**
-	 * 
-	 */
-	private QuantitySelectionPanel panel;
-
-	/**
 	 * GUI element that lets the user run the simulation.
 	 */
 	private SimulationPanel simPanel;
-	
-	/**
-	 * 
-	 */
-	private long simulationTime;
 
 	/**
 	 * 
@@ -222,6 +207,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 		openData.setEnabled(false);
 		fileMenu.remove(openFile);
 		JMenu openMenu = GUITools.createJMenu("Open", "open tooltip", openFile, openData);
+		openMenu.addActionListener(EventHandler.create(ActionListener.class, this, "openFileAndLogHistory"));
 		openMenu.setIcon(openFile.getIcon());
 		openMenu.setMnemonic(openFile.getMnemonic());
 		openFile.setIcon(null);
@@ -257,8 +243,22 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	 * @see de.zbit.gui.BaseFrame#closeFile()
 	 */
 	public boolean closeFile() {
+		return closeFile(true);
+	}
+
+	/**
+	 * 
+	 * @param onlyClosing whether or not this method is called with the purpose to open another model right afterwards.
+	 * 
+	 * @return
+	 */
+	private boolean closeFile(boolean onlyClosing) {
 		if (simPanel != null) {
-			if (GUITools.showQuestionMessage(this, "Close current model and all data without saving?",
+			String message = "Close current model and all data without saving?";
+			if (!onlyClosing) {
+				message = "The current model must be closed before a new model can be opened. " + message;
+			}
+			if (GUITools.showQuestionMessage(this, message,
 				"Closing model", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 				listOfPrefChangeListeners.remove(simPanel.getSimulationToolPanel());
 				if (GUITools.contains(getContentPane(), simPanel)) {
@@ -266,7 +266,10 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 				}
 				simPanel = null;
 				setTitle(getApplicationName());
-				GUITools.swapAccelerator(getJMenuBar(), BaseAction.FILE_OPEN ,Command.OPEN_DATA);
+				if (onlyClosing) {
+					GUITools.swapAccelerator(getJMenuBar(), BaseAction.FILE_OPEN,
+						Command.OPEN_DATA);
+				}
 				GUITools.setEnabled(false, getJMenuBar(), toolBar,
 					BaseAction.FILE_CLOSE, BaseAction.FILE_SAVE_AS,
 					Command.SIMULATION_START, Command.SHOW_OPTIONS, Command.OPEN_DATA,
@@ -290,7 +293,8 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	 * @see de.zbit.gui.BaseFrame#createMainComponent()
 	 */
 	protected Component createMainComponent() {
-		return null;
+		this.simPanel = null;
+		return simPanel;
 	}
 
 	/* (non-Javadoc)
@@ -323,7 +327,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 			if ((item.getActionCommand() != null)
 					&& (item.getActionCommand().equals(Command.SHOW_OPTIONS
 							.toString()))) {
-				simPanel.setShowSettingsPanel(item.isSelected());
+				simPanel.setShowSimulationToolPanel(item.isSelected());
 			}
 		}
 	}
@@ -380,7 +384,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 				SBMLDocument doc = SBMLReader.read(modelFiles[0]);
 				if ((doc != null) && (doc.isSetModel())) {
 					
-					if ((simPanel != null) && !closeFile()) {
+					if ((simPanel != null) && !closeFile(false)) {
 						return null;
 					}
 					
@@ -418,21 +422,31 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 			if (simPanel != null) {
 				Model model = simPanel.getModel();
 				CSVDataImporter importer = new CSVDataImporter();
-				try {
-	        MultiTable data = importer.convert(model, dataFiles[0].getAbsolutePath(), this);
-					if (data != null) {
-						simPanel.setExperimentalData(data);
-						// Optimization should not be available if there is nothing to optimize.
-						GUITools.setEnabled(
-								model.getNumQuantities() - model.getNumSpeciesReferences() > 0,
-								getJMenuBar(), toolBar, Command.OPTIMIZATION);
+				File openDir = null;
+				for (File dataFile : dataFiles) {
+					try {
+						MultiTable data = importer.convert(model,
+							dataFile.getAbsolutePath(), this);
+						if (data != null) {
+							simPanel.addExperimentalData(
+								FileTools.trimExtension(dataFile.getName()), data);
+							if (openDir == null) {
+								openDir = dataFile.getParentFile();
+							}
+						}
+					} catch (Exception exc) {
+						GUITools.showErrorMessage(this, exc);
 					}
-//				TODO: Use	CSVOptions.
-					SBPreferences prefs = SBPreferences
-							.getPreferencesFor(GUIOptions.class);
-					prefs.put(GUIOptions.OPEN_DIR, dataFiles[0].getParent());
-				} catch (Exception exc) {
-					GUITools.showErrorMessage(this, exc);
+				}
+				if (simPanel.getExperimentalDataCount() > 0) {
+					// Optimization should not be available if there is nothing to optimize.
+					GUITools.setEnabled(
+						model.getNumQuantities() - model.getNumSpeciesReferences() > 0,
+						getJMenuBar(), toolBar, Command.OPTIMIZATION);
+				}
+				if (openDir != null) {
+					SBPreferences prefs = SBPreferences.getPreferencesFor(getClass());
+					prefs.put(CSVOptions.CSV_FILES_OPEN_DIR, openDir);
 				}
 			} else {
 				// reject data files
@@ -459,8 +473,8 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	 * 
 	 */
 	public void optimize() {
-		model = simPanel.getModel().getSBMLDocument().clone().getModel();
-		panel = new QuantitySelectionPanel(model);
+		final Model model = simPanel.getModel().getSBMLDocument().clone().getModel();
+		final QuantitySelectionPanel panel = new QuantitySelectionPanel(model);
 		if (JOptionPane.showConfirmDialog(this, panel,
 			"Select quantities for optimization", JOptionPane.OK_CANCEL_OPTION,
 			JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
@@ -475,8 +489,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 					this, "windowClosing", "");
 				final SimulatorUI ui = this;
 				new Thread(new Runnable() {
-					/*
-					 * (non-Javadoc)
+					/* (non-Javadoc)
 					 * @see java.lang.Runnable#run()
 					 */
 					public void run() {
@@ -518,14 +531,8 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 			int process = (int) Math.round(((Number) evt.getNewValue())
 					.doubleValue());
 			memoryBar.percentageChanged(process, -1, "computed");
-			// logger.log(Level.INFO, String.format("Simulating... %1$3s%%",
-			// process));
 		} else if (evt.getPropertyName().equalsIgnoreCase("done")) {
-			this.simulationTime = System.currentTimeMillis()
-					- this.simulationTime;
-			logger.info(String.format("Simulation time: %s s",
-				StringTools.toString(simulationTime * 1E-3d)));
-			this.statusBar.reset();
+			statusBar.reset();
 			// setStatusBarToMemoryUsage();
 			GUITools.setEnabled(true, getJMenuBar(), getJToolBar(),
 					BaseAction.FILE_SAVE_AS, Command.SIMULATION_START);
@@ -548,7 +555,7 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
 	 * @param model
 	 */
 	public void saveModel(Model model) {
-		SBPreferences prefs = SBPreferences.getPreferencesFor(GUIOptions.class);
+		SBPreferences prefs = SBPreferences.getPreferencesFor(getClass());
 		File f = GUITools.saveFileDialog(this, prefs.get(GUIOptions.SAVE_DIR)
 				.toString(), false, false, JFileChooser.FILES_ONLY,
 				SBFileFilter.createSBMLFileFilter());
@@ -604,7 +611,6 @@ public class SimulatorUI extends BaseFrame implements ItemListener,
       logger.info("Starting simulation");
       GUITools.setEnabled(false, getJMenuBar(), getJToolBar(), Command.SIMULATION_START);
       simPanel.addPropertyChangedListener(this);
-      simulationTime = System.currentTimeMillis();
       simPanel.simulate();
     } catch (Exception exc) {
       GUITools.showErrorMessage(this, exc);

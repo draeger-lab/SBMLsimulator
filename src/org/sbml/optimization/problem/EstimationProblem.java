@@ -17,8 +17,12 @@
  */
 package org.sbml.optimization.problem;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Quantity;
@@ -89,7 +93,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * Memorizes the original values of all given {@link Quantity}s to restore
 	 * the original state.
 	 */
-	private double[] originalValues = null;
+	private double originalValues[] = null;
 
 	/**
 	 * 
@@ -99,20 +103,20 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	/**
 	 * Reference data used to judge the quality of a simulation result.
 	 */
-	private transient MultiTable referenceData = null;
+	private transient MultiTable referenceData[] = null;
 
 	/**
 	 * An array to store the fitness of a parameter set to avoid multiple
 	 * allocations
 	 */
-	private transient double[] fitness = new double[1];
+	private transient double fitness[] = new double[1];
 	
 	/**
 	 * To save computation time during the initialization, the initial ranges
 	 * are stored in this 2-dimensional double array when setting the
 	 * {@link QuantityRange} field.
 	 */
-	private double[][] initRanges;
+	private double initRanges[][];
 	
 	/**
 	 * Switch to decide whether or not to use a multiple shooting strategy.
@@ -122,34 +126,39 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	/**
 	 * 
 	 */
-	private Map<String,Integer> idIndex;
+	private Map<String,Integer> id2Index;
 	
 	/**
 	 * 
 	 */
 	public static final String SIMULATION_DATA = "simulation data";
+	
+	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final transient Logger logger = Logger.getLogger(EstimationProblem.class.getName());
 
 	/**
 	 * 
 	 * @param solver
 	 * @param distance
 	 * @param model
-	 * @param referenceData
+	 * @param list
 	 * @param multishoot
 	 * @param quantityRanges
 	 * @throws ModelOverdeterminedException
 	 * @throws SBMLException
 	 */
 	public EstimationProblem(DESSolver solver, QualityMeasure distance, Model model,
-			MultiTable referenceData, boolean multishoot,
+			List<MultiTable> list, boolean multishoot,
 			QuantityRange... quantityRanges)
 			throws ModelOverdeterminedException, SBMLException {
-		this(solver, distance, model, referenceData, quantityRanges);
+		this(solver, distance, model, list, quantityRanges);
 		this.multishoot = multishoot;
 		if (multishoot) {
-			System.out.println("Using multiple shooting!");
+			logger.info("Using multiple shooting!");
 		} else {
-			System.out.println("Using single shooting!");
+			logger.info("Using single shooting!");
 		}
 	}
 
@@ -158,21 +167,31 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * @param solver
 	 * @param distance
 	 * @param model
-	 * @param referenceData
+	 * @param list
 	 * @param quantityRanges
 	 * @throws ModelOverdeterminedException
 	 * @throws SBMLException
 	 */
-	public EstimationProblem(DESSolver solver, QualityMeasure distance, Model model,
-			MultiTable referenceData, QuantityRange... quantityRanges)
-			throws ModelOverdeterminedException, SBMLException {
+	public EstimationProblem(DESSolver solver, QualityMeasure distance,
+		Model model, List<MultiTable> list, QuantityRange... quantityRanges)
+		throws ModelOverdeterminedException, SBMLException {
 		super();
 		multishoot = false;
 		setSolver(solver);
 		setDistance(distance);
 		setModel(model);
-		setReferenceData(referenceData);
+		setReferenceData(list.toArray(new MultiTable[0]));
 		setQuantityRanges(quantityRanges);
+		if (id2Index == null) {
+			id2Index = new HashMap<String, Integer>();
+			String ids[] = interpreter.getIdentifiers();
+			for (int i = 0; i < ids.length; i++) {
+				id2Index.put(ids[i], Integer.valueOf(i));
+			}
+			for (int i = 0; i < quantityRanges.length; i++) {
+				id2Index.remove(quantityRanges[i].getQuantity().getId());
+			}
+		}
 	}
 
 	/**
@@ -207,33 +226,17 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see eva2.server.go.problems.AbstractOptimizationProblem#clone()
 	 */
 	public EstimationProblem clone() {
 		return new EstimationProblem(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see eva2.server.go.problems.AbstractProblemDouble#eval(double[])
 	 */
 	public double[] eval(double[] x) {
-		
-	  if(idIndex==null) {
-		    idIndex = new HashMap<String,Integer>();
-		    String ids[] = interpreter.getIdentifiers();
-		    for (int i = 0; i < ids.length; i++) {
-		      idIndex.put(ids[i], Integer.valueOf(i));
-		    }
-		    
-		    for (int i = 0; i < x.length; i++) {
-		      idIndex.remove(quantityRanges[i].getQuantity().getId());
-		    }
-		}
 	  
 	  for (int i = 0; i < x.length; i++) {
 			quantityRanges[i].getQuantity().setValue(x[i]);
@@ -243,20 +246,24 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		  interpreter.init(false);
 			
 		  double[] initialValues = interpreter.getInitialValues();
-			MultiTable.Block block = referenceData.getBlock(0);
-			for (int col = 0; col < block.getColumnCount(); col++) {
-			  Integer pos = idIndex.get(block.getColumnName(col));
-			  if(pos!=null) {
-			    initialValues[pos] = block.getValueAt(0, col + 1);
+			MultiTable reference = getInitialConditions();
+			for (int col = 0; col < reference.getColumnCount() - 1; col++) {
+			  Integer pos = id2Index.get(reference.getColumnName(col));
+			  if (pos != null) {
+			    initialValues[pos] = ((Double) reference.getValueAt(0, col + 1)).doubleValue();
 			  }
 			}
-			
-			MultiTable solution = multishoot ? solver.solve(interpreter,
-					referenceData.getBlock(0), initialValues)
-					: solver.solve(interpreter, initialValues,
-							referenceData.getTimePoints());
-			fitness[0] = distance.distance(solution.getBlock(0), referenceData
-					.getBlock(0));
+			MultiTable solution; 
+			if (multishoot) {
+				solution = solver.solve(interpreter, getInitialConditions().getBlock(0), initialValues);
+			} else {
+				solution = solver.solve(interpreter, initialValues, getTimePoints());
+			}
+			for (MultiTable data : referenceData) {
+				// equal weight for each reference data set
+				fitness[0] = distance.distance(solution.getBlock(0), data.getBlock(0))
+						/ referenceData.length;
+			}
 			if (bestPerGeneration == null
 					|| (fitness[0] < bestPerGenerationDist)) {
 				bestPerGenerationDist = fitness[0];
@@ -273,21 +280,112 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		return fitnessClone;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
 	 * 
-	 * @see
-	 * eva2.server.go.problems.AbstractOptimizationProblem#evaluatePopulationStart
-	 * (eva2.server.go.populations.Population)
+	 * @return
 	 */
+	public MultiTable getInitialConditions() {
+		if ((initConditions == null) && (referenceData.length > 0)) {
+			if (referenceData.length == 1) {
+				initConditions = referenceData[0];
+			} else {
+				// merge all identifiers
+				ArrayList<String> identifiers = new ArrayList<String>();
+				for (String s : referenceData[0].getBlock(0).getIdentifiers()) {
+					identifiers.add(s);
+				}
+				int i, j, index;
+				for (i = 1; i < referenceData.length; i++) {
+					for (j = 0; j < referenceData[i].getBlock(0).getColumnCount(); j++) {
+						index = Arrays.binarySearch((String[]) identifiers.toArray(),
+							referenceData[i].getBlock(0).getIdentifiers()[j]);
+						if (index < 0) {
+							identifiers.add(-index + 1, referenceData[i].getBlock(0).getIdentifiers()[j]);
+						}
+					}
+				}
+				// determine the merged time points
+				double tp[] = getTimePoints();
+				// merge all data points (using a simple mean calculation)
+				double data[][] = new double[tp.length][identifiers.size()];
+				MultiTable.Block block;
+				for (i = 0; i < tp.length; i++) {
+					for (j = 0; j < identifiers.size(); j++) {
+						for (index = 0; index < referenceData.length; index++) {
+							block = referenceData[index].getBlock(0);
+							if (block.containsColumn(identifiers.get(j))) {
+								data[j][j] += block.getColumn(j).getValue(i) / referenceData.length;
+							} else {
+								// If one value is not available, this data point will become null! 
+								data[j][j] = Double.NaN;
+							}
+						}
+					}
+				}
+				initConditions = new MultiTable(tp, data, identifiers.toArray(new String[0]));
+			}
+		}
+		return initConditions;
+	}
+
+	/**
+	 * Memorizes the time points at which measurements are taken, i.e., at which
+	 * the integration system must be evaluated.
+	 */
+	private double timePoints[] = null;
+	
+	/**
+	 * Memorizes the merged initial conditions for multiple data sets in order to 
+	 * avoid a multiple creation of it in the {@link #eval(double[])} method. 
+	 */
+	private MultiTable initConditions = null;
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public double[] getTimePoints() {
+		if ((timePoints == null) && (referenceData.length > 0)) {
+			// Merge all measurement time points into one double array
+			if (referenceData.length == 1) {
+				this.timePoints = referenceData[0].getTimePoints();
+			} else {
+				ArrayList<Double> tp = new ArrayList<Double>();
+				for (double d : referenceData[0].getTimePoints()) {
+					tp.add(Double.valueOf(d));
+				}
+				int i, j, index;
+				double t;
+				for (i = 1; i < referenceData.length; i++) {
+					for (j = 0; j < referenceData[i].getTimePoints().length; j++) {
+						t = referenceData[i].getTimePoint(j);
+						index = Arrays.binarySearch((Double[]) tp.toArray(), t);
+						if (index < 0) {
+							tp.add(-index + 1, Double.valueOf(t));
+						}
+					}
+				}
+				i = 0;
+				this.timePoints = new double[tp.size()];
+				for (Double d : tp) {
+					this.timePoints[i++] = d.doubleValue();
+				}
+			}
+		}
+		return timePoints;
+	}
+
+	/* (non-Javadoc)
+	 * @see eva2.server.go.problems.AbstractOptimizationProblem#evaluatePopulationStart(eva2.server.go.populations.Population)
+	 */
+	@Override
 	public void evaluatePopulationStart(Population population) {
 		super.evaluatePopulationStart(population);
 		bestPerGeneration = null;
 		bestPerGenerationDist = Double.POSITIVE_INFINITY;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/* (non-Javadoc)
 	 * @see eva2.server.go.problems.AbstractProblemDouble#getAdditionalDataHeader()
 	 */
 	@Override
@@ -296,8 +394,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		return ToolBox.appendArrays(superHead, SIMULATION_DATA);
 	}
 
-	/*
-	 * (non-Javadoc)
+	/* (non-Javadoc)
 	 * @see eva2.server.go.problems.AbstractProblemDouble#getAdditionalDataInfo()
 	 */
 	@Override
@@ -307,8 +404,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 				"Result of the best per generation model simulation");
 	}
 
-	/*
-	 * (non-Javadoc)
+	/* (non-Javadoc)
 	 * @see eva2.server.go.problems.AbstractProblemDouble#getAdditionalDataValue(eva2.server.go.PopulationInterface)
 	 */
 	@Override
@@ -325,9 +421,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		return distance;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see eva2.server.go.problems.InterfaceHasInitRange#getInitRange()
 	 */
 	public double[][] getInitRange() {
@@ -350,9 +444,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		return originalValues;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see eva2.server.go.problems.AbstractProblemDouble#getProblemDimension()
 	 */
 	public int getProblemDimension() {
@@ -379,22 +471,16 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		return quantityRanges;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * eva2.server.go.problems.AbstractProblemDouble#getRangeLowerBound(int)
+	/* (non-Javadoc)
+	 * @see eva2.server.go.problems.AbstractProblemDouble#getRangeLowerBound(int)
 	 */
 	@Override
 	public double getRangeLowerBound(int dim) {
 		return quantityRanges[dim].getMinimum();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * eva2.server.go.problems.AbstractProblemDouble#getRangeUpperBound(int)
+	/* (non-Javadoc)
+	 * @see eva2.server.go.problems.AbstractProblemDouble#getRangeUpperBound(int)
 	 */
 	@Override
 	public double getRangeUpperBound(int dim) {
@@ -407,7 +493,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * 
 	 * @return
 	 */
-	public MultiTable getReferenceData() {
+	public MultiTable[] getReferenceData() {
 		return referenceData;
 	}
 
@@ -503,8 +589,10 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * 
 	 * @param referenceData
 	 */
-	public void setReferenceData(MultiTable referenceData) {
-		if ((referenceData != null) && (referenceData.getColumnCount() <= 1)) {
+	public void setReferenceData(MultiTable... referenceData) {
+		if ((referenceData == null) || (referenceData.length < 1)
+				|| (referenceData[0].getBlockCount() == 0)
+				|| (referenceData[0].getBlock(0).getColumnCount() == 0)) {
 			// time column */+ getModel().getNumSymbols())) {
 			throw new IllegalArgumentException(
 					"At least for one symbol reference data are required.");
