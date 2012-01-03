@@ -37,7 +37,6 @@ import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Quantity;
@@ -88,14 +87,19 @@ public class SimulationPanel extends JPanel implements
   private static final transient Logger logger = Logger.getLogger(SimulationPanel.class.getName());
   
   /**
-   * Table for experimental data, the legend, and the simulation data.
+   * Table for the simulation data.
    */
-  private JTable expTable, simTable;
+  private JTable simTable;
+  
+  /**
+   * Multiple tables
+   */
+  private MultipleTableView<MultiTable> dataTableView;
   
   /**
    * 
    */
-  private JToolBar footPanel;
+  private JToolBar simulationToolPanel;
   
   /**
 	 * 
@@ -111,7 +115,7 @@ public class SimulationPanel extends JPanel implements
   /**
    * Switch to decide whether or not to draw the foot panel.
    */
-  private boolean showSettingsPanel;
+  private boolean showSimulationToolPanel;
   
   /**
    * Indices to more efficiently memorize the location of interesting elements
@@ -139,7 +143,7 @@ public class SimulationPanel extends JPanel implements
    */
   public SimulationPanel(Model model) {
     super();
-    showSettingsPanel = true;
+    showSimulationToolPanel = true;
     this.listeners = new ArrayList<PropertyChangeListener>();
     if (SBMLsimulator.getAvailableSolvers().length == 0) {
       JOptionPane.showMessageDialog(this, StringUtil.toHTML(
@@ -184,24 +188,34 @@ public class SimulationPanel extends JPanel implements
   /**
 	 * 
 	 */
-  public void closeExperimentalData() {
-    expTable = new JTable();
-    expTable.setDefaultRenderer(Double.class, new DecimalCellRenderer(10, 4,
-      SwingConstants.RIGHT));
-    tabbedPane.setEnabledAt(2, false);
+  public void closeAllExperimentalData() {
+    for (int i = dataTableView.getTableCount() - 1; i >= 0; i--) {
+    	closeExpermentalData(i);
+    }
+  }
+  
+  /**
+   * 
+   * @param index
+   */
+  public void closeExpermentalData(int index) {
+  	dataTableView.removeTable(index);
     if (tabbedPane.getSelectedIndex() == 2) {
       tabbedPane.setSelectedIndex(0);
     }
-    visualizationPanel.unsetExperimentData();
+		if (dataTableView.getTableCount() == 0) {
+			tabbedPane.setEnabledAt(2, false);
+			visualizationPanel.unsetExperimentData();
+		}
   }
   
   /**
    * @return
    */
   private SimulationToolPanel createFootPanel() {
-    footPanel = new JToolBar(bundle.getString("INTEGRATION_TOOLBOX"));
+    simulationToolPanel = new JToolBar(bundle.getString("INTEGRATION_TOOLBOX"));
     SimulationToolPanel foot = new SimulationToolPanel(simulationManager);
-    footPanel.add(foot);
+    simulationToolPanel.add(foot);
     return foot;
   }
   
@@ -229,15 +243,23 @@ public class SimulationPanel extends JPanel implements
    * @return
    */
   public QualityMeasure getDistance() {
-    return ((SimulationToolPanel) footPanel.getComponent(0))
+    return ((SimulationToolPanel) simulationToolPanel.getComponent(0))
         .getQualityMeasure();
   }
   
   /**
    * @return
    */
-  public MultiTable getExperimentalData() {
-    return (MultiTable) expTable.getModel();
+  public MultiTable getExperimentalData(int index) {
+    return dataTableView.getTable(index);
+  }
+  
+  /**
+   * 
+   * @return
+   */
+  public List<MultiTable> getExperimentalData() {
+  	return dataTableView.getTables();
   }
   
   /**
@@ -258,10 +280,10 @@ public class SimulationPanel extends JPanel implements
    * @return
    */
   public SimulationToolPanel getSimulationToolPanel() {
-    if (footPanel == null) {
+    if (simulationToolPanel == null) {
       return createFootPanel();
     }
-    return (SimulationToolPanel) footPanel.getComponent(0);
+    return (SimulationToolPanel) simulationToolPanel.getComponent(0);
   }
   
   /**
@@ -286,8 +308,8 @@ public class SimulationPanel extends JPanel implements
           .getModel());
       SimulationToolPanel foot = getSimulationToolPanel();
       foot.addItemListener(visualizationPanel);
-      if (showSettingsPanel) {
-        add(footPanel, BorderLayout.SOUTH);
+      if (showSimulationToolPanel) {
+        add(simulationToolPanel, BorderLayout.SOUTH);
       }
       visualizationPanel.getPlot().setGridVisible(foot.getShowGrid());
       visualizationPanel.getPlot().setShowLegend(foot.getShowLegend());
@@ -303,17 +325,13 @@ public class SimulationPanel extends JPanel implements
         simPanel.add(new JScrollPane(simTable), BorderLayout.CENTER);
         simTable.getModel().addTableModelListener(visualizationPanel);
         
-        JPanel expPanel = new JPanel(new BorderLayout());
-        expTable = new JTable();
-        expTable.setDefaultRenderer(Double.class, new DecimalCellRenderer(10,
-          4, SwingConstants.RIGHT));
-        expPanel.add(new JScrollPane(expTable), BorderLayout.CENTER);
-        expTable.getModel().addTableModelListener(visualizationPanel);
+        dataTableView = new MultipleTableView<MultiTable>();
+        dataTableView.addTableModelListener(visualizationPanel);
         
         tabbedPane = new JTabbedPane();
         tabbedPane.add(bundle.getString("TAB_SIMULATION"), visualizationPanel);
         tabbedPane.add(bundle.getString("TAB_IN_SILICO_DATA"), simPanel);
-        tabbedPane.add(bundle.getString("TAB_EXPERIMENTAL_DATA"), expPanel);
+        tabbedPane.add(bundle.getString("TAB_EXPERIMENTAL_DATA"), dataTableView);
 				tabbedPane.add(bundle.getString("TAB_MODEL_VIEW"),
 					new SBMLModelSplitPane(simulationManager.getSimlationConfiguration()
 							.getModel().getSBMLDocument(), true));
@@ -332,14 +350,14 @@ public class SimulationPanel extends JPanel implements
    * @return
    */
   public boolean isSetExperimentalData() {
-    return expTable.getRowCount() > 0;
+    return (dataTableView != null) && (dataTableView.getTableCount() > 0);
   }
   
   /**
    * @return the showSettingsPanel
    */
   public boolean isShowSettingsPanel() {
-    return showSettingsPanel;
+    return showSimulationToolPanel;
   }
   
   /**
@@ -350,7 +368,7 @@ public class SimulationPanel extends JPanel implements
       visualizationPanel.loadPreferences();
     }
     removeAll();
-    this.footPanel = null;
+    this.simulationToolPanel = null;
     init();
     validate();
   }
@@ -360,7 +378,7 @@ public class SimulationPanel extends JPanel implements
    */
   public void notifyGenerationPerformed(String[] header, Object[] statObjects,
     Double[] statDoubles) {
-    SimulationToolPanel tools = (SimulationToolPanel) footPanel.getComponent(0);
+    SimulationToolPanel tools = (SimulationToolPanel) simulationToolPanel.getComponent(0);
     double currentDistance = tools.getCurrentQuality();
     if (Double.isNaN(currentDistance)
         || (currentDistance > statDoubles[runBestIndex].doubleValue())) {
@@ -470,7 +488,7 @@ public class SimulationPanel extends JPanel implements
    */
   public void saveSimulationResults() {
     try {
-      TableModel simTabModel = getSimulationResultsTable();
+      MultiTable simTabModel = getSimulationResultsTable();
       SBPreferences prefs = SBPreferences.getPreferencesFor(CSVOptions.class);
       if (simTabModel.getRowCount() > 0) {
         File out = GUITools.saveFileDialog(this, prefs.get(
@@ -495,16 +513,15 @@ public class SimulationPanel extends JPanel implements
    */
   public void setAllEnabled(boolean enabled) {
     this.visualizationPanel.setInteractiveScanEnabled(enabled);
-    ((SimulationToolPanel) footPanel.getComponent(0)).setAllEnabled(enabled);
+    ((SimulationToolPanel) simulationToolPanel.getComponent(0)).setAllEnabled(enabled);
   }
   
   /**
    * @param data
    * @throws Exception
    */
-  public void setExperimentalData(MultiTable data) throws Exception {
-    expTable.setModel(data);
-    expTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+  public void addExperimentalData(String title, MultiTable data) throws Exception {
+    dataTableView.addTable(title, data);
     tabbedPane.setEnabledAt(2, true);
     this.firePropertyChange("measurements", null, data);
     //TODO preliminary version: property does not change for quality measurement with the call firePropertyChange()
@@ -520,18 +537,18 @@ public class SimulationPanel extends JPanel implements
   }
   
   /**
-   * @param showSettingsPanel
+   * @param visible
    *        the showSettingsPanel to set
    */
-  public void setShowSettingsPanel(boolean showSettingsPanel) {
-    if (this.showSettingsPanel != showSettingsPanel) {
-      this.showSettingsPanel = showSettingsPanel;
-      if (!showSettingsPanel) {
-        remove(footPanel);
+  public void setShowSimulationToolPanel(boolean visible) {
+    if (this.showSimulationToolPanel != visible) {
+      this.showSimulationToolPanel = visible;
+      if (!visible) {
+        remove(simulationToolPanel);
       } else {
-        add(footPanel, BorderLayout.SOUTH);
+        add(simulationToolPanel, BorderLayout.SOUTH);
       }
-      footPanel.setVisible(showSettingsPanel);
+      simulationToolPanel.setVisible(visible);
       validate();
     }
   }
@@ -562,5 +579,13 @@ public class SimulationPanel extends JPanel implements
   public void simulate() throws Exception {
     simulationManager.simulate();
   }
+
+  /**
+   * 
+   * @return
+   */
+	public int getExperimentalDataCount() {
+		return dataTableView.getTableCount();
+	}
   
 }
