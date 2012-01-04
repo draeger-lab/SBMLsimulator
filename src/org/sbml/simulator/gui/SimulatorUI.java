@@ -19,7 +19,6 @@ package org.sbml.simulator.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -45,8 +44,6 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JToolBar;
 import javax.swing.UIManager;
 
@@ -190,7 +187,6 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	public SimulatorUI(AppConf appConf) {
 		super(appConf);
 		GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.SIMULATION_START);
-//		setStatusBarToMemoryUsage();
 	}
 	
 	
@@ -206,7 +202,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 				"openFileAndLogHistory"), Command.OPEN_DATA);
 		openData.setEnabled(false);
 		fileMenu.remove(openFile);
-		JMenu openMenu = GUITools.createJMenu("Open", "open tooltip", openFile, openData);
+		JMenu openMenu = GUITools.createJMenu(bundle.getString("OPEN"), bundle.getString("OPEN_TOOLTIP"), openFile, openData);
 		openMenu.addActionListener(EventHandler.create(ActionListener.class, this, "openFileAndLogHistory"));
 		openMenu.setIcon(openFile.getIcon());
 		openMenu.setMnemonic(openFile.getMnemonic());
@@ -229,13 +225,9 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 				EventHandler.create(ActionListener.class, this, "optimize"),
 				Command.OPTIMIZATION, UIManager.getIcon("ICON_EVA2"), 'O');
 		optimization.setEnabled(false);
-		JCheckBoxMenuItem item = new JCheckBoxMenuItem("Show options",
-				simPanel != null ? simPanel.isShowSettingsPanel() : true);
-		if (simPanel == null) {
-			item.setEnabled(false);
-		}
-		item.setActionCommand(Command.SHOW_OPTIONS.toString());
-		item.addItemListener(this);
+		JCheckBoxMenuItem item = GUITools.createJCheckBoxMenuItem(
+			Command.SHOW_OPTIONS, simPanel != null ? simPanel.isShowSettingsPanel()
+					: true, simPanel != null, this);
 		return new JMenuItem[] { simulation, optimization, item };
 	}
 
@@ -254,12 +246,12 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	 */
 	private boolean closeFile(boolean onlyClosing) {
 		if (simPanel != null) {
-			String message = "Close current model and all data without saving?";
+			String message = bundle.getString("CLOSE_MODEL_WITHOUT_SAVING");
 			if (!onlyClosing) {
-				message = "The current model must be closed before a new model can be opened. " + message;
+				message = bundle.getString("CLOSE_MODEL_BEFORE_OPENING_NEXT") + ' ' + message;
 			}
 			if (GUITools.showQuestionMessage(this, message,
-				"Closing model", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+				bundle.getString("CLOSING_MODEL"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 				listOfPrefChangeListeners.remove(simPanel.getSimulationToolPanel());
 				if (GUITools.contains(getContentPane(), simPanel)) {
 					getContentPane().remove(simPanel);
@@ -352,9 +344,9 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 					dataFiles = vp.getA().toArray(new File[0]);
 				}
 				if (vp.getB().size() > 0) {
-					JOptionPane.showMessageDialog(this,
-						"Could not open the files " + vp.getB(),
-						"Could not open all files", JOptionPane.WARNING_MESSAGE);
+					GUITools.showListMessage(this,
+						bundle.getString("COULD_NOT_OPEN_FILES"),
+						bundle.getString("UNSUPPORTED_FILE_TYPES"), vp.getB());
 				}
 			}
 		} else {
@@ -381,6 +373,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		// First the model(s):
 		if ((modelFiles != null) && (modelFiles.length > 0)) {
 			try {
+				// TODO: Do this in a different thread with some progress monitor for the user.
 				SBMLDocument doc = SBMLReader.read(modelFiles[0]);
 				if ((doc != null) && (doc.isSetModel())) {
 					
@@ -403,17 +396,17 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 					
 				} else {
 					JOptionPane.showMessageDialog(this, StringUtil.toHTML(
-						"Could not open model " + modelFiles[0].getAbsolutePath(),
-						GUITools.TOOLTIP_LINE_LENGTH));
+						String.format(bundle.getString("COULD_NOT_OPEN_MODEL"),
+							modelFiles[0].getAbsolutePath()), GUITools.TOOLTIP_LINE_LENGTH));
 				}
 			} catch (Exception exc) {
 				GUITools.showErrorMessage(this, exc);
 			}
-			
 			if (modelFiles.length > 1) {
-				JOptionPane.showMessageDialog(this,
-					"Can only open one model, rejecting " + Arrays.toString(modelFiles),
-					"Only one model", JOptionPane.WARNING_MESSAGE);
+				GUITools.showListMessage(this, bundle
+						.getString("CAN_ONLY_OPEN_ONE_MODEL_AT_A_TIME"), bundle
+						.getString("TOO_MANY_MODEL_FILES"), Arrays.asList(modelFiles)
+						.subList(1, modelFiles.length - 1));
 			}
 		}
 		
@@ -451,8 +444,8 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 			} else {
 				// reject data files
 				JOptionPane.showMessageDialog(this,
-					"Cannot open data if no model has been opened.",
-					"Unable to open data", JOptionPane.WARNING_MESSAGE);
+					bundle.getString("CANNOT_OPEN_DATA_WIHTOUT_MODEL"),
+					bundle.getString("UNABLE_TO_OPEN_DATA"), JOptionPane.WARNING_MESSAGE);
 			}
 		}
 
@@ -476,7 +469,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		final Model model = simPanel.getModel().getSBMLDocument().clone().getModel();
 		final QuantitySelectionPanel panel = new QuantitySelectionPanel(model);
 		if (JOptionPane.showConfirmDialog(this, panel,
-			"Select quantities for optimization", JOptionPane.OK_CANCEL_OPTION,
+			bundle.getString("SELECT_QUANTITIES_FOR_OPTIMIZATION"), JOptionPane.OK_CANCEL_OPTION,
 			JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
 			simPanel.setAllEnabled(false);
 			try {
@@ -486,13 +479,14 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 					Command.OPTIMIZATION, BaseAction.EDIT_PREFERENCES);
 				// windowClosing
 				final WindowListener wl = EventHandler.create(WindowListener.class,
-					this, "windowClosing", "");
+					this, "windowClosing");
 				final SimulatorUI ui = this;
 				new Thread(new Runnable() {
 					/* (non-Javadoc)
 					 * @see java.lang.Runnable#run()
 					 */
 					public void run() {
+						// TODO: implement org.sbml.optimization.OptimizationWorker to do this job
 						try {
 							SBPreferences prefs = SBPreferences
 									.getPreferencesFor(EstimationOptions.class);
@@ -524,16 +518,15 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		if (evt.getPropertyName().equalsIgnoreCase("progress")) {
 			AbstractProgressBar memoryBar = this.statusBar.showProgress();
 
-			// TODO: Bessere stelle finden
+			// TODO: find a better place for this
 			((ProgressBarSwing) memoryBar).getProgressBar().setStringPainted(
 					true);
 
 			int process = (int) Math.round(((Number) evt.getNewValue())
 					.doubleValue());
-			memoryBar.percentageChanged(process, -1, "computed");
+			memoryBar.percentageChanged(process, -1, bundle.getString("COMPUTED"));
 		} else if (evt.getPropertyName().equalsIgnoreCase("done")) {
 			statusBar.reset();
-			// setStatusBarToMemoryUsage();
 			GUITools.setEnabled(true, getJMenuBar(), getJToolBar(),
 					BaseAction.FILE_SAVE_AS, Command.SIMULATION_START);
 		}
@@ -579,36 +572,11 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	}
 
 	/**
-	 * add progressbar to the statusbar representing the current memory usage
-	 * method should be called after all import operations
-	 */
-	private void setStatusBarToMemoryUsage() {
-		// AbstractProgressBar memoryBar = this.statusBar.showProgress();
-		int use = (int) ((1f - ((float) Runtime.getRuntime().freeMemory() / (float) Runtime
-				.getRuntime().totalMemory())) * 100);
-		// statusBar.log.info(String.format("Memory usage: %1$3s%%", use));
-		// memoryBar.percentageChanged(use, -1, "of memory used");
-
-		// Create a smaller panel for the statusBar
-		Dimension panelSize = new Dimension(100, 15);
-		JPanel panel = new JPanel();
-		panel.setOpaque(false);
-		panel.setPreferredSize(panelSize);
-		JProgressBar progress = new JProgressBar(0, 100);
-		progress.setValue(use);
-		progress.setPreferredSize(new Dimension(panelSize.width,
-				panelSize.height));
-		panel.add(progress);
-
-		getStatusBar().add(panel, BorderLayout.EAST);
-	}
-
-	/**
 	 * 
 	 */
 	public void simulate() {
     try {
-      logger.info("Starting simulation");
+      logger.info(bundle.getString("LAUNCHING_SIMULATION"));
       GUITools.setEnabled(false, getJMenuBar(), getJToolBar(), Command.SIMULATION_START);
       simPanel.addPropertyChangedListener(this);
       simPanel.simulate();
@@ -631,7 +599,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 						Command.OPTIMIZATION, BaseAction.EDIT_PREFERENCES);
 			}
 		}
-		logger.finer("Clicked OK/Cancel");
+		logger.finer(bundle.getString("RECEIVED_WINDOW_EVENT"));
 	}
 	
 }

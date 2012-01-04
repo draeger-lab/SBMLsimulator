@@ -45,4 +45,9 @@
   <entry key="UNIT_COLUMN">Einheit</entry>
   <entry key="UNKOWN_CLUMN_EXC">Es gibt lediglich %d Spalten, also keine Spalte %d.</entry>
   
+  <!-- SimulatorUI -->
+  
+  <entry key="COULD_NOT_OPEN_FILES">Folgende Dateien konnten nicht geöffnet werden:</entry>
+  <entry key="UNSUPPORTED_FILE_TYPES">Nicht unterstützte Dateitypen</entry>
+  
 </properties>
