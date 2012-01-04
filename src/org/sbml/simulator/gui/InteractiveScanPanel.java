@@ -18,8 +18,6 @@
 package org.sbml.simulator.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -32,9 +30,7 @@ import java.util.ResourceBundle;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JEditorPane;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
@@ -220,9 +216,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
       tab.add(
         bundle.getString("LOCAL_PARAMETERS"),
         new JScrollPane(interactiveScanLocalParameters(maxParameterValue,
-          paramStepSize, model.getNumSymbols(), model.getListOfReactions()),
-          JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-          JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
+          paramStepSize, model.getNumSymbols(), model.getListOfReactions())));
       tab.setEnabledAt(3, hasLocalParameters);
       for (int i = tab.getTabCount() - 1; i >= 0; i--) {
         if (tab.isEnabledAt(i)) {
@@ -362,19 +356,19 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
       if (Double.isNaN(p.getValue())) {
         name = p.getClass().getSimpleName().toLowerCase();
         if (p instanceof Compartment) {
-          if(((Compartment)p).getSpatialDimensions()>0) {
+          if (((Compartment) p).getSpatialDimensions() > 0) {
             value = defaultCompartmentValue;
             p.setValue(value);
-            nans.add(p.getId());
+            nans.add(p.isSetName() ? p.getName() : p.getId());
           }
         } else if (p instanceof Species) {
           value = defaultSpeciesValue;
           p.setValue(value);
-          nans.add(p.getId());
+          nans.add(p.isSetName() ? p.getName() : p.getId());
         } else if (p instanceof Parameter) {
           value = defaultParameterValue;
           p.setValue(value);
-          nans.add(p.getId());
+          nans.add(p.isSetName() ? p.getName() : p.getId());
         }
         if (!(p instanceof Species) && (list.size() > 1)) {
           name += "s";
@@ -400,24 +394,15 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     }
     lh.add(new JPanel(), 1, 0, 1, 1, 0, 0);
     lh.add(new JPanel(), 3, 0, 1, 1, 0, 0);
-    if (nans.size() > 0) {
-      String l = nans.toString().substring(1);
-			JEditorPane label = new JEditorPane("text/html", StringUtil.toHTML(String
-					.format(bundle.getString("REPLACEMENT_OF_UNDEFINED_VALUES"),
-						bundle.getString(nans.size() > 1 ? "VALUES" : "VALUE"), name,
-						l.substring(0, l.length() - 1),
-						bundle.getString(nans.size() > 1 ? "HAVE" : "HAS"), value), 80));
-      label.setEditable(false);
-      Component component;
-      if (nans.size() > 20) {
-        component = new JScrollPane(label);
-        label.setPreferredSize(new Dimension(450, 450));
-      } else {
-        component = label;
-      }
-      JOptionPane.showMessageDialog(this, component,
-        bundle.getString("REPLACING_UNDEFINED_VALUES"), JOptionPane.INFORMATION_MESSAGE);
-    }
+		if (nans.size() > 0) {
+			GUITools.showListMessage(
+				this,
+				StringUtil.toHTML(String.format(
+					bundle.getString("REPLACEMENT_OF_UNDEFINED_VALUES"),
+					bundle.getString(nans.size() > 1 ? "VALUES" : "VALUE"), name,
+					bundle.getString(nans.size() > 1 ? "HAVE" : "HAS"), value), 80),
+				bundle.getString("REPLACING_UNDEFINED_VALUES"), nans);
+		}
     panel.setOpaque(true);
     return panel;
   }

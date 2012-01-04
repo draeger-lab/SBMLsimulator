@@ -66,7 +66,7 @@
   <entry key="RESET_TOOLTIP">Sets all values to the original values from the model. However, previously undefined values will be set to the default values.</entry>
   <entry key="GLOBAL_PARAMETERS">Global Parameters</entry>
   <entry key="LOCAL_PARAMETERS">Local Parameters</entry>
-  <entry key="REPLACEMENT_OF_UNDEFINED_VALUES">Undefined %s for the %s %s %s been replaced by its default value %.3f.</entry>
+  <entry key="REPLACEMENT_OF_UNDEFINED_VALUES">Undefined %s for the following %s %s been replaced by the corresponding default value %.3f.</entry>
   <entry key="VALUE">value</entry>
   <entry key="VALUES">values</entry>
   <entry key="HAVE">have</entry>
@@ -198,8 +198,23 @@
   
   <!-- SimulatorUI -->
   
+  <entry key="CAN_ONLY_OPEN_ONE_MODEL_AT_A_TIME">Can only open one model, rejecting the following files:</entry>
+  <entry key="CANNOT_OPEN_DATA_WIHTOUT_MODEL">Cannot open data if no model has been opened.</entry>
+  <entry key="UNABLE_TO_OPEN_DATA">Unable to open data</entry>
+  <entry key="SELECT_QUANTITIES_FOR_OPTIMIZATION">Select quantities for optimization</entry>
+  <entry key="COMPUTED">computed</entry>
+  <entry key="LAUNCHING_SIMULATION">Launching simulation</entry>
+  <entry key="RECEIVED_WINDOW_EVENT">Received WindowEvent</entry>
+  <entry key="TOO_MANY_MODEL_FILES">Too many model files</entry>
+  <entry key="COULD_NOT_OPEN_FILES">Could not open the following files:</entry>
+  <entry key="CLOSE_MODEL_BEFORE_OPENING_NEXT">The current model must be closed before a new model can be opened.</entry>
+  <entry key="CLOSE_MODEL_WITHOUT_SAVING">Close current model and all data without saving?</entry>
+  <entry key="CLOSING_MODEL">Closing model</entry>
+  <entry key="COULD_NOT_OPEN_MODEL">Could not open model %s.</entry>
   <entry key="FILE_CLOSE">Close model;Closes the currently selected model and all experimental data sets that may be associated with the model.</entry>
   <entry key="FILE_OPEN">Open model;Open a model in SBML format for simulation or parameter optimization.</entry>
+  <entry key="OPEN">Open</entry>
+  <entry key="OPEN_TOOLTIP">Open a model or experimental data.</entry>
   <entry key="OPEN_DATA">Load experimental data</entry>
   <entry key="OPEN_DATA_TOOLTIP">Open one ore multiple experimental data sets.</entry>
   <entry key="OPTIMIZATION">Optimization</entry>
@@ -208,5 +223,6 @@
   <entry key="SHOW_OPTIONS_TOOLTIP">Decide whether or not to display the options.</entry>
   <entry key="SIMULATION_START">Start simulation</entry>
   <entry key="SIMULATION_START_TOOLTIP">Performs a dynamic simulation run with the current settings.</entry>
+  <entry key="UNSUPPORTED_FILE_TYPES">Unsupported file types</entry>
   
 </properties>

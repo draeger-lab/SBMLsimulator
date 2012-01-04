@@ -17,7 +17,11 @@
  */
 package org.sbml.simulator.gui.plot;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jfree.data.xy.AbstractXYDataset;
+import org.sbml.jsbml.Model;
 import org.simulator.math.odes.MultiTable;
 
 /**
@@ -37,53 +41,52 @@ public class MultiTableToTimeSeriesAdapter extends AbstractXYDataset {
    * 
    */
   private MultiTable table;
+  
+  private Map<String, String> idHash;
 
   /**
    * 
    * @param table
    */
-	public MultiTableToTimeSeriesAdapter(MultiTable table) {
+	public MultiTableToTimeSeriesAdapter(MultiTable table, Model model) {
 		this.table = table;
+		this.idHash = new HashMap<String, String>();
+		// TODO: Hash all ids in the model!!!!
 	}
 
-	/*
-	 * (non-Javadoc)
+	/* (non-Javadoc)
 	 * @see org.jfree.data.xy.XYDataset#getItemCount(int)
 	 */
 	public int getItemCount(int series) {
 		return table.getColumn(series+1).getRowCount();
 	}
 
-	/*
-	 * (non-Javadoc)
+	/* (non-Javadoc)
 	 * @see org.jfree.data.xy.XYDataset#getX(int, int)
 	 */
 	public Number getX(int series, int item) {
 		return table.getTimePoint(item);
 	}
 
-	/*
-	 * (non-Javadoc)
+	/* (non-Javadoc)
 	 * @see org.jfree.data.xy.XYDataset#getY(int, int)
 	 */
 	public Number getY(int series, int item) {
-		return table.getValueAt(item, series+1);
+		return table.getValueAt(item, series + 1);
 	}
 
-	/*
-	 * (non-Javadoc)
+	/* (non-Javadoc)
 	 * @see org.jfree.data.general.AbstractSeriesDataset#getSeriesCount()
 	 */
 	public int getSeriesCount() {
-		return table.getColumnCount()-1;
+		return table.getColumnCount() - 1;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/* (non-Javadoc)
 	 * @see org.jfree.data.general.AbstractSeriesDataset#getSeriesKey(int)
 	 */
 	public Comparable<String> getSeriesKey(int series) {
-		return table.getColumnName(series+1);
+		return table.getColumnName(series + 1);
 	}
 
 }

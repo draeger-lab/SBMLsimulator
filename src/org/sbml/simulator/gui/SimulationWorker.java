@@ -51,12 +51,12 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
 	/**
    * The {@link ResourceBundle} for localization.
    */
-  private static final ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
+  private static final transient ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
   
   /**
 	 * A {@link Logger} for this class
 	 */
-  private static final Logger logger = Logger.getLogger(SimulationWorker.class.getName());
+  private static final transient Logger logger = Logger.getLogger(SimulationWorker.class.getName());
   
   /**
    * 

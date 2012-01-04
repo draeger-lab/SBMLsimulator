@@ -267,7 +267,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 		}
 		plot = new Plot(String.format(bundle.getString("X_AXIS_LABEL"),
 			UnitDefinition.printUnits(timeUnits, true).replace('*', '\u00B7')),
-			bundle.getString("Y_AXIS_LABEL"));
+			bundle.getString("Y_AXIS_LABEL"), model);
 		plot.setBorder(BorderFactory.createLoweredBevelBorder());
 		// get rid of this pop-up menu.
 		// TODO: maybe we can make use of this later.

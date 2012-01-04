@@ -129,6 +129,13 @@ public class SimulationPanel extends JPanel implements
   private SimulationManager simulationManager;
   
   /**
+	 * @return the simulationManager
+	 */
+	public SimulationManager getSimulationManager() {
+		return simulationManager;
+	}
+
+	/**
    * The main tabbed pane showing plot, simulation and experimental data.
    */
   private JTabbedPane tabbedPane;
@@ -304,8 +311,7 @@ public class SimulationPanel extends JPanel implements
       if (visualizationPanel == null) {
         visualizationPanel = new SimulationVisualizationPanel();
       }
-      visualizationPanel.setModel(simulationManager.getSimlationConfiguration()
-          .getModel());
+      visualizationPanel.setModel(simulationManager.getSimlationConfiguration().getModel());
       SimulationToolPanel foot = getSimulationToolPanel();
       foot.addItemListener(visualizationPanel);
       if (showSimulationToolPanel) {
@@ -320,8 +326,7 @@ public class SimulationPanel extends JPanel implements
       if (tabbedPane == null) {
         JPanel simPanel = new JPanel(new BorderLayout());
         simTable = new JTable();
-        simTable.setDefaultRenderer(Double.class, new DecimalCellRenderer(10,
-          4, SwingConstants.RIGHT));
+        simTable.setDefaultRenderer(Double.class, new DecimalCellRenderer(10, 4, SwingConstants.RIGHT));
         simPanel.add(new JScrollPane(simTable), BorderLayout.CENTER);
         simTable.getModel().addTableModelListener(visualizationPanel);
         

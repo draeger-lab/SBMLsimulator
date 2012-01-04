@@ -18,12 +18,12 @@
 package org.sbml.simulator.gui.table;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.util.Locale;
 
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
-
-import org.sbml.jsbml.util.StringTools;
 
 /**
  * A table renderer for decimal numbers.
@@ -41,9 +41,23 @@ public class DecimalCellRenderer extends DefaultTableCellRenderer {
 	private static final long serialVersionUID = 7169267933533860622L;
 	
 	/**
+	 * 
+	 */
+	public static final String REAL_FORMAT = "########.###############";
+	/**
+	 * 
+	 */
+	public static final String SCIENTIFIC_FORMAT = "###0.######E0";
+	
+  /**
+	 * 
+	 */
+	public static final String DECIMAL_FORMAT = "###0.######";
+	
+	/**
 	 * alignment (LEFT, CENTER, RIGHT)
 	 */
-	final private int align;
+	private int align;
 	
 	/**
 	 * Switch to decide whether or not numbers should be formatted all with the
@@ -80,6 +94,7 @@ public class DecimalCellRenderer extends DefaultTableCellRenderer {
 	 *        digits.
 	 */
 	public DecimalCellRenderer(int integer, int fraction, int align, boolean exact) {
+		this();
 		this.formatter = NumberFormat.getInstance();
 		formatter.setMaximumIntegerDigits(integer);
 		formatter.setMaximumFractionDigits(fraction);
@@ -91,23 +106,41 @@ public class DecimalCellRenderer extends DefaultTableCellRenderer {
 	 * 
 	 */
 	public DecimalCellRenderer() {
-		this.formatter = new DecimalFormat(StringTools.DECIMAL_FORMAT);
+		this.formatter = new DecimalFormat(DECIMAL_FORMAT);
 		this.align = SwingConstants.RIGHT;
 		this.allSame = false;
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see javax.swing.table.DefaultTableCellRenderer#setValue(java.lang.Object)
 	 */
 	@Override
 	protected void setValue(final Object value) {
 		if ((value != null) && (value instanceof Number)) {
-			setText(formatter.format(((Number) value).doubleValue()));
+			double v = ((Number) value).doubleValue();
+			if (Double.isNaN(v)) {
+				setText("NaN");
+			} else if (Double.isInfinite(v)) {
+				setText((v < 0) ? "-\u221E" : "\u221E");
+			} else if (((int) v) - v == 0) {
+				setText(String.format("%d", Integer.valueOf((int) v)));
+			} else {
+				Locale locale = Locale.getDefault();
+				DecimalFormat df;
+				if ((Math.abs(v) < 1E-5f) || (1E5f < Math.abs(v))) {
+					df = new DecimalFormat(SCIENTIFIC_FORMAT, new DecimalFormatSymbols(locale));
+				} else {
+					df = new DecimalFormat(DECIMAL_FORMAT, new DecimalFormatSymbols(locale));
+				}
+				df.setMaximumIntegerDigits(formatter.getMaximumIntegerDigits());
+				df.setMaximumFractionDigits(formatter.getMaximumFractionDigits());
+				df.setMinimumFractionDigits(formatter.getMinimumFractionDigits());
+				setText(df.format(value));
+			}
 		} else {
 			super.setValue(value);
 		}
 		setHorizontalAlignment(align);
 	}
+
 }
