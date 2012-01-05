@@ -25,6 +25,7 @@ import java.io.IOException;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.xml.stax.SBMLReader;
+import org.sbml.simulator.io.SimulatorIOOptions;
 import org.simulator.math.odes.AbstractDESSolver;
 import org.simulator.math.odes.MultiTable;
 
@@ -83,8 +84,8 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 		FileWriter filewriter;
 		BufferedWriter bufferedWriter;
 		String outCSVFile;
-		if (props.containsKey(SimulatorOptions.SIMULATION_OUTPUT_FILE)) {
-			outCSVFile = props.get(SimulatorOptions.SIMULATION_OUTPUT_FILE)
+		if (props.containsKey(SimulatorIOOptions.SIMULATION_OUTPUT_FILE)) {
+			outCSVFile = props.get(SimulatorIOOptions.SIMULATION_OUTPUT_FILE)
 					.toString();
 		} else {
 			outCSVFile = openFile.substring(0, openFile.lastIndexOf('.'))

@@ -55,6 +55,8 @@ import org.sbml.optimization.EvA2GUIStarter;
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.SBMLsimulator;
+import org.sbml.simulator.io.CSVDataImporter;
+import org.sbml.simulator.io.SimulatorIOOptions;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.AppConf;
@@ -71,6 +73,7 @@ import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
 import de.zbit.util.ValuePairUncomparable;
 import de.zbit.util.prefs.SBPreferences;
+import de.zbit.util.prefs.SBProperties;
 import eva2.EvAInfo;
 import eva2.client.EvAClient;
 import eva2.tools.BasicResourceLoader;
@@ -187,6 +190,13 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	public SimulatorUI(AppConf appConf) {
 		super(appConf);
 		GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.SIMULATION_START);
+		SBProperties props = appConf.getCmdArgs();
+		if (props.containsKey(SimulatorIOOptions.SBML_INPUT_FILE)) {
+			open(new File(props.get(SimulatorIOOptions.SBML_INPUT_FILE).toString()));
+			if (props.containsKey(SimulatorIOOptions.TIME_SERIES_FILE)) {
+				open(new File(props.get(SimulatorIOOptions.TIME_SERIES_FILE).toString()));
+			}
+		}
 	}
 	
 	

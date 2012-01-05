@@ -20,6 +20,8 @@ package org.sbml.simulator.gui;
 import java.awt.Color;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
@@ -34,7 +36,7 @@ import javax.swing.event.TableModelListener;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.UnitDefinition;
-import org.sbml.simulator.gui.plot.MultiTableToTimeSeriesAdapter;
+import org.sbml.simulator.gui.plot.XYDatasetAdapter;
 import org.sbml.simulator.gui.plot.Plot;
 import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.simulator.gui.table.LegendTableModel;
@@ -89,11 +91,13 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	private Plot plot;
 
 	/**
-	 * Results of simulation and experiments.
+	 * Results of a dynamic simulation.
 	 */
-	private MultiTable simData, experimentData;
-
-	private Model model;
+	private MultiTable simData;
+	/**
+	 *  Experimental results.
+	 */
+	private List<MultiTable> experimentData;
 
 	/**
 	 * 
@@ -106,7 +110,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	/**
 	 * @return the experimentData
 	 */
-	public MultiTable getExperimentData() {
+	public List<MultiTable> getExperimentData() {
 		return experimentData;
 	}
 
@@ -189,8 +193,8 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 		if ((simData != null) && (simData.getRowCount() > 0)) {
 			plot(simData, true, true);
 		}
-		if ((experimentData != null) && (experimentData.getRowCount() > 0)) {
-			plot(experimentData, false, simData == null);
+		if ((experimentData != null) && (experimentData.size() > 0)) {
+			plot(experimentData.get(0), false, simData == null);
 		}
 	}
 
@@ -204,38 +208,46 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 *            if true, everything already plotted will be removed before
 	 *            plotting.
 	 */
-	private void plot(MultiTable data, boolean connected,
-			boolean clearFirst) {
-		String name;
+	private void plot(MultiTable data, boolean connected, boolean clearFirst) {
+		String id;
 		Color plotColors[] = new Color[data.getColumnCount() - 1];
 		String infos[] = new String[data.getColumnCount() - 1];
+		LegendTableModel tableModel = legendPanel.getLegendTableModel();
 		for (int i = 0; i < data.getColumnCount() - 1; i++) {
-			name = data.getColumnName(i + 1);
-			LegendTableModel tableModel = legendPanel.getLegendTableModel();
-			if (tableModel.isSelected(name)) {
-				plotColors[i] = tableModel.getColorFor(name);
-				infos[i] = tableModel.getNameFor(name);
+			id = data.getColumnIdentifier(i + 1);
+			if (tableModel.isSelected(id)) {
+				plotColors[i] = tableModel.getColorFor(id);
+				infos[i] = tableModel.getNameFor(id);
 			}
 		}
 		if (clearFirst) {
 			plot.clearAll();
 		}
-		plot.plot(new MultiTableToTimeSeriesAdapter(data, model), connected, plotColors, infos);
+		plot.plot(new XYDatasetAdapter(data), connected, plotColors, infos);
 	}
 
 	/**
 	 * @param data
 	 *            the experimentData to set
 	 */
-	public void setExperimentData(MultiTable data) {
+	public void addExperimentData(MultiTable data) {
 		// deselect non available elements in the legend and select those that
 		// are present in the data
-		this.experimentData = data;
-		if (experimentData != null) {
+		if (data != null) {
+			boolean plot = false;
+			if (experimentData == null) {
+				experimentData = new LinkedList<MultiTable>();
+				plot = true;
+			}
+			experimentData.add(data);
 			LegendTableModel legend = legendPanel.getLegendTableModel();
 			for (int i = 0; i < legend.getRowCount(); i++) {
-				legend.setSelected(i,
-						experimentData.getColumn(legend.getId(i)) != null);
+				if (!legend.isSelected(i) && (data.getColumn(legend.getId(i)) != null)) {
+					legend.setSelected(i, true);
+				}
+			}
+			if (plot) {
+				plot();
 			}
 		}
 	}
@@ -258,7 +270,6 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 * @param model
 	 */
 	public void setModel(Model model) {
-		this.model = model;
 		if (leftComponent != null) {
 			remove(leftComponent);
 		}
@@ -358,8 +369,22 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	/**
 	 * 
 	 */
-	public void unsetExperimentData() {
-		setExperimentData(null);
+	public void removeExperimentData(int index) {
+		if (experimentData != null) {
+			experimentData.remove(index);
+			LegendTableModel legend = legendPanel.getLegendTableModel();
+			for (int i = 0; i < legend.getRowCount(); i++) {
+				if (legend.isSelected(i)) {
+					boolean selected = false;
+					for (int j = 0; (j < experimentData.size()) && !selected; j++) {
+						if (experimentData.get(j).getColumn(legend.getId(i)) != null) {
+							selected = true;
+						}
+					}
+					legend.setSelected(i, selected);
+				}
+			}
+		}
 	}
 
 	/**

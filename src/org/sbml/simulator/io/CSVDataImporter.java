@@ -15,7 +15,7 @@
  * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
-package org.sbml.simulator.gui;
+package org.sbml.simulator.io;
 
 import java.awt.Component;
 import java.io.IOException;
@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 import org.sbml.jsbml.Model;
+import org.sbml.jsbml.UniqueNamedSBase;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.gui.csv.CSVImporterV2;
@@ -69,6 +70,16 @@ public class CSVDataImporter {
 	}
 	
 	/**
+	 * 
+	 * @param pathname
+	 * @return
+	 * @throws IOException
+	 */
+	public MultiTable convert(String pathname) throws IOException {
+		return convert(null, pathname);
+	}
+	
+	/**
 	 * @param model
 	 * @param pathname
 	 * @return
@@ -89,14 +100,20 @@ public class CSVDataImporter {
 	public MultiTable convert(Model model, String pathname, Component parent)
 		throws IOException {
 	  MultiTable data = new MultiTable();
-    String expectedHeader[] = getExpectedTableHead(model); // According to the model: which symbols
-
-    List<ExpectedColumn> cols = new ArrayList<ExpectedColumn>(
-      expectedHeader.length + 1);
-    for (String head : expectedHeader) {
-      cols.add(new ExpectedColumn(head, false));
-    }
-    cols.add(new ExpectedColumn(data.getTimeName(), true));
+	  List<ExpectedColumn> cols;
+	  String expectedHeader[];
+	  
+		if (model != null) {
+			expectedHeader = expectedTableHead(model); // According to the model: which symbols
+			cols = new ArrayList<ExpectedColumn>(expectedHeader.length + 1);
+			for (String head : expectedHeader) {
+				cols.add(new ExpectedColumn(head, false));
+			}
+		} else {
+			expectedHeader = new String[0];
+			cols = new ArrayList<ExpectedColumn>(1);
+		}
+		cols.add(new ExpectedColumn(data.getTimeName(), true));
     
     CSVImporterV2 converter = new CSVImporterV2(pathname, cols);
     
@@ -111,12 +128,13 @@ public class CSVDataImporter {
           timePoints[i] = Double.parseDouble(stringData[i][timeColumn]);
         }
         data.setTimePoints(timePoints);
+        data.setTimeName(bundle.getString("TIME"));
         // exclude time column
         
         String newHead[] = new String[(int) Math.max(0,
           reader.getHeader().length - 1)];
         
-        if (newHead.length > expectedHeader.length) {
+        if ((model != null) && (newHead.length > expectedHeader.length)) {
           JOptionPane.showMessageDialog(parent, StringUtil.toHTML(bundle
               .getString("ADDITIONAL_COLUMNS_ARE_IGNORED_TOOLTIP"), 40), bundle
               .getString("ADDITIONAL_COLUMNS_ARE_IGNORED"),
@@ -135,6 +153,7 @@ public class CSVDataImporter {
           nameToColumn.put(newHead[i], reader.getColumnSensitive(newHead[i]));
         }
         double dataBlock[][] = data.getBlock(0).getData();
+      	
         for (i = 0; i < dataBlock.length; i++) {
           j = 0; // timeCorrection(j, timeColumn)
           for (String head : newHead) {
@@ -151,7 +170,21 @@ public class CSVDataImporter {
             j++;
           }
         }
+        
+				if (model != null) {
+					String colNames[] = new String[newHead.length];
+					UniqueNamedSBase sbase;
+					j = 0;
+					for (String head : newHead) {
+						sbase = model.findUniqueNamedSBase(head);
+						colNames[j++] = (sbase != null) && (sbase.isSetName()) ? sbase
+								.getName() : null;
+					}
+					data.getBlock(0).setColumnNames(colNames);
+				}
+        
         return data;
+        
       } else {
         if (parent != null) {
           JOptionPane.showMessageDialog(parent, StringUtil.toHTML(bundle
@@ -171,8 +204,8 @@ public class CSVDataImporter {
 	 * @param model
 	 * @return
 	 */
-	private String[] getExpectedTableHead(Model model) {
-    return getExpectedTableHead(model, null);
+	private String[] expectedTableHead(Model model) {
+    return expectedTableHead(model, null);
   }
 	
 	/**
@@ -180,7 +213,7 @@ public class CSVDataImporter {
 	 * @param timeName
 	 * @return
 	 */
-	private String[] getExpectedTableHead(Model model, String timeName) {
+	private String[] expectedTableHead(Model model, String timeName) {
 		List<String> modelSymbols = gatherSymbolIds(model);
 		if (timeName != null) {
 		  String head[] = new String[modelSymbols.size() + 1];
@@ -190,7 +223,7 @@ public class CSVDataImporter {
       }
       return head;
     }
-    return modelSymbols.toArray(new String[] {});
+    return modelSymbols.toArray(new String[0]);
 	}
 	
 	/**

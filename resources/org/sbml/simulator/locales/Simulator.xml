@@ -32,6 +32,7 @@
   <entry key="FILE_NOT_CORRECTLY_FORMATTED_TOOLTIP">Cannot read this format, because no column identifiers are provided.</entry>
   <entry key="ADDITIONAL_COLUMNS_ARE_IGNORED">Some elements are ignored</entry>
   <entry key="ADDITIONAL_COLUMNS_ARE_IGNORED_TOOLTIP">The data file contains some elements that do not have a counterpart in the given model. These elements will not occur in the plot and are ignored in the analysis.</entry>
+  <entry key="TIME">Time</entry>
   
   <!-- EstimationOptions -->
     
@@ -165,7 +166,6 @@
   <entry key="TAB_EXPERIMENTAL_DATA">Experimental data</entry>
   <entry key="TAB_MODEL_VIEW">Model</entry>
   <entry key="NO_SIMULATION_PERFORMED">No simulation has been performed yet. Please run the simulation first.</entry>
-  <entry key="TIME">Time</entry>
   
   <!-- SimulationToolPanel -->
   

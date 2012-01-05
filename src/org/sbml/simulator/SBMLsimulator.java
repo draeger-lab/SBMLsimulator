@@ -17,7 +17,6 @@
  */
 package org.sbml.simulator;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -28,12 +27,12 @@ import java.util.logging.Logger;
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.simulator.gui.SimulatorUI;
 import org.sbml.simulator.gui.plot.PlotOptions;
+import org.sbml.simulator.io.SimulatorIOOptions;
 import org.sbml.simulator.math.QualityMeasure;
 import org.simulator.math.odes.AbstractDESSolver;
 
 import de.zbit.AppConf;
 import de.zbit.Launcher;
-import de.zbit.gui.BaseFrame;
 import de.zbit.gui.GUIOptions;
 import de.zbit.io.CSVOptions;
 import de.zbit.util.Reflect;
@@ -185,12 +184,12 @@ public class SBMLsimulator extends Launcher {
 	public void commandLineMode(AppConf appConf) {
 		String openFile = null;
 		SBProperties props = appConf.getCmdArgs();
-		if (props.containsKey(SimulatorOptions.SBML_INPUT_FILE)) {
-			openFile = props.get(SimulatorOptions.SBML_INPUT_FILE).toString();
+		if (props.containsKey(SimulatorIOOptions.SBML_INPUT_FILE)) {
+			openFile = props.get(SimulatorIOOptions.SBML_INPUT_FILE).toString();
 		}
 		String timeSeriesFile = null;
-		if (props.containsKey(SimulatorOptions.TIME_SERIES_FILE)) {
-			timeSeriesFile = props.get(SimulatorOptions.TIME_SERIES_FILE)
+		if (props.containsKey(SimulatorIOOptions.TIME_SERIES_FILE)) {
+			timeSeriesFile = props.get(SimulatorIOOptions.TIME_SERIES_FILE)
 					.toString();
 		}
 
@@ -218,7 +217,7 @@ public class SBMLsimulator extends Launcher {
 	 */
 	public List<Class<? extends KeyProvider>> getCmdLineOptions() {
 		List<Class<? extends KeyProvider>> defAndKeys = new ArrayList<Class<? extends KeyProvider>>(6);
-		defAndKeys.add(SimulatorOptions.class);
+		defAndKeys.add(SimulatorIOOptions.class);
 		defAndKeys.add(SimulationOptions.class);
 		defAndKeys.add(EstimationOptions.class);
 		defAndKeys.add(GUIOptions.class);
@@ -298,18 +297,8 @@ public class SBMLsimulator extends Launcher {
 	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#initGUI(de.zbit.AppConf)
 	 */
-	public BaseFrame initGUI(AppConf appConf) {
-		SimulatorUI simulatorUI = new SimulatorUI(appConf);
-		SBProperties props = appConf.getCmdArgs();
-		if (props.containsKey(SimulatorOptions.SBML_INPUT_FILE)) {
-			simulatorUI.open(new File(props.get(SimulatorOptions.SBML_INPUT_FILE)
-					.toString()));
-			if (props.containsKey(SimulatorOptions.TIME_SERIES_FILE)) {
-				simulatorUI.open(new File(props.get(SimulatorOptions.TIME_SERIES_FILE)
-						.toString()));
-			}
-		}
-		return simulatorUI;
+	public SimulatorUI initGUI(AppConf appConf) {
+		return new SimulatorUI(appConf);
 	}
 
 	/**
@@ -338,8 +327,8 @@ public class SBMLsimulator extends Launcher {
 	 */
 	private void performSimulation(String openFile, SBProperties props) {
 		String outCSVFile;
-		if (props.containsKey(SimulatorOptions.SIMULATION_OUTPUT_FILE)) {
-			outCSVFile = props.get(SimulatorOptions.SIMULATION_OUTPUT_FILE)
+		if (props.containsKey(SimulatorIOOptions.SIMULATION_OUTPUT_FILE)) {
+			outCSVFile = props.get(SimulatorIOOptions.SIMULATION_OUTPUT_FILE)
 					.toString();
 		} else {
 			outCSVFile = openFile.substring(0, openFile.lastIndexOf('.'))

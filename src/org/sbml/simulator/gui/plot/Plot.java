@@ -21,9 +21,12 @@ import java.awt.Color;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.chart.renderer.xy.XYShapeRenderer;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.HorizontalAlignment;
 import org.jfree.ui.RectangleEdge;
@@ -99,37 +102,27 @@ public class Plot extends ChartPanel {
 	 */
 	private void loadUserSettings() {
 		// retrieve a user-defined preference
-		SBPreferences prefs = SBPreferences
-				.getPreferencesFor(PlotOptions.class);
+		SBPreferences prefs = SBPreferences.getPreferencesFor(PlotOptions.class);
+		JFreeChart chart = getChart();
+		XYPlot plot = chart.getXYPlot();
+		
+		plot.setBackgroundPaint(Option.parseOrCast(Color.class,
+			prefs.get(PlotOptions.PLOT_BACKGROUND_COLOR)));
+		plot.setDomainGridlinePaint(Option.parseOrCast(Color.class,
+			prefs.get(PlotOptions.PLOT_GRID_COLOR)));
+		plot.setRangeGridlinePaint(Option.parseOrCast(Color.class,
+			prefs.get(PlotOptions.PLOT_GRID_COLOR)));
+		
+		chart.setTitle(prefs.get(PlotOptions.PLOT_TITLE));
+		
+		setShowLegend(prefs.getBoolean(PlotOptions.SHOW_PLOT_LEGEND));
+		setGridVisible(prefs.getBoolean(PlotOptions.SHOW_PLOT_GRID));
+		setShowGraphToolTips(prefs.getBoolean(PlotOptions.SHOW_PLOT_TOOLTIPS));
 
-		this.getChart()
-				.getXYPlot()
-				.setBackgroundPaint(
-						Option.parseOrCast(Color.class,
-								prefs.get(PlotOptions.PLOT_BACKGROUND_COLOR)));
-		this.getChart()
-				.getXYPlot()
-				.setDomainGridlinePaint(
-						Option.parseOrCast(Color.class,
-								prefs.get(PlotOptions.PLOT_GRID_COLOR)));
-		this.getChart()
-				.getXYPlot()
-				.setRangeGridlinePaint(
-						Option.parseOrCast(Color.class,
-								prefs.get(PlotOptions.PLOT_GRID_COLOR)));
-
-		this.getChart().setTitle(prefs.get(PlotOptions.PLOT_TITLE));
-
-		this.setShowLegend(prefs.getBoolean(PlotOptions.SHOW_PLOT_LEGEND));
-		this.setGridVisible(prefs.getBoolean(PlotOptions.SHOW_PLOT_GRID));
-		this.setShowGraphToolTips(prefs
-				.getBoolean(PlotOptions.SHOW_PLOT_TOOLTIPS));
-
-		XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) this
-				.getChart().getXYPlot().getRenderer(1);
-		if (renderer != null) {
-			renderer.setBaseLinesVisible(false);
-			renderer.setBaseShapesVisible(true);
+		XYItemRenderer renderer = plot.getRenderer(1);
+		if (renderer instanceof XYLineAndShapeRenderer) {
+			((XYLineAndShapeRenderer) renderer).setBaseLinesVisible(false);
+			((XYLineAndShapeRenderer) renderer).setBaseShapesVisible(true);
 		}
 	}
 
@@ -158,32 +151,32 @@ public class Plot extends ChartPanel {
 	public void plot(XYDataset dataset, boolean connected,
 			boolean showLegend, boolean showGrid, Color[] plotColors,
 			String[] infos) {
-		this.getChart().getXYPlot().setDataset(datasetCount, dataset);
+		XYPlot plot = getChart().getXYPlot();
+		
+		plot.setDataset(datasetCount, dataset);
 
-		XYItemRenderer renderer = this.getChart().getXYPlot()
-				.getRenderer(datasetCount);
-		XYLineAndShapeRenderer lineandshap;
-		if (renderer != null) {
-			lineandshap = (XYLineAndShapeRenderer) renderer;
+		 XYItemRenderer renderer;
+		if (connected) {
+			renderer = new XYLineAndShapeRenderer();
+			((XYLineAndShapeRenderer) renderer).setBaseLinesVisible(true);
+			((XYLineAndShapeRenderer) renderer).setBaseShapesVisible(false);
 		} else {
-			lineandshap = new XYLineAndShapeRenderer();
+			renderer = new XYShapeRenderer();
 		}
-		lineandshap.setBaseLinesVisible(true);
-		lineandshap.setBaseShapesVisible(false);
 		for (int i = 0; i < plotColors.length; i++) {
 			Color col = plotColors[i];
 			boolean visible = col != null;
 			// if(infos[i]!=null){
 			int index = i;// plotData.findColumn(infos[i])-1;
-			lineandshap.setSeriesVisible(index, visible);
-			lineandshap.setSeriesVisibleInLegend(index, visible);
-			lineandshap.setSeriesPaint(index, col);
+			renderer.setSeriesVisible(index, visible);
+			renderer.setSeriesVisibleInLegend(index, visible);
+			renderer.setSeriesPaint(index, col);
 			// }
 		}
 
-		this.getChart().getXYPlot().setRenderer(datasetCount++, lineandshap);
+		plot.setRenderer(datasetCount++, renderer);
 
-		this.loadUserSettings();
+		loadUserSettings();
 	}
 
 	// /**
