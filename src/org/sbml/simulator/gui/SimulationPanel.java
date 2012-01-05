@@ -526,7 +526,6 @@ public class SimulationPanel extends JPanel implements
    * @throws Exception
    */
   public void addExperimentalData(String title, MultiTable data) throws Exception {
-    dataTableView.addTable(title, data);
     tabbedPane.setEnabledAt(2, true);
     this.firePropertyChange("measurements", null, data);
     //TODO preliminary version: property does not change for quality measurement with the call firePropertyChange()

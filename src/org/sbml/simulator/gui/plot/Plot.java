@@ -28,8 +28,6 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.HorizontalAlignment;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.VerticalAlignment;
-import org.sbml.jsbml.Model;
-import org.simulator.math.odes.MultiTable;
 
 import de.zbit.util.prefs.Option;
 import de.zbit.util.prefs.SBPreferences;
@@ -57,8 +55,6 @@ public class Plot extends ChartPanel {
 	 */
 	private int datasetCount;
 
-	private Model model;
-
 	// /**
 	// * The x/y label of the plot's axes
 	// */
@@ -68,7 +64,7 @@ public class Plot extends ChartPanel {
 	 * Create a new empty plot panel
 	 */
 	public Plot() {
-		this("", "", null);
+		this("", "");
 	}
 
 	/**
@@ -79,12 +75,10 @@ public class Plot extends ChartPanel {
 	 * @param yname
 	 *            the label of the y-axis
 	 */
-	public Plot(String xname, String yname, Model model) {
+	public Plot(String xname, String yname) {
 		super(ChartFactory.createXYLineChart("", xname, yname, null,
 				PlotOrientation.VERTICAL, true, false, false), false, true,
 				true, false, true);
-
-		this.model = model;
 		
 		this.getChart().getXYPlot().setDomainPannable(true);
 		this.getChart().getXYPlot().setRangePannable(true);
@@ -161,10 +155,9 @@ public class Plot extends ChartPanel {
 	 *            This array must have the same length as the number of columns
 	 *            in the plotData field.
 	 */
-	public void plot(MultiTable plotData, boolean connected,
+	public void plot(XYDataset dataset, boolean connected,
 			boolean showLegend, boolean showGrid, Color[] plotColors,
 			String[] infos) {
-		XYDataset dataset = new MultiTableToTimeSeriesAdapter(plotData, model);
 		this.getChart().getXYPlot().setDataset(datasetCount, dataset);
 
 		XYItemRenderer renderer = this.getChart().getXYPlot()
@@ -254,7 +247,7 @@ public class Plot extends ChartPanel {
 	 * @param plotColors
 	 * @param infos
 	 */
-	public void plot(MultiTable data, boolean connected,
+	public void plot(XYDataset data, boolean connected,
 			Color[] plotColors, String[] infos) {
 		// retrieve a user-defined preference
 		SBPreferences prefs = SBPreferences

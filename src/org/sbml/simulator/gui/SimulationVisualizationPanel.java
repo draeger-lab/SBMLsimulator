@@ -34,6 +34,7 @@ import javax.swing.event.TableModelListener;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.UnitDefinition;
+import org.sbml.simulator.gui.plot.MultiTableToTimeSeriesAdapter;
 import org.sbml.simulator.gui.plot.Plot;
 import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.simulator.gui.table.LegendTableModel;
@@ -91,6 +92,8 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 * Results of simulation and experiments.
 	 */
 	private MultiTable simData, experimentData;
+
+	private Model model;
 
 	/**
 	 * 
@@ -217,7 +220,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 		if (clearFirst) {
 			plot.clearAll();
 		}
-		plot.plot(data, connected, plotColors, infos);
+		plot.plot(new MultiTableToTimeSeriesAdapter(data, model), connected, plotColors, infos);
 	}
 
 	/**
@@ -255,6 +258,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 * @param model
 	 */
 	public void setModel(Model model) {
+		this.model = model;
 		if (leftComponent != null) {
 			remove(leftComponent);
 		}
@@ -267,7 +271,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 		}
 		plot = new Plot(String.format(bundle.getString("X_AXIS_LABEL"),
 			UnitDefinition.printUnits(timeUnits, true).replace('*', '\u00B7')),
-			bundle.getString("Y_AXIS_LABEL"), model);
+			bundle.getString("Y_AXIS_LABEL"));
 		plot.setBorder(BorderFactory.createLoweredBevelBorder());
 		// get rid of this pop-up menu.
 		// TODO: maybe we can make use of this later.

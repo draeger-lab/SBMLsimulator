@@ -17,11 +17,9 @@
  */
 package org.sbml.simulator.gui.plot;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jfree.data.xy.AbstractXYDataset;
 import org.sbml.jsbml.Model;
+import org.sbml.jsbml.UniqueNamedSBase;
 import org.simulator.math.odes.MultiTable;
 
 /**
@@ -41,8 +39,10 @@ public class MultiTableToTimeSeriesAdapter extends AbstractXYDataset {
    * 
    */
   private MultiTable table;
-  
-  private Map<String, String> idHash;
+  /**
+   * The model where we can look up elements for a given identifier.
+   */
+  private Model model;
 
   /**
    * 
@@ -50,8 +50,7 @@ public class MultiTableToTimeSeriesAdapter extends AbstractXYDataset {
    */
 	public MultiTableToTimeSeriesAdapter(MultiTable table, Model model) {
 		this.table = table;
-		this.idHash = new HashMap<String, String>();
-		// TODO: Hash all ids in the model!!!!
+		this.model = model;
 	}
 
 	/* (non-Javadoc)
@@ -86,7 +85,12 @@ public class MultiTableToTimeSeriesAdapter extends AbstractXYDataset {
 	 * @see org.jfree.data.general.AbstractSeriesDataset#getSeriesKey(int)
 	 */
 	public Comparable<String> getSeriesKey(int series) {
-		return table.getColumnName(series + 1);
+		String id = table.getColumnName(series + 1);
+		UniqueNamedSBase sbase = model.findUniqueNamedSBase(id);
+		if ((sbase == null) || !sbase.isSetName()) {
+			return id;
+		}
+		return sbase.getName();
 	}
 
 }
