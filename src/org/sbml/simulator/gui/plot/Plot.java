@@ -148,35 +148,39 @@ public class Plot extends ChartPanel {
 	 *            This array must have the same length as the number of columns
 	 *            in the plotData field.
 	 */
+	@SuppressWarnings("deprecation")
 	public void plot(XYDataset dataset, boolean connected,
 			boolean showLegend, boolean showGrid, Color[] plotColors,
 			String[] infos) {
-		XYPlot plot = getChart().getXYPlot();
 		
+		XYPlot plot = getChart().getXYPlot();
 		plot.setDataset(datasetCount, dataset);
 
-		 XYItemRenderer renderer;
-		if (connected) {
-			renderer = new XYLineAndShapeRenderer();
-			((XYLineAndShapeRenderer) renderer).setBaseLinesVisible(true);
-			((XYLineAndShapeRenderer) renderer).setBaseShapesVisible(false);
+		XYItemRenderer renderer = plot.getRenderer(datasetCount);
+		XYLineAndShapeRenderer linesAndShape;
+		if (renderer != null) {
+			linesAndShape = (XYLineAndShapeRenderer) renderer;
 		} else {
-			renderer = new XYShapeRenderer();
+			linesAndShape = new XYLineAndShapeRenderer();
 		}
+		linesAndShape.setBaseLinesVisible(true);
+		linesAndShape.setBaseShapesVisible(false);
 		for (int i = 0; i < plotColors.length; i++) {
 			Color col = plotColors[i];
 			boolean visible = col != null;
 			// if(infos[i]!=null){
 			int index = i;// plotData.findColumn(infos[i])-1;
-			renderer.setSeriesVisible(index, visible);
-			renderer.setSeriesVisibleInLegend(index, visible);
-			renderer.setSeriesPaint(index, col);
+			linesAndShape.setSeriesLinesVisible(index, connected);
+			linesAndShape.setSeriesShapesVisible(index, !connected);
+			linesAndShape.setSeriesVisible(index, visible);
+			linesAndShape.setSeriesVisibleInLegend(index, visible);
+			linesAndShape.setSeriesPaint(index, col);
 			// }
 		}
 
-		plot.setRenderer(datasetCount++, renderer);
+		plot.setRenderer(datasetCount++, linesAndShape);
 
-		loadUserSettings();
+		this.loadUserSettings();
 	}
 
 	// /**
