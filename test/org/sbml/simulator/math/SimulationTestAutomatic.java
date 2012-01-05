@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.xml.stax.SBMLReader;
-import org.sbml.simulator.gui.CSVDataImporter;
+import org.sbml.simulator.io.CSVDataImporter;
 import org.simulator.math.odes.AbstractDESSolver;
 import org.simulator.math.odes.MultiTable;
 import org.simulator.math.odes.RosenbrockSolver;

@@ -15,7 +15,7 @@
  * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
-package org.sbml.simulator;
+package org.sbml.simulator.io;
 
 import java.io.File;
 import java.util.ResourceBundle;
@@ -33,7 +33,7 @@ import de.zbit.util.prefs.Range;
  * @version $Rev$
  * @since 1.0
  */
-public interface SimulatorOptions extends KeyProvider {
+public interface SimulatorIOOptions extends KeyProvider {
 
 	/**
    * 

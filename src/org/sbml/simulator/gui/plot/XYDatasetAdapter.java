@@ -18,8 +18,6 @@
 package org.sbml.simulator.gui.plot;
 
 import org.jfree.data.xy.AbstractXYDataset;
-import org.sbml.jsbml.Model;
-import org.sbml.jsbml.UniqueNamedSBase;
 import org.simulator.math.odes.MultiTable;
 
 /**
@@ -29,7 +27,7 @@ import org.simulator.math.odes.MultiTable;
  * @version $Rev$
  * @since 1.0
  */
-public class MultiTableToTimeSeriesAdapter extends AbstractXYDataset {
+public class XYDatasetAdapter extends AbstractXYDataset {
 
 	/**
    * Generated serial version identifier.
@@ -39,25 +37,21 @@ public class MultiTableToTimeSeriesAdapter extends AbstractXYDataset {
    * 
    */
   private MultiTable table;
-  /**
-   * The model where we can look up elements for a given identifier.
-   */
-  private Model model;
 
   /**
    * 
    * @param table
    */
-	public MultiTableToTimeSeriesAdapter(MultiTable table, Model model) {
+	public XYDatasetAdapter(MultiTable table) {
+		super();
 		this.table = table;
-		this.model = model;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.jfree.data.xy.XYDataset#getItemCount(int)
 	 */
 	public int getItemCount(int series) {
-		return table.getColumn(series+1).getRowCount();
+		return table.getColumn(series + 1).getRowCount();
 	}
 
 	/* (non-Javadoc)
@@ -85,12 +79,7 @@ public class MultiTableToTimeSeriesAdapter extends AbstractXYDataset {
 	 * @see org.jfree.data.general.AbstractSeriesDataset#getSeriesKey(int)
 	 */
 	public Comparable<String> getSeriesKey(int series) {
-		String id = table.getColumnName(series + 1);
-		UniqueNamedSBase sbase = model.findUniqueNamedSBase(id);
-		if ((sbase == null) || !sbase.isSetName()) {
-			return id;
-		}
-		return sbase.getName();
+		return table.getColumnName(series + 1);
 	}
 
 }

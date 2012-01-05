@@ -22,8 +22,8 @@ import java.util.Properties;
 
 import org.sbml.jsbml.resources.Resource;
 import org.sbml.simulator.SimulationOptions;
-import org.sbml.simulator.SimulatorOptions;
 import org.sbml.simulator.gui.SimulatorUI;
+import org.sbml.simulator.io.SimulatorIOOptions;
 
 import de.zbit.io.CSVOptions;
 import de.zbit.util.prefs.SBProperties;
@@ -82,7 +82,7 @@ public class SimulationModeTest {
 		csvfile = path + "-results.csv";
 		configfile = path + "-settings.txt";
 
-		settings.put(SimulatorOptions.SBML_INPUT_FILE, sbmlFile);
+		settings.put(SimulatorIOOptions.SBML_INPUT_FILE, sbmlFile);
 		settings.put(CSVOptions.CSV_FILE, csvfile);
 
 		Properties cfg = Resource.readProperties(configfile);

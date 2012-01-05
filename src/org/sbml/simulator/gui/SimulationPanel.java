@@ -207,12 +207,12 @@ public class SimulationPanel extends JPanel implements
    */
   public void closeExpermentalData(int index) {
   	dataTableView.removeTable(index);
+		visualizationPanel.removeExperimentData(index);
     if (tabbedPane.getSelectedIndex() == 2) {
       tabbedPane.setSelectedIndex(0);
     }
 		if (dataTableView.getTableCount() == 0) {
 			tabbedPane.setEnabledAt(2, false);
-			visualizationPanel.unsetExperimentData();
 		}
   }
   
@@ -526,11 +526,12 @@ public class SimulationPanel extends JPanel implements
    * @throws Exception
    */
   public void addExperimentalData(String title, MultiTable data) throws Exception {
+  	dataTableView.addTable(title, data);
     tabbedPane.setEnabledAt(2, true);
     this.firePropertyChange("measurements", null, data);
     //TODO preliminary version: property does not change for quality measurement with the call firePropertyChange()
     simulationManager.getQualityMeasurement().propertyChange(new PropertyChangeEvent(this, "measurements", null, data));
-    visualizationPanel.setExperimentData(data);
+    visualizationPanel.addExperimentData(data);
   }
   
   /**

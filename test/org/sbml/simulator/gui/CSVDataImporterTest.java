@@ -28,6 +28,7 @@ import javax.xml.stream.XMLStreamException;
 
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.xml.stax.SBMLReader;
+import org.sbml.simulator.io.CSVDataImporter;
 
 import de.zbit.gui.GUITools;
 
