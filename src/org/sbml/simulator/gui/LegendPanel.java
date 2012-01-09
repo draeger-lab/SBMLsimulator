@@ -22,9 +22,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
@@ -136,7 +136,7 @@ public class LegendPanel extends JPanel implements TableModelListener,
 	/**
 	 * 
 	 */
-	private Set<TableModelListener> setOfTableModelListeners;
+	private List<TableModelListener> listOfTableModelListeners;
 		
 	/**
 	 * 
@@ -144,7 +144,7 @@ public class LegendPanel extends JPanel implements TableModelListener,
 	 */
 	public LegendPanel(Model model, boolean includeReactions) {
 	  super(new BorderLayout());
-    setOfTableModelListeners = new HashSet<TableModelListener>();
+    listOfTableModelListeners = new LinkedList<TableModelListener>();
     add(new JScrollPane(createLegendTable(model, includeReactions)),
       BorderLayout.CENTER);
     JPopupMenu menuSelect = new JPopupMenu(), menuDeselect = new JPopupMenu();
@@ -206,7 +206,7 @@ public class LegendPanel extends JPanel implements TableModelListener,
 	 * @return
 	 */
 	public boolean addTableModelListener(TableModelListener listener) {
-		return setOfTableModelListeners.add(listener);
+		return listOfTableModelListeners.add(listener);
 	}
 
 	/**
@@ -270,7 +270,7 @@ public class LegendPanel extends JPanel implements TableModelListener,
 	 * @return
 	 */
 	public boolean removeTableModelListener(TableModelListener listener) {
-		return setOfTableModelListeners.remove(listener);
+		return listOfTableModelListeners.remove(listener);
 	}
 
 	/* (non-Javadoc)
@@ -284,7 +284,7 @@ public class LegendPanel extends JPanel implements TableModelListener,
         repaint();
       }
     }
-		for (TableModelListener tml : setOfTableModelListeners) {
+		for (TableModelListener tml : listOfTableModelListeners) {
 			tml.tableChanged(e);
 		}
 	}

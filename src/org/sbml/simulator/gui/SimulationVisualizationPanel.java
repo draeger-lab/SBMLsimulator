@@ -20,6 +20,7 @@ package org.sbml.simulator.gui;
 import java.awt.Color;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -34,11 +35,13 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
+import org.jfree.data.xy.AbstractXYDataset;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.UnitDefinition;
-import org.sbml.simulator.gui.plot.XYDatasetAdapter;
+import org.sbml.simulator.gui.plot.BoxPlotDataset;
 import org.sbml.simulator.gui.plot.Plot;
 import org.sbml.simulator.gui.plot.PlotOptions;
+import org.sbml.simulator.gui.plot.XYDatasetAdapter;
 import org.sbml.simulator.gui.table.LegendTableModel;
 import org.simulator.math.odes.MultiTable;
 
@@ -167,7 +170,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 					plot.setShowLegend(button.isSelected());
 				} else if (com.equals(PlotOptions.SHOW_PLOT_TOOLTIPS
 						.getOptionName())) {
-					plot.setShowGraphToolTips(button.isSelected());
+					plot.setDisplayToolTips(button.isSelected());
 				}
 			}
 		}
@@ -191,10 +194,11 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 */
 	public void plot() {
 		if ((simData != null) && (simData.getRowCount() > 0)) {
-			plot(simData, true, true);
+			List<MultiTable> l = Arrays.asList(new MultiTable[] {simData});
+			plot(l, true, true);
 		}
 		if ((experimentData != null) && (experimentData.size() > 0)) {
-			plot(experimentData.get(0), false, simData == null);
+			plot(experimentData, false, simData == null);
 		}
 	}
 
@@ -208,22 +212,36 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 *            if true, everything already plotted will be removed before
 	 *            plotting.
 	 */
-	private void plot(MultiTable data, boolean connected, boolean clearFirst) {
-		String id;
-		Color plotColors[] = new Color[data.getColumnCount() - 1];
-		String infos[] = new String[data.getColumnCount() - 1];
-		LegendTableModel tableModel = legendPanel.getLegendTableModel();
-		for (int i = 0; i < data.getColumnCount() - 1; i++) {
-			id = data.getColumnIdentifier(i + 1);
-			if (tableModel.isSelected(id)) {
-				plotColors[i] = tableModel.getColorFor(id);
-				infos[i] = tableModel.getNameFor(id);
+	private void plot(List<MultiTable> data, boolean connected, boolean clearFirst) {
+		if (data.size() > 0) {
+			AbstractXYDataset d;
+			if (data.size() == 1) {
+				d = new XYDatasetAdapter(data.get(0));
+			} else {
+				d = new BoxPlotDataset(data);
 			}
+			
+			String id;
+			int seriesCount = d.getSeriesCount();
+			Color plotColors[] = new Color[seriesCount];
+			String infos[] = new String[seriesCount];
+			LegendTableModel tableModel = legendPanel.getLegendTableModel();
+			for (int i = 0; i < seriesCount; i++) {
+				id = d.getSeriesKey(i).toString();
+				if (tableModel.isSelected(id)) {
+					// TODO
+					plotColors[i] = tableModel.getColorFor(id);
+					infos[i] = tableModel.getNameFor(id);
+				} else {
+					plotColors[i] = null;
+					infos[i] = null;
+				}
+			}
+			if (clearFirst) {
+				plot.clearAll();
+			}
+			plot.plot(d, connected, plotColors, infos);
 		}
-		if (clearFirst) {
-			plot.clearAll();
-		}
-		plot.plot(new XYDatasetAdapter(data), connected, plotColors, infos);
 	}
 
 	/**
@@ -239,7 +257,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 				experimentData = new LinkedList<MultiTable>();
 				plot = true;
 			}
-			experimentData.add(data);
+			plot |= experimentData.add(data);
 			LegendTableModel legend = legendPanel.getLegendTableModel();
 			for (int i = 0; i < legend.getRowCount(); i++) {
 				if (!legend.isSelected(i) && (data.getColumn(legend.getId(i)) != null)) {
@@ -356,8 +374,8 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 */
 	public void tableChanged(TableModelEvent e) {
 		if (e.getSource() instanceof LegendTableModel) {
-			if ((e.getColumn() == LegendTableModel.getColumnPlot() || e
-					.getColumn() == LegendTableModel.getColumnColor())
+			if (((e.getColumn() == LegendTableModel.getColumnPlot()) || (e
+					.getColumn() == LegendTableModel.getColumnColor()))
 					&& (e.getType() == TableModelEvent.UPDATE)) {
 				plot();
 			}
