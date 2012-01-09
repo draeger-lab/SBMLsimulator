@@ -261,7 +261,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 			}
 			for (MultiTable data : referenceData) {
 				// equal weight for each reference data set
-				fitness[0] = distance.distance(solution.getBlock(0), data.getBlock(0))
+				fitness[0] += distance.distance(solution.getBlock(0), data.getBlock(0))
 						/ referenceData.length;
 			}
 			if (bestPerGeneration == null
