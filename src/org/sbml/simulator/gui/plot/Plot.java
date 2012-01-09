@@ -18,13 +18,11 @@
 package org.sbml.simulator.gui.plot;
 
 import java.awt.Color;
-import java.util.Iterator;
 import java.util.logging.Logger;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.LegendItem;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -82,7 +80,7 @@ public class Plot extends ChartPanel {
 	 *            the label of the y-axis
 	 */
 	public Plot(String xname, String yname) {
-		super(ChartFactory.createXYLineChart("", xname, yname, null, false), false,
+		super(ChartFactory.createXYLineChart("", xname, yname, null, true), false,
 			true, true, false, true);
 		
 		JFreeChart chart = getChart();
@@ -94,11 +92,9 @@ public class Plot extends ChartPanel {
 		setMouseWheelEnabled(true);
 
 		LegendTitle legend = chart.getLegend();
-		if (legend != null) {
-			legend.setPosition(RectangleEdge.BOTTOM);
-			legend.setHorizontalAlignment(HorizontalAlignment.CENTER);
-			legend.setVerticalAlignment(VerticalAlignment.CENTER);
-		}
+		legend.setPosition(RectangleEdge.BOTTOM);
+		legend.setHorizontalAlignment(HorizontalAlignment.CENTER);
+		legend.setVerticalAlignment(VerticalAlignment.CENTER);
 		loadUserSettings();
 	}
 
@@ -211,17 +207,6 @@ public class Plot extends ChartPanel {
 			}
 			plot.setRenderer(datasetCount, linesAndShape);
 		}
-		
-//		int i = 0;
-//		Iterator<LegendItem> items = plot.getLegendItems().iterator();
-//		LegendItem item;
-//		while (items.hasNext()) {
-//			item = items.next();
-//			if (infos[i] != null) {
-//				item.setDescription(infos[i]);
-//			}
-//			i++;
-//		}
 		
 		datasetCount++;
 
