@@ -51,6 +51,7 @@ import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
 import org.sbml.jsbml.SBMLWriter;
+import org.sbml.jsbml.util.StringTools;
 import org.sbml.optimization.EvA2GUIStarter;
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.optimization.problem.EstimationProblem;
@@ -71,6 +72,7 @@ import de.zbit.util.AbstractProgressBar;
 import de.zbit.util.FileTools;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
+import de.zbit.util.Timer;
 import de.zbit.util.ValuePairUncomparable;
 import de.zbit.util.prefs.SBPreferences;
 import de.zbit.util.prefs.SBProperties;
@@ -384,7 +386,10 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		if ((modelFiles != null) && (modelFiles.length > 0)) {
 			try {
 				// TODO: Do this in a different thread with some progress monitor for the user.
+				Timer timer = new Timer();
 				SBMLDocument doc = SBMLReader.read(modelFiles[0]);
+				logger.info(String.format(bundle.getString("READING_TIME"),
+					StringTools.toString(timer.getAndReset(false))));
 				if ((doc != null) && (doc.isSetModel())) {
 					
 					if ((simPanel != null) && !closeFile(false)) {

@@ -17,6 +17,8 @@
  */
 package org.sbml.simulator;
 
+import java.awt.HeadlessException;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -165,6 +167,8 @@ public class SBMLsimulator extends Launcher {
 	/**
 	 * 
 	 * @param args
+	 * @throws IOException 
+	 * @throws HeadlessException 
 	 */
 	public static void main(String args[]) {
 		new SBMLsimulator(args);
