@@ -319,7 +319,7 @@ public class SimulationPanel extends JPanel implements
       }
       visualizationPanel.getPlot().setGridVisible(foot.getShowGrid());
       visualizationPanel.getPlot().setShowLegend(foot.getShowLegend());
-      visualizationPanel.getPlot().setShowGraphToolTips(
+      visualizationPanel.getPlot().setDisplayToolTips(
         foot.getShowGraphToolTips());
 //      visualizationPanel.setPlotToLogScale(foot.getJCheckBoxLegend());
       
@@ -528,6 +528,7 @@ public class SimulationPanel extends JPanel implements
   public void addExperimentalData(String title, MultiTable data) throws Exception {
   	dataTableView.addTable(title, data);
     tabbedPane.setEnabledAt(2, true);
+    // TODO: Don't fire property change event twice!
     this.firePropertyChange("measurements", null, data);
     //TODO preliminary version: property does not change for quality measurement with the call firePropertyChange()
     simulationManager.getQualityMeasurement().propertyChange(new PropertyChangeEvent(this, "measurements", null, data));

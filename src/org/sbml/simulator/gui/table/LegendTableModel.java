@@ -296,9 +296,7 @@ public class LegendTableModel extends AbstractTableModel {
 		throw new NoSuchElementException(id);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see javax.swing.table.TableModel#getRowCount()
 	 */
 	public int getRowCount() {
@@ -310,19 +308,18 @@ public class LegendTableModel extends AbstractTableModel {
 	 * @return
 	 */
 	public int getRowFor(String id) {
-		int index = -1;
+		Integer index = Integer.valueOf(-1);
 		if (lastQueried == null) {
-			lastQueried = new ValuePair<String, Integer>(id,
-					Integer.valueOf(index));
+			lastQueried = new ValuePair<String, Integer>(id, index);
 		} else if (id.equals(lastQueried.getA())) {
 			return lastQueried.getB().intValue();
 		}
 		if (id2Row.containsKey(id)) {
-			index = id2Row.get(id).intValue();
+			index = id2Row.get(id);
 			lastQueried.setA(id);
-			lastQueried.setB(Integer.valueOf(index));
+			lastQueried.setB(index);
 		}
-		return index;
+		return index.intValue();
 	}
 
 	/**

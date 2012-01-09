@@ -18,19 +18,22 @@
 package org.sbml.simulator.gui.plot;
 
 import java.awt.Color;
+import java.util.Iterator;
+import java.util.logging.Logger;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.LegendItem;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.chart.renderer.xy.XYShapeRenderer;
+import org.jfree.chart.title.LegendTitle;
+import org.jfree.chart.util.HorizontalAlignment;
+import org.jfree.chart.util.RectangleEdge;
+import org.jfree.chart.util.VerticalAlignment;
+import org.jfree.data.statistics.BoxAndWhiskerXYDataset;
 import org.jfree.data.xy.XYDataset;
-import org.jfree.ui.HorizontalAlignment;
-import org.jfree.ui.RectangleEdge;
-import org.jfree.ui.VerticalAlignment;
 
 import de.zbit.util.prefs.Option;
 import de.zbit.util.prefs.SBPreferences;
@@ -54,14 +57,14 @@ public class Plot extends ChartPanel {
 	private static final long serialVersionUID = 176134486775218455L;
 	
 	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final transient Logger logger = Logger.getLogger(Plot.class.getName());
+	
+	/**
 	 * 
 	 */
 	private int datasetCount;
-
-	// /**
-	// * The x/y label of the plot's axes
-	// */
-	// private String xlabel,ylabel;
 
 	/**
 	 * Create a new empty plot panel
@@ -79,21 +82,23 @@ public class Plot extends ChartPanel {
 	 *            the label of the y-axis
 	 */
 	public Plot(String xname, String yname) {
-		super(ChartFactory.createXYLineChart("", xname, yname, null,
-				PlotOrientation.VERTICAL, true, false, false), false, true,
-				true, false, true);
+		super(ChartFactory.createXYLineChart("", xname, yname, null, false), false,
+			true, true, false, true);
 		
-		this.getChart().getXYPlot().setDomainPannable(true);
-		this.getChart().getXYPlot().setRangePannable(true);
+		JFreeChart chart = getChart();
+		
+		XYPlot plot = chart.getXYPlot(); 
+		plot.setDomainPannable(true);
+		plot.setRangePannable(true);
 
-		this.setMouseWheelEnabled(true);
+		setMouseWheelEnabled(true);
 
-		this.getChart().getLegend().setPosition(RectangleEdge.BOTTOM);
-		this.getChart().getLegend()
-				.setHorizontalAlignment(HorizontalAlignment.CENTER);
-		this.getChart().getLegend()
-				.setVerticalAlignment(VerticalAlignment.CENTER);
-
+		LegendTitle legend = chart.getLegend();
+		if (legend != null) {
+			legend.setPosition(RectangleEdge.BOTTOM);
+			legend.setHorizontalAlignment(HorizontalAlignment.CENTER);
+			legend.setVerticalAlignment(VerticalAlignment.CENTER);
+		}
 		loadUserSettings();
 	}
 
@@ -117,7 +122,7 @@ public class Plot extends ChartPanel {
 		
 		setShowLegend(prefs.getBoolean(PlotOptions.SHOW_PLOT_LEGEND));
 		setGridVisible(prefs.getBoolean(PlotOptions.SHOW_PLOT_GRID));
-		setShowGraphToolTips(prefs.getBoolean(PlotOptions.SHOW_PLOT_TOOLTIPS));
+		setDisplayToolTips(prefs.getBoolean(PlotOptions.SHOW_PLOT_TOOLTIPS));
 
 		XYItemRenderer renderer = plot.getRenderer(1);
 		if (renderer instanceof XYLineAndShapeRenderer) {
@@ -148,7 +153,6 @@ public class Plot extends ChartPanel {
 	 *            This array must have the same length as the number of columns
 	 *            in the plotData field.
 	 */
-	@SuppressWarnings("deprecation")
 	public void plot(XYDataset dataset, boolean connected,
 			boolean showLegend, boolean showGrid, Color[] plotColors,
 			String[] infos) {
@@ -156,84 +160,73 @@ public class Plot extends ChartPanel {
 		XYPlot plot = getChart().getXYPlot();
 		plot.setDataset(datasetCount, dataset);
 
-		XYItemRenderer renderer = plot.getRenderer(datasetCount);
-		XYLineAndShapeRenderer linesAndShape;
-		if (renderer != null) {
-			linesAndShape = (XYLineAndShapeRenderer) renderer;
+		if (dataset instanceof BoxAndWhiskerXYDataset) {
+			XYBoxAndWhiskerRenderer renderer = new XYBoxAndWhiskerRenderer();
+			/*
+			 * This is necessary because otherwise the boxes of all series will be
+			 * drawn in an identical color. Only if the box paint is null, it will
+			 * look for the series paint.
+			 */
+			renderer.setBoxPaint(null);
+			
+			for (int i = 0; i < plotColors.length; i++) {
+				Color col = plotColors[i];
+				boolean visible = col != null;
+				renderer.setSeriesVisible(i, visible);
+				renderer.setSeriesVisibleInLegend(i, visible);
+				renderer.setSeriesCreateEntities(i, visible);
+				renderer.setSeriesItemLabelsVisible(i, visible);
+				if (visible) {
+					renderer.setSeriesPaint(i, col);
+					renderer.setSeriesFillPaint(i, col);
+					/*
+					 * Makes the "value" of the box a transparent item, i.e., invisible.
+					 * This causes the average and the mean not to be visible... because
+					 * both are drawn in the identical color.
+					 */
+					renderer.setArtifactPaint(i, new Color(0, 0, 0, 75));
+				} else {
+					col = new Color(255, 255, 255, 255);
+					renderer.setSeriesPaint(i, col);
+					renderer.setSeriesFillPaint(i, col);
+					renderer.setSeriesOutlinePaint(i, col);
+					renderer.setArtifactPaint(i, col);
+				}
+			}
+			
+			plot.setRenderer(datasetCount, renderer);
+			
 		} else {
-			linesAndShape = new XYLineAndShapeRenderer();
+			XYLineAndShapeRenderer linesAndShape = new XYLineAndShapeRenderer();
+			linesAndShape.setBaseLinesVisible(true);
+			linesAndShape.setBaseShapesVisible(false);
+			for (int i = 0; i < plotColors.length; i++) {
+				Color col = plotColors[i];
+				boolean visible = col != null;
+				linesAndShape.setSeriesLinesVisible(i, connected);
+				linesAndShape.setSeriesShapesVisible(i, !connected);
+				linesAndShape.setSeriesVisible(i, visible);
+				linesAndShape.setSeriesVisibleInLegend(i, visible);
+				linesAndShape.setSeriesPaint(i, col);
+			}
+			plot.setRenderer(datasetCount, linesAndShape);
 		}
-		linesAndShape.setBaseLinesVisible(true);
-		linesAndShape.setBaseShapesVisible(false);
-		for (int i = 0; i < plotColors.length; i++) {
-			Color col = plotColors[i];
-			boolean visible = col != null;
-			// if(infos[i]!=null){
-			int index = i;// plotData.findColumn(infos[i])-1;
-			linesAndShape.setSeriesLinesVisible(index, connected);
-			linesAndShape.setSeriesShapesVisible(index, !connected);
-			linesAndShape.setSeriesVisible(index, visible);
-			linesAndShape.setSeriesVisibleInLegend(index, visible);
-			linesAndShape.setSeriesPaint(index, col);
-			// }
-		}
-
-		plot.setRenderer(datasetCount++, linesAndShape);
+		
+//		int i = 0;
+//		Iterator<LegendItem> items = plot.getLegendItems().iterator();
+//		LegendItem item;
+//		while (items.hasNext()) {
+//			item = items.next();
+//			if (infos[i] != null) {
+//				item.setDescription(infos[i]);
+//			}
+//			i++;
+//		}
+		
+		datasetCount++;
 
 		this.loadUserSettings();
 	}
-
-	// /**
-	// * @param saveDir
-	// * @param compression
-	// * @return The path to the directory where the user wants to save the plot
-	// * image. If no image is saved, i.e., the user canceled this action,
-	// * the same directory will be returned that has been given as an
-	// * argument.
-	// * @throws AWTException
-	// * @throws IOException
-	// */
-	// public String savePlotImage(String saveDir, float compression)
-	// throws AWTException, IOException {
-	//
-	// try {
-	// File file = GUITools.saveFileDialog(this, saveDir, false, false,
-	// JFileChooser.FILES_ONLY,
-	// SBFileFilter.createPNGFileFilter(),
-	// SBFileFilter.createJPEGFileFilter());
-	// ChartUtilities.saveChartAsJPEG(file, compression, this.getChart(),
-	// WIDTH, HEIGHT, getChartRenderingInfo());
-	// System.out.println(saveDir);
-	// } catch (Exception e) {
-	// e.printStackTrace();
-	// }
-	// // Rectangle area = getBounds();
-	// // area.setLocation(getLocationOnScreen());
-	// // BufferedImage bufferedImage = (new
-	// // Robot()).createScreenCapture(area);
-	// // File file = GUITools.saveFileDialog(this, saveDir, false, false,
-	// // JFileChooser.FILES_ONLY, SBFileFilter.createPNGFileFilter(),
-	// // SBFileFilter.createJPEGFileFilter());
-	// // if (file != null) {
-	// // saveDir = file.getParent();
-	// // if (SBFileFilter.isPNGFile(file)) {
-	// // ImageIO.write(bufferedImage, "png", file);
-	// // } else if (SBFileFilter.isJPEGFile(file)) {
-	// // FileImageOutputStream out = new FileImageOutputStream(file);
-	// // ImageWriter encoder = (ImageWriter) ImageIO
-	// // .getImageWritersByFormatName("JPEG").next();
-	// // JPEGImageWriteParam param = new JPEGImageWriteParam(null);
-	// // param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-	// // param.setCompressionQuality(compression);
-	// // encoder.setOutput(out);
-	// // encoder.write((IIOMetadata) null, new IIOImage(bufferedImage,
-	// // null, null), param);
-	// // out.close();
-	// // }
-	// // }
-	//
-	// return saveDir;
-	// }
 
 	/**
 	 * plot given data into existing panel. All previous data will be cleared.
@@ -244,11 +237,9 @@ public class Plot extends ChartPanel {
 	 * @param plotColors
 	 * @param infos
 	 */
-	public void plot(XYDataset data, boolean connected,
-			Color[] plotColors, String[] infos) {
+	public void plot(XYDataset data, boolean connected, Color[] plotColors, String[] infos) {
 		// retrieve a user-defined preference
-		SBPreferences prefs = SBPreferences
-				.getPreferencesFor(PlotOptions.class);
+		SBPreferences prefs = SBPreferences.getPreferencesFor(PlotOptions.class);
 		plot(data, connected, prefs.getBoolean(PlotOptions.SHOW_PLOT_LEGEND),
 				prefs.getBoolean(PlotOptions.SHOW_PLOT_GRID), plotColors, infos);
 
@@ -261,8 +252,9 @@ public class Plot extends ChartPanel {
 	 */
 	public void setGridVisible(boolean showGrid) {
 		// retrieve a user-defined preference
-		this.getChart().getXYPlot().setDomainGridlinesVisible(showGrid);
-		this.getChart().getXYPlot().setRangeGridlinesVisible(showGrid);
+		XYPlot plot = getChart().getXYPlot();
+		plot.setDomainGridlinesVisible(showGrid);
+		plot.setRangeGridlinesVisible(showGrid);
 	}
 
 	/**
@@ -271,34 +263,20 @@ public class Plot extends ChartPanel {
 	 * @param showLegend
 	 */
 	public void setShowLegend(boolean showLegend) {
-		// retrieve a user-defined preference
-		// SBPreferences prefs = SBPreferences
-		// .getPreferencesFor(PlotOptions.class);
-		// prefs.put(PlotOptions.SHOW_PLOT_LEGEND, showLegend);
-		if (this.getChart().getLegend() != null)
-			this.getChart().getLegend().setVisible(showLegend);
-	}
-
-	/**
-	 * Toggle, if tooltips are shown in the graph.
-	 * 
-	 * @param showGraphToolTips
-	 */
-	public void setShowGraphToolTips(boolean showGraphToolTips) {
-		// retrieve a user-defined preference
-		// SBPreferences prefs = SBPreferences
-		// .getPreferencesFor(PlotOptions.class);
-		// prefs.put(PlotOptions.SHOW_PLOT_TOOLTIPS, showGraphToolTips);
-		this.setDisplayToolTips(showGraphToolTips);
+		LegendTitle legend = getChart().getLegend();
+		if (legend != null) {
+			legend.setVisible(showLegend);
+		}
 	}
 
 	/**
 	 * Clear all data, currently plotted by this panel.
 	 */
 	public void clearAll() {
-		if (this.getChart() != null) {
+		JFreeChart chart = getChart();
+		if (chart != null) {
 			for (int i = 0; i < datasetCount; i++) {
-				this.getChart().getXYPlot().setDataset(i, null);
+				chart.getXYPlot().setDataset(i, null);
 			}
 			datasetCount = 0;
 		}
@@ -319,6 +297,7 @@ public class Plot extends ChartPanel {
 	 * @param selected
 	 */
 	public void toggleLog(boolean selected) {
+		logger.severe("Log scale not implemented");
 	}
 
 }

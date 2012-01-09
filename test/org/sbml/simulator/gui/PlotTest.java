@@ -24,8 +24,11 @@ import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import org.sbml.simulator.gui.plot.XYDatasetAdapter;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.sbml.simulator.gui.plot.BoxPlotDataset;
 import org.sbml.simulator.gui.plot.Plot;
+import org.sbml.simulator.gui.plot.XYDatasetAdapter;
 import org.sbml.simulator.io.CSVDataImporter;
 import org.simulator.math.odes.MultiTable;
 
@@ -60,12 +63,18 @@ public class PlotTest {
 	 */
 	public PlotTest(MultiTable... tables) {
 		Plot plot = new Plot();
-		XYDataSetCollection collection = new XYDataSetCollection();
-		for (MultiTable table : tables) {
-			collection.addSeries(new XYDatasetAdapter(table));
-		}
-		plot.plot(collection, true, ColorPalette.palette(tables[0].getColumnCount() - 1), null);
+//		XYDataSetCollection collection = new XYDataSetCollection();
+//		for (MultiTable table : tables) {
+//			collection.addSeries(new XYDatasetAdapter(table));
+//		}
+		
+		BoxPlotDataset dataset = new BoxPlotDataset(tables);
+		
+//		plot.plot(collection, true, ColorPalette.palette(tables[0].getColumnCount() - 1), null);
+		plot.plot(dataset, false, ColorPalette.palette(tables[0].getColumnCount() - 1), null);
 		show(plot);
+		
+//		show(new ChartPanel(ChartFactory.createBoxAndWhiskerChart("Test", "time", "value", dataset, true)));
 	}
 
 	/**
@@ -73,7 +82,7 @@ public class PlotTest {
 	 * 
 	 * @param plot
 	 */
-	private void show(Plot plot) {
+	private void show(ChartPanel plot) {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(plot, BorderLayout.CENTER);
 		panel.setBorder(BorderFactory.createLoweredBevelBorder());
