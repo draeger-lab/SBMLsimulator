@@ -22,6 +22,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -147,8 +149,8 @@ public class LegendPanel extends JPanel implements TableModelListener,
 	public LegendPanel(Model model, boolean includeReactions) {
 	  super(new BorderLayout());
     listOfTableModelListeners = new LinkedList<TableModelListener>();
-    add(new JScrollPane(createLegendTable(model, includeReactions)),
-      BorderLayout.CENTER);
+    final JTable table = createLegendTable(model, includeReactions);
+		add(new JScrollPane(table), BorderLayout.CENTER);
     JPopupMenu menuSelect = new JPopupMenu(), menuDeselect = new JPopupMenu();
     for (COMPONENT item : COMPONENT.values()) {
       menuSelect.add(GUITools.createJMenuItem(this, item));
@@ -161,11 +163,25 @@ public class LegendPanel extends JPanel implements TableModelListener,
     selectAll.setPreferredSize(GUITools.getMaxPreferredSize(selectAll, selectNone));
     selectNone.setPreferredSize(selectAll.getPreferredSize());    
     checkSelected();
+    
+    JButton searchButton = new JButton(UIManager.getIcon("ICON_SEARCH_16"));
+    searchButton.addActionListener(new ActionListener() {
+			
+    	/* (non-Javadoc)
+    	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+    	 */
+			public void actionPerformed(ActionEvent e) {
+				KeyEvent F3 = new KeyEvent(table, 0, 0, 0, 114, (char) 114);
+				for (KeyListener l : table.getKeyListeners()) {
+					l.keyPressed(F3);
+				}
+			}
+		});
+    
     JPanel foot = new JPanel();
     foot.add(selectAll);
     foot.add(selectNone);
-    // TODO: add some action to the search button!
-    foot.add(new JButton(UIManager.getIcon("ICON_SEARCH_16")));
+    foot.add(searchButton); 
     add(foot, BorderLayout.SOUTH);
   }
 
