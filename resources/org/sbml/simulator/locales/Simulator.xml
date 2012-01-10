@@ -78,6 +78,12 @@
   
   <entry key="RGB_TOOLTIP">Red = %d, Green = %d, Blue = %d</entry>
   
+  <!-- LegendTableCellRenderer -->
+  
+  <entry key="OUTSIDE_TOOLTIP">Surrounding compartment: %s</entry>
+  <entry key="SPECIES_COMPARTMENT">Containing compartment: %s</entry>
+  <entry key="REACTION_COMPARTMENT">Takes place in compartment: %s</entry>
+  
   <!-- LegendTableModel -->
   
   <entry key="PLOT_COLUMN">Plot</entry>

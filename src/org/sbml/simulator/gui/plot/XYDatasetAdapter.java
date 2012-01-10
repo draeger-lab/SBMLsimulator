@@ -27,7 +27,7 @@ import org.simulator.math.odes.MultiTable;
  * @version $Rev$
  * @since 1.0
  */
-public class XYDatasetAdapter extends AbstractXYDataset {
+public class XYDatasetAdapter extends AbstractXYDataset implements MetaDataset {
 
 	/**
    * Generated serial version identifier.
@@ -80,6 +80,13 @@ public class XYDatasetAdapter extends AbstractXYDataset {
 	 */
 	public Comparable<String> getSeriesKey(int series) {
 		return table.getColumnName(series + 1);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.gui.plot.MetaDataset#getId(int)
+	 */
+	public String getSeriesIdentifier(int series) {
+		return table.getColumnIdentifier(series + 1);
 	}
 
 }
