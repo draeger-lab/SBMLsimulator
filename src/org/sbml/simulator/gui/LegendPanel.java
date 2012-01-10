@@ -33,6 +33,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumnModel;
@@ -49,7 +50,7 @@ import org.sbml.simulator.gui.table.LegendTableModel;
 import de.zbit.gui.ActionCommand;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.JDropDownButton;
-import de.zbit.util.JTableTools;
+import de.zbit.gui.table.JTableTools;
 import de.zbit.util.ResourceManager;
 
 /**
@@ -163,6 +164,8 @@ public class LegendPanel extends JPanel implements TableModelListener,
     JPanel foot = new JPanel();
     foot.add(selectAll);
     foot.add(selectNone);
+    // TODO: add some action to the search button!
+    foot.add(new JButton(UIManager.getIcon("ICON_SEARCH_16")));
     add(foot, BorderLayout.SOUTH);
   }
 
