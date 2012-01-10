@@ -213,7 +213,7 @@ public class LegendTableModel extends AbstractTableModel {
 	 */
   private void fillData(NamedSBaseWithDerivedUnit nsb, int rowIndex,
     boolean boolcol) {
-    data[rowIndex][boolCol] = boolcol;
+    data[rowIndex][boolCol] = Boolean.valueOf(boolcol);
     if (boolcol) {
       selectedCount++;
     }
@@ -242,6 +242,9 @@ public class LegendTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public Class<?> getColumnClass(int c) {
+		if (c == nsbCol) {
+			return NamedSBaseWithDerivedUnit.class;
+		}
 		return getValueAt(0, c).getClass();
 	}
 	
@@ -329,16 +332,10 @@ public class LegendTableModel extends AbstractTableModel {
     return selectedCount;
   }
 	
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see javax.swing.table.TableModel#getValueAt(int, int)
 	 */
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		if (columnIndex == nsbCol) {
-			NamedSBase nsb = (NamedSBase) data[rowIndex][columnIndex];
-			return nsb.isSetName() ? nsb.getName() : nsb.getId();
-		}
 		return data[rowIndex][columnIndex];
 	}
 
@@ -383,7 +380,7 @@ public class LegendTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		return (columnIndex == unitCol) ? false : true;
+		return (columnIndex == colorCol) || (columnIndex == boolCol);
 	}
 
 	/**

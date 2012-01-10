@@ -42,6 +42,7 @@ import javax.swing.table.TableColumnModel;
 
 import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.Model;
+import org.sbml.jsbml.NamedSBaseWithDerivedUnit;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.Species;
@@ -52,6 +53,7 @@ import org.sbml.simulator.gui.table.LegendTableModel;
 import de.zbit.gui.ActionCommand;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.JDropDownButton;
+import de.zbit.gui.table.ColoredBooleanRenderer;
 import de.zbit.gui.table.JTableTools;
 import de.zbit.util.ResourceManager;
 
@@ -248,8 +250,11 @@ public class LegendPanel extends JPanel implements TableModelListener,
 		JTable tab = new JTable();
 		tab.setName("legend");
 		tab.setModel(legend);
-		tab.setDefaultEditor(Color.class, new ColorEditor(this));
+		tab.setDefaultEditor(Color.class, new ColorEditor());
 		tab.setDefaultRenderer(Color.class, new LegendTableCellRenderer());
+		tab.setDefaultRenderer(NamedSBaseWithDerivedUnit.class, new LegendTableCellRenderer());
+		tab.setDefaultRenderer(String.class, new LegendTableCellRenderer());
+		tab.setDefaultRenderer(Boolean.class, new ColoredBooleanRenderer());
 		tab.getModel().addTableModelListener(this);
 		JTableTools.setQuickSearch(tab);
     //		tab.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);

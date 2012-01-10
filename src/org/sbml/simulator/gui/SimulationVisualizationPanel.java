@@ -35,10 +35,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
-import org.jfree.data.xy.AbstractXYDataset;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.UnitDefinition;
 import org.sbml.simulator.gui.plot.BoxPlotDataset;
+import org.sbml.simulator.gui.plot.MetaDataset;
 import org.sbml.simulator.gui.plot.Plot;
 import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.simulator.gui.plot.XYDatasetAdapter;
@@ -214,7 +214,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 */
 	private void plot(List<MultiTable> data, boolean connected, boolean clearFirst) {
 		if (data.size() > 0) {
-			AbstractXYDataset d;
+			MetaDataset d;
 			if (data.size() == 1) {
 				d = new XYDatasetAdapter(data.get(0));
 			} else {
@@ -227,7 +227,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 			String infos[] = new String[seriesCount];
 			LegendTableModel tableModel = legendPanel.getLegendTableModel();
 			for (int i = 0; i < seriesCount; i++) {
-				id = d.getSeriesKey(i).toString();
+				id = d.getSeriesIdentifier(i);
 				if (tableModel.isSelected(id)) {
 					// TODO
 					plotColors[i] = tableModel.getColorFor(id);

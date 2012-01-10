@@ -17,6 +17,8 @@
  */
 package org.sbml.simulator.gui.plot;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.SortedMap;
@@ -33,21 +35,8 @@ import org.simulator.math.odes.MultiTable;
  * @version $Rev$
  * @since 1.0
  */
-public class BoxPlotDataset extends AbstractXYDataset implements BoxAndWhiskerXYDataset {
-	
-	/**
-	 * Generated serialization identifier.
-	 */
-	private static final long serialVersionUID = 8754435876684018316L;
-	
-	/**
-	 * The first key is the id of a data series. The second {@link SortedMap}
-	 * stores data {@link Item}s for each time point. So, the second key is the
-	 * time. In this way, this data structure represents a kind of a matrix with
-	 * additional information, but the matrix doesn't have to be a square
-	 * structure, i.e., it is possible to have missing data points for some series.
-	 */
-	private SortedMap<String, SortedMap<Double, Item>> data;
+public class BoxPlotDataset extends AbstractXYDataset implements
+		BoxAndWhiskerXYDataset, MetaDataset {
 	
 	/**
 	 * 
@@ -56,8 +45,8 @@ public class BoxPlotDataset extends AbstractXYDataset implements BoxAndWhiskerXY
 	 * @since 1.0
 	 */
 	private class Item {
-		List<Double> values;
 		BoxAndWhiskerItem item;
+		List<Double> values;
 		
 		/**
 		 * 
@@ -80,6 +69,14 @@ public class BoxPlotDataset extends AbstractXYDataset implements BoxAndWhiskerXY
 			return false;
 		}
 		
+		/**
+		 * 
+		 * @return
+		 */
+		public BoxAndWhiskerItem getItem() {
+			return item;
+		}
+		
 		/* (non-Javadoc)
 		 * @see java.lang.Object#toString()
 		 */
@@ -91,32 +88,137 @@ public class BoxPlotDataset extends AbstractXYDataset implements BoxAndWhiskerXY
 			return values.toString();
 		}
 		
-		/**
-		 * 
-		 * @return
-		 */
-		public BoxAndWhiskerItem getItem() {
-			return item;
-		}
-		
-	}
-	
-	public BoxPlotDataset() {
-		super();
-		data = new TreeMap<String, SortedMap<Double,Item>>();
 	}
 	
 	/**
 	 * 
-	 * @param tables
+	 * @author Andreas Dr&auml;ger
+	 * @version $Rev$
+	 * @since 1.0
 	 */
-	public BoxPlotDataset(MultiTable... tables) {
-		this();
-		if ((tables != null) && (tables.length > 0)) {
-			for (MultiTable table : tables) {
-				add(table);
-			}
+	private class Series extends TreeMap<Double, Item> implements Comparable<Series> {
+
+		/**
+		 * Generated serial version identifier.
+		 */
+		private static final long serialVersionUID = -6990448446534140941L;
+
+		/**
+		 * 
+		 */
+		private String id, name;
+		
+		/**
+		 * 
+		 */
+		public Series() {
+			super();
 		}
+
+		public int compareTo(Series s) {
+			return getName().compareTo(s.getName());
+		}
+
+		/**
+		 * 
+		 * @param series
+		 * @param item
+		 * @return
+		 */
+		public Double find(int item) {
+			int i = 0;
+			for (Double key : keySet()) {
+				if (i == item) {
+					return key;
+				}
+				i++;
+			}
+			return null;
+		}
+
+		/**
+		 * 
+		 * @param item
+		 * @return
+		 */
+		public Item get(int item) {
+			Double time = getTimeAt(item);
+			if (time != null) { 
+				return get(getTimeAt(item)); 
+			}
+			return null;
+		}
+
+		/**
+		 * @return the id
+		 */
+		public String getId() {
+			return id;
+		}
+
+		/**
+		 * @return the name, or if it is not defined, the id.
+		 * @see #getId()
+		 */
+		public String getName() {
+			if (name == null) {
+				return getId();
+			}
+			return name;
+		}
+		
+		/**
+		 * 
+		 * @param item
+		 * @return
+		 */
+		public Double getTimeAt(int item) {
+			Double time = find(item);
+			if (time != null) {
+				return time;
+			}
+			return null;
+		}
+		
+		/**
+		 * @param id the id to set
+		 */
+		public void setId(String id) {
+			this.id = id;
+		}
+		
+		/**
+		 * @param name the name to set
+		 */
+		public void setName(String name) {
+			this.name = name;
+		}
+		
+	}
+	
+	/**
+	 * Generated serialization identifier.
+	 */
+	private static final long serialVersionUID = 8754435876684018316L;
+	
+	/**
+	 * This stores all series including their {@link Item}s in a {@link SortedMap}
+	 * data structure for each time point. So, the second key is the time. In this
+	 * way, this data structure represents a kind of a matrix with additional
+	 * information, but the matrix doesn't have to be a square structure, i.e., it
+	 * is possible to have missing data points for some series.
+	 */
+	private List<Series> series;
+
+	/**
+	 * 
+	 */
+	private SortedMap<String, Series> seriesMap;
+	
+	public BoxPlotDataset() {
+		super();
+		series = new ArrayList<Series>();
+		seriesMap = new TreeMap<String, Series>();
 	}
 	
 	/**
@@ -134,22 +236,38 @@ public class BoxPlotDataset extends AbstractXYDataset implements BoxAndWhiskerXY
 	
 	/**
 	 * 
+	 * @param tables
+	 */
+	public BoxPlotDataset(MultiTable... tables) {
+		this();
+		if ((tables != null) && (tables.length > 0)) {
+			for (MultiTable table : tables) {
+				add(table);
+			}
+		}
+	}
+	
+	/**
+	 * 
 	 * @param table
 	 */
 	public void add(MultiTable table) {
 		double tp[] = table.getTimePoints(), value;
 		String id;
 		Item item;
-		SortedMap<Double, Item> series;
+		Series series;
 		Double time;
 		for (int i = 1; i < table.getColumnCount(); i++) {
 			id = table.getColumnIdentifier(i);
-			if (!data.containsKey(id)) {
-				series = new TreeMap<Double, Item>();
-				data.put(id, series);
+			if (!seriesMap.containsKey(id)) {
+				series = new Series();
+				seriesMap.put(id, series);
+				this.series.add(series);
 			} else {
-				series = data.get(id);
+				series = seriesMap.get(id);
 			}
+			series.setId(id);
+			series.setName(table.getColumnName(i));
 			for (int j = 0; j < tp.length; j++) {
 				value = table.getValueAt(j, i);
 				if (!Double.isNaN(value)) {
@@ -164,81 +282,7 @@ public class BoxPlotDataset extends AbstractXYDataset implements BoxAndWhiskerXY
 				}
 			}
 		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.jfree.data.xy.XYDataset#getItemCount(int)
-	 */
-	public int getItemCount(int series) {
-		return data.get(getSeriesKey(series)).size();
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.jfree.data.xy.XYDataset#getX(int, int)
-	 */
-	public Number getX(int series, int item) {
-		return find(data.get(getSeriesKey(series)), item);
-	}
-	
-	/**
-	 * 
-	 * @param series
-	 * @param item
-	 * @return
-	 */
-	private Double find(SortedMap<Double, Item> series, int item) {
-		int i = 0;
-		for (Double key : series.keySet()) {
-			if (i == item) {
-				return key;
-			}
-			i++;
-		}
-		return null;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.jfree.data.xy.XYDataset#getY(int, int)
-	 */
-	public Number getY(int series, int item) {
-		SortedMap<Double, Item> s = data.get(getSeriesKey(series));
-		if (s != null) {
-			Double time = find(s, item);
-			if (time != null) {
-				Item i = s.get(time);
-				return i.getItem() != null ? i.getItem().getMean() : null;
-			}
-		}
-		return null;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.jfree.data.general.SeriesDataset#getSeriesCount()
-	 */
-	public int getSeriesCount() {
-		return data.size();
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.jfree.data.general.SeriesDataset#getSeriesKey(int)
-	 */
-	public String getSeriesKey(int series) {
-		int i = 0;
-		for (String key : data.keySet()) {
-			if (i == series) {
-				return key;
-			}
-			i++;
-		}
-		return null;
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return data.toString();
+		Collections.sort(this.series);
 	}
 	
 	/* (non-Javadoc)
@@ -248,15 +292,11 @@ public class BoxPlotDataset extends AbstractXYDataset implements BoxAndWhiskerXY
 		return 2d;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.jfree.data.statistics.BoxAndWhiskerXYDataset#getMaxOutlier(int, int)
+	/**
+	 * 
 	 */
-	public Number getMaxOutlier(int series, int item) {
-		Item i = getItem(series, item);
-		if ((i != null) && (i.getItem() != null)) {
-			return i.getItem().getMaxOutlier();
-		}
-		return null;
+	public String getSeriesIdentifier(int series) {
+		return this.series.get(series).getId();
 	}
 	
 	/**
@@ -266,13 +306,23 @@ public class BoxPlotDataset extends AbstractXYDataset implements BoxAndWhiskerXY
 	 * @return
 	 */
 	public Item getItem(int series, int item) {
-		String key = getSeriesKey(series);
-		if (key != null) {
-			SortedMap<Double, Item> s = data.get(key);
-			if (s != null) {
-				Double time = find(s, item);
-				if (time != null) { return s.get(time); }
-			}
+		return this.series.get(series).get(item);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.jfree.data.xy.XYDataset#getItemCount(int)
+	 */
+	public int getItemCount(int series) {
+		return this.series.get(series).size();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.jfree.data.statistics.BoxAndWhiskerXYDataset#getMaxOutlier(int, int)
+	 */
+	public Number getMaxOutlier(int series, int item) {
+		Item i = getItem(series, item);
+		if ((i != null) && (i.getItem() != null)) {
+			return i.getItem().getMaxOutlier();
 		}
 		return null;
 	}
@@ -371,6 +421,46 @@ public class BoxPlotDataset extends AbstractXYDataset implements BoxAndWhiskerXY
 			return i.getItem().getQ3();
 		}
 		return null;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.jfree.data.general.SeriesDataset#getSeriesCount()
+	 */
+	public int getSeriesCount() {
+		return series.size();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.jfree.data.general.SeriesDataset#getSeriesKey(int)
+	 */
+	public String getSeriesKey(int series) {
+		return this.series.get(series).getName();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.jfree.data.xy.XYDataset#getX(int, int)
+	 */
+	public Number getX(int series, int item) {
+		return this.series.get(series).getTimeAt(item);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.jfree.data.xy.XYDataset#getY(int, int)
+	 */
+	public Number getY(int series, int item) {
+		Item i = this.series.get(series).get(item);
+		if (i != null) {
+				return i.getItem() != null ? i.getItem().getMean() : null;
+		}
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return series.toString();
 	}
 	
 }

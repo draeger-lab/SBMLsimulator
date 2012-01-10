@@ -29,8 +29,6 @@ import javax.swing.JDialog;
 import javax.swing.JTable;
 import javax.swing.table.TableCellEditor;
 
-import org.sbml.simulator.gui.LegendPanel;
-
 /**
  * @author Andreas Dr&auml;ger
  * @author Philip Stevens
@@ -70,16 +68,11 @@ public class ColorEditor extends AbstractCellEditor implements TableCellEditor,
 	 * 
 	 */
 	private JDialog dialog;
-	
-	/**
-	 * 
-	 */
-	private LegendPanel parent;
 
 	/**
 	 * 
 	 */
-	public ColorEditor(LegendPanel parent) {
+	public ColorEditor() {
 		button = new JButton();
 		button.setActionCommand(EDIT);
 		button.addActionListener(this);
@@ -89,16 +82,10 @@ public class ColorEditor extends AbstractCellEditor implements TableCellEditor,
 		colorChooser = new JColorChooser();
 		dialog = JColorChooser.createDialog(button, "Pick a Color", true,
 				colorChooser, this, null);
-
-		// Set parent, for being able to send colorchanged events
-		this.parent = parent;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	/* (non-Javadoc)
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (EDIT.equals(e.getActionCommand())) {
@@ -115,21 +102,15 @@ public class ColorEditor extends AbstractCellEditor implements TableCellEditor,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see javax.swing.CellEditor#getCellEditorValue()
 	 */
 	public Object getCellEditorValue() {
 		return currentColor;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * javax.swing.table.TableCellEditor#getTableCellEditorComponent(javax.swing
-	 * .JTable, java.lang.Object, boolean, int, int)
+	/* (non-Javadoc)
+	 * @see javax.swing.table.TableCellEditor#getTableCellEditorComponent(javax.swing.JTable, java.lang.Object, boolean, int, int)
 	 */
 	public Component getTableCellEditorComponent(JTable table, Object value,
 			boolean isSelected, int row, int column) {
