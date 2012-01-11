@@ -50,7 +50,6 @@ import javax.swing.UIManager;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
-import org.sbml.jsbml.SBMLWriter;
 import org.sbml.jsbml.util.StringTools;
 import org.sbml.optimization.EvA2GUIStarter;
 import org.sbml.optimization.problem.EstimationOptions;
@@ -550,33 +549,13 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrame#saveFile()
 	 */
-	public void saveFile() {
-		if (simPanel != null) {
-			// TODO Auto-generated method stub
-			// simPanel.savePlotImage();
-			simPanel.saveSimulationResults();
-			saveModel(simPanel.getModel());
+	public File saveFile() {
+		if (simPanel != null) { 
+			return simPanel.saveToFile(); 
 		}
-	}
-
-	/**
-	 * @param model
-	 */
-	public void saveModel(Model model) {
-		SBPreferences prefs = SBPreferences.getPreferencesFor(getClass());
-		File f = GUITools.saveFileDialog(this, prefs.get(GUIOptions.SAVE_DIR)
-				.toString(), false, false, JFileChooser.FILES_ONLY,
-				SBFileFilter.createSBMLFileFilter());
-		if (f != null) {
-			try {
-			  SBMLWriter.write(model.getSBMLDocument(), f,
-						getApplicationName(),
-						getDottedVersionNumber());
-				prefs.put(GUIOptions.SAVE_DIR, f.getParent());
-			} catch (Exception exc) {
-				GUITools.showErrorMessage(this, exc);
-			}
-		}
+		GUITools.showMessage(bundle.getString("NOTHING_TO_SAVE"),
+			bundle.getString("INFORMATION"));
+		return null;
 	}
 
 	/**

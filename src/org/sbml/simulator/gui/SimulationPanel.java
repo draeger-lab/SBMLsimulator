@@ -26,8 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
 
 import javax.swing.JFileChooser;
+import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -38,18 +40,25 @@ import javax.swing.SwingConstants;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Quantity;
+import org.sbml.jsbml.SBMLWriter;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.QualityMeasurement;
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.SimulationConfiguration;
 import org.sbml.simulator.SimulationManager;
 import org.sbml.simulator.SimulationOptions;
+import org.sbml.simulator.gui.plot.Plot;
+import org.sbml.simulator.gui.table.MultipleTableView;
 import org.sbml.simulator.math.QualityMeasure;
 import org.simulator.math.odes.DESSolver;
 import org.simulator.math.odes.MultiTable;
 
+import de.zbit.gui.BaseFrameTab;
+import de.zbit.gui.GUIOptions;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.table.DecimalCellRenderer;
 import de.zbit.io.CSVOptions;
@@ -70,36 +79,46 @@ import eva2.server.stat.InterfaceStatisticsListener;
  * @since 1.0
  */
 public class SimulationPanel extends JPanel implements
-    InterfaceStatisticsListener, PropertyChangeListener {
+    BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener {
   
+  /**
+   * Support for localization.
+   */
+  private static final transient ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
+  
+  /**
+   * A {@link Logger} for this class.
+   */
+  private static final transient Logger logger = Logger.getLogger(SimulationPanel.class.getName());
   /**
    * Generated serial version identifier
    */
   private static final long serialVersionUID = -7278034514446047207L;
   
   /**
-   * Support for localization.
+   * 
    */
-  private static final transient ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
-  /**
-   * A {@link Logger} for this class.
-   */
-  private static final transient Logger logger = Logger.getLogger(SimulationPanel.class.getName());
+  private static final int TAB_EXPERIMENT_INDEX = 2;
   
   /**
-   * Table for the simulation data.
+   * 
    */
-  private JTable simTable;
+  private static final int TAB_IN_SILICO_DATA_INDEX = 1;
+  
+  /**
+   * 
+   */
+  private static final int TAB_MODEL_VIEW_INDEX = 3;
+  
+  /**
+   * 
+   */
+  private static final int TAB_SIMULATION_INDEX = 0;
   
   /**
    * Multiple tables
    */
   private MultipleTableView<MultiTable> dataTableView;
-  
-  /**
-   * 
-   */
-  private JToolBar simulationToolPanel;
   
   /**
 	 * 
@@ -118,6 +137,11 @@ public class SimulationPanel extends JPanel implements
   private boolean showSimulationToolPanel;
   
   /**
+   * Table for the simulation data.
+   */
+  private JTable simTable;
+
+	/**
    * Indices to more efficiently memorize the location of interesting elements
    * in the call-back function.
    */
@@ -129,13 +153,11 @@ public class SimulationPanel extends JPanel implements
   private SimulationManager simulationManager;
   
   /**
-	 * @return the simulationManager
-	 */
-	public SimulationManager getSimulationManager() {
-		return simulationManager;
-	}
-
-	/**
+   * 
+   */
+  private JToolBar simulationToolPanel;
+  
+  /**
    * The main tabbed pane showing plot, simulation and experimental data.
    */
   private JTabbedPane tabbedPane;
@@ -182,7 +204,19 @@ public class SimulationPanel extends JPanel implements
       }
     }
   }
-  
+  /**
+   * @param data
+   * @throws Exception
+   */
+  public void addExperimentalData(String title, MultiTable data) throws Exception {
+  	dataTableView.addTable(title, data);
+    tabbedPane.setEnabledAt(TAB_EXPERIMENT_INDEX, true);
+    // TODO: Don't fire property change event twice!
+    this.firePropertyChange("measurements", null, data);
+    //TODO preliminary version: property does not change for quality measurement with the call firePropertyChange()
+    simulationManager.getQualityMeasurement().propertyChange(new PropertyChangeEvent(this, "measurements", null, data));
+    visualizationPanel.addExperimentData(data);
+  }
   /* (non-Javadoc)
    * @see org.sbml.simulator.math.odes.DESSolver#addPropertyChangedListener(java.beans.PropertyChangeListener)
    */
@@ -191,7 +225,6 @@ public class SimulationPanel extends JPanel implements
       this.listeners.add(listener);
     }
   }
-  
   /**
 	 * 
 	 */
@@ -208,11 +241,11 @@ public class SimulationPanel extends JPanel implements
   public void closeExpermentalData(int index) {
   	dataTableView.removeTable(index);
 		visualizationPanel.removeExperimentData(index);
-    if (tabbedPane.getSelectedIndex() == 2) {
-      tabbedPane.setSelectedIndex(0);
+    if (tabbedPane.getSelectedIndex() == TAB_EXPERIMENT_INDEX) {
+      tabbedPane.setSelectedIndex(TAB_SIMULATION_INDEX);
     }
-		if (dataTableView.getTableCount() == 0) {
-			tabbedPane.setEnabledAt(2, false);
+		if (dataTableView.getTableCount() == TAB_SIMULATION_INDEX) {
+			tabbedPane.setEnabledAt(TAB_EXPERIMENT_INDEX, false);
 		}
   }
   
@@ -255,13 +288,6 @@ public class SimulationPanel extends JPanel implements
   }
   
   /**
-   * @return
-   */
-  public MultiTable getExperimentalData(int index) {
-    return dataTableView.getTable(index);
-  }
-  
-  /**
    * 
    * @return
    */
@@ -272,9 +298,31 @@ public class SimulationPanel extends JPanel implements
   /**
    * @return
    */
+  public MultiTable getExperimentalData(int index) {
+    return dataTableView.getTable(index);
+  }
+  
+  /**
+   * 
+   * @return
+   */
+	public int getExperimentalDataCount() {
+		return dataTableView.getTableCount();
+	}
+  
+  /**
+   * @return
+   */
   public Model getModel() {
     return this.simulationManager.getSimlationConfiguration().getModel();
   }
+  
+  /**
+	 * @return the simulationManager
+	 */
+	public SimulationManager getSimulationManager() {
+		return simulationManager;
+	}
   
   /**
    * @return
@@ -340,10 +388,10 @@ public class SimulationPanel extends JPanel implements
 				tabbedPane.add(bundle.getString("TAB_MODEL_VIEW"),
 					new SBMLModelSplitPane(simulationManager.getSimlationConfiguration()
 							.getModel().getSBMLDocument(), true));
-        tabbedPane.setEnabledAt(0, true);
-        tabbedPane.setEnabledAt(1, false);
-        tabbedPane.setEnabledAt(2, false);
-        tabbedPane.setEnabledAt(3, true);
+        tabbedPane.setEnabledAt(TAB_SIMULATION_INDEX, true);
+        tabbedPane.setEnabledAt(TAB_IN_SILICO_DATA_INDEX, false);
+        tabbedPane.setEnabledAt(TAB_EXPERIMENT_INDEX, false);
+        tabbedPane.setEnabledAt(TAB_MODEL_VIEW_INDEX, true);
       }
       add(tabbedPane, BorderLayout.CENTER);
     } catch (Exception exc) {
@@ -489,30 +537,106 @@ public class SimulationPanel extends JPanel implements
   }
   
   /**
-   * 
-   */
-  public void saveSimulationResults() {
-    try {
-      MultiTable simTabModel = getSimulationResultsTable();
-      SBPreferences prefs = SBPreferences.getPreferencesFor(CSVOptions.class);
-      if (simTabModel.getRowCount() > 0) {
-        File out = GUITools.saveFileDialog(this, prefs.get(
-          CSVOptions.CSV_FILES_SAVE_DIR).toString(), false, false,
-          JFileChooser.FILES_ONLY, SBFileFilter.createCSVFileFilter());
-        if (out != null) {
-          (new CSVWriter()).write(simTabModel, prefs.get(
-            CSVOptions.CSV_FILES_SEPARATOR_CHAR).toString().charAt(0), out);
-          prefs.put(CSVOptions.CSV_FILES_SAVE_DIR, out.getParent());
-        }
-      } else {
-        JOptionPane.showMessageDialog(this,
-					StringUtil.toHTML(bundle.getString("NO_SIMULATION_PERFORMED"), 40));
+	 * 
+	 * @param saveDir
+	 * @return
+	 */
+	private File saveModel(String saveDir) {
+		File f = GUITools.saveFileDialog(this, saveDir, false, false,
+			JFileChooser.FILES_ONLY, SBFileFilter.createSBMLFileFilter());
+		if (f != null) {
+			try {
+				SBMLWriter.write(getModel().getSBMLDocument(), f,
+							System.getProperty("app.name"),
+							System.getProperty("app.version"));
+				return f;
+			} catch (Exception exc) {
+				GUITools.showErrorMessage(this, exc);
+			}
+		}
+		return null;
+	}
+  
+  /**
+	 * 
+	 * @param saveDir
+	 * @return
+	 */
+	private File savePlotImage(String saveDir) {
+		try {
+			Plot plot = visualizationPanel.getPlot();
+			JFreeChart chart = plot.getChart();
+			SBFileFilter pngFileFilter = SBFileFilter.createPNGFileFilter();
+			SBFileFilter jpegFileFilter = SBFileFilter.createJPEGFileFilter();
+			File file = GUITools.saveFileDialog(this, saveDir, false, false, true,
+				JFileChooser.FILES_ONLY, pngFileFilter, jpegFileFilter);
+			if (file != null) {
+				if (jpegFileFilter.accept(file)) {
+					ChartUtilities.saveChartAsJPEG(file, chart, plot.getWidth(),
+						plot.getHeight());
+				} else { //if (pngFileFilter.accept(file)) {
+					ChartUtilities.saveChartAsPNG(file, chart, plot.getWidth(),
+						plot.getHeight());
+				}
 			}
 		} catch (IOException exc) {
 			GUITools.showErrorMessage(this, exc);
 		}
+		return null;
 	}
   
+  /**
+   * 
+   */
+  private File saveTable(MultiTable tableModel, String noDataAvailableMessage) {
+    try {
+      SBPreferences prefs = SBPreferences.getPreferencesFor(SimulatorUI.class);
+      if (tableModel.getRowCount() > 0) {
+        File out = GUITools.saveFileDialog(this, prefs.get(
+          CSVOptions.CSV_FILES_SAVE_DIR).toString(), false, false,
+          JFileChooser.FILES_ONLY, SBFileFilter.createCSVFileFilter());
+        if (out != null) {
+          (new CSVWriter()).write(tableModel, prefs.get(
+            CSVOptions.CSV_FILES_SEPARATOR_CHAR).toString().charAt(0), out);
+          prefs.put(CSVOptions.CSV_FILES_SAVE_DIR, out.getParent());
+          try {
+						prefs.flush();
+					} catch (BackingStoreException exc) {
+						// Ignore this exception because the user doesn't have a chance to do anything here.
+						logger.fine(exc.getLocalizedMessage());
+					}
+        }
+      } else {
+        JOptionPane.showMessageDialog(this,
+					StringUtil.toHTML(noDataAvailableMessage, 40));
+			}
+		} catch (IOException exc) {
+			GUITools.showErrorMessage(this, exc);
+		}
+    // This is on purpose! Otherwise, the CSV save directory would be used for other files also!
+    return null;
+	}
+  
+  /* (non-Javadoc)
+	 * @see de.zbit.gui.BaseFrameTab#saveToFile()
+	 */
+	public File saveToFile() {
+		SBPreferences prefs = SBPreferences.getPreferencesFor(SimulatorUI.class);
+		String saveDir = prefs.get(GUIOptions.SAVE_DIR);
+		switch (tabbedPane.getSelectedIndex()) {
+			case TAB_SIMULATION_INDEX:
+				return savePlotImage(saveDir);
+			case TAB_MODEL_VIEW_INDEX:
+				return saveModel(saveDir);
+			case TAB_EXPERIMENT_INDEX:
+				return saveTable(dataTableView.getSelectedTable(), bundle.getString("NO_EXPERIMENTAL_DATA_LOADED"));
+			case TAB_IN_SILICO_DATA_INDEX:
+				return saveTable(getSimulationResultsTable(), bundle.getString("NO_SIMULATION_PERFORMED"));
+			default:
+				return null;
+		}
+	}
+
   /**
    * @param enabled
    */
@@ -520,29 +644,15 @@ public class SimulationPanel extends JPanel implements
     this.visualizationPanel.setInteractiveScanEnabled(enabled);
     ((SimulationToolPanel) simulationToolPanel.getComponent(0)).setAllEnabled(enabled);
   }
-  
-  /**
-   * @param data
-   * @throws Exception
-   */
-  public void addExperimentalData(String title, MultiTable data) throws Exception {
-  	dataTableView.addTable(title, data);
-    tabbedPane.setEnabledAt(2, true);
-    // TODO: Don't fire property change event twice!
-    this.firePropertyChange("measurements", null, data);
-    //TODO preliminary version: property does not change for quality measurement with the call firePropertyChange()
-    simulationManager.getQualityMeasurement().propertyChange(new PropertyChangeEvent(this, "measurements", null, data));
-    visualizationPanel.addExperimentData(data);
-  }
-  
+
   /**
    * @param ids
    */
   public void setSelectedQuantities(String... ids) {
     visualizationPanel.setSelectedQuantities(ids);
   }
-  
-  /**
+
+	/**
    * @param visible
    *        the showSettingsPanel to set
    */
@@ -558,8 +668,8 @@ public class SimulationPanel extends JPanel implements
       validate();
     }
   }
-  
-  /**
+
+	/**
    * @param data
    */
   private void setSimulationData(MultiTable data) {
@@ -574,10 +684,10 @@ public class SimulationPanel extends JPanel implements
       col.setPreferredWidth(100);
       col.setMinWidth(100);
     }
-    tabbedPane.setEnabledAt(1, true);
+    tabbedPane.setEnabledAt(TAB_IN_SILICO_DATA_INDEX, true);
   }
 
-  /**
+	/**
    * Conducts the simulation.
    * 
    * @throws Exception
@@ -586,12 +696,11 @@ public class SimulationPanel extends JPanel implements
     simulationManager.simulate();
   }
 
-  /**
-   * 
-   * @return
-   */
-	public int getExperimentalDataCount() {
-		return dataTableView.getTableCount();
+	/* (non-Javadoc)
+	 * @see de.zbit.gui.BaseFrameTab#updateButtons(javax.swing.JMenuBar, javax.swing.JToolBar)
+	 */
+	public void updateButtons(JMenuBar menuBar, JToolBar toolbar) {
+		// TODO Auto-generated method stub
 	}
   
 }
