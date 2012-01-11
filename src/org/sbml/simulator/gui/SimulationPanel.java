@@ -46,12 +46,12 @@ import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.SimulationConfiguration;
 import org.sbml.simulator.SimulationManager;
 import org.sbml.simulator.SimulationOptions;
-import org.sbml.simulator.gui.table.DecimalCellRenderer;
 import org.sbml.simulator.math.QualityMeasure;
 import org.simulator.math.odes.DESSolver;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.gui.GUITools;
+import de.zbit.gui.table.DecimalCellRenderer;
 import de.zbit.io.CSVOptions;
 import de.zbit.io.CSVWriter;
 import de.zbit.io.SBFileFilter;
