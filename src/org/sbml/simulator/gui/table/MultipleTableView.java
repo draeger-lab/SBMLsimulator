@@ -15,7 +15,7 @@
  * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
-package org.sbml.simulator.gui;
+package org.sbml.simulator.gui.table;
 
 import java.awt.BorderLayout;
 import java.util.ArrayList;
@@ -131,6 +131,23 @@ public class MultipleTableView<T extends TableModel> extends JPanel implements I
 			throw new IndexOutOfBoundsException(String.format("No tab with index %d", index)); 
 		}
 		return (JTable) ((JScrollPane) tables.getComponentAt(index)).getViewport().getComponent(0);
+	}
+	
+	/**
+	 * Returns the table that has been selected by the user.
+	 * 
+	 * @return <code>null</code> if no table is selected or this view doesn't
+	 *         contain any tables, the currently selected table otherwise.
+	 */
+	public T getSelectedTable() {
+		if (getTableCount() == 0) {
+			return null;
+		}
+		int index = tables.getSelectedIndex();
+		if (index < 0) {
+			return null;
+		}
+		return getTable(index);
 	}
 	
 	/**
