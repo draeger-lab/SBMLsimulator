@@ -34,7 +34,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
-import org.sbml.simulator.gui.table.DecimalCellRenderer;
+import de.zbit.gui.table.DecimalCellRenderer;
 
 /**
  * This specialized {@link JPanel} contains a single {@link JTabbedPane}, whose

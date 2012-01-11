@@ -46,13 +46,13 @@ import org.sbml.jsbml.NamedSBaseWithDerivedUnit;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.Species;
-import org.sbml.simulator.gui.table.ColorEditor;
 import org.sbml.simulator.gui.table.LegendTableCellRenderer;
 import org.sbml.simulator.gui.table.LegendTableModel;
 
 import de.zbit.gui.ActionCommand;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.JDropDownButton;
+import de.zbit.gui.table.ColorEditor;
 import de.zbit.gui.table.ColoredBooleanRenderer;
 import de.zbit.gui.table.JTableTools;
 import de.zbit.util.ResourceManager;
