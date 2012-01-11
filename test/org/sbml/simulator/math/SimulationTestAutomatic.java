@@ -19,12 +19,16 @@ package org.sbml.simulator.math;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.xml.stax.SBMLReader;
@@ -59,8 +63,8 @@ public class SimulationTestAutomatic {
 	 */
 	public static void main(String[] args) throws IOException {
 		String sbmlfile, csvfile, configfile;
-		for (int modelnr = 1; modelnr <= 400; modelnr++) {
-			System.out.println("model " + modelnr);
+		for (int modelnr = 937; modelnr <= 943; modelnr++) {
+		  System.out.println("model " + modelnr);
 
 			StringBuilder modelFile = new StringBuilder();
 			modelFile.append(modelnr);
@@ -119,7 +123,6 @@ public class SimulationTestAutomatic {
 				*/
 				writer.write(String.valueOf(dist));
 				writer.close();
-				
 				if(dist>0.1) {
 					logger.log(Level.INFO, "relative distance for model-" + modelnr);
 					logger.log(Level.INFO,String.valueOf(dist));
@@ -136,4 +139,93 @@ public class SimulationTestAutomatic {
 			}
 		}
 	}
+	
+	/**
+	 * TEST_CASES must be set to the address of the folder "semantic" in the SBML test suite.
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	@Test
+	public void testModels() throws FileNotFoundException, IOException {
+		String file=System.getenv("TEST_CASES");
+		String sbmlfile, csvfile, configfile;
+		for (int modelnr = 1; modelnr <= 800; modelnr++) {
+		  System.out.println("model " + modelnr);
+
+			StringBuilder modelFile = new StringBuilder();
+			modelFile.append(modelnr);
+			while (modelFile.length() < 5)
+				modelFile.insert(0, '0');
+			String path = modelFile.toString();
+			modelFile.append('/');
+			modelFile.append(path);
+			modelFile.insert(0, file);
+			path = modelFile.toString();
+			sbmlfile = path + "-sbml-l3v1.xml";
+			csvfile = path + "-results.csv";
+			configfile = path + "-settings.txt";
+
+			Properties props = new Properties();
+			props.load(new BufferedReader(new FileReader(configfile)));
+//			int start = Integer.valueOf(props.getProperty("start"));
+			double duration = Double.valueOf(props.getProperty("duration"));
+			double steps = Double.valueOf(props.getProperty("steps"));
+//			double absolute = Double.valueOf(props.getProperty("absolute"));
+//			double relative = Double.valueOf(props.getProperty("relative"));
+			/*
+			 * Other variables:
+			 * variables: S1, S2
+			 * amount:
+			 * concentration:
+			 */
+			try {
+				Model model = (new SBMLReader()).readSBML(sbmlfile).getModel();
+					//sbmlIo.convert2Model(sbmlfile);
+
+				AbstractDESSolver solver = new RosenbrockSolver();
+				SBMLinterpreter interpreter = new SBMLinterpreter(model);
+				// get timepoints
+				CSVDataImporter csvimporter = new CSVDataImporter();
+				MultiTable inputData = csvimporter.convert(model, csvfile);
+				
+				double[] timepoints = inputData.getTimePoints();
+
+				
+				duration=timepoints[timepoints.length-1]-timepoints[0];
+				solver.setStepSize(duration/steps);
+				MultiTable solution=solver.solve(interpreter, interpreter.getInitialValues(), timepoints);
+				
+				
+				QualityMeasure distance = new EuclideanDistance();
+
+				double dist=distance.distance(solution, inputData);
+				
+				BufferedWriter writer = new BufferedWriter(new FileWriter(
+						file + modelnr + "-deviation.txt"));
+				writer.write("relative distance for model-" + modelnr);
+				writer.newLine();
+				/*
+				writer.write(String.valueOf());
+				*/
+				writer.write(String.valueOf(dist));
+				writer.close();
+				Assert.assertFalse(solver.isUnstable());
+				Assert.assertTrue(dist<=0.1);
+				if(dist>0.1) {
+					logger.log(Level.INFO, "relative distance for model-" + modelnr);
+					logger.log(Level.INFO,String.valueOf(dist));
+				}
+				if (solver.isUnstable()) {
+					logger.warning("unstable!");
+				} 
+//					else {
+//					(new Thread(new Plotter(solution, inputData, args[1]
+//							+ modelnr + "-graph.jpg"))).start();
+//				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 }
