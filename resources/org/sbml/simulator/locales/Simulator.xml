@@ -73,6 +73,7 @@
   <entry key="HAVE">have</entry>
   <entry key="HAS">has</entry>
   <entry key="REPLACING_UNDEFINED_VALUES">Replacing undefined values</entry>
+  <entry key="REACTION_ID"> Reaction %s </entry>
   
   <!-- LegendTableCellRenderer -->
   
@@ -109,7 +110,6 @@
   <entry key="PLOT_BACKGROUND_COLOR_TOOLTIP">The background color of the plot</entry>
   <entry key="PLOT_GRID_COLOR">Plot grid color</entry>
   <entry key="PLOT_GRID_COLOR_TOOLTIP">The color of the plot's grid</entry>
-  <entry key="PLOT_TITLE"></entry>
   <entry key="PLOT_TITLE_TOOLTIP">Set the title of the plot</entry>
   <entry key="SHOW_PLOT_GRID">Grid</entry>
   <entry key="SHOW_PLOT_GRID_TOOLTIP">Decide whether or not to draw a grid in the plot area.</entry>
@@ -117,12 +117,20 @@
   <entry key="SHOW_PLOT_LEGEND_TOOLTIP">Add or remove a legend in the plot.</entry>
   <entry key="SHOW_PLOT_TOOLTIPS">Tool tips</entry>
   <entry key="SHOW_PLOT_TOOLTIPS_TOOLTIP">Let the plot display tool tips for each curve.</entry>
-  <entry key="TITLE_OPTIONS">Plot title</entry>
-  <entry key="TITLE_OPTIONS_TOOLTIP">Adjust the tile for the plot</entry>
   <entry key="BASE_OPTIONS">Plotting panel options</entry>
   <entry key="BASE_OPTIONS_TOOLTIP">Options for the visible rectangle of the plot panel</entry>
   <entry key="PLOT_APPEARANCE">Appearance of the plot</entry>
   <entry key="PLOT_APPEARANCE_TOOLTIP">Options for appearance of the plot area</entry>
+  
+  <!-- QuantitySelectionPanel -->
+  
+  <entry key="CHECK_BOX_TOOLTIP">Check this box to include %s %s in the optimization</entry> <!-- SBML element name and name of the instance -->
+  <entry key="EXPLANATION">Please select the model components, whose values are to be optimized. You can also change the allowable ranges for each element.</entry>
+  <entry key="MIN_MAX_SPINNER_TOOL_TIP">Select the absolute %s allowable value for this %s named %s.</entry>
+  <entry key="MINIMUM">minimum</entry>
+  <entry key="MAXIMUM">maximum</entry>
+  <entry key="INIT_MIN_MAX_SPINNER_TOOL_TIP">Select the %s allowable value for this %s named %s in the initialization.</entry>
+  <entry key="TAB_TOOL_TIP">In this tab you can select the %s in the model whose values are to be optimized.</entry>
   
   <!-- SelectionCommand -->
   

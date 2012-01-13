@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.PreferenceChangeEvent;
 import java.util.prefs.PreferenceChangeListener;
 
@@ -351,11 +352,12 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
 	 */
 	public void itemStateChanged(ItemEvent e) {
+		logger.finer(e.getItem().toString() + ' ' + e.getSource());
 		if ((e.getSource() instanceof JComboBox)
 				&& (e.getStateChange() == ItemEvent.SELECTED)) {
 			JComboBox comBox = (JComboBox) e.getSource();
 			try {
-				logger.finest(e.getItem().toString() + "\t" + comBox.getName());
+				logger.fine(e.getItem().toString() + "\t" + comBox.getName());
 				if (comBox.getName().equals(
 					SimulationOptions.QUALITY_MEASURE.toString())) {
 					QualityMeasure dist = SBMLsimulator.getAvailableQualityMeasures()[comBox
@@ -372,6 +374,24 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 				}
 			} catch (Exception exc) {
 				GUITools.showErrorMessage(this, exc);
+			}
+		} else if (e.getSource() instanceof JCheckBox) {
+			JCheckBox box = (JCheckBox) e.getSource();
+			if (box.getName() != null) {
+				String name = box.getName();
+				if (name.equals(PlotOptions.SHOW_PLOT_GRID.toString())
+						|| name.equals(PlotOptions.SHOW_PLOT_LEGEND.toString())
+						|| name.equals(PlotOptions.SHOW_PLOT_TOOLTIPS.toString())) {
+					SBPreferences prefs = SBPreferences.getPreferencesFor(PlotOptions.class);
+					if (prefs.getBoolean(name) && !box.isSelected()) {
+						prefs.put(name, box.isSelected());
+						try {
+							prefs.flush();
+						} catch (BackingStoreException exc) {
+							logger.fine(exc.getLocalizedMessage());
+						}
+					}
+				}
 			}
 		}
 		

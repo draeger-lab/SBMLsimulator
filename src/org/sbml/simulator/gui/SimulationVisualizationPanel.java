@@ -167,7 +167,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 					// setPlotToLogScale(button);
 				} else if (com.equals(PlotOptions.SHOW_PLOT_LEGEND
 						.getOptionName())) {
-					plot.setShowLegend(button.isSelected());
+					plot.setLegendVisible(button.isSelected());
 				} else if (com.equals(PlotOptions.SHOW_PLOT_TOOLTIPS
 						.getOptionName())) {
 					plot.setDisplayToolTips(button.isSelected());
@@ -298,7 +298,8 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 		if (timeUnits == null) {
 			timeUnits = new UnitDefinition(model.getLevel(), model.getVersion());
 		}
-		plot = new Plot(String.format(bundle.getString("X_AXIS_LABEL"),
+		String title = model.isSetName() ? model.getName() : model.getId();
+		plot = new Plot(title, String.format(bundle.getString("X_AXIS_LABEL"),
 			UnitDefinition.printUnits(timeUnits, true).replace('*', '\u00B7')),
 			bundle.getString("Y_AXIS_LABEL"));
 		plot.setBorder(BorderFactory.createLoweredBevelBorder());

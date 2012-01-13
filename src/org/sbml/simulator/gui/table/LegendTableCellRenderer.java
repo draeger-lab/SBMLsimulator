@@ -31,7 +31,6 @@ import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.Species;
 
 import de.zbit.gui.ColorPalette;
-import de.zbit.gui.GUITools;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
 
@@ -94,23 +93,22 @@ public class LegendTableCellRenderer extends JLabel implements TableCellRenderer
 				if (value instanceof Compartment) {
 					Compartment c = (Compartment) value;
 					if (c.isSetOutsideInstance()) {
-						setToolTipText(StringUtil.toHTML(String.format(bundle
-							.getString("OUTSIDE_TOOLTIP"), c.getOutsideInstance()
-							.toString()), GUITools.TOOLTIP_LINE_LENGTH));
+						setToolTipText(StringUtil.toHTMLToolTip(
+							bundle.getString("OUTSIDE_TOOLTIP"), c.getOutsideInstance()));
 					}
 				} else if (value instanceof Species) {
 					Species s = (Species) value;
 					if (s.isSetCompartmentInstance()) {
-						setToolTipText(StringUtil.toHTML(String.format(bundle
-							.getString("SPECIES_COMPARTMENT"), s.getCompartmentInstance()
-							.toString()), GUITools.TOOLTIP_LINE_LENGTH));
+						setToolTipText(StringUtil.toHTMLToolTip(
+							bundle.getString("SPECIES_COMPARTMENT"),
+							s.getCompartmentInstance()));
 					}
 				} else if (value instanceof Reaction) {
 					Reaction r = (Reaction) value;
 					if (r.isSetCompartmentInstance()) {
-						setToolTipText(StringUtil.toHTML(String.format(bundle
-							.getString("REACTION_COMPARTMENT"), r.getCompartmentInstance()
-							.toString()), GUITools.TOOLTIP_LINE_LENGTH));
+						setToolTipText(StringUtil.toHTMLToolTip(
+							bundle.getString("REACTION_COMPARTMENT"),
+							r.getCompartmentInstance()));
 					}
 				}
 				setText(value.toString());
