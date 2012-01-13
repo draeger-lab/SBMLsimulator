@@ -52,7 +52,6 @@ import org.sbml.simulator.SimulationConfiguration;
 import org.sbml.simulator.SimulationManager;
 import org.sbml.simulator.SimulationOptions;
 import org.sbml.simulator.gui.plot.Plot;
-import org.sbml.simulator.gui.table.MultipleTableView;
 import org.sbml.simulator.math.QualityMeasure;
 import org.simulator.math.odes.DESSolver;
 import org.simulator.math.odes.MultiTable;
@@ -61,6 +60,7 @@ import de.zbit.gui.BaseFrameTab;
 import de.zbit.gui.GUIOptions;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.table.DecimalCellRenderer;
+import de.zbit.gui.table.MultipleTableView;
 import de.zbit.io.CSVOptions;
 import de.zbit.io.CSVWriter;
 import de.zbit.io.SBFileFilter;
@@ -366,7 +366,7 @@ public class SimulationPanel extends JPanel implements
         add(simulationToolPanel, BorderLayout.SOUTH);
       }
       visualizationPanel.getPlot().setGridVisible(foot.getShowGrid());
-      visualizationPanel.getPlot().setShowLegend(foot.getShowLegend());
+      visualizationPanel.getPlot().setLegendVisible(foot.getShowLegend());
       visualizationPanel.getPlot().setDisplayToolTips(
         foot.getShowGraphToolTips());
 //      visualizationPanel.setPlotToLogScale(foot.getJCheckBoxLegend());

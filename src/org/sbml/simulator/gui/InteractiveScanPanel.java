@@ -24,6 +24,7 @@ import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
@@ -49,6 +50,7 @@ import org.sbml.jsbml.QuantityWithUnit;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBase;
 import org.sbml.jsbml.Species;
+import org.sbml.jsbml.UnitDefinition;
 import org.sbml.jsbml.util.TreeNodeChangeListener;
 import org.sbml.jsbml.util.compilers.HTMLFormula;
 import org.sbml.simulator.SimulationOptions;
@@ -145,7 +147,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
    * Allows for fast access to all quantities by storing the index in the array
    * for the identifier.
    */
-  private HashMap<String, Integer> quantitiesHash;
+  private Map<String, Integer> quantitiesHash;
   /**
 	 * 
 	 */
@@ -154,7 +156,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
 	 * 
 	 */
   private double paramStepSize, maxCompartmentValue, maxParameterValue,
-      maxSpeciesValue;;
+      maxSpeciesValue;
   
   /**
 	 * 
@@ -313,7 +315,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
           offset);
         offset += r.getKineticLaw().getLocalParameterCount();
         panel.setBorder(BorderFactory.createTitledBorder(String.format(
-          " Reaction %s ", r.getId())));
+          bundle.getString("REACTION_ID"), r.getId())));
         parameterPanel.add(panel);
       }
     }
@@ -386,14 +388,16 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
       
       spinQuantity[index].setName(p.getId());
       spinQuantity[index].addChangeListener(this);
-      lh.add(new JLabel(StringUtil.toHTML(p.toString(), 40)), 0, i, 1, 1, 0, 0);
+      lh.add(new JLabel(StringUtil.toHTML(p.toString(), 40)), 0, i, 1, 1, 0d, 0d);
       lh.add(spinQuantity[index], 2, i, 1, 1, 0, 0);
-      lh.add(
-        new JLabel(StringUtil.toHTML(p.isSetUnits() ? HTMLFormula.toHTML(p
-            .getUnitsInstance()) : "")), 4, i, 1, 1, 0, 0);
+			UnitDefinition ud = p.getDerivedUnitDefinition();
+			if (ud != null) {
+				lh.add(new JLabel(StringUtil.toHTML(HTMLFormula.toHTML(ud))), 4, i, 1,
+					1, 0d, 0d);
+			}
     }
-    lh.add(new JPanel(), 1, 0, 1, 1, 0, 0);
-    lh.add(new JPanel(), 3, 0, 1, 1, 0, 0);
+    lh.add(new JPanel(), 1, 0, 1, 1, 0d, 0d);
+    lh.add(new JPanel(), 3, 0, 1, 1, 0d, 0d);
 		if (nans.size() > 0) {
 			GUITools.showListMessage(
 				this,

@@ -18,12 +18,19 @@
 package org.sbml.simulator.gui.plot;
 
 import java.awt.Color;
+import java.awt.Paint;
+import java.awt.Shape;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.LegendItem;
+import org.jfree.chart.LegendItemCollection;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.AbstractRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.title.LegendTitle;
@@ -63,24 +70,29 @@ public class Plot extends ChartPanel {
 	 * 
 	 */
 	private int datasetCount;
+	
+
+	private Map<String, LegendItem> legendItems;
 
 	/**
 	 * Create a new empty plot panel
 	 */
 	public Plot() {
-		this("", "");
+		this("", "", "");
 	}
 
 	/**
 	 * Create an new empty plot panel with xlabel xname and ylabel yname.
 	 * 
+	 * @param title
+	 *        the title of the plot.
 	 * @param xname
-	 *            the label of the x-axis
+	 *        the label of the x-axis
 	 * @param yname
-	 *            the label of the y-axis
+	 *        the label of the y-axis
 	 */
-	public Plot(String xname, String yname) {
-		super(ChartFactory.createXYLineChart("", xname, yname, null, true), false,
+	public Plot(String title, String xname, String yname) {
+		super(ChartFactory.createXYLineChart(title, xname, yname, null, true), false,
 			true, true, false, true);
 		
 		JFreeChart chart = getChart();
@@ -95,6 +107,7 @@ public class Plot extends ChartPanel {
 		legend.setPosition(RectangleEdge.BOTTOM);
 		legend.setHorizontalAlignment(HorizontalAlignment.CENTER);
 		legend.setVerticalAlignment(VerticalAlignment.CENTER);
+		legendItems = new TreeMap<String, LegendItem>();
 		loadUserSettings();
 	}
 
@@ -114,9 +127,7 @@ public class Plot extends ChartPanel {
 		plot.setRangeGridlinePaint(Option.parseOrCast(Color.class,
 			prefs.get(PlotOptions.PLOT_GRID_COLOR)));
 		
-		chart.setTitle(prefs.get(PlotOptions.PLOT_TITLE));
-		
-		setShowLegend(prefs.getBoolean(PlotOptions.SHOW_PLOT_LEGEND));
+		setLegendVisible(prefs.getBoolean(PlotOptions.SHOW_PLOT_LEGEND));
 		setGridVisible(prefs.getBoolean(PlotOptions.SHOW_PLOT_GRID));
 		setDisplayToolTips(prefs.getBoolean(PlotOptions.SHOW_PLOT_TOOLTIPS));
 
@@ -126,7 +137,7 @@ public class Plot extends ChartPanel {
 			((XYLineAndShapeRenderer) renderer).setBaseShapesVisible(true);
 		}
 	}
-
+	
 	/**
 	 * Plots a matrix either by displaying unconnected or connected points
 	 * depending on the connected parameter.
@@ -158,6 +169,7 @@ public class Plot extends ChartPanel {
 
 		if (dataset instanceof BoxAndWhiskerXYDataset) {
 			XYBoxAndWhiskerRenderer renderer = new XYBoxAndWhiskerRenderer();
+			plot.setRenderer(datasetCount, renderer);
 			/*
 			 * This is necessary because otherwise the boxes of all series will be
 			 * drawn in an identical color. Only if the box paint is null, it will
@@ -180,20 +192,17 @@ public class Plot extends ChartPanel {
 					 * This causes the average and the mean not to be visible... because
 					 * both are drawn in the identical color.
 					 */
-					renderer.setArtifactPaint(i, new Color(0, 0, 0, 75));
+					renderer.setArtifactPaint(i, Color.BLACK);
+					renderer.setMeanPaint(i, new Color(0, 0, 0, 75));
 				} else {
-					col = new Color(255, 255, 255, 255);
-					renderer.setSeriesPaint(i, col);
-					renderer.setSeriesFillPaint(i, col);
-					renderer.setSeriesOutlinePaint(i, col);
-					renderer.setArtifactPaint(i, col);
+					renderer.setSeriesVisible(i, visible);
 				}
+				createItemLabel(i, renderer, dataset.getSeriesKey(i).toString(), col, connected, visible);
 			}
-			
-			plot.setRenderer(datasetCount, renderer);
 			
 		} else {
 			XYLineAndShapeRenderer linesAndShape = new XYLineAndShapeRenderer();
+			plot.setRenderer(datasetCount, linesAndShape);
 			linesAndShape.setBaseLinesVisible(true);
 			linesAndShape.setBaseShapesVisible(false);
 			for (int i = 0; i < plotColors.length; i++) {
@@ -204,13 +213,55 @@ public class Plot extends ChartPanel {
 				linesAndShape.setSeriesVisible(i, visible);
 				linesAndShape.setSeriesVisibleInLegend(i, visible);
 				linesAndShape.setSeriesPaint(i, col);
+				createItemLabel(i, linesAndShape, dataset.getSeriesKey(i).toString(), col, connected, visible);
 			}
-			plot.setRenderer(datasetCount, linesAndShape);
 		}
 		
+		LegendItemCollection legendItemCollection = new LegendItemCollection();
+		for (Map.Entry<String, LegendItem> entry : legendItems.entrySet()) {
+			legendItemCollection.add(entry.getValue());
+		}
+		plot.setFixedLegendItems(legendItemCollection);
 		datasetCount++;
 
-		this.loadUserSettings();
+		setLegendVisible(showLegend);
+		setGridVisible(showGrid);
+	}
+
+	/**
+	 * 
+	 * @param series
+	 * @param renderer
+	 * @param label
+	 * @param col
+	 * @param connected
+	 * @param visible
+	 */
+	private void createItemLabel(int series, AbstractRenderer renderer, String label, Paint col, boolean connected,
+		boolean visible) {
+		if (visible) {
+			LegendItem legendItem = legendItems.containsKey(label) ? legendItems
+					.get(label) : new LegendItem(label, col);
+			legendItem.setSeriesIndex(series);
+			Shape shape = null;
+			if (connected || (datasetCount > 0)) {
+				shape = renderer.lookupLegendShape(series);
+				if (shape != null) {
+					legendItem.setLine(shape);
+				}
+				legendItem.setLinePaint(col);
+				legendItem.setLineVisible(true);
+			}
+			if (!connected || (datasetCount > 0)) {
+				shape = renderer.lookupSeriesShape(series);
+				if (shape != null) {
+					legendItem.setShape(shape);
+				}
+				legendItem.setShapeVisible(true);
+				legendItem.setOutlinePaint(Color.BLACK); 
+			}
+			legendItems.put(label, legendItem);
+		}
 	}
 
 	/**
@@ -227,7 +278,6 @@ public class Plot extends ChartPanel {
 		SBPreferences prefs = SBPreferences.getPreferencesFor(PlotOptions.class);
 		plot(data, connected, prefs.getBoolean(PlotOptions.SHOW_PLOT_LEGEND),
 				prefs.getBoolean(PlotOptions.SHOW_PLOT_GRID), plotColors, infos);
-
 	}
 
 	/**
@@ -247,7 +297,7 @@ public class Plot extends ChartPanel {
 	 * 
 	 * @param showLegend
 	 */
-	public void setShowLegend(boolean showLegend) {
+	public void setLegendVisible(boolean showLegend) {
 		LegendTitle legend = getChart().getLegend();
 		if (legend != null) {
 			legend.setVisible(showLegend);
@@ -264,6 +314,7 @@ public class Plot extends ChartPanel {
 				chart.getXYPlot().setDataset(i, null);
 			}
 			datasetCount = 0;
+			legendItems.clear();
 		}
 	}
 

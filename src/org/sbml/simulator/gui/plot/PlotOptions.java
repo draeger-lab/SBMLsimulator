@@ -54,12 +54,6 @@ public interface PlotOptions extends KeyProvider {
 	public static final Option<Color> PLOT_GRID_COLOR = new Option<Color>(
 		"PLOT_GRID_COLOR", Color.class, bundle, Color.DARK_GRAY);
 	
-	/**
-	 * 
-	 */
-	public static final Option<String> PLOT_TITLE = new Option<String>(
-		"PLOT_TITLE", String.class, bundle, "");
-	
 //    /**
 //     * When storing any GUI elements or other pictures into a JPEG graphics file
 //     * the value associated to this key is used for the degree of compression.
@@ -105,13 +99,6 @@ public interface PlotOptions extends KeyProvider {
 	 */
 	public static final Option<Boolean> SHOW_PLOT_TOOLTIPS = new Option<Boolean>(
 		"SHOW_PLOT_TOOLTIPS", Boolean.class, bundle, Boolean.FALSE);
-	
-	/**
-   * 
-   */
-	@SuppressWarnings("unchecked")
-	public static final OptionGroup<String> TITLE_OPTIONS = new OptionGroup<String>(
-		"TITLE_OPTIONS", bundle, PLOT_TITLE);
 	
 	/**
 	 * 

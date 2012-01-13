@@ -411,7 +411,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 				} else {
 					JOptionPane.showMessageDialog(this, StringUtil.toHTML(
 						String.format(bundle.getString("COULD_NOT_OPEN_MODEL"),
-							modelFiles[0].getAbsolutePath()), GUITools.TOOLTIP_LINE_LENGTH));
+							modelFiles[0].getAbsolutePath()), StringUtil.TOOLTIP_LINE_LENGTH));
 				}
 			} catch (Exception exc) {
 				GUITools.showErrorMessage(this, exc);
