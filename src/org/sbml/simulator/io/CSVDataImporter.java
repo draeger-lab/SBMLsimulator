@@ -158,14 +158,16 @@ public class CSVDataImporter {
           j = 0; // timeCorrection(j, timeColumn)
           for (String head : newHead) {
             String s = stringData[i][nameToColumn.get(head)];
-            if (s.equalsIgnoreCase("INF")) {
-              dataBlock[i][j] = Double.POSITIVE_INFINITY;
-            } else if (s.equalsIgnoreCase("-INF")) {
-              dataBlock[i][j] = Double.NEGATIVE_INFINITY;
-            } else if (s.equalsIgnoreCase("NAN")) {
-              dataBlock[i][j] = Double.NaN;
-            } else {
-              dataBlock[i][j] = Double.parseDouble(s);
+            if ((s != null) && (s.length() > 0)) {
+            	if (s.equalsIgnoreCase("INF")) {
+            		dataBlock[i][j] = Double.POSITIVE_INFINITY;
+            	} else if (s.equalsIgnoreCase("-INF")) {
+            		dataBlock[i][j] = Double.NEGATIVE_INFINITY;
+            	} else if (s.equalsIgnoreCase("NAN")) {
+            		dataBlock[i][j] = Double.NaN;
+            	} else {
+            		dataBlock[i][j] = Double.parseDouble(s);
+            	}
             }
             j++;
           }
