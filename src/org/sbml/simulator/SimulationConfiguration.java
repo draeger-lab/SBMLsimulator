@@ -20,6 +20,7 @@ package org.sbml.simulator;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
 
 import org.sbml.jsbml.Model;
 import org.simulator.math.odes.AbstractDESSolver;
@@ -40,37 +41,37 @@ public class SimulationConfiguration implements PropertyChangeListener {
    * A {@link Logger} for this class.
    */
   private static final transient Logger logger = Logger.getLogger(SimulationConfiguration.class.getName());
-    
-  /**
-   * The model for the current simulation.
-   */
-  private Model model;
-  
-  /**
-   * The solver for the current simulation.
-   */
-  private DESSolver solver;
-  
-  /**
-   * The start time for the current simulation.
-   */
-  private double start;
-  
-  /**
+
+	/**
    * The end time for the current simulation.
    */
   private double end;
-  
-  /**
-   * The step size for the current simulation.
-   */
-  private double stepSize;
-  
-  /**
+
+	/**
    * Include reactions in the output or not.
    */
   private boolean includeReactions;
-  
+
+	/**
+   * The model for the current simulation.
+   */
+  private Model model;
+
+	/**
+   * The solver for the current simulation.
+   */
+  private DESSolver solver;
+
+	/**
+   * The start time for the current simulation.
+   */
+  private double start;
+
+	/**
+   * The step size for the current simulation.
+   */
+  private double stepSize;
+    
   /**
    * Creates a new simulation configuration for the simulation of the given
    * {@link Model}.
@@ -109,6 +110,64 @@ public class SimulationConfiguration implements PropertyChangeListener {
   }
   
   /**
+   * Copy constructor.
+   * 
+   * @param sc
+   */
+	public SimulationConfiguration(SimulationConfiguration sc) {
+		this(sc.getModel(), sc.getSolver(), sc.getStart(), sc.getEnd(), sc
+				.getStepSize(), sc.isIncludeReactions());
+	}
+  
+  /* (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	protected Object clone() throws CloneNotSupportedException {
+		return new SimulationConfiguration(this);
+	}
+  
+  /* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		// Check if the given object is a pointer to precisely the same object:
+		if (super.equals(obj)) { 
+			return true; 
+		}
+		// Check if the given object is of identical class and not null: 
+		if ((obj == null) || (!getClass().equals(obj.getClass()))) { 
+			return false; 
+		}
+		if (obj instanceof SimulationConfiguration) {
+		  SimulationConfiguration conf = (SimulationConfiguration) obj;
+		  boolean equal = true;
+		  equal &= start == conf.getStart();
+		  equal &= end == conf.getEnd();
+		  equal &= includeReactions && conf.isIncludeReactions();
+		  equal &= stepSize == conf.getStepSize();
+		  equal &= isSetModel() == conf.isSetModel();
+		  if (equal && isSetModel()) {
+		  	equal &= model.equals(conf.getModel());
+		  }
+		  equal &= isSetSolver() == conf.isSetSolver();
+		  if (equal && isSetSolver()) {
+		  	equal &= solver.equals(conf.getSolver());
+		  }
+		  return equal;
+		}
+		return false;
+	}
+  
+  /**
+   * @return the end
+   */
+  public double getEnd() {
+    return end;
+  }
+  
+  /**
    * @return the model
    */
   public Model getModel() {
@@ -128,21 +187,34 @@ public class SimulationConfiguration implements PropertyChangeListener {
   public double getStart() {
     return start;
   }
-  
-  /**
-   * @return the end
-   */
-  public double getEnd() {
-    return end;
-  }
-  
-  /**
+
+	/**
    * @return the stepSize
    */
   public double getStepSize() {
     return stepSize;
   }
-    
+  
+  /* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 919;
+		int hashCode = getClass().getName().hashCode();
+		hashCode += prime * Double.valueOf(start).hashCode();
+		hashCode += prime * Double.valueOf(end).hashCode();
+		hashCode += prime * Boolean.valueOf(includeReactions).hashCode();
+		hashCode += prime * Double.valueOf(stepSize).hashCode();
+		if (isSetModel()) {
+			hashCode += prime * model.hashCode();
+		}
+		if (isSetSolver()) {
+			hashCode += prime * solver.hashCode();
+		}
+		return hashCode;
+	}
+  
   /**
    * @return the includeReactions
    */
@@ -150,14 +222,30 @@ public class SimulationConfiguration implements PropertyChangeListener {
     return includeReactions;
   }
   
+  /**
+	 * 
+	 * @return
+	 */
+	public boolean isSetModel() {
+		return model != null;
+	}
+  
+  /**
+	 * 
+	 * @return
+	 */
+	public boolean isSetSolver() {
+		return solver != null;
+	}
+    
   /* (non-Javadoc)
    * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
    */
   public void propertyChange(PropertyChangeEvent evt) {
 		String property = evt.getPropertyName();
-		SBPreferences prefs = SBPreferences
-				.getPreferencesFor(SimulationOptions.class);
-		logger.finest(evt.getPropertyName() + "\t" + evt.getNewValue());
+		SBPreferences prefs = SBPreferences.getPreferencesFor(SimulationOptions.class);
+		boolean change = false;
+		logger.fine(evt.getPropertyName() + "\t" + evt.getNewValue());
 
 		if ("model".equals(property)) {
 			
@@ -167,27 +255,63 @@ public class SimulationConfiguration implements PropertyChangeListener {
 			
 			solver = (AbstractDESSolver) evt.getNewValue();
 			prefs.put(SimulationOptions.ODE_SOLVER, solver.getClass().getName());
+			change = true;
 			
 		} else if (SimulationOptions.SIM_START_TIME.toString().equals(property)) {
 			
-			start = (Double) evt.getNewValue();
+			start = ((Number) evt.getNewValue()).doubleValue();
 			prefs.put(SimulationOptions.SIM_START_TIME, start);
+			change = true;
 			
 		} else if (SimulationOptions.SIM_END_TIME.toString().equals(property)) {
 			
-			end = (Double) evt.getNewValue();
+			end = ((Number) evt.getNewValue()).doubleValue();
 			prefs.put(SimulationOptions.SIM_END_TIME, end);
+			change = true;
 			
 		} else if (SimulationOptions.SIM_STEP_SIZE.toString().equals(property)) {
 			
-			stepSize = (Double) evt.getNewValue();
+			stepSize = ((Number) evt.getNewValue()).doubleValue();
 			prefs.put(SimulationOptions.SIM_STEP_SIZE, stepSize);
+			change = true;
 			
 		} else if ("includeReactions".equals(property)) {
 			
-			includeReactions = (Boolean) evt.getNewValue();
+			includeReactions = ((Boolean) evt.getNewValue()).booleanValue();
 			
 		}
+		
+		if (change) {
+			try {
+				prefs.flush();
+			} catch (BackingStoreException exc) {
+				logger.warning(exc.getLocalizedMessage());
+			}
+		}
+	}
+  
+  /* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getClass().getSimpleName());
+		sb.append('[');
+		sb.append("start=");
+		sb.append(start);
+		sb.append(",end=");
+		sb.append(end);
+		sb.append(",stepSize=");
+		sb.append(stepSize);
+		sb.append(",solver=");
+		sb.append(solver.toString());
+		sb.append(",includeReactions=");
+		sb.append(includeReactions);
+		sb.append(",model=");
+		sb.append(model);
+		sb.append(']');
+		return sb.toString();
 	}
   
 }

@@ -55,6 +55,34 @@ public class XYDatasetAdapter extends AbstractXYDataset implements MetaDataset {
 	}
 
 	/* (non-Javadoc)
+	 * @see org.jfree.data.general.AbstractSeriesDataset#getSeriesCount()
+	 */
+	public int getSeriesCount() {
+		return table.getColumnCount() - 1;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.gui.plot.MetaDataset#getId(int)
+	 */
+	public String getSeriesIdentifier(int series) {
+		return table.getColumnIdentifier(series + 1);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.gui.plot.MetaDataset#getSeriesIndex(java.lang.String)
+	 */
+	public int getSeriesIndex(String identifier) {
+		return table.getColumnIndex(identifier) - 1;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.jfree.data.general.AbstractSeriesDataset#getSeriesKey(int)
+	 */
+	public Comparable<String> getSeriesKey(int series) {
+		return table.getColumnName(series + 1);
+	}
+
+	/* (non-Javadoc)
 	 * @see org.jfree.data.xy.XYDataset#getX(int, int)
 	 */
 	public Number getX(int series, int item) {
@@ -66,27 +94,6 @@ public class XYDatasetAdapter extends AbstractXYDataset implements MetaDataset {
 	 */
 	public Number getY(int series, int item) {
 		return table.getValueAt(item, series + 1);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jfree.data.general.AbstractSeriesDataset#getSeriesCount()
-	 */
-	public int getSeriesCount() {
-		return table.getColumnCount() - 1;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jfree.data.general.AbstractSeriesDataset#getSeriesKey(int)
-	 */
-	public Comparable<String> getSeriesKey(int series) {
-		return table.getColumnName(series + 1);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.sbml.simulator.gui.plot.MetaDataset#getId(int)
-	 */
-	public String getSeriesIdentifier(int series) {
-		return table.getColumnIdentifier(series + 1);
 	}
 
 }

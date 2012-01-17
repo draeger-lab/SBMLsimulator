@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
+import java.util.prefs.PreferenceChangeEvent;
+import java.util.prefs.PreferenceChangeListener;
 
 import javax.swing.JFileChooser;
 import javax.swing.JMenuBar;
@@ -79,7 +81,7 @@ import eva2.server.stat.InterfaceStatisticsListener;
  * @since 1.0
  */
 public class SimulationPanel extends JPanel implements
-    BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener {
+    BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceChangeListener {
   
   /**
    * Support for localization.
@@ -249,16 +251,6 @@ public class SimulationPanel extends JPanel implements
 		}
   }
   
-  /**
-   * @return
-   */
-  private SimulationToolPanel createFootPanel() {
-    simulationToolPanel = new JToolBar(bundle.getString("INTEGRATION_TOOLBOX"));
-    SimulationToolPanel foot = new SimulationToolPanel(simulationManager);
-    simulationToolPanel.add(foot);
-    return foot;
-  }
-  
   /* (non-Javadoc)
    * @see eva2.server.stat.InterfaceStatisticsListener#finalMultiRunResults(java.lang.String[], java.util.List)
    */
@@ -314,7 +306,7 @@ public class SimulationPanel extends JPanel implements
    * @return
    */
   public Model getModel() {
-    return this.simulationManager.getSimlationConfiguration().getModel();
+    return this.simulationManager.getSimulationConfiguration().getModel();
   }
   
   /**
@@ -336,7 +328,10 @@ public class SimulationPanel extends JPanel implements
    */
   public SimulationToolPanel getSimulationToolPanel() {
     if (simulationToolPanel == null) {
-      return createFootPanel();
+    	simulationToolPanel = new JToolBar(bundle.getString("INTEGRATION_TOOLBOX"));
+      SimulationToolPanel foot = new SimulationToolPanel(simulationManager);
+      simulationToolPanel.add(foot);
+      foot.addPreferenceChangeListener(visualizationPanel);
     }
     return (SimulationToolPanel) simulationToolPanel.getComponent(0);
   }
@@ -345,7 +340,7 @@ public class SimulationPanel extends JPanel implements
    * @return
    */
   public DESSolver getSolver() {
-    return simulationManager.getSimlationConfiguration().getSolver();
+    return simulationManager.getSimulationConfiguration().getSolver();
   }
   
   /***
@@ -359,17 +354,16 @@ public class SimulationPanel extends JPanel implements
       if (visualizationPanel == null) {
         visualizationPanel = new SimulationVisualizationPanel();
       }
-      visualizationPanel.setModel(simulationManager.getSimlationConfiguration().getModel());
+      visualizationPanel.setModel(simulationManager.getSimulationConfiguration().getModel());
       SimulationToolPanel foot = getSimulationToolPanel();
-      foot.addItemListener(visualizationPanel);
       if (showSimulationToolPanel) {
         add(simulationToolPanel, BorderLayout.SOUTH);
       }
-      visualizationPanel.getPlot().setGridVisible(foot.getShowGrid());
-      visualizationPanel.getPlot().setLegendVisible(foot.getShowLegend());
-      visualizationPanel.getPlot().setDisplayToolTips(
-        foot.getShowGraphToolTips());
-//      visualizationPanel.setPlotToLogScale(foot.getJCheckBoxLegend());
+      Plot plot = visualizationPanel.getPlot();
+      plot.setGridVisible(foot.getShowGrid());
+      plot.setLegendVisible(foot.getShowLegend());
+      plot.setDisplayToolTips(foot.getShowGraphToolTips());
+//      plot.setPlotToLogScale(foot.getJCheckBoxLegend());
       
       if (tabbedPane == null) {
         JPanel simPanel = new JPanel(new BorderLayout());
@@ -386,7 +380,7 @@ public class SimulationPanel extends JPanel implements
         tabbedPane.add(bundle.getString("TAB_IN_SILICO_DATA"), simPanel);
         tabbedPane.add(bundle.getString("TAB_EXPERIMENTAL_DATA"), dataTableView);
 				tabbedPane.add(bundle.getString("TAB_MODEL_VIEW"),
-					new SBMLModelSplitPane(simulationManager.getSimlationConfiguration()
+					new SBMLModelSplitPane(simulationManager.getSimulationConfiguration()
 							.getModel().getSBMLDocument(), true));
         tabbedPane.setEnabledAt(TAB_SIMULATION_INDEX, true);
         tabbedPane.setEnabledAt(TAB_IN_SILICO_DATA_INDEX, false);
@@ -503,6 +497,7 @@ public class SimulationPanel extends JPanel implements
    * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
    */
   public void propertyChange(PropertyChangeEvent evt) {
+  	logger.fine(evt.getPropertyName());
     if ("progress".equals(evt.getPropertyName())) {
       this.firePropertyChanged(evt);
     } else if ("done".equals(evt.getPropertyName())) {
@@ -525,7 +520,7 @@ public class SimulationPanel extends JPanel implements
    * 
    */
   public void refreshStepSize() {
-    getSolver().setStepSize(simulationManager.getSimlationConfiguration().getStepSize());
+    getSolver().setStepSize(simulationManager.getSimulationConfiguration().getStepSize());
   }
   
   /* (non-Javadoc)
@@ -701,6 +696,13 @@ public class SimulationPanel extends JPanel implements
 	 */
 	public void updateButtons(JMenuBar menuBar, JToolBar toolbar) {
 		// TODO Auto-generated method stub
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.util.prefs.PreferenceChangeListener#preferenceChange(java.util.prefs.PreferenceChangeEvent)
+	 */
+	public void preferenceChange(PreferenceChangeEvent evt) {
+		getSimulationToolPanel().preferenceChange(evt);
 	}
   
 }

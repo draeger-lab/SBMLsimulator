@@ -234,8 +234,7 @@ public class SBMLsimulator extends Launcher {
 	 * @see de.zbit.Launcher#getInteractiveOptions()
 	 */
 	public List<Class<? extends KeyProvider>> getInteractiveOptions() {
-		List<Class<? extends KeyProvider>> defAndKeys = new ArrayList<Class<? extends KeyProvider>>(
-				5);
+		List<Class<? extends KeyProvider>> defAndKeys = new ArrayList<Class<? extends KeyProvider>>(5);
 		defAndKeys.add(SimulationOptions.class);
 		defAndKeys.add(EstimationOptions.class);
 		defAndKeys.add(PlotOptions.class);

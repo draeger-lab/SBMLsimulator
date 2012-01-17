@@ -18,13 +18,13 @@
 package org.sbml.simulator.gui;
 
 import java.awt.Color;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.prefs.PreferenceChangeEvent;
+import java.util.prefs.PreferenceChangeListener;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -36,17 +36,19 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
 import org.sbml.jsbml.Model;
+import org.sbml.jsbml.NamedSBaseWithDerivedUnit;
 import org.sbml.jsbml.UnitDefinition;
 import org.sbml.simulator.gui.plot.BoxPlotDataset;
 import org.sbml.simulator.gui.plot.MetaDataset;
 import org.sbml.simulator.gui.plot.Plot;
-import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.simulator.gui.plot.XYDatasetAdapter;
 import org.sbml.simulator.gui.table.LegendTableModel;
 import org.simulator.math.odes.MultiTable;
 
+import de.zbit.sbml.util.HTMLtools;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
+import de.zbit.util.ValueTripletUncomparable;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -55,7 +57,7 @@ import de.zbit.util.StringUtil;
  * @since 1.0
  */
 public class SimulationVisualizationPanel extends JSplitPane implements
-		ItemListener, TableModelListener {
+		PreferenceChangeListener, TableModelListener {
 
 	private static final transient ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
 
@@ -64,6 +66,10 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 */
 	private static final long serialVersionUID = 2102296020675377066L;
 	/**
+	 *  Experimental results.
+	 */
+	private List<MultiTable> experimentData;
+	/**
 	 * Switches inclusion of reactions in the plot on or off.
 	 */
 	private boolean includeReactions;
@@ -71,6 +77,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 * 
 	 */
 	private InteractiveScanPanel interactiveScanPanel;
+	
 	/**
 	 * 
 	 */
@@ -87,20 +94,15 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 */
 	private double maxCompartmentValue = maxSpinVal,
 			maxParameterValue = maxSpinVal, maxSpeciesValue = maxSpinVal;
-	
+
 	/**
 	 * Plot area
 	 */
 	private Plot plot;
-
 	/**
 	 * Results of a dynamic simulation.
 	 */
 	private MultiTable simData;
-	/**
-	 *  Experimental results.
-	 */
-	private List<MultiTable> experimentData;
 
 	/**
 	 * 
@@ -108,6 +110,32 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	public SimulationVisualizationPanel() {
 		super(HORIZONTAL_SPLIT, true);
 		includeReactions = true;
+	}
+
+	/**
+	 * @param data
+	 *            the experimentData to set
+	 */
+	public void addExperimentData(MultiTable data) {
+		// deselect non available elements in the legend and select those that
+		// are present in the data
+		if (data != null) {
+			boolean plot = false;
+			if (experimentData == null) {
+				experimentData = new LinkedList<MultiTable>();
+				plot = true;
+			}
+			plot |= experimentData.add(data);
+			LegendTableModel legend = legendPanel.getLegendTableModel();
+			for (int i = 0; i < legend.getRowCount(); i++) {
+				if (!legend.isSelected(i) && (data.getColumn(legend.getId(i)) != null)) {
+					legend.setSelected(i, true);
+				}
+			}
+			if (plot) {
+				plot();
+			}
+		}
 	}
 
 	/**
@@ -149,31 +177,6 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 */
 	public MultiTable getSimulationData() {
 		return simData;
-	}
-
-	/* (non-Javadoc)
-	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
-	 */
-	public void itemStateChanged(ItemEvent e) {
-		if (e.getSource() instanceof AbstractButton) {
-			AbstractButton button = (AbstractButton) e.getSource();
-			if (button.getActionCommand() != null) {
-				String com = button.getActionCommand();
-				if (com.equals(PlotOptions.SHOW_PLOT_GRID.getOptionName())) {
-					plot.setGridVisible(button.isSelected());
-					// } else if
-					// (com.equals(PlotOptions.PLOT_LOG_SCALE.getOptionName()))
-					// {
-					// setPlotToLogScale(button);
-				} else if (com.equals(PlotOptions.SHOW_PLOT_LEGEND
-						.getOptionName())) {
-					plot.setLegendVisible(button.isSelected());
-				} else if (com.equals(PlotOptions.SHOW_PLOT_TOOLTIPS
-						.getOptionName())) {
-					plot.setDisplayToolTips(button.isSelected());
-				}
-			}
-		}
 	}
 
 	/**
@@ -229,9 +232,8 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 			for (int i = 0; i < seriesCount; i++) {
 				id = d.getSeriesIdentifier(i);
 				if (tableModel.isSelected(id)) {
-					// TODO
 					plotColors[i] = tableModel.getColorFor(id);
-					infos[i] = tableModel.getNameFor(id);
+					infos[i] = HTMLtools.createTooltip(tableModel.getSBase(i));
 				} else {
 					plotColors[i] = null;
 					infos[i] = null;
@@ -244,28 +246,30 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 		}
 	}
 
-	/**
-	 * @param data
-	 *            the experimentData to set
+	/* (non-Javadoc)
+	 * @see java.util.prefs.PreferenceChangeListener#preferenceChange(java.util.prefs.PreferenceChangeEvent)
 	 */
-	public void addExperimentData(MultiTable data) {
-		// deselect non available elements in the legend and select those that
-		// are present in the data
-		if (data != null) {
-			boolean plot = false;
-			if (experimentData == null) {
-				experimentData = new LinkedList<MultiTable>();
-				plot = true;
-			}
-			plot |= experimentData.add(data);
+	public void preferenceChange(PreferenceChangeEvent evt) {
+		plot.preferenceChange(evt);
+	}
+	
+	/**
+	 * 
+	 */
+	public void removeExperimentData(int index) {
+		if (experimentData != null) {
+			experimentData.remove(index);
 			LegendTableModel legend = legendPanel.getLegendTableModel();
 			for (int i = 0; i < legend.getRowCount(); i++) {
-				if (!legend.isSelected(i) && (data.getColumn(legend.getId(i)) != null)) {
-					legend.setSelected(i, true);
+				if (legend.isSelected(i)) {
+					boolean selected = false;
+					for (int j = 0; (j < experimentData.size()) && !selected; j++) {
+						if (experimentData.get(j).getColumn(legend.getId(i)) != null) {
+							selected = true;
+						}
+					}
+					legend.setSelected(i, selected);
 				}
-			}
-			if (plot) {
-				plot();
 			}
 		}
 	}
@@ -276,7 +280,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	public void setIncludeReactions(boolean includeReactions) {
 		this.includeReactions = includeReactions;
 	}
-	
+
 	/**
 	 * @param enabled
 	 */
@@ -378,31 +382,28 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 			if (((e.getColumn() == LegendTableModel.getColumnPlot()) || (e
 					.getColumn() == LegendTableModel.getColumnColor()))
 					&& (e.getType() == TableModelEvent.UPDATE)) {
-				plot();
+				LegendTableModel legend = (LegendTableModel) e.getSource();
+				List<ValueTripletUncomparable<String, String, Color>> items = new LinkedList<ValueTripletUncomparable<String, String, Color>>();
+				String id, tooltip;
+				Color color;
+				NamedSBaseWithDerivedUnit nsb;
+				ValueTripletUncomparable<String, String, Color> triplet;
+				for (int i = e.getFirstRow(); i <= e.getLastRow(); i++) {
+					boolean selected = ((Boolean) legend.getValueAt(i,
+						LegendTableModel.getColumnPlot())).booleanValue();
+					nsb = (NamedSBaseWithDerivedUnit) legend.getValueAt(i,
+						LegendTableModel.getNamedSBaseColumn());
+					id = nsb.getId();
+					tooltip = HTMLtools.createTooltip(nsb);
+					color = selected ? (Color) legend.getValueAt(i,
+						LegendTableModel.getColumnColor()) : null;
+					triplet = new ValueTripletUncomparable<String, String, Color>(id, tooltip, color);
+					items.add(triplet);
+				}
+				plot.setSeriesVisible(items);
 			}
 		} else if (e.getSource() instanceof MultiTable) {
 			setSimulationData((MultiTable) e.getSource());
-		}
-	}
-
-	/**
-	 * 
-	 */
-	public void removeExperimentData(int index) {
-		if (experimentData != null) {
-			experimentData.remove(index);
-			LegendTableModel legend = legendPanel.getLegendTableModel();
-			for (int i = 0; i < legend.getRowCount(); i++) {
-				if (legend.isSelected(i)) {
-					boolean selected = false;
-					for (int j = 0; (j < experimentData.size()) && !selected; j++) {
-						if (experimentData.get(j).getColumn(legend.getId(i)) != null) {
-							selected = true;
-						}
-					}
-					legend.setSelected(i, selected);
-				}
-			}
 		}
 	}
 

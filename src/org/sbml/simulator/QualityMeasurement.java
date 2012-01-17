@@ -67,13 +67,13 @@ public class QualityMeasurement implements PropertyChangeListener {
 	 * 
 	 */
   private QualityMeasure distance;
-  
-  /**
+
+	/**
    * 
    */
   private List<MultiTable> measurements;
-  
-  /**
+
+	/**
 	 * Creates a new quality measurement. A {@link QualityMeasure} can only be set
 	 * using property changes.
 	 */
@@ -81,8 +81,8 @@ public class QualityMeasurement implements PropertyChangeListener {
     this.measurements = new LinkedList<MultiTable>();
     this.distance = null;
   }
-  
-  /**
+
+	/**
 	 * Creates a new {@link QualityMeasurement} with the given initial
 	 * {@link QualityMeasure} as its distance function.
 	 * 
@@ -92,6 +92,86 @@ public class QualityMeasurement implements PropertyChangeListener {
   	this();
   	this.distance = quality;
   }
+
+	/**
+   * Copy constructor.
+   * 
+   * @param qualityMeasurement
+   */
+  public QualityMeasurement(QualityMeasurement qualityMeasurement) {
+		this(qualityMeasurement.getDistance());
+		this.measurements.addAll(qualityMeasurement.getMeasurements());
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	protected Object clone() throws CloneNotSupportedException {
+		return new QualityMeasurement(this);
+	}
+  
+  /* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+	// Check if the given object is a pointer to precisely the same object:
+		if (super.equals(obj)) { 
+			return true; 
+		}
+		// Check if the given object is of identical class and not null: 
+		if ((obj == null) || (!getClass().equals(obj.getClass()))) { 
+			return false; 
+		}
+		if (obj instanceof QualityMeasurement) {
+		  QualityMeasurement qm = (QualityMeasurement) obj;
+		  boolean equal = true;
+		  equal &= isSetDistance() == qm.isSetDistance();
+		  if (equal && isSetDistance()) {
+		  	equal &= distance.equals(qm.getDistance());
+		  }
+		  equal &= measurements.equals(qm.getMeasurements());
+		  return equal;
+		}
+		return false;
+	}
+  
+  /**
+   * @return the distance
+   */
+  public QualityMeasure getDistance() {
+    return distance;
+  }
+  
+  /**
+   * @return the measurements
+   */
+  public List<MultiTable> getMeasurements() {
+    return measurements;
+  }
+  
+  /* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 7;
+		int hashCode = getClass().getName().hashCode();
+		if (isSetDistance()) {
+			hashCode += prime * distance.hashCode();
+		}
+		hashCode += prime * measurements.hashCode();
+		return hashCode;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean isSetDistance() {
+		return distance != null;
+	}
   
   /* (non-Javadoc)
    * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
@@ -130,18 +210,20 @@ public class QualityMeasurement implements PropertyChangeListener {
     
   }
   
-  /**
-   * @return the distance
-   */
-  public QualityMeasure getDistance() {
-    return distance;
-  }
-  
-  /**
-   * @return the measurements
-   */
-  public List<MultiTable> getMeasurements() {
-    return measurements;
-  }
+  /* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getClass().getSimpleName());
+		sb.append('['); 
+		sb.append("distance=");
+		sb.append(isSetDistance() ? distance.toString() : "null");
+		sb.append(",measurements=");
+		sb.append(measurements.toString());
+		sb.append(']');
+		return sb.toString();
+	}
   
 }
