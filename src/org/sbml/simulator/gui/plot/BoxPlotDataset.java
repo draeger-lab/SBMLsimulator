@@ -211,7 +211,7 @@ public class BoxPlotDataset extends AbstractXYDataset implements
 	private List<Series> series;
 
 	/**
-	 * 
+	 * Mapping between the identifier of a series and the series itself.
 	 */
 	private SortedMap<String, Series> seriesMap;
 	
@@ -290,13 +290,6 @@ public class BoxPlotDataset extends AbstractXYDataset implements
 	 */
 	public double getFaroutCoefficient() {
 		return 2d;
-	}
-	
-	/**
-	 * 
-	 */
-	public String getSeriesIdentifier(int series) {
-		return this.series.get(series).getId();
 	}
 	
 	/**
@@ -430,6 +423,20 @@ public class BoxPlotDataset extends AbstractXYDataset implements
 		return series.size();
 	}
 	
+	/**
+	 * 
+	 */
+	public String getSeriesIdentifier(int series) {
+		return this.series.get(series).getId();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.gui.plot.MetaDataset#getSeriesIndex(java.lang.String)
+	 */
+	public int getSeriesIndex(String identifier) {
+		return Collections.binarySearch(series, seriesMap.get(identifier));
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.jfree.data.general.SeriesDataset#getSeriesKey(int)
 	 */
@@ -443,7 +450,7 @@ public class BoxPlotDataset extends AbstractXYDataset implements
 	public Number getX(int series, int item) {
 		return this.series.get(series).getTimeAt(item);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.jfree.data.xy.XYDataset#getY(int, int)
 	 */

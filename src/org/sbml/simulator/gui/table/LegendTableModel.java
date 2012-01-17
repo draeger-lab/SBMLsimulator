@@ -326,12 +326,21 @@ public class LegendTableModel extends AbstractTableModel {
 	}
 
 	/**
+	 * 
+	 * @param rowIndex
+	 * @return
+	 */
+	public NamedSBaseWithDerivedUnit getSBase(int rowIndex) {
+		return (NamedSBaseWithDerivedUnit) getValueAt(rowIndex, getNamedSBaseColumn());
+	}
+	
+	/**
    * @return the selectedCount the number of selected components in the model.
    */
   public int getSelectedCount() {
     return selectedCount;
   }
-	
+
 	/* (non-Javadoc)
 	 * @see javax.swing.table.TableModel#getValueAt(int, int)
 	 */
@@ -390,7 +399,7 @@ public class LegendTableModel extends AbstractTableModel {
 	public boolean isSelected(int rowIndex) {
 		return ((Boolean) data[rowIndex][boolCol]).booleanValue();
 	}
-
+	
 	/**
 	 * Returns <code>true</code> if the {@link NamedSBase} belonging to the given
    * <code>id</code> is selected for being shown in the plot.
@@ -405,14 +414,14 @@ public class LegendTableModel extends AbstractTableModel {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * @param model
 	 */
 	public void setModel(Model model) {
 		setModel(model, false);
 	}
-
+	
 	/**
 	 * @param model
 	 * @param includeReactions
@@ -423,7 +432,7 @@ public class LegendTableModel extends AbstractTableModel {
 		this.listOfCallableSBase = new ListOfCallableSBase(model);
 		init();
 	}
-	
+
 	/**
 	 * 
 	 * @param selected
@@ -433,7 +442,7 @@ public class LegendTableModel extends AbstractTableModel {
 	    setSelected(i, selected);
 	  }
 	}
-
+	
 	/**
 	 * 
 	 * @param clazz
@@ -469,7 +478,7 @@ public class LegendTableModel extends AbstractTableModel {
 	public void setSelected(int rowIndex, boolean selected) {
 		setValueAt(Boolean.valueOf(selected), rowIndex, getColumnPlot());
 	}
-	
+
 	/**
 	 * Changes the selection status for the {@link NamedSBase} with the given
 	 * identifier.

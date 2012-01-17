@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
@@ -398,7 +399,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 					Model model = doc.getModel();
 					simPanel = new SimulationPanel(model);
 					getContentPane().add(simPanel, BorderLayout.CENTER);
-					addPreferenceChangeListener(simPanel.getSimulationToolPanel());
+					addPreferenceChangeListener(simPanel);
 					
 					GUITools.swapAccelerator(getJMenuBar(), BaseAction.FILE_OPEN ,Command.OPEN_DATA);
 					GUITools.setEnabled(false, getJMenuBar(), BaseAction.FILE_OPEN);
@@ -406,7 +407,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 						BaseAction.FILE_SAVE_AS, Command.SIMULATION_START,
 						Command.SHOW_OPTIONS, Command.OPEN_DATA);
 					setTitle(String.format("%s - %s", getApplicationName(),
-						model.isSetName() ? model.getName() : modelFiles[0].getName()));
+						modelFiles[0].getAbsolutePath()));
 					
 				} else {
 					JOptionPane.showMessageDialog(this, StringUtil.toHTML(
@@ -454,6 +455,11 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 				if (openDir != null) {
 					SBPreferences prefs = SBPreferences.getPreferencesFor(getClass());
 					prefs.put(CSVOptions.CSV_FILES_OPEN_DIR, openDir);
+					try {
+						prefs.flush();
+					} catch (BackingStoreException exc) {
+						logger.fine(exc.getLocalizedMessage());
+					}
 				}
 			} else {
 				// reject data files
