@@ -18,20 +18,25 @@
 package org.sbml.simulator.math;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.math.ode.DerivativeException;
 import org.junit.Assert;
 import org.junit.Test;
 
 import org.sbml.jsbml.Model;
+import org.sbml.jsbml.SBMLException;
+import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.jsbml.xml.stax.SBMLReader;
+import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.io.CSVDataImporter;
 import org.simulator.math.odes.AbstractDESSolver;
 import org.simulator.math.odes.MultiTable;
@@ -62,9 +67,168 @@ public class SimulationTestAutomatic {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
+		boolean onlyRosenbrock=true;
+		if((args.length>=2)&&(args[1].equals("all"))) {
+			onlyRosenbrock=false;
+		}
+		
+		if(onlyRosenbrock) {
+			testRosenbrockSolver(args[0]);
+		}
+		else {
+			statisticForSolvers(args[0]);
+		}
+	}	
+		
+	private static void statisticForSolvers(String file)
+		throws FileNotFoundException, IOException {
 		String sbmlfile, csvfile, configfile;
-		for (int modelnr = 937; modelnr <= 943; modelnr++) {
-		  System.out.println("model " + modelnr);
+		
+		//initialize solvers
+		List<AbstractDESSolver> solvers = new LinkedList<AbstractDESSolver>();
+		for (Class<AbstractDESSolver> solverClass : SBMLsimulator
+				.getAvailableSolvers()) {
+			try {
+				// instantiate solver
+				AbstractDESSolver solver = solverClass.newInstance();
+				if (solver != null) {
+					solvers.add(solver);
+				}
+			} catch (Exception e) {
+				
+			}
+		}
+		
+		int[] highDistances = new int[solvers.size()];
+		int[] errors = new int[solvers.size()];
+		int[] correctSimulations = new int[solvers.size()];
+		int nModels = 0;
+		for (int i = 0; i != solvers.size(); i++) {
+			highDistances[i] = 0;
+			errors[i] = 0;
+			correctSimulations[i] = 0;
+		}
+		
+		for (int modelnr = 1; modelnr <= 900; modelnr++) {
+			System.out.println("model " + modelnr);
+			nModels++;
+			
+			StringBuilder modelFile = new StringBuilder();
+			modelFile.append(modelnr);
+			while (modelFile.length() < 5)
+				modelFile.insert(0, '0');
+			String path = modelFile.toString();
+			modelFile.append('/');
+			modelFile.append(path);
+			modelFile.insert(0, file);
+			path = modelFile.toString();
+			csvfile = path + "-results.csv";
+			configfile = path + "-settings.txt";
+			
+			Properties props = new Properties();
+			props.load(new BufferedReader(new FileReader(configfile)));
+			// int start = Integer.valueOf(props.getProperty("start"));
+			double duration = Double.valueOf(props.getProperty("duration"));
+			double steps = Double.valueOf(props.getProperty("steps"));
+			// double absolute = Double.valueOf(props.getProperty("absolute"));
+			// double relative = Double.valueOf(props.getProperty("relative"));
+			/*
+			 * Other variables: variables: S1, S2 amount: concentration:
+			 */
+			// String[] sbmlFileTypes = { "-sbml-l1v2.xml", "-sbml-l2v1.xml",
+			// "-sbml-l2v2.xml", "-sbml-l2v3.xml", "-sbml-l2v4.xml",
+			// "-sbml-l3v1.xml" };
+			
+			String[] sbmlFileTypes = { "-sbml-l2v1.xml", "-sbml-l2v2.xml",
+					"-sbml-l2v3.xml", "-sbml-l2v4.xml", "-sbml-l3v1.xml" };
+			
+			boolean[] highDistance = new boolean[solvers.size()];
+			boolean[] errorInSimulation = new boolean[solvers.size()];
+			for (int i = 0; i != solvers.size(); i++) {
+				highDistance[i] = false;
+				errorInSimulation[i] = false;
+			}
+			
+			for (String sbmlFileType : sbmlFileTypes) {
+				sbmlfile = path + sbmlFileType;
+				Model model = null;
+				try {
+					model = (new SBMLReader()).readSBML(sbmlfile).getModel();
+				} catch (Exception e) {
+				}
+				if (model != null) {
+					// get timepoints
+					CSVDataImporter csvimporter = new CSVDataImporter();
+					MultiTable inputData = csvimporter.convert(model, csvfile);
+					double[] timepoints = inputData.getTimePoints();
+					duration = timepoints[timepoints.length - 1] - timepoints[0];
+					for (int i = 0; i != solvers.size(); i++) {
+						AbstractDESSolver solver = solvers.get(i);
+						solver.reset();
+						try {
+							double dist = testModel(solver, model, inputData, duration
+									/ steps);
+							if (dist > 0.1) {
+								logger.log(Level.INFO, sbmlFileType + ": "
+										+ "relative distance for model-" + modelnr
+										+ " with solver " + solver.getName());
+								logger.log(Level.INFO, String.valueOf(dist));
+								highDistance[i] = true;
+							} else if (Double.isNaN(dist)) {
+								errorInSimulation[i] = true;
+							}
+						} catch (DerivativeException e) {
+							logger.warning("Exception in model " + modelnr);
+							errorInSimulation[i] = true;
+						} catch (ModelOverdeterminedException e) {
+							logger.warning("OverdeterminationException in model " + modelnr);
+							errorInSimulation[i] = true;
+						}
+					}
+					
+				}
+			}
+			for (int i = 0; i != solvers.size(); i++) {
+				if (highDistance[i]) {
+					highDistances[i]++;
+				}
+				if (errorInSimulation[i]) {
+					errors[i]++;
+				}
+				if ((!highDistance[i]) && (!errorInSimulation[i])) {
+					correctSimulations[i]++;
+				}
+			}
+		}
+		for (int i = 0; i != solvers.size(); i++) {
+			System.out.println(solvers.get(i).getName());
+			System.out.println("Models: " + nModels);
+			System.out.println("Models with too high distance to experimental data: "
+					+ highDistances[i]);
+			System.out.println("Models with errors in simulation: " + errors[i]);
+			System.out.println("Models with correct simulation: "
+					+ correctSimulations[i]);
+			System.out.println();
+		}
+		
+	}
+	
+	/**
+	 * 
+	 * @param file
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	private static void testRosenbrockSolver(String file)
+			throws FileNotFoundException, IOException {
+		String sbmlfile, csvfile, configfile;
+		int highDistances=0;
+		int errors=0;
+		int nModels=0;
+		int correctSimulations=0;
+		AbstractDESSolver solver = new RosenbrockSolver();
+		for (int modelnr = 1; modelnr <= 980; modelnr++) {
+			System.out.println("model " + modelnr);
 
 			StringBuilder modelFile = new StringBuilder();
 			modelFile.append(modelnr);
@@ -73,72 +237,122 @@ public class SimulationTestAutomatic {
 			String path = modelFile.toString();
 			modelFile.append('/');
 			modelFile.append(path);
-			modelFile.insert(0, args[0]);
+			modelFile.insert(0, file);
 			path = modelFile.toString();
-			sbmlfile = path + "-sbml-l3v1.xml";
 			csvfile = path + "-results.csv";
 			configfile = path + "-settings.txt";
 
 			Properties props = new Properties();
 			props.load(new BufferedReader(new FileReader(configfile)));
-//			int start = Integer.valueOf(props.getProperty("start"));
+			// int start = Integer.valueOf(props.getProperty("start"));
 			double duration = Double.valueOf(props.getProperty("duration"));
 			double steps = Double.valueOf(props.getProperty("steps"));
-//			double absolute = Double.valueOf(props.getProperty("absolute"));
-//			double relative = Double.valueOf(props.getProperty("relative"));
+			// double absolute = Double.valueOf(props.getProperty("absolute"));
+			// double relative = Double.valueOf(props.getProperty("relative"));
 			/*
-			 * Other variables:
-			 * variables: S1, S2
-			 * amount:
-			 * concentration:
+			 * Other variables: variables: S1, S2 amount: concentration:
 			 */
-			try {
-				Model model = (new SBMLReader()).readSBML(sbmlfile).getModel();
-					//sbmlIo.convert2Model(sbmlfile);
+			// String[] sbmlFileTypes = { "-sbml-l1v2.xml", "-sbml-l2v1.xml",
+			// "-sbml-l2v2.xml", "-sbml-l2v3.xml", "-sbml-l2v4.xml",
+			// "-sbml-l3v1.xml" };
 
-				AbstractDESSolver solver = new RosenbrockSolver();
-				SBMLinterpreter interpreter = new SBMLinterpreter(model);
-				// get timepoints
-				CSVDataImporter csvimporter = new CSVDataImporter();
-				MultiTable inputData = csvimporter.convert(model, csvfile);
-				
-				double[] timepoints = inputData.getTimePoints();
-
-				
-				duration=timepoints[timepoints.length-1]-timepoints[0];
-				solver.setStepSize(duration/steps);
-				MultiTable solution=solver.solve(interpreter, interpreter.getInitialValues(), timepoints);
-				
-				
-				QualityMeasure distance = new EuclideanDistance();
-
-				double dist=distance.distance(solution, inputData);
-				
-				BufferedWriter writer = new BufferedWriter(new FileWriter(
-						args[1] + modelnr + "-deviation.txt"));
-				writer.write("relative distance for model-" + modelnr);
-				writer.newLine();
-				/*
-				writer.write(String.valueOf());
-				*/
-				writer.write(String.valueOf(dist));
-				writer.close();
-				if(dist>0.1) {
-					logger.log(Level.INFO, "relative distance for model-" + modelnr);
-					logger.log(Level.INFO,String.valueOf(dist));
+			String[] sbmlFileTypes = { "-sbml-l2v1.xml", "-sbml-l2v2.xml",
+					"-sbml-l2v3.xml", "-sbml-l2v4.xml", "-sbml-l3v1.xml" };
+			boolean highDistance=false, errorInSimulation=false;
+			for (String sbmlFileType : sbmlFileTypes) {
+				sbmlfile = path + sbmlFileType;
+				Model model = null;
+				try {
+					model = (new SBMLReader()).readSBML(sbmlfile).getModel();
+				} catch (Exception e) {
 				}
-				if (solver.isUnstable()) {
-					logger.warning("unstable!");
-				} 
-//					else {
-//					(new Thread(new Plotter(solution, inputData, args[1]
-//							+ modelnr + "-graph.jpg"))).start();
-//				}
-			} catch (Exception e) {
-				e.printStackTrace();
+				if (model != null) {
+					// get timepoints
+					CSVDataImporter csvimporter = new CSVDataImporter();
+					MultiTable inputData = csvimporter.convert(model, csvfile);
+					double[] timepoints = inputData.getTimePoints();
+					duration = timepoints[timepoints.length - 1]
+							- timepoints[0];
+					solver.reset();
+					try {
+						double dist=testModel(solver, model, inputData, duration / steps);
+						if (dist > 0.1) {
+							logger.log(Level.INFO, sbmlFileType + ": "
+							+ "relative distance for model-" + modelnr
+							+ " with solver " + solver.getName());
+							logger.log(Level.INFO, String.valueOf(dist));
+							highDistance=true;
+						}
+						else if(Double.isNaN(dist)) {
+							errorInSimulation=true;
+						}
+					}
+					catch(DerivativeException e) {
+						logger.warning("Exception in model " + modelnr);
+						errorInSimulation=true;
+					}
+					catch(ModelOverdeterminedException e) {
+						logger.warning("OverdeterminationException in model " + modelnr);
+						errorInSimulation=true;
+					}
+				}
+			}
+			nModels++;
+			if(highDistance) {
+				highDistances++;
+			}
+			if(errorInSimulation) {
+				errors++;
+			}
+			if((!highDistance) && (!errorInSimulation)) {
+				correctSimulations++;
 			}
 		}
+		System.out.println("Models: "+nModels);
+		System.out.println("Models with too high distance to experimental data: "+highDistances);
+		System.out.println("Models with errors in simulation: "+errors);
+		System.out.println("Models with correct simulation: "+correctSimulations);
 	}
+	
+	/**
+	 * 
+	 * @param model
+	 * @param inputData
+	 * @param timepoints
+	 * @param sbmlFileType
+	 * @param modelnr
+	 * @param stepSize
+	 * @throws ModelOverdeterminedException 
+	 * @throws SBMLException 
+	 * @throws DerivativeException 
+	 */
+	private static double testModel(AbstractDESSolver solver, Model model,
+			MultiTable inputData, double stepSize) throws SBMLException,
+			ModelOverdeterminedException, DerivativeException {
+		// initialize interpreter
+		SBMLinterpreter interpreter = new SBMLinterpreter(model);
+
+		if ((solver != null) && (interpreter != null)) {
+			solver.setStepSize(stepSize);
+
+			// solve
+			MultiTable solution = solver.solve(interpreter,
+					interpreter.getInitialValues(), inputData.getTimePoints());
+
+			// compute distance
+			QualityMeasure distance = new EuclideanDistance();
+			double dist = distance.distance(solution, inputData);
+			if (solver.isUnstable()) {
+				logger.warning("unstable!");
+				return Double.NaN;
+			}
+			return dist;
+		} else {
+			return Double.NaN;
+		}
+
+	}
+	
 	
 	/**
 	 * TEST_CASES must be set to the address of the folder "semantic" in the SBML test suite.
@@ -149,7 +363,7 @@ public class SimulationTestAutomatic {
 	public void testModels() throws FileNotFoundException, IOException {
 		String file=System.getenv("TEST_CASES");
 		String sbmlfile, csvfile, configfile;
-		for (int modelnr = 1; modelnr <= 800; modelnr++) {
+		for (int modelnr = 1; modelnr <= 980; modelnr++) {
 		  System.out.println("model " + modelnr);
 
 			StringBuilder modelFile = new StringBuilder();
@@ -161,7 +375,7 @@ public class SimulationTestAutomatic {
 			modelFile.append(path);
 			modelFile.insert(0, file);
 			path = modelFile.toString();
-			sbmlfile = path + "-sbml-l3v1.xml";
+			
 			csvfile = path + "-results.csv";
 			configfile = path + "-settings.txt";
 
@@ -178,52 +392,73 @@ public class SimulationTestAutomatic {
 			 * amount:
 			 * concentration:
 			 */
-			try {
-				Model model = (new SBMLReader()).readSBML(sbmlfile).getModel();
-					//sbmlIo.convert2Model(sbmlfile);
+			
+			String[] sbmlFileTypes = {"-sbml-l1v2.xml","-sbml-l2v1.xml","-sbml-l2v2.xml","-sbml-l2v3.xml","-sbml-l2v4.xml","-sbml-l3v1.xml"};
+				
+			for (String sbmlFileType : sbmlFileTypes) {
+				sbmlfile = path + sbmlFileType;
+				File sbmlFile = new File(sbmlfile);
 
-				AbstractDESSolver solver = new RosenbrockSolver();
-				SBMLinterpreter interpreter = new SBMLinterpreter(model);
-				// get timepoints
-				CSVDataImporter csvimporter = new CSVDataImporter();
-				MultiTable inputData = csvimporter.convert(model, csvfile);
-				
-				double[] timepoints = inputData.getTimePoints();
+				if ((sbmlFile != null) && (sbmlFile.exists())) {
+					// read model
+					Model model = null;
+					boolean errorInModelReading = false;
+					try {
+						model = (new SBMLReader()).readSBML(sbmlFile)
+								.getModel();
+					} catch (Exception e) {
+						errorInModelReading = true;
+					}
+					Assert.assertNotNull(model);
+					Assert.assertFalse(errorInModelReading);
 
-				
-				duration=timepoints[timepoints.length-1]-timepoints[0];
-				solver.setStepSize(duration/steps);
-				MultiTable solution=solver.solve(interpreter, interpreter.getInitialValues(), timepoints);
-				
-				
-				QualityMeasure distance = new EuclideanDistance();
+					AbstractDESSolver solver = new RosenbrockSolver();
+					// initialize interpreter
+					SBMLinterpreter interpreter = null;
+					boolean exceptionInInterpreter = false;
+					try {
+						interpreter = new SBMLinterpreter(model);
+					} catch (SBMLException e) {
+						exceptionInInterpreter = true;
+					} catch (ModelOverdeterminedException e) {
+						exceptionInInterpreter = true;
+					}
+					Assert.assertNotNull(interpreter);
+					Assert.assertFalse(exceptionInInterpreter);
 
-				double dist=distance.distance(solution, inputData);
-				
-				BufferedWriter writer = new BufferedWriter(new FileWriter(
-						file + modelnr + "-deviation.txt"));
-				writer.write("relative distance for model-" + modelnr);
-				writer.newLine();
-				/*
-				writer.write(String.valueOf());
-				*/
-				writer.write(String.valueOf(dist));
-				writer.close();
-				Assert.assertFalse(solver.isUnstable());
-				Assert.assertTrue(dist<=0.1);
-				if(dist>0.1) {
-					logger.log(Level.INFO, "relative distance for model-" + modelnr);
-					logger.log(Level.INFO,String.valueOf(dist));
+					// get timepoints
+					CSVDataImporter csvimporter = new CSVDataImporter();
+					MultiTable inputData = csvimporter.convert(model, csvfile);
+					double[] timepoints = inputData.getTimePoints();
+					duration = timepoints[timepoints.length - 1]
+							- timepoints[0];
+
+					if ((solver != null) && (interpreter != null)) {
+						System.out.println(sbmlFileType + " "
+								+ solver.getName());
+						solver.setStepSize(duration / steps);
+
+						// solve
+						MultiTable solution = null;
+						boolean errorInSolve = false;
+						try {
+							solution = solver.solve(interpreter,
+									interpreter.getInitialValues(), timepoints);
+						} catch (DerivativeException e) {
+							errorInSolve = true;
+						}
+						Assert.assertNotNull(solution);
+						Assert.assertFalse(errorInSolve);
+						Assert.assertFalse(solver.isUnstable());
+
+						// compute distance
+						QualityMeasure distance = new EuclideanDistance();
+						double dist = distance.distance(solution, inputData);
+						Assert.assertTrue(dist <= 0.2);
+
+					}
 				}
-				if (solver.isUnstable()) {
-					logger.warning("unstable!");
-				} 
-//					else {
-//					(new Thread(new Plotter(solution, inputData, args[1]
-//							+ modelnr + "-graph.jpg"))).start();
-//				}
-			} catch (Exception e) {
-				e.printStackTrace();
+
 			}
 		}
 	}
