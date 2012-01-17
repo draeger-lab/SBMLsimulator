@@ -134,7 +134,7 @@ public class CSVDataImporter {
         String newHead[] = new String[(int) Math.max(0,
           reader.getHeader().length - 1)];
         
-        if ((model != null) && (newHead.length > expectedHeader.length)) {
+        if ((model != null) && (newHead.length > expectedHeader.length) && parent!=null) {
           JOptionPane.showMessageDialog(parent, StringUtil.toHTML(bundle
               .getString("ADDITIONAL_COLUMNS_ARE_IGNORED_TOOLTIP"), 40), bundle
               .getString("ADDITIONAL_COLUMNS_ARE_IGNORED"),
