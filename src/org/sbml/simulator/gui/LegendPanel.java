@@ -228,7 +228,10 @@ public class LegendPanel extends JPanel implements TableModelListener,
 	 * @return
 	 */
 	public boolean addTableModelListener(TableModelListener listener) {
-		return listOfTableModelListeners.add(listener);
+		if (!listOfTableModelListeners.contains(listener)) { 
+			return listOfTableModelListeners.add(listener); 
+		}
+		return false;
 	}
 
 	/**

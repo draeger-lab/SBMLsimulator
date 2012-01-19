@@ -206,11 +206,13 @@ public class SimulationPanel extends JPanel implements
       }
     }
   }
+  
   /**
+   * 
+   * @param title
    * @param data
-   * @throws Exception
    */
-  public void addExperimentalData(String title, MultiTable data) throws Exception {
+  public void addExperimentalData(String title, MultiTable data) {
   	dataTableView.addTable(title, data);
     tabbedPane.setEnabledAt(TAB_EXPERIMENT_INDEX, true);
     // TODO: Don't fire property change event twice!
@@ -219,6 +221,7 @@ public class SimulationPanel extends JPanel implements
     simulationManager.getQualityMeasurement().propertyChange(new PropertyChangeEvent(this, "measurements", null, data));
     visualizationPanel.addExperimentData(data);
   }
+  
   /* (non-Javadoc)
    * @see org.sbml.simulator.math.odes.DESSolver#addPropertyChangedListener(java.beans.PropertyChangeListener)
    */
@@ -407,19 +410,6 @@ public class SimulationPanel extends JPanel implements
     return showSimulationToolPanel;
   }
   
-  /**
-   * 
-   */
-  public void loadPreferences() {
-    if (visualizationPanel != null) {
-      visualizationPanel.loadPreferences();
-    }
-    removeAll();
-    this.simulationToolPanel = null;
-    init();
-    validate();
-  }
-  
   /* (non-Javadoc)
    * @see eva2.server.stat.InterfaceStatisticsListener#notifyGenerationPerformed(java.lang.String[], java.lang.Object[], java.lang.Double[])
    */
@@ -450,7 +440,7 @@ public class SimulationPanel extends JPanel implements
       for (int i = 0; i < selectedQuantityIds.length; i++) {
         double currentQuantity=Double.parseDouble(solutionString[i].replace(',', '.'));
         visualizationPanel.updateQuantity(selectedQuantityIds[i], currentQuantity);
-        System.out.println(selectedQuantityIds[i] + ": " +currentQuantity);
+        logger.info(selectedQuantityIds[i] + ": " +currentQuantity);
       
       }
     }
@@ -668,7 +658,6 @@ public class SimulationPanel extends JPanel implements
    * @param data
    */
   private void setSimulationData(MultiTable data) {
-    data.addTableModelListener(visualizationPanel);
     visualizationPanel.setSimulationData(data);
     simTable.setModel(data);
     simTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -676,8 +665,8 @@ public class SimulationPanel extends JPanel implements
     TableColumn col;
     for (int i = 0; i < simTable.getColumnCount(); i++) {
       col = tabColMod.getColumn(i);
-      col.setPreferredWidth(100);
-      col.setMinWidth(100);
+      col.setPreferredWidth(140);
+      col.setMinWidth(140);
     }
     tabbedPane.setEnabledAt(TAB_IN_SILICO_DATA_INDEX, true);
   }

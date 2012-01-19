@@ -115,13 +115,16 @@ public class BoxPlotDataset extends AbstractXYDataset implements
 			super();
 		}
 
+		/* (non-Javadoc)
+		 * @see java.lang.Comparable#compareTo(java.lang.Object)
+		 */
 		public int compareTo(Series s) {
-			return getName().compareTo(s.getName());
+			return getId().compareTo(s.getId());
 		}
 
 		/**
 		 * 
-		 * @param series
+		 * @param listOfSeries
 		 * @param item
 		 * @return
 		 */
@@ -208,7 +211,7 @@ public class BoxPlotDataset extends AbstractXYDataset implements
 	 * information, but the matrix doesn't have to be a square structure, i.e., it
 	 * is possible to have missing data points for some series.
 	 */
-	private List<Series> series;
+	private List<Series> listOfSeries;
 
 	/**
 	 * Mapping between the identifier of a series and the series itself.
@@ -217,7 +220,7 @@ public class BoxPlotDataset extends AbstractXYDataset implements
 	
 	public BoxPlotDataset() {
 		super();
-		series = new ArrayList<Series>();
+		listOfSeries = new ArrayList<Series>();
 		seriesMap = new TreeMap<String, Series>();
 	}
 	
@@ -225,22 +228,9 @@ public class BoxPlotDataset extends AbstractXYDataset implements
 	 * 
 	 * @param tables
 	 */
-	public BoxPlotDataset(List<MultiTable> tables) {
+	public BoxPlotDataset(Iterable<MultiTable> tables) {
 		this();
-		if ((tables != null) && (tables.size() > 0)) {
-			for (MultiTable table : tables) {
-				add(table);
-			}
-		}
-	}
-	
-	/**
-	 * 
-	 * @param tables
-	 */
-	public BoxPlotDataset(MultiTable... tables) {
-		this();
-		if ((tables != null) && (tables.length > 0)) {
+		if (tables != null) {
 			for (MultiTable table : tables) {
 				add(table);
 			}
@@ -262,7 +252,7 @@ public class BoxPlotDataset extends AbstractXYDataset implements
 			if (!seriesMap.containsKey(id)) {
 				series = new Series();
 				seriesMap.put(id, series);
-				this.series.add(series);
+				this.listOfSeries.add(series);
 			} else {
 				series = seriesMap.get(id);
 			}
@@ -282,7 +272,7 @@ public class BoxPlotDataset extends AbstractXYDataset implements
 				}
 			}
 		}
-		Collections.sort(this.series);
+		Collections.sort(this.listOfSeries);
 	}
 	
 	/* (non-Javadoc)
@@ -299,14 +289,14 @@ public class BoxPlotDataset extends AbstractXYDataset implements
 	 * @return
 	 */
 	public Item getItem(int series, int item) {
-		return this.series.get(series).get(item);
+		return this.listOfSeries.get(series).get(item);
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.jfree.data.xy.XYDataset#getItemCount(int)
 	 */
 	public int getItemCount(int series) {
-		return this.series.get(series).size();
+		return this.listOfSeries.get(series).size();
 	}
 	
 	/* (non-Javadoc)
@@ -420,42 +410,45 @@ public class BoxPlotDataset extends AbstractXYDataset implements
 	 * @see org.jfree.data.general.SeriesDataset#getSeriesCount()
 	 */
 	public int getSeriesCount() {
-		return series.size();
+		return listOfSeries.size();
 	}
 	
 	/**
 	 * 
 	 */
 	public String getSeriesIdentifier(int series) {
-		return this.series.get(series).getId();
+		return this.listOfSeries.get(series).getId();
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.sbml.simulator.gui.plot.MetaDataset#getSeriesIndex(java.lang.String)
 	 */
 	public int getSeriesIndex(String identifier) {
-		return Collections.binarySearch(series, seriesMap.get(identifier));
+		if (!seriesMap.containsKey(identifier)) {
+			return -1;
+		}
+		return Collections.binarySearch(listOfSeries, seriesMap.get(identifier));
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.jfree.data.general.SeriesDataset#getSeriesKey(int)
 	 */
 	public String getSeriesKey(int series) {
-		return this.series.get(series).getName();
+		return this.listOfSeries.get(series).getName();
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.jfree.data.xy.XYDataset#getX(int, int)
 	 */
 	public Number getX(int series, int item) {
-		return this.series.get(series).getTimeAt(item);
+		return this.listOfSeries.get(series).getTimeAt(item);
 	}
 
 	/* (non-Javadoc)
 	 * @see org.jfree.data.xy.XYDataset#getY(int, int)
 	 */
 	public Number getY(int series, int item) {
-		Item i = this.series.get(series).get(item);
+		Item i = this.listOfSeries.get(series).get(item);
 		if (i != null) {
 				return i.getItem() != null ? i.getItem().getMean() : null;
 		}
@@ -467,7 +460,7 @@ public class BoxPlotDataset extends AbstractXYDataset implements
 	 */
 	@Override
 	public String toString() {
-		return series.toString();
+		return listOfSeries.toString();
 	}
 	
 }

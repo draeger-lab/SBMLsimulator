@@ -21,9 +21,11 @@ import org.jfree.data.xy.AbstractXYDataset;
 import org.simulator.math.odes.MultiTable;
 
 /**
+ * A wrapper for a {@link MultiTable} to be plotted easily.
  * 
  * @author Max Zwie&szlig;ele
  * @author Philip Stevens
+ * @author Andreas Dr&auml;ger
  * @version $Rev$
  * @since 1.0
  */
@@ -45,6 +47,35 @@ public class XYDatasetAdapter extends AbstractXYDataset implements MetaDataset {
 	public XYDatasetAdapter(MultiTable table) {
 		super();
 		this.table = table;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.jfree.data.general.AbstractDataset#clone()
+	 */
+	@Override
+	public XYDatasetAdapter clone() throws CloneNotSupportedException {
+		return new XYDatasetAdapter(table);
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		// Check if the given object is a pointer to precisely the same object:
+		if (super.equals(obj)) {
+			return true;
+		}
+		// Check if the given object is of identical class and not null: 
+		if ((obj == null) || (!getClass().equals(obj.getClass()))) {
+			return false;
+		}
+		// Check all child nodes recursively:
+		if (obj instanceof XYDatasetAdapter) {
+			XYDatasetAdapter data = (XYDatasetAdapter) obj;
+			return data.table.equals(table);
+		}
+		return false;
 	}
 
 	/* (non-Javadoc)
@@ -94,6 +125,25 @@ public class XYDatasetAdapter extends AbstractXYDataset implements MetaDataset {
 	 */
 	public Number getY(int series, int item) {
 		return table.getValueAt(item, series + 1);
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 769;
+		int hashCode = getClass().getName().hashCode();
+		hashCode += prime * table.hashCode();
+		return hashCode;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return table.toString();
 	}
 
 }
