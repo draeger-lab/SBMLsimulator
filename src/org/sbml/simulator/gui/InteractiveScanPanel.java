@@ -532,7 +532,11 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
    * @param value
    */
   public void updateQuantity(String id, double value) {
-    quantities[quantitiesHash.get(id).intValue()].setValue(value);
+  	Integer key = quantitiesHash.get(id);
+    if (key != null) {
+      quantities[key.intValue()].setValue(value);
+    }
+  	
   }
   
 }
