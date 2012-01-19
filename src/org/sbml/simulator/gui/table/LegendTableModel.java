@@ -370,7 +370,7 @@ public class LegendTableModel extends AbstractTableModel {
     }
     j = model.getNumCompartments();
     for (i = 0; i < model.getNumSpecies(); i++) {
-      fillData(model.getSpecies(i), i + j, true);
+      fillData(model.getSpecies(i), i + j, false); // true
     }
     j = model.getNumCompartments() + model.getNumSpecies();
     for (i = 0; i < model.getNumParameters(); i++) {
@@ -438,9 +438,12 @@ public class LegendTableModel extends AbstractTableModel {
 	 * @param selected
 	 */
 	public void setSelected(boolean selected) {
-	  for (int i = 0; i < getRowCount(); i++) {
-	    setSelected(i, selected);
+		for (int i = 0; i < getRowCount(); i++) {
+	    data[i][getColumnPlot()] = Boolean.valueOf(selected);
 	  }
+	  TableModelEvent evt = new TableModelEvent(this, 0, getRowCount() - 1, getColumnPlot(), TableModelEvent.UPDATE);
+		selectedCount = selected ? getRowCount() : 0;
+		fireTableChanged(evt);
 	}
 	
 	/**
@@ -515,9 +518,9 @@ public class LegendTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+		Object oldValue = getValueAt(rowIndex, columnIndex);
     if (columnIndex == getColumnPlot()) {
-      boolean plot = ((Boolean) getValueAt(rowIndex, getColumnPlot()))
-          .booleanValue();
+      boolean plot = ((Boolean) oldValue).booleanValue();
       boolean plotNew = ((Boolean) aValue).booleanValue();
       if (plot && !plotNew && (selectedCount > 0)) {
         selectedCount--;
@@ -525,8 +528,10 @@ public class LegendTableModel extends AbstractTableModel {
         selectedCount++;
       }
     }
-    data[rowIndex][columnIndex] = aValue;
-    fireTableCellUpdated(rowIndex, columnIndex);
+		if (!oldValue.equals(aValue)) {
+			data[rowIndex][columnIndex] = aValue;
+			fireTableCellUpdated(rowIndex, columnIndex);
+		}
 	}
 
 	/**

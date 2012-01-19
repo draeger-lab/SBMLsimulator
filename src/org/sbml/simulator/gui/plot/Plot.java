@@ -143,17 +143,18 @@ public class Plot extends ChartPanel implements PreferenceChangeListener {
 	 * 
 	 * @param series
 	 * @param renderer
+	 * @param id
 	 * @param label
+	 * @param infos
 	 * @param col
 	 * @param connected
 	 * @param visible
 	 */
 	private void createItemLabel(int series, AbstractRenderer renderer,
-		String label, String infos, Paint col, boolean connected,
+		String id, String label, String infos, Paint col, boolean connected,
 		boolean visible) {
 		if (visible) {
-			LegendItem legendItem = legendItems.containsKey(label) ? legendItems
-					.get(label) : new LegendItem(label, col);
+			LegendItem legendItem = legendItems.containsKey(id) ? legendItems.get(id) : new LegendItem(label, col);
 			if (infos != null) {
 				legendItem.setToolTipText(infos);
 			}
@@ -175,7 +176,7 @@ public class Plot extends ChartPanel implements PreferenceChangeListener {
 				legendItem.setShapeVisible(true);
 				legendItem.setOutlinePaint(Color.BLACK); 
 			}
-			legendItems.put(label, legendItem);
+			legendItems.put(id, legendItem);
 		}
 	}
 
@@ -272,8 +273,9 @@ public class Plot extends ChartPanel implements PreferenceChangeListener {
 				}
 			}
 			if (!(dataset instanceof MetaDataset)) {
-				createItemLabel(i, renderer, dataset.getSeriesKey(i).toString(), infos[i], col,
-					connected, visible);
+				createItemLabel(i, renderer,
+					((MetaDataset) dataset).getSeriesIdentifier(i),
+					dataset.getSeriesKey(i).toString(), infos[i], col, connected, visible);
 			}
 		}
 		
@@ -392,23 +394,23 @@ public class Plot extends ChartPanel implements PreferenceChangeListener {
 	private void setSeriesVisible(XYDataset data, AbstractRenderer renderer,
 		int index, String tooltip, Color color) {
 		if (index > -1) {
-			boolean visible = color != null;
+			Boolean visible = Boolean.valueOf(color != null);
 			renderer.setSeriesVisible(index, visible);
 			renderer.setSeriesVisibleInLegend(index, visible);
 			renderer.setSeriesItemLabelsVisible(index, visible);
 			renderer.setSeriesCreateEntities(index, visible);
+			String label = data.getSeriesKey(index).toString();
 			String id = null;
 			if (data instanceof MetaDataset) {
 				id = ((MetaDataset) data).getSeriesIdentifier(index);
 			}
-			if (visible) {
+			if (visible.booleanValue()) {
 				renderer.setSeriesPaint(index, color);
 				renderer.setSeriesFillPaint(index, color);
 				if ((id != null) && !legendItems.containsKey(id)) {
-					createItemLabel(index, renderer, data.getSeriesKey(index).toString(), tooltip,
-						color, false, visible);
+					createItemLabel(index, renderer, id, label, tooltip, color, false, visible);
 				}
-			} else if ((id != null) && legendItems.containsKey(id)) {
+			} else if (legendItems.containsKey(id)) {
 				legendItems.remove(id);
 			}
 		}

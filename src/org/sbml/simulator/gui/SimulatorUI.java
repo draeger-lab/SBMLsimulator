@@ -35,8 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.SortedMap;
 import java.util.logging.Logger;
-import java.util.prefs.BackingStoreException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
@@ -50,13 +50,11 @@ import javax.swing.UIManager;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLDocument;
-import org.sbml.jsbml.SBMLReader;
-import org.sbml.jsbml.util.StringTools;
 import org.sbml.optimization.EvA2GUIStarter;
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.SBMLsimulator;
-import org.sbml.simulator.io.CSVDataImporter;
+import org.sbml.simulator.io.CSVReadingTask;
 import org.sbml.simulator.io.SimulatorIOOptions;
 import org.simulator.math.odes.MultiTable;
 
@@ -66,13 +64,13 @@ import de.zbit.gui.BaseFrame;
 import de.zbit.gui.GUIOptions;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.ProgressBarSwing;
+import de.zbit.gui.SerialWorker;
 import de.zbit.io.CSVOptions;
 import de.zbit.io.SBFileFilter;
+import de.zbit.sbml.gui.SBMLReadingTask;
 import de.zbit.util.AbstractProgressBar;
-import de.zbit.util.FileTools;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
-import de.zbit.util.Timer;
 import de.zbit.util.ValuePairUncomparable;
 import de.zbit.util.prefs.SBPreferences;
 import de.zbit.util.prefs.SBProperties;
@@ -381,98 +379,79 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		/*
 		 * Update the graphical user interface given some files (model and maybe data).
 		 */
+		SerialWorker worker = new SerialWorker();
 		
 		// First the model(s):
 		if ((modelFiles != null) && (modelFiles.length > 0)) {
 			try {
-				// TODO: Do this in a different thread with some progress monitor for the user.
-				Timer timer = new Timer();
-				SBMLDocument doc = SBMLReader.read(modelFiles[0]);
-				logger.info(String.format(bundle.getString("READING_TIME"),
-					StringTools.toString(timer.getAndReset(false))));
-				if ((doc != null) && (doc.isSetModel())) {
-					
-					if ((simPanel != null) && !closeFile(false)) {
-						return null;
-					}
-					
-					Model model = doc.getModel();
-					simPanel = new SimulationPanel(model);
-					getContentPane().add(simPanel, BorderLayout.CENTER);
-					addPreferenceChangeListener(simPanel);
-					
-					GUITools.swapAccelerator(getJMenuBar(), BaseAction.FILE_OPEN ,Command.OPEN_DATA);
-					GUITools.setEnabled(false, getJMenuBar(), BaseAction.FILE_OPEN);
-					GUITools.setEnabled(true, getJMenuBar(), toolBar,
-						BaseAction.FILE_SAVE_AS, Command.SIMULATION_START,
-						Command.SHOW_OPTIONS, Command.OPEN_DATA);
-					setTitle(String.format("%s - %s", getApplicationName(),
-						modelFiles[0].getAbsolutePath()));
-					
-				} else {
-					JOptionPane.showMessageDialog(this, StringUtil.toHTML(
-						String.format(bundle.getString("COULD_NOT_OPEN_MODEL"),
-							modelFiles[0].getAbsolutePath()), StringUtil.TOOLTIP_LINE_LENGTH));
-				}
+				SBMLReadingTask task1 = new SBMLReadingTask(modelFiles[0], this);
+				task1.addPropertyChangeListener(EventHandler.create(PropertyChangeListener.class, this, "setSBMLDocument", "newValue"));
+				worker.add(task1);
 			} catch (Exception exc) {
 				GUITools.showErrorMessage(this, exc);
 			}
+			
 			if (modelFiles.length > 1) {
 				GUITools.showListMessage(this, bundle
 						.getString("CAN_ONLY_OPEN_ONE_MODEL_AT_A_TIME"), bundle
 						.getString("TOO_MANY_MODEL_FILES"), Arrays.asList(modelFiles)
-						.subList(1, modelFiles.length - 1));
+						.subList(1, modelFiles.length));
 			}
+		} 
+		
+		if ((dataFiles != null) && (dataFiles.length > 0)) {
+			// Second: the data
+			CSVReadingTask task2 = new CSVReadingTask(this, dataFiles);
+			task2.addPropertyChangeListener(EventHandler.create(PropertyChangeListener.class, this, "addExperimentalData", "newValue"));
+			worker.add(task2);
 		}
 		
-		// Second: the data
-		if ((dataFiles != null) && (dataFiles.length > 0)) {
-			if (simPanel != null) {
-				Model model = simPanel.getModel();
-				CSVDataImporter importer = new CSVDataImporter();
-				File openDir = null;
-				for (File dataFile : dataFiles) {
-					try {
-						MultiTable data = importer.convert(model,
-							dataFile.getAbsolutePath(), this);
-						if (data != null) {
-							simPanel.addExperimentalData(
-								FileTools.trimExtension(dataFile.getName()), data);
-							if (openDir == null) {
-								openDir = dataFile.getParentFile();
-							}
-						}
-					} catch (Exception exc) {
-						GUITools.showErrorMessage(this, exc);
-					}
-				}
-				if (simPanel.getExperimentalDataCount() > 0) {
-					// Optimization should not be available if there is nothing to optimize.
-					GUITools.setEnabled(
-						model.getNumQuantities() - model.getNumSpeciesReferences() > 0,
-						getJMenuBar(), toolBar, Command.OPTIMIZATION);
-				}
-				if (openDir != null) {
-					SBPreferences prefs = SBPreferences.getPreferencesFor(getClass());
-					prefs.put(CSVOptions.CSV_FILES_OPEN_DIR, openDir);
-					try {
-						prefs.flush();
-					} catch (BackingStoreException exc) {
-						logger.fine(exc.getLocalizedMessage());
-					}
-				}
-			} else {
-				// reject data files
-				JOptionPane.showMessageDialog(this,
-					bundle.getString("CANNOT_OPEN_DATA_WIHTOUT_MODEL"),
-					bundle.getString("UNABLE_TO_OPEN_DATA"), JOptionPane.WARNING_MESSAGE);
-			}
-		}
+		worker.execute();
 
 		// setStatusBarToMemoryUsage();
 		validate();
 		
 		return modelFiles;
+	}
+	
+	public void setSBMLDocument(Object obj) {
+		if ((obj == null) || !(obj instanceof SBMLDocument)) {
+			if (obj == null) {
+				logger.fine("Cannot set the SBMLDocument to a null value.");
+			} else {
+				logger.fine(String.format(
+				  "The given object of type %s is ignored because it cannot be cast to SBMLDocument.",
+					obj.getClass().getName()));
+			}
+		} else {
+			SBMLDocument doc = (SBMLDocument) obj;
+			if ((doc != null) && (doc.isSetModel())) {
+				
+				if ((simPanel != null) && !closeFile(false)) {
+					return;
+				}
+				
+				Model model = doc.getModel();
+				simPanel = new SimulationPanel(model);
+				getContentPane().add(simPanel, BorderLayout.CENTER);
+				addPreferenceChangeListener(simPanel);
+				
+				GUITools.swapAccelerator(getJMenuBar(), BaseAction.FILE_OPEN ,Command.OPEN_DATA);
+				GUITools.setEnabled(false, getJMenuBar(), BaseAction.FILE_OPEN);
+				GUITools.setEnabled(true, getJMenuBar(), toolBar,
+					BaseAction.FILE_SAVE_AS, Command.SIMULATION_START,
+					Command.SHOW_OPTIONS, Command.OPEN_DATA);
+				//			setTitle(String.format("%s - %s", getApplicationName(),
+				//				modelFiles[0].getAbsolutePath()));
+				validate();
+				
+			} else {
+				// TODO
+				//			JOptionPane.showMessageDialog(this, StringUtil.toHTML(
+				//				String.format(bundle.getString("COULD_NOT_OPEN_MODEL"),
+				//					modelFiles[0].getAbsolutePath()), StringUtil.TOOLTIP_LINE_LENGTH));
+			}
+		}
 	}
 
 	/**
@@ -600,6 +579,46 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 			}
 		}
 		logger.finer(bundle.getString("RECEIVED_WINDOW_EVENT"));
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public Model getModel() {
+		if (simPanel != null) {
+			return simPanel.getModel();
+		}
+		return null;
+	}
+
+	/**
+	 * 
+	 * @param obj
+	 */
+	@SuppressWarnings("unchecked")
+	public void addExperimentalData(Object obj) {
+		if (obj instanceof SortedMap<?, ?>) {
+			for (Map.Entry<String, MultiTable> entry : ((SortedMap<String, MultiTable>) obj).entrySet()) {
+				addExperimentalData(entry.getKey(), entry.getValue());
+			}
+		}
+	}
+	
+	/**
+	 * 
+	 * @param title
+	 * @param data
+	 */
+	public void addExperimentalData(String title, MultiTable data)  {
+		if (simPanel != null) {
+			simPanel.addExperimentalData(title, data);
+		} else {
+			// reject data files
+			JOptionPane.showMessageDialog(this,
+				bundle.getString("CANNOT_OPEN_DATA_WIHTOUT_MODEL"),
+				bundle.getString("UNABLE_TO_OPEN_DATA"), JOptionPane.WARNING_MESSAGE);
+		}
 	}
 	
 }

@@ -19,7 +19,7 @@ package org.sbml.optimization;
 
 import java.awt.Window;
 import java.awt.event.WindowListener;
-import java.util.List;
+import java.util.logging.Logger;
 
 import eva2.client.EvAClient;
 import eva2.gui.BeanInspector;
@@ -96,18 +96,10 @@ public class EvA2GUIStarter {
 		evaBP.evaClient.getStatistics().addDataListener(statisticsListener); 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * eva2.server.stat.InterfaceStatisticsListener#finalMultiRunResults(java
-	 * .lang.String[], java.util.List)
+	/**
+	 * A {@link Logger} for this class.
 	 */
-	public void finalMultiRunResults(String[] header,
-			List<Object[]> multiRunFinalObjectData) {
-		System.out.println("Last data line of multi runs: "
-				+ BeanInspector.toString(multiRunFinalObjectData));
-	}
+	private static final transient Logger logger = Logger.getLogger(EvA2GUIStarter.class.getName());
 
 	/*
 	 * (non-Javadoc)
@@ -120,7 +112,7 @@ public class EvA2GUIStarter {
 			Object[] statObjects, Double[] statDoubles) {
 		// statDoubles only contains double representations of statObject where
 		// possible (so its redundant)
-		System.out.println("Received data "
+		logger.info("Received data "
 				+ BeanInspector.toString(statObjects));
 	}
 
@@ -132,10 +124,10 @@ public class EvA2GUIStarter {
 	 */
 	public void notifyRunStarted(int runNumber, int plannedMultiRuns,
 			String[] header, String[] metaInfo) {
-		System.out.println("notifyRunStarted, " + runNumber + " of "
+		logger.info("notifyRunStarted, " + runNumber + " of "
 				+ plannedMultiRuns);
-		System.out.println("Headers: " + BeanInspector.toString(header));
-		System.out.println("Meta-info: " + BeanInspector.toString(metaInfo));
+		logger.info("Headers: " + BeanInspector.toString(header));
+		logger.info("Meta-info: " + BeanInspector.toString(metaInfo));
 	}
 
 	/*
@@ -145,7 +137,7 @@ public class EvA2GUIStarter {
 	 * boolean)
 	 */
 	public void notifyRunStopped(int runsPerformed, boolean completedLastRun) {
-		System.out.println("notifyRunStopped, " + runsPerformed
+		logger.info("notifyRunStopped, " + runsPerformed
 				+ ", last finished normally: " + completedLastRun);
 	}
 }

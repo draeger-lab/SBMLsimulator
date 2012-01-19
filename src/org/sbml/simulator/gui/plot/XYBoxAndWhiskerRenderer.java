@@ -67,6 +67,7 @@ public class XYBoxAndWhiskerRenderer extends
 		super();
 		artifactPaintList = new PaintList();
 		meanPaintList = new PaintList();
+		setBaseToolTipGenerator(new BoxAndWhiskerXYToolTipGenerator());
 	}
 	
 	/**
@@ -87,7 +88,10 @@ public class XYBoxAndWhiskerRenderer extends
 		ValueAxis rangeAxis, XYDataset dataset, int series, int item,
 		boolean selected, int pass) {
 		
-		if (!getSeriesVisible(series)) { return; }
+		Boolean visible = getSeriesVisible(series);
+		if ((visible == null) || !visible.booleanValue()) {
+			return; 
+		}
 		
 		// setup for collecting optional entity info...
 		EntityCollection entities = null;
@@ -208,8 +212,11 @@ public class XYBoxAndWhiskerRenderer extends
 		Rectangle2D dataArea, XYPlot plot, ValueAxis domainAxis,
 		ValueAxis rangeAxis, XYDataset dataset, int series, int item,
 		boolean selected, int pass) {
-		
-		if (!getSeriesVisible(series)) { return; }
+
+		Boolean visible = getSeriesVisible(series);
+		if ((visible == null) || !visible.booleanValue()) { 
+			return; 
+		}
 		
 		// setup for collecting optional entity info...
 		EntityCollection entities = null;

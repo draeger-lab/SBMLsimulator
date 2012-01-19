@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 import java.util.prefs.PreferenceChangeEvent;
 import java.util.prefs.PreferenceChangeListener;
 
@@ -59,6 +60,9 @@ import de.zbit.util.ValueTripletUncomparable;
 public class SimulationVisualizationPanel extends JSplitPane implements
 		PreferenceChangeListener, TableModelListener {
 
+	/**
+	 * For localization support.
+	 */
 	private static final transient ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
 
 	/**
@@ -111,6 +115,11 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 		super(HORIZONTAL_SPLIT, true);
 		includeReactions = true;
 	}
+	
+	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final transient Logger logger = Logger.getLogger(SimulationVisualizationPanel.class.getName());
 
 	/**
 	 * @param data
@@ -126,14 +135,22 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 				plot = true;
 			}
 			plot |= experimentData.add(data);
-			LegendTableModel legend = legendPanel.getLegendTableModel();
-			for (int i = 0; i < legend.getRowCount(); i++) {
-				if (!legend.isSelected(i) && (data.getColumn(legend.getId(i)) != null)) {
-					legend.setSelected(i, true);
-				}
-			}
 			if (plot) {
 				plot();
+			}
+			LegendTableModel legend = legendPanel.getLegendTableModel();
+			String id;
+			int columnIndex;
+			boolean selected;
+			for (int i = 0; i < legend.getRowCount(); i++) {
+				id = legend.getId(i);
+				columnIndex = data.getColumnIndex(id);
+				selected = columnIndex > -1;
+				if (selected) {
+					String name = legend.getNameFor(id);
+					logger.fine(String.format("Set %s = %s selected = %b", id, name, selected));
+					legend.setSelected(i, selected);
+				}
 			}
 		}
 	}
@@ -197,8 +214,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 */
 	public void plot() {
 		if ((simData != null) && (simData.getRowCount() > 0)) {
-			List<MultiTable> l = Arrays.asList(new MultiTable[] {simData});
-			plot(l, true, true);
+			plot(Arrays.asList(new MultiTable[] {simData}), true, true);
 		}
 		if ((experimentData != null) && (experimentData.size() > 0)) {
 			plot(experimentData, false, simData == null);
@@ -369,6 +385,9 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	 *            the simData to set
 	 */
 	public void setSimulationData(MultiTable simData) {
+		if (this.simData != null) {
+			this.simData.removeTableModelListener(this);
+		}
 		this.simData = simData;
 		this.simData.addTableModelListener(this);
 		plot();
@@ -389,14 +408,11 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 				NamedSBaseWithDerivedUnit nsb;
 				ValueTripletUncomparable<String, String, Color> triplet;
 				for (int i = e.getFirstRow(); i <= e.getLastRow(); i++) {
-					boolean selected = ((Boolean) legend.getValueAt(i,
-						LegendTableModel.getColumnPlot())).booleanValue();
-					nsb = (NamedSBaseWithDerivedUnit) legend.getValueAt(i,
-						LegendTableModel.getNamedSBaseColumn());
+					boolean selected = ((Boolean) legend.getValueAt(i, LegendTableModel.getColumnPlot())).booleanValue();
+					nsb = (NamedSBaseWithDerivedUnit) legend.getValueAt(i, LegendTableModel.getNamedSBaseColumn());
 					id = nsb.getId();
 					tooltip = HTMLtools.createTooltip(nsb);
-					color = selected ? (Color) legend.getValueAt(i,
-						LegendTableModel.getColumnColor()) : null;
+					color = selected ? (Color) legend.getValueAt(i, LegendTableModel.getColumnColor()) : null;
 					triplet = new ValueTripletUncomparable<String, String, Color>(id, tooltip, color);
 					items.add(triplet);
 				}

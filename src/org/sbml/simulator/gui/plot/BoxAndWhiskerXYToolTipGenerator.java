@@ -1,0 +1,59 @@
+/*
+ * $Id$
+ * $URL$
+ * ---------------------------------------------------------------------
+ * This file is part of SBMLsimulator, a Java-based simulator for models
+ * of biochemical processes encoded in the modeling language SBML.
+ *
+ * Copyright (C) 2007-2011 by the University of Tuebingen, Germany.
+ *
+ * This library is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation. A copy of the license
+ * agreement is provided in the file named "LICENSE.txt" included with
+ * this software distribution and also available online as
+ * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
+ * ---------------------------------------------------------------------
+ */
+package org.sbml.simulator.gui.plot;
+
+import java.text.MessageFormat;
+
+import org.jfree.data.xy.XYDataset;
+
+
+
+/**
+ * @author Andreas Dr&auml;ger
+ * @version $Rev$
+ * @since 1.0
+ */
+public class BoxAndWhiskerXYToolTipGenerator extends
+		org.jfree.chart.labels.BoxAndWhiskerXYToolTipGenerator {
+	
+  /**
+	 * Generated serial version identifier.
+	 */
+	private static final long serialVersionUID = -8559133032127605483L;
+	
+	/**
+	 * 
+	 */
+	private String formatString = "{0}: {1} Mean: {2} Median: {3} Min: {4} Max: {5} Q1: {6} Q3: {7}";
+	
+	/**
+	 * 
+	 */
+	public BoxAndWhiskerXYToolTipGenerator() {
+		super();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.jfree.chart.labels.AbstractXYItemLabelGenerator#generateLabelString(org.jfree.data.xy.XYDataset, int, int)
+	 */
+	@Override
+	public String generateLabelString(XYDataset dataset, int series, int item) {
+		return MessageFormat.format(this.formatString, createItemArray(dataset, series, item));
+	}
+	
+}

@@ -235,7 +235,6 @@
   <entry key="OPEN_DATA_TOOLTIP">Open one ore multiple experimental data sets.</entry>
   <entry key="OPTIMIZATION">Optimization</entry>
   <entry key="OPTIMIZATION_TOOLTIP">Launch the optimization of the quantities in the current model, i.e., fits the model to given experimental data.</entry>
-  <entry key="READING_TIME">Reading time: %s s</entry>
   <entry key="SHOW_OPTIONS">Show options</entry>
   <entry key="SHOW_OPTIONS_TOOLTIP">Decide whether or not to display the options.</entry>
   <entry key="SIMULATION_START">Start simulation</entry>
