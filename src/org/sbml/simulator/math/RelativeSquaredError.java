@@ -53,7 +53,7 @@ public class RelativeSquaredError extends N_Metric {
 	 */
 	@Override
 	double additiveTerm(double x, double y, double root, double defaultValue) {
-		return (y != 0d) ? Math.pow((x - y) / y, root) : Math.abs(x - y);
+		return (y != 0d) ? Math.pow(Math.abs(x - y) / y, root) : Math.abs(x - y);
 	}
 
 	/*

@@ -34,6 +34,26 @@ public class PearsonCorrelation extends QualityMeasure {
 	 */
 	private static final long serialVersionUID = -493779339080103217L;
 
+	
+	/**
+	 * Default constructor. This sets the standard value for the parameter as
+	 * given by the getStandardParameter() method. The default value is set to
+	 * NaN.
+	 */
+	public PearsonCorrelation() {
+		super();
+		meanFunction=new ArithmeticMean();
+	}
+
+	/**
+	 * Constructor, which allows setting the parameter value for default value.
+	 * 
+	 * @param defaultValue
+	 */
+	public PearsonCorrelation(double defaultValue) {
+		super(defaultValue);
+		meanFunction=new ArithmeticMean();
+	}
 	/* (non-Javadoc)
 	 * @see org.sbml.simulator.math.Distance#distance(java.lang.Iterable, java.lang.Iterable, double)
 	 */
