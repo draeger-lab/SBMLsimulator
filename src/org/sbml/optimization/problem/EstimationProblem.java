@@ -29,6 +29,7 @@ import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.optimization.QuantityRange;
+import org.sbml.simulator.math.PearsonCorrelation;
 import org.sbml.simulator.math.QualityMeasure;
 import org.simulator.math.odes.AbstractDESSolver;
 import org.simulator.math.odes.DESSolver;
@@ -127,6 +128,11 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * 
 	 */
 	private Map<String,Integer> id2Index;
+
+	/**
+	 * 
+	 */
+	private boolean negationOfDistance;
 	
 	/**
 	 * 
@@ -176,9 +182,13 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		Model model, List<MultiTable> list, QuantityRange... quantityRanges)
 		throws ModelOverdeterminedException, SBMLException {
 		super();
+		negationOfDistance=false;
 		multishoot = false;
 		setSolver(solver);
 		setDistance(distance);
+		if(distance instanceof PearsonCorrelation) {
+			negationOfDistance=true;
+		}
 		setModel(model);
 		setReferenceData(list.toArray(new MultiTable[0]));
 		setQuantityRanges(quantityRanges);
@@ -200,7 +210,11 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	public EstimationProblem(EstimationProblem problem) {
 		super(problem);
 		setSolver(problem.getSolver());
+		negationOfDistance=false;
 		setDistance(problem.getDistance());
+		if(distance instanceof PearsonCorrelation) {
+			negationOfDistance=true;
+		}
 		try {
 			setModel(problem.getModel());
 		} catch (Exception e) {
@@ -261,8 +275,15 @@ public class EstimationProblem extends AbstractProblemDouble implements
 			}
 			for (MultiTable data : referenceData) {
 				// equal weight for each reference data set
-				fitness[0] += distance.distance(solution.getBlock(0), data.getBlock(0))
+				if(negationOfDistance) {
+					fitness[0] += -1 * distance.distance(solution.getBlock(0), data.getBlock(0))
 						/ referenceData.length;
+				}
+				else {
+					fitness[0] += distance.distance(solution.getBlock(0), data.getBlock(0))
+					/ referenceData.length;
+				}
+				
 			}
 			if (bestPerGeneration == null
 					|| (fitness[0] < bestPerGenerationDist)) {
