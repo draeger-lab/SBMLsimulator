@@ -19,6 +19,7 @@ package org.sbml.simulator.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -32,6 +33,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -91,6 +93,24 @@ import eva2.tools.BasicResourceLoader;
 public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		PropertyChangeListener {
   
+	static {    
+		String iconPaths[] = { "SBMLsimulator_16.png", "SBMLsimulator_32.png",
+				"SBMLsimulator_48.png", "SBMLsimulator_128.png",
+				"SBMLsimulator_256.png" };
+		for (String path : iconPaths) {
+		  URL url = SimulatorUI.class.getResource("img/" + path);
+		  if (url!=null) {
+			  UIManager.put(path.substring(0, path.lastIndexOf('.')), new ImageIcon(url));
+		  }
+		}
+		try {
+		  org.sbml.tolatex.gui.LaTeXExportDialog.initImages();
+		} catch (Throwable t) {
+		  // Also allow KEGGtranslator to compile without
+		  // SBML2LaTeX !
+		}
+	}
+	
 	/**
 	 * Commands that can be understood by this dialog.
 	 * 
@@ -197,6 +217,15 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 				open(new File(props.get(SimulatorIOOptions.TIME_SERIES_FILE).toString()));
 			}
 		}
+		int[] resolutions=new int[]{16,32,48,128,256};
+		List<Image> icons = new LinkedList<Image>();
+		for (int res: resolutions) {
+		  Object icon = UIManager.get("SBMLsimulator_" + res);
+		  if ((icon != null) && (icon instanceof ImageIcon)) {
+		    icons.add(((ImageIcon) icon).getImage());
+		  }
+		}
+		setIconImages(icons);
 	}
 	
 	
