@@ -93,21 +93,15 @@ import eva2.tools.BasicResourceLoader;
 public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		PropertyChangeListener {
   
-	static {    
-		String iconPaths[] = { "SBMLsimulator_16.png", "SBMLsimulator_32.png",
-				"SBMLsimulator_48.png", "SBMLsimulator_128.png",
-				"SBMLsimulator_256.png" };
-		for (String path : iconPaths) {
-		  URL url = SimulatorUI.class.getResource("img/" + path);
-		  if (url!=null) {
-			  UIManager.put(path.substring(0, path.lastIndexOf('.')), new ImageIcon(url));
-		  }
-		}
-		try {
-		  org.sbml.tolatex.gui.LaTeXExportDialog.initImages();
-		} catch (Throwable t) {
-		  // Also allow KEGGtranslator to compile without
-		  // SBML2LaTeX !
+	static {
+		int[] resolutions = new int[] { 16, 32, 48, 128, 256 };
+		String path;
+		for (int resulution : resolutions) {
+			path = "SBMLsimulator_" + resulution + ".png";
+			URL url = SimulatorUI.class.getResource("img/" + path);
+			if (url != null) {
+				UIManager.put(path.substring(0, path.lastIndexOf('.')), new ImageIcon(url));
+			}
 		}
 	}
 	
@@ -217,7 +211,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 				open(new File(props.get(SimulatorIOOptions.TIME_SERIES_FILE).toString()));
 			}
 		}
-		int[] resolutions=new int[]{16,32,48,128,256};
+		int[] resolutions = new int[] {16, 32, 48, 128, 256};
 		List<Image> icons = new LinkedList<Image>();
 		for (int res: resolutions) {
 		  Object icon = UIManager.get("SBMLsimulator_" + res);
