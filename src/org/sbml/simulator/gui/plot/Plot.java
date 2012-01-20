@@ -410,7 +410,7 @@ public class Plot extends ChartPanel implements PreferenceChangeListener {
 				if ((id != null) && !legendItems.containsKey(id)) {
 					createItemLabel(index, renderer, id, label, tooltip, color, false, visible);
 				}
-			} else if (legendItems.containsKey(id)) {
+			} else if ((id != null) && legendItems.containsKey(id)) {
 				legendItems.remove(id);
 			}
 		}
