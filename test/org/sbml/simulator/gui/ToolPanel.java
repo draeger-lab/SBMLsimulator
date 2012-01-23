@@ -18,10 +18,12 @@
 package org.sbml.simulator.gui;
 
 import java.awt.Color;
+import java.awt.HeadlessException;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.IOException;
 
 import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
@@ -32,6 +34,7 @@ import javax.swing.event.ChangeListener;
 import org.sbml.simulator.SimulationOptions;
 
 import de.zbit.gui.prefs.PreferencesPanel;
+import de.zbit.gui.prefs.PreferencesPanelForKeyProvider;
 import de.zbit.util.prefs.SBPreferences;
 
 /**
@@ -39,67 +42,25 @@ import de.zbit.util.prefs.SBPreferences;
  * @version $Rev$
  * @date 07.12.2011
  */
-public class ToolPanel extends JPanel implements ChangeListener, ItemListener, KeyListener {
+public class ToolPanel extends PreferencesPanelForKeyProvider {
 
 	/**
 	 * Generated serial version identifier.
 	 */
 	private static final long serialVersionUID = 732384672242621355L;
 	
-	public ToolPanel() {
-		super();
-		SBPreferences prefs = SBPreferences.getPreferencesFor(SimulationOptions.class);
-		add(PreferencesPanel.createJComponentForOption(SimulationOptions.SIM_START_TIME, prefs, this));
-		add(PreferencesPanel.createJComponentForOption(SimulationOptions.SIM_END_TIME, prefs, this));
-		
-		setBorder(BorderFactory.createLineBorder(Color.BLACK));
+	public ToolPanel() throws IOException {
+		super(SimulationOptions.class);
 	}
 	
 	/**
 	 * 
 	 * @param args
+	 * @throws IOException 
+	 * @throws HeadlessException 
 	 */
-	public static void main(String args[]) {
+	public static void main(String args[]) throws HeadlessException, IOException {
 		JOptionPane.showMessageDialog(null, new ToolPanel());
 	}
 
-	/* (non-Javadoc)
-	 * @see java.awt.event.KeyListener#keyTyped(java.awt.event.KeyEvent)
-	 */
-	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	/* (non-Javadoc)
-	 * @see java.awt.event.KeyListener#keyPressed(java.awt.event.KeyEvent)
-	 */
-	public void keyPressed(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	/* (non-Javadoc)
-	 * @see java.awt.event.KeyListener#keyReleased(java.awt.event.KeyEvent)
-	 */
-	public void keyReleased(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	/* (non-Javadoc)
-	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
-	 */
-	public void itemStateChanged(ItemEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	/* (non-Javadoc)
-	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
-	 */
-	public void stateChanged(ChangeEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
 }

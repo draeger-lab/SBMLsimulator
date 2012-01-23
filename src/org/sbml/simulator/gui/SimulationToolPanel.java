@@ -134,16 +134,16 @@ private List<PreferenceChangeListener> listOfPreferenceChangeListeners;
 		
 		// Create content:
 		LayoutHelper aSet = new LayoutHelper(new JPanel());
-		aSet.add(createIntegrationPanel(), 0, 0, 1, 1, 1d, 0d);
-		aSet.add(createQualityPanel(), 1, 0, 1, 1, 0d, 0d);
-		aSet.add(createPlotPanel(), 2, 0, 1, 1, 0d, 0d);
+		aSet.add(createIntegrationPanel(), 0, 0, 1, 1, .33d, 0d);
+		aSet.add(createQualityPanel(), 1, 0, 1, 1, .33d, 0d);
+		aSet.add(createPlotPanel(), 2, 0, 1, 1, .33d, 0d);
 		add(aSet.getContainer(), BorderLayout.CENTER);
 		
 		// Initialize and add listeners:
 		this.simulationManager.addPropertyChangeListener(this);
 		SimulationConfiguration simulationConfiguration = simulationManager.getSimulationConfiguration();
 		QualityMeasurement qualityMeasurement = simulationManager.getQualityMeasurement();
-    addPropertyChangeListener(simulationConfiguration);
+        addPropertyChangeListener(simulationConfiguration);
 		addPropertyChangeListener(qualityMeasurement);
 	}
 	
