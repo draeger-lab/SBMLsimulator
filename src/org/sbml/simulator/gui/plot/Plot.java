@@ -20,6 +20,7 @@ package org.sbml.simulator.gui.plot;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Shape;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -43,7 +44,6 @@ import org.jfree.chart.util.VerticalAlignment;
 import org.jfree.data.statistics.BoxAndWhiskerXYDataset;
 import org.jfree.data.xy.XYDataset;
 
-import de.zbit.util.ValueTripletUncomparable;
 import de.zbit.util.prefs.Option;
 import de.zbit.util.prefs.SBPreferences;
 
@@ -69,12 +69,6 @@ public class Plot extends ChartPanel implements PreferenceChangeListener {
 	 * Generated serial version identifier.
 	 */
 	private static final long serialVersionUID = 176134486775218455L;
-	
-	/**
-	 * 
-	 */
-	private int datasetCount;
-	
 
 	private Map<String, LegendItem> legendItems;
 
@@ -98,6 +92,7 @@ public class Plot extends ChartPanel implements PreferenceChangeListener {
 	public Plot(String title, String xname, String yname) {
 		super(ChartFactory.createXYLineChart(title, xname, yname, null, true), false,
 			true, true, false, true);
+		this.listOfDataSetProps = new LinkedList<Boolean>();
 		
 		JFreeChart chart = getChart();
 		
@@ -131,11 +126,11 @@ public class Plot extends ChartPanel implements PreferenceChangeListener {
 	public void clearAll() {
 		JFreeChart chart = getChart();
 		if (chart != null) {
-			for (int i = 0; i < datasetCount; i++) {
+			for (int i = 0; i < listOfDataSetProps.size(); i++) {
 				chart.getXYPlot().setDataset(i, null);
 			}
-			datasetCount = 0;
 			legendItems.clear();
+			listOfDataSetProps.clear();
 		}
 	}
 
@@ -160,7 +155,7 @@ public class Plot extends ChartPanel implements PreferenceChangeListener {
 			}
 			legendItem.setSeriesIndex(series);
 			Shape shape = null;
-			if (connected || (datasetCount > 0)) {
+			if (connected) { //  || (datasetCount > 0)
 				shape = renderer.lookupLegendShape(series);
 				if (shape != null) {
 					legendItem.setLine(shape);
@@ -168,7 +163,7 @@ public class Plot extends ChartPanel implements PreferenceChangeListener {
 				legendItem.setLinePaint(col);
 				legendItem.setLineVisible(true);
 			}
-			if (!connected || (datasetCount > 0)) {
+			if (!connected) { //  || (datasetCount > 0)
 				shape = renderer.lookupSeriesShape(series);
 				if (shape != null) {
 					legendItem.setShape(shape);
@@ -207,6 +202,8 @@ public class Plot extends ChartPanel implements PreferenceChangeListener {
 		}
 	}
 
+	private LinkedList<Boolean> listOfDataSetProps;
+	
 	/**
 	 * Plots a matrix either by displaying unconnected or connected points
 	 * depending on the connected parameter.
@@ -232,7 +229,8 @@ public class Plot extends ChartPanel implements PreferenceChangeListener {
 	public void plot(XYDataset dataset, boolean connected,
 			boolean showLegend, boolean showGrid, Color[] plotColors,
 			String[] infos) {
-		
+		int datasetCount = listOfDataSetProps.size();
+		listOfDataSetProps.add(Boolean.valueOf(connected));
 		XYPlot plot = getChart().getXYPlot();
 		plot.setDataset(datasetCount, dataset);
 
@@ -257,30 +255,13 @@ public class Plot extends ChartPanel implements PreferenceChangeListener {
 		for (int i = 0; i < plotColors.length; i++) {
 			Color col = plotColors[i];
 			boolean visible = col != null;
-			setSeriesVisible(dataset, renderer, i, infos[i], col);
-			if (visible) {
-				if (renderer instanceof XYBoxAndWhiskerRenderer) {
-					/*
-					 * Makes the "value" of the box a transparent item, i.e., invisible.
-					 * This causes the average and the mean not to be visible... because
-					 * both are drawn in the identical color.
-					 */
-					((XYBoxAndWhiskerRenderer) renderer).setArtifactPaint(i, Color.BLACK);
-					((XYBoxAndWhiskerRenderer) renderer).setMeanPaint(i, new Color(0, 0, 0, 75));
-				} else {
-					((XYLineAndShapeRenderer) renderer).setSeriesLinesVisible(i, connected);
-					((XYLineAndShapeRenderer) renderer).setSeriesShapesVisible(i, !connected);
-				}
-			}
+			setSeriesVisible(datasetCount, renderer, i, infos[i], col);
 			if (!(dataset instanceof MetaDataset)) {
 				createItemLabel(i, renderer,
 					((MetaDataset) dataset).getSeriesIdentifier(i),
 					dataset.getSeriesKey(i).toString(), infos[i], col, connected, visible);
 			}
 		}
-		
-		datasetCount++;
-
 		setLegendVisible(showLegend);
 		setGridVisible(showGrid);
 	}
@@ -357,13 +338,13 @@ public class Plot extends ChartPanel implements PreferenceChangeListener {
 	 * 
 	 * @param items
 	 */
-	public void setSeriesVisible(List<ValueTripletUncomparable<String, String, Color>> items) {
+	public void setSeriesVisible(List<SeriesInfo> items) {
 		int index;
-		Color color;
+		Paint paint;
 		XYPlot plot = getChart().getXYPlot();
 		String id, tooltip;
 		MetaDataset data;
-		ValueTripletUncomparable<String, String, Color> item;
+		SeriesInfo item;
 		AbstractRenderer renderer;
 		for (int i = 0; i < plot.getDatasetCount(); i++) {
 			// go through all datasets
@@ -372,11 +353,11 @@ public class Plot extends ChartPanel implements PreferenceChangeListener {
 			for (int j = 0; j < items.size(); j++) {
 				// look at each item whose state might have changed
 				item = items.get(j);
-				id = item.getA();
-				tooltip = item.getB();
-				color = item.getC();
+				id = item.getId();
+				tooltip = item.getTooltip();
+				paint = item.getPaint();
 				index = data.getSeriesIndex(id);
-				setSeriesVisible(data, renderer, index, tooltip, color);
+				setSeriesVisible(i, renderer, index, tooltip, paint);
 			}
 		}
 		// update the legend
@@ -385,30 +366,48 @@ public class Plot extends ChartPanel implements PreferenceChangeListener {
 
 	/**
 	 * 
-	 * @param data
+	 * @param dataSetIndex
 	 * @param renderer
 	 * @param index
 	 * @param tooltip
-	 * @param color
+	 * @param paint
 	 */
-	private void setSeriesVisible(XYDataset data, AbstractRenderer renderer,
-		int index, String tooltip, Color color) {
+	private void setSeriesVisible(int dataSetIndex, AbstractRenderer renderer,
+		int index, String tooltip, Paint paint) {
 		if (index > -1) {
-			Boolean visible = Boolean.valueOf(color != null);
+			Boolean visible = Boolean.valueOf(paint != null);
+			XYPlot plot = getChart().getXYPlot();
 			renderer.setSeriesVisible(index, visible);
 			renderer.setSeriesVisibleInLegend(index, visible);
 			renderer.setSeriesItemLabelsVisible(index, visible);
 			renderer.setSeriesCreateEntities(index, visible);
+			XYDataset data = plot.getDataset(dataSetIndex);
 			String label = data.getSeriesKey(index).toString();
 			String id = null;
 			if (data instanceof MetaDataset) {
 				id = ((MetaDataset) data).getSeriesIdentifier(index);
 			}
 			if (visible.booleanValue()) {
-				renderer.setSeriesPaint(index, color);
-				renderer.setSeriesFillPaint(index, color);
+				Boolean v = listOfDataSetProps.get(dataSetIndex);
+				boolean connected = v.booleanValue();
+				boolean linesVisible = v.booleanValue();
+				boolean shapesVisible = !v.booleanValue();
+				if (renderer instanceof XYBoxAndWhiskerRenderer) {
+					/*
+					 * Makes the "value" of the box a transparent item, i.e., invisible.
+					 * This causes the average and the mean not to be visible... because
+					 * both are drawn in the identical color.
+					 */
+					((XYBoxAndWhiskerRenderer) renderer).setArtifactPaint(index, Color.BLACK);
+					((XYBoxAndWhiskerRenderer) renderer).setMeanPaint(index, new Color(0, 0, 0, 75));
+				} else if (renderer instanceof XYLineAndShapeRenderer) {
+					((XYLineAndShapeRenderer) renderer).setSeriesLinesVisible(index, linesVisible);
+					((XYLineAndShapeRenderer) renderer).setSeriesShapesVisible(index, shapesVisible);
+				}
+				renderer.setSeriesPaint(index, paint);
+				renderer.setSeriesFillPaint(index, paint);
 				if ((id != null) && !legendItems.containsKey(id)) {
-					createItemLabel(index, renderer, id, label, tooltip, color, false, visible);
+					createItemLabel(index, renderer, id, label, tooltip, paint, connected, visible);
 				}
 			} else if ((id != null) && legendItems.containsKey(id)) {
 				legendItems.remove(id);
