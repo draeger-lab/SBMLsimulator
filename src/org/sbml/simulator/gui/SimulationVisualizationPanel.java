@@ -42,6 +42,7 @@ import org.sbml.jsbml.UnitDefinition;
 import org.sbml.simulator.gui.plot.BoxPlotDataset;
 import org.sbml.simulator.gui.plot.MetaDataset;
 import org.sbml.simulator.gui.plot.Plot;
+import org.sbml.simulator.gui.plot.SeriesInfo;
 import org.sbml.simulator.gui.plot.XYDatasetAdapter;
 import org.sbml.simulator.gui.table.LegendTableModel;
 import org.simulator.math.odes.MultiTable;
@@ -49,7 +50,6 @@ import org.simulator.math.odes.MultiTable;
 import de.zbit.sbml.util.HTMLtools;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
-import de.zbit.util.ValueTripletUncomparable;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -402,19 +402,20 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 					.getColumn() == LegendTableModel.getColumnColor()))
 					&& (e.getType() == TableModelEvent.UPDATE)) {
 				LegendTableModel legend = (LegendTableModel) e.getSource();
-				List<ValueTripletUncomparable<String, String, Color>> items = new LinkedList<ValueTripletUncomparable<String, String, Color>>();
-				String id, tooltip;
+				List<SeriesInfo> items = new LinkedList<SeriesInfo>();
+				String id, name, tooltip;
 				Color color;
 				NamedSBaseWithDerivedUnit nsb;
-				ValueTripletUncomparable<String, String, Color> triplet;
+				SeriesInfo info;
 				for (int i = e.getFirstRow(); i <= e.getLastRow(); i++) {
 					boolean selected = ((Boolean) legend.getValueAt(i, LegendTableModel.getColumnPlot())).booleanValue();
 					nsb = (NamedSBaseWithDerivedUnit) legend.getValueAt(i, LegendTableModel.getNamedSBaseColumn());
 					id = nsb.getId();
+					name = nsb.isSetName() ? nsb.getName() : null;
 					tooltip = HTMLtools.createTooltip(nsb);
 					color = selected ? (Color) legend.getValueAt(i, LegendTableModel.getColumnColor()) : null;
-					triplet = new ValueTripletUncomparable<String, String, Color>(id, tooltip, color);
-					items.add(triplet);
+					info = new SeriesInfo(id, name, tooltip, color);
+					items.add(info);
 				}
 				plot.setSeriesVisible(items);
 			}

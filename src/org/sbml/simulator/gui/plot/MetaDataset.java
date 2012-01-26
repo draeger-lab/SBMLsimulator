@@ -36,9 +36,9 @@ public interface MetaDataset extends XYDataset {
 	
 	/**
 	 * 
-	 * @param seriesName
+	 * @param identifier
 	 * @return
 	 */
-	public int getSeriesIndex(String seriesName);
+	public int getSeriesIndex(String identifier);
 	
 }

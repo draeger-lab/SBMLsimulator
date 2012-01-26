@@ -49,6 +49,8 @@ public class CSVReadingTask extends SwingWorker<SortedMap<String, MultiTable>, V
 
 	/**
 	 * 
+	 * @param ui
+	 * @param dataFiles
 	 */
 	public CSVReadingTask(SimulatorUI ui, File... dataFiles) {
 		super();

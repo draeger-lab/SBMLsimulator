@@ -636,6 +636,9 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	public void addExperimentalData(String title, MultiTable data)  {
 		if (simPanel != null) {
 			simPanel.addExperimentalData(title, data);
+			if (simPanel.getExperimentalData().size() == 1) {
+				GUITools.setEnabled(true, getJMenuBar(), getJToolBar(), Command.OPTIMIZATION);
+			}
 		} else {
 			// reject data files
 			JOptionPane.showMessageDialog(this,

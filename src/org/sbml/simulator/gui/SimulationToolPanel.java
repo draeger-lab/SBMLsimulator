@@ -460,7 +460,7 @@ private List<PreferenceChangeListener> listOfPreferenceChangeListeners;
 				&& (!pEvt.getNewValue().equals(pEvt.getOldValue()))) {
 			qualityMeasureField.setValue(pEvt.getNewValue());
 			qualityMeasureField.setText(StringUtil.toString(
-				simulationManager.getMeanDistanceValue(), 10, 3, 10));
+				simulationManager.getMeanDistanceValue()));
 			if (!qualityMeasureField.isEnabled()) {
 				qualityMeasureField.setEditable(false);
 				qualityMeasureField.setEnabled(true);
