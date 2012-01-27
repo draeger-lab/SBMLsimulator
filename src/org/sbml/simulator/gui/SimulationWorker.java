@@ -41,12 +41,12 @@ import de.zbit.util.Timer;
 /**
  * @author Andreas Dr&auml;ger
  * @author Philip Stevens
- * @author Max Zwießele
+ * @author Max Zwie&szlig;ele
  * @date 2010-09-17
  * @version $Rev$
  * @since 1.0
  */
-public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implements PropertyChangeListener{
+public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implements PropertyChangeListener {
 
 	/**
    * The {@link ResourceBundle} for localization.

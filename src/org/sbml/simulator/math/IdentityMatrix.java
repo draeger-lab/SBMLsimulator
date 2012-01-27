@@ -21,7 +21,6 @@ package org.sbml.simulator.math;
  * This Class represents a m x m identity matrix
  * 
  * @author Alexander D&ouml;rr
- * @date
  * @version $Rev$
  * @since 1.0
  */

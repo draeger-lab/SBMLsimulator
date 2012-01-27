@@ -8,6 +8,15 @@
 	   and the given value consists of the actual short name and - separated
 	   by a semicolon ";" the corresponding tool tip.
   </comment>
+  
+  <!-- BoxAndWhiskerXYToolTipGenerator -->
+  
+  <entry key="MEAN">mean</entry>
+  <entry key="MEDIAN">median</entry>
+  <entry key="MIN">min</entry>
+  <entry key="MAX">max</entry>
+  <entry key="Q1">Q1</entry>
+  <entry key="Q3">Q3</entry>
       
   <!-- COMPONENT -->
   
@@ -61,6 +70,15 @@
   <entry key="INTEGRATION_STRATEGY">Integration strategy</entry>
   <entry key="INTEGRATION_STRATEGY_TOOLTIP">Select whether or not to apply a multiple shooting strategy.</entry>
   
+  <!-- EstimationProblem -->
+  
+  <entry key="KIND_OF_SHOOTING">Using %s shooting!</entry>
+  <entry key="MULTIPLE">multiple</entry>
+  <entry key="SINGLE">single</entry>
+  <entry key="RESULT_OF_BEST_PER_GENERATION">Result of the best per generation model simulation</entry>
+  <entry key="OPTIMIZATION_TARGET_IS_NOT_PART_OF_THE_MODEL">Cannot estimate the values of quantities that are not part of the given model.</entry>
+  <entry key="MISSING_REFERENCE_DATA">At least for one symbol reference data are required.</entry>
+  
   <!-- InteractiveScanPanel -->
   
   <entry key="RESET">Reset</entry>
@@ -106,6 +124,7 @@
   
   <!-- Plot -->
   
+  <entry key="PLOT_SAVE_DIR_TOOLTIP">The default save directory for graphics files as a result of a plot.</entry>
   <entry key="PLOT_BACKGROUND_COLOR">Plot background color</entry>
   <entry key="PLOT_BACKGROUND_COLOR_TOOLTIP">The background color of the plot</entry>
   <entry key="PLOT_GRID_COLOR">Plot grid color</entry>
@@ -214,6 +233,9 @@
   
   <!-- SimulatorUI -->
   
+  <entry key="ABOUT_HTML">html/about.html</entry>
+  <entry key="LICENSE_HTML">html/License.html</entry>
+  <entry key="ONLINE_HELP_HTML">html/online-help.html</entry>
   <entry key="CAN_ONLY_OPEN_ONE_MODEL_AT_A_TIME">Can only open one model, rejecting the following files:</entry>
   <entry key="CANNOT_OPEN_DATA_WIHTOUT_MODEL">Cannot open data if no model has been opened.</entry>
   <entry key="UNABLE_TO_OPEN_DATA">Unable to open data</entry>

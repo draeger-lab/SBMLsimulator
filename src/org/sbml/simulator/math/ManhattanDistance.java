@@ -21,7 +21,7 @@ package org.sbml.simulator.math;
 /**
  * @author Roland Keller
  * @version $Rev$
- * @since
+ * @since 1.0
  */
 public class ManhattanDistance extends N_Metric {
 	

@@ -121,7 +121,7 @@ public class QualityMeasurement implements PropertyChangeListener {
 			return true; 
 		}
 		// Check if the given object is of identical class and not null: 
-		if ((obj == null) || (!getClass().equals(obj.getClass()))) { 
+		if ((obj == null) || !getClass().equals(obj.getClass())) { 
 			return false; 
 		}
 		if (obj instanceof QualityMeasurement) {

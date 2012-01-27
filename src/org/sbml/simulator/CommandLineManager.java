@@ -43,7 +43,7 @@ import de.zbit.util.prefs.SBProperties;
  * This class handels
  * 
  * @author Alexander D&ouml;rr
- * @version $Rev: 281 $
+ * @version $Rev$
  * @since 1.0
  */
 

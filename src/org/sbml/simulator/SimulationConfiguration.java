@@ -247,7 +247,7 @@ public class SimulationConfiguration implements PropertyChangeListener {
 		boolean change = false;
 		logger.fine(evt.getPropertyName() + "\t" + evt.getNewValue());
 
-		if ("model".equals(property)) {
+		if (property.equals("model")) {
 			
 			model = (Model) evt.getNewValue();
 			
@@ -275,7 +275,7 @@ public class SimulationConfiguration implements PropertyChangeListener {
 			prefs.put(SimulationOptions.SIM_STEP_SIZE, stepSize);
 			change = true;
 			
-		} else if ("includeReactions".equals(property)) {
+		} else if (property.equals("includeReactions")) {
 			
 			includeReactions = ((Boolean) evt.getNewValue()).booleanValue();
 			

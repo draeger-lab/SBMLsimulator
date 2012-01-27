@@ -77,7 +77,7 @@ public interface PlotOptions extends KeyProvider {
    */
   public static final Option<File> PLOT_SAVE_DIR = new Option<File>(
     "PLOT_SAVE_DIR", File.class,
-    "The default save directory for graphics files as a result of a plot.",
+    bundle.getString("PLOT_SAVE_DIR_TOOLTIP"),
     new Range<File>(File.class, SBFileFilter.createDirectoryFilter()),
     new File(System.getProperty("user.home")), false);
 	

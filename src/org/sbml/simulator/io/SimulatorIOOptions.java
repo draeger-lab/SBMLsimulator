@@ -72,4 +72,5 @@ public interface SimulatorIOOptions extends KeyProvider {
 	@SuppressWarnings("unchecked")
 	public final static OptionGroup<File> INPUT_FILES = new OptionGroup<File>(
 			"INPUT_FILES", bundle, SBML_INPUT_FILE, TIME_SERIES_FILE);
+
 }

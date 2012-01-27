@@ -18,8 +18,11 @@
 package org.sbml.simulator.gui.plot;
 
 import java.text.MessageFormat;
+import java.util.ResourceBundle;
 
 import org.jfree.data.xy.XYDataset;
+
+import de.zbit.util.ResourceManager;
 
 
 
@@ -39,13 +42,19 @@ public class BoxAndWhiskerXYToolTipGenerator extends
 	/**
 	 * 
 	 */
-	private String formatString = "{0}: {1} Mean: {2} Median: {3} Min: {4} Max: {5} Q1: {6} Q3: {7}";
+	private String formatString;
 	
 	/**
 	 * 
 	 */
 	public BoxAndWhiskerXYToolTipGenerator() {
 		super();
+		ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
+		formatString = String.format(
+			"{0}: {1} %s: {2} %s: {3} %s: {4} %s: {5} %s: {6} %s: {7}",
+			bundle.getString("MEAN"), bundle.getString("MEDIAN"),
+			bundle.getString("MIN"), bundle.getString("MAX"), bundle.getString("Q1"),
+			bundle.getString("Q3"));
 	}
 	
 	/* (non-Javadoc)

@@ -326,21 +326,21 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	 * @see de.zbit.gui.BaseFrame#getURLAboutMessage()
 	 */
 	public URL getURLAboutMessage() {
-		return getClass().getResource("html/about.html");
+		return getClass().getResource(bundle.getString("ABOUT_HTML"));
 	}
 
 	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrame#getURLLicense()
 	 */
 	public URL getURLLicense() {
-		return getClass().getResource("html/License.html");
+		return getClass().getResource(bundle.getString("LICENSE_HTML"));
 	}
 
 	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrame#getURLOnlineHelp()
 	 */
 	public URL getURLOnlineHelp() {
-		return getClass().getResource("html/online-help.html");
+		return getClass().getResource(bundle.getString("ONLINE_HELP_HTML"));
 	}
 
 	/* (non-Javadoc)
