@@ -140,18 +140,16 @@ public class CSVDataImporter {
               .getString("ADDITIONAL_COLUMNS_ARE_IGNORED"),
             JOptionPane.INFORMATION_MESSAGE);
         }
-        
+        Map<String, Integer> nameToColumn = new HashMap<String, Integer>();
         i = 0;
         for (String head : reader.getHeader()) {
           if (!head.equalsIgnoreCase(data.getTimeName())) {
-            newHead[i++] = head;
+            newHead[i++] = head.trim();
+            nameToColumn.put(newHead[i-1], reader.getColumnSensitive(head));
           }
         }
         data.addBlock(newHead); // alphabetically sorted
-        Map<String, Integer> nameToColumn = new HashMap<String, Integer>();
-        for (i = 0; i < newHead.length; i++) {
-          nameToColumn.put(newHead[i], reader.getColumnSensitive(newHead[i]));
-        }
+        
         double dataBlock[][] = data.getBlock(0).getData();
       	
         for (i = 0; i < dataBlock.length; i++) {
