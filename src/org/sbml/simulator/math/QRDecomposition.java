@@ -227,10 +227,12 @@ public class QRDecomposition implements Serializable {
 	 */
 	
 	public Matrix solve(Matrix B) {
-		if (B.getRowDimension() != m) { throw new IllegalArgumentException(
-			"Matrix row dimensions must agree."); }
-		if (!this.isFullRank()) { throw new RuntimeException(
-			"Matrix is rank deficient."); }
+		if (B.getRowDimension() != m) { 
+			throw new IllegalArgumentException("Matrix row dimensions must agree."); 
+		}
+		if (!this.isFullRank()) { 
+			throw new RuntimeException("Matrix is rank deficient."); 
+		}
 		
 		// Copy right hand side
 		int nx = B.getColumnDimension();

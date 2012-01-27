@@ -82,9 +82,11 @@ public class BoxPlotDataset extends AbstractXYDataset implements
 		 */
 		@Override
 		public String toString() {
-			if (item != null) { return String.format(
-				"[mean=%.3f, median=%.3f, q1=%.3f, q3=%.3f]", item.getMean(),
-				item.getMedian(), item.getQ1(), item.getQ3()); }
+			if (item != null) { 
+				return String.format(
+					"[mean=%.3f, median=%.3f, q1=%.3f, q3=%.3f]", item.getMean(),
+					item.getMedian(), item.getQ1(), item.getQ3());
+			}
 			return values.toString();
 		}
 		

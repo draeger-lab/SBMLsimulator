@@ -18,9 +18,9 @@
 package org.sbml.simulator.gui.table;
 
 import java.awt.Color;
-import java.util.AbstractList;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
@@ -29,7 +29,6 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 
-import org.sbml.jsbml.CallableSBase;
 import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.NamedSBase;
@@ -37,11 +36,10 @@ import org.sbml.jsbml.NamedSBaseWithDerivedUnit;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.Species;
-import org.sbml.jsbml.util.compilers.HTMLFormula;
 
 import de.zbit.gui.ColorPalette;
+import de.zbit.sbml.gui.UnitDerivationWorker;
 import de.zbit.util.ResourceManager;
-import de.zbit.util.StringUtil;
 import de.zbit.util.ValuePair;
 
 /**
@@ -50,55 +48,7 @@ import de.zbit.util.ValuePair;
  * @version $Rev$
  * @since 1.0
  */
-public class LegendTableModel extends AbstractTableModel {
-
-	/**
-	 * 
-	 * @author Andreas Dr&auml;ger
-	 * @version $Rev$
-	 * @since 1.0
-	 */
-	private static class ListOfCallableSBase extends AbstractList<CallableSBase> {
-	  
-	  /**
-	   * 
-	   */
-	  private Model model;
-	  
-	  /**
-	   * 
-	   * @param model
-	   */
-	  public ListOfCallableSBase(Model model) {
-	    this.model = model;
-	  }
-	  
-	  /* (non-Javadoc)
-     * @see java.util.AbstractList#get(int)
-     */
-    public CallableSBase get(int index) {
-      if (index < model.getNumCompartments()) {
-        return model.getCompartment(index);
-      }
-      index -= model.getNumCompartments();
-      if (index < model.getNumSpecies()) {
-        return model.getSpecies(index);
-      }
-      index -= model.getNumSpecies();
-      if (index < model.getNumParameters()) {
-        return model.getParameter(index);
-      }
-      index -= model.getNumParameters();
-      return model.getReaction(index);
-    }
-    
-    /* (non-Javadoc)
-     * @see java.util.AbstractCollection#size()
-     */
-    public int size() {
-      return model.getNumSymbols() + model.getNumReactions();
-    }
-	}
+public class LegendTableModel extends AbstractTableModel implements PropertyChangeListener {
 	
 	/**
 	 * Column indices for the content
@@ -168,8 +118,6 @@ public class LegendTableModel extends AbstractTableModel {
 	 * So save run time memorize the last queried key of the hash.
 	 */
 	private ValuePair<String, Integer> lastQueried;
-
-	private List<CallableSBase> listOfCallableSBase;
 
 	/**
 	 * Pointer to the model
@@ -382,6 +330,7 @@ public class LegendTableModel extends AbstractTableModel {
         fillData(model.getReaction(i), i + j, false);
       }
     }
+    updateOrDeriveUnits();
 	}
 
 	/* (non-Javadoc)
@@ -415,13 +364,29 @@ public class LegendTableModel extends AbstractTableModel {
 		return false;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+	 */
+	public void propertyChange(PropertyChangeEvent evt) {
+		if (evt.getPropertyName().equals("done") && (evt.getOldValue() == null)) {
+			String defs[] = (String[]) evt.getNewValue();
+			for (int rowIndex = 0; rowIndex < defs.length; rowIndex++) {
+				data[rowIndex][unitCol] = defs[rowIndex];
+			}
+			for (TableModelListener l : getTableModelListeners()) {
+				l.tableChanged(new TableModelEvent(this, 0, getRowCount() - 1,
+					getColumnUnit(), TableModelEvent.UPDATE));
+			}
+		}
+	}
+	
 	/**
 	 * @param model
 	 */
 	public void setModel(Model model) {
 		setModel(model, false);
 	}
-	
+
 	/**
 	 * @param model
 	 * @param includeReactions
@@ -429,10 +394,9 @@ public class LegendTableModel extends AbstractTableModel {
 	public void setModel(Model model, boolean includeReactions) {
 		this.includeReactions = includeReactions;
 		this.model = model;
-		this.listOfCallableSBase = new ListOfCallableSBase(model);
 		init();
 	}
-
+	
 	/**
 	 * 
 	 * @param selected
@@ -471,7 +435,7 @@ public class LegendTableModel extends AbstractTableModel {
 	    setSelected(i, selected);
 	  }
 	}
-	
+
 	/**
 	 * Changes the selection status for the {@link NamedSBase} in the given row.
 	 * 
@@ -538,19 +502,9 @@ public class LegendTableModel extends AbstractTableModel {
 	 * 
 	 */
 	public void updateOrDeriveUnits() {
-	  for (int rowIndex = 0; rowIndex < listOfCallableSBase.size(); rowIndex++) {
-      try {
-        data[rowIndex][unitCol] = StringUtil.toHTML(HTMLFormula.toHTML(listOfCallableSBase.get(rowIndex)
-            .getDerivedUnitDefinition()));
-      } catch (Exception exc) {
-        data[rowIndex][unitCol] = "N/A";
-        logger.fine(exc.getLocalizedMessage());
-      }
-    }
-    for (TableModelListener l : getTableModelListeners()) {
-      l.tableChanged(new TableModelEvent(this, 0, getRowCount() - 1,
-        getColumnUnit(), TableModelEvent.UPDATE));
-    }
+		UnitDerivationWorker worker = new UnitDerivationWorker(model);
+		worker.addPropertyChangeListener(this);
+		worker.execute();
 	}
 
 }

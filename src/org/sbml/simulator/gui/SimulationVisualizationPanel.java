@@ -32,7 +32,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
-import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
@@ -344,14 +343,6 @@ public class SimulationVisualizationPanel extends JSplitPane implements
     setLeftComponent(topDown);
     setRightComponent(plot);
     setDividerLocation(topDown.getDividerLocation() + 200);
-    SwingUtilities.invokeLater(new Runnable() {
-      /* (non-Javadoc)
-       * @see java.lang.Runnable#run()
-       */
-      public void run() {
-        legendPanel.updateOrDeriveUnits(); 
-      }
-    });
 	}
 
 	/**

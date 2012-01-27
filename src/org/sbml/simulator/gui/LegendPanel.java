@@ -34,7 +34,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -119,7 +118,7 @@ public class LegendPanel extends JPanel implements TableModelListener,
 	}
 	
 	/**
-	 * 
+	 * Localization support.
 	 */
   private static final transient ResourceBundle bundle = ResourceManager
       .getBundle("org.sbml.simulator.locales.Simulator");
@@ -278,20 +277,6 @@ public class LegendPanel extends JPanel implements TableModelListener,
 	public LegendTableModel getLegendTableModel() {
 		return legend;
 	}
-	
-	/**
-	 * 
-	 */
-  public void updateOrDeriveUnits() {
-    SwingUtilities.invokeLater(new Runnable() {
-      /* (non-Javadoc)
-       * @see java.lang.Runnable#run()
-       */
-      public void run() {
-        legend.updateOrDeriveUnits();
-      }
-    });
-  }
 
 	/**
 	 * 
@@ -310,7 +295,7 @@ public class LegendPanel extends JPanel implements TableModelListener,
       if (e.getColumn() == LegendTableModel.getColumnPlot()) {
         checkSelected();
       } else if (e.getColumn() == LegendTableModel.getColumnUnit()) {
-        repaint();
+        validate();
       }
     }
 		for (TableModelListener tml : listOfTableModelListeners) {

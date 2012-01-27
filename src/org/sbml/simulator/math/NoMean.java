@@ -22,6 +22,7 @@ package org.sbml.simulator.math;
  * @author Roland Keller
  * @version $Rev$
  */
+// TODO: What is NoMean???
 public class NoMean extends MeanFunction {
   
   /**

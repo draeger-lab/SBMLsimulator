@@ -45,35 +45,27 @@ public class RelativeSquaredError extends N_Metric {
 		super(2d);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.sbml.squeezer.math.Distance#additiveTerm(double, double, double,
-	 * double)
+	/* (non-Javadoc)
+	 * @see org.sbml.squeezer.math.Distance#additiveTerm(double, double, double, double)
 	 */
 	@Override
 	double additiveTerm(double x, double y, double root, double defaultValue) {
 		return (y != 0d) ? Math.pow(Math.abs(x - y) / y, root) : Math.abs(x - y);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see org.sbml.squeezer.math.Distance#getName()
 	 */
 	@Override
 	public String getName() {
 		String name = super.getName();
 		if (getRoot() != 2d) {
-			name = String.format(
-				"%s, %s = %s", name, StringTools.toString(getRoot()));
+			name = String.format("%s, %s = %s", name, StringTools.toString(getRoot()));
 		}
 		return name;
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see org.sbml.squeezer.math.NMetric#overallDistance()
 	 */
 	@Override

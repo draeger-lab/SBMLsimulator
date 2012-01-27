@@ -27,6 +27,7 @@ import java.util.Set;
  * 
  * @author Alexander D&ouml;rr
  * @version $Rev$
+ * @since 1.0
  */
 public class ConservationRelations {
 

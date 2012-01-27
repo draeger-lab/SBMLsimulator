@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 import org.sbml.jsbml.Model;
@@ -36,6 +37,7 @@ import org.simulator.math.odes.DESSolver;
 import org.simulator.math.odes.MultiTable;
 import org.simulator.sbml.SBMLinterpreter;
 
+import de.zbit.util.ResourceManager;
 import eva2.server.go.PopulationInterface;
 import eva2.server.go.populations.Population;
 import eva2.server.go.problems.AbstractProblemDouble;
@@ -51,6 +53,8 @@ import eva2.tools.ToolBox;
  */
 public class EstimationProblem extends AbstractProblemDouble implements
 		InterfaceAdditionalPopulationInformer, InterfaceHasInitRange {
+	
+	private static final ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
 	
 	/**
 	 * 
@@ -161,11 +165,8 @@ public class EstimationProblem extends AbstractProblemDouble implements
 			throws ModelOverdeterminedException, SBMLException {
 		this(solver, distance, model, list, quantityRanges);
 		this.multishoot = multishoot;
-		if (multishoot) {
-			logger.info("Using multiple shooting!");
-		} else {
-			logger.info("Using single shooting!");
-		}
+		logger.info(String.format(bundle.getString("KIND_OF_SHOOTING"),
+			multishoot ? bundle.getString("MULTIPLE") : bundle.getString("SINGLE")));
 	}
 
 	/**
@@ -422,7 +423,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	public String[] getAdditionalDataInfo() {
 		String[] superInfo = super.getAdditionalDataInfo();
 		return ToolBox.appendArrays(superInfo,
-				"Result of the best per generation model simulation");
+			bundle.getString("RESULT_OF_BEST_PER_GENERATION"));
 	}
 
 	/* (non-Javadoc)
@@ -602,7 +603,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 			}
 		} else {
 			throw new IllegalArgumentException(
-					"cannot estimate the values of quantities that are not part of the given model.");
+				bundle.getString("OPTIMIZATION_TARGET_IS_NOT_PART_OF_THE_MODEL"));
 		}
 	}
 
@@ -616,7 +617,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 				|| (referenceData[0].getBlock(0).getColumnCount() == 0)) {
 			// time column */+ getModel().getNumSymbols())) {
 			throw new IllegalArgumentException(
-					"At least for one symbol reference data are required.");
+				bundle.getString("MISSING_REFERENCE_DATA"));
 		}
 		this.referenceData = referenceData;
 	}

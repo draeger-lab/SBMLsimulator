@@ -244,6 +244,7 @@ public class SBMLsimulator extends Launcher {
 	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#getLogPackages()
 	 */
+	@Override
 	public String[] getLogPackages() {
 		return new String[] { "de.zbit", "org.sbml", "org.simulator", "eva" };
 	}
@@ -322,6 +323,4 @@ public class SBMLsimulator extends Launcher {
 		}
 		SBPreferences prefs = SBPreferences.getPreferencesFor(EstimationOptions.class);
 	}
-
-
 }

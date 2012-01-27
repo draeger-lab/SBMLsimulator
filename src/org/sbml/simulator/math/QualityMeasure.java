@@ -242,9 +242,7 @@ public abstract class QualityMeasure implements Serializable {
 	    this.meanFunction = meanFunction;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

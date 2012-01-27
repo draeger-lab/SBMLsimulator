@@ -31,12 +31,10 @@ public class ArithmeticMean extends MeanFunction {
 	 */
 	private static final long serialVersionUID = 1738283911802695133L;
 	
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see org.sbml.simulator.math.MeanFunction#computeMean(double[])
 	 */
-	public double computeMean(double[] distances) {
+	public double computeMean(double... distances) {
 		return Mathematics.mean(distances);
 	}
 
