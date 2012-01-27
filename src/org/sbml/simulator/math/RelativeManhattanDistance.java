@@ -37,4 +37,12 @@ public class RelativeManhattanDistance extends Relative_N_Metric {
 		super(new ManhattanDistance());
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.Relative_N_Metric#setRoot(double)
+	 */
+	public void setRoot(double root) {
+		//root should not be changed
+	}
+	
 }

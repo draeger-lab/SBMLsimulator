@@ -25,11 +25,17 @@ import java.io.IOException;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.xml.stax.SBMLReader;
+import org.sbml.simulator.gui.SimulatorUI;
 import org.sbml.simulator.io.SimulatorIOOptions;
+import org.sbml.simulator.math.N_Metric;
+import org.sbml.simulator.math.QualityMeasure;
+import org.sbml.simulator.math.Relative_N_Metric;
 import org.simulator.math.odes.AbstractDESSolver;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.AppConf;
+import de.zbit.io.CSVOptions;
+import de.zbit.io.CSVWriter;
 import de.zbit.util.prefs.SBPreferences;
 import de.zbit.util.prefs.SBProperties;
 
@@ -81,8 +87,8 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 	 */
 	private void processResult(MultiTable data) {
 		SBProperties props = appConf.getCmdArgs();
-		FileWriter filewriter;
-		BufferedWriter bufferedWriter;
+		SBPreferences prefs = SBPreferences
+		.getPreferencesFor(CSVOptions.class);
 		String outCSVFile;
 		if (props.containsKey(SimulatorIOOptions.SIMULATION_OUTPUT_FILE)) {
 			outCSVFile = props.get(SimulatorIOOptions.SIMULATION_OUTPUT_FILE)
@@ -91,37 +97,16 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 			outCSVFile = openFile.substring(0, openFile.lastIndexOf('.'))
 					+ "_simulated.csv";
 		}
-
 		try {
-			filewriter = new FileWriter(outCSVFile);
-			bufferedWriter = new BufferedWriter(filewriter);
-
-			for (int i = 0; i < data.getColumnCount(); i++) {
-				
-				if (i>0) {
-					bufferedWriter.write("\t");
-				}
-				bufferedWriter.write(data.getColumnName(i));		
-				
+			char separator;
+			if(props.containsKey(CSVOptions.CSV_FILES_SEPARATOR_CHAR)) {
+				separator = props.get(CSVOptions.CSV_FILES_SEPARATOR_CHAR).toString().charAt(0);
+			}
+			else {
+				separator = prefs.get(CSVOptions.CSV_FILES_SEPARATOR_CHAR).toString().charAt(0);
 			}
 			
-			bufferedWriter.write(System.getProperty("line.separator"));
-
-			for (int i = 0; i < data.getRowCount(); i++) {
-				
-				bufferedWriter.write(String.valueOf(data.getTimePoint(i)));
-				
-				for (int j = 0; j < data.getColumnCount(); j++) {
-
-					bufferedWriter.write("\t");
-					bufferedWriter.write(String.valueOf(data.getValueAt(j, i)));
-					
-				}
-				bufferedWriter.write(System.getProperty("line.separator"));
-			}
-
-			bufferedWriter.close();
-			
+			(new CSVWriter()).write(data, separator, outCSVFile);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -135,9 +120,8 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 		AbstractDESSolver solver;
 		SBPreferences prefs = SBPreferences
 				.getPreferencesFor(SimulationOptions.class);
-		QualityMeasurement qualityMeasurement;
+		QualityMeasure qualityMeasure;
 		SimulationConfiguration simulationConfiguration;
-		SimulationManager simulationManager;
 		double simEndTime, simStepSize;
 		SBProperties props = appConf.getCmdArgs();
 
@@ -156,9 +140,35 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 		}
 
 		try {
-			qualityMeasurement = (QualityMeasurement) Class.forName(
+			double defaultQualityValue;
+			if (props.containsKey(SimulationOptions.QUALITY_DEFAULT_VALUE)) {
+				defaultQualityValue = Double.valueOf(props
+						.get(SimulationOptions.QUALITY_DEFAULT_VALUE));
+			} else {
+				defaultQualityValue = prefs.getDouble(SimulationOptions.QUALITY_DEFAULT_VALUE);
+			}
+			
+			double root;
+			if (props.containsKey(SimulationOptions.QUALITY_N_METRIC_ROOT)) {
+				root = Double.valueOf(props
+						.get(SimulationOptions.QUALITY_N_METRIC_ROOT));
+			} else {
+				root = prefs.getDouble(SimulationOptions.QUALITY_N_METRIC_ROOT);
+			}
+			
+			qualityMeasure = (QualityMeasure) Class.forName(
 					prefs.getString(SimulationOptions.QUALITY_MEASURE))
 					.newInstance();
+			qualityMeasure.setDefaultValue(defaultQualityValue);
+			
+			if(qualityMeasure instanceof N_Metric) {
+				((N_Metric)qualityMeasure).setRoot(root);
+			}
+			else if(qualityMeasure instanceof Relative_N_Metric) {
+				((Relative_N_Metric)qualityMeasure).setRoot(root);
+			}
+			
+			
 
 			Model model = (new SBMLReader()).readSBML(openFile).getModel();
 
@@ -166,12 +176,37 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 					prefs.getString(SimulationOptions.ODE_SOLVER))
 					.newInstance();
 
+			double defaultCompartmentValue, defaultSpeciesValue, defaultParameterValue;
+	      
+	    if(props.containsKey(SimulationOptions.DEFAULT_INIT_COMPARTMENT_SIZE)) {
+				defaultCompartmentValue=Double.valueOf(props.get(SimulationOptions.DEFAULT_INIT_COMPARTMENT_SIZE));
+			}
+			else {
+				defaultCompartmentValue=Double.valueOf(prefs.get(SimulationOptions.DEFAULT_INIT_COMPARTMENT_SIZE));
+			}
+			
+			if(props.containsKey(SimulationOptions.DEFAULT_INIT_SPECIES_VALUE)) {
+				defaultSpeciesValue=Double.valueOf(props.get(SimulationOptions.DEFAULT_INIT_SPECIES_VALUE));
+			}
+			else {
+				defaultSpeciesValue=Double.valueOf(prefs.get(SimulationOptions.DEFAULT_INIT_SPECIES_VALUE));
+			}
+			
+			if(props.containsKey(SimulationOptions.DEFAULT_INIT_PARAMETER_VALUE)) {
+				defaultParameterValue=Double.valueOf(props.get(SimulationOptions.DEFAULT_INIT_PARAMETER_VALUE));
+			}
+			else {
+				defaultParameterValue=Double.valueOf(prefs.get(SimulationOptions.DEFAULT_INIT_PARAMETER_VALUE));
+			}
+			
 			simulationConfiguration = new SimulationConfiguration(model,
 					solver, 0, simEndTime, simStepSize, false);
 
-			simulationManager = new SimulationManager(qualityMeasurement,
+			simulationManager = new SimulationManager(new QualityMeasurement(qualityMeasure),
 					simulationConfiguration);
 			simulationManager.addPropertyChangeListener(this);
+			
+			//TODO estimation
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -185,7 +220,7 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 	 * @throws Exception
 	 */
 	private void simulate() throws Exception {
-		simulationManager.simulate();
+		simulationManager.simulateWithoutGUI();
 	}
 
 	/* (non-Javadoc)
