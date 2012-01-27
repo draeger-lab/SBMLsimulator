@@ -323,21 +323,5 @@ public class SBMLsimulator extends Launcher {
 		SBPreferences prefs = SBPreferences.getPreferencesFor(EstimationOptions.class);
 	}
 
-	/**
-	 * 
-	 * @param openFile
-	 * @param props
-	 */
-	private void performSimulation(String openFile, SBProperties props) {
-		String outCSVFile;
-		if (props.containsKey(SimulatorIOOptions.SIMULATION_OUTPUT_FILE)) {
-			outCSVFile = props.get(SimulatorIOOptions.SIMULATION_OUTPUT_FILE)
-					.toString();
-		} else {
-			outCSVFile = openFile.substring(0, openFile.lastIndexOf('.'))
-					+ "_simulated.csv";
-		}
-		SBPreferences prefs = SBPreferences.getPreferencesFor(SimulationOptions.class);
-	}
 
 }

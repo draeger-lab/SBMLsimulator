@@ -36,4 +36,12 @@ public class RelativeEuclideanDistance extends Relative_N_Metric {
 		super(new EuclideanDistance());
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.Relative_N_Metric#setRoot(double)
+	 */
+	public void setRoot(double root) {
+		//root should not be changed
+	}
+	
 }

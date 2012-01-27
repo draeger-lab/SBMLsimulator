@@ -29,6 +29,7 @@ import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.simulator.gui.SimulationWorker;
 import org.simulator.math.odes.MultiTable;
+import org.simulator.sbml.SBMLinterpreter;
 
 import eva2.tools.math.Mathematics;
 
@@ -278,6 +279,20 @@ public class SimulationManager implements PropertyChangeListener {
     simworker = new SimulationWorker(simulationConfiguration);
     simworker.addPropertyChangeListener(this);
     simworker.execute();
+  }
+  
+  /**
+   * Performs a simulation with the values stored in the simulation
+   * configuration class.
+   * 
+   * @throws Exception
+   */
+  public void simulateWithoutGUI() throws Exception {
+  	SBMLinterpreter interpreter = new SBMLinterpreter(simulationConfiguration.getModel());
+    solution = SimulationWorker.solveByStepSize(simulationConfiguration.getSolver(), interpreter, interpreter
+        .getInitialValues(), simulationConfiguration.getStart(), simulationConfiguration.getEnd(),
+      simulationConfiguration.getStepSize(), simulationConfiguration.isIncludeReactions());
+    pcs.firePropertyChange("done", null, solution);
   }
   
   /* (non-Javadoc)
