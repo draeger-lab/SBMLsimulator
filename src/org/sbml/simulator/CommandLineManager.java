@@ -19,13 +19,27 @@ package org.sbml.simulator;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
+import javax.xml.stream.XMLStreamException;
+
+import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.Model;
+import org.sbml.jsbml.Parameter;
+import org.sbml.jsbml.Quantity;
+import org.sbml.jsbml.SBMLException;
+import org.sbml.jsbml.Species;
+import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.jsbml.xml.stax.SBMLReader;
-import org.sbml.simulator.gui.SimulatorUI;
+import org.sbml.optimization.EvA2GUIStarter;
+import org.sbml.optimization.QuantityRange;
+import org.sbml.optimization.QuantityWithRange;
+import org.sbml.optimization.problem.EstimationOptions;
+import org.sbml.optimization.problem.EstimationProblem;
+import org.sbml.simulator.io.CSVDataImporter;
 import org.sbml.simulator.io.SimulatorIOOptions;
 import org.sbml.simulator.math.N_Metric;
 import org.sbml.simulator.math.QualityMeasure;
@@ -34,10 +48,22 @@ import org.simulator.math.odes.AbstractDESSolver;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.AppConf;
+import de.zbit.gui.GUITools;
 import de.zbit.io.CSVOptions;
 import de.zbit.io.CSVWriter;
 import de.zbit.util.prefs.SBPreferences;
 import de.zbit.util.prefs.SBProperties;
+import eva2.OptimizerFactory;
+import eva2.client.EvAClient;
+import eva2.gui.GenericObjectEditor;
+import eva2.server.go.IndividualInterface;
+import eva2.server.go.individuals.ESIndividualDoubleData;
+import eva2.server.go.operators.terminators.EvaluationTerminator;
+import eva2.server.go.populations.InterfaceSolutionSet;
+import eva2.server.go.populations.SolutionSet;
+import eva2.server.go.strategies.DifferentialEvolution;
+import eva2.server.go.strategies.InterfaceOptimizer;
+import eva2.server.modules.GOParameters;
 
 /**
  * This class handels
@@ -53,9 +79,28 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 	 * The simulation manager for the current simulation.
 	 */
 	private SimulationManager simulationManager;
-	String openFile;
-	String timeSeriesFile;
-	AppConf appConf;
+	
+	/**
+	 * 
+	 */
+	private String openFile;
+	
+	/**
+	 * 
+	 */
+	private String timeSeriesFile;
+	
+	/**
+	 * 
+	 */
+	private AppConf appConf;
+	
+	/**
+	 * 
+	 */
+	private String outSBMLFile;
+
+	private EstimationProblem estimationProblem;
 
 	public CommandLineManager(String openFile, String timeSeriesFile,
 			AppConf appConf) {
@@ -117,10 +162,10 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 	 * 
 	 */
 	private void loadPreferences() {
-		AbstractDESSolver solver;
+		AbstractDESSolver solver = null;
 		SBPreferences prefs = SBPreferences
 				.getPreferencesFor(SimulationOptions.class);
-		QualityMeasure qualityMeasure;
+		QualityMeasure qualityMeasure = null;
 		SimulationConfiguration simulationConfiguration;
 		double simEndTime, simStepSize;
 		SBProperties props = appConf.getCmdArgs();
@@ -139,9 +184,8 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 			simStepSize = prefs.getDouble(SimulationOptions.SIM_STEP_SIZE);
 		}
 
-		try {
-			double defaultQualityValue;
-			if (props.containsKey(SimulationOptions.QUALITY_DEFAULT_VALUE)) {
+		double defaultQualityValue;
+		if (props.containsKey(SimulationOptions.QUALITY_DEFAULT_VALUE)) {
 				defaultQualityValue = Double.valueOf(props
 						.get(SimulationOptions.QUALITY_DEFAULT_VALUE));
 			} else {
@@ -156,25 +200,51 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 				root = prefs.getDouble(SimulationOptions.QUALITY_N_METRIC_ROOT);
 			}
 			
-			qualityMeasure = (QualityMeasure) Class.forName(
-					prefs.getString(SimulationOptions.QUALITY_MEASURE))
-					.newInstance();
-			qualityMeasure.setDefaultValue(defaultQualityValue);
-			
-			if(qualityMeasure instanceof N_Metric) {
-				((N_Metric)qualityMeasure).setRoot(root);
+			try {
+				qualityMeasure = (QualityMeasure) Class.forName(
+						prefs.getString(SimulationOptions.QUALITY_MEASURE))
+						.newInstance();
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
 			}
-			else if(qualityMeasure instanceof Relative_N_Metric) {
-				((Relative_N_Metric)qualityMeasure).setRoot(root);
+			
+			if(qualityMeasure != null) {
+				qualityMeasure.setDefaultValue(defaultQualityValue);
+			
+				if(qualityMeasure instanceof N_Metric) {
+					((N_Metric)qualityMeasure).setRoot(root);
+				}
+				else if(qualityMeasure instanceof Relative_N_Metric) {
+					((Relative_N_Metric)qualityMeasure).setRoot(root);
+				}
 			}
 			
 			
 
-			Model model = (new SBMLReader()).readSBML(openFile).getModel();
+			Model model = null;
+			try {
+				model = (new SBMLReader()).readSBML(openFile).getModel();
+			} catch (XMLStreamException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 
-			solver = (AbstractDESSolver) Class.forName(
-					prefs.getString(SimulationOptions.ODE_SOLVER))
-					.newInstance();
+			try {
+				solver = (AbstractDESSolver) Class.forName(
+						prefs.getString(SimulationOptions.ODE_SOLVER))
+						.newInstance();
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
 
 			double defaultCompartmentValue, defaultSpeciesValue, defaultParameterValue;
 	      
@@ -202,17 +272,127 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 			simulationConfiguration = new SimulationConfiguration(model,
 					solver, 0, simEndTime, simStepSize, false);
 
-			simulationManager = new SimulationManager(new QualityMeasurement(qualityMeasure),
+			QualityMeasurement measurement = null;
+			if(timeSeriesFile != null) {
+				CSVDataImporter csvimporter = new CSVDataImporter();
+				MultiTable experimentalData = null;
+				try {
+					experimentalData = csvimporter.convert(model, timeSeriesFile);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				List<MultiTable> measurements = new LinkedList<MultiTable>();
+				if(experimentalData != null) {
+					measurements.add(experimentalData);
+				}
+				measurement = new QualityMeasurement(qualityMeasure, measurements);
+			}
+			else {
+				measurement = new QualityMeasurement(qualityMeasure);
+			}
+			simulationManager = new SimulationManager(measurement,
 					simulationConfiguration);
 			simulationManager.addPropertyChangeListener(this);
 			
-			//TODO estimation
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
+			if (timeSeriesFile != null) {
+				initializeEstimationPreferences();
+			}
+		
 	}
+		
+		private void initializeEstimationPreferences() {
+			SBProperties props = appConf.getCmdArgs();
+			if (props.containsKey(EstimationOptions.SBML_OUTPUT_FILE)) {
+				outSBMLFile = props.get(EstimationOptions.SBML_OUTPUT_FILE)
+						.toString();
+			} else {
+				outSBMLFile = openFile.substring(0, openFile.lastIndexOf('.'))
+						+ "_optimized.xml";
+			}
+			SBPreferences prefsEst = SBPreferences.getPreferencesFor(EstimationOptions.class);
+			
+			double initMax, initMin, min, max;
+			if(props.containsKey(EstimationOptions.EST_INIT_MAX_VALUE)) {
+				initMax = Double.valueOf(props.get(EstimationOptions.EST_INIT_MAX_VALUE));
+			}
+			else {
+				initMax = Double.valueOf(prefsEst.get(EstimationOptions.EST_INIT_MAX_VALUE));
+			}
+			
+			if(props.containsKey(EstimationOptions.EST_INIT_MIN_VALUE)) {
+				initMin = Double.valueOf(props.get(EstimationOptions.EST_INIT_MIN_VALUE));
+			}
+			else {
+				initMin = Double.valueOf(prefsEst.get(EstimationOptions.EST_INIT_MIN_VALUE));
+			}
+			
+			if(props.containsKey(EstimationOptions.EST_MAX_VALUE)) {
+				max = Double.valueOf(props.get(EstimationOptions.EST_MAX_VALUE));
+			}
+			else {
+				max = Double.valueOf(prefsEst.get(EstimationOptions.EST_MAX_VALUE));
+			}
+			
+			if(props.containsKey(EstimationOptions.EST_MIN_VALUE)) {
+				min = Double.valueOf(props.get(EstimationOptions.EST_MIN_VALUE));
+			}
+			else {
+				min = Double.valueOf(prefsEst.get(EstimationOptions.EST_MIN_VALUE));
+			}
+			
+			boolean multiShoot;
+			if(props.containsKey(EstimationOptions.EST_MULTI_SHOOT)) {
+				multiShoot = Boolean.valueOf(props.get(EstimationOptions.EST_MULTI_SHOOT));
+			}
+			else {
+				multiShoot = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_MULTI_SHOOT));
+			}
+			
+			boolean allGlobalParameters;
+			if(props.containsKey(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS)) {
+				allGlobalParameters = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS));
+			}
+			else {
+				allGlobalParameters = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS));
+			}
+			
+			boolean allLocalParameters;
+			if(props.containsKey(EstimationOptions.EST_ALL_LOCAL_PARAMETERS)) {
+				allLocalParameters = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_LOCAL_PARAMETERS));
+			}
+			else {
+				allLocalParameters = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_LOCAL_PARAMETERS));
+			}
+			
+			boolean allSpecies=false;
+			if(props.containsKey(EstimationOptions.EST_ALL_SPECIES)) {
+				allSpecies = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_SPECIES));
+			}
+			else {
+				allSpecies = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_SPECIES));
+			}
+			
+			boolean allCompartments = false;
+			if(props.containsKey(EstimationOptions.EST_ALL_COMPARTMENTS)) {
+				allCompartments = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_COMPARTMENTS));
+			}
+			else {
+				allCompartments = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_COMPARTMENTS));
+			}
+			
+			Model clonedModel = simulationManager.getSimulationConfiguration().getModel().clone();
+			try {
+				estimationProblem = new EstimationProblem(simulationManager.getSimulationConfiguration().getSolver(), simulationManager.getQualityMeasurement().getDistance(), clonedModel, simulationManager.getQualityMeasurement().getMeasurements(),
+							multiShoot, createQuantityRanges(clonedModel, allGlobalParameters, allLocalParameters, allSpecies, allCompartments, initMin, initMax, min, max));
+			} catch (SBMLException e) {
+				e.printStackTrace();
+			} catch (ModelOverdeterminedException e) {
+				e.printStackTrace();
+			}
+			
+
+		} 
+
 
 	/**
 	 * Conducts the simulation.
@@ -222,16 +402,97 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 	private void simulate() throws Exception {
 		simulationManager.simulateWithoutGUI();
 	}
+	
+	/**
+	 * 
+	 * @param openFile
+	 * @param timeSeriesFile
+	 * @param props
+	 */
+	private void performOptimization() {
+		
+		GOParameters goParams = new GOParameters(); // Instance for the general
+		// Genetic Optimization
+		// parameterization
+
+		// set the initial EvA problem here
+		goParams.setProblem(estimationProblem);
+		goParams.setOptimizer(new DifferentialEvolution());
+		goParams.setTerminator(new EvaluationTerminator(3000));
+		
+		InterfaceOptimizer optimizer = goParams.getOptimizer();
+		optimizer.init();
+		while (!goParams.getTerminator().isTerminated(optimizer.getPopulation()))  {
+			optimizer.optimize();
+		}
+
+		ESIndividualDoubleData best = (ESIndividualDoubleData)optimizer.getPopulation().get(0);
+		double[] estimations = best.getDoubleData();
+		double fitness = best.getFitness()[0];
+		System.out.println("Fitness: " + fitness);
+		for(int i=0; i!=estimations.length; i++) {
+			System.out.println(estimationProblem.getQuantityRanges()[i].getQuantity().getName() + ": " + estimations[i]);
+		}
+		
+  	
+		
+  		//TODO add listener
+  		//TODO refresh model
+			//TODO output to file
+		
+	}
+
+	/**
+	 * @param model
+	 * @param allGlobalParameters
+	 * @param allLocalParameters
+	 * @param allSpecies
+	 * @param allCompartments
+	 * @return
+	 */
+	private QuantityRange[] createQuantityRanges(Model model,
+		boolean allGlobalParameters, boolean allLocalParameters,
+		boolean allSpecies, boolean allCompartments, double initMin, double initMax, double min, double max) {
+		ArrayList<QuantityRange> quantities = new ArrayList<QuantityRange>();
+		
+		if(allGlobalParameters) {
+			for(Parameter p: model.getListOfParameters()) {
+				quantities.add(new QuantityWithRange(p, initMin, initMax, min, max));
+			}
+		}
+		
+		if(allSpecies) {
+			for(Species s: model.getListOfSpecies()) {
+				quantities.add(new QuantityWithRange(s, initMin, initMax, min, max));
+			}
+		}
+		
+		if(allCompartments) {
+			for(Compartment c: model.getListOfCompartments()) {
+				quantities.add(new QuantityWithRange(c, initMin, initMax, min, max));
+			}
+		}
+		
+		//TODO local parameters
+		
+		return quantities.toArray(new QuantityRange[quantities.size()]);
+	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
 		try {
-			simulate();
+			if(estimationProblem != null) {
+				performOptimization();				
+			}	
+			else {
+				simulate();
+			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace();				
 		}
+		
 	}
 
 }
