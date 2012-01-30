@@ -92,6 +92,16 @@ public class QualityMeasurement implements PropertyChangeListener {
   	this();
   	this.distance = quality;
   }
+  
+  /**
+   * 
+   * @param quality
+   * @param measurements
+   */
+  public QualityMeasurement(QualityMeasure quality, List<MultiTable> measurements) {
+  	this.measurements = measurements;
+  	this.distance = quality;
+  }
 
 	/**
    * Copy constructor.
