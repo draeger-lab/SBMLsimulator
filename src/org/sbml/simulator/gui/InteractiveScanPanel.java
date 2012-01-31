@@ -355,7 +355,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     for (int i = 0; i < list.size(); i++) {
       QuantityWithUnit p = list.get(i);
       value = p.getValue();
-      if (Double.isNaN(p.getValue())) {
+      if (!p.isSetValue()) {
         name = p.getClass().getSimpleName().toLowerCase();
         if (p instanceof Compartment) {
           if (((Compartment) p).getSpatialDimensions() > 0) {
