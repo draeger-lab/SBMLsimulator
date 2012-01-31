@@ -603,6 +603,9 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		}
 		logger.finer(bundle.getString("RECEIVED_WINDOW_EVENT"));
 	}
+	
+	public void windowClosing() {
+	}
 
 	/**
 	 * 
