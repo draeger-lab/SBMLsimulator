@@ -56,7 +56,7 @@ public abstract class QualityMeasure implements Serializable {
 	 */
 	public QualityMeasure() {
 		this.defaultValue = Double.NaN;
-		meanFunction=new NoMean();
+		meanFunction=new ArithmeticMean();
 	}
 
 	/**
@@ -66,7 +66,7 @@ public abstract class QualityMeasure implements Serializable {
 	 */
 	public QualityMeasure(double defaultValue) {
 		this.defaultValue = defaultValue;
-		meanFunction=new NoMean();
+		meanFunction=new ArithmeticMean();
 	}
 
 	/**
