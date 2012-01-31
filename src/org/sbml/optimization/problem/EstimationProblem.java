@@ -262,10 +262,10 @@ public class EstimationProblem extends AbstractProblemDouble implements
 			
 		  double[] initialValues = interpreter.getInitialValues();
 			MultiTable reference = getInitialConditions();
-			for (int col = 0; col < reference.getColumnCount() - 1; col++) {
+			for (int col = 0; col < reference.getColumnCount(); col++) {
 			  Integer pos = id2Index.get(reference.getColumnName(col));
 			  if (pos != null) {
-			    initialValues[pos] = ((Double) reference.getValueAt(0, col + 1)).doubleValue();
+			    initialValues[pos] = ((Double) reference.getValueAt(0, col)).doubleValue();
 			  }
 			}
 			MultiTable solution; 
@@ -274,6 +274,8 @@ public class EstimationProblem extends AbstractProblemDouble implements
 			} else {
 				solution = solver.solve(interpreter, initialValues, getTimePoints());
 			}
+			
+			fitness[0] = 0d;
 			for (MultiTable data : referenceData) {
 				// equal weight for each reference data set
 				if(negationOfDistance) {
