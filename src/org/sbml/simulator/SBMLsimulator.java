@@ -40,7 +40,6 @@ import de.zbit.io.CSVOptions;
 import de.zbit.util.Reflect;
 import de.zbit.util.StringUtil;
 import de.zbit.util.prefs.KeyProvider;
-import de.zbit.util.prefs.SBPreferences;
 import de.zbit.util.prefs.SBProperties;
 
 /**
@@ -305,22 +304,4 @@ public class SBMLsimulator extends Launcher {
 		return new SimulatorUI(appConf);
 	}
 
-	/**
-	 * 
-	 * @param openFile
-	 * @param timeSeriesFile
-	 * @param props
-	 */
-	private void performOptimization(String openFile, String timeSeriesFile,
-			SBProperties props) {
-		String outSBMLFile;
-		if (props.containsKey(EstimationOptions.SBML_OUTPUT_FILE)) {
-			outSBMLFile = props.get(EstimationOptions.SBML_OUTPUT_FILE)
-					.toString();
-		} else {
-			outSBMLFile = openFile.substring(0, openFile.lastIndexOf('.'))
-					+ "_optimized.xml";
-		}
-		SBPreferences prefs = SBPreferences.getPreferencesFor(EstimationOptions.class);
-	}
 }
