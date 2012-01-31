@@ -54,6 +54,7 @@ import org.sbml.simulator.SimulationConfiguration;
 import org.sbml.simulator.SimulationManager;
 import org.sbml.simulator.SimulationOptions;
 import org.sbml.simulator.gui.plot.Plot;
+import org.sbml.simulator.math.PearsonCorrelation;
 import org.sbml.simulator.math.QualityMeasure;
 import org.simulator.math.odes.DESSolver;
 import org.simulator.math.odes.MultiTable;
@@ -334,6 +335,7 @@ public class SimulationPanel extends JPanel implements
     	simulationToolPanel = new JToolBar(bundle.getString("INTEGRATION_TOOLBOX"));
       SimulationToolPanel foot = new SimulationToolPanel(simulationManager);
       simulationToolPanel.add(foot);
+      this.addPropertyChangeListener(foot);
       foot.addPreferenceChangeListener(visualizationPanel);
     }
     return (SimulationToolPanel) simulationToolPanel.getComponent(0);
@@ -419,9 +421,15 @@ public class SimulationPanel extends JPanel implements
     double currentDistance = tools.getCurrentQuality();
     if (Double.isNaN(currentDistance)
         || (currentDistance > statDoubles[runBestIndex].doubleValue())) {
-      setSimulationData((MultiTable) statObjects[simulationDataIndex]);
-			firePropertyChange("quality", getSimulationToolPanel().getCurrentQuality(),
-				statDoubles[runBestIndex].doubleValue());
+      if(statObjects[simulationDataIndex] instanceof MultiTable) {
+      	setSimulationData((MultiTable) statObjects[simulationDataIndex]);
+      }
+      double newValue = statDoubles[runBestIndex].doubleValue();
+      if(getSimulationToolPanel().getQualityMeasure() instanceof PearsonCorrelation) {
+      	newValue = Math.abs(newValue);
+      }
+      firePropertyChange("quality", getSimulationToolPanel().getCurrentQuality(),
+				newValue);
       String[] solutionString = statObjects[solutionIndex].toString().replace("{","").replace("}","").split(", ");
       for (int i = 0; i < selectedQuantityIds.length; i++) {
         visualizationPanel.updateQuantity(selectedQuantityIds[i], Double.parseDouble(solutionString[i].replace(',', '.')));
@@ -503,7 +511,7 @@ public class SimulationPanel extends JPanel implements
       } catch (Exception e) {
       }
       firePropertyChanged(evt);
-    }
+    } 
   }
   
   /**
