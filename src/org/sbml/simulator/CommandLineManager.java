@@ -24,11 +24,15 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
 import javax.xml.stream.XMLStreamException;
 
 import org.sbml.jsbml.Compartment;
+import org.sbml.jsbml.LocalParameter;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Parameter;
+import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.Species;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
@@ -46,6 +50,7 @@ import org.simulator.math.odes.AbstractDESSolver;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.AppConf;
+import de.zbit.gui.LayoutHelper;
 import de.zbit.io.CSVOptions;
 import de.zbit.io.CSVWriter;
 import de.zbit.util.prefs.SBPreferences;
@@ -464,7 +469,15 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 			}
 		}
 		
-		//TODO local parameters
+		if(allLocalParameters) {
+			for (Reaction r : model.getListOfReactions()) {
+				if (r.isSetKineticLaw()) {
+					for(LocalParameter lp: r.getKineticLaw().getListOfLocalParameters()) {
+						quantities.add(new QuantityWithRange(lp, initMin, initMax, min, max));
+					}
+				}
+			}
+		}
 		
 		return quantities.toArray(new QuantityRange[quantities.size()]);
 	}
