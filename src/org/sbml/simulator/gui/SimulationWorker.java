@@ -29,6 +29,7 @@ import javax.swing.SwingWorker;
 import org.apache.commons.math.ode.DerivativeException;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.util.StringTools;
+import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.simulator.SimulationConfiguration;
 import org.simulator.math.odes.DESSolver;
 import org.simulator.math.odes.DESystem;
@@ -121,13 +122,19 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
   /* (non-Javadoc)
    * @see javax.swing.SwingWorker#doInBackground()
    */
-  protected MultiTable doInBackground() throws Exception {
+  protected MultiTable doInBackground() throws ModelOverdeterminedException{
   	timer.reset();
     SBMLinterpreter interpreter = new SBMLinterpreter(configuration.getModel());
-    solution = solveByStepSize(configuration.getSolver(), interpreter, interpreter
-        .getInitialValues(), configuration.getStart(), configuration.getEnd(),
-      configuration.getStepSize(), configuration.isIncludeReactions());
-    return solution;
+    try {
+    	solution = solveByStepSize(configuration.getSolver(), interpreter, interpreter
+    		.getInitialValues(), configuration.getStart(), configuration.getEnd(),
+    		configuration.getStepSize(), configuration.isIncludeReactions());   
+    	return solution;
+    }
+    catch(DerivativeException e) {
+    	logger.warning(e.getMessage());
+    	return null;
+    }
   }
   
   /* (non-Javadoc)
