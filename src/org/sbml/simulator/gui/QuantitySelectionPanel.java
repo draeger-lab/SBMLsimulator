@@ -113,7 +113,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	 * @author Andreas Dr&auml;ger
 	 * @date 2010-09-09
 	 */
-	private class QuantityBlock implements QuantityRange, ItemListener {
+	public class QuantityBlock implements QuantityRange, ItemListener {
 		/**
 		 * Generated serial version identifier.
 		 */
