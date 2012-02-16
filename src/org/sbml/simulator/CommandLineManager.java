@@ -24,8 +24,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
 import javax.xml.stream.XMLStreamException;
 
 import org.sbml.jsbml.Compartment;
@@ -38,7 +36,6 @@ import org.sbml.jsbml.Species;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.jsbml.xml.stax.SBMLReader;
 import org.sbml.optimization.QuantityRange;
-import org.sbml.optimization.QuantityWithRange;
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.io.CSVDataImporter;
@@ -50,7 +47,6 @@ import org.simulator.math.odes.AbstractDESSolver;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.AppConf;
-import de.zbit.gui.LayoutHelper;
 import de.zbit.io.CSVOptions;
 import de.zbit.io.CSVWriter;
 import de.zbit.util.prefs.SBPreferences;
@@ -140,7 +136,7 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 		}
 		try {
 			char separator;
-			if(props.containsKey(CSVOptions.CSV_FILES_SEPARATOR_CHAR)) {
+			if (props.containsKey(CSVOptions.CSV_FILES_SEPARATOR_CHAR)) {
 				separator = props.get(CSVOptions.CSV_FILES_SEPARATOR_CHAR).toString().charAt(0);
 			}
 			else {
@@ -208,13 +204,13 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 				e.printStackTrace();
 			}
 			
-			if(qualityMeasure != null) {
+			if (qualityMeasure != null) {
 				qualityMeasure.setDefaultValue(defaultQualityValue);
 			
-				if(qualityMeasure instanceof N_Metric) {
+				if (qualityMeasure instanceof N_Metric) {
 					((N_Metric)qualityMeasure).setRoot(root);
 				}
-				else if(qualityMeasure instanceof Relative_N_Metric) {
+				else if (qualityMeasure instanceof Relative_N_Metric) {
 					((Relative_N_Metric)qualityMeasure).setRoot(root);
 				}
 			}
@@ -244,21 +240,21 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 
 			double defaultCompartmentValue, defaultSpeciesValue, defaultParameterValue;
 	      
-	    if(props.containsKey(SimulationOptions.DEFAULT_INIT_COMPARTMENT_SIZE)) {
+	    if (props.containsKey(SimulationOptions.DEFAULT_INIT_COMPARTMENT_SIZE)) {
 				defaultCompartmentValue=Double.valueOf(props.get(SimulationOptions.DEFAULT_INIT_COMPARTMENT_SIZE));
 			}
 			else {
 				defaultCompartmentValue=Double.valueOf(prefs.get(SimulationOptions.DEFAULT_INIT_COMPARTMENT_SIZE));
 			}
 			
-			if(props.containsKey(SimulationOptions.DEFAULT_INIT_SPECIES_VALUE)) {
+			if (props.containsKey(SimulationOptions.DEFAULT_INIT_SPECIES_VALUE)) {
 				defaultSpeciesValue=Double.valueOf(props.get(SimulationOptions.DEFAULT_INIT_SPECIES_VALUE));
 			}
 			else {
 				defaultSpeciesValue=Double.valueOf(prefs.get(SimulationOptions.DEFAULT_INIT_SPECIES_VALUE));
 			}
 			
-			if(props.containsKey(SimulationOptions.DEFAULT_INIT_PARAMETER_VALUE)) {
+			if (props.containsKey(SimulationOptions.DEFAULT_INIT_PARAMETER_VALUE)) {
 				defaultParameterValue=Double.valueOf(props.get(SimulationOptions.DEFAULT_INIT_PARAMETER_VALUE));
 			}
 			else {
@@ -269,7 +265,7 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 					solver, 0, simEndTime, simStepSize, false);
 
 			QualityMeasurement measurement = null;
-			if(timeSeriesFile != null) {
+			if (timeSeriesFile != null) {
 				CSVDataImporter csvimporter = new CSVDataImporter();
 				MultiTable experimentalData = null;
 				try {
@@ -278,7 +274,7 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 					e.printStackTrace();
 				}
 				List<MultiTable> measurements = new LinkedList<MultiTable>();
-				if(experimentalData != null) {
+				if (experimentalData != null) {
 					measurements.add(experimentalData);
 				}
 				measurement = new QualityMeasurement(qualityMeasure, measurements);
@@ -308,28 +304,28 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 			SBPreferences prefsEst = SBPreferences.getPreferencesFor(EstimationOptions.class);
 			
 			double initMax, initMin, min, max;
-			if(props.containsKey(EstimationOptions.EST_INIT_MAX_VALUE)) {
+			if (props.containsKey(EstimationOptions.EST_INIT_MAX_VALUE)) {
 				initMax = Double.valueOf(props.get(EstimationOptions.EST_INIT_MAX_VALUE));
 			}
 			else {
 				initMax = Double.valueOf(prefsEst.get(EstimationOptions.EST_INIT_MAX_VALUE));
 			}
 			
-			if(props.containsKey(EstimationOptions.EST_INIT_MIN_VALUE)) {
+			if (props.containsKey(EstimationOptions.EST_INIT_MIN_VALUE)) {
 				initMin = Double.valueOf(props.get(EstimationOptions.EST_INIT_MIN_VALUE));
 			}
 			else {
 				initMin = Double.valueOf(prefsEst.get(EstimationOptions.EST_INIT_MIN_VALUE));
 			}
 			
-			if(props.containsKey(EstimationOptions.EST_MAX_VALUE)) {
+			if (props.containsKey(EstimationOptions.EST_MAX_VALUE)) {
 				max = Double.valueOf(props.get(EstimationOptions.EST_MAX_VALUE));
 			}
 			else {
 				max = Double.valueOf(prefsEst.get(EstimationOptions.EST_MAX_VALUE));
 			}
 			
-			if(props.containsKey(EstimationOptions.EST_MIN_VALUE)) {
+			if (props.containsKey(EstimationOptions.EST_MIN_VALUE)) {
 				min = Double.valueOf(props.get(EstimationOptions.EST_MIN_VALUE));
 			}
 			else {
@@ -337,7 +333,7 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 			}
 			
 			boolean multiShoot;
-			if(props.containsKey(EstimationOptions.EST_MULTI_SHOOT)) {
+			if (props.containsKey(EstimationOptions.EST_MULTI_SHOOT)) {
 				multiShoot = Boolean.valueOf(props.get(EstimationOptions.EST_MULTI_SHOOT));
 			}
 			else {
@@ -345,7 +341,7 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 			}
 			
 			boolean allGlobalParameters;
-			if(props.containsKey(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS)) {
+			if (props.containsKey(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS)) {
 				allGlobalParameters = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS));
 			}
 			else {
@@ -353,7 +349,7 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 			}
 			
 			boolean allLocalParameters;
-			if(props.containsKey(EstimationOptions.EST_ALL_LOCAL_PARAMETERS)) {
+			if (props.containsKey(EstimationOptions.EST_ALL_LOCAL_PARAMETERS)) {
 				allLocalParameters = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_LOCAL_PARAMETERS));
 			}
 			else {
@@ -361,7 +357,7 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 			}
 			
 			boolean allSpecies=false;
-			if(props.containsKey(EstimationOptions.EST_ALL_SPECIES)) {
+			if (props.containsKey(EstimationOptions.EST_ALL_SPECIES)) {
 				allSpecies = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_SPECIES));
 			}
 			else {
@@ -369,7 +365,7 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 			}
 			
 			boolean allCompartments = false;
-			if(props.containsKey(EstimationOptions.EST_ALL_COMPARTMENTS)) {
+			if (props.containsKey(EstimationOptions.EST_ALL_COMPARTMENTS)) {
 				allCompartments = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_COMPARTMENTS));
 			}
 			else {
@@ -426,7 +422,7 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 		double[] estimations = best.getDoubleData();
 		double fitness = best.getFitness()[0];
 		System.out.println("Fitness: " + fitness);
-		for(int i=0; i!=estimations.length; i++) {
+		for (int i=0; i!=estimations.length; i++) {
 			System.out.println(estimationProblem.getQuantityRanges()[i].getQuantity().getName() + ": " + estimations[i]);
 		}
 		
@@ -451,29 +447,29 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 		boolean allSpecies, boolean allCompartments, double initMin, double initMax, double min, double max) {
 		ArrayList<QuantityRange> quantities = new ArrayList<QuantityRange>();
 		
-		if(allGlobalParameters) {
-			for(Parameter p: model.getListOfParameters()) {
-				quantities.add(new QuantityWithRange(p, initMin, initMax, min, max));
+		if (allGlobalParameters) {
+			for (Parameter p: model.getListOfParameters()) {
+				quantities.add(new QuantityRange(p, true, initMin, initMax, min, max));
 			}
 		}
 		
-		if(allSpecies) {
-			for(Species s: model.getListOfSpecies()) {
-				quantities.add(new QuantityWithRange(s, initMin, initMax, min, max));
+		if (allSpecies) {
+			for (Species s: model.getListOfSpecies()) {
+				quantities.add(new QuantityRange(s, true, initMin, initMax, min, max));
 			}
 		}
 		
-		if(allCompartments) {
-			for(Compartment c: model.getListOfCompartments()) {
-				quantities.add(new QuantityWithRange(c, initMin, initMax, min, max));
+		if (allCompartments) {
+			for (Compartment c: model.getListOfCompartments()) {
+				quantities.add(new QuantityRange(c, true, initMin, initMax, min, max));
 			}
 		}
 		
-		if(allLocalParameters) {
+		if (allLocalParameters) {
 			for (Reaction r : model.getListOfReactions()) {
 				if (r.isSetKineticLaw()) {
-					for(LocalParameter lp: r.getKineticLaw().getListOfLocalParameters()) {
-						quantities.add(new QuantityWithRange(lp, initMin, initMax, min, max));
+					for (LocalParameter lp: r.getKineticLaw().getListOfLocalParameters()) {
+						quantities.add(new QuantityRange(lp, true, initMin, initMax, min, max));
 					}
 				}
 			}
@@ -487,7 +483,7 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 	 */
 	public void run() {
 		try {
-			if(estimationProblem != null) {
+			if (estimationProblem != null) {
 				performOptimization();				
 			}	
 			else {

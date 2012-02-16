@@ -36,6 +36,7 @@ import org.sbml.jsbml.NamedSBaseWithDerivedUnit;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.Species;
+import org.sbml.jsbml.UnitDefinition;
 
 import de.zbit.gui.ColorPalette;
 import de.zbit.sbml.gui.UnitDerivationWorker;
@@ -369,7 +370,7 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 	 */
 	public void propertyChange(PropertyChangeEvent evt) {
 		if (evt.getPropertyName().equals("done") && (evt.getOldValue() == null)) {
-			String defs[] = (String[]) evt.getNewValue();
+			UnitDefinition defs[] = (UnitDefinition[]) evt.getNewValue();
 			for (int rowIndex = 0; rowIndex < defs.length; rowIndex++) {
 				data[rowIndex][unitCol] = defs[rowIndex];
 			}

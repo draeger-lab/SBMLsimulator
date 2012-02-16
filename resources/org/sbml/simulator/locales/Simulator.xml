@@ -102,6 +102,7 @@
   <entry key="OUTSIDE_TOOLTIP">Surrounding compartment: %s</entry>
   <entry key="SPECIES_COMPARTMENT">Containing compartment: %s</entry>
   <entry key="REACTION_COMPARTMENT">Takes place in compartment: %s</entry>
+  <entry key="LOCAL_PARAMETER_REACTION">Occurs in the kinetic law of reaction: %s</entry>
   
   <!-- LegendTableModel -->
   

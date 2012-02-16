@@ -117,7 +117,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
   /**
 	 * 
 	 */
-  private JSpinner[] spinQuantity;
+  private JSpinner spinQuantity[];
   /**
 	 * 
 	 */
@@ -134,7 +134,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
   /**
    * Direct pointers to all important quantities in the model.
    */
-  private QuantityWithUnit[] quantities;
+  private QuantityWithUnit quantities[];
   /**
 	 * 
 	 */
@@ -461,14 +461,10 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
    * @param properties
    */
 	public void loadPreferences() {
-		SBPreferences prefs = SBPreferences
-				.getPreferencesFor(SimulationOptions.class);
-		defaultCompartmentValue = prefs
-				.getDouble(SimulationOptions.DEFAULT_INIT_COMPARTMENT_SIZE);
-		defaultSpeciesValue = prefs
-				.getDouble(SimulationOptions.DEFAULT_INIT_SPECIES_VALUE);
-		defaultParameterValue = prefs
-				.getDouble(SimulationOptions.DEFAULT_INIT_PARAMETER_VALUE);
+		SBPreferences prefs = SBPreferences.getPreferencesFor(SimulationOptions.class);
+		defaultCompartmentValue = prefs.getDouble(SimulationOptions.DEFAULT_INIT_COMPARTMENT_SIZE);
+		defaultSpeciesValue = prefs.getDouble(SimulationOptions.DEFAULT_INIT_SPECIES_VALUE);
+		defaultParameterValue = prefs.getDouble(SimulationOptions.DEFAULT_INIT_PARAMETER_VALUE);
 		updateUI();
 	}
   
@@ -503,10 +499,8 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
    * @param index
    */
   private void updateQuantitySpinner(int index) {
-    if (quantities[index].getValue() != ((Number) spinQuantity[index]
-        .getValue()).doubleValue()) {
-      spinQuantity[index]
-          .setValue(Double.valueOf(quantities[index].getValue()));
+    if (quantities[index].getValue() != ((Number) spinQuantity[index].getValue()).doubleValue()) {
+      spinQuantity[index].setValue(Double.valueOf(quantities[index].getValue()));
       if (quantities[index].getValue() != originalValues[index]) {
         buttonReset.setEnabled(true);
       }

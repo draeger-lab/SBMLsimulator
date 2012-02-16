@@ -77,7 +77,7 @@ public class EvA2GUIStarter {
 		// public EvAClient(final String hostName, final Window parent, final
 		// String paramsFile, final InterfaceGOParameters goParams, final
 		// boolean autorun, final boolean noSplash, final boolean noGui) {
-		evaBP.evaClient = new EvAClient(null, parentWindow,null,goParams, false, true, false); // initializes GUI in the background
+		evaBP.evaClient = new EvAClient(null, parentWindow,null, goParams, false, true, false); // initializes GUI in the background
 		// important: wait for GUI initialization before accessing any internal
 		// settings:
 		evaBP.evaClient.awaitClientInitialized(); // this returns as soon as the
@@ -101,43 +101,30 @@ public class EvA2GUIStarter {
 	 */
 	private static final transient Logger logger = Logger.getLogger(EvA2GUIStarter.class.getName());
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * eva2.server.stat.InterfaceStatisticsListener#notifyGenerationPerformed
-	 * (java.lang.String[], java.lang.Object[], java.lang.Double[])
+	/* (non-Javadoc)
+	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyGenerationPerformed(java.lang.String[], java.lang.Object[], java.lang.Double[])
 	 */
 	public void notifyGenerationPerformed(String[] header,
 			Object[] statObjects, Double[] statDoubles) {
 		// statDoubles only contains double representations of statObject where
 		// possible (so its redundant)
-		logger.info("Received data "
-				+ BeanInspector.toString(statObjects));
+		logger.info("Received data " + BeanInspector.toString(statObjects));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStarted(int,
-	 * int, java.lang.String[], java.lang.String[])
+	/* (non-Javadoc)
+	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStarted(int, int, java.lang.String[], java.lang.String[])
 	 */
 	public void notifyRunStarted(int runNumber, int plannedMultiRuns,
 			String[] header, String[] metaInfo) {
-		logger.info("notifyRunStarted, " + runNumber + " of "
-				+ plannedMultiRuns);
+		logger.info("notifyRunStarted, " + runNumber + " of "	+ plannedMultiRuns);
 		logger.info("Headers: " + BeanInspector.toString(header));
 		logger.info("Meta-info: " + BeanInspector.toString(metaInfo));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStopped(int,
-	 * boolean)
+	/* (non-Javadoc)
+	 * @see eva2.server.stat.InterfaceStatisticsListener#notifyRunStopped(int, boolean)
 	 */
 	public void notifyRunStopped(int runsPerformed, boolean completedLastRun) {
-		logger.info("notifyRunStopped, " + runsPerformed
-				+ ", last finished normally: " + completedLastRun);
+		logger.info("notifyRunStopped, " + runsPerformed + ", last finished normally: " + completedLastRun);
 	}
 }
