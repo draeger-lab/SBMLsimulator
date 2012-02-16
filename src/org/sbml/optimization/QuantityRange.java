@@ -20,10 +20,12 @@ package org.sbml.optimization;
 import java.io.Serializable;
 
 import org.sbml.jsbml.Quantity;
+import org.sbml.jsbml.util.StringTools;
 
 import de.zbit.util.ValuePair;
 
 /**
+ * <p>
  * A {@link QuantityRange} gathers all necessary information about a
  * {@link Quantity} whose value is to be calibrated by an optimization procedure
  * and its allowable ranges of interest. Each {@link Quantity} may be
@@ -32,14 +34,99 @@ import de.zbit.util.ValuePair;
  * with ranges for the optimization, where we distinguish between absolute
  * ranges and another range for the initialization before the actual
  * optimization.
+ * </p>
+ * <p>
+ * This data structure that contains all necessary information for one
+ * {@link Quantity}: a {@link Boolean} value to select or de-select it and the
+ * values for the optimization. Furthermore, this data structure stores the
+ * {@link Double}s for the values associated with the {@link Quantity}. In
+ * addition, a pointer to the {@link Quantity} itself is also stored.
+ * </p>
  * 
  * @author Andreas Dr&auml;ger
+ * @author Roland Keller
  * @date 2010-09-09
  * @version $Rev$
  * @since 1.0
  */
-public interface QuantityRange extends Serializable {
+public class QuantityRange implements Cloneable, Serializable {
+	
+	/**
+	 * Generated serial version identifier.
+	 */
+	private static final long serialVersionUID = 1072196369185232057L;
 
+	/**
+	 * 
+	 */
+	private Double minimum, maximum, initMin, initMax;
+	
+	/**
+	 * 
+	 */
+	private Quantity quantity;
+	
+	/**
+	 * 
+	 */
+	private Boolean selected;
+	
+	/**
+	 * @param q
+	 * @param check
+	 * @param initMin
+	 * @param initMax
+	 * @param min
+	 * @param max
+	 */
+	public QuantityRange(Quantity q, boolean selected, double initMin,
+		double initMax, double min, double max) {
+		quantity = q;
+		this.selected = Boolean.valueOf(selected);
+		this.initMin = Double.valueOf(initMin);
+		this.initMax = Double.valueOf(initMax);
+		this.minimum = Double.valueOf(min);
+		this.maximum = Double.valueOf(max);
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	protected QuantityRange clone() {
+		return new QuantityRange((Quantity) quantity.clone(),
+			selected.booleanValue(), initMin.doubleValue(), initMax.doubleValue(),
+			minimum.doubleValue(), maximum.doubleValue());
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		// Check if the given object is a pointer to precisely the same object:
+		if (super.equals(obj)) {
+			return true;
+		}
+		// Check if the given object is of identical class and not null: 
+		if ((obj == null) || (!getClass().equals(obj.getClass()))) {
+			return false;
+		}
+		// Check all child nodes recursively:
+		if (obj instanceof  QuantityRange) {
+			QuantityRange range = (QuantityRange) obj;
+			boolean equal = range.getQuantity().equals(getQuantity());
+			if (equal) {
+				equal &= range.getInitialMinimum() == getInitialMinimum();
+				equal &= range.getInitialMaximum() == getInitialMaximum();
+				equal &= range.getMinimum() == getMinimum();
+				equal &= range.getMaximum() == getMaximum();
+			}
+			return equal;
+		}
+		return false;
+	}
+	
 	/**
 	 * Delivers the maximal allowable value that can be assigned to the
 	 * {@link Quantity} belonging to this {@link Object} during the
@@ -47,8 +134,10 @@ public interface QuantityRange extends Serializable {
 	 * 
 	 * @return The maximal initialization value.
 	 */
-	public double getInitialMaximum();
-
+	public double getInitialMaximum() {
+		return initMax != null ? initMax.doubleValue() : Double.NaN;
+	}
+	
 	/**
 	 * Gives the minimal value that can be used to initialize the
 	 * {@link Quantity} belonging to this {@link Object}.
@@ -56,8 +145,10 @@ public interface QuantityRange extends Serializable {
 	 * @return The lowest possible initialization value for the corresponding
 	 *         {@link Quantity}.
 	 */
-	public double getInitialMinimum();
-
+	public double getInitialMinimum() {
+		return initMin != null ? initMin.doubleValue() : Double.NaN;
+	}
+	
 	/**
 	 * This method directly delivers the range for the initialization with lower
 	 * and upper bound.
@@ -66,8 +157,11 @@ public interface QuantityRange extends Serializable {
 	 *         bound {@link #getInitialMinimum()} and the upper initialization
 	 *         bound {@link #getInitialMaximum()}.
 	 */
-	public ValuePair<Double, Double> getInitialRange();
-
+	public ValuePair<Double, Double> getInitialRange() {
+		return new ValuePair<Double, Double>(Double.valueOf(getInitialMinimum()),
+			Double.valueOf(getInitialMaximum()));
+	}
+	
 	/**
 	 * This gives the absolute maximal value that can be assigned to the
 	 * {@link Quantity} belonging to this {@link Object} during a model
@@ -76,8 +170,10 @@ public interface QuantityRange extends Serializable {
 	 * @return The highest allowable value for the corresponding
 	 *         {@link Quantity}.
 	 */
-	public double getMaximum();
-
+	public double getMaximum() {
+		return maximum != null ? maximum.doubleValue() : Double.NaN;
+	}
+	
 	/**
 	 * The value returned by this method gives the absolute minimum value that
 	 * can be assigned to the corresponding {@link Quantity} during an
@@ -85,29 +181,97 @@ public interface QuantityRange extends Serializable {
 	 * 
 	 * @return The lowest allowable value for this quantity.
 	 */
-	public double getMinimum();
-
+	public double getMinimum() {
+		return minimum != null ? minimum.doubleValue() : Double.NaN;
+	}
+	
 	/**
 	 * This gives the {@link Quantity} whose value is to be calibrated.
 	 * 
 	 * @return The {@link Quantity} of interest.
 	 */
-	public Quantity getQuantity();
-
+	public Quantity getQuantity() {
+		return quantity;
+	}
+	
 	/**
 	 * With this method the allowable range of minimal ({@link #getMinimum())
 	 * and maximal ({@link #getMaximum()}) value can be easily accessed.
 	 * 
 	 * @return The possible interval for the corresponding {@link Quantity}.
 	 */
-	public ValuePair<Double, Double> getRange();
+	public ValuePair<Double, Double> getRange() {
+		return new ValuePair<Double, Double>(Double.valueOf(getMinimum()),
+			Double.valueOf(getMaximum()));
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 769;
+		int hashCode = getClass().getName().hashCode();
+		hashCode += prime * selected.hashCode();
+		hashCode += prime * quantity.hashCode();
+		hashCode += prime * initMin.hashCode();
+		hashCode += prime * initMax.hashCode();
+		hashCode += prime * minimum.hashCode();
+		hashCode += prime * maximum.hashCode();
+		return hashCode;
+	}
 
 	/**
-	 * Gives a {@link String} representation of this {@link Object} that
-	 * represents all of its values.
-	 * 
-	 * @return A {@link String} containing the properties of this {@link Object}
+	 * @return
 	 */
-	public String toString();
+	public boolean isSelected() {
+		return selected != null ? selected.booleanValue() : false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.sbml.optimization.QuantityRange#setInitialMaximum(double)
+	 */
+	public void setInitialMaximum(double initMax) {
+		this.initMax = Double.valueOf(initMax); 
+	}
+
+	/* (non-Javadoc)
+	 * @see org.sbml.optimization.QuantityRange#setInitialMinimum(double)
+	 */
+	public void setInitialMinimum(double initMin) {
+		this.initMin = Double.valueOf(initMin);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.sbml.optimization.QuantityRange#setMaximum(double)
+	 */
+	public void setMaximum(double max) {
+		this.maximum = Double.valueOf(max);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.sbml.optimization.QuantityRange#setMinimum(double)
+	 */
+	public void setMinimum(double min) {
+		this.minimum = Double.valueOf(min);
+	}
+
+	/**
+	 * @param select
+	 */
+	public void setSelected(boolean select) {
+		selected = Boolean.valueOf(select);
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return StringTools.concat(Character.valueOf('['), quantity, ", ",
+			Boolean.valueOf(isSelected()), ": initRange(", getInitialMinimum(),
+			", ", getInitialMaximum(), "), absolutRange(", getMinimum(), ", ",
+			getMaximum(), ")]").toString();
+	}
 
 }

@@ -500,8 +500,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 					Command.SIMULATION_START, BaseAction.FILE_CLOSE,
 					Command.OPTIMIZATION, BaseAction.EDIT_PREFERENCES);
 				// windowClosing
-				final WindowListener wl = EventHandler.create(WindowListener.class,
-					this, "windowClosing");
+				final WindowListener wl = EventHandler.create(WindowListener.class, this, "windowClosing");
 				final SimulatorUI ui = this;
 				new Thread(new Runnable() {
 					/* (non-Javadoc)
@@ -513,12 +512,12 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 							SBPreferences prefs = SBPreferences
 									.getPreferencesFor(EstimationOptions.class);
 							simPanel.refreshStepSize();
-							EvA2GUIStarter.init(
-								new EstimationProblem(simPanel.getSolver(), simPanel
-										.getDistance(), model, simPanel.getExperimentalData(),
-									prefs.getBoolean(EstimationOptions.EST_MULTI_SHOOT), panel
-											.getSelectedQuantityRanges()), ui, simPanel,
-								wl);
+							EstimationProblem estimationProblem = new EstimationProblem(
+								simPanel.getSolver(), simPanel.getDistance(), model, simPanel
+										.getExperimentalData(), prefs
+										.getBoolean(EstimationOptions.EST_MULTI_SHOOT), panel
+										.getSelectedQuantityRanges());
+							EvA2GUIStarter.init(estimationProblem, ui, simPanel, wl);
 							simPanel.setAllEnabled(true);
 						} catch (Throwable exc) {
 							GUITools.showErrorMessage(ui, exc);
@@ -602,9 +601,6 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 			}
 		}
 		logger.finer(bundle.getString("RECEIVED_WINDOW_EVENT"));
-	}
-	
-	public void windowClosing() {
 	}
 
 	/**

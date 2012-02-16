@@ -26,6 +26,8 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 import org.sbml.jsbml.Compartment;
+import org.sbml.jsbml.KineticLaw;
+import org.sbml.jsbml.LocalParameter;
 import org.sbml.jsbml.NamedSBase;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.Species;
@@ -109,6 +111,16 @@ public class LegendTableCellRenderer extends JLabel implements TableCellRenderer
 						setToolTipText(StringUtil.toHTMLToolTip(
 							bundle.getString("REACTION_COMPARTMENT"),
 							r.getCompartmentInstance()));
+					}
+				} else if (value instanceof LocalParameter) {
+					LocalParameter param = (LocalParameter) value;
+					if (param.isSetParentSBMLObject() && param.getParentSBMLObject().isSetParentSBMLObject()) {
+						KineticLaw kl = (KineticLaw) param.getParentSBMLObject().getParentSBMLObject();
+						if (kl.isSetParentSBMLObject()) {
+							Reaction r = kl.getParentSBMLObject();
+							setToolTipText(StringUtil.toHTMLToolTip(
+								bundle.getString("LOCAL_PARAMETER_REACTION"), r));
+						}
 					}
 				}
 				setText(value.toString());

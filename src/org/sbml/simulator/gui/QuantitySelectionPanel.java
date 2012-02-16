@@ -22,38 +22,48 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.text.MessageFormat;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
+import java.util.regex.PatternSyntaxException;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
-import javax.swing.SpinnerNumberModel;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.RowFilter;
+import javax.swing.UIManager;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableRowSorter;
 
-import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.LocalParameter;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.Reaction;
-import org.sbml.jsbml.util.StringTools;
-import org.sbml.jsbml.util.compilers.HTMLFormula;
+import org.sbml.jsbml.UnitDefinition;
 import org.sbml.optimization.QuantityRange;
+import org.sbml.simulator.gui.table.LegendTableCellRenderer;
 
 import de.zbit.gui.ActionCommand;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.LayoutHelper;
+import de.zbit.gui.table.ColoredBooleanRenderer;
+import de.zbit.gui.table.DecimalCellRenderer;
+import de.zbit.sbml.gui.UnitDefinitionCellRenderer;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
-import de.zbit.util.ValuePair;
 
 /**
  * With this element the user can decide which model components should be
@@ -67,10 +77,220 @@ import de.zbit.util.ValuePair;
 public class QuantitySelectionPanel extends JPanel implements ActionListener {
   
   /**
-   * Support for localization.
-   */
-  private static final transient ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
-  
+	 * 
+	 * @author Andreas Dr&auml;ger
+	 * @version $Rev$
+	 * @since 1.0
+	 */
+	private class QuantityRangeModel extends AbstractTableModel {
+
+		/**
+		 * Generated serial version identifier.
+		 */
+		private static final long serialVersionUID = 7445239993441176230L;
+
+		/**
+		 * 
+		 */
+		private int lastPos;
+		/**
+		 * 
+		 */
+		private List<? extends Quantity> listOfQuantities;
+		
+		/**
+		 * 
+		 * @param listOfQuantities
+		 * @param lastPos
+		 */
+		public QuantityRangeModel(List<? extends Quantity> listOfQuantities, int lastPos) {
+			super();
+			this.lastPos = lastPos;
+			this.listOfQuantities = listOfQuantities;
+		}
+
+		/* (non-Javadoc)
+		 * @see javax.swing.table.AbstractTableModel#getColumnClass(int)
+		 */
+		@Override
+		public Class<?> getColumnClass(int columnIndex) {
+			switch (columnIndex) {
+				case 0:
+					return Boolean.class;
+				case 1:
+					return Quantity.class;
+				case 2:
+				case 3:
+				case 4:
+				case 5:
+					return Double.class;
+				case 6:
+					return UnitDefinition.class;
+				default:
+					throw new IndexOutOfBoundsException("Column out of bounds: " + columnIndex);
+			}
+		}
+
+		/* (non-Javadoc)
+		 * @see javax.swing.table.TableModel#getColumnCount()
+		 */
+		public int getColumnCount() {
+			return 7;
+		}
+
+		/* (non-Javadoc)
+		 * @see javax.swing.table.AbstractTableModel#getColumnName(int)
+		 */
+		@Override
+		public String getColumnName(int columnIndex) {
+			switch (columnIndex) {
+				case 0:
+					return "Selected";
+				case 1:
+					return "Name";
+				case 2:
+					return "Initial Minimum";
+				case 3:
+					return "Initial Maximum";
+				case 4:
+					return "Absolute Minimum";
+				case 5:
+					return "Absolute Maximum";
+				case 6:
+					return "Derived Unit";
+				default:
+					throw new IndexOutOfBoundsException("Column out of bounds: " + columnIndex);
+			}
+		}
+
+		/* (non-Javadoc)
+		 * @see javax.swing.table.TableModel#getRowCount()
+		 */
+		public int getRowCount() {
+			return listOfQuantities.size();
+		}
+
+		/* (non-Javadoc)
+		 * @see javax.swing.table.TableModel#getValueAt(int, int)
+		 */
+		public Object getValueAt(int rowIndex, int columnIndex) {
+			if ((rowIndex < 0) || (getRowCount() <= rowIndex)) {
+				throw new IndexOutOfBoundsException("Row out of bounds: " + rowIndex);
+			}
+			QuantityRange qRange = quantityBlocks[lastPos - getRowCount() + rowIndex];
+			// TODO: treat null values!
+			switch (columnIndex) {
+				case 0:
+					return Boolean.valueOf(qRange.isSelected());
+				case 1:
+					return qRange.getQuantity();
+				case 2:
+					return Double.valueOf(qRange.getInitialMinimum());
+				case 3:
+					return Double.valueOf(qRange.getInitialMaximum());
+				case 4:
+					return Double.valueOf(qRange.getMinimum());
+				case 5:
+					return Double.valueOf(qRange.getMaximum());
+				case 6:
+					return qRange.getQuantity().getDerivedUnitDefinition();
+				default:
+					throw new IndexOutOfBoundsException("Column out of bounds: " + columnIndex);
+			}
+		}
+
+		/* (non-Javadoc)
+		 * @see javax.swing.table.AbstractTableModel#isCellEditable(int, int)
+		 */
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+			if ((rowIndex < 0) || (getRowCount() <= rowIndex)) {
+				throw new IndexOutOfBoundsException("Row out of bounds: " + rowIndex);
+			}
+			if ((-1 < columnIndex) && (columnIndex < getColumnCount())) {
+				if (columnIndex == 0) {
+					return true;
+				}
+				if ((columnIndex == 1) || (columnIndex == 6)) {
+					// We neither let the user change the name of the Quantity nor its derived unit!
+					return false;
+				}
+				return quantityBlocks[lastPos - getRowCount() + rowIndex].isSelected();
+			}
+			throw new IndexOutOfBoundsException("Column out of bounds: " + columnIndex);
+		}
+
+		/* (non-Javadoc)
+		 * @see javax.swing.table.AbstractTableModel#setValueAt(java.lang.Object, int, int)
+		 */
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+			if ((rowIndex < 0) || (getRowCount() <= rowIndex)) {
+				throw new IndexOutOfBoundsException("Row out of bounds: " + rowIndex);
+			}
+			QuantityRange range = quantityBlocks[lastPos - getRowCount() + rowIndex];
+			double newVal;
+			switch (columnIndex) {
+				case 0:
+					range.setSelected(((Boolean) aValue).booleanValue());
+					break;
+				case 1:
+					// actually not supported!
+					range.getQuantity().setName(aValue.toString());
+					break;
+				case 2:
+					newVal = ((Double) aValue).doubleValue();
+					if (newVal < range.getInitialMaximum()) {
+						range.setInitialMinimum(newVal);
+					} else {
+						logger.warning(MessageFormat.format(
+							"Cannot adopt the new value {0} because it exceeds the current initial maximum of {1}.",
+							StringUtil.toString(newVal),
+							StringUtil.toString(range.getInitialMaximum())));
+					}
+					break;
+				case 3:
+					newVal = ((Double) aValue).doubleValue();
+					if (range.getInitialMinimum() < newVal) {
+						range.setInitialMaximum(((Double) aValue).doubleValue());
+					} else {
+						logger.warning(MessageFormat.format(
+							"Cannot adopt the new value {0} because falls below the current initial minimum of {1}.",
+							StringUtil.toString(newVal),
+							StringUtil.toString(range.getInitialMinimum())));
+					}
+					break;
+				case 4:
+					newVal = ((Double) aValue).doubleValue();
+					if (newVal < range.getMaximum()) {
+						range.setMinimum(((Double) aValue).doubleValue());
+					} else {
+						logger.warning(MessageFormat.format(
+							"Cannot adopt the new value {0} because exceeds the current maximum of {1}.",
+							StringUtil.toString(newVal),
+							StringUtil.toString(range.getMaximum())));
+					}
+					break;
+				case 5:
+					newVal = ((Double) aValue).doubleValue();
+					if (range.getMinimum() < newVal) {
+						range.setMaximum(((Double) aValue).doubleValue());
+					} else {
+						logger.warning(MessageFormat.format(
+							"Cannot adopt the new value {0} because falls below the current minimum of {1}.",
+							StringUtil.toString(newVal),
+							StringUtil.toString(range.getMinimum())));
+					}
+					break;
+				case 6:
+					logger.warning("Cannot change the derived unit of " + range.getQuantity());
+					break;
+				default:
+					throw new IndexOutOfBoundsException("Column out of bounds: " + columnIndex);
+			}
+		}
+		
+	}
   /**
    * @author Andreas Dr&auml;ger
    * @date 2010-09-08
@@ -101,185 +321,16 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
       return bundle.getString(toString() + "_TOOLTIP");
     }
   }
+  
+  /**
+   * Support for localization.
+   */
+  private static final transient ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
 	
 	/**
-	 * A data structure that contains all necessary information for one
-	 * {@link Quantity}: a {@link JCheckBox} to select or de-select it and the
-	 * values for the optimization. Furthermore, this data structure takes care
-	 * about switching the {@link JSpinner}s for the values associated with the
-	 * {@link Quantity} off. In addition, a pointer to the {@link Quantity} itself
-	 * is also stored.
-	 * 
-	 * @author Andreas Dr&auml;ger
-	 * @date 2010-09-09
-	 */
-	public class QuantityBlock implements QuantityRange, ItemListener {
-		/**
-		 * Generated serial version identifier.
-		 */
-		private static final long serialVersionUID = -1190252378673523294L;
-		
-		/**
-		 * 
-		 */
-		private Quantity quantity;
-		
-		/**
-		 * 
-		 */
-		private JCheckBox checkbox;
-		
-		/**
-		 * 
-		 */
-		private JSpinner minSpinner, maxSpinner, minInitSpinner, maxInitSpinner;
-		
-		/**
-		 * @param q
-		 * @param check
-		 * @param initMin
-		 * @param initMax
-		 * @param min
-		 * @param max
-		 */
-		public QuantityBlock(Quantity q, JCheckBox check, JSpinner initMin,
-			JSpinner initMax, JSpinner min, JSpinner max) {
-			quantity = q;
-			checkbox = check;
-			minInitSpinner = initMin;
-			maxInitSpinner = initMax;
-			minSpinner = min;
-			maxSpinner = max;
-			enableSpinners(checkbox.isSelected());
-			checkbox.addItemListener(this);
-			String className = q.getClass().getSimpleName();
-			String name = q.isSetName() ? q.getName() : q.getId();
-			checkbox.setToolTipText(StringUtil.toHTMLToolTip(
-				bundle.getString("CHECK_BOX_TOOLTIP"), className, name));
-			minInitSpinner.setToolTipText(StringUtil.toHTMLToolTip(
-				bundle.getString("INIT_MIN_MAX_SPINNER_TOOL_TIP"),
-				bundle.getString("MINIMUM"), className, name));
-			maxInitSpinner.setToolTipText(StringUtil.toHTMLToolTip(
-				bundle.getString("INIT_MIN_MAX_SPINNER_TOOL_TIP"),
-				bundle.getString("MAXIMUM"), className, name));
-			minSpinner.setToolTipText(StringUtil.toHTMLToolTip(
-				bundle.getString("MIN_MAX_SPINNER_TOOL_TIP"),
-				bundle.getString("MINIMUM"), className, name));
-			maxSpinner.setToolTipText(StringUtil.toHTMLToolTip(
-				bundle.getString("MIN_MAX_SPINNER_TOOL_TIP"),
-				bundle.getString("MAXIMUM"), className, name));
-		}
-		
-		/**
-		 * @param enabled
-		 */
-		private void enableSpinners(boolean enabled) {
-			minInitSpinner.setEnabled(enabled);
-			maxInitSpinner.setEnabled(enabled);
-			minSpinner.setEnabled(enabled);
-			maxSpinner.setEnabled(enabled);
-		}
-		
-		/* (non-Javadoc)
-		 * @see org.sbml.optimization.QuantityRange#getInitialMaximum()
-		 */
-		public double getInitialMaximum() {
-			return ((Double) maxInitSpinner.getValue()).doubleValue();
-		}
-		
-		/* (non-Javadoc)
-		 * @see org.sbml.optimization.QuantityRange#getInitialMinimum()
-		 */
-		public double getInitialMinimum() {
-			return ((Double) minInitSpinner.getValue()).doubleValue();
-		}
-		
-		/* (non-Javadoc)
-		 * @see org.sbml.optimization.QuantityRange#getInitialRange()
-		 */
-		public ValuePair<Double, Double> getInitialRange() {
-			return new ValuePair<Double, Double>(Double.valueOf(getInitialMinimum()),
-				Double.valueOf(getInitialMaximum()));
-		}
-		
-		/**
-		 * @return
-		 */
-		public double getMaximum() {
-			return ((Double) maxSpinner.getValue()).doubleValue();
-		}
-		
-		/**
-		 * @return
-		 */
-		public double getMinimum() {
-			return ((Double) minSpinner.getValue()).doubleValue();
-		}
-		
-		/**
-		 * @return
-		 */
-		public Quantity getQuantity() {
-			return quantity;
-		}
-		
-		/* (non-Javadoc)
-		 * @see org.sbml.optimization.QuantityRange#getRange()
-		 */
-		public ValuePair<Double, Double> getRange() {
-			return new ValuePair<Double, Double>(Double.valueOf(getMinimum()),
-				Double.valueOf(getMaximum()));
-		}
-		
-		/**
-		 * @return
-		 */
-		public boolean isSelected() {
-			return checkbox.isSelected();
-		}
-		
-		/* (non-Javadoc)
-		 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent )
-		 */
-		public void itemStateChanged(ItemEvent e) {
-			if ((e.getSource() != null) && (e.getSource() == checkbox)) {
-				enableSpinners(checkbox.isSelected());
-			}
-		}
-		
-		/**
-		 * @param select
-		 */
-		public void setSelected(boolean select) {
-			checkbox.setSelected(select);
-		}
-		
-		/* (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return StringTools.concat(Character.valueOf('['), quantity, ", ",
-				Boolean.valueOf(isSelected()), ": initRange(", getInitialMinimum(),
-				", ", getInitialMaximum(), "), absolutRange(", getMinimum(), ", ",
-				getMaximum(), ")]").toString();
-		}
-	}
-	
-	/**
-	 * 
-	 */
-	private JButton[] selectAllButtons;
-	/**
-	 * 
-	 */
-	private JButton[] deselectAllButtons;
-	
-	/**
-	 * 
-	 */
-	private QuantityBlock quantityBlocks[];
-	
+   * A {@link Logger} for this class.
+   */
+  private static final transient Logger logger = Logger.getLogger(QuantitySelectionPanel.class.getName());
 	/**
 	 * Generated serial version identifier
 	 */
@@ -291,6 +342,11 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	public static long getSerialVersionUId() {
 		return serialVersionUID;
 	}
+	
+	/**
+	 * 
+	 */
+	private JButton[] deselectAllButtons;
 	
 	/**
 	 * Values for {@link JSpinner}s of the initialization range
@@ -308,6 +364,16 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	private Model model;
 	
 	/**
+	 * 
+	 */
+	private QuantityRange quantityBlocks[];
+	
+	/**
+	 * 
+	 */
+	private JButton[] selectAllButtons;
+	
+	/**
 	 * This pane displays all selections for each group of different
 	 * {@link Quantity}s.
 	 */
@@ -319,7 +385,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	public QuantitySelectionPanel(Model model) {
 		super();
 		this.model = model;
-		quantityBlocks = new QuantityBlock[model.getNumSymbols()
+		quantityBlocks = new QuantityRange[model.getNumSymbols()
 				+ model.getNumLocalParameters()];
 		// One button each for every group of elements
 		selectAllButtons = new JButton[4];
@@ -327,20 +393,18 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		
 		tabs = new JTabbedPane();
 		int curr = 0;
-		tabs.add(bundle.getString("COMPARTMENTS"),
+		tabs.addTab(bundle.getString("COMPARTMENTS"),
 			createQuantityPanel(model.getListOfCompartments(), curr, 0));
 		curr += model.getNumCompartments();
-		tabs.add(bundle.getString("SPECIES"), createQuantityPanel(model.getListOfSpecies(), curr, 1));
+		tabs.addTab(bundle.getString("SPECIES"), createQuantityPanel(model.getListOfSpecies(), curr, 1));
 		curr += model.getNumSpecies();
 		JPanel quantityPanel = createQuantityPanel(model.getListOfParameters(),
 			curr, 2);
 		// TODO
 //		quantityPanel.setPreferredSize(new Dimension(550, 500));
-		tabs.add(bundle.getString("GLOBAL_PARAMETERS"), new JScrollPane(
-			quantityPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
+		tabs.addTab(bundle.getString("GLOBAL_PARAMETERS"), quantityPanel);
 		curr += model.getNumParameters();
-		tabs.add(bundle.getString("LOCAL_PARAMETERS"),
+		tabs.addTab(bundle.getString("LOCAL_PARAMETERS"),
 			createLocalParameterTab(model));
 		
 		/*
@@ -375,35 +439,14 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		/*
 		 * Ensure same size of all tabs.
 		 */
-		double maxHeight = 0, maxWidth = 0, height, width;
-		Dimension dim;
+		Component components[] = new Component[tabs.getTabCount()];
 		for (i = 0; i < tabs.getTabCount(); i++) {
-			dim = tabs.getComponentAt(i).getPreferredSize();
-			height = dim.getHeight();
-			width = dim.getWidth();
-			if (height > maxHeight) {
-				maxHeight = height;
-			}
-			if (width > maxWidth) {
-				maxWidth = width;
-			}
+			components[i] = tabs.getTabComponentAt(i);
 		}
-		for (i = 0; i < tabs.getTabCount(); i++) {
-			dim = tabs.getComponentAt(i).getPreferredSize();
-			height = dim.getHeight();
-			width = dim.getWidth();
-			if (height < maxHeight) {
-				dim = new Dimension((int) width, (int) maxHeight);
-				tabs.getComponentAt(i).setPreferredSize(dim);
-			}
-			if (width < maxWidth) {
-				dim = new Dimension((int) maxWidth, (int) maxHeight);
-				tabs.getComponentAt(i).setPreferredSize(dim);
-			}
-		}
+		GUITools.calculateAndSetMaxWidth(components);
 		
 		LayoutHelper lh = new LayoutHelper(this);
-		lh.add(new JLabel(StringUtil.toHTMLToolTip(bundle.getString("EXPLANATION"))));
+		lh.add(new JLabel(StringUtil.toHTMLToolTip(bundle.getString("EXPLANATION"))), 1d, 0d);
 		lh.add(tabs);
 	}
 	
@@ -412,7 +455,9 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if ((e.getActionCommand() == null) || (e.getSource() == null)
-				|| !(e.getSource() instanceof JButton)) { return; }
+				|| !(e.getSource() instanceof JButton)) { 
+			return; 
+		}
 		JButton button = (JButton) e.getSource();
 		int i = 0, begin = 0, end = quantityBlocks.length;
 		while (!GUITools.contains(tabs.getComponentAt(i), button)) {
@@ -445,7 +490,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 				deselectAllButtons[i].setEnabled(false);
 				break;
 			default:
-				System.err.printf("unknown command %s\n", e.getActionCommand());
+				logger.warning(String.format("unknown command %s\n", e.getActionCommand()));
 				select = false;
 				break;
 		}
@@ -453,6 +498,8 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		for (i = begin; i < end; i++) {
 			quantityBlocks[i].setSelected(select);
 		}
+		tabs.getSelectedComponent().validate();
+		tabs.getSelectedComponent().repaint();
 	}
 	
 	/**
@@ -462,7 +509,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	 * @param select
 	 * @return
 	 */
-	private Component createButtonPanel(int buttonIndex, boolean select) {
+	private Component createButtonPanel(int buttonIndex, boolean select, final JTable table) {
 		JButton selectAllButton = GUITools.createButton(
 			SelectionCommand.OPTIMIZE_ALL.getName(), null, this, SelectionCommand.OPTIMIZE_ALL,
 			SelectionCommand.OPTIMIZE_ALL.getToolTip());
@@ -476,33 +523,77 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		selectAllButtons[buttonIndex] = selectAllButton;
 		deselectAllButtons[buttonIndex] = deselectAllButton;
 		
+		// Filtering:
+		QuantityRangeModel rangeModel = (QuantityRangeModel) table.getModel();
+		table.setPreferredScrollableViewportSize(new Dimension(500, 70));
+    table.setFillsViewportHeight(true);
+    table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    final TableRowSorter<QuantityRangeModel> sorter = new TableRowSorter<QuantityRangeModel>(rangeModel);
+		table.setRowSorter(sorter);
+		// Create a separate form for filterText and statusText
+
+    final JTextField filterText = new JTextField(40);
+    // Whenever filterText changes, invoke newFilter.
+		filterText.getDocument().addDocumentListener(new DocumentListener() {
+			/* (non-Javadoc)
+			 * @see javax.swing.event.DocumentListener#changedUpdate(javax.swing.event.DocumentEvent)
+			 */
+			public void changedUpdate(DocumentEvent e) {
+				filter(filterText, sorter);
+			}
+			
+			/* (non-Javadoc)
+			 * @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event.DocumentEvent)
+			 */
+			public void insertUpdate(DocumentEvent e) {
+				filter(filterText, sorter);
+			}
+			
+			/* (non-Javadoc)
+			 * @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event.DocumentEvent)
+			 */
+			public void removeUpdate(DocumentEvent e) {
+				filter(filterText, sorter);
+			}
+		});
+    LayoutHelper lh = new LayoutHelper(new JPanel());
+    lh.add(new JLabel(UIManager.getIcon("ICON_SEARCH_16")), filterText);
+		// End Filtering
+    
 		JPanel panel = new JPanel();
 		panel.add(selectAllButton);
 		panel.add(deselectAllButton);
-		return panel;
+		lh.add(panel, 2);
+		return lh.getContainer();
 	}
+	
+  /**
+   * Update the row filter regular expression from the expression in
+   * the text box.
+   */
+  private void filter(JTextField filterText, TableRowSorter<QuantityRangeModel> sorter) {
+      RowFilter<QuantityRangeModel, Object> rf = null;
+      // If current expression doesn't parse, don't update.
+      try {
+      	rf = RowFilter.regexFilter(filterText.getText(), 1);
+      } catch (PatternSyntaxException exc) {
+      	return;
+      }
+      sorter.setRowFilter(rf);
+  }
 	
 	/**
 	 * @param model
 	 * @return
 	 */
 	private Container createLocalParameterTab(Model model) {
-		LayoutHelper lh = new LayoutHelper(new JPanel());
-		JPanel p;
-		int curr = model.getNumSymbols();
+		List<LocalParameter> listOfAllLocalParameters = new LinkedList<LocalParameter>();
 		for (Reaction r : model.getListOfReactions()) {
-			if (r.isSetKineticLaw()
-					&& (r.getKineticLaw().getLocalParameterCount() > 0)) {
-				p = new JPanel();
-				p.setBorder(BorderFactory.createTitledBorder(String.format(
-					" Reaction %s ", r.isSetName() ? r.getName() : r.getId())));
-				p.add(createQuantityPanel(r.getKineticLaw().getListOfLocalParameters(),
-					curr, 3));
-				curr += r.getKineticLaw().getLocalParameterCount();
-				lh.add(p);
+			if (r.isSetKineticLaw() && (r.getKineticLaw().getLocalParameterCount() > 0)) {
+				listOfAllLocalParameters.addAll(r.getKineticLaw().getListOfLocalParameters());
 			}
 		}
-		return finishContainer(lh, 3, true, curr);
+		return createQuantityPanel(listOfAllLocalParameters, model.getNumSymbols(), 3);
 	}
 	
 	/**
@@ -512,78 +603,83 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	 * @return
 	 */
 	private JPanel createQuantityPanel(
-		ListOf<? extends Quantity> listOfQuantities, int curr, int tabIndex) {
-		LayoutHelper lh = new LayoutHelper(new JPanel());
+		List<? extends Quantity> listOfQuantities, int curr, int tabIndex) {
 		boolean isLocalParameter = false;
 		boolean select = true;
-		JSeparator sep = new JSeparator(JSeparator.VERTICAL);
-		lh.add(true, new JLabel(), new JLabel("<html>initial<br/>minimum</html>"),
-			new JLabel("<html>initial<br/>maximum</html>"), sep, new JLabel(
-				"<html>absolute<br/>minimum</html>"), new JLabel(
-				"<html>absolute<br/>maximum</html>"), sep, new JLabel(
-				"<html>derived<br/>unit</html>"));
 		for (Quantity q : listOfQuantities) {
 			isLocalParameter |= q instanceof LocalParameter;
 			select = isLocalParameter || (q instanceof Parameter);
-      JCheckBox chck = new JCheckBox(StringUtil.toHTML(q.isSetName() ? q
-          .getName() : q.getId(), 25), select);
-			
-			// Initialization
-			JSpinner minInit = new JSpinner(new SpinnerNumberModel(initMinValue,
-				initMinValue, initMaxValue, stepSize));
-			JSpinner maxInit = new JSpinner(new SpinnerNumberModel(initMaxValue,
-				initMinValue, initMaxValue, stepSize));
-			
-			// Optimization
-			JSpinner min = new JSpinner(new SpinnerNumberModel(minValue, minValue,
-				maxValue, stepSize));
-			JSpinner max = new JSpinner(new SpinnerNumberModel(maxValue, minValue,
-				maxValue, stepSize));
-			
-			quantityBlocks[curr++] = new QuantityBlock(q, chck, minInit, maxInit,
-				min, max);
-			lh.add(
-				true,
-				chck,
-				minInit,
-				maxInit,
-				sep,
-				min,
-				max,
-				sep,
-				new JLabel(StringTools.concat("<html>",
-					HTMLFormula.toHTML(q.getDerivedUnitDefinition()), "</html>")
-						.toString()));
+			quantityBlocks[curr++] = new QuantityRange(q, select, initMinValue, initMaxValue,
+				minValue, maxValue);
 		}
-		if (!isLocalParameter) { return finishContainer(lh, tabIndex, select,
-			listOfQuantities.size()); }
-		return (JPanel) lh.getContainer();
-	}
-	
-	/**
-	 * Finishes the panel
-	 * 
-	 * @param lh
-	 * @param buttonIndex
-	 * @param select
-	 * @param numElements
-	 * @return
-	 */
-	private JPanel finishContainer(LayoutHelper lh, int buttonIndex,
-		boolean select, int numElements) {
-		Container container = lh.getContainer();
-		JScrollPane scroll = new JScrollPane(container,
-			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-			JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		QuantityRangeModel rangeModel = new QuantityRangeModel(listOfQuantities, curr);
+		JTable table = new JTable(rangeModel) {
+			
+			/**
+			 * Generated serial version identifier.
+			 */
+			private static final long serialVersionUID = -2185541045003706883L;
+
+			/* (non-Javadoc)
+			 * @see javax.swing.JTable#getToolTipText(java.awt.event.MouseEvent)
+			 */
+			@Override
+			public String getToolTipText(MouseEvent e) {
+        java.awt.Point p = e.getPoint();
+        int rowIndex = rowAtPoint(p);
+        int colIndex = columnAtPoint(p);
+        int realColumnIndex = convertColumnIndexToModel(colIndex);
+        if (rowIndex < 0) {
+        	return null;
+        }
+        Quantity q = (Quantity) getValueAt(rowIndex, 1);
+        String name = q.toString();
+        String className = q.getElementName();
+        switch (realColumnIndex) {
+					case 0:
+						return StringUtil.toHTMLToolTip(
+		        	bundle.getString("CHECK_BOX_TOOLTIP"), className, name);
+					case 1:
+						return super.getToolTipText(e); 
+					case 2:
+						return StringUtil.toHTMLToolTip(
+		        	bundle.getString("INIT_MIN_MAX_SPINNER_TOOL_TIP"),
+		        	bundle.getString("MINIMUM"), className, name);
+					case 3:
+						return StringUtil.toHTMLToolTip(
+		        	bundle.getString("INIT_MIN_MAX_SPINNER_TOOL_TIP"),
+		        	bundle.getString("MAXIMUM"), className, name);
+					case 4:
+						return StringUtil.toHTMLToolTip(
+		        	bundle.getString("MIN_MAX_SPINNER_TOOL_TIP"),
+		        	bundle.getString("MINIMUM"), className, name);
+					case 5:
+						return StringUtil.toHTMLToolTip(
+		        	bundle.getString("MIN_MAX_SPINNER_TOOL_TIP"),
+		        	bundle.getString("MAXIMUM"), className, name);
+					default:
+						return null;
+				}
+    }};
+		table.setDefaultRenderer(Boolean.class, new ColoredBooleanRenderer());
+		table.setDefaultRenderer(Quantity.class, new LegendTableCellRenderer());
+		table.setDefaultRenderer(Double.class, new DecimalCellRenderer());
+		table.setDefaultRenderer(UnitDefinition.class, new UnitDefinitionCellRenderer());
+//		table.setDefaultEditor(Double.class, new DefaultCellEditor(new JSpinner(new SpinnerNumberModel())));
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+    
+		LayoutHelper lh = new LayoutHelper(new JPanel());
+		lh.add(new JScrollPane(table));
+		
+		// finish container
+		int numElements = listOfQuantities.size();
 		int height = 10 + 25 * numElements;
-		if (buttonIndex == 3) {
-			height += model.getNumReactions() * 5;
-		}
+		Container container = lh.getContainer();
 		container.setPreferredSize(new Dimension(550, (int) Math.min(250, height)));
 		lh = new LayoutHelper(new JPanel());
-		lh.add(scroll);
-		lh.add(new JSeparator(), 0, lh.getRow() + 1, 5, 1);
-		lh.add(createButtonPanel(buttonIndex, select), 0, lh.getRow() + 2, 5, 1);
+		lh.add(container);
+		lh.add(new JSeparator(), 0, lh.getRow() + 1, 5, 1, 1d, 0d);
+		lh.add(createButtonPanel(tabIndex, select, table), 0, lh.getRow() + 2, 5, 1, 0d, 0d);
 		
 		return (JPanel) lh.getContainer();
 	}

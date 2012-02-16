@@ -45,6 +45,7 @@ import org.sbml.jsbml.NamedSBaseWithDerivedUnit;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.Species;
+import org.sbml.jsbml.UnitDefinition;
 import org.sbml.simulator.gui.table.LegendTableCellRenderer;
 import org.sbml.simulator.gui.table.LegendTableModel;
 
@@ -54,6 +55,7 @@ import de.zbit.gui.JDropDownButton;
 import de.zbit.gui.table.ColorEditor;
 import de.zbit.gui.table.ColoredBooleanRenderer;
 import de.zbit.gui.table.JTableTools;
+import de.zbit.sbml.gui.UnitDefinitionCellRenderer;
 import de.zbit.util.ResourceManager;
 
 /**
@@ -255,7 +257,7 @@ public class LegendPanel extends JPanel implements TableModelListener,
 		tab.setDefaultEditor(Color.class, new ColorEditor());
 		tab.setDefaultRenderer(Color.class, new LegendTableCellRenderer());
 		tab.setDefaultRenderer(NamedSBaseWithDerivedUnit.class, new LegendTableCellRenderer());
-		tab.setDefaultRenderer(String.class, new LegendTableCellRenderer());
+		tab.setDefaultRenderer(UnitDefinition.class, new UnitDefinitionCellRenderer());
 		tab.setDefaultRenderer(Boolean.class, new ColoredBooleanRenderer());
 		tab.getModel().addTableModelListener(this);
 		JTableTools.setQuickSearch(tab);
