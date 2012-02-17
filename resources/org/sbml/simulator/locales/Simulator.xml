@@ -28,8 +28,8 @@
   <entry key="SPECIES_TOOLTIP">If this option is selected, all species of the model are plotted.</entry>
   <entry key="PARAMETERS">Parameters</entry>
   <entry key="PARAMETERS_TOOLTIP">With this option you can plot the changes of all global parameters in the model.</entry>
-  <entry key="REACTIONS">Fluxes</entry>
-  <entry key="REACTIONS_TOOLTIP">Select this option to plot the evolution of all flux values in the model.</entry>
+  <entry key="FLUXES">Fluxes</entry>
+  <entry key="FLUXES_TOOLTIP">Select this option to plot the evolution of all flux values in the model.</entry>
   <entry key="SELECT_ALL">Select</entry>
   <entry key="SELECT_ALL_TOOLTIP">Select the components to be shown in the plot.</entry>
   <entry key="SELECT_NONE">Deselect</entry>
@@ -45,6 +45,7 @@
   
   <!-- EstimationOptions -->
     
+  <entry key="EstimationOptions">Estimation Options</entry>
   <entry key="EST_ALL_COMPARTMENTS">Compartment sizes</entry>
   <entry key="EST_ALL_COMPARTMENTS_TOOLTIP">Decide whether or not by default all compartments in a model should be considered the target of an optimization, i.e., value estimation.</entry>
   <entry key="EST_ALL_GLOBAL_PARAMETERS">Global parameter values</entry>
@@ -72,10 +73,10 @@
   
   <!-- EstimationProblem -->
   
-  <entry key="KIND_OF_SHOOTING">Using %s shooting!</entry>
+  <entry key="KIND_OF_SHOOTING">Using {0} shooting!</entry>
   <entry key="MULTIPLE">multiple</entry>
   <entry key="SINGLE">single</entry>
-  <entry key="RESULT_OF_BEST_PER_GENERATION">Result of the best per generation model simulation</entry>
+  <entry key="RESULT_OF_BEST_PER_GENERATION">Result of the best individual per generation of the model simulation</entry>
   <entry key="OPTIMIZATION_TARGET_IS_NOT_PART_OF_THE_MODEL">Cannot estimate the values of quantities that are not part of the given model.</entry>
   <entry key="MISSING_REFERENCE_DATA">At least for one symbol reference data are required.</entry>
   
@@ -85,7 +86,7 @@
   <entry key="RESET_TOOLTIP">Sets all values to the original values from the model. However, previously undefined values will be set to the default values.</entry>
   <entry key="GLOBAL_PARAMETERS">Global Parameters</entry>
   <entry key="LOCAL_PARAMETERS">Local Parameters</entry>
-  <entry key="REPLACEMENT_OF_UNDEFINED_VALUES">Undefined %s for the following %s %s been replaced by the corresponding default value %.3f.</entry>
+  <entry key="REPLACEMENT_OF_UNDEFINED_VALUES">Undefined {0} for the following {1} {2} been replaced by the corresponding default value {3,number}.</entry>
   <entry key="VALUE">value</entry>
   <entry key="VALUES">values</entry>
   <entry key="HAVE">have</entry>
@@ -144,6 +145,19 @@
   
   <!-- QuantitySelectionPanel -->
   
+  <entry key="UNKNOWN_COMMAND">Unknown command "{0}"</entry>
+  <entry key="ROW_INDEX_OUT_OF_BOUNDS">Row index {0} out of bounds: {1} rows available.</entry>
+  <entry key="COLUMN_INDEX_OUT_OF_BOUNDS">Column index {0} out of bounds: {1} columns available.</entry>
+  <entry key="CANNOT_ADOPT_NEW_VALUE">Cannot adopt the new value {0} because it {4} the current {3} of {1}.</entry>
+  <entry key="CANNOT_DERIVE_UNIT_OF">Cannot change the derived unit of {0}.</entry>
+  <entry key="EXCEEDS">exceeds</entry>
+  <entry key="SELECTED">Selected</entry>
+  <entry key="NAME">Name</entry>
+  <entry key="INITIAL_MINIMUM">Initial Minimum</entry>
+  <entry key="INITIAL_MAXIMUM">Initial Maximum</entry>
+  <entry key="ABSOLUTE_MINIMUM">Absolute Minimum</entry>
+  <entry key="ABSOLUTE_MAXIMUM">Absolute Maximum</entry>
+  <entry key=""></entry>
   <entry key="CHECK_BOX_TOOLTIP">Check this box to include %s %s in the optimization</entry> <!-- SBML element name and name of the instance -->
   <entry key="EXPLANATION">Please select the model components, whose values are to be optimized. You can also change the allowable ranges for each element.</entry>
   <entry key="MIN_MAX_SPINNER_TOOL_TIP">Select the absolute %s allowable value for this %s named %s.</entry>
@@ -217,12 +231,15 @@
   
   <!-- SimulationWorker -->
   
-  <entry key="MODEL_UNSTABLE_EXCEPTION">Simulation not possible because the model is unstable.</entry>
+  <entry key="MODEL_UNSTABLE_EXCEPTION">Simulation not possible because the model is unstable. Please try again with a different solver.</entry>
   
   <!-- SimulatorOptions -->
   
+  <entry key="SimulatorOptions">Simulator Options</entry>
   <entry key="INPUT_FILES">Select input files</entry>
   <entry key="INPUT_FILES_TOOLTIP">These options are used to select all input files for the simulation.</entry>
+  <entry key="OUTPUT_FILES">Select output files</entry>
+  <entry key="OUTPUT_FILES_TOOLTIP">Select output files for the results of simulation and parameter estimation.</entry>
   <entry key="SBML_INPUT_FILE">SBML input file</entry>
   <entry key="SBML_INPUT_FILE_TOOLTIP">Select a model in SBML format that is to be simulated.</entry>
   <entry key="SBML_OUTPUT_FILE">SBML output file</entry>

@@ -8,16 +8,91 @@
 	   and the given value consists of the actual short name and - separated
 	   by a semicolon ";" the corresponding tool tip.
   </comment>
+    
+  <!-- BoxAndWhiskerXYToolTipGenerator -->
+  
+  <entry key="MEAN">Durchschnitt</entry>
+  <entry key="MEDIAN">Median</entry>
+  <entry key="MIN">Minimum</entry>
+  <entry key="MAX">Maximum</entry>
+  <entry key="Q1">1. Quantil</entry>
+  <entry key="Q3">3. Quantil</entry>
   
   <!-- COMPONENT -->
   
   <entry key="ALL">Alle Komponenten</entry>
+  <entry key="ALL_TOOLTIP">Wählt alle verfügbaren Komponenten für die Darstellung im Diagramm aus.</entry>
   <entry key="COMPARTMENTS">Kompartimente</entry>
+  <entry key="COMPARTMENTS_TOOLTIP">Wählt alle Kompartimente für die Darstellung im Diagramm aus.</entry>
   <entry key="SPECIES">Spezies</entry>
+  <entry key="SPECIES_TOOLTIP">Wenn diese Option gewählt wird, so werden alle Spezies des models im Diagramm dargestellt.</entry>
   <entry key="PARAMETERS">Parameter</entry>
-  <entry key="REACTIONS">Flüsse</entry>
+  <entry key="PARAMETERS_TOOLTIP">Mit dieser Option werden die Änderungen aller globalen Parameter im Diagramm dargestellt.</entry>
+  <entry key="FLUXES">Flüsse</entry>
+  <entry key="FLUXES_TOOLTIP">Wählen Sie diese Option, um die zeitlichen Änderungen aller Flüsse des Modells darstellen zu lassen.</entry>
   <entry key="SELECT_ALL">Auswählen</entry>
+  <entry key="SELECT_ALL_TOOLTIP">Wählt die Komponenten, die im Diagramm angezeigt werden sollen.</entry>
   <entry key="SELECT_NONE">Abwählen</entry>
+  <entry key="SELECT_NONE_TOOLTIP">Wählt die Komponenten, die nicht in die graphische Darstellung im Diagramm einbezogen werden sollen.</entry>
+  
+  <!-- CSVDataImporter -->
+  
+  <entry key="FILE_NOT_CORRECTLY_FORMATTED">Unlesbare Datei</entry>
+  <entry key="FILE_NOT_CORRECTLY_FORMATTED_TOOLTIP">Das gegebene Format konnte nicht gelesen werden, weil keine Spalten-Identifikatoren darin angegeben sind.</entry>
+  <entry key="ADDITIONAL_COLUMNS_ARE_IGNORED">Einige Elemente werden ignoriert.</entry>
+  <entry key="ADDITIONAL_COLUMNS_ARE_IGNORED_TOOLTIP">Die Datei enthält einige Elemente, die kein zugehöriges Gegenstück im gegebenen Modell besitzen. Diese Elemente werden nicht im Diagramm erscheinen und in der weiteren Analyse ignoriert werden</entry>
+  <entry key="TIME">Zeit</entry>
+    
+  <!-- EstimationOptions -->
+    
+  <entry key="EstimationOptions">Einstellungen für Schätzungverfahren</entry>
+  <entry key="EST_ALL_COMPARTMENTS">Kompartimentgrößen</entry>
+  <entry key="EST_ALL_COMPARTMENTS_TOOLTIP">Entscheiden Sie, ob alle Kompartimente zur die Schätzung ihrer jeweiligen Kompartimentgrößen des Modells ausgewählt sein sollen.</entry>
+  <entry key="EST_ALL_GLOBAL_PARAMETERS">Werte globaler Parameter</entry>
+  <entry key="EST_ALL_GLOBAL_PARAMETERS_TOOLTIP">Entscheiden Sie, ob die Werte aller globaler parameter des gegebenen Modells als Optimierungsziele ausgewählt sein sollen.</entry>
+  <entry key="EST_ALL_LOCAL_PARAMETERS">Werte lokaler Parameter</entry>
+  <entry key="EST_ALL_LOCAL_PARAMETERS_TOOLTIP">Legen Sie fest, ob die Werte aller lokalen Parameter des gegebenen Modells als Optimierungsziele ausgewählt werden sollen.</entry>
+  <entry key="EST_ALL_SPECIES">Anfangswerte der Spezies</entry>
+  <entry key="EST_ALL_SPECIES_TOOLTIP">Wenn diese Option ausgewählt ist, werden die Anfangswerte aller Spezies des Modells als Optimierungsziele ausgewählt.</entry>
+  <entry key="EST_INIT_MAX_VALUE">Obere Schranke während der Initialisierung</entry>
+  <entry key="EST_INIT_MAX_VALUE_TOOLTIP">Der maximal mögliche Wert für einen zu optimierenden Wert in der Initialisierungsphase der gewählten Schätzmethode.</entry>
+  <entry key="EST_INIT_MIN_VALUE">Untere Schranke während der Initialisierung</entry>
+  <entry key="EST_INIT_MIN_VALUE_TOOLTIP">Der minimal mögliche Wert für einen zu optimierenden Wert in der Initialisierungsphase der gewählten Schätzmethode.</entry>
+  <entry key="EST_MAX_VALUE">Obere Schranke des Schätzintervalls</entry>
+  <entry key="EST_MAX_VALUE_TOOLTIP">Der maximal mögliche Wert, der während einer Optimierung von einer zu schätzenden Größe angenommen werden darf, also nach der Initialisierungsphase.</entry>
+  <entry key="EST_MIN_VALUE">Untere Schranke des Schätzintervalls</entry>
+  <entry key="EST_MIN_VALUE_TOOLTIP">Der minimal mögliche Wert, der während einer Optimierung von einer zu schätzenden Größe angenommen werden darf, also nach der Initialisierungsphase.</entry>
+  <entry key="EST_MULTI_SHOOT">Verwende multiple Anfangswerte</entry>
+  <entry key="EST_MULTI_SHOOT_TOOLTIP">Legen Sie fest, ob die Modellkalibrierung mittels einer multiplen Anfangswertproblem durchgeführt werden soll. Dies sollte der voreingestellte Wert sein. Andernfalls sollte eine einmalige Initialiserung des Systems mit nur einem Anfangswert. Multiple Anfangswerte bedeuten, dass an jedem Messpunkt ein neuer Anfangswert angenommen und von dort die gewöhnliche Differentialgleichung erneut gelöst wird, wohingegen im Fall eines einzelnen Anfangswertes versucht wird, das Differentialgleichungssystem komplett vom ersten Zeitpunkt an zu lösen. Dabei kann der Raum der möglichen Qualitätsfunktionen der Optimierung deutlich stärkere Unstetigkeiten enthalten, sodass eine Optimierung erschwert wird.</entry>
+  <entry key="OPTIMIZATION_TARGETS">Voreingestellte Optimierungsziele</entry>
+  <entry key="OPTIMIZATION_TARGETS_TOOLTIP">Wählen Sie die voreingestellten Optimierungsziele aus.</entry>
+  <entry key="OPTIMIZATION_RANGES">Wertebereiche aller Optimierungsziele</entry>
+  <entry key="OPTIMIZATION_RANGES_TOOLTIP">Definieren Sie die Bereiche, in denen zu schätzende Größen initialisiert werden und außerdem die Bereiche, für die endgültigen Schätzwerte.</entry>
+  <entry key="INTEGRATION_STRATEGY">Integrationsstrategie</entry>
+  <entry key="INTEGRATION_STRATEGY_TOOLTIP">Wählen Sie, ob das Differentialgleichungssystem nur ein einziges Mal, oder wiederholt initialisiert werden soll.</entry>
+ 
+  <!-- EstimationProblem -->
+  
+  <entry key="KIND_OF_SHOOTING">Benuntzung eines {0} Anfangsproblembs!</entry>
+  <entry key="MULTIPLE">mehrfachen</entry>
+  <entry key="SINGLE">einzigen</entry>
+  <entry key="RESULT_OF_BEST_PER_GENERATION">Ergebnis des besten Individums der Generation während der Modellsimulation</entry>
+  <entry key="OPTIMIZATION_TARGET_IS_NOT_PART_OF_THE_MODEL">Die Werte der Größen, die nicht zum gegebenen Modell gehören, konnten nicht geschätzt werden.</entry>
+  <entry key="MISSING_REFERENCE_DATA">Um eine Schätzung durchführen zu können, werden mindestens für eine Modellkomponente Referenzdaten benötigt.</entry>
+  
+  <!-- InteractiveScanPanel -->
+  
+  <entry key="RESET">Zurücksetzen</entry>
+  <entry key="RESET_TOOLTIP">Stellt alle Werte des ursprünglichen Modells wieder her. Zuvor nicht definierte Werte werden jedoch zu Standardwerten zurückgesetzt.</entry>
+  <entry key="GLOBAL_PARAMETERS">Globale Parameter</entry>
+  <entry key="LOCAL_PARAMETERS">Lokale Parameter</entry>
+  <!--<entry key="REPLACEMENT_OF_UNDEFINED_VALUES">Nichtdefinierte {0} für die folgenden {1} {2} wurde durch den zugehörigen Standardwert {3,number} ersetzt.</entry>
+  <entry key="VALUE">Wert</entry>
+  <entry key="VALUES">Werte</entry>
+  <entry key="HAVE">have</entry>
+  <entry key="HAS">has</entry>-->
+  <entry key="REPLACING_UNDEFINED_VALUES">Ersetzung undefinierter Werte</entry>
+  <entry key="REACTION_ID"> Reaktion {0} </entry>
   
   <!-- SimulationOptions -->
   

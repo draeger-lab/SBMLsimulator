@@ -68,8 +68,7 @@ public class CSVReadingTask extends SwingWorker<SortedMap<String, MultiTable>, V
 		if (model != null) {
 			for (File dataFile : files) {
 				try {
-					MultiTable data = importer.convert(model,
-						dataFile.getAbsolutePath(), simulator);
+					MultiTable data = importer.convert(model, dataFile.getAbsolutePath(), simulator);
 					if (data != null) {
 						resultMap.put(FileTools.trimExtension(dataFile.getName()), data);
 						if (openDir == null) {

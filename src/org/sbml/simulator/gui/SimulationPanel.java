@@ -415,21 +415,19 @@ public class SimulationPanel extends JPanel implements
   /* (non-Javadoc)
    * @see eva2.server.stat.InterfaceStatisticsListener#notifyGenerationPerformed(java.lang.String[], java.lang.Object[], java.lang.Double[])
    */
-  public void notifyGenerationPerformed(String[] header, Object[] statObjects,
-    Double[] statDoubles) {
+  public void notifyGenerationPerformed(String[] header, Object[] statObjects, Double[] statDoubles) {
     SimulationToolPanel tools = (SimulationToolPanel) simulationToolPanel.getComponent(0);
     double currentDistance = tools.getCurrentQuality();
     if (Double.isNaN(currentDistance)
         || (currentDistance > statDoubles[runBestIndex].doubleValue())) {
-      if(statObjects[simulationDataIndex] instanceof MultiTable) {
+      if (statObjects[simulationDataIndex] instanceof MultiTable) {
       	setSimulationData((MultiTable) statObjects[simulationDataIndex]);
       }
       double newValue = statDoubles[runBestIndex].doubleValue();
-      if(getSimulationToolPanel().getQualityMeasure() instanceof PearsonCorrelation) {
+      if (getSimulationToolPanel().getQualityMeasure() instanceof PearsonCorrelation) {
       	newValue = Math.abs(newValue);
       }
-      firePropertyChange("quality", getSimulationToolPanel().getCurrentQuality(),
-				newValue);
+      firePropertyChange("quality", getSimulationToolPanel().getCurrentQuality(), newValue);
       String[] solutionString = statObjects[solutionIndex].toString().replace("{","").replace("}","").split(", ");
       for (int i = 0; i < selectedQuantityIds.length; i++) {
         visualizationPanel.updateQuantity(selectedQuantityIds[i], Double.parseDouble(solutionString[i].replace(',', '.')));
@@ -440,16 +438,14 @@ public class SimulationPanel extends JPanel implements
   /* (non-Javadoc)
    * @see eva2.server.stat.InterfaceStatisticsListener#notifyMultiRunFinished(java.lang.String[], java.util.List)
    */
-  public boolean notifyMultiRunFinished(String[] header,
-    List<Object[]> multiRunFinalObjectData) {
-    for(Object[] obj: multiRunFinalObjectData) {
+  public boolean notifyMultiRunFinished(String[] header, List<Object[]> multiRunFinalObjectData) {
+    for (Object[] obj: multiRunFinalObjectData) {
       String[] solutionString = obj[solutionIndex].toString().replace("{","").replace("}","").split(", ");
-      logger.fine("Fitness: " + ((Double) obj[1]));
+      logger.info("Fitness: " + ((Double) obj[1]));
       for (int i = 0; i < selectedQuantityIds.length; i++) {
         double currentQuantity=Double.parseDouble(solutionString[i].replace(',', '.'));
         visualizationPanel.updateQuantity(selectedQuantityIds[i], currentQuantity);
-        logger.info(selectedQuantityIds[i] + ": " +currentQuantity);
-      
+        logger.info(selectedQuantityIds[i] + ": " + currentQuantity);
       }
     }
     return true;

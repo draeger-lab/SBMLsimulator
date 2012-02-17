@@ -97,7 +97,7 @@ public class LegendPanel extends JPanel implements TableModelListener,
     /**
      * Select this option to plot the evolution of all flux values in the model.
      */
-    REACTIONS,
+    FLUXES,
     /**
      * If this option is selected, all species of the model are plotted.
      */
@@ -207,7 +207,7 @@ public class LegendPanel extends JPanel implements TableModelListener,
           case PARAMETERS:
             legend.setSelected(Parameter.class, selected);
             break;
-          case REACTIONS:
+          case FLUXES:
             legend.setSelected(Reaction.class, selected);
             break;
           case SPECIES:

@@ -24,7 +24,6 @@ import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.beans.EventHandler;
 import java.beans.PropertyChangeEvent;
@@ -93,18 +92,6 @@ import eva2.tools.BasicResourceLoader;
 public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		PropertyChangeListener {
   
-	static {
-		int[] resolutions = new int[] { 16, 32, 48, 128, 256 };
-		String path;
-		for (int resulution : resolutions) {
-			path = "SBMLsimulator_" + resulution + ".png";
-			URL url = SimulatorUI.class.getResource("img/" + path);
-			if (url != null) {
-				UIManager.put(path.substring(0, path.lastIndexOf('.')), new ImageIcon(url));
-			}
-		}
-	}
-	
 	/**
 	 * Commands that can be understood by this dialog.
 	 * 
@@ -151,7 +138,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 					.firstLetterUpperCase(toString().replace('_', ' '));
 		}
 	}
-
+	
 	/**
    * The resource bundle to be used to display texts to a user.
    */
@@ -167,6 +154,18 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	 * Generated serial version identifier
 	 */
 	private static final long serialVersionUID = -5289766427756813972L;
+
+	static {
+		int[] resolutions = new int[] { 16, 32, 48, 128, 256 };
+		String path;
+		for (int resulution : resolutions) {
+			path = "SBMLsimulator_" + resulution + ".png";
+			URL url = SimulatorUI.class.getResource("img/" + path);
+			if (url != null) {
+				UIManager.put(path.substring(0, path.lastIndexOf('.')), new ImageIcon(url));
+			}
+		}
+	}
 
 	static {
 		BasicResourceLoader rl = BasicResourceLoader.instance();
@@ -186,31 +185,12 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		this((AppConf) null);
 	}
 	
-	/* (non-Javadoc)
-	 * @see de.zbit.gui.BaseFrame#getAlternativeBaseActionNames()
-	 */
-	@Override
-	protected Map<BaseAction, String> getAlternativeBaseActionNames() {
-		Map<BaseAction, String> nameMap = new HashMap<BaseFrame.BaseAction, String>();
-		nameMap.put(BaseAction.FILE_OPEN, bundle.getString(BaseAction.FILE_OPEN.toString()));
-		nameMap.put(BaseAction.FILE_CLOSE, bundle.getString(BaseAction.FILE_CLOSE.toString()));
-		return nameMap;
-	}
-
 	/**
 	 * 
 	 * @param appConf
 	 */
 	public SimulatorUI(AppConf appConf) {
 		super(appConf);
-		GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.SIMULATION_START);
-		SBProperties props = appConf.getCmdArgs();
-		if (props.containsKey(SimulatorIOOptions.SBML_INPUT_FILE)) {
-			open(new File(props.get(SimulatorIOOptions.SBML_INPUT_FILE).toString()));
-			if (props.containsKey(SimulatorIOOptions.TIME_SERIES_FILE)) {
-				open(new File(props.get(SimulatorIOOptions.TIME_SERIES_FILE).toString()));
-			}
-		}
 		int[] resolutions = new int[] {16, 32, 48, 128, 256};
 		List<Image> icons = new LinkedList<Image>();
 		for (int res: resolutions) {
@@ -220,28 +200,48 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		  }
 		}
 		setIconImages(icons);
+		GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.SIMULATION_START);
+		SBProperties props = appConf.getCmdArgs();
+		if (props.containsKey(SimulatorIOOptions.SBML_INPUT_FILE)) {
+			open(new File(props.get(SimulatorIOOptions.SBML_INPUT_FILE).toString()));
+			if (props.containsKey(SimulatorIOOptions.TIME_SERIES_FILE)) {
+				open(new File(props.get(SimulatorIOOptions.TIME_SERIES_FILE).toString()));
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @param obj
+	 */
+	@SuppressWarnings("unchecked")
+	public void addExperimentalData(Object obj) {
+		if (obj instanceof SortedMap<?, ?>) {
+			for (Map.Entry<String, MultiTable> entry : ((SortedMap<String, MultiTable>) obj).entrySet()) {
+				addExperimentalData(entry.getKey(), entry.getValue());
+			}
+		}
 	}
 	
 	
 
-	/* (non-Javadoc)
-	 * @see de.zbit.gui.BaseFrame#createFileMenu(boolean)
+	/**
+	 * 
+	 * @param title
+	 * @param data
 	 */
-	@Override
-	protected JMenu createFileMenu(boolean loadDefaultFileMenuEntries) {
-		JMenu fileMenu = super.createFileMenu(loadDefaultFileMenuEntries);
-		JMenuItem openFile = (JMenuItem) GUITools.find(fileMenu, BaseAction.FILE_OPEN);
-		JMenuItem openData = GUITools.createJMenuItem(EventHandler.create(ActionListener.class, this,
-				"openFileAndLogHistory"), Command.OPEN_DATA);
-		openData.setEnabled(false);
-		fileMenu.remove(openFile);
-		JMenu openMenu = GUITools.createJMenu(bundle.getString("OPEN"), bundle.getString("OPEN_TOOLTIP"), openFile, openData);
-		openMenu.addActionListener(EventHandler.create(ActionListener.class, this, "openFileAndLogHistory"));
-		openMenu.setIcon(openFile.getIcon());
-		openMenu.setMnemonic(openFile.getMnemonic());
-		openFile.setIcon(null);
-		fileMenu.add(openMenu, 0);
-		return fileMenu;
+	public void addExperimentalData(String title, MultiTable data)  {
+		if (simPanel != null) {
+			simPanel.addExperimentalData(title, data);
+			if (simPanel.getExperimentalData().size() == 1) {
+				GUITools.setEnabled(true, getJMenuBar(), getJToolBar(), Command.OPTIMIZATION);
+			}
+		} else {
+			// reject data files
+			JOptionPane.showMessageDialog(this,
+				bundle.getString("CANNOT_OPEN_DATA_WIHTOUT_MODEL"),
+				bundle.getString("UNABLE_TO_OPEN_DATA"), JOptionPane.WARNING_MESSAGE);
+		}
 	}
 
 	/* (non-Javadoc)
@@ -308,6 +308,26 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	}
 
 	/* (non-Javadoc)
+	 * @see de.zbit.gui.BaseFrame#createFileMenu(boolean)
+	 */
+	@Override
+	protected JMenu createFileMenu(boolean loadDefaultFileMenuEntries) {
+		JMenu fileMenu = super.createFileMenu(loadDefaultFileMenuEntries);
+		JMenuItem openFile = (JMenuItem) GUITools.find(fileMenu, BaseAction.FILE_OPEN);
+		JMenuItem openData = GUITools.createJMenuItem(EventHandler.create(ActionListener.class, this,
+				"openFileAndLogHistory"), Command.OPEN_DATA);
+		openData.setEnabled(false);
+		fileMenu.remove(openFile);
+		JMenu openMenu = GUITools.createJMenu(bundle.getString("OPEN"), bundle.getString("OPEN_TOOLTIP"), openFile, openData);
+		openMenu.addActionListener(EventHandler.create(ActionListener.class, this, "openFileAndLogHistory"));
+		openMenu.setIcon(openFile.getIcon());
+		openMenu.setMnemonic(openFile.getMnemonic());
+		openFile.setIcon(null);
+		fileMenu.add(openMenu, 0);
+		return fileMenu;
+	}
+
+	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrame#createJToolBar()
 	 */
 	protected JToolBar createJToolBar() {
@@ -323,6 +343,28 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	}
 
 	/* (non-Javadoc)
+	 * @see de.zbit.gui.BaseFrame#getAlternativeBaseActionNames()
+	 */
+	@Override
+	protected Map<BaseAction, String> getAlternativeBaseActionNames() {
+		Map<BaseAction, String> nameMap = new HashMap<BaseFrame.BaseAction, String>();
+		nameMap.put(BaseAction.FILE_OPEN, bundle.getString(BaseAction.FILE_OPEN.toString()));
+		nameMap.put(BaseAction.FILE_CLOSE, bundle.getString(BaseAction.FILE_CLOSE.toString()));
+		return nameMap;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public Model getModel() {
+		if (simPanel != null) {
+			return simPanel.getModel();
+		}
+		return null;
+	}
+
+	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrame#getURLAboutMessage()
 	 */
 	public URL getURLAboutMessage() {
@@ -335,7 +377,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	public URL getURLLicense() {
 		return getClass().getResource(bundle.getString("LICENSE_HTML"));
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrame#getURLOnlineHelp()
 	 */
@@ -355,6 +397,13 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 				simPanel.setShowSimulationToolPanel(item.isSelected());
 			}
 		}
+	}
+
+	/**
+	 * @param file
+	 */
+	public File[] open(File... files) {
+    return openFileAndLogHistory(files);
 	}
 
 	/* (non-Javadoc)
@@ -436,7 +485,115 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		
 		return modelFiles;
 	}
+
+	/**
+	 * Called when the EvA2 client is closing.
+	 * 
+	 * @param evaClient
+	 */
+	public void optimizationFinished(Object evaClient) {
+		if (evaClient instanceof JFrame) {
+			JFrame frame = (JFrame) evaClient;
+			if ((frame.getName() != null) && !frame.isVisible()
+					&& (frame.getName().equals(EvAClient.class.getSimpleName()))) {
+				simPanel.setAllEnabled(true);
+				GUITools.setEnabled(true, getJMenuBar(), toolBar,
+						BaseAction.FILE_SAVE_AS, Command.SIMULATION_START, BaseAction.FILE_CLOSE,
+						Command.OPTIMIZATION, BaseAction.EDIT_PREFERENCES);
+			}
+		}
+		logger.finer(bundle.getString("RECEIVED_WINDOW_EVENT"));
+	}
+
+	/**
+	 * Launches the optimization.
+	 */
+	public void optimize() {
+		GUITools.setEnabled(false, getJMenuBar(), toolBar,
+			Command.SIMULATION_START, BaseAction.FILE_CLOSE, Command.OPTIMIZATION,
+			BaseAction.EDIT_PREFERENCES);
+		final Model model = simPanel.getModel().getSBMLDocument().clone().getModel();
+		final QuantitySelectionPanel panel = new QuantitySelectionPanel(model);
+		if (JOptionPane.showConfirmDialog(this, panel,
+			bundle.getString("SELECT_QUANTITIES_FOR_OPTIMIZATION"), JOptionPane.OK_CANCEL_OPTION,
+			JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
+			simPanel.setAllEnabled(false);
+			try {
+				simPanel.notifyQuantitiesSelected(panel.getSelectedQuantityIds());
+				final WindowListener wl = EventHandler.create(WindowListener.class,
+					this, "optimizationFinished", "source", "windowClosed");
+				final SimulatorUI ui = this;
+				new Thread(new Runnable() {
+					/* (non-Javadoc)
+					 * @see java.lang.Runnable#run()
+					 */
+					public void run() {
+						// TODO: implement org.sbml.optimization.OptimizationWorker to do this job
+						try {
+							SBPreferences prefs = SBPreferences
+									.getPreferencesFor(EstimationOptions.class);
+							simPanel.refreshStepSize();
+							EstimationProblem estimationProblem = new EstimationProblem(
+								simPanel.getSolver(), simPanel.getDistance(), model, simPanel
+										.getExperimentalData(), prefs
+										.getBoolean(EstimationOptions.EST_MULTI_SHOOT), panel
+										.getSelectedQuantityRanges());
+							EvA2GUIStarter.init(estimationProblem, ui, simPanel, wl);
+							simPanel.setAllEnabled(true);
+						} catch (Throwable exc) {
+							GUITools.showErrorMessage(ui, exc);
+							simPanel.setAllEnabled(true);
+						}
+					}
+				}).start();
+			} catch (Throwable exc) {
+				GUITools.showErrorMessage(this, exc);
+				simPanel.setAllEnabled(true);
+			}
+		} else {
+			GUITools.setEnabled(true, getJMenuBar(), toolBar,
+				Command.SIMULATION_START, BaseAction.FILE_CLOSE, Command.OPTIMIZATION,
+				BaseAction.EDIT_PREFERENCES);
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+	 */
+	public void propertyChange(PropertyChangeEvent evt) {
+		if (evt.getPropertyName().equalsIgnoreCase("progress")) {
+			AbstractProgressBar memoryBar = this.statusBar.showProgress();
+
+			// TODO: find a better place for this
+			((ProgressBarSwing) memoryBar).getProgressBar().setStringPainted(
+					true);
+
+			int process = (int) Math.round(((Number) evt.getNewValue())
+					.doubleValue());
+			memoryBar.percentageChanged(process, -1, bundle.getString("COMPUTED"));
+		} else if (evt.getPropertyName().equalsIgnoreCase("done")) {
+			if (evt.getNewValue() != null) {
+				statusBar.reset();
+			} else {
+				statusBar.percentageChanged(100, 0, "");
+			}
+			GUITools.setEnabled(true, getJMenuBar(), getJToolBar(),
+					BaseAction.FILE_SAVE_AS, Command.SIMULATION_START);
+		}
+	}
 	
+	/* (non-Javadoc)
+	 * @see de.zbit.gui.BaseFrame#saveFile()
+	 */
+	public File saveFile() {
+		if (simPanel != null) { 
+			return simPanel.saveToFile(); 
+		}
+		GUITools.showMessage(bundle.getString("NOTHING_TO_SAVE"),
+			bundle.getString("INFORMATION"));
+		return null;
+	}
+
 	public void setSBMLDocument(Object obj) {
 		if ((obj == null) || !(obj instanceof SBMLDocument)) {
 			if (obj == null) {
@@ -478,100 +635,12 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	}
 
 	/**
-	 * @param file
-	 */
-	public File[] open(File... files) {
-    return openFileAndLogHistory(files);
-	}
-
-	/**
-	 * 
-	 */
-	public void optimize() {
-		final Model model = simPanel.getModel().getSBMLDocument().clone().getModel();
-		final QuantitySelectionPanel panel = new QuantitySelectionPanel(model);
-		if (JOptionPane.showConfirmDialog(this, panel,
-			bundle.getString("SELECT_QUANTITIES_FOR_OPTIMIZATION"), JOptionPane.OK_CANCEL_OPTION,
-			JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
-			simPanel.setAllEnabled(false);
-			try {
-				simPanel.notifyQuantitiesSelected(panel.getSelectedQuantityIds());
-				GUITools.setEnabled(false, getJMenuBar(), toolBar,
-					Command.SIMULATION_START, BaseAction.FILE_CLOSE,
-					Command.OPTIMIZATION, BaseAction.EDIT_PREFERENCES);
-				// windowClosing
-				final WindowListener wl = EventHandler.create(WindowListener.class, this, "windowClosing");
-				final SimulatorUI ui = this;
-				new Thread(new Runnable() {
-					/* (non-Javadoc)
-					 * @see java.lang.Runnable#run()
-					 */
-					public void run() {
-						// TODO: implement org.sbml.optimization.OptimizationWorker to do this job
-						try {
-							SBPreferences prefs = SBPreferences
-									.getPreferencesFor(EstimationOptions.class);
-							simPanel.refreshStepSize();
-							EstimationProblem estimationProblem = new EstimationProblem(
-								simPanel.getSolver(), simPanel.getDistance(), model, simPanel
-										.getExperimentalData(), prefs
-										.getBoolean(EstimationOptions.EST_MULTI_SHOOT), panel
-										.getSelectedQuantityRanges());
-							EvA2GUIStarter.init(estimationProblem, ui, simPanel, wl);
-							simPanel.setAllEnabled(true);
-						} catch (Throwable exc) {
-							GUITools.showErrorMessage(ui, exc);
-							simPanel.setAllEnabled(true);
-						}
-					}
-				}).start();
-			} catch (Throwable exc) {
-				GUITools.showErrorMessage(this, exc);
-				simPanel.setAllEnabled(true);
-			}
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-	 */
-	public void propertyChange(PropertyChangeEvent evt) {
-		if (evt.getPropertyName().equalsIgnoreCase("progress")) {
-			AbstractProgressBar memoryBar = this.statusBar.showProgress();
-
-			// TODO: find a better place for this
-			((ProgressBarSwing) memoryBar).getProgressBar().setStringPainted(
-					true);
-
-			int process = (int) Math.round(((Number) evt.getNewValue())
-					.doubleValue());
-			memoryBar.percentageChanged(process, -1, bundle.getString("COMPUTED"));
-		} else if (evt.getPropertyName().equalsIgnoreCase("done")) {
-			statusBar.reset();
-			GUITools.setEnabled(true, getJMenuBar(), getJToolBar(),
-					BaseAction.FILE_SAVE_AS, Command.SIMULATION_START);
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see de.zbit.gui.BaseFrame#saveFile()
-	 */
-	public File saveFile() {
-		if (simPanel != null) { 
-			return simPanel.saveToFile(); 
-		}
-		GUITools.showMessage(bundle.getString("NOTHING_TO_SAVE"),
-			bundle.getString("INFORMATION"));
-		return null;
-	}
-
-	/**
 	 * @param ids
 	 */
 	public void setSelectedQuantities(String... ids) {
 		simPanel.setSelectedQuantities(ids);
 	}
-
+	
 	/**
 	 * 
 	 */
@@ -584,66 +653,6 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
     } catch (Exception exc) {
       GUITools.showErrorMessage(this, exc);
     }
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.awt.event.WindowListener#windowClosing(java.awt.event.WindowEvent)
-	 */
-	public void windowClosing(WindowEvent e) {
-		if (e.getSource() instanceof JFrame) {
-			JFrame frame = (JFrame) e.getSource();
-			if ((frame.getName() != null)
-					&& (frame.getName().equals(EvAClient.class.getSimpleName()))) {
-				simPanel.setAllEnabled(true);
-				GUITools.setEnabled(true, getJMenuBar(), toolBar,
-						BaseAction.FILE_SAVE_AS, Command.SIMULATION_START, BaseAction.FILE_CLOSE,
-						Command.OPTIMIZATION, BaseAction.EDIT_PREFERENCES);
-			}
-		}
-		logger.finer(bundle.getString("RECEIVED_WINDOW_EVENT"));
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public Model getModel() {
-		if (simPanel != null) {
-			return simPanel.getModel();
-		}
-		return null;
-	}
-
-	/**
-	 * 
-	 * @param obj
-	 */
-	@SuppressWarnings("unchecked")
-	public void addExperimentalData(Object obj) {
-		if (obj instanceof SortedMap<?, ?>) {
-			for (Map.Entry<String, MultiTable> entry : ((SortedMap<String, MultiTable>) obj).entrySet()) {
-				addExperimentalData(entry.getKey(), entry.getValue());
-			}
-		}
-	}
-	
-	/**
-	 * 
-	 * @param title
-	 * @param data
-	 */
-	public void addExperimentalData(String title, MultiTable data)  {
-		if (simPanel != null) {
-			simPanel.addExperimentalData(title, data);
-			if (simPanel.getExperimentalData().size() == 1) {
-				GUITools.setEnabled(true, getJMenuBar(), getJToolBar(), Command.OPTIMIZATION);
-			}
-		} else {
-			// reject data files
-			JOptionPane.showMessageDialog(this,
-				bundle.getString("CANNOT_OPEN_DATA_WIHTOUT_MODEL"),
-				bundle.getString("UNABLE_TO_OPEN_DATA"), JOptionPane.WARNING_MESSAGE);
-		}
 	}
 	
 }

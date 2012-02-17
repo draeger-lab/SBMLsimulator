@@ -45,7 +45,9 @@ import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import javax.swing.text.JTextComponent;
 
 import org.sbml.jsbml.LocalParameter;
 import org.sbml.jsbml.Model;
@@ -82,6 +84,71 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	 * @version $Rev$
 	 * @since 1.0
 	 */
+	private class DocumentFilterListener<M extends TableModel> implements DocumentListener {
+		/**
+		 * 
+		 */
+		private JTextComponent tf;
+		/**
+		 * 
+		 */
+		private TableRowSorter<M> sorter;
+		
+		/**
+		 * 
+		 * @param <T>
+		 * @param tf
+		 * @param sorter
+		 */
+		public DocumentFilterListener(JTextComponent tf, TableRowSorter<M> sorter) {
+			this.tf = tf;
+			this.sorter = sorter;
+		}
+		
+		/* (non-Javadoc)
+		 * @see javax.swing.event.DocumentListener#changedUpdate(javax.swing.event.DocumentEvent)
+		 */
+		public void changedUpdate(DocumentEvent e) {
+			filter();
+		}
+		
+		/**
+	   * Update the row filter regular expression from the expression in
+	   * the text box.
+	   */
+	  private void filter() {
+	      RowFilter<M, Object> rf = null;
+	      // If current expression doesn't parse, don't update.
+	      try {
+	      	rf = RowFilter.regexFilter(tf.getText(), 1);
+	      } catch (PatternSyntaxException exc) {
+	      	return;
+	      }
+	      sorter.setRowFilter(rf);
+	  }
+		
+		/* (non-Javadoc)
+		 * @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event.DocumentEvent)
+		 */
+		public void insertUpdate(DocumentEvent e) {
+			filter();
+		}
+		
+	  /* (non-Javadoc)
+		 * @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event.DocumentEvent)
+		 */
+		public void removeUpdate(DocumentEvent e) {
+			filter();
+		}
+	}
+	
+  /**
+	 * A wrapper for {@link QuantityRange} to an {@link AbstractTableModel}.
+	 * 
+	 * @author Andreas Dr&auml;ger
+	 * @version $Rev$
+	 * @since 1.0
+	 */
 	private class QuantityRangeModel extends AbstractTableModel {
 
 		/**
@@ -90,11 +157,12 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		private static final long serialVersionUID = 7445239993441176230L;
 
 		/**
-		 * 
+		 * Index of the last position within the overall array of
+		 * {@link QuantityRange} that is stored in the surrounding class.
 		 */
 		private int lastPos;
 		/**
-		 * 
+		 * The list of {@link Quantity}s that are of interest here.
 		 */
 		private List<? extends Quantity> listOfQuantities;
 		
@@ -127,7 +195,9 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 				case 6:
 					return UnitDefinition.class;
 				default:
-					throw new IndexOutOfBoundsException("Column out of bounds: " + columnIndex);
+					throw new IndexOutOfBoundsException(MessageFormat.format(
+						bundle.getString("COLUMN_INDEX_OUT_OF_BOUNDS"), columnIndex,
+						getColumnCount()));
 			}
 		}
 
@@ -145,21 +215,23 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		public String getColumnName(int columnIndex) {
 			switch (columnIndex) {
 				case 0:
-					return "Selected";
+					return bundle.getString("SELECTED");
 				case 1:
-					return "Name";
+					return bundle.getString("NAME");
 				case 2:
-					return "Initial Minimum";
+					return bundle.getString("INITIAL_MINIMUM");
 				case 3:
-					return "Initial Maximum";
+					return bundle.getString("INITIAL_MAXIMUM");
 				case 4:
-					return "Absolute Minimum";
+					return bundle.getString("ABSOLUTE_MINIMUM");
 				case 5:
-					return "Absolute Maximum";
+					return bundle.getString("ABSOLUTE_MAXIMUM");
 				case 6:
-					return "Derived Unit";
+					return bundle.getString("UNIT_COLUMN");
 				default:
-					throw new IndexOutOfBoundsException("Column out of bounds: " + columnIndex);
+					throw new IndexOutOfBoundsException(MessageFormat.format(
+						bundle.getString("COLUMN_INDEX_OUT_OF_BOUNDS"), columnIndex,
+						getColumnCount()));
 			}
 		}
 
@@ -175,10 +247,11 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		 */
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			if ((rowIndex < 0) || (getRowCount() <= rowIndex)) {
-				throw new IndexOutOfBoundsException("Row out of bounds: " + rowIndex);
+				throw new IndexOutOfBoundsException(
+					MessageFormat.format(bundle.getString("ROW_INDEX_OUT_OF_BOUNDS"),
+						rowIndex, getRowCount()));
 			}
 			QuantityRange qRange = quantityBlocks[lastPos - getRowCount() + rowIndex];
-			// TODO: treat null values!
 			switch (columnIndex) {
 				case 0:
 					return Boolean.valueOf(qRange.isSelected());
@@ -195,7 +268,9 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 				case 6:
 					return qRange.getQuantity().getDerivedUnitDefinition();
 				default:
-					throw new IndexOutOfBoundsException("Column out of bounds: " + columnIndex);
+					throw new IndexOutOfBoundsException(MessageFormat.format(
+						bundle.getString("COLUMN_INDEX_OUT_OF_BOUNDS"), columnIndex,
+						getColumnCount()));
 			}
 		}
 
@@ -205,7 +280,9 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
 			if ((rowIndex < 0) || (getRowCount() <= rowIndex)) {
-				throw new IndexOutOfBoundsException("Row out of bounds: " + rowIndex);
+				throw new IndexOutOfBoundsException(
+					MessageFormat.format(bundle.getString("ROW_INDEX_OUT_OF_BOUNDS"),
+						rowIndex, getRowCount()));
 			}
 			if ((-1 < columnIndex) && (columnIndex < getColumnCount())) {
 				if (columnIndex == 0) {
@@ -217,7 +294,9 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 				}
 				return quantityBlocks[lastPos - getRowCount() + rowIndex].isSelected();
 			}
-			throw new IndexOutOfBoundsException("Column out of bounds: " + columnIndex);
+			throw new IndexOutOfBoundsException(MessageFormat.format(
+				bundle.getString("COLUMN_INDEX_OUT_OF_BOUNDS"), columnIndex,
+				getColumnCount()));
 		}
 
 		/* (non-Javadoc)
@@ -226,7 +305,9 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		@Override
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 			if ((rowIndex < 0) || (getRowCount() <= rowIndex)) {
-				throw new IndexOutOfBoundsException("Row out of bounds: " + rowIndex);
+				throw new IndexOutOfBoundsException(
+					MessageFormat.format(bundle.getString("ROW_INDEX_OUT_OF_BOUNDS"),
+						rowIndex, getRowCount()));
 			}
 			QuantityRange range = quantityBlocks[lastPos - getRowCount() + rowIndex];
 			double newVal;
@@ -244,9 +325,9 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 						range.setInitialMinimum(newVal);
 					} else {
 						logger.warning(MessageFormat.format(
-							"Cannot adopt the new value {0} because it exceeds the current initial maximum of {1}.",
-							StringUtil.toString(newVal),
-							StringUtil.toString(range.getInitialMaximum())));
+							bundle.getString("CANNOT_ADOPT_NEW_VALUE"),
+							StringUtil.toString(newVal), StringUtil.toString(range.getInitialMaximum()), 
+							bundle.getString("INITIAL_MAXIMUM"), bundle.getString("EXCEEDS")));
 					}
 					break;
 				case 3:
@@ -255,9 +336,9 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 						range.setInitialMaximum(((Double) aValue).doubleValue());
 					} else {
 						logger.warning(MessageFormat.format(
-							"Cannot adopt the new value {0} because falls below the current initial minimum of {1}.",
-							StringUtil.toString(newVal),
-							StringUtil.toString(range.getInitialMinimum())));
+							bundle.getString("CANNOT_ADOPT_NEW_VALUE"),
+							StringUtil.toString(newVal), StringUtil.toString(range.getInitialMinimum()), 
+							bundle.getString("INITIAL_MINIMUM"), bundle.getString("FALLS_BELOW")));
 					}
 					break;
 				case 4:
@@ -266,9 +347,9 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 						range.setMinimum(((Double) aValue).doubleValue());
 					} else {
 						logger.warning(MessageFormat.format(
-							"Cannot adopt the new value {0} because exceeds the current maximum of {1}.",
-							StringUtil.toString(newVal),
-							StringUtil.toString(range.getMaximum())));
+							bundle.getString("CANNOT_ADOPT_NEW_VALUE"),
+							StringUtil.toString(newVal), StringUtil.toString(range.getMaximum()), 
+							bundle.getString("ABSOLUTE_MAXIMUM"), bundle.getString("EXCEEDS")));
 					}
 					break;
 				case 5:
@@ -277,20 +358,23 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 						range.setMaximum(((Double) aValue).doubleValue());
 					} else {
 						logger.warning(MessageFormat.format(
-							"Cannot adopt the new value {0} because falls below the current minimum of {1}.",
-							StringUtil.toString(newVal),
-							StringUtil.toString(range.getMinimum())));
+							bundle.getString("CANNOT_ADOPT_NEW_VALUE"),
+							StringUtil.toString(newVal), StringUtil.toString(range.getMinimum()), 
+							bundle.getString("ABSOLUTE_MINIMUM"), bundle.getString("FALLS_BELOW")));
 					}
 					break;
 				case 6:
-					logger.warning("Cannot change the derived unit of " + range.getQuantity());
+					logger.warning(MessageFormat.format(bundle.getString("CANNOT_DERIVE_UNIT_OF"), range.getQuantity()));
 					break;
 				default:
-					throw new IndexOutOfBoundsException("Column out of bounds: " + columnIndex);
+					throw new IndexOutOfBoundsException(MessageFormat.format(
+						bundle.getString("COLUMN_INDEX_OUT_OF_BOUNDS"), columnIndex,
+						getColumnCount()));
 			}
 		}
 		
 	}
+  
   /**
    * @author Andreas Dr&auml;ger
    * @date 2010-09-08
@@ -321,32 +405,26 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
       return bundle.getString(toString() + "_TOOLTIP");
     }
   }
-  
-  /**
+	
+	/**
    * Support for localization.
    */
   private static final transient ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
-	
 	/**
    * A {@link Logger} for this class.
    */
   private static final transient Logger logger = Logger.getLogger(QuantitySelectionPanel.class.getName());
+	
 	/**
 	 * Generated serial version identifier
 	 */
 	private static final long serialVersionUID = -4979926949556272791L;
 	
 	/**
-	 * @return the serialversionuid
+	 * The buttons that allow to (un-) select all items 
+	 * representing instances of {@link Quantity}.
 	 */
-	public static long getSerialVersionUId() {
-		return serialVersionUID;
-	}
-	
-	/**
-	 * 
-	 */
-	private JButton[] deselectAllButtons;
+	private JButton[] deselectAllButtons, selectAllButtons;
 	
 	/**
 	 * Values for {@link JSpinner}s of the initialization range
@@ -364,14 +442,10 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	private Model model;
 	
 	/**
-	 * 
+	 * This array has one range (initial min, initial max, absolute min, absolute
+	 * max) for each {@link Quantity} within the given model.
 	 */
 	private QuantityRange quantityBlocks[];
-	
-	/**
-	 * 
-	 */
-	private JButton[] selectAllButtons;
 	
 	/**
 	 * This pane displays all selections for each group of different
@@ -380,7 +454,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	private JTabbedPane tabs;
 	
 	/**
-	 * 
+	 * Creates a new {@link QuantitySelectionPanel} for the given {@link Model}.
 	 */
 	public QuantitySelectionPanel(Model model) {
 		super();
@@ -393,19 +467,14 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		
 		tabs = new JTabbedPane();
 		int curr = 0;
-		tabs.addTab(bundle.getString("COMPARTMENTS"),
-			createQuantityPanel(model.getListOfCompartments(), curr, 0));
+		tabs.addTab(bundle.getString("COMPARTMENTS"), createQuantityPanel(model.getListOfCompartments(), curr, 0));
 		curr += model.getNumCompartments();
 		tabs.addTab(bundle.getString("SPECIES"), createQuantityPanel(model.getListOfSpecies(), curr, 1));
 		curr += model.getNumSpecies();
-		JPanel quantityPanel = createQuantityPanel(model.getListOfParameters(),
-			curr, 2);
-		// TODO
-//		quantityPanel.setPreferredSize(new Dimension(550, 500));
+		JPanel quantityPanel = createQuantityPanel(model.getListOfParameters(), curr, 2);
 		tabs.addTab(bundle.getString("GLOBAL_PARAMETERS"), quantityPanel);
 		curr += model.getNumParameters();
-		tabs.addTab(bundle.getString("LOCAL_PARAMETERS"),
-			createLocalParameterTab(model));
+		tabs.addTab(bundle.getString("LOCAL_PARAMETERS"), createLocalParameterTab(model));
 		
 		/*
 		 * Enable tabs with selectable elements and disable all others.
@@ -414,22 +483,22 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		tabs.setToolTipTextAt(
 			3,
 			StringUtil.toHTMLToolTip(bundle.getString("TAB_TOOL_TIP"),
-				bundle.getString("LOCAL_PARAMETERS")));
+			bundle.getString("LOCAL_PARAMETERS")));
 		tabs.setEnabledAt(2, model.getNumParameters() > 0);
 		tabs.setToolTipTextAt(
 			2,
 			StringUtil.toHTMLToolTip(bundle.getString("TAB_TOOL_TIP"),
-				bundle.getString("GLOBAL_PARAMETERS")));
+			bundle.getString("GLOBAL_PARAMETERS")));
 		tabs.setEnabledAt(1, model.getNumSpecies() > 0);
 		tabs.setToolTipTextAt(
 			1,
 			StringUtil.toHTMLToolTip(bundle.getString("TAB_TOOL_TIP"),
-				bundle.getString("SPECIES")));
+			bundle.getString("SPECIES")));
 		tabs.setEnabledAt(0, model.getNumCompartments() > 0);
 		tabs.setToolTipTextAt(
 			0,
 			StringUtil.toHTMLToolTip(bundle.getString("TAB_TOOL_TIP"),
-				bundle.getString("COMPARTMENTS")));
+			bundle.getString("COMPARTMENTS")));
 		int i = 3;
 		while ((i < tabs.getTabCount()) && (!tabs.isEnabledAt(i))) {
 			i--;
@@ -490,7 +559,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 				deselectAllButtons[i].setEnabled(false);
 				break;
 			default:
-				logger.warning(String.format("unknown command %s\n", e.getActionCommand()));
+				logger.warning(MessageFormat.format(bundle.getString("UNKNOWN_COMMAND"), e.getActionCommand()));
 				select = false;
 				break;
 		}
@@ -528,34 +597,13 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		table.setPreferredScrollableViewportSize(new Dimension(500, 70));
     table.setFillsViewportHeight(true);
     table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    final TableRowSorter<QuantityRangeModel> sorter = new TableRowSorter<QuantityRangeModel>(rangeModel);
+    TableRowSorter<QuantityRangeModel> sorter = new TableRowSorter<QuantityRangeModel>(rangeModel);
 		table.setRowSorter(sorter);
 		// Create a separate form for filterText and statusText
 
-    final JTextField filterText = new JTextField(40);
+    JTextField filterText = new JTextField(40);
     // Whenever filterText changes, invoke newFilter.
-		filterText.getDocument().addDocumentListener(new DocumentListener() {
-			/* (non-Javadoc)
-			 * @see javax.swing.event.DocumentListener#changedUpdate(javax.swing.event.DocumentEvent)
-			 */
-			public void changedUpdate(DocumentEvent e) {
-				filter(filterText, sorter);
-			}
-			
-			/* (non-Javadoc)
-			 * @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event.DocumentEvent)
-			 */
-			public void insertUpdate(DocumentEvent e) {
-				filter(filterText, sorter);
-			}
-			
-			/* (non-Javadoc)
-			 * @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event.DocumentEvent)
-			 */
-			public void removeUpdate(DocumentEvent e) {
-				filter(filterText, sorter);
-			}
-		});
+		filterText.getDocument().addDocumentListener(new DocumentFilterListener<QuantityRangeModel>(filterText, sorter));
     LayoutHelper lh = new LayoutHelper(new JPanel());
     lh.add(new JLabel(UIManager.getIcon("ICON_SEARCH_16")), filterText);
 		// End Filtering
@@ -566,21 +614,6 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		lh.add(panel, 2);
 		return lh.getContainer();
 	}
-	
-  /**
-   * Update the row filter regular expression from the expression in
-   * the text box.
-   */
-  private void filter(JTextField filterText, TableRowSorter<QuantityRangeModel> sorter) {
-      RowFilter<QuantityRangeModel, Object> rf = null;
-      // If current expression doesn't parse, don't update.
-      try {
-      	rf = RowFilter.regexFilter(filterText.getText(), 1);
-      } catch (PatternSyntaxException exc) {
-      	return;
-      }
-      sorter.setRowFilter(rf);
-  }
 	
 	/**
 	 * @param model
@@ -665,7 +698,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		table.setDefaultRenderer(Quantity.class, new LegendTableCellRenderer());
 		table.setDefaultRenderer(Double.class, new DecimalCellRenderer());
 		table.setDefaultRenderer(UnitDefinition.class, new UnitDefinitionCellRenderer());
-//		table.setDefaultEditor(Double.class, new DefaultCellEditor(new JSpinner(new SpinnerNumberModel())));
+		//  table.setDefaultEditor(Double.class, new DefaultCellEditor(new JSpinner(new SpinnerNumberModel())));
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
     
 		LayoutHelper lh = new LayoutHelper(new JPanel());

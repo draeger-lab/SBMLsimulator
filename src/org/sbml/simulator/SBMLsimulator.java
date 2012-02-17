@@ -254,8 +254,7 @@ public class SBMLsimulator extends Launcher {
 	public URL getURLlicenseFile() {
 		URL url = null;
 		try {
-			url = new URL(
-					"http://www.gnu.org/licenses/lgpl-3.0-standalone.html");
+			url = new URL("http://www.gnu.org/licenses/lgpl-3.0-standalone.html");
 		} catch (MalformedURLException exc) {
 			logger.log(Level.FINER, exc.getLocalizedMessage(), exc);
 		}
@@ -268,8 +267,7 @@ public class SBMLsimulator extends Launcher {
 	public URL getURLOnlineUpdate() {
 		URL url = null;
 		try {
-			url = new URL(
-					"http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/downloads/");
+			url = new URL("http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/downloads/");
 		} catch (MalformedURLException exc) {
 			logger.log(Level.FINER, exc.getLocalizedMessage(), exc);
 		}
