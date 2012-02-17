@@ -21,6 +21,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -314,7 +315,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
             .getListOfLocalParameters(), maxParameterValue, paramStepSize,
           offset);
         offset += r.getKineticLaw().getLocalParameterCount();
-        panel.setBorder(BorderFactory.createTitledBorder(String.format(
+        panel.setBorder(BorderFactory.createTitledBorder(MessageFormat.format(
           bundle.getString("REACTION_ID"), r.getId())));
         parameterPanel.add(panel);
       }
@@ -401,7 +402,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
 		if (nans.size() > 0) {
 			GUITools.showListMessage(
 				this,
-				StringUtil.toHTML(String.format(
+				StringUtil.toHTML(MessageFormat.format(
 					bundle.getString("REPLACEMENT_OF_UNDEFINED_VALUES"),
 					bundle.getString(nans.size() > 1 ? "VALUES" : "VALUE"), name,
 					bundle.getString(nans.size() > 1 ? "HAVE" : "HAS"), value), 80),
@@ -530,7 +531,6 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     if (key != null) {
       quantities[key.intValue()].setValue(value);
     }
-  	
   }
   
 }

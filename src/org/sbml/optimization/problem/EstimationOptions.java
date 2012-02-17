@@ -135,14 +135,6 @@ public interface EstimationOptions extends KeyProvider {
 	public static final OptionGroup<Boolean> INTEGRATION_STRATEGY = new OptionGroup<Boolean>(
 		"INTEGRATION_STRATEGY", bundle, EST_MULTI_SHOOT);
 	
-	/**
-	 * SBML output file.
-	 */
-	public static final Option<File> SBML_OUTPUT_FILE = new Option<File>(
-			"SBML_OUTPUT_FILE", File.class, bundle, new Range<File>(File.class,
-					SBFileFilter.createSBMLFileFilter()), new File(
-					System.getProperty("user.dir")));
-	
 	/*
 	 * TODO: Select Optimization algorithm and Termination criterion and SBML-output file
 	 */

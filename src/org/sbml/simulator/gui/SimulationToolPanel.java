@@ -457,7 +457,10 @@ private List<PreferenceChangeListener> listOfPreferenceChangeListeners;
 		logger.fine(pEvt.toString());
 		if (pEvt.getPropertyName().equals("done")
 				&& (simulationManager.getDistanceValues().length > 0)
-				&& (!pEvt.getNewValue().equals(pEvt.getOldValue()))) {
+				&& !((pEvt.getNewValue() == null) && (pEvt.getOldValue() == null))
+				&& ((((pEvt.getNewValue() == null) && (pEvt.getOldValue() != null)) || ((pEvt
+						.getNewValue() != null) && (pEvt.getOldValue() == null))) || (!pEvt
+						.getNewValue().equals(pEvt.getOldValue())))) {
 			qualityMeasureField.setValue(simulationManager.getMeanDistanceValue());
 			qualityMeasureField.setText(StringUtil.toString(
 				simulationManager.getMeanDistanceValue()));

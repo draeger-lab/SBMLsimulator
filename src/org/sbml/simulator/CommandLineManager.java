@@ -294,8 +294,8 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 		
 		private void initializeEstimationPreferences() {
 			SBProperties props = appConf.getCmdArgs();
-			if (props.containsKey(EstimationOptions.SBML_OUTPUT_FILE)) {
-				outSBMLFile = props.get(EstimationOptions.SBML_OUTPUT_FILE)
+			if (props.containsKey(SimulatorIOOptions.SBML_OUTPUT_FILE)) {
+				outSBMLFile = props.get(SimulatorIOOptions.SBML_OUTPUT_FILE)
 						.toString();
 			} else {
 				outSBMLFile = openFile.substring(0, openFile.lastIndexOf('.'))

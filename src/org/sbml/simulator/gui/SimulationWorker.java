@@ -21,7 +21,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
@@ -131,7 +130,7 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
     		configuration.getStepSize(), configuration.isIncludeReactions());   
     	return solution;
     }
-    catch(DerivativeException e) {
+    catch (DerivativeException e) {
     	logger.warning(e.getMessage());
     	return null;
     }
@@ -143,15 +142,22 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
   @Override
   protected void done() {
   	double time = timer.getAndReset(false);
+  	MultiTable result = null;
+  	String logMessage = null;
     try {
-      firePropertyChange("done", null, get());
+    	result = get();
+      firePropertyChange("done", null, result);
     } catch (InterruptedException e) {
-      logger.log(Level.WARNING, e.getLocalizedMessage(), e);
+      logMessage = e.getLocalizedMessage();
     } catch (ExecutionException e) {     
-      logger.log(Level.WARNING, e.getLocalizedMessage(), e);
+    	logMessage = e.getLocalizedMessage();
     }
     configuration.getSolver().removePropertyChangeListener(this);
-  	logger.info(String.format("Simulation time: %s s", StringTools.toString(time)));
+    if (logMessage != null) {
+    	logger.warning(logMessage);
+    } else if (result != null) {
+    	logger.info(String.format("Simulation time: %s s", StringTools.toString(time)));
+    }
   }
 
   /**

@@ -38,9 +38,8 @@ public interface SimulatorIOOptions extends KeyProvider {
 	/**
    * 
    */
-	public static final ResourceBundle bundle = ResourceManager
-			.getBundle("org.sbml.simulator.locales.Simulator");
-
+	public static final ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
+	
 	/**
 	 * SBML input file.
 	 */
@@ -50,19 +49,27 @@ public interface SimulatorIOOptions extends KeyProvider {
 					System.getProperty("user.dir")));
 	
 	/**
-	 * Path to a file with a time series of species/compartment/parameter
-	 * values.
+	 * SBML output file.
 	 */
-	public static final Option<File> TIME_SERIES_FILE = new Option<File>(
-			"TIME_SERIES_FILE", File.class, bundle, new Range<File>(File.class,
-					SBFileFilter.createCSVFileFilter()), new File(
-					System.getProperty("user.home")));
-	
+	public static final Option<File> SBML_OUTPUT_FILE = new Option<File>(
+			"SBML_OUTPUT_FILE", File.class, bundle, new Range<File>(File.class,
+					SBFileFilter.createSBMLFileFilter()), new File(
+					System.getProperty("user.dir")));
+
 	/**
 	 * Output of a simulation.
 	 */
 	public static final Option<File> SIMULATION_OUTPUT_FILE = new Option<File>(
 			"SIMULATION_OUTPUT_FILE", File.class, bundle, new Range<File>(File.class,
+					SBFileFilter.createCSVFileFilter()), new File(
+					System.getProperty("user.home")));
+	
+	/**
+	 * Path to a file with a time series of species/compartment/parameter
+	 * values.
+	 */
+	public static final Option<File> TIME_SERIES_FILE = new Option<File>(
+			"TIME_SERIES_FILE", File.class, bundle, new Range<File>(File.class,
 					SBFileFilter.createCSVFileFilter()), new File(
 					System.getProperty("user.home")));
 
@@ -72,5 +79,12 @@ public interface SimulatorIOOptions extends KeyProvider {
 	@SuppressWarnings("unchecked")
 	public final static OptionGroup<File> INPUT_FILES = new OptionGroup<File>(
 			"INPUT_FILES", bundle, SBML_INPUT_FILE, TIME_SERIES_FILE);
-
+	
+	/**
+	 * Select output files for the results of simulation and parameter estimation.
+	 */
+	@SuppressWarnings("unchecked")
+	public final static OptionGroup<File> OUTPUT_FILES = new OptionGroup<File>(
+		"OUTPUT_FILES", bundle, SBML_OUTPUT_FILE, SIMULATION_OUTPUT_FILE);
+	
 }

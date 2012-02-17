@@ -17,6 +17,7 @@
  */
 package org.sbml.optimization.problem;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -165,7 +166,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 			throws ModelOverdeterminedException, SBMLException {
 		this(solver, distance, model, list, quantityRanges);
 		this.multishoot = multishoot;
-		logger.info(String.format(bundle.getString("KIND_OF_SHOOTING"),
+		logger.info(MessageFormat.format(bundle.getString("KIND_OF_SHOOTING"),
 			multishoot ? bundle.getString("MULTIPLE") : bundle.getString("SINGLE")));
 	}
 
