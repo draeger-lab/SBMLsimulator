@@ -128,7 +128,6 @@ public class CSVDataImporter {
           timePoints[i] = Double.parseDouble(stringData[i][timeColumn]);
         }
         data.setTimePoints(timePoints);
-        data.setTimeName(bundle.getString("TIME"));
         // exclude time column
         
         String newHead[] = new String[(int) Math.max(0,
@@ -182,6 +181,7 @@ public class CSVDataImporter {
 					}
 					data.getBlock(0).setColumnNames(colNames);
 				}
+        data.setTimeName(bundle.getString("TIME"));
         
         return data;
         
