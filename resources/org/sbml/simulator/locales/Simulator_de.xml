@@ -86,11 +86,12 @@
   <entry key="RESET_TOOLTIP">Stellt alle Werte des ursprünglichen Modells wieder her. Zuvor nicht definierte Werte werden jedoch zu Standardwerten zurückgesetzt.</entry>
   <entry key="GLOBAL_PARAMETERS">Globale Parameter</entry>
   <entry key="LOCAL_PARAMETERS">Lokale Parameter</entry>
-  <!--<entry key="REPLACEMENT_OF_UNDEFINED_VALUES">Nichtdefinierte {0} für die folgenden {1} {2} wurde durch den zugehörigen Standardwert {3,number} ersetzt.</entry>
-  <entry key="VALUE">Wert</entry>
-  <entry key="VALUES">Werte</entry>
-  <entry key="HAVE">have</entry>
-  <entry key="HAS">has</entry>-->
+  <entry key="REPLACEMENT_OF_UNDEFINED_VALUES">{0} für {1} {2} durch den zugehörigen Standardwert {3,number} ersetzt:</entry>
+  <entry key="VALUE_PARTS">Der nicht definierte Wert;Die nicht definierten {0,number} Werte</entry>
+  <entry key="NAME_PARTS_COMPARTMENT">folgendes Kompartiment;folgende Kompartimente</entry>  
+  <entry key="NAME_PARTS_SPECIES">folgende Species;folgende Species</entry>
+  <entry key="NAME_PARTS_PARAMETER">folgenden Parameter;folgende Parameter</entry>
+  <entry key="HAS_BEEN_PARTS">wurde;wurden</entry>
   <entry key="REPLACING_UNDEFINED_VALUES">Ersetzung undefinierter Werte</entry>
   <entry key="REACTION_ID"> Reaktion {0} </entry>
   

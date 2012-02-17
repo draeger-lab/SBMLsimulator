@@ -86,13 +86,14 @@
   <entry key="RESET_TOOLTIP">Sets all values to the original values from the model. However, previously undefined values will be set to the default values.</entry>
   <entry key="GLOBAL_PARAMETERS">Global Parameters</entry>
   <entry key="LOCAL_PARAMETERS">Local Parameters</entry>
-  <entry key="REPLACEMENT_OF_UNDEFINED_VALUES">Undefined {0} for the following {1} {2} been replaced by the corresponding default value {3,number}.</entry>
-  <entry key="VALUE">value</entry>
-  <entry key="VALUES">values</entry>
-  <entry key="HAVE">have</entry>
-  <entry key="HAS">has</entry>
+  <entry key="REPLACEMENT_OF_UNDEFINED_VALUES">{0} for {1} {2} replaced by the corresponding default value {3,number}:</entry>
+  <entry key="VALUE_PARTS">The undefined value;The undefined {0,number} values</entry>
+  <entry key="NAME_PARTS_PARAMETER">following parameter;following parameters</entry>
+  <entry key="NAME_PARTS_SPECIES">following species;following species</entry>
+  <entry key="NAME_PARTS_COMPARTMENT">following compartment;following compartments</entry>  
+  <entry key="HAS_BEEN_PARTS">has been;have been</entry>
   <entry key="REPLACING_UNDEFINED_VALUES">Replacing undefined values</entry>
-  <entry key="REACTION_ID"> Reaction %s </entry>
+  <entry key="REACTION_ID"> Reaction {0} </entry>
   
   <!-- LegendTableCellRenderer -->
   

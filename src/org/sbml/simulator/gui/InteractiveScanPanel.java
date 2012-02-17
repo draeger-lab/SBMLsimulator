@@ -21,6 +21,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
+import java.text.ChoiceFormat;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -357,24 +358,23 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
       QuantityWithUnit p = list.get(i);
       value = p.getValue();
       if (!p.isSetValue()) {
-        name = p.getClass().getSimpleName().toLowerCase();
         if (p instanceof Compartment) {
+        	name = "NAME_PARTS_COMPARTMENT";
           if (((Compartment) p).getSpatialDimensions() > 0) {
             value = defaultCompartmentValue;
             p.setValue(value);
             nans.add(p.isSetName() ? p.getName() : p.getId());
           }
         } else if (p instanceof Species) {
+        	name = "NAME_PARTS_SPECIES";
           value = defaultSpeciesValue;
           p.setValue(value);
           nans.add(p.isSetName() ? p.getName() : p.getId());
         } else if (p instanceof Parameter) {
+        	name = "NAME_PARTS_PARAMETER";
           value = defaultParameterValue;
           p.setValue(value);
           nans.add(p.isSetName() ? p.getName() : p.getId());
-        }
-        if (!(p instanceof Species) && (list.size() > 1)) {
-          name += "s";
         }
       }
       maxValue = Math.max(value, maxValue);
@@ -400,12 +400,19 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     lh.add(new JPanel(), 1, 0, 1, 1, 0d, 0d);
     lh.add(new JPanel(), 3, 0, 1, 1, 0d, 0d);
 		if (nans.size() > 0) {
+			MessageFormat form = new MessageFormat(bundle.getString("REPLACEMENT_OF_UNDEFINED_VALUES"));
+			double[] limits = { 1, 2 };
+			String[] valuePart = bundle.getString("VALUE_PARTS").split(";");
+			String[] namePart = bundle.getString(name).split(";");
+			String[] hasBeen = bundle.getString("HAS_BEEN_PARTS").split(";");
+			form.setFormatByArgumentIndex(0, new ChoiceFormat(limits, valuePart));
+			form.setFormatByArgumentIndex(1, new ChoiceFormat(limits, namePart));
+			form.setFormatByArgumentIndex(2, new ChoiceFormat(limits, hasBeen));
+			Integer count = Integer.valueOf(nans.size());
 			GUITools.showListMessage(
 				this,
-				StringUtil.toHTML(MessageFormat.format(
-					bundle.getString("REPLACEMENT_OF_UNDEFINED_VALUES"),
-					bundle.getString(nans.size() > 1 ? "VALUES" : "VALUE"), name,
-					bundle.getString(nans.size() > 1 ? "HAVE" : "HAS"), value), 80),
+				StringUtil.toHTML(
+					form.format(new Object[] { count, count, count, Double.valueOf(value) }), 80),
 				bundle.getString("REPLACING_UNDEFINED_VALUES"), nans);
 		}
     panel.setOpaque(true);
