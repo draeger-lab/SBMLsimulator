@@ -482,22 +482,22 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		tabs.setEnabledAt(3, model.getNumLocalParameters() > 0);
 		tabs.setToolTipTextAt(
 			3,
-			StringUtil.toHTMLToolTip(bundle.getString("TAB_TOOL_TIP"),
+			StringUtil.toHTMLMessageToolTip(bundle.getString("TAB_TOOL_TIP"),
 			bundle.getString("LOCAL_PARAMETERS")));
 		tabs.setEnabledAt(2, model.getNumParameters() > 0);
 		tabs.setToolTipTextAt(
 			2,
-			StringUtil.toHTMLToolTip(bundle.getString("TAB_TOOL_TIP"),
+			StringUtil.toHTMLMessageToolTip(bundle.getString("TAB_TOOL_TIP"),
 			bundle.getString("GLOBAL_PARAMETERS")));
 		tabs.setEnabledAt(1, model.getNumSpecies() > 0);
 		tabs.setToolTipTextAt(
 			1,
-			StringUtil.toHTMLToolTip(bundle.getString("TAB_TOOL_TIP"),
+			StringUtil.toHTMLMessageToolTip(bundle.getString("TAB_TOOL_TIP"),
 			bundle.getString("SPECIES")));
 		tabs.setEnabledAt(0, model.getNumCompartments() > 0);
 		tabs.setToolTipTextAt(
 			0,
-			StringUtil.toHTMLToolTip(bundle.getString("TAB_TOOL_TIP"),
+			StringUtil.toHTMLMessageToolTip(bundle.getString("TAB_TOOL_TIP"),
 			bundle.getString("COMPARTMENTS")));
 		int i = 3;
 		while ((i < tabs.getTabCount()) && (!tabs.isEnabledAt(i))) {
@@ -670,24 +670,24 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
         String className = q.getElementName();
         switch (realColumnIndex) {
 					case 0:
-						return StringUtil.toHTMLToolTip(
+						return StringUtil.toHTMLMessageToolTip(
 		        	bundle.getString("CHECK_BOX_TOOLTIP"), className, name);
 					case 1:
 						return super.getToolTipText(e); 
 					case 2:
-						return StringUtil.toHTMLToolTip(
+						return StringUtil.toHTMLMessageToolTip(
 		        	bundle.getString("INIT_MIN_MAX_SPINNER_TOOL_TIP"),
 		        	bundle.getString("MINIMUM"), className, name);
 					case 3:
-						return StringUtil.toHTMLToolTip(
+						return StringUtil.toHTMLMessageToolTip(
 		        	bundle.getString("INIT_MIN_MAX_SPINNER_TOOL_TIP"),
 		        	bundle.getString("MAXIMUM"), className, name);
 					case 4:
-						return StringUtil.toHTMLToolTip(
+						return StringUtil.toHTMLMessageToolTip(
 		        	bundle.getString("MIN_MAX_SPINNER_TOOL_TIP"),
 		        	bundle.getString("MINIMUM"), className, name);
 					case 5:
-						return StringUtil.toHTMLToolTip(
+						return StringUtil.toHTMLMessageToolTip(
 		        	bundle.getString("MIN_MAX_SPINNER_TOOL_TIP"),
 		        	bundle.getString("MAXIMUM"), className, name);
 					default:

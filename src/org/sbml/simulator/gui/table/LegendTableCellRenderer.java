@@ -19,6 +19,7 @@ package org.sbml.simulator.gui.table;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 import javax.swing.JLabel;
@@ -78,7 +79,7 @@ public class LegendTableCellRenderer extends JLabel implements TableCellRenderer
     }
 		if (value instanceof Color) {
 			Color newColor = (Color) value;
-			setToolTipText(String.format(bundle.getString("RGB_TOOLTIP"), newColor
+			setToolTipText(MessageFormat.format(bundle.getString("RGB_TOOLTIP"), newColor
 				.getRed(), newColor.getGreen(), newColor.getBlue()));
 			setBackground(newColor);
 			setForeground(newColor);
@@ -95,20 +96,20 @@ public class LegendTableCellRenderer extends JLabel implements TableCellRenderer
 				if (value instanceof Compartment) {
 					Compartment c = (Compartment) value;
 					if (c.isSetOutsideInstance()) {
-						setToolTipText(StringUtil.toHTMLToolTip(
+						setToolTipText(StringUtil.toHTMLMessageToolTip(
 							bundle.getString("OUTSIDE_TOOLTIP"), c.getOutsideInstance()));
 					}
 				} else if (value instanceof Species) {
 					Species s = (Species) value;
 					if (s.isSetCompartmentInstance()) {
-						setToolTipText(StringUtil.toHTMLToolTip(
+						setToolTipText(StringUtil.toHTMLMessageToolTip(
 							bundle.getString("SPECIES_COMPARTMENT"),
 							s.getCompartmentInstance()));
 					}
 				} else if (value instanceof Reaction) {
 					Reaction r = (Reaction) value;
 					if (r.isSetCompartmentInstance()) {
-						setToolTipText(StringUtil.toHTMLToolTip(
+						setToolTipText(StringUtil.toHTMLMessageToolTip(
 							bundle.getString("REACTION_COMPARTMENT"),
 							r.getCompartmentInstance()));
 					}
@@ -118,7 +119,7 @@ public class LegendTableCellRenderer extends JLabel implements TableCellRenderer
 						KineticLaw kl = (KineticLaw) param.getParentSBMLObject().getParentSBMLObject();
 						if (kl.isSetParentSBMLObject()) {
 							Reaction r = kl.getParentSBMLObject();
-							setToolTipText(StringUtil.toHTMLToolTip(
+							setToolTipText(StringUtil.toHTMLMessageToolTip(
 								bundle.getString("LOCAL_PARAMETER_REACTION"), r));
 						}
 					}

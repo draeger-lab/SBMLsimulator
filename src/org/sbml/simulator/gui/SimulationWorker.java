@@ -19,6 +19,7 @@ package org.sbml.simulator.gui;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
@@ -27,7 +28,6 @@ import javax.swing.SwingWorker;
 
 import org.apache.commons.math.ode.DerivativeException;
 import org.sbml.jsbml.SBMLException;
-import org.sbml.jsbml.util.StringTools;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.simulator.SimulationConfiguration;
 import org.simulator.math.odes.DESSolver;
@@ -156,7 +156,7 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
     if (logMessage != null) {
     	logger.warning(logMessage);
     } else if (result != null) {
-    	logger.info(String.format("Simulation time: %s s", StringTools.toString(time)));
+    	logger.info(MessageFormat.format(bundle.getString("SIMULATION_TIME"), time));
     }
   }
 
