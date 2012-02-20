@@ -45,7 +45,7 @@
     
   <!-- EstimationOptions -->
     
-  <entry key="EstimationOptions">Einstellungen für Schätzungverfahren</entry>
+  <entry key="EstimationOptions">Schätzungverfahren</entry>
   <entry key="EST_ALL_COMPARTMENTS">Kompartimentgrößen</entry>
   <entry key="EST_ALL_COMPARTMENTS_TOOLTIP">Entscheiden Sie, ob alle Kompartimente zur die Schätzung ihrer jeweiligen Kompartimentgrößen des Modells ausgewählt sein sollen.</entry>
   <entry key="EST_ALL_GLOBAL_PARAMETERS">Werte globaler Parameter</entry>
@@ -95,35 +95,193 @@
   <entry key="REPLACING_UNDEFINED_VALUES">Ersetzung undefinierter Werte</entry>
   <entry key="REACTION_ID"> Reaktion {0} </entry>
   
-  <!-- SimulationOptions -->
+  <!-- LegendTableCellRenderer -->
   
-  <entry key="DEFAULT_INIT_COMPARTMENT_SIZE_TOOLTIP">Falls nicht anders spezifiziert, wird der hier angegebene Wert dafür genutzt, um Kompartimentgrößen zu initialisieren.</entry>
-  <entry key="QUALITY_MEASURES">Bewertungsfunktion der Modellqualität</entry>
-  <entry key="QUALITY_MEASURES_TOOLTIP">Diese Einstellungen ermöglichen es, festzulegen, wie die Qualität eines Parametersatzes bezüglich gegebener experimenteller Daten zu bewerten ist.</entry>
-  <entry key="SIMULATION_CONFIGURATION">Einstellungen für die Simulation</entry>
-  <entry key="SIMULATION_CONFIGURATION_TOOLTIP">Hier können Parameter für die Simulation eingestellt werden.</entry>
-    
-  <!-- Plot -->
+  <entry key="RGB_TOOLTIP">Rot = {0,number}, Grün = {1,number}, Blau = {2,number}</entry>
+  <entry key="OUTSIDE_TOOLTIP">Umgebendes Kompartiment: {0}</entry>
+  <entry key="SPECIES_COMPARTMENT">Enthalten im Kompartiment: {0}</entry>
+  <entry key="REACTION_COMPARTMENT">Findet im Kompartiment {0} statt.</entry>
+  <entry key="LOCAL_PARAMETER_REACTION">In der kinetischen Gleichung der Reaktion: {0}</entry>
   
-  <entry key="SHOW_PLOT_GRID">Gitter</entry>
-  <entry key="SHOW_PLOT_GRID_TOOLTIP">Entscheiden Sie, ob Gitternetzlinien in das Koordinatensystem eingezeichnet werden sollen.</entry>
-  <entry key="SHOW_PLOT_LEGEND">Legende</entry>
-  <entry key="SHOW_PLOT_LEGEND_TOOLTIP">Diese Option fügt eine Legende im Koordinatensystem ein oder entfernt diese.</entry>
-  <entry key="SHOW_PLOT_TOOLTIPS">Hilfstexte</entry>
-  <entry key="SHOW_PLOT_TOOLTIPS_TOOLTIP">Hier kann festgelegt werden, ob an den einzelnen Kurven bzw. Punkten im Koordinatensystem Hilfstexte eingeblendet werden sollen.</entry>
-  
-    
   <!-- LegendTableModel -->
   
-  <entry key="PLOT_COLUMN">Darstellen</entry>
+  <entry key="PLOT_COLUMN">Anzeigen</entry>
   <entry key="COLOR_COLUMN">Farbe</entry>
   <entry key="COMPONENT_COLUMN">Komponente</entry>
   <entry key="UNIT_COLUMN">Einheit</entry>
-  <entry key="UNKOWN_CLUMN_EXC">Es gibt lediglich %d Spalten, also keine Spalte %d.</entry>
+  <entry key="UNKOWN_CLUMN_EXC">Nur {0,number} Spalten, keine Spalte {1,number}</entry>
+  
+  <!-- Metrics -->
+  
+  <entry key="N_Metric">N-Metrik</entry>
+  <entry key="EuclideanDistance">Euclisch</entry>
+  <entry key="ManhattanDistance">Manhattan</entry>
+  <entry key="DISTANCE">Distance</entry>
+  <entry key="RelativeSquaredError">Relativer quadratischer Fehler</entry>
+  <entry key="EXPONENT">Exponent</entry>
+  <entry key="PearsonCorrelation">Pearsons Korrelationskoeffizient</entry>
+  <entry key="RELATIVE">Relativ</entry>
+  
+  <!-- Plot -->
+  
+  <entry key="PLOT_SAVE_DIR_TOOLTIP">Das voreingestellte Verzeichnis, in dem im Diagramm dargestellte Simulationsergebnisse als Graphiken gespeichert werden.</entry>
+  <entry key="PLOT_BACKGROUND_COLOR">Hintergrundfarbe</entry>
+  <entry key="PLOT_BACKGROUND_COLOR_TOOLTIP">Stellen Sie hier ein, welche Farbe im Hintergrund des Diagramms angezeigt werden soll.</entry>
+  <entry key="PLOT_GRID_COLOR">Gitternetzfarbe</entry>
+  <entry key="PLOT_GRID_COLOR_TOOLTIP">Die Farbe des Gitternetzes im Diagramm</entry>
+  <entry key="PLOT_TITLE_TOOLTIP">Diagrammüberschrift</entry>
+  <entry key="SHOW_PLOT_GRID">Gitternetz</entry>
+  <entry key="SHOW_PLOT_GRID_TOOLTIP">Entscheiden Sie, ob Gitternetzlinien in das Koordinatensystem eingezeichnet werden sollen.</entry>
+  <entry key="SHOW_PLOT_LEGEND">Legende</entry>
+  <entry key="SHOW_PLOT_LEGEND_TOOLTIP">Hier kann eingestellt werden, ob eine Legende zum Diagramm hinzugefügt werden soll.</entry>
+  <entry key="SHOW_PLOT_TOOLTIPS">Hilfsttexte</entry>
+  <entry key="SHOW_PLOT_TOOLTIPS_TOOLTIP">Hier kann festgelegt werden, ob an den einzelnen Kurven bzw. Punkten im Koordinatensystem Hilfstexte eingeblendet werden sollen.</entry>
+  <entry key="BASE_OPTIONS">Diagramm</entry>
+  <entry key="BASE_OPTIONS_TOOLTIP">Optionen für das sichtbare Rechteck, in dem sich das Diagramm befindet.</entry>
+  <entry key="PLOT_APPEARANCE">Erscheinungsbild des Diagramms</entry>
+  <entry key="PLOT_APPEARANCE_TOOLTIP">Optionen, die das Erscheinungsbild der Diagrammfläche beeinflussen.</entry>
+    
+  <!-- PlotOptions -->
+  
+  <entry key="PlotOptions">Diagramm</entry>
+  
+  <!-- QuantitySelectionPanel -->
+  
+  <entry key="UNKNOWN_COMMAND">Unbekannter Befehl "{0}"</entry>
+  <entry key="ROW_INDEX_OUT_OF_BOUNDS">Zeilenindex {0} außerhalb des zulässigen Bereiches: {1} Zeilen vorhanden.</entry>
+  <entry key="COLUMN_INDEX_OUT_OF_BOUNDS">Spaltenindex {0} außerhalb des zuläassigen Bereiches: {1} Spalten vorhanden.</entry>
+  <entry key="CANNOT_ADOPT_NEW_VALUE">Der neue Wert {0,number} kann nicht übernommen werden, weil er das aktuelle {3} von {1,number} {4}.</entry>
+  <entry key="CANNOT_DERIVE_UNIT_OF">Der Wert der hergeleiteten Einheit {0} kann nicht geändert werden.</entry>
+  <entry key="EXCEEDS">übersteigt</entry>
+  <entry key="SELECTED">Ausgewählt</entry>
+  <entry key="NAME">Name</entry>
+  <entry key="INITIAL_MINIMUM">initiales Minimum</entry>
+  <entry key="INITIAL_MAXIMUM">initiales Maximum</entry>
+  <entry key="ABSOLUTE_MINIMUM">absolutes Minimum</entry>
+  <entry key="ABSOLUTE_MAXIMUM">absolutes Maximum</entry>
+  <entry key="CHECK_BOX_TOOLTIP">Wählen Sie diese Option aus, um {0} {1} als zu optimierende Größe auszuwählen.</entry> <!-- SBML element name and name of the instance -->
+  <entry key="EXPLANATION">Wählen Sie bitte die Modellkomponenten aus, deren Werte geschätzt werden sollen. Sie können auch die zulässigen Intervalle einer jeden Größe verändern.</entry>
+  <entry key="MIN_MAX_SPINNER_TOOL_TIP">Wählen Sie den zulässigen absoluten {0}-Wert für dieses {1}-Element namens {2}.</entry>
+  <entry key="MINIMUM">Minimum</entry>
+  <entry key="MAXIMUM">Maximum</entry>
+  <entry key="INIT_MIN_MAX_SPINNER_TOOL_TIP">Wählen Sie den Zulässigen {0}-Wert für dieses {1}-Element namens {2} in der Initialisierungsphase der Schätzmethode.</entry>
+  <entry key="TAB_TOOL_TIP">In diesem Reiter können Sie die {0}-Elemente des Modells auswählen, deren Werte geschetzt werden sollen.</entry>
+  
+  <!-- SelectionCommand -->
+  
+  <entry key="OPTIMIZE_ALL">Alle auswählen</entry>
+  <entry key="OPTIMIZE_ALL_TOOLTIP">Betätigen Sie diese Schaltfläche, um alle Elemente der obigen Tabelle auf einmal auszuwählen.</entry>
+  <entry key="OPTIMIZE_NONE">Keine auswählen</entry>
+  <entry key="OPTIMIZE_NONE_TOOLTIP">Wenn Sie diese Schaltfläche betätigen, werden alle Elemente der obigen Tabelle abgewählt.</entry>
+  
+  <!-- SimulationOptions -->
+  
+  <entry key="SimulationOptions">Dynamische Simulation</entry>
+  <entry key="DEFAULT_INIT_COMPARTMENT_SIZE">Anfangswert der Kompartimentgröße</entry>
+  <entry key="DEFAULT_INIT_COMPARTMENT_SIZE_TOOLTIP">Falls nicht anders spezifiziert, wird der hier angegebene Wert dafür genutzt, um Kompartimentgrößen zu initialisieren.</entry>
+  <entry key="DEFAULT_INIT_SPECIES_VALUE">Anfangswert für Spezies</entry>
+  <entry key="DEFAULT_INIT_SPECIES_VALUE_TOOLTIP">Falls kein Anfangswert für eine Spezies angegeben ist, wird dieser Wert verwendet, um die jeweilige Spezies zu initialisieren. Abhängig davon, ob die Spezies ausschließlich in Substanzeinheiten (also nicht in Konzentrationseinheiten) interpretiert werden muss (Eigenschaft "hasOnlySubstanceUnits=true") wird dieser Wert als Anfangsmenge oder Anfangskonzentration interpretiert.</entry>
+  <entry key="DEFAULT_INIT_PARAMETER_VALUE">Anfangswert für Parameter</entry>
+  <entry key="DEFAULT_INIT_PARAMETER_VALUE_TOOLTIP">Der Wert, der als Anfangswert von Parametern genutzt wird, deren Werte nicht spezifiziert sind.</entry>
+  <entry key="DEFAULT_VALUES">Fehlende Werte</entry>
+  <entry key="DEFAULT_VALUES_TOOLTIP">Legen Sie die Zahlenwerte fest, mit welchen fehlende Anfangswerte von Kompartimenten, Spezies und Parametern ersetzt werden sollen. Dabei muss beachtet werden, dass der Wert nur dann als fehlend angesehen wird, wenn tatsächlich kein Wert definiert ist (im Gegensatz zu ungültigen Werten). Weiterhin kann die Einheit je nach Größe unterschiedlich sein. Hier kann nur jeweils ein einheitlicher Zahlenwert pro Modellkomponente festgelegt werden.</entry>
+  <entry key="QUALITY_MEASURE">Bewertungsfunktion der Modellqualität</entry>
+  <entry key="QUALITY_MEASURE_TOOLTIP">Diese Einstellungen ermöglichen es, festzulegen, wie die Qualität eines Parametersatzes bezüglich gegebener experimenteller Daten zu bewerten ist.</entry>
+  <entry key="QUALITY_DEFAULT_VALUE">Voreingestelter Qualitätswert</entry>
+  <entry key="QUALITY_DEFAULT_VALUE_TOOLTIP">Der voreingestellte Rückgabewert der Qualitätsfunktion, der in solchen Fällen genutzt werden kann, falls es aus irgendwelchen Gründen nicht möglich ist, einen wahren Qualitätswert zu berechen. Ein Beispiel dafür kann sein, dass eine Division durch Null verhindert wird.</entry>
+  <entry key="QUALITY_N_METRIC_ROOT">N-Metrik Wurzelexponent</entry>
+  <entry key="QUALITY_N_METRIC_ROOT_TOOLTIP">Der Wurzelparameter der Distanzfunktion für die n-Metrik: Im Fall der n-Norm nimmt dieser den gleichen Wert wie der Exponent an. Beispielsweise kann die eulidische Distanz mit einem Wurzelexponenten von zwei erhalten werden, wohingegen die Manhattan-Norm einen Exponenten von eins besitzt. Der relative quadratische Fehler hat ebenfalls einen Wurzelexponenten von zwei. Dieser Wert kann jedoch verändert werden.</entry>
+  <entry key="QUALITY_MEASURES">Bewertungsfunktion</entry>
+  <entry key="QUALITY_MEASURES_TOOLTIP">Mit dieser Option können Sie festlegen, wie die Qualität eines Parametersets bezüglich gegebener experimenteller Daten ermittelt werden soll.</entry>
+  <entry key="ODE_SOLVER">Differentialgleichungslöser</entry>
+  <entry key="ODE_SOLVER_TOOLTIP">Wählen Sie einen Löser für gewöhnliche Differentialgleichungssysteme (gDGS). Die gegebenen Klase muss AbstractDESSolver erweitern und einen leeren Konstruktor besitzen.</entry>
+  <entry key="SIM_START_TIME">Anfangszeit</entry>
+  <entry key="SIM_START_TIME_TOOLTIP">Der reele Wert, der dieser Option zugeordnet wird, muss im Falle von SBML gleich null sein. Allgemein kann jedoch jede beliebige Anfangszeit gewählt werden. Deswegen gibt es diese Einstellungsmöglichkeit. Da aber in SBML-Modellen die Anfangszeit auf null festgelegt ist, sollte die Simulation zu keiner anderen Zeit beginnen.</entry>
+  <entry key="SIM_END_TIME">Endzeit</entry>
+  <entry key="SIM_END_TIME_TOOLTIP">Die hier angegebene nicht-negative reelle Zahl gibt an, bis zu welchem simulierten Zeitpunkt das aktuelle Modell berechnet werden soll. Im Falle von SBML muss dieser Wert echt größer als null sein.</entry>
+  <entry key="SIM_STEP_SIZE">Schrittweite</entry>
+  <entry key="SIMULATION_CONFIGURATION">Einstellungen für die Simulation</entry>
+  <entry key="SIMULATION_CONFIGURATION_TOOLTIP">Hier können Parameter für die Simulation eingestellt werden.</entry>  
+  
+  <!-- SimulationPanel -->
+  
+  <entry key="NO_ODE_SOLVERS_AVAILABLE_MESSAGE">Es konnten keine Löser für Differentialgleichungssysteme gefunden werden. Daher kann auch keine Simulation durchgeführt werden.</entry>
+  <entry key="NO_ODE_SOLVERS_AVAILABLE">Fehlende Differentialgleichungslöser</entry>
+  <entry key="NULL_MODEL">Das Modell ist ungültig.</entry>
+  <entry key="INTEGRATION_TOOLBOX">Integrationswerkzeuge</entry>
+  <entry key="TAB_SIMULATION">Simulation</entry>
+  <entry key="TAB_IN_SILICO_DATA">Berechnete Daten</entry>
+  <entry key="TAB_EXPERIMENTAL_DATA">Experimentelle Daten</entry>
+  <entry key="TAB_MODEL_VIEW">Modell</entry>
+  <entry key="NO_SIMULATION_PERFORMED">Es wurde noch keine Simulation durchgeführt. Führen Sie bitte zunächst die Simulation aus.</entry>
+  <entry key="NO_EXPERIMENTAL_DATA_LOADED">Bisher wurden weder experimentelle Daten geöffnet, noch modifiziert. Daher gibt es derzeit noch nichts zum Abspeichern.</entry>
+  
+  <!-- SimulationToolPanel -->
+  
+  <entry key="STEP_COUNT">Anzahl der Schritte</entry>
+  <entry key="STEP_COUNT_TOOLTIP">Die Anzahl von Zeitpunkten zwischen Beginn- und Endzeit der Simulation, an denen die numerische Integrationsroutine das Differentialgleichungssystem lösen soll. Die Anzahl der Integrationsschritte bestimmt die Integrationsschrittweite, die das gesamte Integrationsintervall in gleichgroße Subintervalle unterteilt.</entry>
+  <entry key="PLOT_SETTINGS">Diagrammeinstellungen</entry>
+  
+  <!-- SimulationVisualizationPanel -->
+  
+  <entry key="X_AXIS_LABEL">Zeit in {0}</entry>
+  <entry key="Y_AXIS_LABEL">Wert</entry>
+  <entry key="NO_LOGARITHMIC_SCALE_POSSIBLE">Da mindestens ein Wert auf der Ordinatenachse den Wert null nicht übersteigt, kann keine logarithmische Skala verwendet werden.</entry>
+  <entry key="WARNING">Achtung</entry>
+  
+  <!-- SimulationWorker -->
+  
+  <entry key="MODEL_UNSTABLE_EXCEPTION">Eine Simulation konnte nicht durchgeführt werden, weil das Modell instabil ist. Versuchen Sie es bitte nochmals mit einem anderen Lösungsverfahren.</entry>
+  <entry key="SIMULATION_TIME">Rechenzeit: {0,number} s</entry>
+  
+  <!-- SimulatorOptions -->
+  
+  <entry key="SimulatorOptions">Simulator-Einstellungen</entry>
+  <entry key="INPUT_FILES">Eingabedateien</entry>
+  <entry key="INPUT_FILES_TOOLTIP">Diese Optionen ermöglichen Ihnen die Auswahl gewünschter Eingabedateien für die Simulation.</entry>
+  <entry key="OUTPUT_FILES">Ausgabedateien</entry>
+  <entry key="OUTPUT_FILES_TOOLTIP">Hier können Sie die Dateien auswählen, in denen die Simulationsergebnisse oder das Resultat einer Parameterschätzung gespeichert werden soll.</entry>
+  <entry key="SBML_INPUT_FILE">SBML-Eingabedatei</entry>
+  <entry key="SBML_INPUT_FILE_TOOLTIP">Wählen Sie ein Modell im SBML-Format zur Simulation aus.</entry>
+  <entry key="SBML_OUTPUT_FILE">SBML-Ausgabedatei</entry>
+  <entry key="SBML_OUTPUT_FILE_TOOLTIP">Wählen Sie eine Datei, in der ein Modell im SBML-Format nach einer Parameterschätzung gespeichert werden soll.</entry>
+  <entry key="SIMULATION_OUTPUT_FILE">Datei für Simulationsergebnisse</entry>
+  <entry key="SIMULATION_OUTPUT_FILE_TOOLTIP">Wählen Sie eine Datei aus, in der die Ergebnisse der numerischen Integration gespeichert werden sollen.</entry>
+  <entry key="TIME_SERIES_FILE">Zeitreihen-Datensatz</entry>
+  <entry key="TIME_SERIES_FILE_TOOLTIP">Geben Sie eine Datei an, die zeitlich aufgelöste Messwerte für Spezies, Kompartimente oder Parameter enthält.</entry>
   
   <!-- SimulatorUI -->
   
-  <entry key="COULD_NOT_OPEN_FILES">Folgende Dateien konnten nicht geöffnet werden:</entry>
+  <entry key="ABOUT_HTML">html/about.html</entry>
+  <entry key="LICENSE_HTML">html/License.html</entry>
+  <entry key="ONLINE_HELP_HTML">html/online-help.html</entry>
+  <entry key="CAN_ONLY_OPEN_ONE_MODEL_AT_A_TIME">Es kann lediglich ein Modell geöffnet werden. Folgende Dateien wurden daher zurückgewiesen:</entry>
+  <entry key="CANNOT_OPEN_DATA_WIHTOUT_MODEL">Ein Datensatz kann erst dann geöffnet werden, wenn bereits ein SBML-Modell geöffnet wurde.</entry>
+  <entry key="UNABLE_TO_OPEN_DATA">Der angegebene Datensatz kann nicht geöffnet werden.</entry>
+  <entry key="SELECT_QUANTITIES_FOR_OPTIMIZATION">Wählen Sie die zu Schätzenden Modellkomponenten aus.</entry>
+  <entry key="COMPUTED">berechnet</entry>
+  <entry key="LAUNCHING_SIMULATION">Leite die Simulation ein.</entry>
+  <entry key="RECEIVED_WINDOW_EVENT">Empfange ein Fensterereignis</entry>
+  <entry key="TOO_MANY_MODEL_FILES">Zu viele Modelldateien</entry>
+  <entry key="COULD_NOT_OPEN_FILES">Die folgenden Dateien konnten nicht geöffnet werden:</entry>
+  <entry key="CLOSE_MODEL_BEFORE_OPENING_NEXT">Das aktuelle Modell muss geschlossen werden, bevor ein neues Modell geöffnet werden kann.</entry>
+  <entry key="CLOSE_MODEL_WITHOUT_SAVING">Soll das aktuelle Modell ohne zu speichern geschlossen werden?</entry>
+  <entry key="CLOSING_MODEL">Schließe das Modell</entry>
+  <entry key="COULD_NOT_OPEN_MODEL">Das Modell {0} konnte nicht geöffnet werden.</entry>
+  <entry key="FILE_CLOSE">Modell schließen;Schließt das aktuell ausgewählte Modell samt aller experimenteller Datensätze, die mit diesem verbunden sind.</entry>
+  <entry key="FILE_OPEN">Modell öffnen;Öffnet ein Modell im SBML-Format zur Simulation oder Parameterschätzung.</entry>
+  <entry key="OPEN">Öffnen</entry>
+  <entry key="OPEN_TOOLTIP">Öffnet ein Modell oder experimentelle Datensätze.</entry>
+  <entry key="OPEN_DATA">Lade experimentelle Daten</entry>
+  <entry key="OPEN_DATA_TOOLTIP">Öffnet einen oder mehrere experimentelle Datensätze.</entry>
+  <entry key="OPTIMIZATION">Optimierung</entry>
+  <entry key="OPTIMIZATION_TOOLTIP">Leitet die Optimierung ausgwählter Modellkomponenten ein. Das heißt, das simulierte Modell wird an gegebene experimentelle Daten angepasst.</entry>
+  <entry key="SHOW_OPTIONS">Zeige Simulationswerkzeuge</entry>
+  <entry key="SHOW_OPTIONS_TOOLTIP">Entscheiden Sie, ob die Einstellungsmöglichkeiten für die Simulation angezeigt werden soll.</entry>
+  <entry key="SIMULATION_START">Simulation starten</entry>
+  <entry key="SIMULATION_START_TOOLTIP">Führt eine dynamische Simulation mit den aktuellen Einstellungen durch.</entry>
   <entry key="UNSUPPORTED_FILE_TYPES">Nicht unterstützte Dateitypen</entry>
+  <entry key="INFORMATION">Information</entry>
+  <entry key="NOTHING_TO_SAVE">Es gibt im Moment nichts abzuspeichern.</entry>
   
 </properties>

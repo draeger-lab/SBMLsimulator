@@ -97,14 +97,11 @@
   
   <!-- LegendTableCellRenderer -->
   
-  <entry key="RGB_TOOLTIP">Red = %d, Green = %d, Blue = %d</entry>
-  
-  <!-- LegendTableCellRenderer -->
-  
-  <entry key="OUTSIDE_TOOLTIP">Surrounding compartment: %s</entry>
-  <entry key="SPECIES_COMPARTMENT">Containing compartment: %s</entry>
-  <entry key="REACTION_COMPARTMENT">Takes place in compartment: %s</entry>
-  <entry key="LOCAL_PARAMETER_REACTION">Occurs in the kinetic law of reaction: %s</entry>
+  <entry key="RGB_TOOLTIP">Red = {0,number}, Green = {1,number}, Blue = {2,number}</entry>
+  <entry key="OUTSIDE_TOOLTIP">Surrounding compartment: {0}</entry>
+  <entry key="SPECIES_COMPARTMENT">Containing compartment: {0}</entry>
+  <entry key="REACTION_COMPARTMENT">Takes place in compartment: {0}</entry>
+  <entry key="LOCAL_PARAMETER_REACTION">Occurs in the kinetic law of reaction: {0}</entry>
   
   <!-- LegendTableModel -->
   
@@ -112,7 +109,7 @@
   <entry key="COLOR_COLUMN">Color</entry>
   <entry key="COMPONENT_COLUMN">Component</entry>
   <entry key="UNIT_COLUMN">Unit</entry>
-  <entry key="UNKOWN_CLUMN_EXC">Only %d columns, no column %d</entry>
+  <entry key="UNKOWN_CLUMN_EXC">Only {0,number} columns, no column {1,number}</entry>
     
   <!-- Metrics -->
   
@@ -144,12 +141,16 @@
   <entry key="PLOT_APPEARANCE">Appearance of the plot</entry>
   <entry key="PLOT_APPEARANCE_TOOLTIP">Options for appearance of the plot area</entry>
   
+  <!-- PlotOptions -->
+  
+  <entry key="PlotOptions">Plot Options</entry>
+  
   <!-- QuantitySelectionPanel -->
   
   <entry key="UNKNOWN_COMMAND">Unknown command "{0}"</entry>
   <entry key="ROW_INDEX_OUT_OF_BOUNDS">Row index {0} out of bounds: {1} rows available.</entry>
   <entry key="COLUMN_INDEX_OUT_OF_BOUNDS">Column index {0} out of bounds: {1} columns available.</entry>
-  <entry key="CANNOT_ADOPT_NEW_VALUE">Cannot adopt the new value {0} because it {4} the current {3} of {1}.</entry>
+  <entry key="CANNOT_ADOPT_NEW_VALUE">Cannot adopt the new value {0,number} because it {4} the current {3} of {1,number}.</entry>
   <entry key="CANNOT_DERIVE_UNIT_OF">Cannot change the derived unit of {0}.</entry>
   <entry key="EXCEEDS">exceeds</entry>
   <entry key="SELECTED">Selected</entry>
@@ -158,14 +159,13 @@
   <entry key="INITIAL_MAXIMUM">Initial Maximum</entry>
   <entry key="ABSOLUTE_MINIMUM">Absolute Minimum</entry>
   <entry key="ABSOLUTE_MAXIMUM">Absolute Maximum</entry>
-  <entry key=""></entry>
-  <entry key="CHECK_BOX_TOOLTIP">Check this box to include %s %s in the optimization</entry> <!-- SBML element name and name of the instance -->
+  <entry key="CHECK_BOX_TOOLTIP">Check this box to include {0} {1} in the optimization</entry> <!-- SBML element name and name of the instance -->
   <entry key="EXPLANATION">Please select the model components, whose values are to be optimized. You can also change the allowable ranges for each element.</entry>
-  <entry key="MIN_MAX_SPINNER_TOOL_TIP">Select the absolute %s allowable value for this %s named %s.</entry>
+  <entry key="MIN_MAX_SPINNER_TOOL_TIP">Select the absolute {0} allowable value for this {1} named {2}.</entry>
   <entry key="MINIMUM">minimum</entry>
   <entry key="MAXIMUM">maximum</entry>
-  <entry key="INIT_MIN_MAX_SPINNER_TOOL_TIP">Select the %s allowable value for this %s named %s in the initialization.</entry>
-  <entry key="TAB_TOOL_TIP">In this tab you can select the %s in the model whose values are to be optimized.</entry>
+  <entry key="INIT_MIN_MAX_SPINNER_TOOL_TIP">Select the {0} allowable value for this {1} named {2} in the initialization.</entry>
+  <entry key="TAB_TOOL_TIP">In this tab you can select the {0} in the model whose values are to be optimized.</entry>
   
   <!-- SelectionCommand -->
   
@@ -182,16 +182,16 @@
   <entry key="DEFAULT_INIT_SPECIES_VALUE">Initial species value</entry>
   <entry key="DEFAULT_INIT_SPECIES_VALUE_TOOLTIP">If not specified the value corresponding to this argument will be used to initialize species depending on their hasOnlySubstanceUnits property as initial amount or initial concentration.</entry>
   <entry key="DEFAULT_INIT_PARAMETER_VALUE">Initial value of parameters</entry>
-  <entry key="DEFAULT_INIT_PARAMETER_VALUE_TOOLTIP">The value that is set for newly created parameters.</entry>
+  <entry key="DEFAULT_INIT_PARAMETER_VALUE_TOOLTIP">The default initial value that is set for parameters with undefined value.</entry>
   <entry key="DEFAULT_VALUES">Missing values</entry>
-  <entry key="DEFAULT_VALUES_TOOLTIP">Decide how to treat the values of compartments, species, and parameters if no initial value has been defined in the model.</entry>
+  <entry key="DEFAULT_VALUES_TOOLTIP">Decide how to treat the values of compartments, species, and parameters if no initial value has been defined in the model. A missing initial value is to be distinguished from invalid, i.e., NaN, values. Furthermore, the elements may have very diverse the units associated with them. Here it is only possible to define one numeric value for each element group, irrespective of any unit.</entry>
   <entry key="QUALITY_MEASURE">Evaluation criteria for the model's quality</entry>
   <entry key="QUALITY_MEASURE_TOOLTIP">This specifies the class name of the default quality function that evaluates the quality of a simulation with respect to given (experimental) data.</entry>
   <entry key="QUALITY_DEFAULT_VALUE">Default quality value</entry>
-  <entry key="QUALITY_DEFAULT_VALUE_TOOLTIP">The default return value of a quality function that can be used if for some reason a quality cannot be computed.</entry>
+  <entry key="QUALITY_DEFAULT_VALUE_TOOLTIP">The default return value of a quality function that can be used if for some reason a quality cannot be computed. For example, this might avoid a division by zero.</entry>
   <entry key="QUALITY_N_METRIC_ROOT">N-metric root exponent</entry>
   <entry key="QUALITY_N_METRIC_ROOT_TOOLTIP">The root parameter in the distance function for n-metrics: in case of the n-norm this is at the same time also the exponent. For instance, the Eulidean distance has a root value of two, whereas the Manhattan norm has a root of one. In the RSE, the default root is also two, but this value may be changed.</entry>
-  <entry key="QUALITY_MEASURES">Model quality function</entry>
+  <entry key="QUALITY_MEASURES">Quality function</entry>
   <entry key="QUALITY_MEASURES_TOOLTIP">Here you can specify how to evaluate the quality of a parameter set with respect to given experimental data.</entry>
   <entry key="ODE_SOLVER">Differential equation solver</entry>
   <entry key="ODE_SOLVER_TOOLTIP">This gives the class name of the default solver for Ordinary Differential Equation (ODE) systems. The associated class must implement AbstractDESSolver and must have a constructor without any parameters.</entry>
@@ -202,7 +202,7 @@
   <entry key="SIM_STEP_SIZE">Step size</entry>
   <entry key="SIM_STEP_SIZE_TOOLTIP">The greater this value the longer the computation time, but the more accurate will be the result.</entry>
   <entry key="SIMULATION_CONFIGURATION">Settings for the simulation</entry>
-  <entry key="SIMULATION_CONFIGURATION_TOOLTIP">Here you can specify parameters for the simulation of the model</entry>
+  <entry key="SIMULATION_CONFIGURATION_TOOLTIP">Here you can specify parameters for the simulation of the model.</entry>
     
   <!-- SimulationPanel -->
   
@@ -225,7 +225,7 @@
   
   <!-- SimulationVisualizationPanel -->
   
-  <entry key="X_AXIS_LABEL">Time in %s</entry>
+  <entry key="X_AXIS_LABEL">Time in {0}</entry>
   <entry key="Y_AXIS_LABEL">Value</entry>
   <entry key="NO_LOGARITHMIC_SCALE_POSSIBLE">Cannot change to logarithmic scale because at least one value on the y-axis is not greater than zero.</entry>
   <entry key="WARNING">Warning</entry>
@@ -233,6 +233,7 @@
   <!-- SimulationWorker -->
   
   <entry key="MODEL_UNSTABLE_EXCEPTION">Simulation not possible because the model is unstable. Please try again with a different solver.</entry>
+  <entry key="SIMULATION_TIME">Computation time: {0,number} s</entry>
   
   <!-- SimulatorOptions -->
   
@@ -267,7 +268,7 @@
   <entry key="CLOSE_MODEL_BEFORE_OPENING_NEXT">The current model must be closed before a new model can be opened.</entry>
   <entry key="CLOSE_MODEL_WITHOUT_SAVING">Close current model and all data without saving?</entry>
   <entry key="CLOSING_MODEL">Closing model</entry>
-  <entry key="COULD_NOT_OPEN_MODEL">Could not open model %s.</entry>
+  <entry key="COULD_NOT_OPEN_MODEL">Could not open model {0}.</entry>
   <entry key="FILE_CLOSE">Close model;Closes the currently selected model and all experimental data sets that may be associated with the model.</entry>
   <entry key="FILE_OPEN">Open model;Open a model in SBML format for simulation or parameter optimization.</entry>
   <entry key="OPEN">Open</entry>

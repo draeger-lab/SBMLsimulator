@@ -18,6 +18,7 @@
 package org.sbml.simulator.gui;
 
 import java.awt.Color;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -318,7 +319,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 			timeUnits = new UnitDefinition(model.getLevel(), model.getVersion());
 		}
 		String title = model.isSetName() ? model.getName() : model.getId();
-		plot = new Plot(title, String.format(bundle.getString("X_AXIS_LABEL"),
+		plot = new Plot(title, MessageFormat.format(bundle.getString("X_AXIS_LABEL"),
 			UnitDefinition.printUnits(timeUnits, true).replace('*', '\u00B7')),
 			bundle.getString("Y_AXIS_LABEL"));
 		plot.setBorder(BorderFactory.createLoweredBevelBorder());

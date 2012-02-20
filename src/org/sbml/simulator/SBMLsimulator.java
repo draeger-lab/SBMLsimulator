@@ -37,8 +37,6 @@ import de.zbit.AppConf;
 import de.zbit.Launcher;
 import de.zbit.gui.GUIOptions;
 import de.zbit.io.CSVOptions;
-import de.zbit.util.Reflect;
-import de.zbit.util.StringUtil;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.SBProperties;
 
@@ -51,6 +49,7 @@ import de.zbit.util.prefs.SBProperties;
  * @version $Rev$
  * @since 1.0
  */
+@SuppressWarnings("unchecked")
 public class SBMLsimulator extends Launcher {
 
 	/**
@@ -64,12 +63,12 @@ public class SBMLsimulator extends Launcher {
 	public static final transient Logger logger = Logger
 			.getLogger(SBMLsimulator.class.getName());
 
-	/**
-	 * The possible location of this class in a jar file if used in plug-in
-	 * mode.
-	 */
-	public static final String JAR_LOCATION = "plugin"
-			+ StringUtil.fileSeparator();
+//	/**
+//	 * The possible location of this class in a jar file if used in plug-in
+//	 * mode.
+//	 */
+//	public static final String JAR_LOCATION = "plugin"
+//			+ StringUtil.fileSeparator();
 
 	/**
 	 * The package where all mathematical functions, in particular distance
@@ -86,16 +85,56 @@ public class SBMLsimulator extends Launcher {
 	 * An array of all available implementations of distance functions to judge
 	 * the quality of a simulation based on parameter and initial value settings.
 	 */
-	private static final Class<QualityMeasure> AVAILABLE_QUALITY_MEASURES[] = Reflect
-			.getAllClassesInPackage(MATH_PACKAGE, true, true, QualityMeasure.class,
-				JAR_LOCATION, true);
+	private static final Class<QualityMeasure> AVAILABLE_QUALITY_MEASURES[];
 	
 	/**
 	 * An array of all available ordinary differential equation solvers.
 	 */
-	private static final Class<AbstractDESSolver> AVAILABLE_SOLVERS[] = Reflect
-			.getAllClassesInPackage(SOLVER_PACKAGE, true, true,
-				AbstractDESSolver.class, JAR_LOCATION, true);
+	private static final Class<AbstractDESSolver> AVAILABLE_SOLVERS[];
+	
+	static {
+		int i;
+		//	AVAILABLE_QUALITY_MEASURES = Reflect.getAllClassesInPackage(MATH_PACKAGE,
+		//	true, true, QualityMeasure.class, JAR_LOCATION, true);
+		String classes[] = new String[] {
+				"org.sbml.simulator.math.EuclideanDistance",
+				"org.sbml.simulator.math.ManhattanDistance",
+				"org.sbml.simulator.math.N_Metric",
+				"org.sbml.simulator.math.PearsonCorrelation",
+				"org.sbml.simulator.math.RelativeEuclideanDistance",
+				"org.sbml.simulator.math.RelativeManhattanDistance",
+				"org.sbml.simulator.math.RelativeSquaredError",
+				"org.sbml.simulator.math.Relative_N_Metric" };
+		AVAILABLE_QUALITY_MEASURES = new Class[classes.length];
+		for (i = 0; i < classes.length; i++) {
+			try {
+				AVAILABLE_QUALITY_MEASURES[i] = (Class<QualityMeasure>) Class.forName(classes[i]);
+			} catch (ClassNotFoundException exc) {
+				logger.severe(exc.getLocalizedMessage());
+			}
+		}
+		
+		// AVAILABLE_SOLVERS = Reflect.getAllClassesInPackage(SOLVER_PACKAGE, true,
+		//   true, AbstractDESSolver.class, JAR_LOCATION, true);
+		classes = new String[] { 
+				"org.simulator.math.odes.AdamsBashforthSolver",
+				"org.simulator.math.odes.AdamsMoultonSolver",
+				"org.simulator.math.odes.DormandPrince54Solver",
+				"org.simulator.math.odes.DormandPrince853Solver",
+				"org.simulator.math.odes.EulerMethod",
+				"org.simulator.math.odes.GraggBulirschStoerSolver",
+				"org.simulator.math.odes.HighamHall54Solver",
+				"org.simulator.math.odes.RosenbrockSolver",
+				"org.simulator.math.odes.RungeKutta_EventSolver" };
+		AVAILABLE_SOLVERS = new Class[classes.length];
+		for (i = 0; i < classes.length; i++) {
+			try {
+				AVAILABLE_SOLVERS[i] = (Class<AbstractDESSolver>) Class.forName(classes[i]);
+			} catch (ClassNotFoundException exc) {
+				logger.severe(exc.getLocalizedMessage());
+			}
+		}
+	}
 
 	/**
 	 * 

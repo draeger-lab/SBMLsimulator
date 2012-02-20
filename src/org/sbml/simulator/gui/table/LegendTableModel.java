@@ -20,6 +20,7 @@ package org.sbml.simulator.gui.table;
 import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.text.MessageFormat;
 import java.util.Hashtable;
 import java.util.NoSuchElementException;
 import java.util.ResourceBundle;
@@ -221,7 +222,7 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 		default:
 			break;
 		}
-    throw new IndexOutOfBoundsException(String.format(
+    throw new IndexOutOfBoundsException(MessageFormat.format(
       bundle.getString("UNKOWN_CLUMN_EXC"), getColumnCount(), column));
 	}
 

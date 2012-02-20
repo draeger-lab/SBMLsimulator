@@ -38,12 +38,11 @@ public class ManhattanDistance extends N_Metric {
 		super(1d);
 	}
 	
-	/*
-	 * (non-Javadoc)
+	/* (non-Javadoc)
 	 * @see org.sbml.simulator.math.N_Metric#setRoot(double)
 	 */
 	public void setRoot(double root) {
-		//root should not be changed
+		// root should not be changed
 	}
 
 }
