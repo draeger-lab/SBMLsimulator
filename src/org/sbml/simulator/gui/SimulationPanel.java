@@ -5,7 +5,7 @@
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
  *
- * Copyright (C) 2007-2011 by the University of Tuebingen, Germany.
+ * Copyright (C) 2007-2012 by the University of Tuebingen, Germany.
  *
  * This library is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -492,9 +492,9 @@ public class SimulationPanel extends JPanel implements
    */
   public void propertyChange(PropertyChangeEvent evt) {
   	logger.fine(evt.getPropertyName());
-    if ("progress".equals(evt.getPropertyName())) {
+    if (evt.getPropertyName().equals("progress")) {
       this.firePropertyChanged(evt);
-    } else if ("done".equals(evt.getPropertyName())) {
+    } else if (evt.getPropertyName().equals("done")) {
       MultiTable data = (MultiTable) evt.getNewValue();
       if (data != null) {
         setSimulationData(data);
@@ -662,6 +662,7 @@ public class SimulationPanel extends JPanel implements
    * @param data
    */
   private void setSimulationData(MultiTable data) {
+  	data.setTimeName(bundle.getString("TIME"));
     visualizationPanel.setSimulationData(data);
     simTable.setModel(data);
     simTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);

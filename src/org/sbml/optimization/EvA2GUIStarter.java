@@ -5,7 +5,7 @@
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
  *
- * Copyright (C) 2007-2011 by the University of Tuebingen, Germany.
+ * Copyright (C) 2007-2012 by the University of Tuebingen, Germany.
  *
  * This library is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -43,6 +43,13 @@ public class EvA2GUIStarter {
 	 * 
 	 */
 	private EvAClient evaClient = null;
+	
+	/**
+	 * Private in order to prohibit initialization of this class.
+	 */
+	private EvA2GUIStarter() {
+		super();
+	}
 
 	/**
 	 * 
@@ -56,7 +63,9 @@ public class EvA2GUIStarter {
 			InterfaceStatisticsListener statisticsListener,
 			WindowListener windowListener) {
 		EvA2GUIStarter evaBP = new EvA2GUIStarter();
+		logger.fine("created EvA2 GUI starter");
 		GOParameters goParams = new GOParameters(); // Instance for the general
+		logger.fine("created GO parameters");
 		// Genetic Optimization
 		// parameterization
 
@@ -65,35 +74,43 @@ public class EvA2GUIStarter {
 		DifferentialEvolution optimizer = new DifferentialEvolution();
 		goParams.setOptimizer(optimizer);
 		goParams.setTerminator(new EvaluationTerminator(3000));
+		logger.fine("created optimizer Differential Evolution");
 
 		// set the initial EvA problem here
 		goParams.setProblem(problem);
+		logger.fine("Set problem");
 
 		// hide some properties which should not be shown
-		GenericObjectEditor.setHideProperty(goParams.getClass(), "problem",
-				true);
-		GenericObjectEditor.setHideProperty(goParams.getClass(),
-				"postProcessParams", true);
+		logger.fine("hiding unnecessary GUI options");
+		GenericObjectEditor.setHideProperty(goParams.getClass(), "problem", true);
+		GenericObjectEditor.setHideProperty(goParams.getClass(), "postProcessParams", true);
 		// public EvAClient(final String hostName, final Window parent, final
 		// String paramsFile, final InterfaceGOParameters goParams, final
 		// boolean autorun, final boolean noSplash, final boolean noGui) {
-		evaBP.evaClient = new EvAClient(null, parentWindow,null, goParams, false, true, false); // initializes GUI in the background
+		logger.fine("launching the actual EvA Client");
+		evaBP.evaClient = new EvAClient(null, parentWindow, null, goParams, false, true, false); // initializes GUI in the background
 		// important: wait for GUI initialization before accessing any internal
 		// settings:
+		logger.fine("waiting for EvA Client to get ready");
 		evaBP.evaClient.awaitClientInitialized(); // this returns as soon as the
 		// GUI is ready
+		logger.fine("adding WindowListener to the EvA Client");
 		evaBP.evaClient.addWindowListener(windowListener);
 
 		// modify initial settings:
+		logger.fine("defining statistics properties");
 		evaBP.evaClient.getStatistics().getStatisticsParameter()
 				.setOutputAllFieldsAsText(true); // activate output of all data
 		// fields
 
+		logger.fine("updating main EvA2 main panel");
 		evaBP.evaClient.refreshMainPanels(); // GUI update due to the changes
 		// made through the API
 
 		// add a data listener instance:
-		evaBP.evaClient.getStatistics().addDataListener(statisticsListener); 
+		logger.fine("adding data listener to EvA2");
+		evaBP.evaClient.getStatistics().addDataListener(statisticsListener);
+		logger.fine("EvA2 should now be ready.");
 	}
 
 	/**

@@ -5,7 +5,7 @@
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
  *
- * Copyright (C) 2007-2011 by the University of Tuebingen, Germany.
+ * Copyright (C) 2007-2012 by the University of Tuebingen, Germany.
  *
  * This library is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -496,10 +496,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 			JFrame frame = (JFrame) evaClient;
 			if ((frame.getName() != null) && !frame.isVisible()
 					&& (frame.getName().equals(EvAClient.class.getSimpleName()))) {
-				simPanel.setAllEnabled(true);
-				GUITools.setEnabled(true, getJMenuBar(), toolBar,
-						BaseAction.FILE_SAVE_AS, Command.SIMULATION_START, BaseAction.FILE_CLOSE,
-						Command.OPTIMIZATION, BaseAction.EDIT_PREFERENCES);
+				setSimulationAndOptimizationEnabled(true);
 			}
 		}
 		logger.finer(bundle.getString("RECEIVED_WINDOW_EVENT"));
@@ -509,15 +506,15 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	 * Launches the optimization.
 	 */
 	public void optimize() {
-		GUITools.setEnabled(false, getJMenuBar(), toolBar,
-			Command.SIMULATION_START, BaseAction.FILE_CLOSE, Command.OPTIMIZATION,
-			BaseAction.EDIT_PREFERENCES);
+		if (simPanel == null) {
+			return;
+		}
+		setSimulationAndOptimizationEnabled(false);
 		final Model model = simPanel.getModel().getSBMLDocument().clone().getModel();
 		final QuantitySelectionPanel panel = new QuantitySelectionPanel(model);
 		if (JOptionPane.showConfirmDialog(this, panel,
 			bundle.getString("SELECT_QUANTITIES_FOR_OPTIMIZATION"), JOptionPane.OK_CANCEL_OPTION,
 			JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
-			simPanel.setAllEnabled(false);
 			try {
 				simPanel.notifyQuantitiesSelected(panel.getSelectedQuantityIds());
 				final WindowListener wl = EventHandler.create(WindowListener.class,
@@ -539,24 +536,21 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 										.getBoolean(EstimationOptions.EST_MULTI_SHOOT), panel
 										.getSelectedQuantityRanges());
 							EvA2GUIStarter.init(estimationProblem, ui, simPanel, wl);
-							simPanel.setAllEnabled(true);
 						} catch (Throwable exc) {
 							GUITools.showErrorMessage(ui, exc);
-							simPanel.setAllEnabled(true);
+							setSimulationAndOptimizationEnabled(true);
 						}
 					}
 				}).start();
 			} catch (Throwable exc) {
 				GUITools.showErrorMessage(this, exc);
-				simPanel.setAllEnabled(true);
+				setSimulationAndOptimizationEnabled(true);
 			}
 		} else {
-			GUITools.setEnabled(true, getJMenuBar(), toolBar,
-				Command.SIMULATION_START, BaseAction.FILE_CLOSE, Command.OPTIMIZATION,
-				BaseAction.EDIT_PREFERENCES);
+			setSimulationAndOptimizationEnabled(true);
 		}
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
 	 */
@@ -581,7 +575,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 					BaseAction.FILE_SAVE_AS, Command.SIMULATION_START);
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrame#saveFile()
 	 */
@@ -593,7 +587,11 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 			bundle.getString("INFORMATION"));
 		return null;
 	}
-
+	
+	/**
+	 * 
+	 * @param obj must be an instance of {@link SBMLDocument}.
+	 */
 	public void setSBMLDocument(Object obj) {
 		if ((obj == null) || !(obj instanceof SBMLDocument)) {
 			if (obj == null) {
@@ -639,6 +637,19 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	 */
 	public void setSelectedQuantities(String... ids) {
 		simPanel.setSelectedQuantities(ids);
+	}
+
+	/**
+	 * Small helper method that enables or disables all buttons and user
+	 * interfaces to launch optimization or simulation.
+	 * 
+	 * @param enabled
+	 */
+	private void setSimulationAndOptimizationEnabled(boolean enabled) {
+		GUITools.setEnabled(enabled, getJMenuBar(), toolBar,
+			Command.SIMULATION_START, BaseAction.FILE_CLOSE, Command.OPTIMIZATION,
+			BaseAction.EDIT_PREFERENCES);
+		simPanel.setAllEnabled(enabled);
 	}
 	
 	/**
