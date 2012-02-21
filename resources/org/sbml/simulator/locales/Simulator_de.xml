@@ -73,7 +73,7 @@
  
   <!-- EstimationProblem -->
   
-  <entry key="KIND_OF_SHOOTING">Benuntzung eines {0} Anfangsproblembs!</entry>
+  <entry key="KIND_OF_SHOOTING">Benutzung eines {0} Anfangsproblems!</entry>
   <entry key="MULTIPLE">mehrfachen</entry>
   <entry key="SINGLE">einzigen</entry>
   <entry key="RESULT_OF_BEST_PER_GENERATION">Ergebnis des besten Individums der Generation während der Modellsimulation</entry>
