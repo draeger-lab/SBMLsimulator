@@ -253,6 +253,8 @@
   <!-- SimulatorUI -->
   
   <entry key="ABOUT_HTML">html/about.html</entry>
+  <entry key="CANNOT_LAUNCH_EVA2">Die Optimierungsbibliothek EvA2 kann nicht initialisiert werden. Dieses Problem tritt immer dann auf, wenn diese Bibliothek ihren eigenen Speicherort auf Ihrem lokalen Rechner nicht finden kann. Dies kann beispielsweise passieren, wenn Sie dieses Programm als eine "Java™ Web Start"-Anwendung ausführen. Damit Sie eine Modellkalibrierung vornehmen können, laden Sie sich bitte selbst das Programm SBMLsimulator komplett herunter, und führen Sie es anschließend durch Doppelklick auf die heruntergeladene JAR-Datei direkt aus. Bitte schauen Sie dazu auch in die Online-Hilfe dieses Programms, wo Sie unter anderem einen direkten Verweis auf die Webseite von SBMLsimulator finden können.</entry>
+    <entry key="ERROR_MESSAGE">Fehlermeldung</entry>
   <entry key="LICENSE_HTML">html/License.html</entry>
   <entry key="ONLINE_HELP_HTML">html/online-help.html</entry>
   <entry key="CAN_ONLY_OPEN_ONE_MODEL_AT_A_TIME">Es kann lediglich ein Modell geöffnet werden. Folgende Dateien wurden daher zurückgewiesen:</entry>

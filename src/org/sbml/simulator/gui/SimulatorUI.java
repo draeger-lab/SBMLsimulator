@@ -509,6 +509,14 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		if (simPanel == null) {
 			return;
 		}
+		URL baseDir = getClass().getClassLoader().getResource("");
+		if (baseDir == null) {
+			GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.OPTIMIZATION);
+			JOptionPane.showMessageDialog(this,
+				StringUtil.toHTMLToolTip(bundle.getString("CANNOT_LAUNCH_EVA2")),
+				bundle.getString("ERROR_MESSAGE"), JOptionPane.ERROR_MESSAGE);
+			return;
+		}
 		setSimulationAndOptimizationEnabled(false);
 		final Model model = simPanel.getModel().getSBMLDocument().clone().getModel();
 		final QuantitySelectionPanel panel = new QuantitySelectionPanel(model);
