@@ -254,6 +254,8 @@
   <!-- SimulatorUI -->
   
   <entry key="ABOUT_HTML">html/about.html</entry>
+  <entry key="CANNOT_LAUNCH_EVA2">The optimization tool box EvA2 cannot be launched. This problem occurs whenever this program cannot determine its own location on your local computer. This happens, for instance, if you have started SBMLsimulator as a Java™ Web Start application. In order to be able to invoke any model calibration method, please download the entire program SBMLsimulator and run it locally, e.g., by double clicking on the JAR file. Please have a look into the online help of SBMLsimulator where you can find a direct link to the project's homepage.</entry>
+  <entry key="ERROR_MESSAGE">Error Message</entry>
   <entry key="LICENSE_HTML">html/License.html</entry>
   <entry key="ONLINE_HELP_HTML">html/online-help.html</entry>
   <entry key="CAN_ONLY_OPEN_ONE_MODEL_AT_A_TIME">Can only open one model, rejecting the following files:</entry>
