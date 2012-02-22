@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
+import org.apache.commons.math.ode.DerivativeException;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.SBMLException;
@@ -142,6 +143,11 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	/**
 	 * 
 	 */
+	private double defaultValue;
+	
+	/**
+	 * 
+	 */
 	public static final String SIMULATION_DATA = "simulation data";
 	
 	/**
@@ -184,6 +190,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		Model model, List<MultiTable> list, QuantityRange... quantityRanges)
 		throws ModelOverdeterminedException, SBMLException {
 		super();
+		defaultValue = 10000;
 		negationOfDistance=false;
 		multishoot = false;
 		setSolver(solver);
@@ -211,6 +218,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 */
 	public EstimationProblem(EstimationProblem problem) {
 		super(problem);
+		defaultValue = 10000;
 		setSolver(problem.getSolver());
 		negationOfDistance=false;
 		setDistance(problem.getDistance());
@@ -264,28 +272,39 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		  double[] initialValues = interpreter.getInitialValues();
 			MultiTable reference = getInitialConditions();
 			for (int col = 0; col < reference.getColumnCount(); col++) {
-			  Integer pos = id2Index.get(reference.getColumnName(col));
+			  String name = reference.getColumnIdentifier(col);
+			  Integer pos = id2Index.get(name);
 			  if (pos != null) {
 			    initialValues[pos] = ((Double) reference.getValueAt(0, col)).doubleValue();
 			  }
 			}
-			MultiTable solution; 
-			if (multishoot) {
-				solution = solver.solve(interpreter, getInitialConditions().getBlock(0), initialValues);
-			} else {
-				solution = solver.solve(interpreter, initialValues, getTimePoints());
+			MultiTable solution = null; 
+			try {
+				if (multishoot) {
+					solution = solver.solve(interpreter,
+						getInitialConditions().getBlock(0), initialValues);
+				} else {
+					solution = solver.solve(interpreter, initialValues, getTimePoints());
+				}
+			} catch (DerivativeException e) {
+				logger.warning(e.getLocalizedMessage());
 			}
 			
 			fitness[0] = 0d;
 			for (MultiTable data : referenceData) {
-				// equal weight for each reference data set
-				if(negationOfDistance) {
-					fitness[0] += -1 * distance.distance(solution.getBlock(0), data.getBlock(0))
-						/ referenceData.length;
-				}
-				else {
-					fitness[0] += distance.distance(solution.getBlock(0), data.getBlock(0))
-					/ referenceData.length;
+				if (solution == null) {
+					fitness[0] = defaultValue;
+				} else {
+					// equal weight for each reference data set
+					if (negationOfDistance) {
+						fitness[0] += -1
+								* distance.distance(solution.getBlock(0), data.getBlock(0))
+								/ referenceData.length;
+					} else {
+						fitness[0] += distance.distance(solution.getBlock(0),
+							data.getBlock(0))
+								/ referenceData.length;
+					}
 				}
 				
 			}
@@ -293,7 +312,9 @@ public class EstimationProblem extends AbstractProblemDouble implements
 					|| (fitness[0] < bestPerGenerationDist)) {
 				bestPerGenerationDist = fitness[0];
 				bestPerGeneration = solution;
-				bestPerGeneration.setName(SIMULATION_DATA);
+				if(solution != null) {
+					bestPerGeneration.setName(SIMULATION_DATA);
+				}
 			}
 
 		} catch (Exception e) {
