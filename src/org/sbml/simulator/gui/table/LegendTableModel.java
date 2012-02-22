@@ -192,10 +192,18 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 	 */
 	@Override
 	public Class<?> getColumnClass(int c) {
-		if (c == nsbCol) {
-			return NamedSBaseWithDerivedUnit.class;
+		switch (c) {
+			case boolCol:
+				return Boolean.class;
+			case colorCol:
+				return Color.class;
+			case nsbCol:
+				return NamedSBaseWithDerivedUnit.class;
+			case unitCol:
+				return UnitDefinition.class;
+			default:
+				return getValueAt(0, c).getClass();
 		}
-		return getValueAt(0, c).getClass();
 	}
 	
 	/* (non-Javadoc)
