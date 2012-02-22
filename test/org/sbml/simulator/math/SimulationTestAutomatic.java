@@ -68,12 +68,20 @@ public class SimulationTestAutomatic {
 	 */
 	public static void main(String[] args) throws IOException {
 		boolean onlyRosenbrock=true;
+		boolean testBiomodels=false;
 		if((args.length>=2)&&(args[1].equals("all"))) {
 			onlyRosenbrock=false;
+		}
+		if((args.length>=2)&&(args[1].equals("biomodels"))) {
+			onlyRosenbrock=false;
+			testBiomodels=true;
 		}
 		
 		if(onlyRosenbrock) {
 			testRosenbrockSolver(args[0]);
+		}
+		else if(testBiomodels) {
+			testBiomodels(args[0]);
 		}
 		else {
 			statisticForSolvers(args[0]);
@@ -109,7 +117,7 @@ public class SimulationTestAutomatic {
 			correctSimulations[i] = 0;
 		}
 		
-		for (int modelnr = 1; modelnr <= 900; modelnr++) {
+		for (int modelnr = 1; modelnr <= 980; modelnr++) {
 			System.out.println("model " + modelnr);
 			nModels++;
 			
@@ -139,7 +147,7 @@ public class SimulationTestAutomatic {
 			// "-sbml-l2v2.xml", "-sbml-l2v3.xml", "-sbml-l2v4.xml",
 			// "-sbml-l3v1.xml" };
 			
-			String[] sbmlFileTypes = { "-sbml-l2v1.xml", "-sbml-l2v2.xml",
+			String[] sbmlFileTypes = {"-sbml-l1v2.xml", "-sbml-l2v1.xml", "-sbml-l2v2.xml",
 					"-sbml-l2v3.xml", "-sbml-l2v4.xml", "-sbml-l3v1.xml" };
 			
 			boolean[] highDistance = new boolean[solvers.size()];
@@ -252,11 +260,8 @@ public class SimulationTestAutomatic {
 			/*
 			 * Other variables: variables: S1, S2 amount: concentration:
 			 */
-			// String[] sbmlFileTypes = { "-sbml-l1v2.xml", "-sbml-l2v1.xml",
-			// "-sbml-l2v2.xml", "-sbml-l2v3.xml", "-sbml-l2v4.xml",
-			// "-sbml-l3v1.xml" };
-
-			String[] sbmlFileTypes = { "-sbml-l2v1.xml", "-sbml-l2v2.xml",
+			
+			String[] sbmlFileTypes = {"-sbml-l1v2.xml", "-sbml-l2v1.xml", "-sbml-l2v2.xml",
 					"-sbml-l2v3.xml", "-sbml-l2v4.xml", "-sbml-l3v1.xml" };
 			boolean highDistance=false, errorInSimulation=false;
 			for (String sbmlFileType : sbmlFileTypes) {
@@ -316,6 +321,69 @@ public class SimulationTestAutomatic {
 	
 	/**
 	 * 
+	 * @param file
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	private static void testBiomodels(String file) throws FileNotFoundException,
+		IOException {
+		int errors = 0;
+		int nModels = 0;
+		AbstractDESSolver solver = new RosenbrockSolver();
+		
+		for (int modelnr = 48; modelnr <= 48; modelnr++) {
+			System.out.println("Biomodel " + modelnr);
+			Model model = null;
+			try {
+				String modelFile="";
+				if(modelnr<10) {
+					modelFile = file + "BIOMD000000000" + modelnr + ".xml";
+				}
+				else if(modelnr<100) {
+					modelFile = file + "BIOMD00000000" + modelnr + ".xml";
+				}
+				else {
+					modelFile = file + "BIOMD0000000" + modelnr + ".xml";
+				}
+				model = (new SBMLReader()).readSBML(modelFile).getModel();
+			} catch (Exception e) {
+				model = null;
+				logger.warning("Exception while reading Biomodel " + modelnr);
+				errors++;
+			}
+			if (model != null) {
+				solver.reset();
+				try {
+					SBMLinterpreter interpreter = new SBMLinterpreter(model);
+					
+					if ((solver != null) && (interpreter != null)) {
+						solver.setStepSize(0.01);
+						
+						// solve
+						solver.solve(interpreter, interpreter.getInitialValues(), 0, 10);
+						
+						if (solver.isUnstable()) {
+							logger.warning("unstable!");
+							errors++;
+						}
+					}
+				} catch (DerivativeException e) {
+					logger.warning("Exception in Biomodel " + modelnr);
+					errors++;
+				} catch (ModelOverdeterminedException e) {
+					logger.warning("OverdeterminationException in Biomodel " + modelnr);
+					errors++;
+				}
+			}
+			nModels++;
+		}
+		System.out.println("Models: " + nModels);
+		System.out.println("Models with errors in simulation: " + errors);
+		System.out.println("Models with correct simulation: " + (nModels - errors));
+	}
+	
+	/**
+	 * 
 	 * @param model
 	 * @param inputData
 	 * @param timepoints
@@ -340,7 +408,7 @@ public class SimulationTestAutomatic {
 					interpreter.getInitialValues(), inputData.getTimePoints());
 
 			// compute distance
-			QualityMeasure distance = new EuclideanDistance();
+			QualityMeasure distance = new RelativeEuclideanDistance();
 			double dist = distance.distance(solution, inputData);
 			if (solver.isUnstable()) {
 				logger.warning("unstable!");
