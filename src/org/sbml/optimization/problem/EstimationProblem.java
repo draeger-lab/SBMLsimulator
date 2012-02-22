@@ -287,7 +287,6 @@ public class EstimationProblem extends AbstractProblemDouble implements
 					solution = solver.solve(interpreter, initialValues, getTimePoints());
 				}
 			} catch (DerivativeException e) {
-				logger.warning(e.getLocalizedMessage());
 			}
 			
 			fitness[0] = 0d;
