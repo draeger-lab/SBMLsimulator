@@ -26,9 +26,9 @@
         <description>SBMLsimulator - a versatile and efficient simulator and parameter estimator for biological models.</description>
         <description kind="short">SBMLsimulator</description>
         <homepage href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator"/>
-        <icon href="http://cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/img/SBMLsimulator_48.png"/>
-        <icon kind="shortcut" href="http://cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/img/SBMLsimulator_16.png" width="16" height="16"/>
-        <icon kind="splash" href="http://cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/img/Splash.gif"/>
+        <!-- <icon href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/img/SBMLsimulator_48.png"/> -->
+        <!-- <icon kind="shortcut" href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/img/SBMLsimulator_16.png" width="16" height="16"/> -->
+        <icon kind="splash" href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/img/Splash.gif"/>
         <offline-allowed/>
     </information>
     <security>
