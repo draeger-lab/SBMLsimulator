@@ -208,6 +208,7 @@ public class XYBoxAndWhiskerRenderer extends
 	/* (non-Javadoc)
    * @see org.jfree.chart.renderer.xy.XYBoxAndWhiskerRenderer#drawVerticalItem(java.awt.Graphics2D, org.jfree.chart.renderer.xy.XYItemRendererState, java.awt.geom.Rectangle2D, org.jfree.chart.plot.XYPlot, org.jfree.chart.axis.ValueAxis, org.jfree.chart.axis.ValueAxis, org.jfree.data.xy.XYDataset, int, int, boolean, int)
    */
+	@SuppressWarnings("unchecked")
 	protected void drawVerticalItem(Graphics2D g2, XYItemRendererState state,
 		Rectangle2D dataArea, XYPlot plot, ValueAxis domainAxis,
 		ValueAxis rangeAxis, XYDataset dataset, int series, int item,
