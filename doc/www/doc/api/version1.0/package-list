@@ -1,0 +1,8 @@
+org.sbml.optimization
+org.sbml.optimization.problem
+org.sbml.simulator
+org.sbml.simulator.gui
+org.sbml.simulator.gui.plot
+org.sbml.simulator.gui.table
+org.sbml.simulator.io
+org.sbml.simulator.math
