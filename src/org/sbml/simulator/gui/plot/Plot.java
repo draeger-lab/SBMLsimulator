@@ -350,7 +350,7 @@ public class Plot extends ChartPanel implements PreferenceChangeListener {
 			// go through all datasets
 			data = (MetaDataset) plot.getDataset(i);
 			renderer = (AbstractRenderer) plot.getRenderer(i);
-			for (int j = 0; j < items.size(); j++) {
+			for (int j = 0; (j < items.size()) && (data != null); j++) {
 				// look at each item whose state might have changed
 				item = items.get(j);
 				id = item.getId();
