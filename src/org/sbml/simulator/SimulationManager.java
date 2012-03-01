@@ -21,6 +21,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Arrays;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,6 +31,8 @@ import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.simulator.gui.SimulationWorker;
 import org.simulator.math.odes.MultiTable;
 import org.simulator.sbml.SBMLinterpreter;
+
+import de.zbit.util.ResourceManager;
 
 import eva2.tools.math.Mathematics;
 
@@ -247,17 +250,18 @@ public class SimulationManager implements PropertyChangeListener {
    * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
    */
   public void propertyChange(PropertyChangeEvent evt) {
-    if ("progress".equals(evt.getPropertyName())) {
-      this.pcs.firePropertyChange(evt);
-    } else if ("done".equals(evt.getPropertyName())) {
-      solution = simworker.getSolution();
+    if (evt.getPropertyName().equals("progress")) {
+      pcs.firePropertyChange(evt);
+		} else if (evt.getPropertyName().equals("done") && (simworker != null)
+				&& !simworker.isCancelled()) {
       try {
+      	solution = simworker.get();
         computeModelQuality();
       } catch (Exception e) {
         logger.log(Level.WARNING, e.getLocalizedMessage());
       }
-      this.pcs.firePropertyChange(evt);
     }
+    pcs.firePropertyChange(evt);
   }
 
 	/**
@@ -266,7 +270,7 @@ public class SimulationManager implements PropertyChangeListener {
    * @param listener
    */
   public void removePropertyChangeListener(PropertyChangeListener listener) {
-    this.pcs.removePropertyChangeListener(listener);
+    pcs.removePropertyChangeListener(listener);
   }
 
 	/**
@@ -288,6 +292,7 @@ public class SimulationManager implements PropertyChangeListener {
    * @throws Exception
    */
   public void simulateWithoutGUI() throws Exception {
+  	// TODO: The purpose of the SimulationManager is to be independent from any GUI!
   	SBMLinterpreter interpreter = new SBMLinterpreter(simulationConfiguration.getModel());
     solution = SimulationWorker.solveByStepSize(simulationConfiguration.getSolver(), interpreter, interpreter
         .getInitialValues(), simulationConfiguration.getStart(), simulationConfiguration.getEnd(),
@@ -295,7 +300,24 @@ public class SimulationManager implements PropertyChangeListener {
     pcs.firePropertyChange("done", null, solution);
   }
   
-  /* (non-Javadoc)
+  /**
+	 * 
+	 * @return
+	 */
+	public boolean stopSimulation() {
+		ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
+		if (simworker != null) {
+			if (simworker.cancel(true)) {
+				return true;
+			}
+			logger.warning(bundle.getString("SIMULATION_COULD_NOT_BE_CANCELED"));
+		} else {
+			logger.warning(bundle.getString("NO_RUNNING_SIMULATION"));
+		}
+		return false;
+	}
+
+	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

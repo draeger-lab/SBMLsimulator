@@ -456,6 +456,7 @@ private List<PreferenceChangeListener> listOfPreferenceChangeListeners;
 	public void propertyChange(PropertyChangeEvent pEvt) {
 		logger.fine(pEvt.toString());
 		if (pEvt.getPropertyName().equals("done")
+				&& (simulationManager.getDistanceValues() != null)
 				&& (simulationManager.getDistanceValues().length > 0)
 				&& !((pEvt.getNewValue() == null) && (pEvt.getOldValue() == null))
 				&& ((((pEvt.getNewValue() == null) && (pEvt.getOldValue() != null)) || ((pEvt
@@ -469,8 +470,7 @@ private List<PreferenceChangeListener> listOfPreferenceChangeListeners;
 				qualityMeasureField.setEnabled(true);
 				qualityMeasureField.setAlignmentX(RIGHT_ALIGNMENT);
 			}
-		}
-		else if(pEvt.getPropertyName().equals("quality")) {
+		} else if(pEvt.getPropertyName().equals("quality")) {
 			double newValue = (Double)pEvt.getNewValue();
 			qualityMeasureField.setValue(newValue);
 			qualityMeasureField.setText(StringUtil.toString(
