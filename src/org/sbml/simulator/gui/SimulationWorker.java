@@ -129,7 +129,7 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
     SBMLinterpreter interpreter = new SBMLinterpreter(configuration.getModel());
     try {
     	computationThread = Thread.currentThread();
-    	solution = solveByStepSize(configuration.getSolver(), interpreter, interpreter
+    	solution = solveByStepSize(configuration.getSolver().clone(), interpreter, interpreter
     		.getInitialValues(), configuration.getStart(), configuration.getEnd(),
     		configuration.getStepSize(), configuration.isIncludeReactions());   
     	return solution;
