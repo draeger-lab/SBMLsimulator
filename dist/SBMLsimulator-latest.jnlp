@@ -37,7 +37,7 @@
     <resources>
       <!-- Application Resources -->
       <j2se version="1.6+" initial-heap-size="64m" max-heap-size="256m" java-vm-args="-splash:org/sbml/simulator/gui/img/Splash.gif" href="http://java.sun.com/products/autodl/j2se"/>
-      <jar href="SBMLsimulator-0.9-rc1.jar" main="true"/>
+      <jar href="SBMLsimulator-1.0-rc2.jar" main="true"/>
     </resources>
     <application-desc name="SBMLsimulator" main-class="org.sbml.simulator.SBMLsimulator" width="640" height="480"/>
     <update check="background"/>

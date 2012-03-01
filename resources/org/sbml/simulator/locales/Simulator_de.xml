@@ -45,7 +45,7 @@
     
   <!-- EstimationOptions -->
     
-  <entry key="EstimationOptions">Schätzungverfahren</entry>
+  <entry key="EstimationOptions">Schätzverfahren</entry>
   <entry key="EST_ALL_COMPARTMENTS">Kompartimentgrößen</entry>
   <entry key="EST_ALL_COMPARTMENTS_TOOLTIP">Entscheiden Sie, ob alle Kompartimente zur die Schätzung ihrer jeweiligen Kompartimentgrößen des Modells ausgewählt sein sollen.</entry>
   <entry key="EST_ALL_GLOBAL_PARAMETERS">Werte globaler Parameter</entry>
