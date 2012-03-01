@@ -268,11 +268,9 @@ public class SimulationPanel extends JPanel implements
    * @see org.sbml.simulator.math.odes.DESSolver#firePropertyChanged(double, double)
    */
   public void firePropertyChanged(PropertyChangeEvent evt) {
-    if (!this.listeners.isEmpty()) {
-      for (PropertyChangeListener listener : this.listeners) {
-        listener.propertyChange(evt);
-      }
-    }
+  	for (PropertyChangeListener listener : listeners) {
+  		listener.propertyChange(evt);
+  	}
   }
   
   /**
@@ -488,24 +486,32 @@ public class SimulationPanel extends JPanel implements
   }
   
   /* (non-Javadoc)
+	 * @see java.util.prefs.PreferenceChangeListener#preferenceChange(java.util.prefs.PreferenceChangeEvent)
+	 */
+	public void preferenceChange(PreferenceChangeEvent evt) {
+		getSimulationToolPanel().preferenceChange(evt);
+	}
+  
+  /* (non-Javadoc)
    * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
    */
   public void propertyChange(PropertyChangeEvent evt) {
   	logger.fine(evt.getPropertyName());
     if (evt.getPropertyName().equals("progress")) {
-      this.firePropertyChanged(evt);
+      firePropertyChanged(evt);
     } else if (evt.getPropertyName().equals("done")) {
       MultiTable data = (MultiTable) evt.getNewValue();
-      if (data != null) {
-        setSimulationData(data);
-      }
-      try {
-				if (simulationManager.getQualityMeasurement().getMeasurements().size() > 0) {
-					firePropertyChange("quality", getSimulationToolPanel()
-							.getCurrentQuality(), simulationManager.getMeanDistanceValue());
+			if (data != null) {
+				setSimulationData(data);
+				try {
+					if (simulationManager.getQualityMeasurement().getMeasurements().size() > 0) {
+						firePropertyChange("quality", getSimulationToolPanel()
+								.getCurrentQuality(), simulationManager.getMeanDistanceValue());
+					}
+				} catch (Exception exc) {
+					logger.warning(exc.getLocalizedMessage());
 				}
-      } catch (Exception e) {
-      }
+			}
       firePropertyChanged(evt);
     } 
   }
@@ -605,7 +611,7 @@ public class SimulationPanel extends JPanel implements
     // This is on purpose! Otherwise, the CSV save directory would be used for other files also!
     return null;
 	}
-  
+
   /* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrameTab#saveToFile()
 	 */
@@ -634,7 +640,7 @@ public class SimulationPanel extends JPanel implements
     ((SimulationToolPanel) simulationToolPanel.getComponent(0)).setAllEnabled(enabled);
   }
 
-  /**
+	/**
    * @param ids
    */
   public void setSelectedQuantities(String... ids) {
@@ -684,19 +690,22 @@ public class SimulationPanel extends JPanel implements
   public void simulate() throws Exception {
     simulationManager.simulate();
   }
+	
+	/**
+	 * Interrupts a running simulation.
+	 */
+	public boolean stopSimulation() {
+		if (simulationManager != null) {
+			return simulationManager.stopSimulation();
+		}
+		return false;
+	}
 
 	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrameTab#updateButtons(javax.swing.JMenuBar, javax.swing.JToolBar)
 	 */
 	public void updateButtons(JMenuBar menuBar, JToolBar toolbar) {
 		// TODO Auto-generated method stub
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.util.prefs.PreferenceChangeListener#preferenceChange(java.util.prefs.PreferenceChangeEvent)
-	 */
-	public void preferenceChange(PreferenceChangeEvent evt) {
-		getSimulationToolPanel().preferenceChange(evt);
 	}
   
 }

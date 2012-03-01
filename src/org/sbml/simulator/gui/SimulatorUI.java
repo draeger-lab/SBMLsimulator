@@ -113,7 +113,11 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		/**
 		 * Start a new simulation with the current settings.
 		 */
-		SIMULATION_START;
+		SIMULATION_START,
+		/**
+		 * Interrupts a running simulation.
+		 */
+		SIMULATION_STOP;
 
 		/* (non-Javadoc)
 		 * @see de.zbit.gui.ActionCommand#getName()
@@ -165,9 +169,6 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 				UIManager.put(path.substring(0, path.lastIndexOf('.')), new ImageIcon(url));
 			}
 		}
-	}
-
-	static {
 		BasicResourceLoader rl = BasicResourceLoader.instance();
 		byte[] bytes = rl.getBytesFromResourceLocation(EvAInfo.iconLocation, true);
 		UIManager.put("ICON_EVA2", new ImageIcon(Toolkit.getDefaultToolkit().createImage(bytes)));
@@ -200,7 +201,8 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		  }
 		}
 		setIconImages(icons);
-		GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.SIMULATION_START);
+		GUITools.setEnabled(false, getJMenuBar(), toolBar,
+			Command.SIMULATION_START, Command.SIMULATION_STOP);
 		SBProperties props = appConf.getCmdArgs();
 		if (props.containsKey(SimulatorIOOptions.SBML_INPUT_FILE)) {
 			open(new File(props.get(SimulatorIOOptions.SBML_INPUT_FILE).toString()));
@@ -251,9 +253,13 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	protected JMenuItem[] additionalEditMenuItems() {
 		// new ImageIcon(SimulatorUI.class.getResource("img/CAMERA_16.png"))
 		UIManager.put("PLAY_16", new ImageIcon(SimulatorUI.class.getResource("img/PLAY_16.png")));
-		JMenuItem simulation = GUITools.createJMenuItem(
+		UIManager.put("STOP_16", new ImageIcon(SimulatorUI.class.getResource("img/STOP_16.png")));
+		JMenuItem startSimulation = GUITools.createJMenuItem(
 				EventHandler.create(ActionListener.class, this, "simulate"),
 				Command.SIMULATION_START, UIManager.getIcon("PLAY_16"), 'S');
+		JMenuItem stopSimulation = GUITools.createJMenuItem(
+			EventHandler.create(ActionListener.class, this, "stopSimulation"),
+			Command.SIMULATION_STOP, UIManager.getIcon("STOP_16"), false);
 		JMenuItem optimization = GUITools.createJMenuItem(
 				EventHandler.create(ActionListener.class, this, "optimize"),
 				Command.OPTIMIZATION, UIManager.getIcon("ICON_EVA2"), 'O');
@@ -261,7 +267,21 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		JCheckBoxMenuItem item = GUITools.createJCheckBoxMenuItem(
 			Command.SHOW_OPTIONS, simPanel != null ? simPanel.isShowSettingsPanel()
 					: true, simPanel != null, this);
-		return new JMenuItem[] { simulation, optimization, item };
+		return new JMenuItem[] { startSimulation, stopSimulation, optimization, item };
+	}
+	
+	/**
+	 * Cancels a running simulation.
+	 * 
+	 * @return
+	 */
+	public boolean stopSimulation() {
+		if (simPanel != null) {
+			GUITools.setEnabled(false, getJMenuBar(), getJToolBar(), Command.SIMULATION_STOP);
+			GUITools.setEnabled(true, getJMenuBar(), getJToolBar(), Command.SIMULATION_START);
+			return simPanel.stopSimulation();
+		}
+		return false;
 	}
 
 	/* (non-Javadoc)
@@ -567,13 +587,12 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 			AbstractProgressBar memoryBar = this.statusBar.showProgress();
 
 			// TODO: find a better place for this
-			((ProgressBarSwing) memoryBar).getProgressBar().setStringPainted(
-					true);
+			((ProgressBarSwing) memoryBar).getProgressBar().setStringPainted(true);
 
-			int process = (int) Math.round(((Number) evt.getNewValue())
-					.doubleValue());
+			int process = (int) Math.round(((Number) evt.getNewValue()).doubleValue());
 			memoryBar.percentageChanged(process, -1, bundle.getString("COMPUTED"));
 		} else if (evt.getPropertyName().equalsIgnoreCase("done")) {
+			GUITools.setEnabled(false, getJMenuBar(), getJToolBar(), Command.SIMULATION_STOP);
 			if (evt.getNewValue() != null) {
 				statusBar.reset();
 			} else {
@@ -667,6 +686,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
     try {
       logger.info(bundle.getString("LAUNCHING_SIMULATION"));
       GUITools.setEnabled(false, getJMenuBar(), getJToolBar(), Command.SIMULATION_START);
+      GUITools.setEnabled(true, getJMenuBar(), getJToolBar(), Command.SIMULATION_STOP);
       simPanel.addPropertyChangedListener(this);
       simPanel.simulate();
     } catch (Exception exc) {

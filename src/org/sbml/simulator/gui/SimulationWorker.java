@@ -39,6 +39,8 @@ import de.zbit.util.ResourceManager;
 import de.zbit.util.Timer;
 
 /**
+ * Performs a dynamic simulation in background.
+ * 
  * @author Andreas Dr&auml;ger
  * @author Philip Stevens
  * @author Max Zwie&szlig;ele
@@ -117,6 +119,7 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
    * 
    */
   private Timer timer;
+  private Thread computationThread;
   
   /* (non-Javadoc)
    * @see javax.swing.SwingWorker#doInBackground()
@@ -125,13 +128,13 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
   	timer.reset();
     SBMLinterpreter interpreter = new SBMLinterpreter(configuration.getModel());
     try {
+    	computationThread = Thread.currentThread();
     	solution = solveByStepSize(configuration.getSolver(), interpreter, interpreter
     		.getInitialValues(), configuration.getStart(), configuration.getEnd(),
     		configuration.getStepSize(), configuration.isIncludeReactions());   
     	return solution;
-    }
-    catch (DerivativeException e) {
-    	logger.warning(e.getMessage());
+    } catch (DerivativeException exc) {
+    	logger.warning(exc.getLocalizedMessage());
     	return null;
     }
   }
@@ -141,32 +144,34 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
    */
   @Override
   protected void done() {
-  	double time = timer.getAndReset(false);
-  	MultiTable result = null;
-  	String logMessage = null;
-    try {
-    	result = get();
-      firePropertyChange("done", null, result);
-    } catch (InterruptedException e) {
-      logMessage = e.getLocalizedMessage();
-    } catch (ExecutionException e) {     
-    	logMessage = e.getLocalizedMessage();
-    }
-    configuration.getSolver().removePropertyChangeListener(this);
-    if (logMessage != null) {
-    	logger.warning(logMessage);
-    } else if (result != null) {
-    	logger.info(MessageFormat.format(bundle.getString("SIMULATION_TIME"), time));
-    }
+		double time = timer.getAndReset(false);
+  	if (isCancelled()) {
+			if ((computationThread != null) && computationThread.isAlive()
+					&& !computationThread.isInterrupted()) {
+				logger.fine("Thread was not yet interrupted!");
+				computationThread.interrupt();
+			}
+			logger.info(MessageFormat.format(bundle.getString("SIMULATION_CANCELED"), time));
+			firePropertyChange("done", null, null);
+		} else {
+			MultiTable result = null;
+			String logMessage = null;
+			try {
+				result = get();
+				firePropertyChange("done", null, result);
+			} catch (InterruptedException exc) {
+				logMessage = exc.getLocalizedMessage();
+			} catch (ExecutionException exc) {
+				logMessage = exc.getLocalizedMessage();
+			}
+			configuration.getSolver().removePropertyChangeListener(this);
+			if (logMessage != null) {
+				logger.warning(logMessage);
+			} else if (result != null) {
+				logger.info(MessageFormat.format(bundle.getString("SIMULATION_TIME"), time));
+			}
+		}
   }
-
-  /**
-   * 
-   * @return
-   */
-  public MultiTable getSolution() {
-    return solution;
-  } 
   
   /* (non-Javadoc)
    * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)

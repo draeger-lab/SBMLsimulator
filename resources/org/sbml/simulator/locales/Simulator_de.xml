@@ -173,6 +173,11 @@
   <entry key="OPTIMIZE_ALL_TOOLTIP">Betätigen Sie diese Schaltfläche, um alle Elemente der obigen Tabelle auf einmal auszuwählen.</entry>
   <entry key="OPTIMIZE_NONE">Keine auswählen</entry>
   <entry key="OPTIMIZE_NONE_TOOLTIP">Wenn Sie diese Schaltfläche betätigen, werden alle Elemente der obigen Tabelle abgewählt.</entry>
+    
+  <!-- SimulationManager -->
+  
+  <entry key="SIMULATION_COULD_NOT_BE_CANCELED">Die Simulation kann nicht abgebrochen werden.</entry>
+  <entry key="NO_RUNNING_SIMULATION">Derzeit wird keine Simulation durchgeführt, die abgebrochen werden könnte.</entry>
   
   <!-- SimulationOptions -->
   
@@ -233,6 +238,7 @@
   
   <entry key="MODEL_UNSTABLE_EXCEPTION">Eine Simulation konnte nicht durchgeführt werden, weil das Modell instabil ist. Versuchen Sie es bitte nochmals mit einem anderen Lösungsverfahren.</entry>
   <entry key="SIMULATION_TIME">Rechenzeit: {0,number} s</entry>
+  <entry key="SIMULATION_CANCELED">Simulation nach {0,number} s abgebrochen.</entry>
   
   <!-- SimulatorOptions -->
   
@@ -282,6 +288,8 @@
   <entry key="SHOW_OPTIONS_TOOLTIP">Entscheiden Sie, ob die Einstellungsmöglichkeiten für die Simulation angezeigt werden soll.</entry>
   <entry key="SIMULATION_START">Simulation starten</entry>
   <entry key="SIMULATION_START_TOOLTIP">Führt eine dynamische Simulation mit den aktuellen Einstellungen durch.</entry>
+  <entry key="SIMULATION_STOP">Simulation beenden</entry>
+  <entry key="SIMULATION_STOP_TOOLTIP">Bricht eine laufende Simulation ab.</entry>
   <entry key="UNSUPPORTED_FILE_TYPES">Nicht unterstützte Dateitypen</entry>
   <entry key="INFORMATION">Information</entry>
   <entry key="NOTHING_TO_SAVE">Es gibt im Moment nichts abzuspeichern.</entry>
