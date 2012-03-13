@@ -22,7 +22,7 @@ import java.io.Serializable;
 import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.util.StringTools;
 
-import de.zbit.util.ValuePair;
+import de.zbit.util.objectwrapper.ValuePair;
 
 /**
  * <p>

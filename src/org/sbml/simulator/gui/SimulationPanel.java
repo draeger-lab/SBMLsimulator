@@ -47,6 +47,7 @@ import org.jfree.chart.JFreeChart;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.SBMLWriter;
+import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.QualityMeasurement;
 import org.sbml.simulator.SBMLsimulator;
@@ -62,11 +63,11 @@ import org.simulator.math.odes.MultiTable;
 import de.zbit.gui.BaseFrameTab;
 import de.zbit.gui.GUIOptions;
 import de.zbit.gui.GUITools;
-import de.zbit.gui.table.DecimalCellRenderer;
 import de.zbit.gui.table.MultipleTableView;
-import de.zbit.io.CSVOptions;
-import de.zbit.io.CSVWriter;
-import de.zbit.io.SBFileFilter;
+import de.zbit.gui.table.renderer.DecimalCellRenderer;
+import de.zbit.io.csv.CSVOptions;
+import de.zbit.io.csv.CSVWriter;
+import de.zbit.io.filefilter.SBFileFilter;
 import de.zbit.sbml.gui.SBMLModelSplitPane;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
@@ -193,7 +194,8 @@ public class SimulationPanel extends JPanel implements
         double timeEnd = prefs.getDouble(SimulationOptions.SIM_END_TIME);
         double stepSize = prefs.getDouble(SimulationOptions.SIM_STEP_SIZE);
         boolean includeReactions = true;
-        clazz = prefs.get(SimulationOptions.QUALITY_MEASURE);
+        prefs = SBPreferences.getPreferencesFor(EstimationOptions.class);
+        clazz = prefs.get(EstimationOptions.QUALITY_MEASURE);
         QualityMeasure quality = (QualityMeasure) Class.forName(clazz.substring(clazz.indexOf(' ') + 1)).newInstance();
         QualityMeasurement measurement = new QualityMeasurement(quality);
         simulationManager = new SimulationManager(measurement,
@@ -706,6 +708,15 @@ public class SimulationPanel extends JPanel implements
 	 */
 	public void updateButtons(JMenuBar menuBar, JToolBar toolbar) {
 		// TODO Auto-generated method stub
+	}
+
+	/**
+	 * Opens a dialog to print the current plot.
+	 */
+	public void print() {
+		if (visualizationPanel != null) {
+			visualizationPanel.print();
+		}
 	}
   
 }

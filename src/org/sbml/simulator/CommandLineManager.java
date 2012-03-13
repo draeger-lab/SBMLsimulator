@@ -47,8 +47,8 @@ import org.simulator.math.odes.AbstractDESSolver;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.AppConf;
-import de.zbit.io.CSVOptions;
-import de.zbit.io.CSVWriter;
+import de.zbit.io.csv.CSVOptions;
+import de.zbit.io.csv.CSVWriter;
 import de.zbit.util.prefs.SBPreferences;
 import de.zbit.util.prefs.SBProperties;
 import eva2.server.go.individuals.ESIndividualDoubleData;
@@ -177,24 +177,24 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 		}
 
 		double defaultQualityValue;
-		if (props.containsKey(SimulationOptions.QUALITY_DEFAULT_VALUE)) {
+		if (props.containsKey(EstimationOptions.QUALITY_DEFAULT_VALUE)) {
 				defaultQualityValue = Double.valueOf(props
-						.get(SimulationOptions.QUALITY_DEFAULT_VALUE));
+						.get(EstimationOptions.QUALITY_DEFAULT_VALUE));
 			} else {
-				defaultQualityValue = prefs.getDouble(SimulationOptions.QUALITY_DEFAULT_VALUE);
+				defaultQualityValue = prefs.getDouble(EstimationOptions.QUALITY_DEFAULT_VALUE);
 			}
 			
 			double root;
-			if (props.containsKey(SimulationOptions.QUALITY_N_METRIC_ROOT)) {
+			if (props.containsKey(EstimationOptions.QUALITY_N_METRIC_ROOT)) {
 				root = Double.valueOf(props
-						.get(SimulationOptions.QUALITY_N_METRIC_ROOT));
+						.get(EstimationOptions.QUALITY_N_METRIC_ROOT));
 			} else {
-				root = prefs.getDouble(SimulationOptions.QUALITY_N_METRIC_ROOT);
+				root = prefs.getDouble(EstimationOptions.QUALITY_N_METRIC_ROOT);
 			}
 			
 			try {
 				qualityMeasure = (QualityMeasure) Class.forName(
-						prefs.getString(SimulationOptions.QUALITY_MEASURE))
+						prefs.getString(EstimationOptions.QUALITY_MEASURE))
 						.newInstance();
 			} catch (InstantiationException e) {
 				e.printStackTrace();
@@ -214,8 +214,6 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 					((Relative_N_Metric)qualityMeasure).setRoot(root);
 				}
 			}
-			
-			
 
 			Model model = null;
 			try {
@@ -292,98 +290,99 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 		
 	}
 		
-		private void initializeEstimationPreferences() {
-			SBProperties props = appConf.getCmdArgs();
-			if (props.containsKey(SimulatorIOOptions.SBML_OUTPUT_FILE)) {
-				outSBMLFile = props.get(SimulatorIOOptions.SBML_OUTPUT_FILE)
-						.toString();
-			} else {
-				outSBMLFile = openFile.substring(0, openFile.lastIndexOf('.'))
-						+ "_optimized.xml";
-			}
-			SBPreferences prefsEst = SBPreferences.getPreferencesFor(EstimationOptions.class);
-			
-			double initMax, initMin, min, max;
-			if (props.containsKey(EstimationOptions.EST_INIT_MAX_VALUE)) {
-				initMax = Double.valueOf(props.get(EstimationOptions.EST_INIT_MAX_VALUE));
-			}
-			else {
-				initMax = Double.valueOf(prefsEst.get(EstimationOptions.EST_INIT_MAX_VALUE));
-			}
-			
-			if (props.containsKey(EstimationOptions.EST_INIT_MIN_VALUE)) {
-				initMin = Double.valueOf(props.get(EstimationOptions.EST_INIT_MIN_VALUE));
-			}
-			else {
-				initMin = Double.valueOf(prefsEst.get(EstimationOptions.EST_INIT_MIN_VALUE));
-			}
-			
-			if (props.containsKey(EstimationOptions.EST_MAX_VALUE)) {
-				max = Double.valueOf(props.get(EstimationOptions.EST_MAX_VALUE));
-			}
-			else {
-				max = Double.valueOf(prefsEst.get(EstimationOptions.EST_MAX_VALUE));
-			}
-			
-			if (props.containsKey(EstimationOptions.EST_MIN_VALUE)) {
-				min = Double.valueOf(props.get(EstimationOptions.EST_MIN_VALUE));
-			}
-			else {
-				min = Double.valueOf(prefsEst.get(EstimationOptions.EST_MIN_VALUE));
-			}
-			
-			boolean multiShoot;
-			if (props.containsKey(EstimationOptions.EST_MULTI_SHOOT)) {
-				multiShoot = Boolean.valueOf(props.get(EstimationOptions.EST_MULTI_SHOOT));
-			}
-			else {
-				multiShoot = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_MULTI_SHOOT));
-			}
-			
-			boolean allGlobalParameters;
-			if (props.containsKey(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS)) {
-				allGlobalParameters = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS));
-			}
-			else {
-				allGlobalParameters = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS));
-			}
-			
-			boolean allLocalParameters;
-			if (props.containsKey(EstimationOptions.EST_ALL_LOCAL_PARAMETERS)) {
-				allLocalParameters = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_LOCAL_PARAMETERS));
-			}
-			else {
-				allLocalParameters = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_LOCAL_PARAMETERS));
-			}
-			
-			boolean allSpecies=false;
-			if (props.containsKey(EstimationOptions.EST_ALL_SPECIES)) {
-				allSpecies = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_SPECIES));
-			}
-			else {
-				allSpecies = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_SPECIES));
-			}
-			
-			boolean allCompartments = false;
-			if (props.containsKey(EstimationOptions.EST_ALL_COMPARTMENTS)) {
-				allCompartments = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_COMPARTMENTS));
-			}
-			else {
-				allCompartments = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_COMPARTMENTS));
-			}
-			
-			Model clonedModel = simulationManager.getSimulationConfiguration().getModel().clone();
-			try {
-				estimationProblem = new EstimationProblem(simulationManager.getSimulationConfiguration().getSolver(), simulationManager.getQualityMeasurement().getDistance(), clonedModel, simulationManager.getQualityMeasurement().getMeasurements(),
-							multiShoot, createQuantityRanges(clonedModel, allGlobalParameters, allLocalParameters, allSpecies, allCompartments, initMin, initMax, min, max));
-			} catch (SBMLException e) {
-				e.printStackTrace();
-			} catch (ModelOverdeterminedException e) {
-				e.printStackTrace();
-			}
-			
-
-		} 
+	/**
+	 * 
+	 */
+	private void initializeEstimationPreferences() {
+		SBProperties props = appConf.getCmdArgs();
+		if (props.containsKey(SimulatorIOOptions.SBML_OUTPUT_FILE)) {
+			outSBMLFile = props.get(SimulatorIOOptions.SBML_OUTPUT_FILE)
+					.toString();
+		} else {
+			outSBMLFile = openFile.substring(0, openFile.lastIndexOf('.'))
+					+ "_optimized.xml";
+		}
+		SBPreferences prefsEst = SBPreferences.getPreferencesFor(EstimationOptions.class);
+		
+		double initMax, initMin, min, max;
+		if (props.containsKey(EstimationOptions.EST_INIT_MAX_VALUE)) {
+			initMax = Double.valueOf(props.get(EstimationOptions.EST_INIT_MAX_VALUE));
+		}
+		else {
+			initMax = Double.valueOf(prefsEst.get(EstimationOptions.EST_INIT_MAX_VALUE));
+		}
+		
+		if (props.containsKey(EstimationOptions.EST_INIT_MIN_VALUE)) {
+			initMin = Double.valueOf(props.get(EstimationOptions.EST_INIT_MIN_VALUE));
+		}
+		else {
+			initMin = Double.valueOf(prefsEst.get(EstimationOptions.EST_INIT_MIN_VALUE));
+		}
+		
+		if (props.containsKey(EstimationOptions.EST_MAX_VALUE)) {
+			max = Double.valueOf(props.get(EstimationOptions.EST_MAX_VALUE));
+		}
+		else {
+			max = Double.valueOf(prefsEst.get(EstimationOptions.EST_MAX_VALUE));
+		}
+		
+		if (props.containsKey(EstimationOptions.EST_MIN_VALUE)) {
+			min = Double.valueOf(props.get(EstimationOptions.EST_MIN_VALUE));
+		}
+		else {
+			min = Double.valueOf(prefsEst.get(EstimationOptions.EST_MIN_VALUE));
+		}
+		
+		boolean multiShoot;
+		if (props.containsKey(EstimationOptions.EST_MULTI_SHOOT)) {
+			multiShoot = Boolean.valueOf(props.get(EstimationOptions.EST_MULTI_SHOOT));
+		}
+		else {
+			multiShoot = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_MULTI_SHOOT));
+		}
+		
+		boolean allGlobalParameters;
+		if (props.containsKey(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS)) {
+			allGlobalParameters = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS));
+		}
+		else {
+			allGlobalParameters = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS));
+		}
+		
+		boolean allLocalParameters;
+		if (props.containsKey(EstimationOptions.EST_ALL_LOCAL_PARAMETERS)) {
+			allLocalParameters = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_LOCAL_PARAMETERS));
+		}
+		else {
+			allLocalParameters = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_LOCAL_PARAMETERS));
+		}
+		
+		boolean allSpecies=false;
+		if (props.containsKey(EstimationOptions.EST_ALL_SPECIES)) {
+			allSpecies = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_SPECIES));
+		}
+		else {
+			allSpecies = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_SPECIES));
+		}
+		
+		boolean allCompartments = false;
+		if (props.containsKey(EstimationOptions.EST_ALL_COMPARTMENTS)) {
+			allCompartments = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_COMPARTMENTS));
+		}
+		else {
+			allCompartments = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_COMPARTMENTS));
+		}
+		
+		Model clonedModel = simulationManager.getSimulationConfiguration().getModel().clone();
+		try {
+			estimationProblem = new EstimationProblem(simulationManager.getSimulationConfiguration().getSolver(), simulationManager.getQualityMeasurement().getDistance(), clonedModel, simulationManager.getQualityMeasurement().getMeasurements(),
+				multiShoot, createQuantityRanges(clonedModel, allGlobalParameters, allLocalParameters, allSpecies, allCompartments, initMin, initMax, min, max));
+		} catch (SBMLException e) {
+			e.printStackTrace();
+		} catch (ModelOverdeterminedException e) {
+			e.printStackTrace();
+		}
+	}
 
 
 	/**

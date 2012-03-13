@@ -58,11 +58,11 @@ import org.sbml.jsbml.UnitDefinition;
 import org.sbml.optimization.QuantityRange;
 import org.sbml.simulator.gui.table.LegendTableCellRenderer;
 
-import de.zbit.gui.ActionCommand;
 import de.zbit.gui.GUITools;
-import de.zbit.gui.LayoutHelper;
-import de.zbit.gui.table.ColoredBooleanRenderer;
-import de.zbit.gui.table.DecimalCellRenderer;
+import de.zbit.gui.actioncommand.ActionCommand;
+import de.zbit.gui.layout.LayoutHelper;
+import de.zbit.gui.table.renderer.ColoredBooleanRenderer;
+import de.zbit.gui.table.renderer.DecimalCellRenderer;
 import de.zbit.sbml.gui.UnitDefinitionCellRenderer;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;

@@ -30,8 +30,8 @@ import org.sbml.simulator.gui.SimulatorUI;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.gui.GUITools;
-import de.zbit.io.CSVOptions;
-import de.zbit.util.FileTools;
+import de.zbit.io.FileTools;
+import de.zbit.io.csv.CSVOptions;
 import de.zbit.util.prefs.SBPreferences;
 
 /**

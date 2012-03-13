@@ -21,6 +21,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
+import java.util.prefs.PreferenceChangeEvent;
+import java.util.prefs.PreferenceChangeListener;
 
 import org.sbml.jsbml.Model;
 import org.simulator.math.odes.AbstractDESSolver;
@@ -35,7 +37,7 @@ import de.zbit.util.prefs.SBPreferences;
  * @version $Rev$
  * @since 1.0
  */
-public class SimulationConfiguration implements PropertyChangeListener {
+public class SimulationConfiguration implements PropertyChangeListener, PreferenceChangeListener {
   
   /**
    * A {@link Logger} for this class.
@@ -68,9 +70,9 @@ public class SimulationConfiguration implements PropertyChangeListener {
   private double start;
 
 	/**
-   * The step size for the current simulation.
+   * The step size, absolute and relative tolerance for the current simulation.
    */
-  private double stepSize;
+  private double stepSize, absTol, relTol;
     
   /**
    * Creates a new simulation configuration for the simulation of the given
@@ -161,6 +163,14 @@ public class SimulationConfiguration implements PropertyChangeListener {
 	}
   
   /**
+	 * 
+	 * @return
+	 */
+	public double getAbsTol() {
+		return absTol;
+	}
+  
+  /**
    * @return the end
    */
   public double getEnd() {
@@ -175,6 +185,14 @@ public class SimulationConfiguration implements PropertyChangeListener {
   }
   
   /**
+	 * 
+	 * @return
+	 */
+	public double getRelTol() {
+		return relTol;
+	}
+
+	/**
    * @return the solver
    */
   public DESSolver getSolver() {
@@ -187,8 +205,8 @@ public class SimulationConfiguration implements PropertyChangeListener {
   public double getStart() {
     return start;
   }
-
-	/**
+  
+  /**
    * @return the stepSize
    */
   public double getStepSize() {
@@ -221,7 +239,7 @@ public class SimulationConfiguration implements PropertyChangeListener {
   public boolean isIncludeReactions() {
     return includeReactions;
   }
-  
+    
   /**
 	 * 
 	 * @return
@@ -237,8 +255,8 @@ public class SimulationConfiguration implements PropertyChangeListener {
 	public boolean isSetSolver() {
 		return solver != null;
 	}
-    
-  /* (non-Javadoc)
+
+	/* (non-Javadoc)
    * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
    */
   public void propertyChange(PropertyChangeEvent evt) {
@@ -279,6 +297,18 @@ public class SimulationConfiguration implements PropertyChangeListener {
 			
 			includeReactions = ((Boolean) evt.getNewValue()).booleanValue();
 			
+		} else if (property.equals(SimulationOptions.ABS_TOL.toString())) {
+			
+			absTol = ((Double) evt.getNewValue()).doubleValue();
+			prefs.put(SimulationOptions.ABS_TOL, absTol);
+			change = true;
+			
+		} else if (property.equals(SimulationOptions.REL_TOL.toString())) {
+			
+			relTol = ((Double) evt.getNewValue()).doubleValue();
+			prefs.put(SimulationOptions.REL_TOL, relTol);
+			change = true;
+			
 		}
 		
 		if (change) {
@@ -289,8 +319,24 @@ public class SimulationConfiguration implements PropertyChangeListener {
 			}
 		}
 	}
-  
-  /* (non-Javadoc)
+
+	/**
+	 * 
+	 * @param absTol
+	 */
+	public void setAbsTol(double absTol) {
+		this.absTol = absTol;
+	}
+
+	/**
+	 * 
+	 * @param relTol
+	 */
+	public void setRelTol(double relTol) {
+		this.relTol = relTol;
+	}
+	
+	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
@@ -312,6 +358,45 @@ public class SimulationConfiguration implements PropertyChangeListener {
 		sb.append(model);
 		sb.append(']');
 		return sb.toString();
+	}
+
+	/* (non-Javadoc)
+	 * @see java.util.prefs.PreferenceChangeListener#preferenceChange(java.util.prefs.PreferenceChangeEvent)
+	 */
+	public void preferenceChange(PreferenceChangeEvent evt) {
+		String property = evt.getKey();
+		logger.fine(property + "=" + evt.getNewValue());
+
+		if (SimulationOptions.ODE_SOLVER.toString().equals(property)) {
+			try {
+				solver = (DESSolver) Class.forName(evt.getNewValue()).newInstance();
+			} catch (InstantiationException exc) {
+				logger.warning(exc.getLocalizedMessage());
+			} catch (IllegalAccessException exc) {
+				logger.warning(exc.getLocalizedMessage());
+			} catch (ClassNotFoundException exc) {
+				logger.warning(exc.getLocalizedMessage());
+			}
+			
+		} else if (SimulationOptions.SIM_START_TIME.toString().equals(property)) {
+			start = Double.parseDouble(evt.getNewValue());
+			
+		} else if (SimulationOptions.SIM_END_TIME.toString().equals(property)) {
+			end = Double.parseDouble(evt.getNewValue());
+			
+		} else if (SimulationOptions.SIM_STEP_SIZE.toString().equals(property)) {
+			stepSize = Double.parseDouble(evt.getNewValue());
+			
+		} else if (property.equals("includeReactions")) {
+			includeReactions = Boolean.parseBoolean(evt.getNewValue());
+			
+		} else if (property.equals(SimulationOptions.ABS_TOL.toString())) {
+			absTol = Double.parseDouble(evt.getNewValue());
+			
+		} else if (property.equals(SimulationOptions.REL_TOL.toString())) {
+			relTol = Double.parseDouble(evt.getNewValue());
+			
+		}
 	}
   
 }

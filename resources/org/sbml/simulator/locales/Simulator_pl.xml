@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+  <comment>
+	   This configuration describes the names of buttons and menu
+	   items in base graphical user interfaces. To change the configuration
+	   note that the key is the same as the enum type in BaseFrame.BaseAction
+	   and the given value consists of the actual short name and - separated
+	   by a semicolon ";" the corresponding tool tip.
+  </comment>
+  
+  <!-- SimulatorUI -->
+  
+  <entry key="PRINT">Drukuj</entry>
+  
+</properties>

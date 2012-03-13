@@ -35,8 +35,9 @@ import org.simulator.math.odes.AbstractDESSolver;
 
 import de.zbit.AppConf;
 import de.zbit.Launcher;
+import de.zbit.gui.BaseFrame;
 import de.zbit.gui.GUIOptions;
-import de.zbit.io.CSVOptions;
+import de.zbit.io.csv.CSVOptions;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.SBProperties;
 
@@ -337,7 +338,7 @@ public class SBMLsimulator extends Launcher {
 	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#initGUI(de.zbit.AppConf)
 	 */
-	public SimulatorUI initGUI(AppConf appConf) {
+	public BaseFrame initGUI(AppConf appConf) {
 		return new SimulatorUI(appConf);
 	}
 

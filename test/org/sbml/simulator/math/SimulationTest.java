@@ -68,6 +68,7 @@ public class SimulationTest {
 	            (new File(args[1])).getAbsolutePath());
 	    
 			solver.setStepSize(0.1);
+			// TODO: Rel-Tolerance, Abs-Tolerance.
 			MultiTable solution = solver.solve(interpreter, interpreter.getInitialValues(), 0, 10);
 			
 			MultiTable solution1 = solver.solve(interpreter,

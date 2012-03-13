@@ -25,7 +25,7 @@ import org.sbml.simulator.SimulationOptions;
 import org.sbml.simulator.gui.SimulatorUI;
 import org.sbml.simulator.io.SimulatorIOOptions;
 
-import de.zbit.io.CSVOptions;
+import de.zbit.io.csv.CSVOptions;
 import de.zbit.util.prefs.SBProperties;
 
 /**

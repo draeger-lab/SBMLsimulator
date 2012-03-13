@@ -41,6 +41,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.simulator.QualityMeasurement;
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.SimulationConfiguration;
@@ -50,12 +51,12 @@ import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.simulator.math.QualityMeasure;
 import org.simulator.math.odes.AbstractDESSolver;
 
-import de.zbit.gui.ActionCommandRenderer;
 import de.zbit.gui.GUITools;
-import de.zbit.gui.LayoutHelper;
+import de.zbit.gui.actioncommand.ActionCommandRenderer;
+import de.zbit.gui.layout.LayoutHelper;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
-import de.zbit.util.ValuePair;
+import de.zbit.util.objectwrapper.ValuePair;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.SBPreferences;
 
@@ -86,16 +87,16 @@ public class SimulationToolPanel extends JPanel implements ItemListener,
 	 */
 	private static final long serialVersionUID = -6540887561618807199L;
 
-/**
- * 
- */
-private List<PreferenceChangeListener> listOfPreferenceChangeListeners;
+	/**
+	 * 
+	 */
+	private List<PreferenceChangeListener> listOfPreferenceChangeListeners;
 	
 	/**
-		 * Text field to display the quality of a simulation with respect to a given
-		 * data set.
-		 */
-		private JFormattedTextField qualityMeasureField;
+	 * Text field to display the quality of a simulation with respect to a given
+	 * data set.
+	 */
+	private JFormattedTextField qualityMeasureField;
 	
 	/**
 	 * Contains all available quality measure functions and ODE solvers.
@@ -143,7 +144,8 @@ private List<PreferenceChangeListener> listOfPreferenceChangeListeners;
 		this.simulationManager.addPropertyChangeListener(this);
 		SimulationConfiguration simulationConfiguration = simulationManager.getSimulationConfiguration();
 		QualityMeasurement qualityMeasurement = simulationManager.getQualityMeasurement();
-        addPropertyChangeListener(simulationConfiguration);
+		addPreferenceChangeListener(simulationConfiguration);
+		addPropertyChangeListener(simulationConfiguration);
 		addPropertyChangeListener(qualityMeasurement);
 	}
 	
@@ -235,8 +237,8 @@ private List<PreferenceChangeListener> listOfPreferenceChangeListeners;
 			distFunctions,
 			new ActionCommandRenderer(),
 			distFunctions.length > 1,
-			SimulationOptions.QUALITY_MEASURE.toString(),
-			SimulationOptions.QUALITY_MEASURE.getDescription(),
+			EstimationOptions.QUALITY_MEASURE.toString(),
+			EstimationOptions.QUALITY_MEASURE.getDescription(),
 			searchSelectedItem(distFunctions, qualityMeasurement.getDistance()
 					.getClass().getName()), this);
 		qualityMeasureField = new JFormattedTextField();
@@ -245,7 +247,7 @@ private List<PreferenceChangeListener> listOfPreferenceChangeListeners;
 		dSet.add(new JPanel());
 		dSet.add(qualityMeasureField);
 		dPanel.setBorder(BorderFactory.createTitledBorder(
-			' ' + SimulationOptions.QUALITY_MEASURES.getName() + ' '));
+			' ' + EstimationOptions.QUALITY_MEASURES.getName() + ' '));
 		return dPanel;
 	}
 
@@ -358,10 +360,10 @@ private List<PreferenceChangeListener> listOfPreferenceChangeListeners;
 			try {
 				logger.fine(e.getItem().toString() + "\t" + comBox.getName());
 				if (comBox.getName().equals(
-					SimulationOptions.QUALITY_MEASURE.toString())) {
+					EstimationOptions.QUALITY_MEASURE.toString())) {
 					QualityMeasure dist = SBMLsimulator.getAvailableQualityMeasures()[comBox
 							.getSelectedIndex()].getConstructor().newInstance();
-					firePropertyChange(SimulationOptions.QUALITY_MEASURE.toString(),
+					firePropertyChange(EstimationOptions.QUALITY_MEASURE.toString(),
 						simulationManager.getQualityMeasurement().getDistance(), dist);
 					
 				} else if (comBox.getName().equals(
@@ -422,7 +424,7 @@ private List<PreferenceChangeListener> listOfPreferenceChangeListeners;
 		} else if (key.equals(SimulationOptions.ODE_SOLVER.toString())) {
 			solverComboBox.setSelectedIndex(searchSelectedItem(
 				SBMLsimulator.getAvailableSolvers(), evt.getNewValue()));
-		} else if (key.equals(SimulationOptions.QUALITY_MEASURE.toString())) {
+		} else if (key.equals(EstimationOptions.QUALITY_MEASURE.toString())) {
 			qualityMeasureFunctions.setSelectedIndex(searchSelectedItem(
 				SBMLsimulator.getAvailableQualityMeasures(), evt.getNewValue()));
 		
