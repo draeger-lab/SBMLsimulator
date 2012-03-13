@@ -22,6 +22,7 @@ import java.awt.Component;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowListener;
@@ -47,6 +48,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 
 import org.sbml.jsbml.Model;
@@ -60,21 +62,21 @@ import org.sbml.simulator.io.SimulatorIOOptions;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.AppConf;
-import de.zbit.gui.ActionCommand;
 import de.zbit.gui.BaseFrame;
 import de.zbit.gui.GUIOptions;
 import de.zbit.gui.GUITools;
-import de.zbit.gui.ProgressBarSwing;
 import de.zbit.gui.SerialWorker;
-import de.zbit.io.CSVOptions;
-import de.zbit.io.SBFileFilter;
+import de.zbit.gui.actioncommand.ActionCommand;
+import de.zbit.io.csv.CSVOptions;
+import de.zbit.io.filefilter.SBFileFilter;
 import de.zbit.sbml.gui.SBMLReadingTask;
-import de.zbit.util.AbstractProgressBar;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
-import de.zbit.util.ValuePairUncomparable;
+import de.zbit.util.objectwrapper.ValuePairUncomparable;
 import de.zbit.util.prefs.SBPreferences;
 import de.zbit.util.prefs.SBProperties;
+import de.zbit.util.progressbar.AbstractProgressBar;
+import de.zbit.util.progressbar.gui.ProgressBarSwing;
 import eva2.EvAInfo;
 import eva2.client.EvAClient;
 import eva2.tools.BasicResourceLoader;
@@ -117,7 +119,11 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		/**
 		 * Interrupts a running simulation.
 		 */
-		SIMULATION_STOP;
+		SIMULATION_STOP,
+		/**
+		 * Prints the current graph.
+		 */
+		PRINT;
 
 		/* (non-Javadoc)
 		 * @see de.zbit.gui.ActionCommand#getName()
@@ -236,7 +242,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		if (simPanel != null) {
 			simPanel.addExperimentalData(title, data);
 			if (simPanel.getExperimentalData().size() == 1) {
-				GUITools.setEnabled(true, getJMenuBar(), getJToolBar(), Command.OPTIMIZATION);
+				GUITools.setEnabled(true, getJMenuBar(), getJToolBar(), Command.OPTIMIZATION, Command.PRINT);
 			}
 		} else {
 			// reject data files
@@ -247,19 +253,48 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	}
 
 	/* (non-Javadoc)
+	 * @see de.zbit.gui.BaseFrame#additionalFileMenuItems()
+	 */
+	@Override
+	protected JMenuItem[] additionalFileMenuItems() {
+		boolean macOS = GUITools.isMacOSX();
+		int ctr_down = macOS ? InputEvent.META_DOWN_MASK : InputEvent.CTRL_DOWN_MASK;
+		ImageIcon icon = new ImageIcon(SimulatorUI.class.getResource("img/PRINT_16.png"));
+		UIManager.put("PRINT_16", icon);
+		JMenuItem print = GUITools.createJMenuItem(
+			EventHandler.create(ActionListener.class, this, "print"), Command.PRINT,
+			icon, KeyStroke.getKeyStroke('P', ctr_down));
+		print.setEnabled(false);
+		return new JMenuItem[] {print};
+	}
+	
+	/**
+	 * Print the current plot.
+	 */
+	public void print() {
+		if (simPanel != null) {
+			simPanel.print();
+		}
+	}
+
+	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrame#additionalEditMenuItems()
 	 */
 	@Override
 	protected JMenuItem[] additionalEditMenuItems() {
+		ImageIcon icon = new ImageIcon(SimulatorUI.class.getResource("img/PLAY_16.png"));
 		// new ImageIcon(SimulatorUI.class.getResource("img/CAMERA_16.png"))
-		UIManager.put("PLAY_16", new ImageIcon(SimulatorUI.class.getResource("img/PLAY_16.png")));
-		UIManager.put("STOP_16", new ImageIcon(SimulatorUI.class.getResource("img/STOP_16.png")));
+		UIManager.put("PLAY_16", icon);
 		JMenuItem startSimulation = GUITools.createJMenuItem(
 				EventHandler.create(ActionListener.class, this, "simulate"),
-				Command.SIMULATION_START, UIManager.getIcon("PLAY_16"), 'S');
+				Command.SIMULATION_START, icon, 'S');
+		
+		icon = new ImageIcon(SimulatorUI.class.getResource("img/STOP_16.png"));
+		UIManager.put("STOP_16", icon);
 		JMenuItem stopSimulation = GUITools.createJMenuItem(
 			EventHandler.create(ActionListener.class, this, "stopSimulation"),
-			Command.SIMULATION_STOP, UIManager.getIcon("STOP_16"), false);
+			Command.SIMULATION_STOP, icon, false);
+		
 		JMenuItem optimization = GUITools.createJMenuItem(
 				EventHandler.create(ActionListener.class, this, "optimize"),
 				Command.OPTIMIZATION, UIManager.getIcon("ICON_EVA2"), 'O');
@@ -305,7 +340,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 			}
 			if (GUITools.showQuestionMessage(this, message,
 				bundle.getString("CLOSING_MODEL"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-				listOfPrefChangeListeners.remove(simPanel.getSimulationToolPanel());
+				removePreferenceChangeListener(simPanel.getSimulationToolPanel());
 				if (GUITools.contains(getContentPane(), simPanel)) {
 					getContentPane().remove(simPanel);
 				}
@@ -318,7 +353,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 				GUITools.setEnabled(false, getJMenuBar(), toolBar,
 					BaseAction.FILE_CLOSE, BaseAction.FILE_SAVE_AS,
 					Command.SIMULATION_START, Command.SHOW_OPTIONS, Command.OPEN_DATA,
-					Command.OPTIMIZATION);
+					Command.OPTIMIZATION, Command.PRINT);
 				GUITools.setEnabled(true, getJMenuBar(), toolBar, BaseAction.FILE_OPEN);
 				repaint();
 				return true;
@@ -547,7 +582,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 				simPanel.notifyQuantitiesSelected(panel.getSelectedQuantityIds());
 				final WindowListener wl = EventHandler.create(WindowListener.class,
 					this, "optimizationFinished", "source", "windowClosed");
-				final SimulatorUI ui = this;
+				final BaseFrame ui = this;
 				new Thread(new Runnable() {
 					/* (non-Javadoc)
 					 * @see java.lang.Runnable#run()
@@ -599,7 +634,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 				statusBar.percentageChanged(100, 0, "");
 			}
 			GUITools.setEnabled(true, getJMenuBar(), getJToolBar(),
-					BaseAction.FILE_SAVE_AS, Command.SIMULATION_START);
+					BaseAction.FILE_SAVE_AS, Command.SIMULATION_START, Command.PRINT);
 		}
 	}
 

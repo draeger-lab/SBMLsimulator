@@ -20,7 +20,7 @@ package org.sbml.simulator.io;
 import java.io.File;
 import java.util.ResourceBundle;
 
-import de.zbit.io.SBFileFilter;
+import de.zbit.io.filefilter.SBFileFilter;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.Option;

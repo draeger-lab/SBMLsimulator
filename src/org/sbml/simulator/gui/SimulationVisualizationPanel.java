@@ -431,4 +431,13 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 		interactiveScanPanel.updateQuantity(id, value);
 	}
 
+	/**
+	 * 
+	 */
+	public void print() {
+		if (plot != null) {
+			plot.createChartPrintJob();
+		}
+	}
+
 }

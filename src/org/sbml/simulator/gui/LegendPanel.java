@@ -49,12 +49,12 @@ import org.sbml.jsbml.UnitDefinition;
 import org.sbml.simulator.gui.table.LegendTableCellRenderer;
 import org.sbml.simulator.gui.table.LegendTableModel;
 
-import de.zbit.gui.ActionCommand;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.JDropDownButton;
+import de.zbit.gui.actioncommand.ActionCommand;
 import de.zbit.gui.table.ColorEditor;
-import de.zbit.gui.table.ColoredBooleanRenderer;
-import de.zbit.gui.table.JTableTools;
+import de.zbit.gui.table.JTableSearch;
+import de.zbit.gui.table.renderer.ColoredBooleanRenderer;
 import de.zbit.sbml.gui.UnitDefinitionCellRenderer;
 import de.zbit.util.ResourceManager;
 
@@ -260,7 +260,7 @@ public class LegendPanel extends JPanel implements TableModelListener,
 		tab.setDefaultRenderer(UnitDefinition.class, new UnitDefinitionCellRenderer());
 		tab.setDefaultRenderer(Boolean.class, new ColoredBooleanRenderer());
 		tab.getModel().addTableModelListener(this);
-		JTableTools.setQuickSearch(tab);
+		JTableSearch.setQuickSearch(tab);
     //		tab.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
     TableColumnModel colModel = tab.getColumnModel();
     int index[] = new int[] { LegendTableModel.getColumnPlot(),

@@ -57,9 +57,9 @@ import org.sbml.jsbml.util.TreeNodeChangeListener;
 import org.sbml.jsbml.util.compilers.HTMLFormula;
 import org.sbml.simulator.SimulationOptions;
 
-import de.zbit.gui.ActionCommand;
 import de.zbit.gui.GUITools;
-import de.zbit.gui.LayoutHelper;
+import de.zbit.gui.actioncommand.ActionCommand;
+import de.zbit.gui.layout.LayoutHelper;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
 import de.zbit.util.prefs.SBPreferences;

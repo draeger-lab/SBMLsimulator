@@ -68,6 +68,14 @@
   <entry key="OPTIMIZATION_TARGETS_TOOLTIP">Select the default optimization targets.</entry>
   <entry key="OPTIMIZATION_RANGES">Ranges of all optimization targets</entry>
   <entry key="OPTIMIZATION_RANGES_TOOLTIP">Define the initial and absolute ranges of all optimization targets.</entry>
+  <entry key="QUALITY_MEASURE">Evaluation criteria for the model's quality</entry>
+  <entry key="QUALITY_MEASURE_TOOLTIP">This specifies the class name of the default quality function that evaluates the quality of a simulation with respect to given (experimental) data.</entry>
+  <entry key="QUALITY_DEFAULT_VALUE">Default quality value</entry>
+  <entry key="QUALITY_DEFAULT_VALUE_TOOLTIP">The default return value of a quality function that can be used if for some reason a quality cannot be computed. For example, this might avoid a division by zero.</entry>
+  <entry key="QUALITY_N_METRIC_ROOT">N-metric root exponent</entry>
+  <entry key="QUALITY_N_METRIC_ROOT_TOOLTIP">The root parameter in the distance function for n-metrics: in case of the n-norm this is at the same time also the exponent. For instance, the Eulidean distance has a root value of two, whereas the Manhattan norm has a root of one. In the RSE, the default root is also two, but this value may be changed.</entry>
+  <entry key="QUALITY_MEASURES">Quality function</entry>
+  <entry key="QUALITY_MEASURES_TOOLTIP">Here you can specify how to evaluate the quality of a parameter set with respect to given experimental data.</entry>
   <entry key="INTEGRATION_STRATEGY">Integration strategy</entry>
   <entry key="INTEGRATION_STRATEGY_TOOLTIP">Select whether or not to apply a multiple shooting strategy.</entry>
   
@@ -181,6 +189,10 @@
   
   <!-- SimulationOptions -->
   
+  <entry key="ABS_TOL">Absolute tolerance</entry>
+  <entry key="ABS_TOL_TOOLTIP">Allowed absolute vectorial error.</entry>
+  <entry key="REL_TOL">Relative tolerance</entry>
+  <entry key="REL_TOL_TOOLTIP">Allowed relative vectorial error.</entry>
   <entry key="SimulationOptions">Simulation options</entry>
   <entry key="DEFAULT_INIT_COMPARTMENT_SIZE">Initial compartment size</entry>
   <entry key="DEFAULT_INIT_COMPARTMENT_SIZE_TOOLTIP">If not specified the value corresponding to this argument will be used to initialize the size of compartments.</entry>
@@ -190,14 +202,6 @@
   <entry key="DEFAULT_INIT_PARAMETER_VALUE_TOOLTIP">The default initial value that is set for parameters with undefined value.</entry>
   <entry key="DEFAULT_VALUES">Missing values</entry>
   <entry key="DEFAULT_VALUES_TOOLTIP">Decide how to treat the values of compartments, species, and parameters if no initial value has been defined in the model. A missing initial value is to be distinguished from invalid, i.e., NaN, values. Furthermore, the elements may have very diverse the units associated with them. Here it is only possible to define one numeric value for each element group, irrespective of any unit.</entry>
-  <entry key="QUALITY_MEASURE">Evaluation criteria for the model's quality</entry>
-  <entry key="QUALITY_MEASURE_TOOLTIP">This specifies the class name of the default quality function that evaluates the quality of a simulation with respect to given (experimental) data.</entry>
-  <entry key="QUALITY_DEFAULT_VALUE">Default quality value</entry>
-  <entry key="QUALITY_DEFAULT_VALUE_TOOLTIP">The default return value of a quality function that can be used if for some reason a quality cannot be computed. For example, this might avoid a division by zero.</entry>
-  <entry key="QUALITY_N_METRIC_ROOT">N-metric root exponent</entry>
-  <entry key="QUALITY_N_METRIC_ROOT_TOOLTIP">The root parameter in the distance function for n-metrics: in case of the n-norm this is at the same time also the exponent. For instance, the Eulidean distance has a root value of two, whereas the Manhattan norm has a root of one. In the RSE, the default root is also two, but this value may be changed.</entry>
-  <entry key="QUALITY_MEASURES">Quality function</entry>
-  <entry key="QUALITY_MEASURES_TOOLTIP">Here you can specify how to evaluate the quality of a parameter set with respect to given experimental data.</entry>
   <entry key="ODE_SOLVER">Differential equation solver</entry>
   <entry key="ODE_SOLVER_TOOLTIP">This gives the class name of the default solver for Ordinary Differential Equation (ODE) systems. The associated class must implement AbstractDESSolver and must have a constructor without any parameters.</entry>
   <entry key="SIM_START_TIME">Start time</entry>
@@ -260,39 +264,41 @@
   <!-- SimulatorUI -->
   
   <entry key="ABOUT_HTML">html/about.html</entry>
-  <entry key="CANNOT_LAUNCH_EVA2">The optimization tool box EvA2 cannot be launched. This problem occurs whenever this program cannot determine its own location on your local computer. This happens, for instance, if you have started SBMLsimulator as a Java™ Web Start application. In order to be able to invoke any model calibration method, please download the entire program SBMLsimulator and run it locally, e.g., by double clicking on the JAR file. Please have a look into the online help of SBMLsimulator where you can find a direct link to the project's homepage.</entry>
-  <entry key="ERROR_MESSAGE">Error Message</entry>
-  <entry key="LICENSE_HTML">html/License.html</entry>
-  <entry key="ONLINE_HELP_HTML">html/online-help.html</entry>
   <entry key="CAN_ONLY_OPEN_ONE_MODEL_AT_A_TIME">Can only open one model, rejecting the following files:</entry>
+  <entry key="CANNOT_LAUNCH_EVA2">The optimization tool box EvA2 cannot be launched. This problem occurs whenever this program cannot determine its own location on your local computer. This happens, for instance, if you have started SBMLsimulator as a Java™ Web Start application. In order to be able to invoke any model calibration method, please download the entire program SBMLsimulator and run it locally, e.g., by double clicking on the JAR file. Please have a look into the online help of SBMLsimulator where you can find a direct link to the project's homepage.</entry>
   <entry key="CANNOT_OPEN_DATA_WIHTOUT_MODEL">Cannot open data if no model has been opened.</entry>
-  <entry key="UNABLE_TO_OPEN_DATA">Unable to open data</entry>
-  <entry key="SELECT_QUANTITIES_FOR_OPTIMIZATION">Select quantities for optimization</entry>
-  <entry key="COMPUTED">computed</entry>
-  <entry key="LAUNCHING_SIMULATION">Launching simulation</entry>
-  <entry key="RECEIVED_WINDOW_EVENT">Received WindowEvent</entry>
-  <entry key="TOO_MANY_MODEL_FILES">Too many model files</entry>
-  <entry key="COULD_NOT_OPEN_FILES">Could not open the following files:</entry>
   <entry key="CLOSE_MODEL_BEFORE_OPENING_NEXT">The current model must be closed before a new model can be opened.</entry>
   <entry key="CLOSE_MODEL_WITHOUT_SAVING">Close current model and all data without saving?</entry>
   <entry key="CLOSING_MODEL">Closing model</entry>
+  <entry key="COMPUTED">computed</entry>
+  <entry key="COULD_NOT_OPEN_FILES">Could not open the following files:</entry>
   <entry key="COULD_NOT_OPEN_MODEL">Could not open model {0}.</entry>
+  <entry key="ERROR_MESSAGE">Error Message</entry>
   <entry key="FILE_CLOSE">Close model;Closes the currently selected model and all experimental data sets that may be associated with the model.</entry>
   <entry key="FILE_OPEN">Open model;Open a model in SBML format for simulation or parameter optimization.</entry>
+  <entry key="INFORMATION">Information</entry>
+  <entry key="LICENSE_HTML">html/License.html</entry>
+  <entry key="LAUNCHING_SIMULATION">Launching simulation</entry>
+  <entry key="NOTHING_TO_SAVE">There is nothing to be saved at the moment.</entry>
   <entry key="OPEN">Open</entry>
   <entry key="OPEN_TOOLTIP">Open a model or experimental data.</entry>
   <entry key="OPEN_DATA">Load experimental data</entry>
   <entry key="OPEN_DATA_TOOLTIP">Open one ore multiple experimental data sets.</entry>
   <entry key="OPTIMIZATION">Optimization</entry>
   <entry key="OPTIMIZATION_TOOLTIP">Launch the optimization of the quantities in the current model, i.e., fits the model to given experimental data.</entry>
+  <entry key="ONLINE_HELP_HTML">html/online-help.html</entry>
+  <entry key="PRINT">Print</entry>
+  <entry key="PRINT_TOOLTIP">Opens a dialog to print the plot image.</entry>
+  <entry key="RECEIVED_WINDOW_EVENT">Received WindowEvent</entry>
   <entry key="SHOW_OPTIONS">Show options</entry>
   <entry key="SHOW_OPTIONS_TOOLTIP">Decide whether or not to display the options.</entry>
+  <entry key="SELECT_QUANTITIES_FOR_OPTIMIZATION">Select quantities for optimization</entry>
   <entry key="SIMULATION_START">Start simulation</entry>
   <entry key="SIMULATION_START_TOOLTIP">Performs a dynamic simulation run with the current settings.</entry>
   <entry key="SIMULATION_STOP">Stop simulation</entry>
   <entry key="SIMULATION_STOP_TOOLTIP">Interrupts a running simulation.</entry>
+  <entry key="TOO_MANY_MODEL_FILES">Too many model files</entry>
+  <entry key="UNABLE_TO_OPEN_DATA">Unable to open data</entry>
   <entry key="UNSUPPORTED_FILE_TYPES">Unsupported file types</entry>
-  <entry key="INFORMATION">Information</entry>
-  <entry key="NOTHING_TO_SAVE">There is nothing to be saved at the moment.</entry>
   
 </properties>

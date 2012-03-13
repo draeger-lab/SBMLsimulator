@@ -21,7 +21,7 @@ import java.awt.Color;
 import java.io.File;
 import java.util.ResourceBundle;
 
-import de.zbit.io.SBFileFilter;
+import de.zbit.io.filefilter.SBFileFilter;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.Option;
@@ -101,7 +101,7 @@ public interface PlotOptions extends KeyProvider {
 		"SHOW_PLOT_TOOLTIPS", Boolean.class, bundle, Boolean.FALSE);
 	
 	/**
-	 * 
+	 * Plotting panel options
 	 */
 	@SuppressWarnings("unchecked")
 	public static final OptionGroup<Boolean> BASE_OPTIONS = new OptionGroup<Boolean>(
@@ -109,7 +109,7 @@ public interface PlotOptions extends KeyProvider {
 		SHOW_PLOT_TOOLTIPS);
 
 	/**
-	 * 
+	 * Appearance of the plot
 	 */
 	@SuppressWarnings("unchecked")
 	public static final OptionGroup<Color> PLOT_APPEARANCE = new OptionGroup<Color>(

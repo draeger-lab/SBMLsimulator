@@ -42,7 +42,7 @@ import org.sbml.jsbml.UnitDefinition;
 import de.zbit.gui.ColorPalette;
 import de.zbit.sbml.gui.UnitDerivationWorker;
 import de.zbit.util.ResourceManager;
-import de.zbit.util.ValuePair;
+import de.zbit.util.objectwrapper.ValuePair;
 
 /**
  * @author Andreas Dr&auml;ger

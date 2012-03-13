@@ -19,10 +19,21 @@ package org.sbml.optimization.problem;
 
 import java.util.ResourceBundle;
 
+import org.sbml.simulator.SBMLsimulator;
+import org.sbml.simulator.math.EuclideanDistance;
+import org.sbml.simulator.math.ManhattanDistance;
+import org.sbml.simulator.math.N_Metric;
+import org.sbml.simulator.math.RelativeEuclideanDistance;
+import org.sbml.simulator.math.RelativeManhattanDistance;
+import org.sbml.simulator.math.RelativeSquaredError;
+import org.sbml.simulator.math.Relative_N_Metric;
+
 import de.zbit.util.ResourceManager;
+import de.zbit.util.objectwrapper.ValuePairUncomparable;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.Option;
 import de.zbit.util.prefs.OptionGroup;
+import de.zbit.util.prefs.Range;
 
 /**
  * A collection of {@link Option}s to configure the parameter estimation
@@ -131,6 +142,65 @@ public interface EstimationOptions extends KeyProvider {
 	@SuppressWarnings("unchecked")
 	public static final OptionGroup<Boolean> INTEGRATION_STRATEGY = new OptionGroup<Boolean>(
 		"INTEGRATION_STRATEGY", bundle, EST_MULTI_SHOOT);
+	
+	/**
+	 * This specifies the class name of the default distance function that
+	 * evaluates the quality of a simulation with respect to given (experimental)
+	 * data.
+	 */
+	@SuppressWarnings({ "rawtypes" })
+	public static final Option<Class> QUALITY_MEASURE = new Option<Class>(
+			"QUALITY_MEASURE", Class.class, bundle, new Range<Class>(Class.class,
+					SBMLsimulator.getAvailableQualityMeasureClasses()),
+					RelativeSquaredError.class);
+ 
+	/**
+	 * The default return value of a distance function that can be used if for
+	 * some reason a distance cannot be computed.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes"} )
+	public static final Option<Double> QUALITY_DEFAULT_VALUE = new Option<Double>(
+    "QUALITY_DEFAULT_VALUE", Double.class, bundle, Double.valueOf(1E3),
+    new ValuePairUncomparable<Option<Class>, Range<Class>>(
+      QUALITY_MEASURE,
+      new Range<Class>(Class.class, Relative_N_Metric.class)),
+    new ValuePairUncomparable<Option<Class>, Range<Class>>(
+      QUALITY_MEASURE,
+      new Range<Class>(Class.class, RelativeSquaredError.class)),
+    new ValuePairUncomparable<Option<Class>, Range<Class>>(
+      QUALITY_MEASURE,
+      new Range<Class>(Class.class, RelativeEuclideanDistance.class)),
+    new ValuePairUncomparable<Option<Class>, Range<Class>>(
+      QUALITY_MEASURE,
+      new Range<Class>(Class.class, RelativeManhattanDistance.class))
+  );
+  
+  /**
+   * The root parameter in the distance function: in case of the n-norm this is
+   * at the same time also the exponent. For instance, the {@link EuclideanDistance}
+   * distance has a root value of two, whereas the {@link ManhattanDistance} norm has a
+   * root of one. In the {@link RelativeSquaredError}, the default root is also two, but this
+   * value may be changed.
+   */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+  public static final Option<Double> QUALITY_N_METRIC_ROOT = new Option<Double>(
+    "QUALITY_N_METRIC_ROOT", Double.class, bundle, Double.valueOf(3d),
+    new ValuePairUncomparable<Option<Class>, Range<Class>>(QUALITY_MEASURE,
+      new Range<Class>(Class.class, N_Metric.class)),
+    new ValuePairUncomparable<Option<Class>, Range<Class>>(QUALITY_MEASURE,
+      new Range<Class>(Class.class, RelativeSquaredError.class)),
+    new ValuePairUncomparable<Option<Class>, Range<Class>>(QUALITY_MEASURE,
+      new Range<Class>(Class.class, Relative_N_Metric.class)));
+
+	/**
+	 * Here you can specify how to evaluate the quality of a parameter set with
+	 * respect to given experimental data.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static final OptionGroup QUALITY_MEASURES = new OptionGroup(
+		"QUALITY_MEASURES", bundle, QUALITY_MEASURE, QUALITY_DEFAULT_VALUE,
+		QUALITY_N_METRIC_ROOT);
+	
 	
 	/*
 	 * TODO: Select Optimization algorithm and Termination criterion and SBML-output file

@@ -19,18 +19,11 @@ package org.sbml.simulator;
 
 import java.util.ResourceBundle;
 
-import org.sbml.simulator.math.EuclideanDistance;
-import org.sbml.simulator.math.ManhattanDistance;
-import org.sbml.simulator.math.N_Metric;
-import org.sbml.simulator.math.RelativeEuclideanDistance;
-import org.sbml.simulator.math.RelativeManhattanDistance;
-import org.sbml.simulator.math.RelativeSquaredError;
-import org.sbml.simulator.math.Relative_N_Metric;
 import org.simulator.math.odes.AbstractDESSolver;
 import org.simulator.math.odes.RungeKutta_EventSolver;
 
 import de.zbit.util.ResourceManager;
-import de.zbit.util.ValuePairUncomparable;
+import de.zbit.util.objectwrapper.ValuePairUncomparable;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.Option;
 import de.zbit.util.prefs.OptionGroup;
@@ -89,74 +82,37 @@ public interface SimulationOptions extends KeyProvider {
 		"DEFAULT_VALUES", bundle, DEFAULT_INIT_COMPARTMENT_SIZE,
 		DEFAULT_INIT_SPECIES_VALUE, DEFAULT_INIT_PARAMETER_VALUE);
 
-	 /**
-   * This specifies the class name of the default distance function that
-   * evaluates the quality of a simulation with respect to given (experimental)
-   * data.
-   */
-  @SuppressWarnings({ "rawtypes", "unchecked" })
-  public static final Option<Class> QUALITY_MEASURE = new Option<Class>(
-    "QUALITY_MEASURE", Class.class, bundle, new Range<Class>(Class.class,
-      SBMLsimulator.getAvailableQualityMeasureClasses()),
-    RelativeSquaredError.class);
-	
-	/**
-	 * The default return value of a distance function that can be used if for
-	 * some reason a distance cannot be computed.
-	 */
-  @SuppressWarnings({ "unchecked", "rawtypes"} )
-  public static final Option<Double> QUALITY_DEFAULT_VALUE = new Option<Double>(
-    "QUALITY_DEFAULT_VALUE", Double.class, bundle, Double.valueOf(1E3),
-    new ValuePairUncomparable<Option<Class>, Range<Class>>(
-      QUALITY_MEASURE,
-      new Range<Class>(Class.class, Relative_N_Metric.class)),
-    new ValuePairUncomparable<Option<Class>, Range<Class>>(
-      QUALITY_MEASURE,
-      new Range<Class>(Class.class, RelativeSquaredError.class)),
-    new ValuePairUncomparable<Option<Class>, Range<Class>>(
-      QUALITY_MEASURE,
-      new Range<Class>(Class.class, RelativeEuclideanDistance.class)),
-    new ValuePairUncomparable<Option<Class>, Range<Class>>(
-      QUALITY_MEASURE,
-      new Range<Class>(Class.class, RelativeManhattanDistance.class))
-  );
-  
-  /**
-   * The root parameter in the distance function: in case of the n-norm this is
-   * at the same time also the exponent. For instance, the {@link EuclideanDistance}
-   * distance has a root value of two, whereas the {@link ManhattanDistance} norm has a
-   * root of one. In the {@link RelativeSquaredError}, the default root is also two, but this
-   * value may be changed.
-   */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-  public static final Option<Double> QUALITY_N_METRIC_ROOT = new Option<Double>(
-    "QUALITY_N_METRIC_ROOT", Double.class, bundle, Double.valueOf(3d),
-    new ValuePairUncomparable<Option<Class>, Range<Class>>(QUALITY_MEASURE,
-      new Range<Class>(Class.class, N_Metric.class)),
-    new ValuePairUncomparable<Option<Class>, Range<Class>>(QUALITY_MEASURE,
-      new Range<Class>(Class.class, RelativeSquaredError.class)),
-    new ValuePairUncomparable<Option<Class>, Range<Class>>(QUALITY_MEASURE,
-      new Range<Class>(Class.class, Relative_N_Metric.class)));
-
-	/**
-	 * Here you can specify how to evaluate the quality of a parameter set with
-	 * respect to given experimental data.
-	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static final OptionGroup QUALITY_MEASURES = new OptionGroup(
-		"QUALITY_MEASURES", bundle, QUALITY_MEASURE, QUALITY_DEFAULT_VALUE,
-		QUALITY_N_METRIC_ROOT);
-
 	/**
 	 * This gives the class name of the default solver for ordinary differential
 	 * equation systems. The associated class must implement
 	 * {@link AbstractDESSolver} and must have a constructor without any
 	 * parameters.
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes" })
   public static final Option<Class> ODE_SOLVER = new Option<Class>(
     "ODE_SOLVER", Class.class, bundle, new Range<Class>(Class.class,
       SBMLsimulator.getAvailableSolverClasses()), RungeKutta_EventSolver.class);
+	
+	/**
+	 * 
+	 */
+	@SuppressWarnings("rawtypes")
+	public static final ValuePairUncomparable<Option<Class>, Range<Class>> ADAPTIVE_STEP_SIZE_SOLVERS = new ValuePairUncomparable<Option<Class>, Range<Class>>(
+		ODE_SOLVER, new Range<Class>(Class.class, org.simulator.math.odes.AdaptiveStepsizeIntegrator.class));
+
+	/**
+	 * 
+	 */
+	@SuppressWarnings("unchecked")
+	public static final Option<Double> ABS_TOL = new Option<Double>("ABS_TOL",
+		Double.class, bundle, Double.valueOf(1E-10d), ADAPTIVE_STEP_SIZE_SOLVERS);
+	
+	/**
+	 * 
+	 */
+	@SuppressWarnings("unchecked")
+	public static final Option<Double> REL_TOL = new Option<Double>("REL_TOL",
+		Double.class, bundle, Double.valueOf(1E-6d), ADAPTIVE_STEP_SIZE_SOLVERS);
 	
 	/**
 	 * With the associated non-negative double number that has to be greater than
@@ -171,7 +127,6 @@ public interface SimulationOptions extends KeyProvider {
 	 * zero. Generally, any start time would be possible. This is why this key
 	 * exists. But SBML is defined to start its simulation at the time zero.
 	 */
-  @SuppressWarnings("unchecked")
   public static final Option<Double> SIM_START_TIME = new Option<Double>(
     "SIM_START_TIME", Double.class, bundle, new Range<Double>(Double.class,
       "{[0, 1E5]}"), Double.valueOf(0d));
@@ -189,7 +144,7 @@ public interface SimulationOptions extends KeyProvider {
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static final OptionGroup SIMULATION_CONFIGURATION = new OptionGroup(
-		"SIMULATION_CONFIGURATION", bundle, ODE_SOLVER, SIM_START_TIME,
-		SIM_END_TIME, SIM_STEP_SIZE);
+		"SIMULATION_CONFIGURATION", bundle, ODE_SOLVER, ABS_TOL, REL_TOL,
+		SIM_START_TIME, SIM_END_TIME, SIM_STEP_SIZE);
 
 }

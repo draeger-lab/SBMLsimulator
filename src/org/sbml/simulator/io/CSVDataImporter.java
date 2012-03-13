@@ -35,7 +35,7 @@ import org.simulator.math.odes.MultiTable;
 
 import de.zbit.gui.csv.CSVImporterV2;
 import de.zbit.gui.csv.ExpectedColumn;
-import de.zbit.io.CSVReader;
+import de.zbit.io.csv.CSVReader;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
 

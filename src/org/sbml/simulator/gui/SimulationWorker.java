@@ -30,6 +30,7 @@ import org.apache.commons.math.ode.DerivativeException;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.simulator.SimulationConfiguration;
+import org.simulator.math.odes.AdaptiveStepsizeIntegrator;
 import org.simulator.math.odes.DESSolver;
 import org.simulator.math.odes.DESystem;
 import org.simulator.math.odes.MultiTable;
@@ -69,17 +70,24 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
    * @param timeEnd
    * @param stepSize
    * @param includeReactions
+   * @param absTol ignored if solver is not an instance of {@link AdaptiveStepsizeIntegrator}
+   * @param relTol ignored if solver is not an instance of {@link AdaptiveStepsizeIntegrator}
    * @return
    * @throws SBMLException
-   * @throws IntegrationException
+   * @throws DerivativeException
    */
   public static MultiTable solveByStepSize(DESSolver solver, DESystem system, double[] initialValues, double timeStart,
-    double timeEnd, double stepSize, boolean includeReactions)
+    double timeEnd, double stepSize, boolean includeReactions, double absTol, double relTol)
       throws SBMLException,
       DerivativeException {
     
     solver.setStepSize(stepSize);
     solver.setIncludeIntermediates(includeReactions);
+    if (solver instanceof AdaptiveStepsizeIntegrator) {
+    	AdaptiveStepsizeIntegrator integrator = (AdaptiveStepsizeIntegrator) solver;
+    	integrator.setAbsTol(absTol);
+    	integrator.setRelTol(relTol);
+    }
     MultiTable solution = solver.solve(system, initialValues, timeStart, timeEnd);
 
     if (solver.isUnstable()) {
@@ -129,9 +137,11 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
     SBMLinterpreter interpreter = new SBMLinterpreter(configuration.getModel());
     try {
     	computationThread = Thread.currentThread();
-    	solution = solveByStepSize(configuration.getSolver().clone(), interpreter, interpreter
-    		.getInitialValues(), configuration.getStart(), configuration.getEnd(),
-    		configuration.getStepSize(), configuration.isIncludeReactions());   
+			solution = solveByStepSize(configuration.getSolver().clone(),
+				interpreter, interpreter.getInitialValues(), configuration.getStart(),
+				configuration.getEnd(), configuration.getStepSize(),
+				configuration.isIncludeReactions(), configuration.getAbsTol(),
+				configuration.getRelTol());   
     	return solution;
     } catch (DerivativeException exc) {
     	logger.warning(exc.getLocalizedMessage());

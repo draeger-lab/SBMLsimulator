@@ -68,6 +68,14 @@
   <entry key="OPTIMIZATION_TARGETS_TOOLTIP">Wählen Sie die voreingestellten Optimierungsziele aus.</entry>
   <entry key="OPTIMIZATION_RANGES">Wertebereiche aller Optimierungsziele</entry>
   <entry key="OPTIMIZATION_RANGES_TOOLTIP">Definieren Sie die Bereiche, in denen zu schätzende Größen initialisiert werden und außerdem die Bereiche, für die endgültigen Schätzwerte.</entry>
+  <entry key="QUALITY_MEASURE">Bewertungsfunktion der Modellqualität</entry>
+  <entry key="QUALITY_MEASURE_TOOLTIP">Diese Einstellungen ermöglichen es, festzulegen, wie die Qualität eines Parametersatzes bezüglich gegebener experimenteller Daten zu bewerten ist.</entry>
+  <entry key="QUALITY_DEFAULT_VALUE">Voreingestelter Qualitätswert</entry>
+  <entry key="QUALITY_DEFAULT_VALUE_TOOLTIP">Der voreingestellte Rückgabewert der Qualitätsfunktion, der in solchen Fällen genutzt werden kann, falls es aus irgendwelchen Gründen nicht möglich ist, einen wahren Qualitätswert zu berechen. Ein Beispiel dafür kann sein, dass eine Division durch Null verhindert wird.</entry>
+  <entry key="QUALITY_N_METRIC_ROOT">N-Metrik Wurzelexponent</entry>
+  <entry key="QUALITY_N_METRIC_ROOT_TOOLTIP">Der Wurzelparameter der Distanzfunktion für die n-Metrik: Im Fall der n-Norm nimmt dieser den gleichen Wert wie der Exponent an. Beispielsweise kann die eulidische Distanz mit einem Wurzelexponenten von zwei erhalten werden, wohingegen die Manhattan-Norm einen Exponenten von eins besitzt. Der relative quadratische Fehler hat ebenfalls einen Wurzelexponenten von zwei. Dieser Wert kann jedoch verändert werden.</entry>
+  <entry key="QUALITY_MEASURES">Bewertungsfunktion</entry>
+  <entry key="QUALITY_MEASURES_TOOLTIP">Mit dieser Option können Sie festlegen, wie die Qualität eines Parametersets bezüglich gegebener experimenteller Daten ermittelt werden soll.</entry>
   <entry key="INTEGRATION_STRATEGY">Integrationsstrategie</entry>
   <entry key="INTEGRATION_STRATEGY_TOOLTIP">Wählen Sie, ob das Differentialgleichungssystem nur ein einziges Mal, oder wiederholt initialisiert werden soll.</entry>
  
@@ -181,6 +189,10 @@
   
   <!-- SimulationOptions -->
   
+  <entry key="ABS_TOL">Absolute Toleranz</entry>
+  <entry key="ABS_TOL_TOOLTIP">Erlaubter absoluter vectorieller Fehler.</entry>
+  <entry key="REL_TOL">Relative Toleranz</entry>
+  <entry key="REL_TOL_TOOLTIP">Erlaubter relativer vectorieller Fehler.</entry>
   <entry key="SimulationOptions">Dynamische Simulation</entry>
   <entry key="DEFAULT_INIT_COMPARTMENT_SIZE">Anfangswert der Kompartimentgröße</entry>
   <entry key="DEFAULT_INIT_COMPARTMENT_SIZE_TOOLTIP">Falls nicht anders spezifiziert, wird der hier angegebene Wert dafür genutzt, um Kompartimentgrößen zu initialisieren.</entry>
@@ -190,14 +202,6 @@
   <entry key="DEFAULT_INIT_PARAMETER_VALUE_TOOLTIP">Der Wert, der als Anfangswert von Parametern genutzt wird, deren Werte nicht spezifiziert sind.</entry>
   <entry key="DEFAULT_VALUES">Fehlende Werte</entry>
   <entry key="DEFAULT_VALUES_TOOLTIP">Legen Sie die Zahlenwerte fest, mit welchen fehlende Anfangswerte von Kompartimenten, Spezies und Parametern ersetzt werden sollen. Dabei muss beachtet werden, dass der Wert nur dann als fehlend angesehen wird, wenn tatsächlich kein Wert definiert ist (im Gegensatz zu ungültigen Werten). Weiterhin kann die Einheit je nach Größe unterschiedlich sein. Hier kann nur jeweils ein einheitlicher Zahlenwert pro Modellkomponente festgelegt werden.</entry>
-  <entry key="QUALITY_MEASURE">Bewertungsfunktion der Modellqualität</entry>
-  <entry key="QUALITY_MEASURE_TOOLTIP">Diese Einstellungen ermöglichen es, festzulegen, wie die Qualität eines Parametersatzes bezüglich gegebener experimenteller Daten zu bewerten ist.</entry>
-  <entry key="QUALITY_DEFAULT_VALUE">Voreingestelter Qualitätswert</entry>
-  <entry key="QUALITY_DEFAULT_VALUE_TOOLTIP">Der voreingestellte Rückgabewert der Qualitätsfunktion, der in solchen Fällen genutzt werden kann, falls es aus irgendwelchen Gründen nicht möglich ist, einen wahren Qualitätswert zu berechen. Ein Beispiel dafür kann sein, dass eine Division durch Null verhindert wird.</entry>
-  <entry key="QUALITY_N_METRIC_ROOT">N-Metrik Wurzelexponent</entry>
-  <entry key="QUALITY_N_METRIC_ROOT_TOOLTIP">Der Wurzelparameter der Distanzfunktion für die n-Metrik: Im Fall der n-Norm nimmt dieser den gleichen Wert wie der Exponent an. Beispielsweise kann die eulidische Distanz mit einem Wurzelexponenten von zwei erhalten werden, wohingegen die Manhattan-Norm einen Exponenten von eins besitzt. Der relative quadratische Fehler hat ebenfalls einen Wurzelexponenten von zwei. Dieser Wert kann jedoch verändert werden.</entry>
-  <entry key="QUALITY_MEASURES">Bewertungsfunktion</entry>
-  <entry key="QUALITY_MEASURES_TOOLTIP">Mit dieser Option können Sie festlegen, wie die Qualität eines Parametersets bezüglich gegebener experimenteller Daten ermittelt werden soll.</entry>
   <entry key="ODE_SOLVER">Differentialgleichungslöser</entry>
   <entry key="ODE_SOLVER_TOOLTIP">Wählen Sie einen Löser für gewöhnliche Differentialgleichungssysteme (gDGS). Die gegebenen Klase muss AbstractDESSolver erweitern und einen leeren Konstruktor besitzen.</entry>
   <entry key="SIM_START_TIME">Anfangszeit</entry>
@@ -284,6 +288,8 @@
   <entry key="OPEN_DATA_TOOLTIP">Öffnet einen oder mehrere experimentelle Datensätze.</entry>
   <entry key="OPTIMIZATION">Optimierung</entry>
   <entry key="OPTIMIZATION_TOOLTIP">Leitet die Optimierung ausgwählter Modellkomponenten ein. Das heißt, das simulierte Modell wird an gegebene experimentelle Daten angepasst.</entry>
+  <entry key="PRINT">Drucken</entry>
+  <entry key="PRINT_TOOLTIP">Öffnet einen Dialog, um das Diagramm zu drucken.</entry>
   <entry key="SHOW_OPTIONS">Zeige Simulationswerkzeuge</entry>
   <entry key="SHOW_OPTIONS_TOOLTIP">Entscheiden Sie, ob die Einstellungsmöglichkeiten für die Simulation angezeigt werden soll.</entry>
   <entry key="SIMULATION_START">Simulation starten</entry>

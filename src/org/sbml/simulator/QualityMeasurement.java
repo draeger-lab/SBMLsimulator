@@ -22,6 +22,7 @@ import java.beans.PropertyChangeListener;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.simulator.math.EuclideanDistance;
 import org.sbml.simulator.math.N_Metric;
 import org.sbml.simulator.math.QualityMeasure;
@@ -189,23 +190,23 @@ public class QualityMeasurement implements PropertyChangeListener {
   public void propertyChange(PropertyChangeEvent evt) {
     String property = evt.getPropertyName();
     SBPreferences prefs = SBPreferences
-        .getPreferencesFor(SimulationOptions.class);
+        .getPreferencesFor(EstimationOptions.class);
     
-    if (SimulationOptions.QUALITY_MEASURE.toString().equals(property)) {
+    if (EstimationOptions.QUALITY_MEASURE.toString().equals(property)) {
       distance = (QualityMeasure) evt.getNewValue();
       // TODO: Consider creating a new interface that provides a setRoot method.
       if (distance instanceof N_Metric) {
         if(!(distance instanceof EuclideanDistance)) {
           ((N_Metric) distance).setRoot(prefs
-              .getDouble(SimulationOptions.QUALITY_N_METRIC_ROOT));
+              .getDouble(EstimationOptions.QUALITY_N_METRIC_ROOT));
         }
       } else if (distance instanceof Relative_N_Metric) {
           if(!(distance instanceof RelativeEuclideanDistance)) {
             ((Relative_N_Metric) distance).setRoot(prefs
-              .getDouble(SimulationOptions.QUALITY_N_METRIC_ROOT));
+              .getDouble(EstimationOptions.QUALITY_N_METRIC_ROOT));
           }
       }
-      prefs.put(SimulationOptions.QUALITY_MEASURE, distance.getClass()
+      prefs.put(EstimationOptions.QUALITY_MEASURE, distance.getClass()
           .getName());
       
     } else if ("measurements".equals(property)) {
