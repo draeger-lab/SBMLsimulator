@@ -159,7 +159,7 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 				.getPreferencesFor(SimulationOptions.class);
 		QualityMeasure qualityMeasure = null;
 		SimulationConfiguration simulationConfiguration;
-		double simEndTime, simStepSize;
+		double simEndTime, simStepSize, absTol, relTol;
 		SBProperties props = appConf.getCmdArgs();
 
 		if (props.containsKey(SimulationOptions.SIM_END_TIME)) {
@@ -259,8 +259,22 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 				defaultParameterValue=Double.valueOf(prefs.get(SimulationOptions.DEFAULT_INIT_PARAMETER_VALUE));
 			}
 			
+			if (props.containsKey(SimulationOptions.ABS_TOL)) {
+				absTol = Double.valueOf(props.get(SimulationOptions.ABS_TOL));
+			}
+			else {
+				absTol = Double.valueOf(prefs.get(SimulationOptions.ABS_TOL));
+			}
+			
+			if (props.containsKey(SimulationOptions.REL_TOL)) {
+				relTol = Double.valueOf(props.get(SimulationOptions.REL_TOL));
+			}
+			else {
+				relTol = Double.valueOf(prefs.get(SimulationOptions.REL_TOL));
+			}
+			
 			simulationConfiguration = new SimulationConfiguration(model,
-					solver, 0, simEndTime, simStepSize, false);
+					solver, 0, simEndTime, simStepSize, false, absTol, relTol);
 
 			QualityMeasurement measurement = null;
 			if (timeSeriesFile != null) {
