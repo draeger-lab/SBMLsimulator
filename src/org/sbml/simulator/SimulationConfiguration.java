@@ -26,6 +26,7 @@ import java.util.prefs.PreferenceChangeListener;
 
 import org.sbml.jsbml.Model;
 import org.simulator.math.odes.AbstractDESSolver;
+import org.simulator.math.odes.AdaptiveStepsizeIntegrator;
 import org.simulator.math.odes.DESSolver;
 
 import de.zbit.util.prefs.SBPreferences;
@@ -86,6 +87,8 @@ public class SimulationConfiguration implements PropertyChangeListener, Preferen
     this.end = 0d;
     this.stepSize = 0d;
     this.includeReactions = true;
+    this.absTol = Double.NaN;
+    this.relTol = Double.NaN;
     this.solver = null;
   }
   
@@ -102,13 +105,15 @@ public class SimulationConfiguration implements PropertyChangeListener, Preferen
    * @param includeReactions
    */
   public SimulationConfiguration(Model model, DESSolver solver,
-    double timeStart, double timeEnd, double stepSize, boolean includeReactions) {
+    double timeStart, double timeEnd, double stepSize, boolean includeReactions, double absTol, double relTol) {
     this(model);
     this.solver = solver;
     this.start = timeStart;
     this.end = timeEnd;
     this.stepSize = stepSize;
     this.includeReactions = includeReactions;
+    this.absTol = absTol;
+    this.relTol = relTol;
   }
   
   /**
@@ -118,7 +123,7 @@ public class SimulationConfiguration implements PropertyChangeListener, Preferen
    */
 	public SimulationConfiguration(SimulationConfiguration sc) {
 		this(sc.getModel(), sc.getSolver(), sc.getStart(), sc.getEnd(), sc
-				.getStepSize(), sc.isIncludeReactions());
+				.getStepSize(), sc.isIncludeReactions(), sc.getAbsTol(), sc.getRelTol());
 	}
   
   /* (non-Javadoc)
@@ -156,6 +161,11 @@ public class SimulationConfiguration implements PropertyChangeListener, Preferen
 		  equal &= isSetSolver() == conf.isSetSolver();
 		  if (equal && isSetSolver()) {
 		  	equal &= solver.equals(conf.getSolver());
+		  	
+		  	if(equal && (solver instanceof AdaptiveStepsizeIntegrator)) {
+		  		equal &= absTol == conf.getAbsTol();
+		  		equal &= relTol == conf.getRelTol();
+		  	}
 		  }
 		  return equal;
 		}
