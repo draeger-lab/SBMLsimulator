@@ -119,7 +119,6 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
    */
   public SimulationWorker(SimulationConfiguration configuration) throws Exception {
     this.configuration = configuration;
-    this.configuration.getSolver().addPropertyChangeListener(this);
     this.timer = new Timer();
   }
   
@@ -137,7 +136,9 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
     SBMLinterpreter interpreter = new SBMLinterpreter(configuration.getModel());
     try {
     	computationThread = Thread.currentThread();
-			solution = solveByStepSize(configuration.getSolver().clone(),
+    	DESSolver solver = configuration.getSolver().clone();
+    	solver.addPropertyChangeListener(this);
+			solution = solveByStepSize(solver,
 				interpreter, interpreter.getInitialValues(), configuration.getStart(),
 				configuration.getEnd(), configuration.getStepSize(),
 				configuration.isIncludeReactions(), configuration.getAbsTol(),

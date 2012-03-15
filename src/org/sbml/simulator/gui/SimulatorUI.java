@@ -620,19 +620,16 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	public void propertyChange(PropertyChangeEvent evt) {
 		if (evt.getPropertyName().equalsIgnoreCase("progress")) {
 			AbstractProgressBar memoryBar = this.statusBar.showProgress();
-
+			ProgressBarSwing progressBar = (ProgressBarSwing) memoryBar;
 			// TODO: find a better place for this
-			((ProgressBarSwing) memoryBar).getProgressBar().setStringPainted(true);
+			progressBar.getProgressBar().setStringPainted(true);
 
 			int process = (int) Math.round(((Number) evt.getNewValue()).doubleValue());
 			memoryBar.percentageChanged(process, -1, bundle.getString("COMPUTED"));
 		} else if (evt.getPropertyName().equalsIgnoreCase("done")) {
 			GUITools.setEnabled(false, getJMenuBar(), getJToolBar(), Command.SIMULATION_STOP);
-			if (evt.getNewValue() != null) {
-				statusBar.reset();
-			} else {
-				statusBar.percentageChanged(100, 0, "");
-			}
+			statusBar.showProgress().finished();
+			statusBar.hideProgress();
 			GUITools.setEnabled(true, getJMenuBar(), getJToolBar(),
 					BaseAction.FILE_SAVE_AS, Command.SIMULATION_START, Command.PRINT);
 		}
