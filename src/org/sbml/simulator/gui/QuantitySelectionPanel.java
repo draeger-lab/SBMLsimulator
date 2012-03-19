@@ -28,7 +28,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
-import java.util.regex.PatternSyntaxException;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -42,8 +41,6 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.UIManager;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -61,6 +58,7 @@ import org.sbml.simulator.gui.table.LegendTableCellRenderer;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.actioncommand.ActionCommand;
 import de.zbit.gui.layout.LayoutHelper;
+import de.zbit.gui.table.AbstractDocumentFilterListener;
 import de.zbit.gui.table.renderer.ColoredBooleanRenderer;
 import de.zbit.gui.table.renderer.DecimalCellRenderer;
 import de.zbit.sbml.gui.UnitDefinitionCellRenderer;
@@ -79,20 +77,13 @@ import de.zbit.util.StringUtil;
 public class QuantitySelectionPanel extends JPanel implements ActionListener {
   
   /**
+	 * A helpful class to filter the content of a {@link TableModel}.
 	 * 
 	 * @author Andreas Dr&auml;ger
 	 * @version $Rev$
 	 * @since 1.0
 	 */
-	private class DocumentFilterListener<M extends TableModel> implements DocumentListener {
-		/**
-		 * 
-		 */
-		private JTextComponent tf;
-		/**
-		 * 
-		 */
-		private TableRowSorter<M> sorter;
+	private class DocumentFilterListener<M extends TableModel> extends AbstractDocumentFilterListener<M> {
 		
 		/**
 		 * 
@@ -101,45 +92,16 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		 * @param sorter
 		 */
 		public DocumentFilterListener(JTextComponent tf, TableRowSorter<M> sorter) {
-			this.tf = tf;
-			this.sorter = sorter;
+			super(tf, sorter);
 		}
-		
+
 		/* (non-Javadoc)
-		 * @see javax.swing.event.DocumentListener#changedUpdate(javax.swing.event.DocumentEvent)
+		 * @see de.zbit.gui.table.AbstractDocumentFilterListener#createFilter(java.lang.String)
 		 */
-		public void changedUpdate(DocumentEvent e) {
-			filter();
+		protected RowFilter<M, Object> createFilter(String text) throws Exception {
+			return RowFilter.regexFilter(text, 1);
 		}
-		
-		/**
-	   * Update the row filter regular expression from the expression in
-	   * the text box.
-	   */
-	  private void filter() {
-	      RowFilter<M, Object> rf = null;
-	      // If current expression doesn't parse, don't update.
-	      try {
-	      	rf = RowFilter.regexFilter(tf.getText(), 1);
-	      } catch (PatternSyntaxException exc) {
-	      	return;
-	      }
-	      sorter.setRowFilter(rf);
-	  }
-		
-		/* (non-Javadoc)
-		 * @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event.DocumentEvent)
-		 */
-		public void insertUpdate(DocumentEvent e) {
-			filter();
-		}
-		
-	  /* (non-Javadoc)
-		 * @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event.DocumentEvent)
-		 */
-		public void removeUpdate(DocumentEvent e) {
-			filter();
-		}
+
 	}
 	
   /**
@@ -459,8 +421,8 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	public QuantitySelectionPanel(Model model) {
 		super();
 		this.model = model;
-		quantityBlocks = new QuantityRange[model.getNumSymbols()
-				+ model.getNumLocalParameters()];
+		quantityBlocks = new QuantityRange[model.getSymbolCount()
+				+ model.getLocalParameterCount()];
 		// One button each for every group of elements
 		selectAllButtons = new JButton[4];
 		deselectAllButtons = new JButton[4];
@@ -468,33 +430,33 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		tabs = new JTabbedPane();
 		int curr = 0;
 		tabs.addTab(bundle.getString("COMPARTMENTS"), createQuantityPanel(model.getListOfCompartments(), curr, 0));
-		curr += model.getNumCompartments();
+		curr += model.getCompartmentCount();
 		tabs.addTab(bundle.getString("SPECIES"), createQuantityPanel(model.getListOfSpecies(), curr, 1));
-		curr += model.getNumSpecies();
+		curr += model.getSpeciesCount();
 		JPanel quantityPanel = createQuantityPanel(model.getListOfParameters(), curr, 2);
 		tabs.addTab(bundle.getString("GLOBAL_PARAMETERS"), quantityPanel);
-		curr += model.getNumParameters();
+		curr += model.getParameterCount();
 		tabs.addTab(bundle.getString("LOCAL_PARAMETERS"), createLocalParameterTab(model));
 		
 		/*
 		 * Enable tabs with selectable elements and disable all others.
 		 */
-		tabs.setEnabledAt(3, model.getNumLocalParameters() > 0);
+		tabs.setEnabledAt(3, model.getLocalParameterCount() > 0);
 		tabs.setToolTipTextAt(
 			3,
 			StringUtil.toHTMLMessageToolTip(bundle.getString("TAB_TOOL_TIP"),
 			bundle.getString("LOCAL_PARAMETERS")));
-		tabs.setEnabledAt(2, model.getNumParameters() > 0);
+		tabs.setEnabledAt(2, model.getParameterCount() > 0);
 		tabs.setToolTipTextAt(
 			2,
 			StringUtil.toHTMLMessageToolTip(bundle.getString("TAB_TOOL_TIP"),
 			bundle.getString("GLOBAL_PARAMETERS")));
-		tabs.setEnabledAt(1, model.getNumSpecies() > 0);
+		tabs.setEnabledAt(1, model.getSpeciesCount() > 0);
 		tabs.setToolTipTextAt(
 			1,
 			StringUtil.toHTMLMessageToolTip(bundle.getString("TAB_TOOL_TIP"),
 			bundle.getString("SPECIES")));
-		tabs.setEnabledAt(0, model.getNumCompartments() > 0);
+		tabs.setEnabledAt(0, model.getCompartmentCount() > 0);
 		tabs.setToolTipTextAt(
 			0,
 			StringUtil.toHTMLMessageToolTip(bundle.getString("TAB_TOOL_TIP"),
@@ -534,16 +496,16 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		}
 		String title = tabs.getTitleAt(i);
 		if (title.equals(bundle.getString("COMPARTMENTS"))) {
-			end = model.getNumCompartments();
+			end = model.getCompartmentCount();
 		} else if (title.equals(bundle.getString("SPECIES"))) {
-			begin = model.getNumCompartments();
-			end = begin + model.getNumSpecies();
+			begin = model.getCompartmentCount();
+			end = begin + model.getSpeciesCount();
 		} else if (title.equals(bundle.getString("GLOBAL_PARAMETERS"))) {
-			begin = model.getNumCompartments() + model.getNumSpecies();
-			end = begin + model.getNumParameters();
+			begin = model.getCompartmentCount() + model.getSpeciesCount();
+			end = begin + model.getParameterCount();
 		} else {
 			// local parameters
-			begin = model.getNumSymbols();
+			begin = model.getSymbolCount();
 		}
 		boolean select;
 		Dimension d = (Dimension) button.getPreferredSize().clone();
@@ -599,10 +561,8 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
     table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     TableRowSorter<QuantityRangeModel> sorter = new TableRowSorter<QuantityRangeModel>(rangeModel);
 		table.setRowSorter(sorter);
-		// Create a separate form for filterText and statusText
-
     JTextField filterText = new JTextField(40);
-    // Whenever filterText changes, invoke newFilter.
+    // Whenever filterText changes, invoke newFilter:
 		filterText.getDocument().addDocumentListener(new DocumentFilterListener<QuantityRangeModel>(filterText, sorter));
     LayoutHelper lh = new LayoutHelper(new JPanel());
     lh.add(new JLabel(UIManager.getIcon("ICON_SEARCH_16")), filterText);
@@ -626,7 +586,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 				listOfAllLocalParameters.addAll(r.getKineticLaw().getListOfLocalParameters());
 			}
 		}
-		return createQuantityPanel(listOfAllLocalParameters, model.getNumSymbols(), 3);
+		return createQuantityPanel(listOfAllLocalParameters, model.getSymbolCount(), 3);
 	}
 	
 	/**

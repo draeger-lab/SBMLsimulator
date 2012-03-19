@@ -192,7 +192,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     if (model != null) {
       int offset = 0;
       // initialize fields
-      this.spinQuantity = new JSpinner[model.getNumQuantitiesWithUnit()];
+      this.spinQuantity = new JSpinner[model.getQuantityWithUnitCount()];
       this.originalValues = new double[spinQuantity.length];
       this.quantities = new QuantityWithUnit[originalValues.length];
       this.quantitiesHash = new HashMap<String, Integer>();
@@ -201,26 +201,26 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
         bundle.getString("COMPARTMENTS"),
         interactiveScanScrollPane(model.getListOfCompartments(),
           maxCompartmentValue, paramStepSize, offset));
-      offset += model.getNumCompartments();
-      tab.setEnabledAt(0, model.getNumCompartments() > 0);
+      offset += model.getCompartmentCount();
+      tab.setEnabledAt(0, model.getCompartmentCount() > 0);
       
       tab.add(
         bundle.getString("SPECIES"),
         interactiveScanScrollPane(model.getListOfSpecies(), maxParameterValue,
           paramStepSize, offset));
-      offset += model.getNumSpecies();
-      tab.setEnabledAt(1, model.getNumSpecies() > 0);
+      offset += model.getSpeciesCount();
+      tab.setEnabledAt(1, model.getSpeciesCount() > 0);
       
       tab.add(
         bundle.getString("GLOBAL_PARAMETERS"),
         interactiveScanScrollPane(model.getListOfParameters(), maxSpeciesValue,
           paramStepSize, offset));
-      tab.setEnabledAt(2, model.getNumParameters() > 0);
+      tab.setEnabledAt(2, model.getParameterCount() > 0);
       
       tab.add(
         bundle.getString("LOCAL_PARAMETERS"),
         new JScrollPane(interactiveScanLocalParameters(maxParameterValue,
-          paramStepSize, model.getNumSymbols(), model.getListOfReactions())));
+          paramStepSize, model.getSymbolCount(), model.getListOfReactions())));
       tab.setEnabledAt(3, hasLocalParameters);
       for (int i = tab.getTabCount() - 1; i >= 0; i--) {
         if (tab.isEnabledAt(i)) {
