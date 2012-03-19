@@ -310,10 +310,10 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 	 * 
 	 */
 	private void init() {
-		int dim = model.getNumCompartments() + model.getNumSpecies()
-				+ model.getNumParameters();
+		int dim = model.getCompartmentCount() + model.getSpeciesCount()
+				+ model.getParameterCount();
 		if (includeReactions) {
-			dim += model.getNumReactions();
+			dim += model.getReactionCount();
 		}
 		id2Row = new Hashtable<String, Integer>();
 		lastQueried = null;
@@ -323,20 +323,20 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 			data[i][unitCol] = "";
 		}
 		
-		for (i = 0; i < model.getNumCompartments(); i++) {
+		for (i = 0; i < model.getCompartmentCount(); i++) {
       fillData(model.getCompartment(i), i, false);
     }
-    j = model.getNumCompartments();
-    for (i = 0; i < model.getNumSpecies(); i++) {
+    j = model.getCompartmentCount();
+    for (i = 0; i < model.getSpeciesCount(); i++) {
       fillData(model.getSpecies(i), i + j, false); // true
     }
-    j = model.getNumCompartments() + model.getNumSpecies();
-    for (i = 0; i < model.getNumParameters(); i++) {
+    j = model.getCompartmentCount() + model.getSpeciesCount();
+    for (i = 0; i < model.getParameterCount(); i++) {
       fillData(model.getParameter(i), i + j, false);
     }
     if (includeReactions) {
-      j = model.getNumSymbols();
-      for (i = 0; i < model.getNumReactions(); i++) {
+      j = model.getSymbolCount();
+      for (i = 0; i < model.getReactionCount(); i++) {
         fillData(model.getReaction(i), i + j, false);
       }
     }
@@ -428,17 +428,17 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 	public void setSelected(Class<? extends NamedSBase> clazz, boolean selected) {
 	  int start = 0, end = 0;
 	  if (clazz.isAssignableFrom(Reaction.class)) {
-	    start = model.getNumSymbols();
+	    start = model.getSymbolCount();
 	    end = getRowCount();
 	  } else {
 	    if (clazz.isAssignableFrom(Compartment.class)) {
-	      end = model.getNumCompartments();
+	      end = model.getCompartmentCount();
 	    } else if (clazz.isAssignableFrom(Parameter.class)) {
-	      start = model.getNumCompartments() + model.getNumSpecies();
-	      end = model.getNumSymbols();
+	      start = model.getCompartmentCount() + model.getSpeciesCount();
+	      end = model.getSymbolCount();
 	    } else if (clazz.isAssignableFrom(Species.class)) {
-	      start = model.getNumCompartments();
-	      end = start + model.getNumSpecies();
+	      start = model.getCompartmentCount();
+	      end = start + model.getSpeciesCount();
 	    }
 	  }
 	  for (int i = start; i < end; i++) {
