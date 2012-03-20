@@ -360,7 +360,6 @@ public class SimulationTestAutomatic {
 						solver.setStepSize(0.01);
 						
 						// solve
-						// TODO: Rel-Tolerance, Abs-Tolerance.
 						solver.solve(interpreter, interpreter.getInitialValues(), 0, 10);
 						
 						if (solver.isUnstable()) {
