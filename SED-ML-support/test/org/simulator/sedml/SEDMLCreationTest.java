@@ -57,9 +57,10 @@ public class SEDMLCreationTest {
 	}
 
 	//demonstrates how to create a SEDML file, describing an output to plot all species from a simulation.
+	//SED_ML_CREATION_TEST must be set to the address of the file to use for testing the sed-ml creation.
 	@Test
 	public final void testSEDMLCreate() throws IOException, XMLStreamException, SBMLException, ModelOverdeterminedException, DerivativeException, XMLException {
-		File abc1test = new File(System.getenv("SED_ML_TEST"));
+		File abc1test = new File(System.getenv("SED_ML_CREATION_TEST"));
 		// Read the model and initialize solver
 		double start=0;
 		double end=10;
@@ -98,7 +99,7 @@ public class SEDMLCreationTest {
 	// or to generate a SED-ML archive.
 	private SEDMLDocument saveExperimentToSEDML(double start, double end,
 			double stepsize, AbstractDESSolver solver, Model model) {
-		File abc1test = new File(System.getenv("SED_ML_TEST"));
+		File abc1test = new File(System.getenv("SED_ML_CREATION_TEST"));
 		SEDMLDocument doc = Libsedml.createDocument();
 		SedML sedml = doc.getSedMLModel();
 		
