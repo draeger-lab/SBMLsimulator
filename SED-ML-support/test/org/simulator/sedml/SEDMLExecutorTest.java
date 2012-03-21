@@ -32,12 +32,7 @@ import org.simulator.math.odes.MultiTable;
  *
  */
 public class SEDMLExecutorTest {
-	/*
-	 * This file describes a straightforward simulation of a basic model a->b->c
-	 */
-	File abc1test = new File("sed1.xml");
-	File miriamtest = new File("ClockSedML.xml");
-	SedML sedml=null;
+	SedML sedml = null;
 	@Before
 	public void setUp() throws Exception {
 		
@@ -47,9 +42,15 @@ public class SEDMLExecutorTest {
 	public void tearDown() throws Exception {
 	}
 
+//SED_ML_EXECUTOR_TEST must be set to the address of the file to use for testing the sed-ml execution.
 	@Test
 	public final void testBasicSEDMLExecutorForLocalFile() throws XMLException {
-		// get the SED-ML object model from file. The model referred to in this 
+		/*
+	 * This file describes a straightforward simulation of a basic model a->b->c
+	 */
+		File abc1test = new File(System.getenv("SED_ML_EXECUTOR_TEST"));
+	
+	// get the SED-ML object model from file. The model referred to in this 
 		//SEDML file is defined by a relative path and is in the top-level folder.
 		SEDMLDocument doc = Libsedml.readDocument(abc1test);
 		// check no errors in SEDML file, else simulation will not work so well.
@@ -75,9 +76,13 @@ public class SEDMLExecutorTest {
 			assertEquals("A_dg",mt.getBlock(0).getColumn(0).getColumnName());
 		
 	}
+	
+  //SED_ML_MIRIAM_TEST must be set to the address of the file to test with.
 	// retrieves model from Miriam DB - needs internet connection
 	@Test
 	public final void testBasicSEDMLExecutorForMiriamURNDefinedModel() throws XMLException {
+		File miriamtest = new File(System.getenv("SED_ML_MIRIAM_TEST"));
+		
 		sedml=Libsedml.readDocument(miriamtest).getSedMLModel();
 		// in this SED-ML file there's just one output. If there were several,
 		// we could either iterate or get user to  decide what they want to run.
