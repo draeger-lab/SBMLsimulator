@@ -1,0 +1,136 @@
+\documentclass[
+  BCOR12mm,
+  letterpaper,
+  11pt,
+  headsepline,
+  pointlessnumbers,
+  tablecaptionabove,
+  onelinecaption,
+  headinclude,
+  appendixprefix,
+  idxtotoc,
+  bibtotoc,
+  twoside,
+  titlepage
+]{scrreprt}
+
+\usepackage{UT}
+
+% booktabs is for toprule, bottomrule, etc. in tables.
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}   %stellt den Befehl \newcolumntype bereit
+\usepackage{hyperref} % Links im dokument
+%\usepackage[utf8]{inputenc} %unicode support
+
+\hypersetup{
+              bookmarks={true},
+              bookmarksopen={true},
+              bookmarksopenlevel={0},
+              bookmarksnumbered={true},
+              breaklinks={true},
+              colorlinks={false},
+              pdfpagemode={UseOutlines},
+              pdftitle={SBMLsimulator},
+              pdfauthor={Andreas Dr\"ager} {Roland Keller} {Alexander D\"orr}
+              {Stephanie Tscherneck} {Ute Hofmann} {Clemens Wrzodek} {Akira
+              Funahashi} {Akito Tabira} {Benjamin Kandel} {Marcus Klein} {Maria
+              Thomas} {Nicolas Rodriguez} {Nicolas Le Nov\'ere} {Ulrich M.
+              Zanger} {Andreas Zell}, 
+              pdfsubject={User's Guide}, pdfkeywords={Key word 1} {Key word 1} {...} {Key word n}
+              pdftex, pdffitwindow={true},
+              pdfstartview={FitV},
+              pdfnewwindow={false},
+              pdfdisplaydoctitle={true},
+              pdfhighlight={/P},
+              plainpages={false},
+              unicode={true},
+              urlcolor={blue}
+}
+
+%HYPHENATION
+\hyphenation{
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Gestaltung der Titelseite     %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcolumntype{C}[1]{>{\centering\arraybackslash}m{#1}}
+\newcolumntype{L}[1]{>{\centering\arraybackslash}p{#1}}
+
+\titlehead{\centering\includegraphics[width=0.75\textwidth]{img/UT_WBMW_mathnat_4C}}
+\subject{User's Guide}
+\title{
+\centering
+\begin{tabular}{rl}
+\includegraphics[width=.2\columnwidth]{../logo/Logo.pdf} &
+SBMLsimulator
+\end{tabular}
+}
+\subtitle{An efficient Java\TTra solver implementation for SBML}
+
+
+\author{Andreas Dr\"ager\thanks{Corresponding author:
+\href{mailto:andreas.draeger@uni-tuebingen.de}{andreas.draeger@uni-tuebingen.de}}\and%
+Roland Keller\and%
+Alexander D\"orr\and%
+Stephanie Tscherneck\and%
+Ute Hofmann\and%
+Clemens Wrzodek\and%
+Akira Funahashi\and%
+Akito Tabira\and%
+Benjamin Kandel\and%
+Marcus Klein\and%
+Maria Thomas\and%
+Nicolas Rodriguez\and%
+Nicolas Le Nov\'ere\and%
+Ulrich M. Zanger\and%
+Andreas Zell}
+\date{\today}
+\publishers{Center for Bioinformatics Tuebingen (ZBIT)}
+
+\usepackage{pdflscape}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Beginn des Dokumentes         %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Titelei                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagenumbering{roman}		% kleine lateinische Seitenzahlen
+\maketitle
+\begin{abstract}
+\input{tex/00_abstract}
+\end{abstract}
+
+\setcounter{tocdepth}{1}
+\tableofcontents		% Inhaltsverzeichnis
+% \listoffigures
+% \listoftables
+
+\cleardoublepage		% Erzeugt neue Leerseite. Muss ggf. auskommentiert werden.
+\pagenumbering{arabic}		% Ab hier mit arabischen Zahlen numerieren
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Beginn der eigentlichen Arbeit%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\include{tex/01_docuBody}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Das Literaturverzeichnis      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bibliographystyle{natbib}
+\bibliography{tex/literature}
+
+\end{document}
