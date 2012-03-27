@@ -419,9 +419,13 @@ public class SimulationPanel extends JPanel implements
    */
   public void notifyGenerationPerformed(String[] header, Object[] statObjects, Double[] statDoubles) {
     SimulationToolPanel tools = (SimulationToolPanel) simulationToolPanel.getComponent(0);
+    if((simulationDataIndex == 0) && (runBestIndex == 0)) {
+    	this.notifyRunStarted(0, 1, header, null);
+    }
+    
     double currentDistance = tools.getCurrentQuality();
-    if (Double.isNaN(currentDistance)
-        || (currentDistance > statDoubles[runBestIndex].doubleValue())) {
+    //if (Double.isNaN(currentDistance)) {
+        //|| (currentDistance > statDoubles[runBestIndex].doubleValue())) {
       if (statObjects[simulationDataIndex] instanceof MultiTable) {
       	setSimulationData((MultiTable) statObjects[simulationDataIndex]);
       }
@@ -432,9 +436,14 @@ public class SimulationPanel extends JPanel implements
       firePropertyChange("quality", getSimulationToolPanel().getCurrentQuality(), newValue);
       String[] solutionString = statObjects[solutionIndex].toString().replace("{","").replace("}","").split(", ");
       for (int i = 0; i < selectedQuantityIds.length; i++) {
-        visualizationPanel.updateQuantity(selectedQuantityIds[i], Double.parseDouble(solutionString[i].replace(',', '.')));
+    	  if(solutionString.length == selectedQuantityIds.length) {
+    		  visualizationPanel.updateQuantity(selectedQuantityIds[i], Double.parseDouble(solutionString[i].replace(',', '.')));
+    	  }
+    	  else {
+    		  System.out.println();
+    	  }
       }
-    }
+    //}
   }
   
   /* (non-Javadoc)
