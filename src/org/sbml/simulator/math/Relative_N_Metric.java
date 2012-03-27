@@ -86,8 +86,11 @@ public class Relative_N_Metric extends QualityMeasure {
 		double denominator2=metric.distance(x,nullVector,defaultValue);
 		if ((denominator != 0) && (denominator2 != 0) ) {
 			return numerator / denominator;
-		} else {
+		} else if((denominator == 0) && (numerator == 0)){
 			return numerator;
+		}
+		else {
+			return 1000;
 		}
 	}
 

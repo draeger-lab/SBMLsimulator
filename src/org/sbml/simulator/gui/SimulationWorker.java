@@ -133,9 +133,10 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
    */
   protected MultiTable doInBackground() throws ModelOverdeterminedException{
   	timer.reset();
-    SBMLinterpreter interpreter = new SBMLinterpreter(configuration.getModel());
+    
     try {
     	computationThread = Thread.currentThread();
+    	SBMLinterpreter interpreter = new SBMLinterpreter(configuration.getModel().clone());
     	DESSolver solver = configuration.getSolver().clone();
     	solver.addPropertyChangeListener(this);
 			solution = solveByStepSize(solver,
