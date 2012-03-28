@@ -136,7 +136,7 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
     
     try {
     	computationThread = Thread.currentThread();
-    	SBMLinterpreter interpreter = new SBMLinterpreter(configuration.getModel().clone());
+    	SBMLinterpreter interpreter = new SBMLinterpreter(configuration.getModel());
     	DESSolver solver = configuration.getSolver().clone();
     	solver.addPropertyChangeListener(this);
 			solution = solveByStepSize(solver,
