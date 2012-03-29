@@ -42,6 +42,11 @@ public class Relative_N_Metric extends QualityMeasure {
 	private static final ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
 	
 	/**
+	 * Is default value NaN? (for faster computation)
+	 */
+	private boolean defaultNaN;
+	
+	/**
 	 * 
 	 */
 	protected N_Metric metric;
@@ -50,8 +55,9 @@ public class Relative_N_Metric extends QualityMeasure {
 	 * 
 	 */
 	public Relative_N_Metric() {
-		super();
+		super(Double.NaN);
 		metric = new N_Metric();
+		defaultNaN = true;
 	}
 	
 	/**
@@ -61,6 +67,7 @@ public class Relative_N_Metric extends QualityMeasure {
 	public Relative_N_Metric(double root) {
 		super(Double.NaN);
 		metric = new N_Metric(root);
+		defaultNaN = true;
 	}
 
 	/**
@@ -68,8 +75,14 @@ public class Relative_N_Metric extends QualityMeasure {
 	 * @param metric
 	 */
 	public Relative_N_Metric(N_Metric metric) {
-		super(Double.NaN);
+		super();
 		this.metric = metric;
+		if(Double.isNaN(metric.getDefaultValue())) {
+			defaultNaN = true;
+		}
+		else {
+			defaultNaN = false;
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -86,11 +99,13 @@ public class Relative_N_Metric extends QualityMeasure {
 		double denominator2=metric.distance(x,nullVector,defaultValue);
 		if ((denominator != 0) && (denominator2 != 0) ) {
 			return numerator / denominator;
-		} else if((denominator == 0) && (numerator == 0)){
+		} else if((denominator == 0) && (denominator2 == 0)){
 			return numerator;
+		} else if(defaultNaN) {
+				return numerator;
 		}
 		else {
-			return 1000;
+			return this.defaultValue;
 		}
 	}
 
@@ -100,6 +115,20 @@ public class Relative_N_Metric extends QualityMeasure {
 	public String getName() {
 		return String.format("%s %s", bundle.getString("RELATIVE"),
 			metric.getName());
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.math.QualityMeasure#setDefaultValue(double)
+	 */
+	public void setDefaultValue(double value) {
+		super.setDefaultValue(value);
+		if(Double.isNaN(defaultValue)) {
+			defaultNaN = true;
+		}
+		else {
+			defaultNaN = false;
+		}
 	}
 
 	/**

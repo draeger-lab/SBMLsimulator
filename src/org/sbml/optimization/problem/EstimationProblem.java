@@ -195,6 +195,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		multishoot = false;
 		setSolver(solver);
 		setDistance(distance);
+		distance.setDefaultValue(1000);
 		if(distance instanceof PearsonCorrelation) {
 			negationOfDistance=true;
 		}
