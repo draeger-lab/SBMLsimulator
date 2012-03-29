@@ -75,7 +75,7 @@ public class Relative_N_Metric extends QualityMeasure {
 	 * @param metric
 	 */
 	public Relative_N_Metric(N_Metric metric) {
-		super();
+		super(Double.NaN);
 		this.metric = metric;
 		if(Double.isNaN(metric.getDefaultValue())) {
 			defaultNaN = true;
