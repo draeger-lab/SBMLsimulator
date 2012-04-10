@@ -320,6 +320,7 @@ public class XYBoxAndWhiskerRenderer extends
 			if ((p != null) && (yyAverage > (dataArea.getMinY() - aRadius))
 					&& (yyAverage < (dataArea.getMaxY() + aRadius))) {
 				g2.setPaint(p);
+				// TODO: Remove multiplier with 2 and set to the middle
 				Ellipse2D.Double avgEllipse = new Ellipse2D.Double(xx - aRadius,
 					yyAverage - aRadius, aRadius * 2, aRadius * 2);
 				g2.fill(avgEllipse);
