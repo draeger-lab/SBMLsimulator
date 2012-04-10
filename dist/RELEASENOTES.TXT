@@ -1,0 +1,19 @@
+
+* SBMsimulator 0.9-rc1 (released finally in ??? (???)) is based on the following subversion revisions:
+  SBMLsimulatorCore ???
+  SBMLsimulator ???
+  SBMLsqueezer ???
+  JSBML ???
+  SysBio ???
+  SBML2LaTeX ???
+
+
+
+* SBMsimulator 1.0-rc2 (released finally in March 2011 (2012-03-01)) is based on the following subversion revisions:
+  SBMLsimulatorCore ???
+  SBMLsimulator ???
+  SBMLsqueezer ???
+  JSBML ???
+  SysBio ???
+  SBML2LaTeX ???
+
