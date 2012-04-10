@@ -1,6 +1,6 @@
 /*
  * $Id:  UnitDerivitionTest.java 10:56:10 draeger$
- * $URL: UnitDerivitionTest.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
