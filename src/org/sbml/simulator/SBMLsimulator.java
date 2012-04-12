@@ -325,7 +325,7 @@ public class SBMLsimulator extends Launcher {
 	 * @see de.zbit.Launcher#getYearOfProgramRelease()
 	 */
 	public short getYearOfProgramRelease() {
-		return (short) 2011;
+		return (short) 2012;
 	}
 
 	/* (non-Javadoc)

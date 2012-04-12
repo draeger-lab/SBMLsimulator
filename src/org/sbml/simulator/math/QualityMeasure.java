@@ -196,7 +196,9 @@ public abstract class QualityMeasure implements Serializable {
 		ArrayList<Double> distances= new ArrayList<Double>();
 		
 		for (int i = 0; i < identifiers.length; i++) {
-			distances.add(distance(x.getColumn(i), expected.getColumn(identifiers[i])));
+			if(identifiers[i]!=null && expected.containsColumn(identifiers[i])) {
+				distances.add(distance(x.getColumn(i), expected.getColumn(identifiers[i])));
+			}
 		}
 		return distances;
 	}
