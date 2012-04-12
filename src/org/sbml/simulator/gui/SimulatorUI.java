@@ -573,7 +573,9 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 			return;
 		}
 		setSimulationAndOptimizationEnabled(false);
-		final Model model = simPanel.getModel().getSBMLDocument().clone().getModel();
+		SBMLDocument doc1 = simPanel.getModel().getSBMLDocument();
+		SBMLDocument doc2 = doc1.clone();
+		final Model model = doc2.getModel();
 		final QuantitySelectionPanel panel = new QuantitySelectionPanel(model);
 		if (JOptionPane.showConfirmDialog(this, panel,
 			bundle.getString("SELECT_QUANTITIES_FOR_OPTIMIZATION"), JOptionPane.OK_CANCEL_OPTION,
