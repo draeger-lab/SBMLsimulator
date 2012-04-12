@@ -276,7 +276,10 @@ public class EstimationProblem extends AbstractProblemDouble implements
 			  String name = reference.getColumnIdentifier(col);
 			  Integer pos = id2Index.get(name);
 			  if (pos != null) {
-			    initialValues[pos] = ((Double) reference.getValueAt(0, col)).doubleValue();
+			    double value = ((Double) reference.getValueAt(0, col)).doubleValue();
+			    if(!Double.isNaN(value)) {
+			    	initialValues[pos] = value;
+			    }
 			  }
 			}
 			MultiTable solution = null; 
