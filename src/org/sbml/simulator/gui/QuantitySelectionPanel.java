@@ -601,7 +601,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		boolean select = true;
 		for (Quantity q : listOfQuantities) {
 			isLocalParameter |= q instanceof LocalParameter;
-			select = isLocalParameter || (q instanceof Parameter);
+			select = isLocalParameter || (q instanceof Parameter) || !q.isSetValue() || Double.isNaN(q.getValue());
 			quantityBlocks[curr++] = new QuantityRange(q, select, initMinValue, initMaxValue,
 				minValue, maxValue);
 		}
