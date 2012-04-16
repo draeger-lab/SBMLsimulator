@@ -10,7 +10,7 @@
 	    SBMLsimulator.
 	    	
 	    The resulting redistributable is the SIGNED jar file,
-    	stored in $appJarSgn which is currently "SBMLsimulator.jar".
+    	stored in $appJar which is currently "SBMLsimulator.jar".
     </echo>
   </target>
 
@@ -18,7 +18,7 @@
   <target name="init">
   	<echo>
   	  PLESE MAKE SURE ALL PATHS ARE CORRECT AND DECIDE IF YOU WANT
-  	  TO USE THE LIB-JARs OR REFERENFCED PROJETS.
+  	  TO USE THE LIB-JARs OR REFERENCED PROJECTS.
   	</echo>
     <!-- the base directory of the SBMLsimulator repository -->
     <property name="base" location=".."/>
@@ -29,13 +29,22 @@
     <!-- the path to the SBMLsimulator binaries -->
     <property name="classes" location="${base}/bin"/>
     
+    <!-- the unobfuscated application jar file -->
+    <property name="appJarRaw" value="SBMLsimulator_unobfuscated.jar"/>
+  	
     <!-- the unsigned application jar file -->
-    <property name="appJar" value="SBMLsimulator_unsigned.jar"/>
+    <property name="appJarObf" value="SBMLsimulator_unsigned.jar"/>
 
-    <!-- the signed application jar file -->
-    <property name="appJarSgn" value="SBMLsimulator.jar"/>
+    <!-- the FINAL obfuscated signed application jar file -->
+    <property name="appJar" value="SBMLsimulator.jar"/>
+
   	
-  	
+    <!-- the yGuard jar file containing the obfuscation task -->
+    <property name="yGuardJar" value="yguard.jar"/>
+    
+    <!-- the log file geenrated by the obfuscation task -->
+    <property name="obfuscationLog" value="obfuscation-log.xml"/>
+    	
     <!-- =================================== -->
     <!-- PATHS TO REFERENCED PROJETS -->
     
@@ -47,16 +56,14 @@
     <property name="SBML2LaTeXPath" location="${base}/../SBML2LaTeX" />
     <!-- the path to SBMLsimulatorCore -->
     <property name="SBMLsimulatorCorePath" location="${base}/../SBMLsimulatorCore" />
-    <!-- the path to SBMLsqueezer -->
-    <property name="SBMLsqueezerPath" location="${base}/../SBMLsqueezer" />
     <!-- =================================== -->
   	
   </target>
 
   <!-- puts the application specific classes into application.jar. -->
   <target name="jar" depends="init">
-    <delete file="${appJar}"/>
-    <jar jarfile="${appJar}">
+    <delete file="${appJarRaw}"/>
+    <jar jarfile="${appJarRaw}">
       <manifest>
         <attribute name="Main-Class" value="org.sbml.simulator.SBMLsimulator"/>
         <attribute name="Built-By" value="Center for Bioinformatics Tuebingen (ZBIT)"/>
@@ -96,8 +103,7 @@
           <zipfileset excludes="META-INF/*" src="${SysBioPath}/lib/commons-cli-1.1.jar"/>
           <zipfileset excludes="META-INF/*" src="${SysBioPath}/lib/quaqua.jar"/>
           <zipfileset excludes="META-INF/*" src="${SysBioPath}/lib/sysbio-osx-support.jar"/>
-    	
-          <zipfileset excludes="META-INF/*.SF" src="${base}/lib/sbmlsqueezer.jar"/>
+    	    <zipfileset excludes="META-INF/*" src="${SysBioPath}/lib/graph/y.jar"/>
     	
           <!--<zipfileset excludes="META-INF/*.SF" src="${base}/lib/SBMLsimulatorCore.jar"/>-->
           <fileset dir="${SBMLsimulatorCorePath}/bin">
@@ -129,11 +135,76 @@
     </jar>
   </target>
 
+
+  <!-- obfuscates y.jar and adjusts application.jar accordingly. -->
+  <!-- Generates the jar files yObf.jar and applicationObf.jar.  -->
+  <target name="obfuscate" depends="jar">
+    <taskdef name="yguard" classname="com.yworks.yguard.YGuardTask" classpath="${yGuardJar}"/>
+    <yguard>
+
+      <!-- obfuscate yFiles for public deployment -->
+      <inoutpair in="${appJarRaw}" out="${appJarObf}"/>
+
+      <!-- [OPTIONALLY] Keep the line number table and the source file attributes
+                 of the public part of the "application" -->
+      <attribute name="LineNumberTable,LocalVariableTable,SourceFile">
+        <patternset>
+          <include name="de.zbit.**"/>
+        </patternset>
+      </attribute>
+
+      <rename logfile="${obfuscationLog}" replaceClassNameStrings="true" mainclass="${main}">
+        <!-- conservemanifest="true" -->
+        <!-- use some unique package prefix for obfuscated classes to avoid name clashes -->
+        <property name="obfuscation-prefix" value="obfuscatedintegrator"/>
+
+
+        <keep>
+          <package>
+            <patternset>
+              <include name="de.**.*"/>
+            </patternset>
+          </package>
+
+          
+             <!-- Keep all method, field, and class names of the "application"             -->
+             <!-- This could be adjusted to your needs if you don't want to let            -->
+             <!-- your whole application unobfuscated.                                     -->
+             <!-- In that case simply add some more "exclude" statements as depicted below -->
+             <class classes="private" methods="private" fields="private">
+              <patternset>
+                <!-- Do not obfuscate anything, by default -->
+               <include name="**.*"/>
+
+                <!-- Obfuscate all classes that make use of y.jar -->
+              	<!-- We can NOT obfuscate de.zbit.graph.**.*, because there are some resources (labels) in there -->
+                <exclude name="de.zbit.graph.*"/>
+              	<exclude name="de.zbit.graph.gui.**.*"/>
+                <exclude name="de.zbit.graph.io.**.*"/>
+              	<exclude name="de.zbit.graph.sbgn.**.*"/>
+              	
+
+               <!-- Obfuscate the included y.jar -->
+               <exclude name="y.**.*"/>
+              </patternset>
+             </class>
+            
+        </keep>
+
+        <!-- make sure that the .properties files are renamed according to their               -->
+        <!-- corresponding class files, yFiles needs this to function properly when obfuscated -->
+        <adjust replaceName="true">
+          <include name="y/**/*.properties"/>
+        </adjust>
+      </rename>
+    </yguard>
+  </target>
+
   <!-- signs the application -->
-  <target name="sign" depends="jar">
-  	<delete file="${appJarSgn}"/>
+  <target name="sign" depends="obfuscate">
+  	<delete file="${appJar}"/>
     <!-- Having an "keystore" file is required. Generate it with the "keytool" in the current directory. -->  	
-	  <signjar alias="SBMLsimulator" jar="${appJar}" keypass="d=dpfSBMLsimulator!" keystore="keystore" signedjar="${appJarSgn}" storepass="d=dpfSBMLsimulator!"/>
+	  <signjar alias="SBMLsimulator" jar="${appJarObf}" keypass="d=dpfSBMLsimulator!" keystore="keystore" signedjar="${appJar}" storepass="d=dpfSBMLsimulator!"/>
   </target>
 
 	
@@ -141,15 +212,16 @@
   <target name="run" depends="sign">
     <java classname="org.sbml.simulator.SBMLsimulator" fork="true">
       <classpath>
-        <pathelement location="${appJarSgn}"/>
+        <pathelement location="${appJar}"/>
       </classpath>
     </java>
   </target>
 
   <!-- Removes all that has been built -->
   <target name="clean" depends="init">
-  	<delete file="${appJar}"/>
-    <delete file="${appJarSgn}"/>
+  	<delete file="${appJarRaw}"/>
+  	<delete file="${appJarObf}"/>
+    <delete file="${appJar}"/>
     <delete includeemptydirs="true" dir="${classes}"/>
   </target>
 
