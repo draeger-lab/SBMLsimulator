@@ -222,6 +222,7 @@
   <entry key="TAB_IN_SILICO_DATA">Berechnete Daten</entry>
   <entry key="TAB_EXPERIMENTAL_DATA">Experimentelle Daten</entry>
   <entry key="TAB_MODEL_VIEW">Modell</entry>
+  <entry key="TAB_GRAPH_VIEW">Graph</entry>
   <entry key="NO_SIMULATION_PERFORMED">Es wurde noch keine Simulation durchgeführt. Führen Sie bitte zunächst die Simulation aus.</entry>
   <entry key="NO_EXPERIMENTAL_DATA_LOADED">Bisher wurden weder experimentelle Daten geöffnet, noch modifiziert. Daher gibt es derzeit noch nichts zum Abspeichern.</entry>
   

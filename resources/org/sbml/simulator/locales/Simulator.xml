@@ -223,6 +223,7 @@
   <entry key="TAB_IN_SILICO_DATA">Computed data</entry>
   <entry key="TAB_EXPERIMENTAL_DATA">Experimental data</entry>
   <entry key="TAB_MODEL_VIEW">Model</entry>
+  <entry key="TAB_GRAPH_VIEW">Graph</entry>
   <entry key="NO_SIMULATION_PERFORMED">No simulation has been performed yet. Please run the simulation first.</entry>
   <entry key="NO_EXPERIMENTAL_DATA_LOADED">Currently, no experimental data have been opened, nor modified. There is nothing to be saved at the moment.</entry>
   

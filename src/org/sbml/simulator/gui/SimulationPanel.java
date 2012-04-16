@@ -60,6 +60,7 @@ import org.sbml.simulator.math.QualityMeasure;
 import org.simulator.math.odes.DESSolver;
 import org.simulator.math.odes.MultiTable;
 
+import de.zbit.graph.gui.TranslatorSBMLgraphPanel;
 import de.zbit.gui.BaseFrameTab;
 import de.zbit.gui.GUIOptions;
 import de.zbit.gui.GUITools;
@@ -78,6 +79,7 @@ import eva2.server.stat.InterfaceStatisticsListener;
 
 /**
  * @author Andreas Dr&auml;ger
+ * @author Clemens Wrzodek
  * @date 2010-04-06
  * @version $Rev$
  * @since 1.0
@@ -113,6 +115,11 @@ public class SimulationPanel extends JPanel implements
    * 
    */
   private static final int TAB_MODEL_VIEW_INDEX = 3;
+  
+  /**
+   * 
+   */
+  private static final int TAB_GRAPH_VIEW_INDEX = 4;
   
   /**
    * 
@@ -382,6 +389,9 @@ public class SimulationPanel extends JPanel implements
         dataTableView = new MultipleTableView<MultiTable>();
         dataTableView.addTableModelListener(visualizationPanel);
         
+        
+        TranslatorSBMLgraphPanel graphView = new TranslatorSBMLgraphPanel(getModel().getSBMLDocument(), false);
+        
         tabbedPane = new JTabbedPane();
         tabbedPane.add(bundle.getString("TAB_SIMULATION"), visualizationPanel);
         tabbedPane.add(bundle.getString("TAB_IN_SILICO_DATA"), simPanel);
@@ -389,10 +399,14 @@ public class SimulationPanel extends JPanel implements
 				tabbedPane.add(bundle.getString("TAB_MODEL_VIEW"),
 					new SBMLModelSplitPane(simulationManager.getSimulationConfiguration()
 							.getModel().getSBMLDocument(), true));
+				tabbedPane.add(bundle.getString("TAB_GRAPH_VIEW"), graphView);
+				
+				
         tabbedPane.setEnabledAt(TAB_SIMULATION_INDEX, true);
         tabbedPane.setEnabledAt(TAB_IN_SILICO_DATA_INDEX, false);
         tabbedPane.setEnabledAt(TAB_EXPERIMENT_INDEX, false);
         tabbedPane.setEnabledAt(TAB_MODEL_VIEW_INDEX, true);
+        tabbedPane.setEnabledAt(TAB_GRAPH_VIEW_INDEX, true);
       }
       add(tabbedPane, BorderLayout.CENTER);
     } catch (Exception exc) {
@@ -717,7 +731,7 @@ public class SimulationPanel extends JPanel implements
 	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrameTab#updateButtons(javax.swing.JMenuBar, javax.swing.JToolBar)
 	 */
-	public void updateButtons(JMenuBar menuBar, JToolBar toolbar) {
+	public void updateButtons(JMenuBar menuBar, JToolBar... toolbar) {
 		// TODO Auto-generated method stub
 	}
 
