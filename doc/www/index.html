@@ -1,0 +1,325 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de"><head>
+	<!-- <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> -->
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<!-- 
+	This website is powered by TYPO3 - inspiring people to share!
+	TYPO3 is a free open source Content Management Framework initially created by Kasper Skaarhoj and licensed under GNU/GPL.
+	TYPO3 is copyright 1998-2008 of Kasper Skaarhoj. Extensions are copyright of their respective owners.
+	Information and contribution at http://typo3.com/ and http://typo3.org/
+--><!--HEAD-->
+  
+    <meta name="description" content="SBMLsimulator is a fast, accurate, and easily usable program for dynamic model simulation and heuristic parameter optimization of models encoded in the Systems Biology Markup Language (SBML). In order to ensure a high reliability of this software, it  has been benchmarked against the entire SBML Test Suite and all models from the Biomodels.net database. It includes a large collection of nature-inspired heuristic optimization procedures for efficient model calibration. SBMLsimulator provides an intuitive Graphical User Interface (GUI) and several command-line options to be suitable for large-scale batch processing and model calibration. SBMLsimulator runs on all platforms that provide a standard Java Virtual Machine and is based on the open-source library JSBML.">
+    <meta name="keywords" content="SBML, dynamic simulation, model calibration, numerical integration">
+    <meta name="author" content="Andreas Dr&auml;ger, andreas.draeger@uni-tuebingen.de">
+    <meta name="DC.Publisher" content="Andreas Dr&auml;ger, andreas.draeger@uni-tuebingen.de">
+    <meta name="DC.Date" content="2008-12-16:9+34:00">
+    <meta name="DC.Language" content="en">
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <meta name="ROBOTS" content="index">
+    <meta name="robots" content="follow">
+    <meta name="revisit-after" content="30 days">
+<title>SBMLsimulator</title>
+        <style type="text/css">
+      .menu {
+        text-align: center;
+        margin: auto;
+        /*background-color: #cccccc;*/
+        background: url(images/button.png) repeat-x;
+        padding-top: 5px;
+        padding-bottom: 5px;
+        border: 1px solid #eeeeee;
+        -moz-border-radius: 4px 4px 4px 4px;
+        border-bottom: 0px solid #ffffff;
+      }
+      .menu a {
+        text-decoration: none;
+        color: 333333;
+      }
+      .menu a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  <!--/HEAD-->
+	<link rel="shortcut icon" href="http://www.cogsys.cs.uni-tuebingen.de/favicon.ico">
+	<link rel="icon" href="http://www.cogsys.cs.uni-tuebingen.de/favicon.ico">
+
+	<link rel="stylesheet" type="text/css" href="index_files/cal_styles.css">
+	<link rel="stylesheet" type="text/css" href="index_files/contact.css">
+	<link rel="stylesheet" type="text/css" href="index_files/menus.css">
+	<link rel="stylesheet" type="text/css" href="index_files/structure.css">
+	<link rel="stylesheet" type="text/css" href="index_files/tok_betriebszustand_styles.css">
+	<link rel="stylesheet" type="text/css" href="index_files/tt_news_styles.css">
+	<link rel="stylesheet" type="text/css" href="index_files/typo.css">
+	<link rel="stylesheet" type="text/css" href="index_files/formated-tables.css">
+	<link rel="stylesheet" type="text/css" href="index_files/misc.css">
+
+<title>University of T&uuml;bingen: SBMLsimulator</title>
+	<title>Aktuell</title>
+	<meta name="generator" content="STOWS">
+	<!-- <script type="text/javascript" src="typo3temp/javascript_a708894199.js"></script>-->
+
+</head>
+<body class=" template-index.html" dir="ltr">
+
+<!--NEW HEADER-->
+<div id="outer">
+<div id="top">
+      <div id="uni-t-logo">
+        <a href="http://www.uni-tuebingen.de/" target="_top"><img src="index_files/logo-uni-tuebingen.png" alt="Logo Universit&auml;t T&uuml;bingen" title="Logo Universit&auml;t T&uuml;bingen" border="0" height="100" width="260"></a><a href="http://www.uni-tuebingen.de//index.php?id=11065&amp;L=" target="_top"><img src="index_files/mnf-cs-logo.gif" alt="Logo" title="Logo" border="0" height="90" width="460"></a>
+      </div>
+
+      <div id="wrapper-header-right">
+        <div id="languages">
+          <span class="language"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/en/faculties/mathematisch-naturwissenschaftliche-fakultaet.html" title="Englische Version"></a></span>
+        </div>
+
+        <div id="search">
+          <form action="http://www.google.com/cse" id="af3bcd69fb21a9b916e4ced3efb19b3b1" name="af3bcd69fb21a9b916e4ced3efb19b3b1" enctype="multipart/form-data" method="get">
+            <div style="display:none;">
+              <input name="cx" value="017452130158815283935:qd8588vefb4" type="hidden"><input name="ie" value="UTF-8" type="hidden">
+            </div><input name="q" size="20" value="Suche" class="searchinput" onfocus="if(this.value=='Suche'){this.value=''}" type="text"><input name="sa" src="index_files/pfeil_rot.gif" alt="Suche" title="Suche" id="search-arrow" type="image">
+          </form>
+        </div>
+
+          <div class="wrapper-fontsize_uniaz_login">
+			
+<!-- hier waren die komischen fontsizes -->
+		
+          <img src="index_files/schriftgrad_strich.png" alt="" title="" style="float: left; margin-top: 10px;" border="0" height="32" width="26">
+
+           <div class="uniaz-login">
+            <a href="http://uni-tuebingen.de/index.php?id=343" class="uniaz">Uni A-Z</a>
+          </div>
+      </div><!-- ende #wrapper-header-right-->
+    </div>
+
+    <div class="cleanup"></div>
+
+   <div class="cleanup"></div>
+   <div id="banner"><img src="index_files/Header_vers1.jpg" alt="Bildleiste" title="Bildleiste" border="0" height="100" width="900"></div>
+   <div id="red-banner"></div>
+
+  <!--<NOBR>  <img src="http://www.cogsys.cs.uni-tuebingen.de/newstyle/uploads/media/banner-aktuell.jpg" /><img src="http://www.cogsys.cs.uni-tuebingen.de/newstyle/uploads/media/banner-aktuell.jpg" /> </NOBR>-->
+
+    <div class="cleanup"></div>
+
+    <ul id="mainmenu" class="mainmenu4">
+
+      <li class="mainmenuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/welcome_e.html" onfocus="blurLink(this);">CS-Home</a></li>
+      <li class="mainmenuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/lehrstuhl/welcome_e.html" onfocus="blurLink(this);">Chair</a></li>
+      <li class="mainmenuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/mitarb/welcome_e.html" onfocus="blurLink(this);">Staff</a></li>
+      <li class="mainmenuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/forschung/welcome_e.html" onfocus="blurLink(this);">Research Projects</a></li>
+      <li class="mainmenuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/welcome_e.html" onfocus="blurLink(this);">Software</a></li>
+      <li class="mainmenuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/publikationen/publications_welcome.html" onfocus="blurLink(this);">Publications</a></li>
+      <li class="mainmenuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/lehre/ss12/welcome.html" onfocus="blurLink(this);">Teaching</a></li>
+      <li class="mainmenuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/diplomarbeiten/welcome.html" onfocus="blurLink(this);">Theses</a></li>
+      <li class="mainmenuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/stellen/welcome.html" onfocus="blurLink(this);">Vacancies</a></li>
+      <li class="mainmenuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/anreise/welcome.html" onfocus="blurLink(this);">Address</a></li>
+
+    </ul>
+
+    <div class="cleanup"></div>
+
+    <div id="breadcrumb">
+      <a href="http://www.uni-tuebingen.de/landingpage.html" onfocus="blurLink(this);">Home</a> &gt; 
+      <a href="http://www.uni-tuebingen.de/fakultaeten.html" onfocus="blurLink(this);">Fakult&auml;ten</a> &gt;
+      <a href="http://www.mnf.uni-tuebingen.de/" onfocus="blurLink(this);">Mathematisch-Naturwissenschaftliche Fakult&auml;t</a> &gt; 
+      <a href="http://www.wsi.uni-tuebingen.de/fachbereich/wilhelm-schickard-institut-fuer-informatik.html" onfocus="blurLink(this);">Fachbereich Informatik</a> &gt;
+      <a href="http://www.cogsys.cs.uni-tuebingen.de/" onfocus="blurLink(this);">Cognitive Systems</a>   
+
+  <div id="mainmenusep">
+  
+  	<a href="http://www.cogsys.cs.uni-tuebingen.de/welcome_e.html" onfocus="blurLink(this);">Cognitive Systems</a>&nbsp;&gt;&nbsp;
+	<a href="http://www.cogsys.cs.uni-tuebingen.de/software/welcome_e.html" onfocus="blurLink(this);">Software</a>&nbsp;&gt;&nbsp;
+  	<a href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/index.html" onfocus="blurLink(this);">SBMLsimulator</a>&nbsp;&gt;&nbsp;
+  
+  </div>
+  </div> <!-- breadcrump -->
+
+    <hr id="headersep-gold">
+  <div id="mid">	
+    <div id="submenu">
+	  
+     <div class="submenuheader">
+      <a href="http://www.cogsys.cs.uni-tuebingen.de/" onfocus="blurLink(this);">Cognitive Systems</a>
+     </div>
+      <div class="sub1menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/lehrstuhl/welcome_e.html" onfocus="blurLink(this);"><!--noindex--> About the Chair<!--/noindex--></a></div>
+      <div class="sub1menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/mitarb/welcome_e.html" onfocus="blurLink(this);"><!--noindex--> Staff<!--/noindex--></a></div>
+      <div class="sub1menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/forschung/welcome_e.html" onfocus="blurLink(this);"><!--noindex--> Research Projects<!--/noindex--></a></div>
+       <div class="sub1menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/welcome_e.html" onfocus="blurLink(this);"><!--noindex--> Software<!--/noindex--></a></div>
+ 	  <div class="sub2menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/snns/welcome_e.html" onfocus="blurLink(this);"><!--noindex--> SNNS<!--/noindex--></a></div>
+ 	  <div class="sub2menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/JavaNNS/welcome_e.html" onfocus="blurLink(this);"><!--noindex--> JavaNNS<!--/noindex--></a></div>
+ 	  <div class="sub2menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/joelib/index.html" onfocus="blurLink(this);"><!--noindex--> JOELib<!--/noindex--></a></div>
+ 	  <div class="sub2menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/JCell/index.html" onfocus="blurLink(this);"><!--noindex--> JCell<!--/noindex--></a></div>
+ 	  <div class="sub2menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/OAKernels/welcome_e.html" onfocus="blurLink(this);"><!--noindex--> OAKernels<!--/noindex--></a></div>
+ 	  <div class="sub2menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/4DFAP/welcome_e.html" onfocus="blurLink(this);"><!--noindex--> 4D Flexible Atom-Pair Kernel<!--/noindex--></a></div>
+ 	  <div class="sub2menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/bluedesc/welcome_e.html" onfocus="blurLink(this);"><!--noindex--> BlueDesc<!--/noindex--></a></div>
+ 	  <div class="sub2menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/KEGGtranslator/index.htm" onfocus="blurLink(this);"><!--noindex--> KEGGtranslator<!--/noindex--></a></div>
+ 	  <div class="sub2menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsqueezer/index.htm" onfocus="blurLink(this);"><!--noindex--> SBMLsqueezer<!--/noindex--></a></div>
+	<div class="sub2menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/index.html" onfocus="blurLink(this);"><!--noindex-->SBMLsimulator<!--/noindex--></a></div>
+ 	  <div class="sub3menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/doc/index.html" onfocus="blurLink(this);"><!--noindex-->Documentation<!--/noindex--> </a></div>
+ 	  <div class="sub3menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/downloads/index.html" onfocus="blurLink(this);"><!--noindex-->Downloads<!--/noindex--> </a></div>
+ 	  <div class="sub3menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/acknowledgments.html" onfocus="blurLink(this);"><!--noindex-->Acknowledgments<!--/noindex--> </a></div>
+ 	  <div class="sub3menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/license.html" onfocus="blurLink(this);"><!--noindex-->License<!--/noindex--> </a></div>
+ 	  <div class="sub2menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/ProDGe/index.htm" onfocus="blurLink(this);"><!--noindex--> ProDGe<!--/noindex--></a></div>
+ 	  <div class="sub2menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/ModuleMaster/welcome_e.html" onfocus="blurLink(this);"><!--noindex--> ModuleMaster<!--/noindex--></a></div>
+ 	  <div class="sub2menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/SABINE/welcome_e.html" onfocus="blurLink(this);"><!--noindex--> SABINE<!--/noindex--></a></div>
+ 	  <div class="sub2menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/EDISA/welcome_e.html" onfocus="blurLink(this);"><!--noindex--> EDISA<!--/noindex--></a></div>
+ 	  <div class="sub2menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/scpsolver/welcome_e.html" onfocus="blurLink(this);"><!--noindex--> SCP Solver<!--/noindex--></a></div>
+ 	  <div class="sub2menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/EvA2/index.html" onfocus="blurLink(this);"><!--noindex--> EvA2<!--/noindex--></a></div>
+ 	  <div class="sub2menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/stows/welcome_e.html" onfocus="blurLink(this);"><!--noindex--> STOWS<!--/noindex--></a></div>
+      <div class="sub1menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/publikationen/publications_welcome.html" onfocus="blurLink(this);"><!--noindex--> Publications<!--/noindex--></a></div>
+      <div class="sub1menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/lehre/ss12/welcome.html" onfocus="blurLink(this);"><!--noindex--> Teaching<!--/noindex--></a></div>
+      <div class="sub1menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/diplomarbeiten/welcome.html" onfocus="blurLink(this);"><!--noindex--> Theses<!--/noindex--></a></div>
+      <div class="sub1menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/stellen/welcome.html" onfocus="blurLink(this);"><!--noindex--> Vacancies<!--/noindex--></a></div>
+      <div class="sub1menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/anreise/welcome_e.html" onfocus="blurLink(this);"><!--noindex--> Address/Directions<!--/noindex--></a></div>
+      <div class="sub1menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/links/welcome_e.html" onfocus="blurLink(this);"><!--noindex--> External Links<!--/noindex--></a></div>
+      <div class="sub1menuitem"><a href="http://www.cogsys.cs.uni-tuebingen.de/local/welcome.html" onfocus="blurLink(this);"><!--noindex--> Internal Pages<!--/noindex--></a></div>
+      <div class="sub1menuitem"><a href="http://www.cs.uni-tuebingen.de/" onfocus="blurLink(this);"><!--noindex--> Computer Science Dept.<!--/noindex--></a></div>
+      <div class="sub1menuitem"><a href="http://www.uni-tuebingen.de/" onfocus="blurLink(this);"><!--noindex--> University of T&uuml;bingen<!--/noindex--></a></div>
+	 
+     &nbsp;
+    </div> <!-- submenu -->
+    
+
+    <div id="content" class="content-width"><!--BODY-->
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="98%">
+  <tbody><tr>
+    <td class="menu" width="14%"><a href="doc/index.html">Documentation</a></td>
+    <td class="menu" width="14%"><a href="downloads/index.html">Downloads</a></td>
+    <td class="menu" width="14%"><a href="acknowledgments.html">Acknowledgments</a></td>
+    <td class="menu" width="14%"><a href="license.html">License</a></td>
+  </tr>
+</tbody></table>
+<p>&nbsp;</p>
+  <br/>
+  <p style="margin:auto; text-align:center;">
+    <table align="center" border="0">
+      <tr>
+        <td rowspan="3">
+          <img src="img/SBMLsimulator_128.png"><br/>
+        </td>
+        <td> </td>
+      </tr>
+      <tr>
+        <td> <h1 class="important">SBMLsimulator</h1> </td>
+      </tr>
+      <tr>
+        <td> </td>
+      </tr>
+      <tr>
+        <td colspan="2"> <b>An efficient Java&trade; solver implementation for SBML</b> </td>
+      </tr>
+    </table>
+  </p>
+  <table border="0" width="95%"><tbody><tr><td>
+  <p style="margin:auto; text-align:center;">
+    Andreas Dr&auml;ger<sup>1</sup>,
+    Roland Keller<sup>1</sup>,
+    Alexander D&ouml;rr<sup>1</sup>,
+    Stephanie Tscherneck<sup>1</sup>,
+    Benjamin Kandel<sup>2</sup>,
+    Marcus Klein<sup>2</sup>,
+	Ute Hofmann<sup>2</sup>,
+	Maria Thomas<sup>2</sup>,
+    Michael Ziller<sup>1,3</sup>,
+    Nicolas Rodriguez<sup>4</sup>,
+    Nicolas Le Nov&egrave;re<sup>4</sup>, 
+    Akira Funahashi<sup>5</sup>, 
+    Akito Tabira<sup>5</sup>,
+    Ulrich M. Zanger<sup>2</sup>,
+    and Andreas Zell<sup>1</sup>
+  </p><br/><p style="font-size:smaller;margin:auto;text-align:center;">
+    <sup>1</sup>Center for Bioinformatics T&uuml;bingen (ZBIT), Germany,
+    <sup>2</sup>Dr. Margarethe Fischer-Bosch-Institute for Clinical Pharmacology (IKP), Stuttgart, Germany,
+    <sup>3</sup>Department of Stem Cell and Regenerative Biology, Harvard University, Cambridge, MA, United States,
+    <sup>4</sup>European Bioinformatics Institute, Wellcome Trust Genome Campus, Hinxton, United Kingdom,
+    <sup>5</sup>Keio University, Graduate School of Science and Technology, Yokohama, Japan
+  </p>
+  <br/>
+
+  <p><b>Short description:</b>
+  SBMLsimulator is a fast, accurate, and easily usable program for dynamic model simulation and heuristic 
+  parameter optimization of models encoded in the Systems Biology Markup Language (SBML). In order to ensure 
+  a high reliability of this software, it  has been benchmarked against the entire SBML Test Suite and all 
+  models from the Biomodels.net database. It includes a large collection of nature-inspired heuristic 
+  optimization procedures for efficient model calibration. SBMLsimulator provides an intuitive Graphical
+  User Interface (GUI) and several command-line options to be suitable for large-scale batch processing and 
+  model calibration. SBMLsimulator runs on all platforms that provide a standard Java Virtual Machine and is 
+  based on the open-source library JSBML. The simulation core library of SBMLsimulator can be obtained as a
+  separate application programming library.
+</td></tr></tbody></table>
+
+<h1>
+  <table align="center" border="0" cellpadding="0" cellspacing="0" width="98%">
+    <tbody><tr>
+      <td class="menu" width="14%"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/downloads/SBMLsimulator-latest.jnlp">Java&trade; Web Start version</a></td>
+      <td class="menu" width="14%"><a href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/downloads/index.html">Download<br/>stand-alone version</a></td>
+    </tr>
+  </tbody></table>
+</h1>
+
+<div align="center">
+<table bgcolor="#f4f4f4" border="0" cellpadding="15" cellspacing="0" width="95%">
+    <tbody><tr><td bgcolor="#ffffff"><img src="index_files/current_news_e.html" alt="info" height="16" width="99"></td></tr>
+    <tr>
+      <td>
+          <b>First Release:</b> Click here to <a href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/downloads/index.html">download SBMLsimulator</a>. 
+            Note that an installation of <a href="http://www.java.com/de/download/" target="_blank">Java&trade; 1.5</a> or higher is required.
+            program.&nbsp;&nbsp;-&nbsp;&nbsp; (<i><a href="http://www.cogsys.cs.uni-tuebingen.de/mitarb/draeger">draeger</a> - 2012-03-01 15:32</i>)
+          <hr noshade="noshade" size="1" width="100%">
+          <div align="center">[<a href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/index.html">News archive</a>]</div>
+        </td>
+    </tr>
+    </tbody></table>
+</div>
+<br/>
+  <p style="text-align:center;"></p>
+  <p></p>
+  <h3 align="center">This project is promoted by:</h3>
+  <p></p>
+  <table style="text-align:center;" border="0" cellpadding="10" cellspacing="10" width="95%" align="center">
+    <tbody>
+      <tr>
+        <td width="2%"><a href="http://www.bmbf.de/"><b>BMBF</b></a></td>
+        <td width="2%"><a href="http://www.zbit.uni-tuebingen.de/"><b>ZBIT</b></a></td>
+        <td width="2%"><a href="http://www.virtual-liver.de/"><b>Virtual Liver</b></a></td>
+      </tr>
+      <tr>
+        <td width="2%">
+          <a href="http://www.bmbf.de/"><img src="index_files/bmbf.html" align="top"></a>
+        </td>
+        <td width="2%">
+          <a href="http://www.zbit.uni-tuebingen.de/"><img src="index_files/zbit_logo.html" align="top"></a>
+        </td>
+        <td width="2%">
+          <a href="http://www.virtual-liver.de/"><img src="index_files/VLN_left_small.html" align="top"></a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p></p>
+
+    <!--/BODY-->
+			
+    </div> <!-- body -->
+
+  </div>
+  <div class="cleanup"></div>
+  <div id="footer">
+	
+	<div id="footer-left">
+				<!-- <a href="./index.php?id=167&amp;L=">Anmelden</a> -->
+	</div>
+	<div id="footer-right">
+		Last changes: 28.02.2012, 10:54 CET &nbsp;|&nbsp;© 2001-2011&nbsp;|&nbsp;University of T&uuml;bingen&nbsp;|&nbsp;<a href="http://www.cogsys.cs.uni-tuebingen.de/impressum.html">Impressum</a>
+			</div>
+	
+	<div class="cleanup"></div>
+	
+</div>
+</div>
+
+
+</div></body></html>
