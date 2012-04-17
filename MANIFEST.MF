@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Created-By: Fat Jar Eclipse Plug-In
+Main-Class: org.sbml.simulator.SBMLsimulator
+SplashScreen-Image: org/sbml/simulator/gui/img/Splash.gif
+
+Name: org/apache/log4j/
+Implementation-Title: log4j
+Implementation-Version: 1.2.8
+Implementation-Vendor: "Apache Software Foundation"

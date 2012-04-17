@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+  <comment>
+	   This configuration describes the names of buttons and menu
+	   items in base graphical user interfaces. To change the configuration
+	   note that the key is the same as the enum type in BaseFrame.BaseAction
+	   and the given value consists of the actual short name and - separated
+	   by a semicolon ";" the corresponding tool tip.
+  </comment>
+  
+  <!-- BoxAndWhiskerXYToolTipGenerator -->
+  
+  <entry key="MEAN">mean</entry>
+  <entry key="MEDIAN">median</entry>
+  <entry key="MIN">min</entry>
+  <entry key="MAX">max</entry>
+  <entry key="Q1">Q1</entry>
+  <entry key="Q3">Q3</entry>
+      
+  <!-- COMPONENT -->
+  
+  <entry key="ALL">All components</entry>
+  <entry key="ALL_TOOLTIP">Selects all available components for the plot.</entry>
+  <entry key="COMPARTMENTS">Compartments</entry>
+  <entry key="COMPARTMENTS_TOOLTIP">Selects all compartments for the plot.</entry>
+  <entry key="SPECIES">Species</entry>
+  <entry key="SPECIES_TOOLTIP">If this option is selected, all species of the model are plotted.</entry>
+  <entry key="PARAMETERS">Parameters</entry>
+  <entry key="PARAMETERS_TOOLTIP">With this option you can plot the changes of all global parameters in the model.</entry>
+  <entry key="FLUXES">Fluxes</entry>
+  <entry key="FLUXES_TOOLTIP">Select this option to plot the evolution of all flux values in the model.</entry>
+  <entry key="SELECT_ALL">Select</entry>
+  <entry key="SELECT_ALL_TOOLTIP">Select the components to be shown in the plot.</entry>
+  <entry key="SELECT_NONE">Deselect</entry>
+  <entry key="SELECT_NONE_TOOLTIP">Select the components to be excluded from the plot.</entry>
+  
+  <!-- CSVDataImporter -->
+  
+  <entry key="FILE_NOT_CORRECTLY_FORMATTED">Unreadable file</entry>
+  <entry key="FILE_NOT_CORRECTLY_FORMATTED_TOOLTIP">Cannot read this format, because no column identifiers are provided.</entry>
+  <entry key="ADDITIONAL_COLUMNS_ARE_IGNORED">Some elements are ignored</entry>
+  <entry key="ADDITIONAL_COLUMNS_ARE_IGNORED_TOOLTIP">The data file contains some elements that do not have a counterpart in the given model. These elements will not occur in the plot and are ignored in the analysis.</entry>
+  <entry key="TIME">Time</entry>
+  
+  <!-- EstimationOptions -->
+    
+  <entry key="EstimationOptions">Estimation Options</entry>
+  <entry key="EST_ALL_COMPARTMENTS">Compartment sizes</entry>
+  <entry key="EST_ALL_COMPARTMENTS_TOOLTIP">Decide whether or not by default all compartments in a model should be considered the target of an optimization, i.e., value estimation.</entry>
+  <entry key="EST_ALL_GLOBAL_PARAMETERS">Global parameter values</entry>
+  <entry key="EST_ALL_GLOBAL_PARAMETERS_TOOLTIP">Decide whether or not by default all global parameters in a model should be considered the target of an optimization, i.e., value estimation.</entry>
+  <entry key="EST_ALL_LOCAL_PARAMETERS">Local parameter values</entry>
+  <entry key="EST_ALL_LOCAL_PARAMETERS_TOOLTIP">Decide whether or not by default all local parameters in a model should be considered the target of an optimization, i.e., value estimation.</entry>
+  <entry key="EST_ALL_SPECIES">Initial species values</entry>
+  <entry key="EST_ALL_SPECIES_TOOLTIP">Decide whether or not by default all species in a model should be considered the target of an optimization, i.e., value estimation.</entry>
+  <entry key="EST_INIT_MAX_VALUE">Upper bound of initial estimates</entry>
+  <entry key="EST_INIT_MAX_VALUE_TOOLTIP">The maximal value of the initialization range in a parameter estimation procedure.</entry>
+  <entry key="EST_INIT_MIN_VALUE">Lower bound of initial estimates</entry>
+  <entry key="EST_INIT_MIN_VALUE_TOOLTIP">The minimal value of the initialization range in a parameter estimation procedure.</entry>
+  <entry key="EST_MAX_VALUE">Upper bound for estimated values</entry>
+  <entry key="EST_MAX_VALUE_TOOLTIP">The maximal value in the absolute allowable range in a parameter estimation procedure.</entry>
+  <entry key="EST_MIN_VALUE">Lower bound for estimated values</entry>
+  <entry key="EST_MIN_VALUE_TOOLTIP">The minimal value in the absolute allowable range in a parameter estimation procedure.</entry>
+  <entry key="EST_MULTI_SHOOT">Use multiple shooting integration</entry>
+  <entry key="EST_MULTI_SHOOT_TOOLTIP">Decide whether a model calibration should be done using multiple shoot technique. This should be the default. The other possibility is the so-called single shoot technique. This means that only one initial value is taken to integrate the ordinary differential equation system, whereas the multiple shoot technique restarts the integration in each time step given the values in this step. The aim is then to come as close as possible to the start value in the next time step. In many cases the fitness landscape becomes much more friendly when using a multiple shoot strategy.</entry>
+  <entry key="OPTIMIZATION_TARGETS">Default optimization targets</entry>
+  <entry key="OPTIMIZATION_TARGETS_TOOLTIP">Select the default optimization targets.</entry>
+  <entry key="OPTIMIZATION_RANGES">Ranges of all optimization targets</entry>
+  <entry key="OPTIMIZATION_RANGES_TOOLTIP">Define the initial and absolute ranges of all optimization targets.</entry>
+  <entry key="QUALITY_MEASURE">Evaluation criteria for the model's quality</entry>
+  <entry key="QUALITY_MEASURE_TOOLTIP">This specifies the class name of the default quality function that evaluates the quality of a simulation with respect to given (experimental) data.</entry>
+  <entry key="QUALITY_DEFAULT_VALUE">Default quality value</entry>
+  <entry key="QUALITY_DEFAULT_VALUE_TOOLTIP">The default return value of a quality function that can be used if for some reason a quality cannot be computed. For example, this might avoid a division by zero.</entry>
+  <entry key="QUALITY_N_METRIC_ROOT">N-metric root exponent</entry>
+  <entry key="QUALITY_N_METRIC_ROOT_TOOLTIP">The root parameter in the distance function for n-metrics: in case of the n-norm this is at the same time also the exponent. For instance, the Eulidean distance has a root value of two, whereas the Manhattan norm has a root of one. In the RSE, the default root is also two, but this value may be changed.</entry>
+  <entry key="QUALITY_MEASURES">Quality function</entry>
+  <entry key="QUALITY_MEASURES_TOOLTIP">Here you can specify how to evaluate the quality of a parameter set with respect to given experimental data.</entry>
+  <entry key="INTEGRATION_STRATEGY">Integration strategy</entry>
+  <entry key="INTEGRATION_STRATEGY_TOOLTIP">Select whether or not to apply a multiple shooting strategy.</entry>
+  
+  <!-- EstimationProblem -->
+  
+  <entry key="KIND_OF_SHOOTING">Using {0} shooting!</entry>
+  <entry key="MULTIPLE">multiple</entry>
+  <entry key="SINGLE">single</entry>
+  <entry key="RESULT_OF_BEST_PER_GENERATION">Result of the best individual per generation of the model simulation</entry>
+  <entry key="OPTIMIZATION_TARGET_IS_NOT_PART_OF_THE_MODEL">Cannot estimate the values of quantities that are not part of the given model.</entry>
+  <entry key="MISSING_REFERENCE_DATA">At least for one symbol reference data are required.</entry>
+  
+  <!-- InteractiveScanPanel -->
+  
+  <entry key="RESET">Reset</entry>
+  <entry key="RESET_TOOLTIP">Sets all values to the original values from the model. However, previously undefined values will be set to the default values.</entry>
+  <entry key="GLOBAL_PARAMETERS">Global Parameters</entry>
+  <entry key="LOCAL_PARAMETERS">Local Parameters</entry>
+  <entry key="REPLACEMENT_OF_UNDEFINED_VALUES">{0} for {1} {2} replaced by the corresponding default value {3,number}:</entry>
+  <entry key="VALUE_PARTS">The undefined value;The undefined {0,number} values</entry>
+  <entry key="NAME_PARTS_PARAMETER">following parameter;following parameters</entry>
+  <entry key="NAME_PARTS_SPECIES">following species;following species</entry>
+  <entry key="NAME_PARTS_COMPARTMENT">following compartment;following compartments</entry>  
+  <entry key="HAS_BEEN_PARTS">has been;have been</entry>
+  <entry key="REPLACING_UNDEFINED_VALUES">Replacing undefined values</entry>
+  <entry key="REACTION_ID"> Reaction {0} </entry>
+  
+  <!-- LegendTableCellRenderer -->
+  
+  <entry key="RGB_TOOLTIP">Red = {0,number}, Green = {1,number}, Blue = {2,number}</entry>
+  <entry key="OUTSIDE_TOOLTIP">Surrounding compartment: {0}</entry>
+  <entry key="SPECIES_COMPARTMENT">Containing compartment: {0}</entry>
+  <entry key="REACTION_COMPARTMENT">Takes place in compartment: {0}</entry>
+  <entry key="LOCAL_PARAMETER_REACTION">Occurs in the kinetic law of reaction: {0}</entry>
+  
+  <!-- LegendTableModel -->
+  
+  <entry key="PLOT_COLUMN">Plot</entry>
+  <entry key="COLOR_COLUMN">Color</entry>
+  <entry key="COMPONENT_COLUMN">Component</entry>
+  <entry key="UNIT_COLUMN">Unit</entry>
+  <entry key="UNKOWN_CLUMN_EXC">Only {0,number} columns, no column {1,number}</entry>
+    
+  <!-- Metrics -->
+  
+  <entry key="N_Metric">N-metric</entry>
+  <entry key="EuclideanDistance">Euclidean</entry>
+  <entry key="ManhattanDistance">Manhattan</entry>
+  <entry key="DISTANCE">distance</entry>
+  <entry key="RelativeSquaredError">Relative Squared Error</entry>
+  <entry key="EXPONENT">exponent</entry>
+  <entry key="PearsonCorrelation">Pearson's correlation coefficient</entry>
+  <entry key="RELATIVE">Relative</entry>
+  
+  <!-- Plot -->
+  
+  <entry key="PLOT_SAVE_DIR_TOOLTIP">The default save directory for graphics files as a result of a plot.</entry>
+  <entry key="PLOT_BACKGROUND_COLOR">Plot background color</entry>
+  <entry key="PLOT_BACKGROUND_COLOR_TOOLTIP">The background color of the plot</entry>
+  <entry key="PLOT_GRID_COLOR">Plot grid color</entry>
+  <entry key="PLOT_GRID_COLOR_TOOLTIP">The color of the plot's grid</entry>
+  <entry key="PLOT_TITLE_TOOLTIP">Set the title of the plot</entry>
+  <entry key="SHOW_PLOT_GRID">Grid</entry>
+  <entry key="SHOW_PLOT_GRID_TOOLTIP">Decide whether or not to draw a grid in the plot area.</entry>
+  <entry key="SHOW_PLOT_LEGEND">Legend</entry>
+  <entry key="SHOW_PLOT_LEGEND_TOOLTIP">Add or remove a legend in the plot.</entry>
+  <entry key="SHOW_PLOT_TOOLTIPS">Tool tips</entry>
+  <entry key="SHOW_PLOT_TOOLTIPS_TOOLTIP">Let the plot display tool tips for each curve.</entry>
+  <entry key="BASE_OPTIONS">Plotting panel options</entry>
+  <entry key="BASE_OPTIONS_TOOLTIP">Options for the visible rectangle of the plot panel</entry>
+  <entry key="PLOT_APPEARANCE">Appearance of the plot</entry>
+  <entry key="PLOT_APPEARANCE_TOOLTIP">Options for appearance of the plot area</entry>
+  
+  <!-- PlotOptions -->
+  
+  <entry key="PlotOptions">Plot Options</entry>
+  
+  <!-- QuantitySelectionPanel -->
+  
+  <entry key="UNKNOWN_COMMAND">Unknown command "{0}"</entry>
+  <entry key="ROW_INDEX_OUT_OF_BOUNDS">Row index {0} out of bounds: {1} rows available.</entry>
+  <entry key="COLUMN_INDEX_OUT_OF_BOUNDS">Column index {0} out of bounds: {1} columns available.</entry>
+  <entry key="CANNOT_ADOPT_NEW_VALUE">Cannot adopt the new value {0,number} because it {4} the current {3} of {1,number}.</entry>
+  <entry key="CANNOT_DERIVE_UNIT_OF">Cannot change the derived unit of {0}.</entry>
+  <entry key="EXCEEDS">exceeds</entry>
+  <entry key="SELECTED">Selected</entry>
+  <entry key="NAME">Name</entry>
+  <entry key="INITIAL_MINIMUM">Initial Minimum</entry>
+  <entry key="INITIAL_MAXIMUM">Initial Maximum</entry>
+  <entry key="ABSOLUTE_MINIMUM">Absolute Minimum</entry>
+  <entry key="ABSOLUTE_MAXIMUM">Absolute Maximum</entry>
+  <entry key="CHECK_BOX_TOOLTIP">Check this box to include {0} {1} in the optimization</entry> <!-- SBML element name and name of the instance -->
+  <entry key="EXPLANATION">Please select the model components, whose values are to be optimized. You can also change the allowable ranges for each element.</entry>
+  <entry key="MIN_MAX_SPINNER_TOOL_TIP">Select the absolute {0} allowable value for this {1} named {2}.</entry>
+  <entry key="MINIMUM">minimum</entry>
+  <entry key="MAXIMUM">maximum</entry>
+  <entry key="INIT_MIN_MAX_SPINNER_TOOL_TIP">Select the {0} allowable value for this {1} named {2} in the initialization.</entry>
+  <entry key="TAB_TOOL_TIP">In this tab you can select the {0} in the model whose values are to be optimized.</entry>
+  
+  <!-- SelectionCommand -->
+  
+  <entry key="OPTIMIZE_ALL">Select all</entry>
+  <entry key="OPTIMIZE_ALL_TOOLTIP">With this button you can easily select all elements on this panel</entry>
+  <entry key="OPTIMIZE_NONE">Select none</entry>
+  <entry key="OPTIMIZE_NONE_TOOLTIP">With this button you can easily deselect all elements on this panel.</entry>
+    
+  <!-- SimulationManager -->
+  
+  <entry key="SIMULATION_COULD_NOT_BE_CANCELED">Simulation cannot be canceled.</entry>
+  <entry key="NO_RUNNING_SIMULATION">No simulation running that could be canceled.</entry>
+  
+  <!-- SimulationOptions -->
+  
+  <entry key="ABS_TOL">Absolute tolerance</entry>
+  <entry key="ABS_TOL_TOOLTIP">Allowed absolute vectorial error.</entry>
+  <entry key="REL_TOL">Relative tolerance</entry>
+  <entry key="REL_TOL_TOOLTIP">Allowed relative vectorial error.</entry>
+  <entry key="SimulationOptions">Simulation options</entry>
+  <entry key="DEFAULT_INIT_COMPARTMENT_SIZE">Initial compartment size</entry>
+  <entry key="DEFAULT_INIT_COMPARTMENT_SIZE_TOOLTIP">If not specified the value corresponding to this argument will be used to initialize the size of compartments.</entry>
+  <entry key="DEFAULT_INIT_SPECIES_VALUE">Initial species value</entry>
+  <entry key="DEFAULT_INIT_SPECIES_VALUE_TOOLTIP">If not specified the value corresponding to this argument will be used to initialize species depending on their hasOnlySubstanceUnits property as initial amount or initial concentration.</entry>
+  <entry key="DEFAULT_INIT_PARAMETER_VALUE">Initial value of parameters</entry>
+  <entry key="DEFAULT_INIT_PARAMETER_VALUE_TOOLTIP">The default initial value that is set for parameters with undefined value.</entry>
+  <entry key="DEFAULT_VALUES">Missing values</entry>
+  <entry key="DEFAULT_VALUES_TOOLTIP">Decide how to treat the values of compartments, species, and parameters if no initial value has been defined in the model. A missing initial value is to be distinguished from invalid, i.e., NaN, values. Furthermore, the elements may have very diverse the units associated with them. Here it is only possible to define one numeric value for each element group, irrespective of any unit.</entry>
+  <entry key="ODE_SOLVER">Differential equation solver</entry>
+  <entry key="ODE_SOLVER_TOOLTIP">This gives the class name of the default solver for Ordinary Differential Equation (ODE) systems. The associated class must implement AbstractDESSolver and must have a constructor without any parameters.</entry>
+  <entry key="SIM_START_TIME">Start time</entry>
+  <entry key="SIM_START_TIME_TOOLTIP">The double value associated with this key must, in case of SBML equal to zero. Generally, any start time would be possible. This is why this key exists. But SBML is defined to start its simulation at the time zero.</entry>
+  <entry key="SIM_END_TIME">End time</entry>
+  <entry key="SIM_END_TIME_TOOLTIP">With the associated non-negative double number that has to be greater than 0 when simulating SBML models, it is possible to perform a simulation.</entry>
+  <entry key="SIM_STEP_SIZE">Step size</entry>
+  <entry key="SIM_STEP_SIZE_TOOLTIP">The greater this value the longer the computation time, but the more accurate will be the result.</entry>
+  <entry key="SIMULATION_CONFIGURATION">Settings for the simulation</entry>
+  <entry key="SIMULATION_CONFIGURATION_TOOLTIP">Here you can specify parameters for the simulation of the model.</entry>
+    
+  <!-- SimulationPanel -->
+  
+  <entry key="NO_ODE_SOLVERS_AVAILABLE_MESSAGE">Could not find any solvers for differential equation systems. A simulation is therefore not possible.</entry>
+  <entry key="NO_ODE_SOLVERS_AVAILABLE">No ODE solver available</entry>
+  <entry key="NULL_MODEL">Model is null.</entry>
+  <entry key="INTEGRATION_TOOLBOX">Integration tool box</entry>
+  <entry key="TAB_SIMULATION">Simulation</entry>
+  <entry key="TAB_IN_SILICO_DATA">Computed data</entry>
+  <entry key="TAB_EXPERIMENTAL_DATA">Experimental data</entry>
+  <entry key="TAB_MODEL_VIEW">Model</entry>
+  <entry key="NO_SIMULATION_PERFORMED">No simulation has been performed yet. Please run the simulation first.</entry>
+  <entry key="NO_EXPERIMENTAL_DATA_LOADED">Currently, no experimental data have been opened, nor modified. There is nothing to be saved at the moment.</entry>
+  
+  <!-- SimulationToolPanel -->
+  
+  <entry key="STEP_COUNT">Number of steps</entry>
+  <entry key="STEP_COUNT_TOOLTIP">The number of time points between the start and the end time of the simulation at which the numerical integration routine should solve the differential equation system. The number of integration steps determines the step size of the integration that equally divides the entire time interval into smaller sub-intervals.</entry>
+  <entry key="PLOT_SETTINGS">Plot settings</entry>
+  
+  <!-- SimulationVisualizationPanel -->
+  
+  <entry key="X_AXIS_LABEL">Time in {0}</entry>
+  <entry key="Y_AXIS_LABEL">Value</entry>
+  <entry key="NO_LOGARITHMIC_SCALE_POSSIBLE">Cannot change to logarithmic scale because at least one value on the y-axis is not greater than zero.</entry>
+  <entry key="WARNING">Warning</entry>
+  
+  <!-- SimulationWorker -->
+  
+  <entry key="MODEL_UNSTABLE_EXCEPTION">Simulation not possible because the model is unstable. Please try again with a different solver.</entry>
+  <entry key="SIMULATION_TIME">Computation time: {0,number} s</entry>
+  <entry key="SIMULATION_CANCELED">Simulation canceled after {0,number} s.</entry>
+  
+  <!-- SimulatorOptions -->
+  
+  <entry key="SimulatorOptions">Simulator Options</entry>
+  <entry key="INPUT_FILES">Select input files</entry>
+  <entry key="INPUT_FILES_TOOLTIP">These options are used to select all input files for the simulation.</entry>
+  <entry key="OUTPUT_FILES">Select output files</entry>
+  <entry key="OUTPUT_FILES_TOOLTIP">Select output files for the results of simulation and parameter estimation.</entry>
+  <entry key="SBML_INPUT_FILE">SBML input file</entry>
+  <entry key="SBML_INPUT_FILE_TOOLTIP">Select a model in SBML format that is to be simulated.</entry>
+  <entry key="SBML_OUTPUT_FILE">SBML output file</entry>
+  <entry key="SBML_OUTPUT_FILE_TOOLTIP">Select a file where to store the model in SBML format after parameter optimization.</entry>
+  <entry key="SIMULATION_OUTPUT_FILE">Simulation output file</entry>
+  <entry key="SIMULATION_OUTPUT_FILE_TOOLTIP">Select a file where to store the results of a simulation.</entry>
+  <entry key="TIME_SERIES_FILE">Time series data file</entry>
+  <entry key="TIME_SERIES_FILE_TOOLTIP">Path to a file with a time series of species/compartment/parameter values.</entry>
+  
+  <!-- SimulatorUI -->
+  
+  <entry key="ABOUT_HTML">html/about.html</entry>
+  <entry key="CAN_ONLY_OPEN_ONE_MODEL_AT_A_TIME">Can only open one model, rejecting the following files:</entry>
+  <entry key="CANNOT_LAUNCH_EVA2">The optimization tool box EvA2 cannot be launched. This problem occurs whenever this program cannot determine its own location on your local computer. This happens, for instance, if you have started SBMLsimulator as a Java™ Web Start application. In order to be able to invoke any model calibration method, please download the entire program SBMLsimulator and run it locally, e.g., by double clicking on the JAR file. Please have a look into the online help of SBMLsimulator where you can find a direct link to the project's homepage.</entry>
+  <entry key="CANNOT_OPEN_DATA_WIHTOUT_MODEL">Cannot open data if no model has been opened.</entry>
+  <entry key="CLOSE_MODEL_BEFORE_OPENING_NEXT">The current model must be closed before a new model can be opened.</entry>
+  <entry key="CLOSE_MODEL_WITHOUT_SAVING">Close current model and all data without saving?</entry>
+  <entry key="CLOSING_MODEL">Closing model</entry>
+  <entry key="COMPUTED">computed</entry>
+  <entry key="COULD_NOT_OPEN_FILES">Could not open the following files:</entry>
+  <entry key="COULD_NOT_OPEN_MODEL">Could not open model {0}.</entry>
+  <entry key="ERROR_MESSAGE">Error Message</entry>
+  <entry key="FILE_CLOSE">Close model;Closes the currently selected model and all experimental data sets that may be associated with the model.</entry>
+  <entry key="FILE_OPEN">Open model;Open a model in SBML format for simulation or parameter optimization.</entry>
+  <entry key="INFORMATION">Information</entry>
+  <entry key="LICENSE_HTML">html/License.html</entry>
+  <entry key="LAUNCHING_SIMULATION">Launching simulation</entry>
+  <entry key="NOTHING_TO_SAVE">There is nothing to be saved at the moment.</entry>
+  <entry key="OPEN">Open</entry>
+  <entry key="OPEN_TOOLTIP">Open a model or experimental data.</entry>
+  <entry key="OPEN_DATA">Load experimental data</entry>
+  <entry key="OPEN_DATA_TOOLTIP">Open one ore multiple experimental data sets.</entry>
+  <entry key="OPTIMIZATION">Optimization</entry>
+  <entry key="OPTIMIZATION_TOOLTIP">Launch the optimization of the quantities in the current model, i.e., fits the model to given experimental data.</entry>
+  <entry key="ONLINE_HELP_HTML">html/online-help.html</entry>
+  <entry key="PRINT">Print</entry>
+  <entry key="PRINT_TOOLTIP">Opens a dialog to print the plot image.</entry>
+  <entry key="RECEIVED_WINDOW_EVENT">Received WindowEvent</entry>
+  <entry key="SHOW_OPTIONS">Show options</entry>
+  <entry key="SHOW_OPTIONS_TOOLTIP">Decide whether or not to display the options.</entry>
+  <entry key="SELECT_QUANTITIES_FOR_OPTIMIZATION">Select quantities for optimization</entry>
+  <entry key="SIMULATION_START">Start simulation</entry>
+  <entry key="SIMULATION_START_TOOLTIP">Performs a dynamic simulation run with the current settings.</entry>
+  <entry key="SIMULATION_STOP">Stop simulation</entry>
+  <entry key="SIMULATION_STOP_TOOLTIP">Interrupts a running simulation.</entry>
+  <entry key="TOO_MANY_MODEL_FILES">Too many model files</entry>
+  <entry key="UNABLE_TO_OPEN_DATA">Unable to open data</entry>
+  <entry key="UNSUPPORTED_FILE_TYPES">Unsupported file types</entry>
+  
+</properties>
