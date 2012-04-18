@@ -87,8 +87,8 @@
     	
           <!--<zipfileset excludes="META-INF/*,de/zbit/resources/*,de/zbit/mapper/*,**/package.html,overview.html" src="${base}/lib/sysbio.jar"/> -->
           <fileset dir="${SysBioPath}/bin">
-    	      <exclude name="de/zbit/resources/*"/>
-    	      <exclude name="de/zbit/mapper/*"/>
+    	      <exclude name="de/zbit/resources/**/*"/>
+    	      <exclude name="de/zbit/mapper/**/*"/>
     	      <exclude name="**/package.html"/>
     	      <exclude name="overview.html"/>
     	    </fileset>
