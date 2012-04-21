@@ -36,7 +36,7 @@ public class JSliderTest extends JFrame implements DynamicGraph{
 	JFrame window = new JFrame("SliderTest");
 	JSlider searchBar = new JSlider();
 	JLabel timepoint = new JLabel("Timepoint: 0");
-	JLabel dataStrings = new JLabel("data");
+	JLabel dataStrings = new JLabel("<data>");
 	JButton play = new JButton("Play");
 	JButton pause = new JButton("Pause");
 	JButton stop = new JButton("Stop");
