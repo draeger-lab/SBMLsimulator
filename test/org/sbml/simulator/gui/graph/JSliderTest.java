@@ -35,15 +35,16 @@ public class JSliderTest extends JFrame implements DynamicGraph{
 	
 	JFrame window = new JFrame("SliderTest");
 	JSlider searchBar = new JSlider();
-	JLabel timepoint = new JLabel("0");
+	JLabel timepoint = new JLabel("Timepoint: 0");
 	JLabel dataStrings = new JLabel("data");
 	JButton play = new JButton("Play");
 	JButton pause = new JButton("Pause");
+	JButton stop = new JButton("Stop");
 	
 	
 	private DynamicCore core = new DynamicCore(this);
 	
-	private Controller controller = new Controller(core, this);
+	private Controller controller = new Controller(core);
 	
 	private MultiTable testTable = new MultiTable();
 	
@@ -51,7 +52,7 @@ public class JSliderTest extends JFrame implements DynamicGraph{
 		double[] timepoints = {0.1,0.2,0.3,0.4,0.5};
 		testTable.setTimePoints(timepoints);
 		
-		String[] IDs = {"eins", "zwei", "drei"};
+		String[] IDs = {"ID1", "ID2", "ID3"};
 		testTable.addBlock(IDs);
 		
 		double[][] data = {{1,2,3},{4,5,6},{7,8,9},{10,11,12},{13,14,15}};
@@ -72,6 +73,7 @@ public class JSliderTest extends JFrame implements DynamicGraph{
 		
 		play.addActionListener(controller);
 		pause.addActionListener(controller);
+		stop.addActionListener(controller);
 		
 		window.setSize(260, 200);
 		window.setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -81,6 +83,7 @@ public class JSliderTest extends JFrame implements DynamicGraph{
 		window.add(searchBar);
 		window.add(play);
 		window.add(pause);
+		window.add(stop);
 		window.setVisible(true);
 	}
 
@@ -89,8 +92,12 @@ public class JSliderTest extends JFrame implements DynamicGraph{
 	 */
 	@Override
 	public void updateGraph(double timePoint, MultiTable updateThem) {
-		timepoint.setText("Timepoint: " +timePoint);
-		dataStrings.setText("Data: " + updateThem.getValueAt(0, 1));
+		timepoint.setText("Timepoint: " +timePoint); 
+		String dataString = "";
+		for(int i = 1; i <= updateThem.getColumnCount(); i++){
+			dataString += updateThem.getColumnIdentifier(i) + ": " + updateThem.getValueAt(0, i) + " || " ; //there's just one row (timepoint to be updated)
+		}
+		dataStrings.setText(dataString);
 		searchBar.setValue(core.getIndexOfTimePoint(timePoint));
 	}
 

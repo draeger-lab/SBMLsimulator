@@ -31,11 +31,9 @@ import javax.swing.event.ChangeListener;
 public class Controller implements ChangeListener, ActionListener{
 	
 	private DynamicCore core;
-	private DynamicGraph graph;
 
-	public Controller(DynamicCore core, DynamicGraph graph){
+	public Controller(DynamicCore core){
 		this.core = core;
-		this.graph = graph;
 	}
 	
 	/* (non-Javadoc)
@@ -44,7 +42,6 @@ public class Controller implements ChangeListener, ActionListener{
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		int timepoint = ((JSlider)e.getSource()).getValue();
-		System.out.println(timepoint);
 		core.setCurrTimePoint(timepoint);
 		
 	}
@@ -58,6 +55,8 @@ public class Controller implements ChangeListener, ActionListener{
 			core.play();
 		}else if(e.getActionCommand().equals("Pause")){
 			core.pausePlay();
+		}else if(e.getActionCommand().equals("Stop")){
+			core.stopPlay();
 		}
 		
 		
