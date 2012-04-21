@@ -92,7 +92,7 @@ public class DynamicCore {
 	/**
 	 * Determines the speed of the the play method
 	 */
-	private int playspeed = 400;
+	private int playspeed = 700;
 	
 	/**
 	 * Constructs the core with an observer.
@@ -167,6 +167,16 @@ public class DynamicCore {
 	public void pausePlay(){
 		System.out.println("pause");
 		play.stop();
+	}
+	
+	/**
+	 * Stops the play thread
+	 */
+	public void stopPlay(){
+		System.out.println("stop");
+		play.stop();
+		currTimePoint = data.getTimePoint(0);
+		currTimePointChanged(data.getTimePoint(0));
 	}
 	
 	/**
