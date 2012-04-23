@@ -62,7 +62,6 @@ public class JSliderTest extends JFrame implements DynamicGraph{
 	public void init(){
 		generateTestTable();
 		core.setData(testTable);
-		core.addObserver(this);
 		
 		searchBar.setMaximum(testTable.getRowCount()-1);
 		searchBar.setMinimum(0);
@@ -98,7 +97,7 @@ public class JSliderTest extends JFrame implements DynamicGraph{
 			dataString += updateThem.getColumnIdentifier(i) + ": " + updateThem.getValueAt(0, i) + " || " ; //there's just one row (timepoint to be updated)
 		}
 		dataStrings.setText(dataString);
-		searchBar.setValue(core.getIndexOfTimePoint(timePoint));
+		searchBar.setValue(core.getIndexOfTimepoint(timePoint));
 	}
 
 }

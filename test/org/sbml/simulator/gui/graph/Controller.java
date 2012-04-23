@@ -42,7 +42,7 @@ public class Controller implements ChangeListener, ActionListener{
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		int timepoint = ((JSlider)e.getSource()).getValue();
-		core.setCurrTimePoint(timepoint);
+		core.setCurrTimepoint(timepoint);
 		
 	}
 

@@ -25,6 +25,6 @@ import org.simulator.math.odes.MultiTable;
  */
 public interface DynamicGraph {
 
-	public void updateGraph(double timePoint, MultiTable updateThem);
+	public void updateGraph(double timepoint, MultiTable updateThem);
 	
 }
