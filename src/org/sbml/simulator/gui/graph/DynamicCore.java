@@ -38,8 +38,8 @@ public class DynamicCore {
 	 */
 	private class Play extends Thread{
 		public void run(){
-			for(int i = getIndexOfTimePoint(currTimePoint); i < timePoints.length; i++){
-				setCurrTimePoint(timePoints[i]);				
+			for(int i = getIndexOfTimepoint(currTimepoint); i < timePoints.length; i++){
+				setCurrTimepoint(timePoints[i]);				
 				try {
 					sleep(playspeed);
 				} catch (InterruptedException e) {
@@ -57,7 +57,7 @@ public class DynamicCore {
 	/**
 	 * Saves the currently displayed timestep.
 	 */
-	private double currTimePoint;
+	private double currTimepoint;
 	
 	/**
 	 * Saves the maximum simulated time.
@@ -109,7 +109,7 @@ public class DynamicCore {
 	public void setData(MultiTable data){
 		this.data = data;
 		timePoints = data.getTimePoints();
-		currTimePoint = data.getTimePoint(0);
+		currTimepoint = data.getTimePoint(0);
 		//TODO: set simulation settings (min,max,stepsize)
 	}
 	
@@ -117,20 +117,20 @@ public class DynamicCore {
 	 * Set the current time displayed by the graph.
 	 * @param time
 	 */
-	public void setCurrTimePoint(double time){
+	public void setCurrTimepoint(double time){
 		//TODO: check if time exists and if it's within borders
-		this.currTimePoint = time;
-		currTimePointChanged(time);
+		this.currTimepoint = time;
+		currTimepointChanged(time);
 	}
 	
 	/**
 	 * Set the current time displayed by the graph to the given rowIndex of the MultiTable.
 	 * @param time
 	 */
-	public void setCurrTimePoint(int rowIndex){
+	public void setCurrTimepoint(int rowIndex){
 		//TODO: check if time exists and if it's within borders
-		this.currTimePoint = data.getTimePoint(rowIndex);
-		currTimePointChanged(data.getTimePoint(rowIndex));
+		this.currTimepoint = data.getTimePoint(rowIndex);
+		currTimepointChanged(data.getTimePoint(rowIndex));
 	}
 	
 	/**
@@ -145,10 +145,10 @@ public class DynamicCore {
 	 * Notifies all observers about the change and delivers changed Species & Reactions
 	 */
 	//TODO: deliver changed values with respect to the chosen graphelements
-	private void currTimePointChanged(double changedTo){
-		double[] currTimePoints = {currTimePoint};
+	private void currTimepointChanged(double changedTo){
+		double[] currTimePoints = {currTimepoint};
 		for(DynamicGraph dg : observers){
-			dg.updateGraph(currTimePoint, data.filter(currTimePoints));
+			dg.updateGraph(currTimepoint, data.filter(currTimePoints));
 		}
 	}
 	
@@ -175,8 +175,8 @@ public class DynamicCore {
 	public void stopPlay(){
 		System.out.println("stop");
 		play.stop();
-		currTimePoint = data.getTimePoint(0);
-		currTimePointChanged(data.getTimePoint(0));
+		currTimepoint = data.getTimePoint(0);
+		currTimepointChanged(data.getTimePoint(0));
 	}
 	
 	/**
@@ -184,7 +184,7 @@ public class DynamicCore {
 	 * @param timepoint
 	 * @return index of the timepoint, if not found, then -1
 	 */
-	public int getIndexOfTimePoint(double timepoint) {
+	public int getIndexOfTimepoint(double timepoint) {
 		int searchedIndex = -1;
 		for(int i = 0; i < timePoints.length; i++){
 			if(timepoint == timePoints[i]){
