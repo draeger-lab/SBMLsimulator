@@ -20,6 +20,9 @@ package org.sbml.simulator.gui.graph;
 import org.simulator.math.odes.MultiTable;
 
 /**
+ * Interface to ensure any DynamicCore observer provides the necessary methods
+ * and eventually identifies the implementing class as a view in MVC-pattern.
+ * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
