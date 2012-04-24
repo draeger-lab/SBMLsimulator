@@ -17,14 +17,16 @@
  */
 package org.sbml.simulator.gui.graph;
 
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-
-import de.zbit.gui.GUITools;
 
 /**
  * JPanel to control the timepoints of a dynamic simulation
@@ -35,67 +37,135 @@ import de.zbit.gui.GUITools;
 public class DynamicControlPanel extends JPanel{
 	private static final long serialVersionUID = 6692563909762370732L;
 	
-	
+	/**
+	 * Pointer to related core
+	 */
 	private DynamicCore core;
-	private double[] timepointsOfSimulation;
+	
+	/**
+	 * Registered controller
+	 */
 	private DynamicController controller;
 	
+	/*
+	 * GUI elements
+	 * TODO: GUITools Buttons
+	 */
 	private JLabel timelbl;
 	private JSlider searchBar;
 	private JButton play;
 	private JButton pause;
 	private JButton stop;
+	private JButton video;
 	
-	public DynamicControlPanel(){
+	
+	/**
+	 * Constructs a new control panel without an associated core
+	 */
+	public DynamicControlPanel() {
 		init();
-		//TODO: construct controller
 	}
-	
+
+	/**
+	 * Constructs an new control panel with associated core.
+	 * @param core
+	 */
 	public DynamicControlPanel(DynamicCore core){
-		this.core = core;
+		setCore(core);
 		init();
-		//TODO: set JSlider values with respect to core 
 	}
-	
+
+	/**
+	 * Sets the related core to this control panel.
+	 * A DynamicController is constructed in addition, hence all control actions 
+	 * (buttons, searchbar) are associated with a controller.
+	 * 
+	 * @param core
+	 */
 	public void setCore(DynamicCore core){
 		this.core = core;
-		timepointsOfSimulation = core.getTimepoints();
+		double[] timepointsOfSimulation = core.getTimepoints();
 		searchBar.setMinimum(0);
 		searchBar.setMaximum(timepointsOfSimulation.length-1);
-		timelbl.setText(timepointsOfSimulation[0] + "");
 		
+		/*
+		 * Controller needs to be assigned after setting the boundries of JSlider.
+		 * Otherwise the current JSlider-value will change, thus invoking a change of the 
+		 * current saved timepoint of the core.
+		 * (Does not cause inconsistency but leads to a change of the first setted curr core value).
+		 */
+		controller.setCore(core);
+		setTimepoint(core.getCurrTimepoint());
 		//TODO: enable Buttons when core is set
 	}
 	
+	/**
+	 * Initialize this panel
+	 */
 	private void init(){
+		GridBagLayout gbl = new GridBagLayout();
+		setLayout(gbl);
+		
 		searchBar = new JSlider();
+		searchBar.setMajorTickSpacing(1);
+		searchBar.setPaintTicks(true);
+		searchBar.setValue(0);
 		
 		//TODO: GUITools JButtons
-		//TODO: Add savetoimagesbutton
-		timelbl = new JLabel();
+		timelbl = new JLabel("Zeitpunkt: N/A");
 		play = new JButton("Play");
 		pause = new JButton("Pause");
 		stop = new JButton("Stop");
+		video = new JButton("Vid");
 		
-		add(timelbl);
-		add(searchBar);
-		add(play);
+		
+		controller = new DynamicController(null);
+		searchBar.addChangeListener(controller);
+		play.addActionListener(controller);
+		pause.addActionListener(controller);
+		stop.addActionListener(controller);
+		
+		//TODO: Layout -.-
+		addComponent(gbl, searchBar, 0, 0, 5, 1, 1.0, 1.0, new Insets(0,0,0,0), GridBagConstraints.CENTER);
+		addComponent(gbl, play, 0, 1, 1, 1, 0, 0, new Insets(0,0,0,0), GridBagConstraints.CENTER);
+		addComponent(gbl, pause, 1, 1, 1, 1, 0, 0, new Insets(0,0,0,0), GridBagConstraints.CENTER);
+		addComponent(gbl, stop, 2, 1, 1, 1, 0, 0, new Insets(0,0,0,0), GridBagConstraints.CENTER);
+		addComponent(gbl, video, 3, 1, 1, 1, 0, 0, new Insets(0,0,0,0), GridBagConstraints.CENTER);
+		addComponent(gbl, timelbl, 4, 1, 1, 1, 1.0, 0, new Insets(0,0,0,0), GridBagConstraints.EAST);
+		
+		/*
+		add(searchBar,BorderLayout.PAGE_START);
+		add(play, BorderLayout.WEST);
 		add(pause);
 		add(stop);
+		add(timelbl, BorderLayout.EAST);
+		*/
 		
 		setMinimumSize(new Dimension(0, 50)); //TODO: Adjust
 	}
-	
-	//TODO: accessmethods
-	public void setMinValue(int minValue){
-		searchBar.setMinimum(minValue);
+		
+	/**
+	 * Sets the JSlider to the given timepoint and updates the time label
+	 * @param timepoint
+	 */
+	public void setTimepoint(double timepoint){
+		searchBar.setValue(core.getIndexOfTimepoint(timepoint));
+		timelbl.setText("Zeitpunkt: " + timepoint);
+		//TODO: locale
 	}
 	
-	public void setMaxValue(int maxValue){
-		searchBar.setMaximum(maxValue);
-	}
-	
-	public void setValue(int value){
-		searchBar.setValue(value);
+	private void addComponent(GridBagLayout gbl, Component c, int x, int y,
+            int width, int height, double weightx, double weighty, Insets insets, int anchor) {
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.gridx = x; gbc.gridy = y;
+		gbc.gridwidth = width; 
+		gbc.gridheight = height;
+		gbc.weightx = weightx; 
+		gbc.weighty = weighty;
+		gbc.insets = insets;
+		gbc.anchor = anchor;
+		gbl.setConstraints( c, gbc );
+		add( c );
 	}
 }

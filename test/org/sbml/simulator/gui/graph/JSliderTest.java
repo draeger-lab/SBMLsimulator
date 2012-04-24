@@ -42,9 +42,9 @@ public class JSliderTest extends JFrame implements DynamicGraph{
 	JButton stop = new JButton("Stop");
 	
 	
-	private DynamicCore core = new DynamicCore(this);
+	private DynamicCore core;
 	
-	private Controller controller = new Controller(core);
+	private Controller controller;
 	
 	private MultiTable testTable = new MultiTable();
 	
@@ -61,7 +61,8 @@ public class JSliderTest extends JFrame implements DynamicGraph{
 	
 	public void init(){
 		generateTestTable();
-		core.setData(testTable);
+		core = new DynamicCore(this, testTable);
+		controller = new Controller(core);
 		
 		searchBar.setMaximum(testTable.getRowCount()-1);
 		searchBar.setMinimum(0);

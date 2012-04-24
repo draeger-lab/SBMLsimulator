@@ -28,26 +28,46 @@ import org.simulator.math.odes.MultiTable;
 import de.zbit.graph.gui.TranslatorSBMLgraphPanel;
 
 /**
+ * This class brings all elements concerning the dynamic visualization together
+ * and makes sure that every part is consistent with each other, i.e. search bar with 
+ * visualized values.
+ * (This is ensured by the implementation of DynamicGraph. Every change of the slider
+ * wents through this class).
+ * It represents the view in MVC-Pattern and therefore awaits change notifies of the
+ * DynamicCore.
+ * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
 public class DynamicView extends JSplitPane implements DynamicGraph, PropertyChangeListener{
 	private static final long serialVersionUID = 4111494340467647183L;
 	
+	/**
+	 * Panel for the graph representation
+	 */
 	private TranslatorSBMLgraphPanel graphPanel;
+	
+	/**
+	 * Panel for the controls of the dynamic visualization
+	 */
 	private DynamicControlPanel controlPanel;
 	
-	private DynamicCore core;
+	//TODO implementation of a panel to choose which elements should be visualized by matter of dynamics
+
 	
+	/**
+	 * Constructs all necessary elements
+	 * @param document
+	 */
 	public DynamicView(SBMLDocument document){
 		super(JSplitPane.VERTICAL_SPLIT, false);
 		graphPanel = new TranslatorSBMLgraphPanel(document, false);
-		controlPanel = new DynamicControlPanel(); //TODO: set core
+		controlPanel = new DynamicControlPanel();
 		
 		add(graphPanel);
 		add(controlPanel);
 		
-		setDividerLocation(300); 
+		setDividerLocation(250); 
 		//TODO: adjust location fullscreen/windowed
 	}
 
@@ -56,22 +76,26 @@ public class DynamicView extends JSplitPane implements DynamicGraph, PropertyCha
 	 */
 	@Override
 	public void updateGraph(double timepoint, MultiTable updateThem) {
-		//TODO
-		System.out.println("corechange");
+		//TODO implement changes of the graphelements with respect to the given MultiTable and chosen elements
+		controlPanel.setTimepoint(timepoint);
 	}
 
 	/* (non-Javadoc)
 	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
 	 */
 	@Override
-	public void propertyChange(PropertyChangeEvent arg0) {
-		// TODO set core of controlPanel
-		
-		core = new DynamicCore(this);
-		//core.setData(TODO);
-		controlPanel.setCore(core);
-		//System.out.println("done");
-		
+	public void propertyChange(PropertyChangeEvent e) {
+		if(e.getPropertyName().equals("done")){
+			//simulation done
+			MultiTable data = (MultiTable) e.getNewValue();
+			if (data != null) {
+				/*
+				 * As a new core is constructed every time the simulation is finished,
+				 * the control panel is consistent with the simulated data.
+				 */
+				controlPanel.setCore(new DynamicCore(this, data));
+			}
+		}
 	}
 
 }

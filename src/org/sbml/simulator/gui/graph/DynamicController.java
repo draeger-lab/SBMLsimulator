@@ -17,16 +17,70 @@
  */
 package org.sbml.simulator.gui.graph;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 /**
+ * Controller class for DynamicControlPanel.
+ * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
-public class DynamicController {
+public class DynamicController implements ChangeListener, ActionListener{
 
+	/**
+	 * Pointer to associated core
+	 */
 	private DynamicCore core;
 	
+	
+	/**
+	 * Constructs a new controller.
+	 * @param core
+	 */
 	public DynamicController(DynamicCore core){
 		this.core = core;
+	}
+	
+
+	/**
+	 * Sets the core of this controller
+	 * @param core
+	 */
+	public void setCore(DynamicCore core) {
+		this.core = core;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if(core != null){
+			if(e.getActionCommand().equals("Play")){
+				core.play();
+			}else if(e.getActionCommand().equals("Pause")){
+				core.pausePlay();
+			}else if(e.getActionCommand().equals("Stop")){
+				core.stopPlay();
+			}		
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
+	 */
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		if(core != null){
+			int timepoint = ((JSlider)e.getSource()).getValue();
+			core.setCurrTimepoint(timepoint);
+		}
+		
 	}
 	
 }

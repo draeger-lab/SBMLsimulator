@@ -24,7 +24,9 @@ import javax.swing.SwingWorker;
 import org.simulator.math.odes.MultiTable;
 
 /**
- * Represents the core of the dynamic visualization. 
+ * Represents the core of the dynamic visualization and therefore
+ * the model in MVC-pattern.
+ * Holds all necessary data and logic to run the simulation.
  * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
@@ -97,16 +99,30 @@ public class DynamicCore {
 	 */
 	private int playspeed = 700;
 	
+	
 	/**
 	 * Constructs the core with an observer.
 	 * @param observer
 	 */
+	/*
 	public DynamicCore(DynamicGraph observer){
 		observers.add(observer);
 	}
+	*/
 	
 	/**
-	 * Set simulated data
+	 * Construstructs the core with an observer and simulation data.
+	 * @param observer
+	 * @param data
+	 */
+	public DynamicCore(DynamicGraph observer, MultiTable data){
+		observers.add(observer);
+		setData(data);
+	}
+	
+	/**
+	 * Set simulated data and the current 
+	 * timepoint to the first entry of the MultiTable
 	 * @param data
 	 */
 	public void setData(MultiTable data){
@@ -124,6 +140,7 @@ public class DynamicCore {
 	public double[] getTimepoints(){
 		return timePoints;
 	}
+	
 	
 	/**
 	 * Set the current time displayed by the graph.
@@ -143,6 +160,14 @@ public class DynamicCore {
 		//TODO: check if time exists and if it's within borders
 		this.currTimepoint = data.getTimePoint(rowIndex);
 		currTimepointChanged(data.getTimePoint(rowIndex));
+	}
+	
+	/**
+	 * Get the current timepoint of the core
+	 * @return
+	 */
+	public double getCurrTimepoint(){
+		return currTimepoint;
 	}
 	
 	/**
@@ -177,18 +202,21 @@ public class DynamicCore {
 	 * Pauses the play worker
 	 */
 	public void pausePlay(){
-		System.out.println("pause");
-		playWorker.cancel(true);
+		if(playWorker != null){
+			playWorker.cancel(true);
+		}
 	}
 	
 	/**
 	 * Stops the play worker
 	 */
 	public void stopPlay(){
-		System.out.println("stop");
-		playWorker.cancel(true);
+		if(playWorker != null){
+			playWorker.cancel(true);
+		}
 		currTimepoint = data.getTimePoint(0);
 		currTimepointChanged(data.getTimePoint(0));
+		
 	}
 	
 	/**

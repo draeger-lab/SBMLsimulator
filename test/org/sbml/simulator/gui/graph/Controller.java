@@ -25,6 +25,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 /**
+ * Controller for a DynamicControlPanel.
+ * No check for existing core before operations on it, because related buttons only active,
+ * when core existing.
+ * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
