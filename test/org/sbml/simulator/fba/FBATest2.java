@@ -6,17 +6,8 @@ import java.util.logging.Level;
 
 import javax.xml.stream.XMLStreamException;
 
-import org.sbml.fba.util.FBAutil;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
-
-import scpsolver.constraints.LinearBiggerThanEqualsConstraint;
-import scpsolver.constraints.LinearEqualsConstraint;
-import scpsolver.constraints.QuadraticSmallerThanEqualsContraint;
-import scpsolver.lpsolver.SolverFactory;
-import scpsolver.qpsolver.QuadraticProgram;
-import scpsolver.qpsolver.QuadraticProgramSolver;
-import scpsolver.util.SparseVector;
 
 import de.zbit.util.logging.LogUtil;
 import eva2.tools.math.Jama.Matrix;

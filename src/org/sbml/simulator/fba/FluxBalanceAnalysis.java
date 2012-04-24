@@ -10,13 +10,12 @@ import java.util.logging.Logger;
 
 import javax.xml.stream.XMLStreamException;
 
-import org.sbml.fba.util.FBAutil;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLReader;
 import org.sbml.jsbml.SpeciesReference;
-import org.sbml.simulator.math.StabilityMatrix;
-import org.sbml.simulator.math.StoichiometricMatrix;
+import org.sbml.simulator.stability.math.StabilityMatrix;
+import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
 import eva2.tools.math.Jama.Matrix;
 

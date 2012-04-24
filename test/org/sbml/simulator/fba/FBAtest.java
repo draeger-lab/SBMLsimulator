@@ -22,8 +22,8 @@ import org.sbml.jsbml.SBMLReader;
 import org.sbml.jsbml.Species;
 import org.sbml.jsbml.SpeciesReference;
 import org.sbml.jsbml.util.StringTools;
-import org.sbml.simulator.math.StabilityMatrix;
-import org.sbml.simulator.math.StoichiometricMatrix;
+import org.sbml.simulator.stability.math.StabilityMatrix;
+import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
 import eva2.tools.math.Jama.Matrix;
 

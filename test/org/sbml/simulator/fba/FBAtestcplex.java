@@ -1,10 +1,5 @@
 package org.sbml.simulator.fba;
 
-import ilog.concert.IloException;
-import ilog.concert.IloNumExpr;
-import ilog.concert.IloNumVar;
-import ilog.cplex.IloCplex;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -15,12 +10,10 @@ import java.util.logging.Logger;
 
 import javax.xml.stream.XMLStreamException;
 
-import org.sbml.fba.util.FBAutil;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.util.StringTools;
-import org.sbml.simulator.math.ConservationRelations;
-import org.sbml.simulator.math.StabilityMatrix;
-import org.sbml.simulator.math.StoichiometricMatrix;
+import org.sbml.simulator.stability.math.ConservationRelations;
+import org.sbml.simulator.stability.math.StabilityMatrix;
 
 import de.zbit.util.logging.LogUtil;
 import eva2.tools.math.Jama.Matrix;
