@@ -35,6 +35,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSlider;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
@@ -54,6 +56,8 @@ import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.SimulationConfiguration;
 import org.sbml.simulator.SimulationManager;
 import org.sbml.simulator.SimulationOptions;
+import org.sbml.simulator.gui.graph.DynamicControlPanel;
+import org.sbml.simulator.gui.graph.DynamicView;
 import org.sbml.simulator.gui.plot.Plot;
 import org.sbml.simulator.math.PearsonCorrelation;
 import org.sbml.simulator.math.QualityMeasure;
@@ -389,7 +393,8 @@ public class SimulationPanel extends JPanel implements
         dataTableView = new MultipleTableView<MultiTable>();
         dataTableView.addTableModelListener(visualizationPanel);
         
-        
+        DynamicView dynamicGraphView = new DynamicView(getModel().getSBMLDocument());
+        simulationManager.addPropertyChangeListener(dynamicGraphView); //TODO: get simulation data!!!
         TranslatorSBMLgraphPanel graphView = new TranslatorSBMLgraphPanel(getModel().getSBMLDocument(), false);
         
         tabbedPane = new JTabbedPane();
@@ -399,7 +404,7 @@ public class SimulationPanel extends JPanel implements
 				tabbedPane.add(bundle.getString("TAB_MODEL_VIEW"),
 					new SBMLModelSplitPane(simulationManager.getSimulationConfiguration()
 							.getModel().getSBMLDocument(), true));
-				tabbedPane.add(bundle.getString("TAB_GRAPH_VIEW"), graphView);
+				tabbedPane.add(bundle.getString("TAB_GRAPH_VIEW"), dynamicGraphView);
 				
 				
         tabbedPane.setEnabledAt(TAB_SIMULATION_INDEX, true);

@@ -19,6 +19,8 @@ package org.sbml.simulator.gui.graph;
 
 import java.util.ArrayList;
 
+import javax.swing.SwingWorker;
+
 import org.simulator.math.odes.MultiTable;
 
 /**
@@ -28,31 +30,32 @@ import org.simulator.math.odes.MultiTable;
  * @version $Rev$
  */
 public class DynamicCore {
-	
-	
 	/**
 	 * Own thread to cycle through timepoints
-	 * 	
+	 * 
 	 * @author Fabian Schwarzkopf
 	 * @version $Rev$
 	 */
-	private class Play extends Thread{
-		public void run(){
+	private class PlayWorker extends SwingWorker<Void, Void>{
+
+		/* (non-Javadoc)
+		 * @see javax.swing.SwingWorker#doInBackground()
+		 */
+		@Override
+		protected Void doInBackground() throws Exception {
 			for(int i = getIndexOfTimepoint(currTimepoint); i < timePoints.length; i++){
-				setCurrTimepoint(timePoints[i]);				
-				try {
-					sleep(playspeed);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+				setCurrTimepoint(timePoints[i]);
+				Thread.sleep(playspeed);
 			}
+			return null;
 		}
+		
 	}
 	
 	/**
-	 * Play-thread object
+	 * Play thread worker
 	 */
-	private Play play;
+	private PlayWorker playWorker;
 
 	/**
 	 * Saves the currently displayed timestep.
@@ -70,7 +73,7 @@ public class DynamicCore {
 	private double minTime = 0;
 	
 	/**
-	 * Saves the stepsize of the simulated data.
+	 * Saves the stepsize of the simulated data. Maybe needed.
 	 */
 	private double stepSize;
 	
@@ -110,7 +113,16 @@ public class DynamicCore {
 		this.data = data;
 		timePoints = data.getTimePoints();
 		currTimepoint = data.getTimePoint(0);
-		//TODO: set simulation settings (min,max,stepsize)
+		minTime = data.getTimePoint(0);
+		maxTime = data.getTimePoint(data.getRowCount()-1);
+	}
+	
+	/**
+	 * Get timepoints of the simulation
+	 * @return
+	 */
+	public double[] getTimepoints(){
+		return timePoints;
 	}
 	
 	/**
@@ -157,24 +169,24 @@ public class DynamicCore {
 	 * and additionally updates the graph
 	 */
 	public void play(){
-		play = new Play();
-		play.start();
+		playWorker = new PlayWorker();
+		playWorker.execute();
 	}	
 	
 	/**
-	 * Pauses the play thread
+	 * Pauses the play worker
 	 */
 	public void pausePlay(){
 		System.out.println("pause");
-		play.stop();
+		playWorker.cancel(true);
 	}
 	
 	/**
-	 * Stops the play thread
+	 * Stops the play worker
 	 */
 	public void stopPlay(){
 		System.out.println("stop");
-		play.stop();
+		playWorker.cancel(true);
 		currTimepoint = data.getTimePoint(0);
 		currTimepointChanged(data.getTimePoint(0));
 	}
