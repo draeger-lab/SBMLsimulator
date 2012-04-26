@@ -151,7 +151,7 @@ public abstract class QualityMeasure implements Serializable {
 		} 
 	  
 		ArrayList<Double> distances= new ArrayList<Double>();
-		for (int i = 0; i < Math.max(left.getBlockCount(), right.getBlockCount()); i++) {
+		for (int i = 0; i < Math.min(left.getBlockCount(), right.getBlockCount()); i++) {
 			distances.addAll(getColumnDistances(left.getBlock(i), right.getBlock(i)));
 		}
 		return meanFunction.computeMean(distances);
