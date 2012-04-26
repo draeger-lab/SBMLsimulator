@@ -26,6 +26,7 @@ import javax.swing.event.ChangeListener;
 
 /**
  * Controller class for DynamicControlPanel.
+ * It represents the controller in MVC-pattern.
  * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
@@ -37,13 +38,19 @@ public class DynamicController implements ChangeListener, ActionListener{
 	 */
 	private DynamicCore core;
 	
+	/**
+	 * Pointer to associated control panel
+	 */
+	private DynamicControlPanel controlPanel;
+	
 	
 	/**
 	 * Constructs a new controller.
 	 * @param core
 	 */
-	public DynamicController(DynamicCore core){
+	public DynamicController(DynamicCore core, DynamicControlPanel controlPanel){
 		this.core = core;
+		this.controlPanel = controlPanel;
 	}
 	
 
@@ -61,12 +68,25 @@ public class DynamicController implements ChangeListener, ActionListener{
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(core != null){
-			if(e.getActionCommand().equals("Play")){
+			System.out.println("CONTROLLER: " + e.getActionCommand());
+			if(e.getActionCommand().equals("PLAY")){
 				core.play();
-			}else if(e.getActionCommand().equals("Pause")){
+				controlPanel.enablePlay(false);
+				controlPanel.enablePause(true);
+				controlPanel.enableStop(true);
+				//TODO: enable button when play finished
+				//TODO: maybe disable toVideo button
+			}else if(e.getActionCommand().equals("PAUSE")){
 				core.pausePlay();
-			}else if(e.getActionCommand().equals("Stop")){
+				controlPanel.enablePlay(true);
+				controlPanel.enablePause(false);
+			}else if(e.getActionCommand().equals("STOP")){
 				core.stopPlay();
+				controlPanel.enablePlay(true);
+				controlPanel.enablePause(false);
+				controlPanel.enableStop(false);
+			}else if(e.getActionCommand().equals("TOVIDEO")){
+				//TODO save as video with maximum sim-speed
 			}		
 		}
 	}

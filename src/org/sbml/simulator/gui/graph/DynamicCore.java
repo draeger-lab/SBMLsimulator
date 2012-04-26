@@ -229,7 +229,6 @@ public class DynamicCore {
 		if(playWorker == null){
 			playWorker = new PlayWorker();
 			playWorker.execute();
-			System.out.println("PLAY");
 		}
 	}	
 	
