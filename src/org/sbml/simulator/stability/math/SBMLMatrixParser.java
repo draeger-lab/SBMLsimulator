@@ -203,7 +203,7 @@ public class SBMLMatrixParser {
 				modSpeciesRef = reac.getModifier(m);
 
 				if (modSpeciesRef.getSBOTerm() == -1) {
-					classification = classifyModifier(reac, modSpeciesRef);
+					classification = classifyModifier(reac, n, modSpeciesRef);
 				}
 
 				// potentiator
@@ -245,10 +245,11 @@ public class SBMLMatrixParser {
 	 * 
 	 * @param reac
 	 * @param msr
+	 * @param index of the reaction
 	 * @return
 	 * @throws SBMLException
 	 */
-	private int classifyModifier(Reaction reac, ModifierSpeciesReference msr)
+	private int classifyModifier(Reaction reac, int reactionIndex, ModifierSpeciesReference msr)
 			throws SBMLException {
 		SBMLinterpreter sbmli;
 		int result = 0;
@@ -261,17 +262,17 @@ public class SBMLMatrixParser {
 			sbmli = new SBMLinterpreter(model);
 			iA = model.getSpecies(msr.getSpecies()).getInitialAmount();
 			// evaluate reaction with normal amount
-			normal = reac.getKineticLaw().getMath().compile(sbmli.getASTNodeInterpreter()).toDouble();
+			normal = sbmli.compileReaction(reactionIndex);
 
 			// evaluate reaction with half of the normal amount
 			model.getSpecies(msr.getSpecies()).setInitialAmount(iA / 2);
 			sbmli = new SBMLinterpreter(model);
-			half = reac.getKineticLaw().getMath().compile(sbmli.getASTNodeInterpreter()).toDouble();
+			half = sbmli.compileReaction(reactionIndex);
 
 			// evaluate reaction with twice the normal amount
 			model.getSpecies(msr.getSpecies()).setInitialAmount(iA * 2);
 			sbmli = new SBMLinterpreter(model);
-			twice = reac.getKineticLaw().getMath().compile(sbmli.getASTNodeInterpreter()).toDouble();
+			twice = sbmli.compileReaction(reactionIndex);
 
 			if ((half < normal) && (normal < twice)) {
 				result = 1;
