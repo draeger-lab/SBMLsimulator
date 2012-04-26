@@ -53,6 +53,11 @@ public class DynamicView extends JSplitPane implements DynamicGraph, PropertyCha
 	private DynamicControlPanel controlPanel;
 	
 	//TODO implementation of a panel to choose which elements should be visualized by matter of dynamics
+	
+	/**
+	 * Pointer to the used core
+	 */
+	private DynamicCore core;
 
 	
 	/**
@@ -78,6 +83,14 @@ public class DynamicView extends JSplitPane implements DynamicGraph, PropertyCha
 	public void updateGraph(double timepoint, MultiTable updateThem) {
 		//TODO implement changes of the graphelements with respect to the given MultiTable and chosen elements
 		controlPanel.setTimepoint(timepoint);
+		
+		//TODO update graph
+		
+		/*
+		 * notify core that graph is updated
+		 */
+		System.out.println("DEBUG: graph finished");
+		core.graphUpdateFinished();		
 	}
 
 	/* (non-Javadoc)
@@ -93,7 +106,8 @@ public class DynamicView extends JSplitPane implements DynamicGraph, PropertyCha
 				 * As a new core is constructed every time the simulation is finished,
 				 * the control panel is consistent with the simulated data.
 				 */
-				controlPanel.setCore(new DynamicCore(this, data));
+				core = new DynamicCore(this, data);
+				controlPanel.setCore(core);
 			}
 		}
 	}

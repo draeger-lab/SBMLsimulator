@@ -45,9 +45,11 @@ public class Controller implements ChangeListener, ActionListener{
 	 */
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		int timepoint = ((JSlider)e.getSource()).getValue();
-		core.setCurrTimepoint(timepoint);
-		
+		System.out.println("TEST STATECHANGED");
+		if(core != null){
+			int timepoint = ((JSlider)e.getSource()).getValue();
+			core.setCurrTimepoint(timepoint);
+		}
 	}
 
 	/* (non-Javadoc)
