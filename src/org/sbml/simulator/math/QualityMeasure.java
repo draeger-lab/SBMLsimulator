@@ -143,12 +143,6 @@ public abstract class QualityMeasure implements Serializable {
 	 * @return
 	 */
 	public double distance(MultiTable x, MultiTable expected) {
-		if (x.getBlockCount() > expected.getBlockCount()) {
-			MultiTable swap = expected;
-			expected = x;
-			x = swap;
-		}
-	  
 		MultiTable left = x;
 		MultiTable right = expected;
 		if(x.isSetTimePoints() && expected.isSetTimePoints()) {
@@ -157,7 +151,7 @@ public abstract class QualityMeasure implements Serializable {
 		} 
 	  
 		ArrayList<Double> distances= new ArrayList<Double>();
-		for (int i = 0; i < left.getBlockCount(); i++) {
+		for (int i = 0; i < Math.max(left.getBlockCount(), right.getBlockCount()); i++) {
 			distances.addAll(getColumnDistances(left.getBlock(i), right.getBlock(i)));
 		}
 		return meanFunction.computeMean(distances);
@@ -186,12 +180,6 @@ public abstract class QualityMeasure implements Serializable {
 	 * @return
 	 */
 	public ArrayList<Double> getColumnDistances(MultiTable.Block x, MultiTable.Block expected) {
-		if (x.getColumnCount() > expected.getColumnCount()) {
-			MultiTable.Block swap = expected;
-			expected = x;
-			x = swap;
-		}
-		
 		String identifiers[] = x.getIdentifiers();
 		ArrayList<Double> distances= new ArrayList<Double>();
 		
