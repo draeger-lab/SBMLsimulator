@@ -23,21 +23,55 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
+import javax.swing.UIManager;
+
+import org.sbml.simulator.gui.SimulatorUI;
+
+import de.zbit.gui.GUITools;
+import de.zbit.gui.actioncommand.ActionCommand;
+import de.zbit.util.StringUtil;
 
 /**
- * JPanel to control the timepoints of a dynamic simulation
+ * JPanel to control the timepoints of a dynamic simulation.
+ * It is a module of the view in MVC-pattern.
  * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
 public class DynamicControlPanel extends JPanel{
 	private static final long serialVersionUID = 6692563909762370732L;
+	
+	/**
+	 * List of action commands
+	 * @author Fabian Schwarzkopf
+	 * @version $Rev$
+	 */
+	public enum Buttons implements ActionCommand{
+		PLAY, PAUSE, STOP, TOVIDEO;
+
+		/* (non-Javadoc)
+		 * @see de.zbit.gui.actioncommand.ActionCommand#getName()
+		 */
+		@Override
+		public String getName() {
+			return StringUtil.firstLetterLowerCase(toString());
+		}
+
+		/* (non-Javadoc)
+		 * @see de.zbit.gui.actioncommand.ActionCommand#getToolTip()
+		 */
+		@Override
+		public String getToolTip() {
+			return null;
+		}
+	}
 	
 	/**
 	 * Pointer to related core
@@ -102,6 +136,8 @@ public class DynamicControlPanel extends JPanel{
 		controller.setCore(core);
 		setTimepoint(core.getCurrTimepoint());
 		//TODO: enable Buttons when core is set
+		Component[] elements = {play, video, searchBar, simVeloCombo, simVeloSpin};
+		GUITools.setEnabledForAll(true, elements);
 	}
 	
 	/**
@@ -111,40 +147,45 @@ public class DynamicControlPanel extends JPanel{
 		GridBagLayout gbl = new GridBagLayout();
 		setLayout(gbl);
 		
+		ImageIcon playIcon = new ImageIcon(SimulatorUI.class.getResource("graph/GPL_PLAY_16.png"));
+		UIManager.put("GPL_PLAY_16", playIcon);
+		ImageIcon pauseIcon = new ImageIcon(SimulatorUI.class.getResource("graph/GPL_PAUSE_16.png"));
+		UIManager.put("GPL_PLAY_16", pauseIcon);
+		ImageIcon stopIcon = new ImageIcon(SimulatorUI.class.getResource("graph/GPL_STOP_16.png"));
+		UIManager.put("GPL_STOP_16", stopIcon);
+		ImageIcon toVideoIcon = new ImageIcon(SimulatorUI.class.getResource("graph/GPL_VIDEO_16.png"));
+		UIManager.put("GPL_VIDEO_16", stopIcon);
+		
 		searchBar = new JSlider();
 		searchBar.setMajorTickSpacing(1);
 		searchBar.setPaintTicks(true);
 		searchBar.setValue(0);
 		
-		//TODO: GUITools JButtons
+		controller = new DynamicController(null, this);
+		
 		timelbl = new JLabel("Zeitpunkt: N/A");
-		play = new JButton("Play");
-		pause = new JButton("Pause");
-		stop = new JButton("Stop");
-		video = new JButton("Vid");
+		play = GUITools.createButton(playIcon, controller, Buttons.PLAY, "Startet die Simulation als Film.");
+		pause = GUITools.createButton(pauseIcon, controller, Buttons.PAUSE, "Pausiert die Simulation.");
+		stop = GUITools.createButton(stopIcon, controller, Buttons.STOP, "Stoppt die Simulation.");
+		video = GUITools.createButton(toVideoIcon, controller, Buttons.TOVIDEO, "Speichert die Simulation als Film.");
 		simVelolbl = new JLabel("Simulationsgeschwindigkeit");
 		simVeloCombo = new JComboBox();
 		simVeloSpin = new JSpinner();
 		
-		
-		controller = new DynamicController(null);
-		searchBar.addChangeListener(controller);
-		play.addActionListener(controller);
-		pause.addActionListener(controller);
-		stop.addActionListener(controller);
-		
-		//TODO: Layout -.-
 		addComponent(gbl, searchBar, 	0, 0, 6, 1, GridBagConstraints.CENTER, 	GridBagConstraints.HORIZONTAL, 	1, 0, new Insets(0,0,0,0));
 		addComponent(gbl, play, 		0, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, pause, 		1, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, stop, 		2, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, video, 		3, 1, 1, 1, GridBagConstraints.WEST,	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
-		addComponent(gbl, timelbl, 		5, 1, 1, 1, GridBagConstraints.EAST, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, timelbl, 		3, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, simVelolbl,	0, 2, 4, 1, GridBagConstraints.WEST,	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, simVeloCombo,	3, 2, 1, 1, GridBagConstraints.CENTER,  GridBagConstraints.HORIZONTAL,	1, 0, new Insets(2,2,2,2));
 		addComponent(gbl, simVeloSpin,	5, 2, 1, 1, GridBagConstraints.EAST, 	GridBagConstraints.BOTH, 		0, 0, new Insets(2,2,2,2));
 		
-		setMinimumSize(new Dimension(0, 50)); //TODO: Adjust
+		setMinimumSize(new Dimension(0, 80)); //TODO: Adjust
+		
+		Component[] elements = {play, pause, stop, video, searchBar, simVeloCombo, simVeloSpin};
+		GUITools.setEnabledForAll(false, elements);
 	}
 		
 	/**
@@ -158,12 +199,39 @@ public class DynamicControlPanel extends JPanel{
 	}
 	
 	/**
-	 * Checks if the given timepoint is already shown by the slider
-	 * @param value
-	 * @return
+	 * Sets enable status for the searchbar
+	 * (If the user presses play or toVideo, this method should be invoked by the controller)
+	 * @param bool
 	 */
-	public boolean isValueOfSlider(double timepoint){
-		return searchBar.getValue() == core.getIndexOfTimepoint(timepoint);
+	public void enableSearchBar(boolean bool){
+		searchBar.setEnabled(bool);
+	}
+	
+	/**
+	 * Sets enable status for the play button
+	 * (If the user presses play or toVideo, this method should be invoked by the controller)
+	 * @param bool
+	 */
+	public void enablePlay(boolean bool){
+		play.setEnabled(bool);
+	}
+
+	/**
+	 * Sets enable status for the stop button
+	 * (If the user presses play or toVideo, this method should be invoked by the controller)
+	 * @param bool
+	 */
+	public void enableStop(boolean bool){
+		stop.setEnabled(bool);
+	}
+	
+	/**
+	 * Sets enable status for the pause button
+	 * (If the user presses play or toVideo, this method should be invoked by the controller)
+	 * @param bool
+	 */
+	public void enablePause(boolean bool){
+		pause.setEnabled(bool);
 	}
 	
 	/**

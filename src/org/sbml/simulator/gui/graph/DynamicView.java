@@ -72,7 +72,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph, PropertyCha
 		add(graphPanel);
 		add(controlPanel);
 		
-		setDividerLocation(250); 
+		setDividerLocation(220); 
 		//TODO: adjust location fullscreen/windowed
 	}
 
@@ -89,7 +89,6 @@ public class DynamicView extends JSplitPane implements DynamicGraph, PropertyCha
 		/*
 		 * notify core that graph is updated
 		 */
-		System.out.println("DEBUG: graph finished");
 		core.graphUpdateFinished();		
 	}
 
