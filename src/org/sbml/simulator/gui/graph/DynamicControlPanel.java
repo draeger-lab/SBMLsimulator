@@ -24,9 +24,11 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JSpinner;
 
 /**
  * JPanel to control the timepoints of a dynamic simulation
@@ -57,6 +59,9 @@ public class DynamicControlPanel extends JPanel{
 	private JButton pause;
 	private JButton stop;
 	private JButton video;
+	private JLabel simVelolbl;
+	private JComboBox simVeloCombo;
+	private JSpinner simVeloSpin;
 	
 	
 	/**
@@ -117,6 +122,9 @@ public class DynamicControlPanel extends JPanel{
 		pause = new JButton("Pause");
 		stop = new JButton("Stop");
 		video = new JButton("Vid");
+		simVelolbl = new JLabel("Simulationsgeschwindigkeit");
+		simVeloCombo = new JComboBox();
+		simVeloSpin = new JSpinner();
 		
 		
 		controller = new DynamicController(null);
@@ -126,20 +134,15 @@ public class DynamicControlPanel extends JPanel{
 		stop.addActionListener(controller);
 		
 		//TODO: Layout -.-
-		addComponent(gbl, searchBar, 0, 0, 5, 1, 1.0, 1.0, new Insets(0,0,0,0), GridBagConstraints.CENTER);
-		addComponent(gbl, play, 0, 1, 1, 1, 0, 0, new Insets(0,0,0,0), GridBagConstraints.CENTER);
-		addComponent(gbl, pause, 1, 1, 1, 1, 0, 0, new Insets(0,0,0,0), GridBagConstraints.CENTER);
-		addComponent(gbl, stop, 2, 1, 1, 1, 0, 0, new Insets(0,0,0,0), GridBagConstraints.CENTER);
-		addComponent(gbl, video, 3, 1, 1, 1, 0, 0, new Insets(0,0,0,0), GridBagConstraints.CENTER);
-		addComponent(gbl, timelbl, 4, 1, 1, 1, 1.0, 0, new Insets(0,0,0,0), GridBagConstraints.EAST);
-		
-		/*
-		add(searchBar,BorderLayout.PAGE_START);
-		add(play, BorderLayout.WEST);
-		add(pause);
-		add(stop);
-		add(timelbl, BorderLayout.EAST);
-		*/
+		addComponent(gbl, searchBar, 	0, 0, 6, 1, GridBagConstraints.CENTER, 	GridBagConstraints.HORIZONTAL, 	1, 0, new Insets(0,0,0,0));
+		addComponent(gbl, play, 		0, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, pause, 		1, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, stop, 		2, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, video, 		3, 1, 1, 1, GridBagConstraints.WEST,	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, timelbl, 		5, 1, 1, 1, GridBagConstraints.EAST, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, simVelolbl,	0, 2, 4, 1, GridBagConstraints.WEST,	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, simVeloCombo,	3, 2, 1, 1, GridBagConstraints.CENTER,  GridBagConstraints.HORIZONTAL,	1, 0, new Insets(2,2,2,2));
+		addComponent(gbl, simVeloSpin,	5, 2, 1, 1, GridBagConstraints.EAST, 	GridBagConstraints.BOTH, 		0, 0, new Insets(2,2,2,2));
 		
 		setMinimumSize(new Dimension(0, 50)); //TODO: Adjust
 	}
@@ -154,10 +157,32 @@ public class DynamicControlPanel extends JPanel{
 		//TODO: locale
 	}
 	
+	/**
+	 * Checks if the given timepoint is already shown by the slider
+	 * @param value
+	 * @return
+	 */
+	public boolean isValueOfSlider(double timepoint){
+		return searchBar.getValue() == core.getIndexOfTimepoint(timepoint);
+	}
+	
+	/**
+	 * Helper to layout components
+	 * @param gbl
+	 * @param c
+	 * @param x
+	 * @param y
+	 * @param width
+	 * @param height
+	 * @param weightx
+	 * @param weighty
+	 * @param insets
+	 * @param anchor
+	 */
 	private void addComponent(GridBagLayout gbl, Component c, int x, int y,
-            int width, int height, double weightx, double weighty, Insets insets, int anchor) {
+            int width, int height, int anchor, int fill, double weightx, double weighty, Insets insets) {
 		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.fill = GridBagConstraints.BOTH;
+		gbc.fill = fill;
 		gbc.gridx = x; gbc.gridy = y;
 		gbc.gridwidth = width; 
 		gbc.gridheight = height;

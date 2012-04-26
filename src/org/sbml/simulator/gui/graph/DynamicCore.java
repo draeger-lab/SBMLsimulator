@@ -45,12 +45,34 @@ public class DynamicCore {
 		 */
 		@Override
 		protected Void doInBackground() throws Exception {
-			for(int i = getIndexOfTimepoint(currTimepoint); i < timePoints.length; i++){
+			for(int i = getIndexOfTimepoint(currTimepoint)+1; i < timePoints.length; i++){
+				notification = false;
 				setCurrTimepoint(timePoints[i]);
 				Thread.sleep(playspeed);
+				
+				/*
+				 * Wait till graph drawing is finished 
+				 */
+				while(!notification){
+					Thread.sleep(AWAITNOTIFICATION);
+				}
 			}
 			return null;
 		}
+
+		/* (non-Javadoc)
+		 * @see javax.swing.SwingWorker#done()
+		 */
+		@Override
+		protected void done() {
+			super.done();
+			/*
+			 * Ensure that only one playWorker is active
+			 */
+			playWorker = null;
+		}
+		
+		
 		
 	}
 	
@@ -58,7 +80,18 @@ public class DynamicCore {
 	 * Play thread worker
 	 */
 	private PlayWorker playWorker;
-
+	
+	/**
+	 * Notification if graph is updated.
+	 * Gets changed by to threads, therefore volatile.
+	 */
+	private volatile boolean notification;
+	
+	/**
+	 * Sleeptime while waiting for notification
+	 */
+	private final long AWAITNOTIFICATION = 20;
+	
 	/**
 	 * Saves the currently displayed timestep.
 	 */
@@ -73,11 +106,6 @@ public class DynamicCore {
 	 * Saves the minimum simulated time. By default zero.
 	 */
 	private double minTime = 0;
-	
-	/**
-	 * Saves the stepsize of the simulated data. Maybe needed.
-	 */
-	private double stepSize;
 	
 	/**
 	 * Dynamic displayed data.
@@ -99,16 +127,6 @@ public class DynamicCore {
 	 */
 	private int playspeed = 700;
 	
-	
-	/**
-	 * Constructs the core with an observer.
-	 * @param observer
-	 */
-	/*
-	public DynamicCore(DynamicGraph observer){
-		observers.add(observer);
-	}
-	*/
 	
 	/**
 	 * Construstructs the core with an observer and simulation data.
@@ -148,8 +166,10 @@ public class DynamicCore {
 	 */
 	public void setCurrTimepoint(double time){
 		//TODO: check if time exists and if it's within borders
-		this.currTimepoint = time;
-		currTimepointChanged(time);
+		if(currTimepoint != time){
+			this.currTimepoint = time;
+			currTimepointChanged(time);
+		}
 	}
 	
 	/**
@@ -158,8 +178,11 @@ public class DynamicCore {
 	 */
 	public void setCurrTimepoint(int rowIndex){
 		//TODO: check if time exists and if it's within borders
-		this.currTimepoint = data.getTimePoint(rowIndex);
-		currTimepointChanged(data.getTimePoint(rowIndex));
+		double incomingTimepoint = data.getTimePoint(rowIndex);
+		if(currTimepoint != incomingTimepoint){
+			this.currTimepoint = incomingTimepoint;
+			currTimepointChanged(incomingTimepoint);
+		}
 	}
 	
 	/**
@@ -179,6 +202,15 @@ public class DynamicCore {
 	}
 	
 	/**
+	 * Notifies the play worker, that the graph is ready for the next
+	 * timepoint. 
+	 * (Graph drawing completed)
+	 */
+	public void graphUpdateFinished(){
+		notification = true;
+	}
+	
+	/**
 	 * Notifies all observers about the change and delivers changed Species & Reactions
 	 */
 	//TODO: deliver changed values with respect to the chosen graphelements
@@ -194,8 +226,11 @@ public class DynamicCore {
 	 * and additionally updates the graph
 	 */
 	public void play(){
-		playWorker = new PlayWorker();
-		playWorker.execute();
+		if(playWorker == null){
+			playWorker = new PlayWorker();
+			playWorker.execute();
+			System.out.println("PLAY");
+		}
 	}	
 	
 	/**
@@ -204,6 +239,7 @@ public class DynamicCore {
 	public void pausePlay(){
 		if(playWorker != null){
 			playWorker.cancel(true);
+			playWorker = null;
 		}
 	}
 	
@@ -213,6 +249,7 @@ public class DynamicCore {
 	public void stopPlay(){
 		if(playWorker != null){
 			playWorker.cancel(true);
+			playWorker = null;
 		}
 		currTimepoint = data.getTimePoint(0);
 		currTimepointChanged(data.getTimePoint(0));
