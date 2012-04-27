@@ -72,6 +72,7 @@ public class DynamicController implements ChangeListener, ActionListener{
 			if(e.getActionCommand().equals("PLAY")){
 				core.play();
 				controlPanel.enablePlay(false);
+				controlPanel.enableSearchBar(false);
 				controlPanel.enablePause(true);
 				controlPanel.enableStop(true);
 				//TODO: enable button when play finished
@@ -79,10 +80,12 @@ public class DynamicController implements ChangeListener, ActionListener{
 			}else if(e.getActionCommand().equals("PAUSE")){
 				core.pausePlay();
 				controlPanel.enablePlay(true);
+				controlPanel.enableSearchBar(true);
 				controlPanel.enablePause(false);
 			}else if(e.getActionCommand().equals("STOP")){
 				core.stopPlay();
 				controlPanel.enablePlay(true);
+				controlPanel.enableSearchBar(true);
 				controlPanel.enablePause(false);
 				controlPanel.enableStop(false);
 			}else if(e.getActionCommand().equals("TOVIDEO")){
