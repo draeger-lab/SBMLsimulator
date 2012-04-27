@@ -29,12 +29,13 @@ import de.zbit.graph.gui.TranslatorSBMLgraphPanel;
 
 /**
  * This class brings all elements concerning the dynamic visualization together
- * and makes sure that every part is consistent with each other, i.e. search bar with 
- * visualized values.
- * (This is ensured by the implementation of DynamicGraph. Every change of the slider
- * wents through this class).
- * It represents the view in MVC-Pattern and therefore awaits change notifies of the
- * DynamicCore.
+ * and makes sure that every part is consistent with each other, i.e. search bar
+ * with visualized values. (This is ensured by the implementation of
+ * DynamicGraph. Every change of the slider wents through this class). It is
+ * capable of implementing any type of JPanels as graph-drawing part, as long as
+ * it implements the interface TODO . 
+ * It represents the view in MVC-Pattern and therefore awaits change notifies of 
+ * the DynamicCore.
  * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
@@ -81,14 +82,32 @@ public class DynamicView extends JSplitPane implements DynamicGraph, PropertyCha
 	 */
 	@Override
 	public void updateGraph(double timepoint, MultiTable updateThem) {
-		//TODO implement changes of the graphelements with respect to the given MultiTable and chosen elements
 		controlPanel.setTimepoint(timepoint);
 		
-		//TODO update graph
+		//TODO implement changes of the graphelements with respect to the given MultiTable and chosen elements
+        /*
+         * To ensure that the dynamic change of graph rendering will make a
+         * noticible change in size or color the passed values have to be
+         * conditioned. Therefore not absolute values will be passed but
+         * relative.
+         */
 		
-		/*
-		 * notify core that graph is updated
+		
+
+//		System.out.println("(DEBUG) VIEW: initiate graph update");
+		/**
+		 * incompleted test with TestModel
 		 */
+//		for(int i = 3; i <= 8; i++){
+//		    System.out.println(updateThem.getColumnIdentifier(i));
+//            /*
+//             * There's just one row because the core passes only the necessary
+//             * data for the particular timepoint
+//             */
+//		    graphPanel.dynamicChangeOfNode(updateThem.getColumnIdentifier(i), updateThem.getValueAt(0, i)*50);
+//		}
+		
+        //notify core that graph is updated
 		core.graphUpdateFinished();		
 	}
 

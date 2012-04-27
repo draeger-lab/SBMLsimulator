@@ -165,8 +165,7 @@ public class DynamicCore {
 	 * @param time
 	 */
 	public void setCurrTimepoint(double time){
-		//TODO: check if time exists and if it's within borders
-		if(currTimepoint != time){
+		if(currTimepoint != time && time >= minTime && time <= maxTime){
 			this.currTimepoint = time;
 			currTimepointChanged(time);
 		}
@@ -177,12 +176,12 @@ public class DynamicCore {
 	 * @param time
 	 */
 	public void setCurrTimepoint(int rowIndex){
-		//TODO: check if time exists and if it's within borders
 		double incomingTimepoint = data.getTimePoint(rowIndex);
-		if(currTimepoint != incomingTimepoint){
-			this.currTimepoint = incomingTimepoint;
-			currTimepointChanged(incomingTimepoint);
-		}
+        if (currTimepoint != incomingTimepoint && incomingTimepoint >= minTime
+                && incomingTimepoint <= maxTime){
+            this.currTimepoint = incomingTimepoint;
+            currTimepointChanged(incomingTimepoint);
+        }
 	}
 	
 	/**
@@ -191,6 +190,14 @@ public class DynamicCore {
 	 */
 	public double getCurrTimepoint(){
 		return currTimepoint;
+	}
+	
+	/**
+	 * Get the maximum timepoint of the core
+	 * @return
+	 */
+	public double getMaxTime(){
+	    return maxTime;
 	}
 	
 	/**

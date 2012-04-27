@@ -83,9 +83,14 @@ public class DynamicControlPanel extends JPanel{
 	 */
 	private DynamicController controller;
 	
+	/**
+	 * Saves the maximum time for the timelbl.
+	 * (To save some computing time).
+	 */
+	private double maxTime;
+	
 	/*
 	 * GUI elements
-	 * TODO: GUITools Buttons
 	 */
 	private JLabel timelbl;
 	private JSlider searchBar;
@@ -126,6 +131,7 @@ public class DynamicControlPanel extends JPanel{
 		double[] timepointsOfSimulation = core.getTimepoints();
 		searchBar.setMinimum(0);
 		searchBar.setMaximum(timepointsOfSimulation.length-1);
+		maxTime = core.getMaxTime();
 		
 		/*
 		 * Controller needs to be assigned after setting the boundries of JSlider.
@@ -135,7 +141,6 @@ public class DynamicControlPanel extends JPanel{
 		 */
 		controller.setCore(core);
 		setTimepoint(core.getCurrTimepoint());
-		//TODO: enable Buttons when core is set
 		Component[] elements = {play, video, searchBar, simVeloCombo, simVeloSpin};
 		GUITools.setEnabledForAll(true, elements);
 	}
@@ -163,6 +168,7 @@ public class DynamicControlPanel extends JPanel{
 		
 		controller = new DynamicController(null, this);
 		
+		searchBar.addChangeListener(controller);
 		timelbl = new JLabel("Zeitpunkt: N/A");
 		play = GUITools.createButton(playIcon, controller, Buttons.PLAY, "Startet die Simulation als Film.");
 		pause = GUITools.createButton(pauseIcon, controller, Buttons.PAUSE, "Pausiert die Simulation.");
@@ -194,7 +200,7 @@ public class DynamicControlPanel extends JPanel{
 	 */
 	public void setTimepoint(double timepoint){
 		searchBar.setValue(core.getIndexOfTimepoint(timepoint));
-		timelbl.setText("Zeitpunkt: " + timepoint);
+		timelbl.setText("Zeitpunkt: " + timepoint + " / " + maxTime);
 		//TODO: locale
 	}
 	
@@ -258,7 +264,7 @@ public class DynamicControlPanel extends JPanel{
 		gbc.weighty = weighty;
 		gbc.insets = insets;
 		gbc.anchor = anchor;
-		gbl.setConstraints( c, gbc );
-		add( c );
+		gbl.setConstraints(c, gbc);
+		add(c);
 	}
 }
