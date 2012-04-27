@@ -93,8 +93,8 @@ public class DynamicCore {
 	private final long AWAITNOTIFICATION = 20;
 	
 	/**
-	 * Saves the currently displayed timestep.
-	 */
+     * Saves the currently displayed timestep.
+     */
 	private double currTimepoint;
 	
 	/**
@@ -146,9 +146,9 @@ public class DynamicCore {
 	public void setData(MultiTable data){
 		this.data = data;
 		timePoints = data.getTimePoints();
-		currTimepoint = data.getTimePoint(0);
 		minTime = data.getTimePoint(0);
 		maxTime = data.getTimePoint(data.getRowCount()-1);
+		setCurrTimepoint(data.getTimePoint(0));
 	}
 	
 	/**

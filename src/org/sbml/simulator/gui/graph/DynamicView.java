@@ -22,7 +22,9 @@ import java.beans.PropertyChangeListener;
 
 import javax.swing.JSplitPane;
 
+import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.SBMLDocument;
+import org.sbml.jsbml.Species;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.graph.gui.TranslatorSBMLgraphPanel;
@@ -59,13 +61,28 @@ public class DynamicView extends JSplitPane implements DynamicGraph, PropertyCha
 	 * Pointer to the used core
 	 */
 	private DynamicCore core;
-
+	
+	/**
+	 * sbml document
+	 */
+	private SBMLDocument sbmlDocument;
+	
+	/**
+	 * list of species (to save computing time)
+	 * TODO: "find" faster in hashmap?
+	 */
+	private ListOf<Species> speciesIDs; 
+	
+	/**
+	 * list of reactions (to save computing time)
+	 */
+//	private String[] reactionIDs;
 	
 	/**
 	 * Constructs all necessary elements
 	 * @param document
 	 */
-	public DynamicView(SBMLDocument document){
+	public DynamicView(SBMLDocument document){	    
 		super(JSplitPane.VERTICAL_SPLIT, false);
 		graphPanel = new TranslatorSBMLgraphPanel(document, false);
 		controlPanel = new DynamicControlPanel();
@@ -75,6 +92,8 @@ public class DynamicView extends JSplitPane implements DynamicGraph, PropertyCha
 		
 		setDividerLocation(220); 
 		//TODO: adjust location fullscreen/windowed
+		sbmlDocument = document;
+		speciesIDs = document.getModel().getListOfSpecies();
 	}
 
 	/* (non-Javadoc)
@@ -89,23 +108,23 @@ public class DynamicView extends JSplitPane implements DynamicGraph, PropertyCha
          * To ensure that the dynamic change of graph rendering will make a
          * noticible change in size or color the passed values have to be
          * conditioned. Therefore not absolute values will be passed but
-         * relative.
+         * relative (TODO).
          */
-		
-		
-
-//		System.out.println("(DEBUG) VIEW: initiate graph update");
 		/**
-		 * incompleted test with TestModel
+		 * incompleted test with TestModel.xml
 		 */
-//		for(int i = 3; i <= 8; i++){
-//		    System.out.println(updateThem.getColumnIdentifier(i));
-//            /*
-//             * There's just one row because the core passes only the necessary
-//             * data for the particular timepoint
-//             */
-//		    graphPanel.dynamicChangeOfNode(updateThem.getColumnIdentifier(i), updateThem.getValueAt(0, i)*50);
-//		}
+		for(int i = 1; i <= updateThem.getColumnCount(); i++){
+		    if(speciesIDs.get(updateThem.getColumnIdentifier(i)) != null){
+//		        System.out.println(updateThem.getColumnIdentifier(i));
+	            /*
+	             * There's just one row because the core passes only the necessary
+	             * data for the particular timepoint
+	             */
+		        graphPanel.dynamicChangeOfNode(updateThem.getColumnIdentifier(i), updateThem.getValueAt(0, i)*50);
+		    }
+		    
+
+		}
 		
         //notify core that graph is updated
 		core.graphUpdateFinished();		
