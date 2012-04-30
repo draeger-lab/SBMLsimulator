@@ -46,14 +46,14 @@ public class DynamicCore {
 		@Override
 		protected Void doInBackground() throws Exception {
 			for(int i = getIndexOfTimepoint(currTimepoint)+1; i < timePoints.length; i++){
-				notification = false;
+				graphIsDrawn = false;
 				setCurrTimepoint(timePoints[i]);
 				Thread.sleep(playspeed);
 				
 				/*
 				 * Wait till graph drawing is finished 
 				 */
-				while(!notification){
+				while(!graphIsDrawn){
 					Thread.sleep(AWAITNOTIFICATION);
 				}
 			}
@@ -85,7 +85,7 @@ public class DynamicCore {
 	 * Notification if graph is updated.
 	 * Gets changed by to threads, therefore volatile.
 	 */
-	private volatile boolean notification;
+	private volatile boolean graphIsDrawn;
 	
 	/**
 	 * Sleeptime while waiting for notification
@@ -201,6 +201,22 @@ public class DynamicCore {
 	}
 	
 	/**
+	 * Get the speed of cycling through all timepoints with the play method
+	 * @return
+	 */
+	public int getPlayspeed(){
+	    return playspeed;
+	}
+	
+	/**
+	 * Set the speed of cycling through all timepoints with the play method
+	 * @param speed
+	 */
+	public void setPlayspeed(int speed){
+	    playspeed = speed;
+	}
+	
+	/**
 	 * Add an observer
 	 * @param observer
 	 */
@@ -214,13 +230,12 @@ public class DynamicCore {
 	 * (Graph drawing completed)
 	 */
 	public void graphUpdateFinished(){
-		notification = true;
+		graphIsDrawn = true;
 	}
 	
 	/**
 	 * Notifies all observers about the change and delivers changed Species & Reactions
 	 */
-	//TODO: deliver changed values with respect to the chosen graphelements
 	private void currTimepointChanged(double changedTo){
 		double[] currTimePoints = {currTimepoint};
 		for(DynamicGraph dg : observers){

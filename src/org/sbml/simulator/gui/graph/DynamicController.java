@@ -19,19 +19,21 @@ package org.sbml.simulator.gui.graph;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 /**
- * Controller class for DynamicControlPanel.
- * It represents the controller in MVC-pattern.
+ * Controller class for DynamicControlPanel. It represents the controller in
+ * MVC-pattern and controls any user generated event due to the control panel.
  * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
-public class DynamicController implements ChangeListener, ActionListener{
+public class DynamicController implements ChangeListener, ActionListener, ItemListener{
 
 	/**
 	 * Pointer to associated core
@@ -68,13 +70,15 @@ public class DynamicController implements ChangeListener, ActionListener{
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(core != null){
-			System.out.println("CONTROLLER: " + e.getActionCommand());
 			if(e.getActionCommand().equals("PLAY")){
+			    core.setPlayspeed(controlPanel.getSimulationSpeed());
 				core.play();
 				controlPanel.enablePlay(false);
 				controlPanel.enableSearchBar(false);
 				controlPanel.enablePause(true);
 				controlPanel.enableStop(true);
+				controlPanel.enableSimVeloComboBox(false);
+				controlPanel.enableSimVeloSpin(false);
 				//TODO: enable button when play finished
 				//TODO: maybe disable toVideo button
 			}else if(e.getActionCommand().equals("PAUSE")){
@@ -82,12 +86,16 @@ public class DynamicController implements ChangeListener, ActionListener{
 				controlPanel.enablePlay(true);
 				controlPanel.enableSearchBar(true);
 				controlPanel.enablePause(false);
+                controlPanel.enableSimVeloComboBox(true);
+                controlPanel.enableSimVeloSpin(true);
 			}else if(e.getActionCommand().equals("STOP")){
 				core.stopPlay();
 				controlPanel.enablePlay(true);
 				controlPanel.enableSearchBar(true);
 				controlPanel.enablePause(false);
 				controlPanel.enableStop(false);
+                controlPanel.enableSimVeloComboBox(true);
+                controlPanel.enableSimVeloSpin(true);
 			}else if(e.getActionCommand().equals("TOVIDEO")){
 				//TODO save as video with maximum sim-speed
 			}		
@@ -105,5 +113,17 @@ public class DynamicController implements ChangeListener, ActionListener{
 		}
 		
 	}
+
+
+    /* (non-Javadoc)
+     * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
+     */
+    @Override
+    public void itemStateChanged(ItemEvent ie){
+        if(ie.getStateChange() == ItemEvent.SELECTED){
+            controlPanel.setSimVeloCombo(ie.getItem());
+        }
+        
+    }
 	
 }

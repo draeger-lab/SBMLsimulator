@@ -99,7 +99,7 @@ public class DynamicControlPanel extends JPanel{
 	private JButton stop;
 	private JButton video;
 	private JLabel simVelolbl;
-	private JComboBox simVeloCombo;
+	private JComboBox<String> simVeloCombo;
 	private JSpinner simVeloSpin;
 	
 	
@@ -174,16 +174,23 @@ public class DynamicControlPanel extends JPanel{
 		pause = GUITools.createButton(pauseIcon, controller, Buttons.PAUSE, "Pausiert die Simulation.");
 		stop = GUITools.createButton(stopIcon, controller, Buttons.STOP, "Stoppt die Simulation.");
 		video = GUITools.createButton(toVideoIcon, controller, Buttons.TOVIDEO, "Speichert die Simulation als Film.");
+		
 		simVelolbl = new JLabel("Simulationsgeschwindigkeit");
-		simVeloCombo = new JComboBox();
+		simVeloCombo = new JComboBox<String>();
+		simVeloCombo.addItem("Schnell");
+		simVeloCombo.addItem("Normal");
+		simVeloCombo.addItem("Langsam");
+		simVeloCombo.addItemListener(controller);		
 		simVeloSpin = new JSpinner();
+		setSimVeloCombo("Normal"); //by default 'normal speed'
+		
 		
 		addComponent(gbl, searchBar, 	0, 0, 6, 1, GridBagConstraints.CENTER, 	GridBagConstraints.HORIZONTAL, 	1, 0, new Insets(0,0,0,0));
 		addComponent(gbl, play, 		0, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, pause, 		1, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, stop, 		2, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, video, 		3, 1, 1, 1, GridBagConstraints.WEST,	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
-		addComponent(gbl, timelbl, 		3, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, timelbl, 		3, 1, 2, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, simVelolbl,	0, 2, 4, 1, GridBagConstraints.WEST,	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, simVeloCombo,	3, 2, 1, 1, GridBagConstraints.CENTER,  GridBagConstraints.HORIZONTAL,	1, 0, new Insets(2,2,2,2));
 		addComponent(gbl, simVeloSpin,	5, 2, 1, 1, GridBagConstraints.EAST, 	GridBagConstraints.BOTH, 		0, 0, new Insets(2,2,2,2));
@@ -202,6 +209,38 @@ public class DynamicControlPanel extends JPanel{
 		searchBar.setValue(core.getIndexOfTimepoint(timepoint));
 		timelbl.setText("Zeitpunkt: " + timepoint + " / " + maxTime);
 		//TODO: locale
+	}
+	
+	/**
+	 * Get the playspeed of the simulation as chosen by the user
+	 * @return
+	 */
+	public int getSimulationSpeed(){
+	    try{
+	        return (int) simVeloSpin.getValue();
+	    }catch(Exception e){
+	        System.err.println(e.getStackTrace());
+	        return 700; //playspeed per default
+	    }
+	}
+	
+	/**
+	 * Setting the simulation speed by JComboBox items
+	 * TODO locale
+	 * @param i
+	 */
+	public void setSimVeloCombo(Object item){
+	    simVeloCombo.setSelectedItem(item);
+	    if(item.equals("Schnell")){
+	        //fast speed
+	        simVeloSpin.setValue(350);
+	    }else if(item.equals("Normal")){
+	        //normal speed
+	        simVeloSpin.setValue(700);
+	    }else if(item.equals("Langsam")){
+	        //slow speed
+	        simVeloSpin.setValue(1400);
+	    }
 	}
 	
 	/**
@@ -238,6 +277,24 @@ public class DynamicControlPanel extends JPanel{
 	 */
 	public void enablePause(boolean bool){
 		pause.setEnabled(bool);
+	}
+	
+	/**
+     * Sets enable status for the combobox to choose velocity
+     * (If the user presses play or toVideo, this method should be invoked by the controller)
+	 * @param bool
+	 */
+	public void enableSimVeloComboBox(boolean bool){
+	    simVeloCombo.setEnabled(bool);
+	}
+	
+	/**
+     * Sets enable status for the spinner to choose velocity
+     * (If the user presses play or toVideo, this method should be invoked by the controller)
+     * @param bool
+     */
+	public void enableSimVeloSpin(boolean bool){
+	    simVeloSpin.setEnabled(bool);
 	}
 	
 	/**
