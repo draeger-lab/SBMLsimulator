@@ -21,6 +21,9 @@ import java.util.ArrayList;
 
 import javax.swing.SwingWorker;
 
+import org.sbml.jsbml.ListOf;
+import org.sbml.jsbml.SBMLDocument;
+import org.sbml.jsbml.Species;
 import org.simulator.math.odes.MultiTable;
 
 /**
@@ -54,7 +57,7 @@ public class DynamicCore {
 				 * Wait till graph drawing is finished 
 				 */
 				while(!graphIsDrawn){
-					Thread.sleep(AWAITNOTIFICATION);
+					Thread.sleep(AWAITING);
 				}
 			}
 			return null;
@@ -71,9 +74,6 @@ public class DynamicCore {
 			 */
 			playWorker = null;
 		}
-		
-		
-		
 	}
 	
 	/**
@@ -90,7 +90,7 @@ public class DynamicCore {
 	/**
 	 * Sleeptime while waiting for notification
 	 */
-	private final long AWAITNOTIFICATION = 20;
+	private final long AWAITING = 20;
 	
 	/**
      * Saves the currently displayed timestep.
@@ -116,6 +116,22 @@ public class DynamicCore {
 	 * List of all simulated timepoints
 	 */
 	private double[] timePoints;
+	
+	/**
+	 * Lower limit of species data in Multitable
+	 */
+	private double minDataSpecies;
+	
+	/**
+	 * Upper limit of species data in Multitable
+	 */
+	private double maxDataSpecies;
+	
+	/**
+     * Current status of limits whether computed or not. Not computed by default
+     * to save constructing time.
+     */
+	private boolean limitsComputed = false;
 	
 	/**
 	 * List of all listeners, which will be notified, when the current timestep changes.
@@ -198,6 +214,22 @@ public class DynamicCore {
 	 */
 	public double getMaxTime(){
 	    return maxTime;
+	}
+	
+	/**
+	 * Get the lower limit of the data in simulation data
+	 * @return lower limit if already computed by {@link computeLimits} otherwise null
+	 */
+	public double getMinDataSpecies(){
+	    return limitsComputed ? minDataSpecies : null;
+	}
+	
+	/**
+	 * Get the upper limit of the data in simulation data
+     * @return upper limit if already computed by {@link computeLimits} otherwise null
+	 */
+	public double getMaxDataSpecies(){
+	    return limitsComputed ? maxDataSpecies : null;
 	}
 	
 	/**
@@ -290,5 +322,34 @@ public class DynamicCore {
 			}
 		}
 		return searchedIndex;
+	}
+	
+	/**
+	 * Computation of min values in and max values in the simulation data. O(n^2).
+	 * @param document needed to distinguish between reactions and species.
+	 */
+	public void computeLimits(SBMLDocument document){
+	    //init
+	    ListOf<Species> speciesIDs = document.getModel().getListOfSpecies();
+	    maxDataSpecies = Double.MIN_VALUE;
+	    minDataSpecies = Double.MAX_VALUE;
+	    
+	    //compute
+	    for (int i = 1; i < data.getColumnCount(); i++){
+            if (speciesIDs.get(data.getColumnIdentifier(i)) != null){
+                for (int j = 0; j < data.getRowCount(); j++){
+                    if (speciesIDs.get(data.getColumnIdentifier(i)) != null){
+                        double tmpValue = data.getValueAt(j, i);
+                        if (tmpValue < minDataSpecies){
+                            minDataSpecies = tmpValue;
+                        }else if (tmpValue > maxDataSpecies){
+                            maxDataSpecies = tmpValue;
+                        }
+                    }
+                }
+            }
+        }
+	    
+	    limitsComputed = true;
 	}
 }
