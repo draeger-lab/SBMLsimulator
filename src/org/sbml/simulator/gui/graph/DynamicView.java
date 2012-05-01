@@ -21,6 +21,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.JSplitPane;
+import javax.swing.SwingWorker;
 
 import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.Reaction;
@@ -63,6 +64,11 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      * Pointer to the used core
      */
     private DynamicCore core;
+    
+    /**
+     * Used SBMLDocument
+     */
+    private SBMLDocument document;
 
     /**
      * list of species (to save computing time) TODO: "find" faster in hashmap?
@@ -104,6 +110,8 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
 
         setDividerLocation(220);
         // TODO: adjust location fullscreen/windowed
+        
+        this.document = document;
         speciesIDs = document.getModel().getListOfSpecies();
         reactionIDs = document.getModel().getListOfReactions();
     }
@@ -135,25 +143,25 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                  * There's just one row because the core passes only the
                  * necessary data for the particular timepoint
                  */
-                
-                m = 50; //m & c should be computed specified for the simulation
-                c = 0;
                 graphPanel.dynamicChangeOfNode(
                         updateThem.getColumnIdentifier(i),
                         updateThem.getValueAt(0, i) * m + c);
             }else if(reactionIDs.get(updateThem.getColumnIdentifier(i)) != null){
                 //TODO
+                graphPanel.dynamicChangeOfReaction(updateThem.getColumnIdentifier(i), 10);
             }
 
         }
 
-        // notify core that graph is updated
+        /*
+         * Notifiy that graph update is finished. Ensures that play-thread in
+         * core doesn't overtravel the drawing.
+         */
         core.graphUpdateFinished();
     }
 
     /*
      * (non-Javadoc)
-     * 
      * @see java.beans.PropertyChangeListener#propertyChange(java.beans.
      * PropertyChangeEvent)
      */
@@ -169,30 +177,32 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                  * data.
                  */
                 core = new DynamicCore(this, data);
-                controlPanel.setCore(core);
-                double minValue = Double.MAX_VALUE;
-                double maxValue = Double.MIN_VALUE;
-                //compute lowerLimit and upperLimit of data
-                //TODO own thread because of O(n^2)
+                
                 /*
-                for (int i = 1; i < data.getColumnCount(); i++){
-                    if (speciesIDs.get(data.getColumnIdentifier(i)) != null){
-//                        System.out.println(data.getColumnIdentifier(i));
-                        for (int j = 0; j < data.getRowCount(); j++){
-                            if (speciesIDs.get(data.getColumnIdentifier(i)) != null){
-                                double tmpValue = data.getValueAt(j, i);
-                                if (tmpValue < minValue){
-                                    minValue = tmpValue;
-                                }else if (tmpValue > maxValue){
-                                    maxValue = tmpValue;
-                                }
-                            }
-                        }
+                 * Computation in own swingworker because of O(n^2).
+                 * Ensures that UI doesn't get blocked in case of bigger data sets.
+                 */
+                SwingWorker<Void, Void> computationOfLimits = new SwingWorker<Void, Void>(){
+
+                    @Override
+                    protected Void doInBackground() throws Exception{
+                        core.computeLimits(document);
+                        return null;
                     }
-                }
-                */
-                m = BIASComputation.computeBIAS(minValue, maxValue);
-                c = BIASComputation.getYintercept();
+
+                    /* (non-Javadoc)
+                     * @see javax.swing.SwingWorker#done()
+                     */
+                    @Override
+                    protected void done(){
+                        super.done();
+                        //activate controlpanel after computation of limits
+                        m = BIASComputation.computeBIAS(core.getMinDataSpecies(), core.getMaxDataSpecies());
+                        c = BIASComputation.getYintercept();
+                        controlPanel.setCore(core);
+                    }
+                };
+                computationOfLimits.execute();
             }
         }
     }

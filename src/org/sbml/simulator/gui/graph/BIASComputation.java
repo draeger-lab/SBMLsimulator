@@ -26,15 +26,18 @@ package org.sbml.simulator.gui.graph;
 public class BIASComputation{
     
     /**
-     * Maximum size of a node
+     * Minimum size of a node
      */
     private static final int MIN_OUT_NODE = 7;
     
     /**
-     * Minimum size of a node
+     * Maximum size of a node
      */
     private static final int MAX_OUT_NODE = 50;
     
+    /**
+     * yintercept of linear regression
+     */
     private static double yintercept;
 
     /**
@@ -52,12 +55,11 @@ public class BIASComputation{
     }
     
     /**
-     * Returnd the yintercept.
+     * Returns the yintercept.
      * Only to use after {@link computeBIAS}.
-     * @return
+     * @return yintercept if already computed, otherwise 0
      */
     public static double getYintercept(){
-//        System.out.println("BIASC: return y = " + yintercept);
         return yintercept;
     }
     
