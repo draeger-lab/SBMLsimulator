@@ -29,14 +29,14 @@ import org.simulator.math.odes.MultiTable;
 /**
  * Represents the core of the dynamic visualization and therefore
  * the model in MVC-pattern.
- * Holds all necessary data and logic to run the simulation.
+ * Holds all necessary data and logic to run the dynamic visualization.
  * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
 public class DynamicCore {
 	/**
-	 * Own thread to cycle through timepoints
+	 * Own thread to cycle through timepoints.
 	 * 
 	 * @author Fabian Schwarzkopf
 	 * @version $Rev$
@@ -54,7 +54,7 @@ public class DynamicCore {
 				Thread.sleep(playspeed);
 				
 				/*
-				 * Wait till graph drawing is finished 
+				 * Wait till graph drawing is finished in case of large data
 				 */
 				while(!graphIsDrawn){
 					Thread.sleep(AWAITING);
@@ -77,7 +77,7 @@ public class DynamicCore {
 	}
 	
 	/**
-	 * Play thread worker
+	 * Play thread worker.
 	 */
 	private PlayWorker playWorker;
 	
@@ -88,7 +88,7 @@ public class DynamicCore {
 	private volatile boolean graphIsDrawn;
 	
 	/**
-	 * Sleeptime while waiting for notification
+	 * Sleeptime while waiting for notification.
 	 */
 	private final long AWAITING = 20;
 	
@@ -118,18 +118,18 @@ public class DynamicCore {
 	private double[] timePoints;
 	
 	/**
-	 * Lower limit of species data in Multitable
+	 * Lower limit of species data in given {@link MultiTable} if computed.
 	 */
 	private double minDataSpecies;
 	
 	/**
-	 * Upper limit of species data in Multitable
+	 * Upper limit of species data in given {@link MultiTable} if computed.
 	 */
 	private double maxDataSpecies;
 	
 	/**
      * Current status of limits whether computed or not. Not computed by default
-     * to save constructing time.
+     * to save constructing time if not needed.
      */
 	private boolean limitsComputed = false;
 	
@@ -139,7 +139,8 @@ public class DynamicCore {
 	private ArrayList<DynamicGraph> observers = new ArrayList<DynamicGraph>();
 	
 	/**
-	 * Determines the speed of the the play method
+	 * Determines the speed of the the play method.
+	 * By default 700.
 	 */
 	private int playspeed = 700;
 	
@@ -154,11 +155,11 @@ public class DynamicCore {
 		setData(data);
 	}
 	
-	/**
-	 * Set simulated data and the current 
-	 * timepoint to the first entry of the MultiTable
-	 * @param data
-	 */
+    /**
+     * Set simulated data and the current timepoint to the first entry of the
+     * given data.
+     * @param data
+     */
 	public void setData(MultiTable data){
 		this.data = data;
 		timePoints = data.getTimePoints();
@@ -168,7 +169,7 @@ public class DynamicCore {
 	}
 	
 	/**
-	 * Get timepoints of the simulation
+	 * Get timepoints of the simulation.
 	 * @return
 	 */
 	public double[] getTimepoints(){
@@ -188,7 +189,7 @@ public class DynamicCore {
 	}
 	
 	/**
-	 * Set the current time displayed by the graph to the given rowIndex of the MultiTable.
+	 * Set the current time displayed by the graph to the given rowIndex of the data.
 	 * @param time
 	 */
 	public void setCurrTimepoint(int rowIndex){
@@ -201,7 +202,7 @@ public class DynamicCore {
 	}
 	
 	/**
-	 * Get the current timepoint of the core
+	 * Get the current timepoint of the core.
 	 * @return
 	 */
 	public double getCurrTimepoint(){
@@ -209,7 +210,7 @@ public class DynamicCore {
 	}
 	
 	/**
-	 * Get the maximum timepoint of the core
+	 * Get the maximum timepoint of the core.
 	 * @return
 	 */
 	public double getMaxTime(){
@@ -217,7 +218,7 @@ public class DynamicCore {
 	}
 	
 	/**
-	 * Get the lower limit of the data in simulation data
+	 * Get the lower limit of the data in simulation data.
 	 * @return lower limit if already computed by {@link computeLimits} otherwise null
 	 */
 	public double getMinDataSpecies(){
@@ -225,7 +226,7 @@ public class DynamicCore {
 	}
 	
 	/**
-	 * Get the upper limit of the data in simulation data
+	 * Get the upper limit of the data in simulation data.
      * @return upper limit if already computed by {@link computeLimits} otherwise null
 	 */
 	public double getMaxDataSpecies(){
@@ -233,7 +234,7 @@ public class DynamicCore {
 	}
 	
 	/**
-	 * Get the speed of cycling through all timepoints with the play method
+	 * Get the speed of cycling through all timepoints with the play method.
 	 * @return
 	 */
 	public int getPlayspeed(){
@@ -241,7 +242,7 @@ public class DynamicCore {
 	}
 	
 	/**
-	 * Set the speed of cycling through all timepoints with the play method
+	 * Set the speed of cycling through all timepoints with the play method.
 	 * @param speed
 	 */
 	public void setPlayspeed(int speed){
@@ -249,7 +250,7 @@ public class DynamicCore {
 	}
 	
 	/**
-	 * Add an observer
+	 * Add an observer.
 	 * @param observer
 	 */
 	public void addObserver(DynamicGraph observer){
@@ -257,16 +258,15 @@ public class DynamicCore {
 	}
 	
 	/**
-	 * Notifies the play worker, that the graph is ready for the next
-	 * timepoint. 
-	 * (Graph drawing completed)
-	 */
+     * Notifies the play worker, that the graph is ready for the next timepoint.
+     * (Graph drawing completed).
+     */
 	public void graphUpdateFinished(){
 		graphIsDrawn = true;
 	}
 	
 	/**
-	 * Notifies all observers about the change and delivers changed Species & Reactions
+	 * Notifies all observers about the change and delivers changed species & reactions.
 	 */
 	private void currTimepointChanged(double changedTo){
 		double[] currTimePoints = {currTimepoint};
@@ -277,7 +277,7 @@ public class DynamicCore {
 	
 	/**
 	 * Cycles through all saved timepoints (ongoing from the current timepoint)
-	 * and additionally updates the graph
+	 * and additionally updates the graph.
 	 */
 	public void play(){
 		if(playWorker == null){
@@ -287,7 +287,7 @@ public class DynamicCore {
 	}	
 	
 	/**
-	 * Pauses the play worker
+	 * Pauses the play worker.
 	 */
 	public void pausePlay(){
 		if(playWorker != null){
@@ -297,7 +297,7 @@ public class DynamicCore {
 	}
 	
 	/**
-	 * Stops the play worker
+	 * Stops the play worker.
 	 */
 	public void stopPlay(){
 		if(playWorker != null){
@@ -327,6 +327,7 @@ public class DynamicCore {
 	/**
 	 * Computation of min values in and max values in the simulation data. O(n^2).
 	 * @param document needed to distinguish between reactions and species.
+	 * TODO determine limits of reactions
 	 */
 	public void computeLimits(SBMLDocument document){
 	    //init
