@@ -18,7 +18,8 @@
 package org.sbml.simulator.gui.graph;
 
 /**
- * work in progress
+ * This class provides methods to map simulated values to a fitting codomain of
+ * yFiles input values.
  * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
@@ -26,26 +27,25 @@ package org.sbml.simulator.gui.graph;
 public class BIASComputation{
     
     /**
-     * Minimum size of a node
+     * Minimum size of a node.
      */
     private static final int MIN_OUT_NODE = 7;
     
     /**
-     * Maximum size of a node
+     * Maximum size of a node.
      */
     private static final int MAX_OUT_NODE = 50;
     
     /**
-     * yintercept of linear regression
+     * yintercept of linear regression.
      */
     private static double yintercept;
 
     /**
-     * Compute slope of linear regression
-     * 
+     * Compute slope of linear regression.
      * @param lowerLimit
      * @param upperLimit
-     * @return
+     * @return slope
      */
     public static double computeBIAS(double lowerLimit, double upperLimit){
         double slope = (MAX_OUT_NODE-MIN_OUT_NODE) / (upperLimit - lowerLimit);
