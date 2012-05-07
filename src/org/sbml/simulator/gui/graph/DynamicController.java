@@ -23,9 +23,12 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 
 /**
  * Controller class for {@link DynamicControlPanel}. It represents the
@@ -36,7 +39,7 @@ import javax.swing.event.ChangeListener;
  * @version $Rev$
  */
 public class DynamicController implements ChangeListener, ActionListener,
-        ItemListener{
+        ItemListener, TableModelListener{
 
     /**
      * Pointer to associated {@link DynamicCore}.
@@ -47,16 +50,11 @@ public class DynamicController implements ChangeListener, ActionListener,
      * Pointer to associated {@link DynamicControlPanel}.
      */
     private DynamicControlPanel controlPanel;
-
+    
     /**
-     * Constructs a new controller.
-     * @param core {@link DynamicCore}
-     * @param controlPanel {@link DynamicControlPanel}
+     * Pointer to asociated {@link DynamicView}
      */
-    public DynamicController(DynamicCore core, DynamicControlPanel controlPanel){
-        this.core = core;
-        this.controlPanel = controlPanel;
-    }
+    private DynamicView view;
 
     /**
      * Sets the {@link DynamicCore} of this controller.
@@ -64,6 +62,18 @@ public class DynamicController implements ChangeListener, ActionListener,
      */
     public void setCore(DynamicCore core){
         this.core = core;
+    }
+    
+    /**
+     * Sets the {@link DynamicView} for this controller.
+     * @param view {@link DynamicView}
+     */
+    public void setView(DynamicView view){
+        this.view = view;
+    }
+    
+    public void setControlerPanel(DynamicControlPanel controlPanel){
+        this.controlPanel = controlPanel;
     }
 
     /*
@@ -107,6 +117,9 @@ public class DynamicController implements ChangeListener, ActionListener,
                 }else if (e.getActionCommand().equals("TOVIDEO")){
                     // TODO save as video with maximum sim-speed
                 }
+            }else if(e.getSource() instanceof JCheckBox){
+                //labels switched on/off
+                view.updateGraph();
             }
         }
     }
@@ -139,7 +152,18 @@ public class DynamicController implements ChangeListener, ActionListener,
         if (ie.getStateChange() == ItemEvent.SELECTED){
             controlPanel.setSimVeloCombo(ie.getItem());
         }
+    }
 
+    /* (non-Javadoc)
+     * @see javax.swing.event.TableModelListener#tableChanged(javax.swing.event.TableModelEvent)
+     */
+    @Override
+    public void tableChanged(TableModelEvent e){
+        //TODO each time a checkbox gets changed, this method is invoked two times BUG
+        if(core!= null){
+//            System.out.println("tablechange");
+           view.updateGraph();
+        }
     }
 
 }

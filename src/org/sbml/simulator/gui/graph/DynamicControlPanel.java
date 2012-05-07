@@ -84,6 +84,11 @@ public class DynamicControlPanel extends JPanel{
 	private DynamicController controller;
 	
 	/**
+	 * Pointer to related {@link DynamicView}
+	 */
+	private DynamicView view;
+	
+	/**
 	 * Saves the maximum time for the timelbl.
 	 * (To save some computing time).
 	 */
@@ -104,27 +109,28 @@ public class DynamicControlPanel extends JPanel{
 	private JLabel labelslbl;
 	private JCheckBox labelsCB;
 	
+	/**
+	 * Constructs a new control panel.
+	 * @param controller
+	 */
+	public DynamicControlPanel(DynamicController controller) {
+        this.controller = controller;
+        this.controller.setControlerPanel(this);
+		init();
+	}
 	
 	/**
-	 * Constructs a new control panel without an associated {@link DynamicCore}.
+	 * Constructs a new control panel with all dependancies.
+	 * @param view
+	 * @param controller
 	 */
-	public DynamicControlPanel() {
-		init();
-	}
-
-	/**
-	 * Constructs an new control panel with associated {@link DynamicCore}.
-	 * @param core {@link DynamicCore}
-	 */
-	public DynamicControlPanel(DynamicCore core){
-		setCore(core);
-		init();
-	}
-
+	public DynamicControlPanel(DynamicView view, DynamicController controller){
+        this(controller);
+        this.view = view;
+    }
+	
 	/**
 	 * Sets the related {@link DynamicCore} to this control panel.
-	 * A {@link DynamicController} is constructed in addition, hence all control actions 
-	 * (buttons, searchbar) are associated with a controller.
 	 * 
 	 * @param core {@link DynamicCore}
 	 */
@@ -142,6 +148,7 @@ public class DynamicControlPanel extends JPanel{
 		 * (Does not cause inconsistency but leads to a change of the first setted curr core value).
 		 */
 		controller.setCore(core);
+		controller.setView(view);
 		setTimepoint(core.getCurrTimepoint());
 		Component[] elements = {play, video, searchBar, simVeloCombo, simVeloSpin, labelsCB};
 		GUITools.setEnabledForAll(true, elements);
@@ -170,8 +177,8 @@ public class DynamicControlPanel extends JPanel{
 		
 		labelslbl = new JLabel("Labels");
 		labelsCB = new JCheckBox();
+		labelsCB.addActionListener(controller);
 		
-		controller = new DynamicController(null, this);
 		
 		searchBar.addChangeListener(controller);
 		timelbl = new JLabel("Zeitpunkt: N/A");
@@ -211,8 +218,10 @@ public class DynamicControlPanel extends JPanel{
 	 * @param timepoint
 	 */
 	public void setTimepoint(double timepoint){
-		searchBar.setValue(core.getIndexOfTimepoint(timepoint));
-		timelbl.setText("Zeitpunkt: " + timepoint + " / " + maxTime);
+	    if(core != null){
+    		searchBar.setValue(core.getIndexOfTimepoint(timepoint));
+    		timelbl.setText("Zeitpunkt: " + timepoint + " / " + maxTime);
+	    }
 		//TODO: locale
 	}
 	
@@ -318,6 +327,36 @@ public class DynamicControlPanel extends JPanel{
      */
 	public void enableVideo(boolean bool){
 	    video.setEnabled(bool);
+	}
+	
+	/**
+	 * Sets enable status for all given components to given boolean.
+	 * TODO
+	 * @param bool
+	 * @param c
+	 */
+	public void enablePanelComponent(boolean bool, Component... c){
+	    for(int i = 0; i < c.length; i++){
+	        if(c[i] instanceof JButton){
+	            if(((JButton)c[i]).getActionCommand().equals("PLAY")){
+	                
+	            }else if(((JButton)c[i]).getActionCommand().equals("PAUSE")){
+	                
+	            }else if(((JButton)c[i]).getActionCommand().equals("STOP")){
+	                
+	            }else if(((JButton)c[i]).getActionCommand().equals("TOVIDEO")){
+	                
+	            }
+	        }else if(c[i] instanceof JSpinner){
+	            
+	        }else if(c[i] instanceof JCheckBox){
+	            
+	        }else if(c[i] instanceof JSlider){
+	            
+	        }else if(c[i] instanceof JComboBox<?>){
+	            
+	        }
+	    }
 	}
 	
 	/**
