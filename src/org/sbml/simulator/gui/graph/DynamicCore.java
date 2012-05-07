@@ -93,9 +93,11 @@ public class DynamicCore {
 	private final long AWAITING = 20;
 	
 	/**
-     * Saves the currently displayed timestep.
+     * Saves the currently displayed timestep. To ensure that the first
+     * timepoint setted by construction is send to the observers, this field is
+     * initialized with -1.
      */
-	private double currTimepoint;
+	private double currTimepoint = -1;
 	
 	/**
 	 * Saves the maximum simulated time.
@@ -143,7 +145,6 @@ public class DynamicCore {
 	 * By default 700.
 	 */
 	private int playspeed = 700;
-	
 	
 	/**
 	 * Construstructs the core with an observer and simulation data.
@@ -306,7 +307,6 @@ public class DynamicCore {
 		}
 		currTimepoint = data.getTimePoint(0);
 		currTimepointChanged(data.getTimePoint(0));
-		
 	}
 	
 	/**

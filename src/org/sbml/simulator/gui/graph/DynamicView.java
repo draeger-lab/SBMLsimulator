@@ -66,6 +66,11 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      * Panel for the controls of the dynamic visualization.
      */
     private DynamicControlPanel controlPanel;
+    
+    /**
+     * Pointer to associated {@link DynamicController}.
+     */
+    private DynamicController controller;
 
     /**
      * Pointer to the used {@link DynamicCore}.
@@ -86,6 +91,16 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      * list of reactions (to save computing time).
      */
      private ListOf<Reaction> reactionIDs;
+     
+     /**
+      * Saves the currently displayed time.
+      */
+     private double currTime;
+     
+     /**
+      * Saves the currently displayed data.
+      */
+     private MultiTable currData;
 
     /**
      * Parameter to adjust values used in dynamic update of the graph. Slope by
@@ -111,11 +126,15 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      */
     public DynamicView(SBMLDocument document){
         super(JSplitPane.VERTICAL_SPLIT, false);
+        
+        //init
+        controller = new DynamicController();
         graphPanel = new TranslatorSBMLgraphPanel(document, false);
         legend = new LegendPanel(document.getModel(), true);
+        legend.addTableModelListener(controller);
         graphWithLegend = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, legend, graphPanel);
         graphWithLegend.setDividerLocation(330);
-        controlPanel = new DynamicControlPanel();
+        controlPanel = new DynamicControlPanel(this, controller);
 
         add(graphWithLegend);
         add(controlPanel);
@@ -126,6 +145,14 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         speciesIDs = document.getModel().getListOfSpecies();
         reactionIDs = document.getModel().getListOfReactions();
     }
+    
+    /**
+     * Updates the displayed graph with respect to the user chosen settings
+     * (i.e. turning on/off labels).
+     */
+    public void updateGraph(){
+        updateGraph(currTime, currData);
+    }
 
     /*
      * (non-Javadoc)
@@ -135,6 +162,10 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      */
     @Override
     public void updateGraph(double timepoint, MultiTable updateThem){
+        //save currently displayed properties
+        currTime = timepoint;
+        currData = updateThem;
+        //update JSlider (in case of "play")
         controlPanel.setTimepoint(timepoint);
         /*
          * To ensure that the dynamic change of graph rendering will make a
@@ -159,10 +190,9 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                             tmpValue, controlPanel.getSelectionStateOfLabels());
 
                 }else if (reactionIDs.get(id) != null){
-                    // TODO
-                    graphPanel.dynamicChangeOfReaction(id, 10);
+                    // TODO adjust given values
+//                    graphPanel.dynamicChangeOfReaction(id, updateThem.getValueAt(0, i));
                 }
-
             }else{
                 graphPanel.notSelected(id);
             }
@@ -172,7 +202,9 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
          * Notifiy that graph update is finished. Ensures that play-thread in
          * core doesn't overtravel the drawing.
          */
-        core.graphUpdateFinished();
+        if(core != null){
+            core.graphUpdateFinished();
+        }
     }
 
     /*
