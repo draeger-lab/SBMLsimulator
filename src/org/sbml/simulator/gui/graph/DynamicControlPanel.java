@@ -21,6 +21,7 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -46,7 +47,16 @@ import de.zbit.util.StringUtil;
  * @version $Rev$
  */
 public class DynamicControlPanel extends JPanel{
+	
+	/**
+	 * 
+	 */
 	private static final long serialVersionUID = 6692563909762370732L;
+	
+	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final transient Logger logger = Logger.getLogger(DynamicControlPanel.class.getName());
 	
 	/**
 	 * List of action commands.
@@ -104,7 +114,7 @@ public class DynamicControlPanel extends JPanel{
 	private JButton stop;
 	private JButton video;
 	private JLabel simVelolbl;
-	private JComboBox<String> simVeloCombo;
+	private JComboBox simVeloCombo;
 	private JSpinner simVeloSpin;
 	private JLabel labelslbl;
 	private JCheckBox labelsCB;
@@ -124,7 +134,7 @@ public class DynamicControlPanel extends JPanel{
 	 * @param view
 	 * @param controller
 	 */
-	public DynamicControlPanel(DynamicView view, DynamicController controller){
+	public DynamicControlPanel(DynamicView view, DynamicController controller) {
         this(controller);
         this.view = view;
     }
@@ -134,7 +144,7 @@ public class DynamicControlPanel extends JPanel{
 	 * 
 	 * @param core {@link DynamicCore}
 	 */
-	public void setCore(DynamicCore core){
+	public void setCore(DynamicCore core) {
 		this.core = core;
 		double[] timepointsOfSimulation = core.getTimepoints();
 		searchBar.setMinimum(0);
@@ -157,7 +167,8 @@ public class DynamicControlPanel extends JPanel{
 	/**
 	 * Initialize this panel.
 	 */
-	private void init(){
+	private void init() {
+		logger.fine("Entering init method");
 		GridBagLayout gbl = new GridBagLayout();
 		setLayout(gbl);
 		
@@ -189,7 +200,7 @@ public class DynamicControlPanel extends JPanel{
 		//TODO locale
 		
 		simVelolbl = new JLabel("Simulationsgeschwindigkeit");
-		simVeloCombo = new JComboBox<String>();
+		simVeloCombo = new JComboBox();
 		simVeloCombo.addItem("Schnell");
 		simVeloCombo.addItem("Normal");
 		simVeloCombo.addItem("Langsam");
@@ -217,8 +228,8 @@ public class DynamicControlPanel extends JPanel{
 	 * Sets the {@link JSlider} to the given timepoint and updates the time label.
 	 * @param timepoint
 	 */
-	public void setTimepoint(double timepoint){
-	    if(core != null){
+	public void setTimepoint(double timepoint) {
+	    if (core != null) {
     		searchBar.setValue(core.getIndexOfTimepoint(timepoint));
     		timelbl.setText("Zeitpunkt: " + timepoint + " / " + maxTime);
 	    }
@@ -229,10 +240,10 @@ public class DynamicControlPanel extends JPanel{
 	 * Get the playspeed of the simulation as chosen by the user.
 	 * @return value of the velocity {@link JSpinner}.
 	 */
-	public int getSimulationSpeed(){
-	    try{
-	        return (int) simVeloSpin.getValue();
-	    }catch(Exception e){
+	public int getSimulationSpeed() {
+	    try {
+	        return ((Integer) simVeloSpin.getValue()).intValue();
+	    } catch(Exception e) {
 	        System.err.println(e.getStackTrace());
 	        return 700; //playspeed per default
 	    }
@@ -243,15 +254,15 @@ public class DynamicControlPanel extends JPanel{
 	 * TODO locale
 	 * @param item
 	 */
-	public void setSimVeloCombo(Object item){
+	public void setSimVeloCombo(Object item) {
 	    simVeloCombo.setSelectedItem(item);
-	    if(item.equals("Schnell")){
+	    if (item.equals("Schnell")) {
 	        //fast speed
 	        simVeloSpin.setValue(150);
-	    }else if(item.equals("Normal")){
+	    } else if (item.equals("Normal")) {
 	        //normal speed
 	        simVeloSpin.setValue(500);
-	    }else if(item.equals("Langsam")){
+	    } else if (item.equals("Langsam")) {
 	        //slow speed
 	        simVeloSpin.setValue(900);
 	    }
@@ -262,7 +273,7 @@ public class DynamicControlPanel extends JPanel{
 	 * (If the user presses play or toVideo, this method should be invoked by the controller).
 	 * @param bool
 	 */
-	public void enableSearchBar(boolean bool){
+	public void enableSearchBar(boolean bool) {
 		searchBar.setEnabled(bool);
 	}
 	
@@ -271,7 +282,7 @@ public class DynamicControlPanel extends JPanel{
 	 * (If the user presses play or toVideo, this method should be invoked by the controller).
 	 * @param bool
 	 */
-	public void enablePlay(boolean bool){
+	public void enablePlay(boolean bool) {
 		play.setEnabled(bool);
 	}
 
@@ -280,7 +291,7 @@ public class DynamicControlPanel extends JPanel{
 	 * (If the user presses play or toVideo, this method should be invoked by the controller).
 	 * @param bool
 	 */
-	public void enableStop(boolean bool){
+	public void enableStop(boolean bool) {
 		stop.setEnabled(bool);
 	}
 	
@@ -289,7 +300,7 @@ public class DynamicControlPanel extends JPanel{
 	 * (If the user presses play or toVideo, this method should be invoked by the controller).
 	 * @param bool
 	 */
-	public void enablePause(boolean bool){
+	public void enablePause(boolean bool) {
 		pause.setEnabled(bool);
 	}
 	
@@ -298,7 +309,7 @@ public class DynamicControlPanel extends JPanel{
      * (If the user presses play or toVideo, this method should be invoked by the controller).
 	 * @param bool
 	 */
-	public void enableSimVeloComboBox(boolean bool){
+	public void enableSimVeloComboBox(boolean bool) {
 	    simVeloCombo.setEnabled(bool);
 	}
 	
@@ -307,7 +318,7 @@ public class DynamicControlPanel extends JPanel{
      * (If the user presses play or toVideo, this method should be invoked by the controller).
      * @param bool
      */
-	public void enableSimVeloSpin(boolean bool){
+	public void enableSimVeloSpin(boolean bool) {
 	    simVeloSpin.setEnabled(bool);
 	}
 	
@@ -316,7 +327,7 @@ public class DynamicControlPanel extends JPanel{
      * (If the user presses play or toVideo, this method should be invoked by the controller).
      * @param bool
      */
-	public void enableLabelsCB(boolean bool){
+	public void enableLabelsCB(boolean bool) {
 	    labelsCB.setEnabled(bool);
 	}
 	
@@ -325,7 +336,7 @@ public class DynamicControlPanel extends JPanel{
      * (If the user presses play or toVideo, this method should be invoked by the controller).
      * @param bool
      */
-	public void enableVideo(boolean bool){
+	public void enableVideo(boolean bool) {
 	    video.setEnabled(bool);
 	}
 	
@@ -335,25 +346,25 @@ public class DynamicControlPanel extends JPanel{
 	 * @param bool
 	 * @param c
 	 */
-	public void enablePanelComponent(boolean bool, Component... c){
-	    for(int i = 0; i < c.length; i++){
-	        if(c[i] instanceof JButton){
-	            if(((JButton)c[i]).getActionCommand().equals("PLAY")){
+	public void enablePanelComponent(boolean bool, Component... c) {
+	    for (int i = 0; i < c.length; i++) {
+	        if (c[i] instanceof JButton) {
+	            if (((JButton)c[i]).getActionCommand().equals("PLAY")) {
 	                
-	            }else if(((JButton)c[i]).getActionCommand().equals("PAUSE")){
+	            } else if (((JButton)c[i]).getActionCommand().equals("PAUSE")) {
 	                
-	            }else if(((JButton)c[i]).getActionCommand().equals("STOP")){
+	            } else if (((JButton)c[i]).getActionCommand().equals("STOP")) {
 	                
-	            }else if(((JButton)c[i]).getActionCommand().equals("TOVIDEO")){
+	            } else if (((JButton)c[i]).getActionCommand().equals("TOVIDEO")) {
 	                
 	            }
-	        }else if(c[i] instanceof JSpinner){
+	        } else if (c[i] instanceof JSpinner) {
 	            
-	        }else if(c[i] instanceof JCheckBox){
+	        } else if (c[i] instanceof JCheckBox) {
 	            
-	        }else if(c[i] instanceof JSlider){
+	        } else if (c[i] instanceof JSlider) {
 	            
-	        }else if(c[i] instanceof JComboBox<?>){
+	        } else if (c[i] instanceof JComboBox) {
 	            
 	        }
 	    }
@@ -363,7 +374,7 @@ public class DynamicControlPanel extends JPanel{
 	 * Returns selection state of labels-checkbox.
 	 * @return selections state of labels-checkbox
 	 */
-	public boolean getSelectionStateOfLabels(){
+	public boolean getSelectionStateOfLabels() {
 	    return labelsCB.isSelected();
 	}
 	
