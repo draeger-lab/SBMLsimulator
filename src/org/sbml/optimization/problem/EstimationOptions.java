@@ -2,7 +2,7 @@
  * $Id:  EstimationOptions.java 16:12:42 draeger$
  * $URL$
  * ---------------------------------------------------------------------
- * This file is part of SBMLsimulator, a Java-based simulator for models
+ * This file is part of Simulation Core Library, a Java-based library for
  * of biochemical processes encoded in the modeling language SBML.
  *
  * Copyright (C) 2007-2012 by the University of Tuebingen, Germany.
