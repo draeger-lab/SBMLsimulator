@@ -39,7 +39,7 @@ import javax.swing.event.TableModelListener;
  * @version $Rev$
  */
 public class DynamicController implements ChangeListener, ActionListener,
-        ItemListener, TableModelListener{
+        ItemListener, TableModelListener {
 
     /**
      * Pointer to associated {@link DynamicCore}.
@@ -50,7 +50,7 @@ public class DynamicController implements ChangeListener, ActionListener,
      * Pointer to associated {@link DynamicControlPanel}.
      */
     private DynamicControlPanel controlPanel;
-    
+
     /**
      * Pointer to asociated {@link DynamicView}
      */
@@ -58,9 +58,11 @@ public class DynamicController implements ChangeListener, ActionListener,
 
     /**
      * Sets the {@link DynamicCore} of this controller.
-     * @param core {@link DynamicCore}
+     * 
+     * @param core
+     *            {@link DynamicCore}
      */
-    public void setCore(DynamicCore core){
+    public void setCore(DynamicCore core) {
         this.core = core;
     }
     
@@ -68,11 +70,11 @@ public class DynamicController implements ChangeListener, ActionListener,
      * Sets the {@link DynamicView} for this controller.
      * @param view {@link DynamicView}
      */
-    public void setView(DynamicView view){
+    public void setView(DynamicView view) {
         this.view = view;
     }
-    
-    public void setControlerPanel(DynamicControlPanel controlPanel){
+
+    public void setControlerPanel(DynamicControlPanel controlPanel) {
         this.controlPanel = controlPanel;
     }
 
@@ -83,47 +85,67 @@ public class DynamicController implements ChangeListener, ActionListener,
      * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     @Override
-    public void actionPerformed(ActionEvent e){
-        if (core != null){
-            if (e.getSource() instanceof JButton){
-                if (e.getActionCommand().equals("PLAY")){
+    public void actionPerformed(ActionEvent e) {
+        if (core != null) {
+            if (e.getSource() instanceof JButton) {
+                if (e.getActionCommand().equals("PLAY")) {
                     core.setPlayspeed(controlPanel.getSimulationSpeed());
                     core.play();
-                    controlPanel.enablePlay(false);
-                    controlPanel.enableSearchBar(false);
-                    controlPanel.enablePause(true);
-                    controlPanel.enableStop(true);
-                    controlPanel.enableSimVeloComboBox(false);
-                    controlPanel.enableSimVeloSpin(false);
-                    controlPanel.enableVideo(false);
+                    setPlayStatus();
                     // TODO: enable button when play finished
-                }else if (e.getActionCommand().equals("PAUSE")){
+                } else if (e.getActionCommand().equals("PAUSE")) {
                     core.pausePlay();
-                    controlPanel.enablePlay(true);
-                    controlPanel.enableSearchBar(true);
-                    controlPanel.enablePause(false);
-                    controlPanel.enableSimVeloComboBox(true);
-                    controlPanel.enableSimVeloSpin(true);
-                    controlPanel.enableVideo(true);
-                }else if (e.getActionCommand().equals("STOP")){
+                    setPauseStatus();
+                } else if (e.getActionCommand().equals("STOP")) {
                     core.stopPlay();
-                    controlPanel.enablePlay(true);
-                    controlPanel.enableSearchBar(true);
-                    controlPanel.enablePause(false);
-                    controlPanel.enableStop(false);
-                    controlPanel.enableSimVeloComboBox(true);
-                    controlPanel.enableSimVeloSpin(true);
-                    controlPanel.enableVideo(true);
-                }else if (e.getActionCommand().equals("TOVIDEO")){
+                    setStopStatus();
+                } else if (e.getActionCommand().equals("TOVIDEO")) {
                     // TODO save as video with maximum sim-speed
                 }
-            }else if(e.getSource() instanceof JCheckBox){
-                //labels switched on/off
+            } else if (e.getSource() instanceof JCheckBox) {
+                // labels switched on/off
                 view.updateGraph();
             }
         }
     }
+    
+    /**
+     * Enables {@link DynamicControlPanel} elements accordant to play status.
+     */
+    public void setPlayStatus() {
+        controlPanel.enablePlay(false);
+        controlPanel.enableSearchBar(false);
+        controlPanel.enablePause(true);
+        controlPanel.enableStop(true);
+        controlPanel.enableSimVeloComboBox(false);
+        controlPanel.enableSimVeloSpin(false);
+        controlPanel.enableVideo(false);
+    }
+    
+    /**
+     * Enables {@link DynamicControlPanel} elements accordant to pause status.
+     */
+    public void setPauseStatus() {
+        controlPanel.enablePlay(true);
+        controlPanel.enableSearchBar(true);
+        controlPanel.enablePause(false);
+        controlPanel.enableSimVeloComboBox(true);
+        controlPanel.enableSimVeloSpin(true);
+        controlPanel.enableVideo(true);
+    }
 
+    /**
+     * Enables {@link DynamicControlPanel} elements accordant to stop status.
+     */
+    public void setStopStatus() {
+        controlPanel.enablePlay(true);
+        controlPanel.enableSearchBar(true);
+        controlPanel.enablePause(false);
+        controlPanel.enableStop(false);
+        controlPanel.enableSimVeloComboBox(true);
+        controlPanel.enableSimVeloSpin(true);
+        controlPanel.enableVideo(true);
+    }
     /*
      * (non-Javadoc)
      * 
@@ -132,9 +154,9 @@ public class DynamicController implements ChangeListener, ActionListener,
      * )
      */
     @Override
-    public void stateChanged(ChangeEvent e){
-        if (core != null){
-            if (e.getSource() instanceof JSlider){
+    public void stateChanged(ChangeEvent e) {
+        if (core != null) {
+            if (e.getSource() instanceof JSlider) {
                 int timepoint = ((JSlider) e.getSource()).getValue();
                 core.setCurrTimepoint(timepoint);
             }
@@ -148,8 +170,8 @@ public class DynamicController implements ChangeListener, ActionListener,
      * java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
      */
     @Override
-    public void itemStateChanged(ItemEvent ie){
-        if (ie.getStateChange() == ItemEvent.SELECTED){
+    public void itemStateChanged(ItemEvent ie) {
+        if (ie.getStateChange() == ItemEvent.SELECTED) {
             controlPanel.setSimVeloCombo(ie.getItem());
         }
     }
@@ -158,11 +180,12 @@ public class DynamicController implements ChangeListener, ActionListener,
      * @see javax.swing.event.TableModelListener#tableChanged(javax.swing.event.TableModelEvent)
      */
     @Override
-    public void tableChanged(TableModelEvent e){
-        //TODO each time a checkbox gets changed, this method is invoked two times BUG
-        if(core!= null){
-//            System.out.println("tablechange");
-           view.updateGraph();
+    public void tableChanged(TableModelEvent e) {
+        // TODO each time a checkbox gets changed, this method is invoked two
+        // times BUG?
+        if (core != null) {
+            // System.out.println("tablechange");
+            view.updateGraph();
         }
     }
 

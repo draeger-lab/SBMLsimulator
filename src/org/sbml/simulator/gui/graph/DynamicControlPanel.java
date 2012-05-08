@@ -21,6 +21,8 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.text.MessageFormat;
+import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
@@ -37,7 +39,7 @@ import org.sbml.simulator.gui.SimulatorUI;
 
 import de.zbit.gui.GUITools;
 import de.zbit.gui.actioncommand.ActionCommand;
-import de.zbit.util.StringUtil;
+import de.zbit.util.ResourceManager;
 
 /**
  * This panel holds all elements to control the dynamic visualization.
@@ -59,6 +61,12 @@ public class DynamicControlPanel extends JPanel{
 	private static final transient Logger logger = Logger.getLogger(DynamicControlPanel.class.getName());
 	
 	/**
+     * Localization support.
+     */
+  private static final transient ResourceBundle bundle = ResourceManager
+      .getBundle("org.sbml.simulator.locales.Simulator");
+	
+	/**
 	 * List of action commands.
 	 * @author Fabian Schwarzkopf
 	 * @version $Rev$
@@ -71,7 +79,8 @@ public class DynamicControlPanel extends JPanel{
 		 */
 		@Override
 		public String getName() {
-			return StringUtil.firstLetterLowerCase(toString());
+//			return StringUtil.firstLetterLowerCase(toString());
+		    return bundle.getString(this.toString());
 		}
 
 		/* (non-Javadoc)
@@ -79,7 +88,7 @@ public class DynamicControlPanel extends JPanel{
 		 */
 		@Override
 		public String getToolTip() {
-			return null;
+		    return bundle.getString(this.toString() + "_TOOLTIP");
 		}
 	}
 	
@@ -94,7 +103,7 @@ public class DynamicControlPanel extends JPanel{
 	private DynamicController controller;
 	
 	/**
-	 * Pointer to related {@link DynamicView}
+	 * Pointer to related {@link DynamicView}.
 	 */
 	private DynamicView view;
 	
@@ -140,10 +149,12 @@ public class DynamicControlPanel extends JPanel{
     }
 	
 	/**
-	 * Sets the related {@link DynamicCore} to this control panel.
-	 * 
-	 * @param core {@link DynamicCore}
-	 */
+     * Sets the related {@link DynamicCore} to this control panel and activates
+     * all corresponding elements.
+     * 
+     * @param core
+     *            {@link DynamicCore}
+     */
 	public void setCore(DynamicCore core) {
 		this.core = core;
 		double[] timepointsOfSimulation = core.getTimepoints();
@@ -186,27 +197,25 @@ public class DynamicControlPanel extends JPanel{
 		searchBar.setPaintTicks(true);
 		searchBar.setValue(0);
 		
-		labelslbl = new JLabel("Labels");
+		labelslbl = new JLabel(bundle.getString("LABELS"));
 		labelsCB = new JCheckBox();
 		labelsCB.addActionListener(controller);
 		
-		
 		searchBar.addChangeListener(controller);
-		timelbl = new JLabel("Zeitpunkt: N/A");
-		play = GUITools.createButton(playIcon, controller, Buttons.PLAY, "Startet die Simulation als Film.");
-		pause = GUITools.createButton(pauseIcon, controller, Buttons.PAUSE, "Pausiert die Simulation.");
-		stop = GUITools.createButton(stopIcon, controller, Buttons.STOP, "Stoppt die Simulation.");
-		video = GUITools.createButton(toVideoIcon, controller, Buttons.TOVIDEO, "Speichert die Simulation als Film.");
-		//TODO locale
+		timelbl = new JLabel(MessageFormat.format("{0}: {1}", new Object[]{bundle.getString("TIMEPOINT"), "N/A"}));
+		play = GUITools.createButton(playIcon, controller, Buttons.PLAY, Buttons.PLAY.getToolTip());
+		pause = GUITools.createButton(pauseIcon, controller, Buttons.PAUSE, Buttons.PAUSE.getToolTip());
+		stop = GUITools.createButton(stopIcon, controller, Buttons.STOP, Buttons.STOP.getToolTip());
+		video = GUITools.createButton(toVideoIcon, controller, Buttons.TOVIDEO, Buttons.TOVIDEO.getToolTip());
 		
-		simVelolbl = new JLabel("Simulationsgeschwindigkeit");
+		simVelolbl = new JLabel(bundle.getString("SIMULATIONSPEED"));
 		simVeloCombo = new JComboBox();
-		simVeloCombo.addItem("Schnell");
-		simVeloCombo.addItem("Normal");
-		simVeloCombo.addItem("Langsam");
+		simVeloCombo.addItem(bundle.getString("FAST"));
+		simVeloCombo.addItem(bundle.getString("NORMAL"));
+		simVeloCombo.addItem(bundle.getString("SLOW"));
 		simVeloCombo.addItemListener(controller);		
 		simVeloSpin = new JSpinner();
-		setSimVeloCombo("Normal"); //by default 'normal speed'
+		setSimVeloCombo(bundle.getString("NORMAL")); //by default 'normal speed'
 		
 		addComponent(gbl, searchBar, 	0, 0, 7, 1, GridBagConstraints.CENTER, 	GridBagConstraints.HORIZONTAL, 	1, 0, new Insets(0,0,0,0));
 		addComponent(gbl, play, 		0, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
@@ -222,6 +231,7 @@ public class DynamicControlPanel extends JPanel{
 
 		Component[] elements = {play, pause, stop, video, searchBar, simVeloCombo, simVeloSpin, labelsCB};
 		GUITools.setEnabledForAll(false, elements);
+		logger.fine("DynamicControlPanel initialized.");
 	}
 		
 	/**
@@ -231,9 +241,8 @@ public class DynamicControlPanel extends JPanel{
 	public void setTimepoint(double timepoint) {
 	    if (core != null) {
     		searchBar.setValue(core.getIndexOfTimepoint(timepoint));
-    		timelbl.setText("Zeitpunkt: " + timepoint + " / " + maxTime);
+    		timelbl.setText(MessageFormat.format("{0}: {1,number,0.00} / {2,number,0.00}", new Object[]{bundle.getString("TIMEPOINT"), timepoint, maxTime}));
 	    }
-		//TODO: locale
 	}
 	
 	/**
@@ -244,27 +253,23 @@ public class DynamicControlPanel extends JPanel{
 	    try {
 	        return ((Integer) simVeloSpin.getValue()).intValue();
 	    } catch(Exception e) {
-	        System.err.println(e.getStackTrace());
-	        return 700; //playspeed per default
+	        logger.warning(bundle.getString("FALSE_INPUT"));
+	        return 200; //playspeed per default
 	    }
 	}
 	
 	/**
 	 * Setting the simulation speed by {@link JComboBox} items.
-	 * TODO locale
 	 * @param item
 	 */
 	public void setSimVeloCombo(Object item) {
 	    simVeloCombo.setSelectedItem(item);
-	    if (item.equals("Schnell")) {
-	        //fast speed
+	    if (item.equals(bundle.getString("FAST"))) {
+	        simVeloSpin.setValue(45);
+	    } else if (item.equals(bundle.getString("NORMAL"))) {
 	        simVeloSpin.setValue(150);
-	    } else if (item.equals("Normal")) {
-	        //normal speed
-	        simVeloSpin.setValue(500);
-	    } else if (item.equals("Langsam")) {
-	        //slow speed
-	        simVeloSpin.setValue(900);
+	    } else if (item.equals(bundle.getString("SLOW"))) {
+	        simVeloSpin.setValue(400);
 	    }
 	}
 	
@@ -338,36 +343,6 @@ public class DynamicControlPanel extends JPanel{
      */
 	public void enableVideo(boolean bool) {
 	    video.setEnabled(bool);
-	}
-	
-	/**
-	 * Sets enable status for all given components to given boolean.
-	 * TODO
-	 * @param bool
-	 * @param c
-	 */
-	public void enablePanelComponent(boolean bool, Component... c) {
-	    for (int i = 0; i < c.length; i++) {
-	        if (c[i] instanceof JButton) {
-	            if (((JButton)c[i]).getActionCommand().equals("PLAY")) {
-	                
-	            } else if (((JButton)c[i]).getActionCommand().equals("PAUSE")) {
-	                
-	            } else if (((JButton)c[i]).getActionCommand().equals("STOP")) {
-	                
-	            } else if (((JButton)c[i]).getActionCommand().equals("TOVIDEO")) {
-	                
-	            }
-	        } else if (c[i] instanceof JSpinner) {
-	            
-	        } else if (c[i] instanceof JCheckBox) {
-	            
-	        } else if (c[i] instanceof JSlider) {
-	            
-	        } else if (c[i] instanceof JComboBox) {
-	            
-	        }
-	    }
 	}
 	
 	/**
