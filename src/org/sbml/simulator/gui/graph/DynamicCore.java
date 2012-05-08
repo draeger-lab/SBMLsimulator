@@ -69,6 +69,10 @@ public class DynamicCore {
 		@Override
 		protected void done() {
 			super.done();
+			for(DynamicGraph dg : observers){
+			    dg.donePlay();
+			}
+			
 			/*
 			 * Ensure that only one playWorker is active
 			 */

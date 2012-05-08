@@ -17,27 +17,40 @@
  */
 package org.sbml.simulator.gui.graph;
 
-import org.simulator.math.odes.MultiTable;
+import de.zbit.graph.gui.TranslatorSBMLgraphPanel;
 
 /**
- * Interface to ensure any {@link DynamicCore} observer provides the necessary methods
- * and eventually identifies the implementing class as a view in MVC-pattern.
+ * This interface gathers all methods to change the visualization of a displayed
+ * graph on a {@link TranslatorSBMLgraphPanel}. Therefore every class that
+ * manipulates the graph should implement this interface and override the
+ * methods.
  * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
-public interface DynamicGraph {
-
+public interface GraphManipulator {
+    
     /**
-     * Method envoked by related {@link DynamicCore} when timepoint changes.
-     * @param timepoint
-     * @param updateThem
+     * Changes the visualization of a given node.
+     * @param id
+     * @param valueForGraph
+     * @param realValue
+     * @param labels
      */
-	public void updateGraph(double timepoint, MultiTable updateThem);
-	
-	/**
-	 * Method envoked by related {@link DynamicCore} when playthread is done.
-	 */
-	public void donePlay();
-	
+    public void dynamicChangeOfNode(String id, double valueForGraph,
+            double realValue, boolean labels);
+    
+    /**
+     * Changes the visualization of a given reaction.
+     * @param id
+     * @param value
+     */
+    public void dynamicChangeOfReaction(String id, double value);
+    
+    /**
+     * Reverts the changes for the given id.
+     * @param id
+     */
+    public void revertChanges(String id);
+    
 }
