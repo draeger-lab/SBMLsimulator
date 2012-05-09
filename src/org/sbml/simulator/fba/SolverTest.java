@@ -2,6 +2,11 @@ package org.sbml.simulator.fba;
 
 import java.util.Arrays;
 
+import scpsolver.constraints.LinearBiggerThanEqualsConstraint;
+import scpsolver.lpsolver.LinearProgramSolver;
+import scpsolver.lpsolver.SolverFactory;
+import scpsolver.problems.LinearProgram;
+
 
 public class SolverTest {
 
