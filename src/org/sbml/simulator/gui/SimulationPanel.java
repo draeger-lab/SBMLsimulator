@@ -717,7 +717,7 @@ public class SimulationPanel extends JPanel implements
 	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrameTab#updateButtons(javax.swing.JMenuBar, javax.swing.JToolBar)
 	 */
-	public void updateButtons(JMenuBar menuBar, JToolBar toolbar) {
+	public void updateButtons(JMenuBar menuBar, JToolBar... toolbar) {
 		// TODO Auto-generated method stub
 	}
 
