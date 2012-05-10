@@ -29,16 +29,14 @@ import de.zbit.graph.gui.TranslatorSBMLgraphPanel;
  * @version $Rev$
  */
 public interface GraphManipulator {
-    
+
     /**
      * Changes the visualization of a given node.
      * @param id
-     * @param valueForGraph
-     * @param realValue
+     * @param value
      * @param labels
      */
-    public void dynamicChangeOfNode(String id, double valueForGraph,
-            double realValue, boolean labels);
+    public void dynamicChangeOfNode(String id, double value, boolean labels);
     
     /**
      * Changes the visualization of a given reaction.
@@ -51,6 +49,5 @@ public interface GraphManipulator {
      * Reverts the changes for the given id.
      * @param id
      */
-    public void revertChanges(String id);
-    
+    public void revertChanges(String id);    
 }

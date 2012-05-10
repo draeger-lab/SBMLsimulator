@@ -105,23 +105,6 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      private GraphManipulator graphManipulator;
 
     /**
-     * Parameter to adjust values used in dynamic update of the graph. Slope by
-     * linear regression to ensure that optimal values will be passed.
-     * y = m * x + c
-     * TODO save in own object together with all other values concerning the mapping
-     */
-    private double m;
-
-    /**
-     * Parameter to adjust values used in dynamic update of the graph.
-     * y-intercept by linear regression to ensure that optimal values will be
-     * passed.
-     * y = m * x + c
-     * TODO save in own object together with all other values concerning the mapping
-     */
-    private double c;
-
-    /**
      * Constructs all necessary elements.
      * 
      * @param document
@@ -184,9 +167,8 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                      * There's just one row because the core passes only the
                      * necessary data for the particular timepoint
                      */
-                    double tmpValue = updateThem.getValueAt(0, i);
-                    graphManipulator.dynamicChangeOfNode(id, tmpValue * m + c,
-                            tmpValue, controlPanel.getSelectionStateOfLabels());
+                    graphManipulator.dynamicChangeOfNode(id, updateThem.getValueAt(0, i),
+                            controlPanel.getSelectionStateOfLabels());
 
                 } else if (sbmlModel.getReaction(id) != null) {
                     // TODO adjust given values
@@ -244,9 +226,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                     protected void done() {
                         super.done();
                         //activate controlpanel after computation of limits
-                        //TODO mapping
-                        m = BIASComputation.computeBIAS(core.getMinDataSpecies(), core.getMaxDataSpecies());
-                        c = BIASComputation.getYintercept();
+                        graphManipulator = new ManipulatorOfNodeSize(graphPanel.getConverter(), core.getMinDataSpecies(), core.getMaxDataSpecies());
                         controlPanel.setCore(core);
                         updateGraph();
                     }
