@@ -34,5 +34,14 @@ public class FluxBalanceAnalysis {
 	 */
 	public TargetFunction targetFunc;
 	public Constraints constraints;
+	
+	public FluxBalanceAnalysis(TargetFunction target, Constraints constraints) {
+		this.targetFunc = target;
+		this.constraints = constraints;
+		
+		// TODO Auto-generated constructor stub
+	}
+	
+	
 
 }
