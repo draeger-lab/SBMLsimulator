@@ -17,7 +17,9 @@
  */
 package org.sbml.simulator.gui.graph;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -25,12 +27,14 @@ import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.UIManager;
@@ -72,14 +76,13 @@ public class DynamicControlPanel extends JPanel{
 	 * @version $Rev$
 	 */
 	public enum Buttons implements ActionCommand{
-		PLAY, PAUSE, STOP, TOVIDEO;
+		PLAY, PAUSE, STOP, TOVIDEO, NODESIZE, NODECOLOR;
 
 		/* (non-Javadoc)
 		 * @see de.zbit.gui.actioncommand.ActionCommand#getName()
 		 */
 		@Override
 		public String getName() {
-//			return StringUtil.firstLetterLowerCase(toString());
 		    return bundle.getString(this.toString());
 		}
 
@@ -103,11 +106,6 @@ public class DynamicControlPanel extends JPanel{
 	private DynamicController controller;
 	
 	/**
-	 * Pointer to related {@link DynamicView}.
-	 */
-	private DynamicView view;
-	
-	/**
 	 * Saves the maximum time for the timelbl.
 	 * (To save some computing time).
 	 */
@@ -127,6 +125,8 @@ public class DynamicControlPanel extends JPanel{
 	private JSpinner simVeloSpin;
 	private JLabel labelslbl;
 	private JCheckBox labelsCB;
+	private JRadioButton nodesize;
+	private JRadioButton nodecolor;
 	
 	/**
 	 * Constructs a new control panel.
@@ -134,7 +134,7 @@ public class DynamicControlPanel extends JPanel{
 	 */
 	public DynamicControlPanel(DynamicController controller) {
         this.controller = controller;
-        this.controller.setControlerPanel(this);
+        this.controller.setControlPanel(this);
 		init();
 	}
 	
@@ -145,7 +145,6 @@ public class DynamicControlPanel extends JPanel{
 	 */
 	public DynamicControlPanel(DynamicView view, DynamicController controller) {
         this(controller);
-        this.view = view;
     }
 	
 	/**
@@ -169,7 +168,6 @@ public class DynamicControlPanel extends JPanel{
 		 * (Does not cause inconsistency but leads to a change of the first setted curr core value).
 		 */
 		controller.setCore(core);
-		controller.setView(view);
 		setTimepoint(core.getCurrTimepoint());
 		Component[] elements = {play, video, searchBar, simVeloCombo, simVeloSpin, labelsCB};
 		GUITools.setEnabledForAll(true, elements);
@@ -216,6 +214,20 @@ public class DynamicControlPanel extends JPanel{
 		simVeloCombo.addItemListener(controller);		
 		simVeloSpin = new JSpinner();
 		setSimVeloCombo(bundle.getString("NORMAL")); //by default 'normal speed'
+	
+		nodesize = new JRadioButton(bundle.getString("NODESIZE"));
+		nodesize.setActionCommand(Buttons.NODESIZE.toString());
+		nodesize.addActionListener(controller);
+		nodesize.setSelected(true);
+		nodecolor = new JRadioButton(bundle.getString("NODECOLOR"));
+		nodecolor.setActionCommand(Buttons.NODECOLOR.toString());
+		nodecolor.addActionListener(controller);
+		JPanel manipulatorsPane = new JPanel();
+		manipulatorsPane.setLayout(new BorderLayout());
+		manipulatorsPane.add(nodesize, BorderLayout.LINE_START);
+		manipulatorsPane.add(nodecolor, BorderLayout.AFTER_LAST_LINE);
+		manipulatorsPane.setBorder(BorderFactory.createTitledBorder(bundle.getString("MANIPULATORCHOOSER")));
+		manipulatorsPane.setMinimumSize(new Dimension(80, 20));
 		
 		addComponent(gbl, searchBar, 	0, 0, 7, 1, GridBagConstraints.CENTER, 	GridBagConstraints.HORIZONTAL, 	1, 0, new Insets(0,0,0,0));
 		addComponent(gbl, play, 		0, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
@@ -228,6 +240,7 @@ public class DynamicControlPanel extends JPanel{
 		addComponent(gbl, simVeloSpin,	4, 2, 1, 1, GridBagConstraints.EAST, 	GridBagConstraints.BOTH, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, labelslbl,    5, 2, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.NONE,        0, 0, new Insets(2,8,2,0));
 		addComponent(gbl, labelsCB,     6, 2, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, manipulatorsPane, 7, 0, 3, 3, GridBagConstraints.CENTER,  GridBagConstraints.BOTH,        0, 0, new Insets(2,2,2,2));
 
 		Component[] elements = {play, pause, stop, video, searchBar, simVeloCombo, simVeloSpin, labelsCB};
 		GUITools.setEnabledForAll(false, elements);
@@ -351,6 +364,41 @@ public class DynamicControlPanel extends JPanel{
 	 */
 	public boolean getSelectionStateOfLabels() {
 	    return labelsCB.isSelected();
+	}
+	
+	/**
+	 * Sets the selection state of the nodesize-radiobutton.
+	 * @param bool
+	 */
+	public void setNodesizeSelectionState(boolean bool){
+	    nodesize.setSelected(bool);
+	}
+	
+	/**
+	 * Sets the selection state of the nodecolor-radiobutton.
+	 * @param bool
+	 */
+	public void setNodecolorSelectionState(boolean bool){
+	    nodecolor.setSelected(bool);
+	}
+	
+	/**
+     * Returns index of the selected {@link GraphManipulator}.<br>
+     * <ul>
+     * <li>0: {@link ManipulatorOfNodeSize}</li>
+     * <li>1: {@link ManipulatorOfNodeColor}</li>
+     * </ul>
+     * <br>
+     * However, if none is selected, the index pf {@link ManipulatorOfNodeSize}
+     * is returned per default.
+     * 
+     * @return
+     */
+	public int getSelectedManipulator(){
+	    if(nodecolor.isSelected()){
+	        return 1;
+	    }
+	    return 0;
 	}
 	
 	/**

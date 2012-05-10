@@ -18,12 +18,10 @@
 package org.sbml.simulator.gui.graph;
 
 import java.awt.Color;
-import java.text.MessageFormat;
 import java.util.LinkedList;
 
 import y.base.Edge;
 import y.view.LineType;
-import y.view.NodeLabel;
 import y.view.NodeRealizer;
 import de.zbit.graph.io.SBML2GraphML;
 
@@ -34,13 +32,7 @@ import de.zbit.graph.io.SBML2GraphML;
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
-public class ManipulatorOfNodeSize implements GraphManipulator{
-    
-    /**
-     * Pointer to graph.
-     */
-    private SBML2GraphML graph;
-    
+public class ManipulatorOfNodeSize extends AbstractGraphManipulator{    
     /**
      * Default setting for the minimum node size.
      */
@@ -52,22 +44,9 @@ public class ManipulatorOfNodeSize implements GraphManipulator{
     private double maxNodeSize = 50;
     
     /**
-     * slope of linear regression. 
+     * Slope of linear regression m, and yintercept c. 
      */
-    private double m = 1;
-    
-    /**
-     * yintercept of linear regression. 
-     */
-    private double c = 0;
-    
-    /**
-     * Constructs a new nodesize-manipulator on the give graph without linear regression.
-     * @param graph
-     */
-    public ManipulatorOfNodeSize(SBML2GraphML graph){
-        this.graph = graph;
-    }
+    private double m = 1, c= 0;
 
     /**
      * Constructs a new nodesize-manipulator on the given graph. Minimum node
@@ -77,7 +56,7 @@ public class ManipulatorOfNodeSize implements GraphManipulator{
      * @param upperDataLimit
      */
     public ManipulatorOfNodeSize(SBML2GraphML graph, double lowerSpeciesLimit, double upperSpeciesLimit){
-        this.graph = graph;
+        super(graph);
         getLinearRegression(minNodeSize, maxNodeSize, lowerSpeciesLimit, upperSpeciesLimit);
     }
     
@@ -91,7 +70,7 @@ public class ManipulatorOfNodeSize implements GraphManipulator{
      * @param upperDataLimit
      */
     public ManipulatorOfNodeSize(SBML2GraphML graph, double minNodeSize, double maxNodeSize, double lowerSpeciesLimit, double upperSpeciesLimit){
-        this.graph = graph;
+        super(graph);
         this.minNodeSize = minNodeSize;
         this.maxNodeSize = maxNodeSize;
         getLinearRegression(minNodeSize, maxNodeSize, lowerSpeciesLimit, upperSpeciesLimit);
@@ -105,7 +84,7 @@ public class ManipulatorOfNodeSize implements GraphManipulator{
      * @param upperDataLimit
      */
     private void getLinearRegression(double minNodeSize, double maxNodeSize, double lowerDataLimit, double upperDataLimit){
-        double[] linearRegression = BIASComputation.computeBIAS(lowerDataLimit, upperDataLimit, minNodeSize, maxNodeSize);
+        double[] linearRegression = computeBIAS(lowerDataLimit, upperDataLimit, minNodeSize, maxNodeSize);
         m = linearRegression[0];
         c = linearRegression[1];
     }
@@ -124,22 +103,9 @@ public class ManipulatorOfNodeSize implements GraphManipulator{
         /*
          * Label Node with ID and real value at this timepoint. Last label will
          * be treated as dynamic label
-         * TODO labeling in own function
          */
         if (labels) {
-            if (nr.labelCount() > 1) {
-                nr.getLabel(nr.labelCount() - 1).setText(
-                        MessageFormat.format("{0}: {1,number,0.0000}",
-                                new Object[] { id, value }));
-            } else {
-                nr.addLabel(new NodeLabel(MessageFormat.format(
-                        "{0}: {1,number,0.0000}",
-                        new Object[] { id, value })));
-                NodeLabel nl = nr.getLabel(nr.labelCount() - 1);
-                nl.setModel(NodeLabel.SIDES);
-                nl.setPosition(NodeLabel.S); // South of node
-                nl.setDistance(-3);
-            }
+            labelNode(nr, id, value);
         } else if (nr.labelCount() > 1) {
             // labels switched off, therefore remove them, if there are any
             nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
@@ -168,24 +134,4 @@ public class ManipulatorOfNodeSize implements GraphManipulator{
                     .setLineType(newLineType);
         }
     }
-
-    /* (non-Javadoc)
-     * @see org.sbml.simulator.gui.graph.GraphManipulator#revertChanges(java.lang.String)
-     */
-    @Override
-    public void revertChanges(String id) {
-        if (graph.getId2node().get(id) != null) {
-            NodeRealizer nr = graph.getSimpleGraph().getRealizer(
-                    graph.getId2node().get(id));
-            nr.setSize(8, 8);
-            nr.setFillColor(Color.LIGHT_GRAY);
-
-            if (nr.labelCount() > 1) {
-                // if not selected disable label
-                nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
-            }
-        }
-        graph.getSimpleGraph().updateViews();
-    }
-
 }

@@ -60,6 +60,9 @@
   <entry key="FALSE_INPUT">Eingabe kein positiver Integer.</entry>
   <entry key="TIMEPOINT">Zeitpunkt</entry>
   <entry key="SIMULATIONSPEED">Simulationsgeschwindigkeit</entry>
+  <entry key="NODESIZE">Knotengröße</entry>
+  <entry key="NODECOLOR">Knotenfarbe</entry>
+  <entry key="MANIPULATORCHOOSER">Visualisierung</entry>
   
   <!-- EstimationOptions -->
     

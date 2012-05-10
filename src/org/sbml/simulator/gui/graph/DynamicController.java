@@ -24,6 +24,7 @@ import java.awt.event.ItemListener;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -40,7 +41,6 @@ import javax.swing.event.TableModelListener;
  */
 public class DynamicController implements ChangeListener, ActionListener,
         ItemListener, TableModelListener {
-
     /**
      * Pointer to associated {@link DynamicCore}.
      */
@@ -52,9 +52,19 @@ public class DynamicController implements ChangeListener, ActionListener,
     private DynamicControlPanel controlPanel;
 
     /**
-     * Pointer to asociated {@link DynamicView}
+     * Pointer to asociated {@link DynamicView}.
      */
     private DynamicView view;
+    
+    /**
+     * Constructs a new {@link DynamicController} with the corresponding
+     * {@link DynamicView}.
+     * 
+     * @param view
+     */
+    public DynamicController(DynamicView view){
+        this.view = view;
+    }
 
     /**
      * Sets the {@link DynamicCore} of this controller.
@@ -65,16 +75,12 @@ public class DynamicController implements ChangeListener, ActionListener,
     public void setCore(DynamicCore core) {
         this.core = core;
     }
-    
-    /**
-     * Sets the {@link DynamicView} for this controller.
-     * @param view {@link DynamicView}
-     */
-    public void setView(DynamicView view) {
-        this.view = view;
-    }
 
-    public void setControlerPanel(DynamicControlPanel controlPanel) {
+    /**
+     * Sets the corresponding {@link DynamicControlPanel}.
+     * @param controlPanel
+     */
+    public void setControlPanel(DynamicControlPanel controlPanel) {
         this.controlPanel = controlPanel;
     }
 
@@ -104,6 +110,19 @@ public class DynamicController implements ChangeListener, ActionListener,
                 }
             } else if (e.getSource() instanceof JCheckBox) {
                 // labels switched on/off
+                view.updateGraph();
+            }
+        }
+        if(e.getSource() instanceof JRadioButton){
+            if(e.getActionCommand().equals("NODESIZE")){
+                view.setGraphManipulator(0);
+                controlPanel.setNodecolorSelectionState(false);
+                controlPanel.setNodesizeSelectionState(true);
+                view.updateGraph();
+            }else if(e.getActionCommand().equals("NODECOLOR")){
+                view.setGraphManipulator(1);
+                controlPanel.setNodesizeSelectionState(false);
+                controlPanel.setNodecolorSelectionState(true);
                 view.updateGraph();
             }
         }

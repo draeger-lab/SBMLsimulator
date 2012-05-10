@@ -113,7 +113,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         super(JSplitPane.VERTICAL_SPLIT, false);
         
         //init
-        controller = new DynamicController();
+        controller = new DynamicController(this);
         graphPanel = new TranslatorSBMLgraphPanel(document, false);
         legend = new LegendPanel(document.getModel(), true);
         legend.addTableModelListener(controller);
@@ -131,11 +131,37 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     }
     
     /**
+     * This functions changes the graph manipulator to the given index:<br>
+     * <ul><li>0: {@link ManipulatorOfNodeSize}.</li>
+     * <li>1: {@link ManipulatorOfNodeColor}.</li></ul>
+     * 
+     * @param i
+     */
+    public void setGraphManipulator(int i){
+        if (core != null){
+            switch (i) {
+            case 0:
+                graphManipulator = new ManipulatorOfNodeSize(
+                        graphPanel.getConverter(), core.getMinDataSpecies(),
+                        core.getMaxDataSpecies());
+                break;
+            case 1:
+                graphManipulator = new ManipulatorOfNodeColor(
+                        graphPanel.getConverter(), core.getMinDataSpecies(),
+                        core.getMaxDataSpecies());
+                break;
+            }
+        }
+    }
+    
+    /**
      * Updates the displayed graph with respect to the user chosen settings
      * (i.e. turning on/off labels).
      */
     public void updateGraph() {
-        updateGraph(currTime, currData);
+        if(core != null){
+            updateGraph(currTime, currData);
+        }
     }
 
     /*
@@ -226,12 +252,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                     @Override
                     protected void done() {
                         super.done();
-                        //node size manipulator per default with default settings
-                        graphManipulator = new ManipulatorOfNodeSize(
-                                graphPanel.getConverter(),
-                                core.getMinDataSpecies(),
-                                core.getMaxDataSpecies());
-//                        graphManipulator = new ManipulatorOfNodeColor(graphPanel.getConverter(), core.getMinDataSpecies(), core.getMaxDataSpecies());
+                        setGraphManipulator(controlPanel.getSelectedManipulator()); 
                         //activate controlpanel after computation of limits
                         controlPanel.setCore(core);
                         updateGraph();
