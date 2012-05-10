@@ -25,7 +25,24 @@ package org.sbml.simulator.fba.controller;
  */
 public class FluxVector {
 	
-	public FluxVector() {
+	private int dimension;
+	
+	public FluxVector(int dim) {
+		this.setDimension(dim);
 		// TODO Auto-generated constructor stub
+	}
+
+	/**
+	 * @param dimension the dimension to set
+	 */
+	public void setDimension(int dimension) {
+		this.dimension = dimension;
+	}
+
+	/**
+	 * @return the dimension
+	 */
+	public int getDimension() {
+		return dimension;
 	}
 }

@@ -39,6 +39,8 @@ public class SettingPanel extends JPanel{
 	private VODSettingPanel vodSettings;
 
 	public SettingPanel() {
+		this.fbaSettings = new FBASettingPanel();
+		this.vodSettings = new VODSettingPanel();
 		// TODO Auto-generated constructor stub
 	}
 

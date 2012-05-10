@@ -40,6 +40,9 @@ public class FBAPanel extends JPanel{
 	private static final long serialVersionUID = 1L;
 	
 	public FBAPanel() {
+		this.chart = new ChartPanel();
+		this.settings = new SettingPanel();
+		this.vod = new VODPanel();
 		// TODO Auto-generated constructor stub
 	}
 
