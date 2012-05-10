@@ -395,7 +395,7 @@ public class SimulationPanel extends JPanel implements
         
         DynamicView dynamicGraphView = new DynamicView(getModel().getSBMLDocument());
         simulationManager.addPropertyChangeListener(dynamicGraphView); //get simulation data when finished
-        TranslatorSBMLgraphPanel graphView = new TranslatorSBMLgraphPanel(getModel().getSBMLDocument(), false);
+//        TranslatorSBMLgraphPanel graphView = new TranslatorSBMLgraphPanel(getModel().getSBMLDocument(), false);
         
         tabbedPane = new JTabbedPane();
         tabbedPane.add(bundle.getString("TAB_SIMULATION"), visualizationPanel);
@@ -404,7 +404,7 @@ public class SimulationPanel extends JPanel implements
 				tabbedPane.add(bundle.getString("TAB_MODEL_VIEW"),
 					new SBMLModelSplitPane(simulationManager.getSimulationConfiguration()
 							.getModel().getSBMLDocument(), true));
-				tabbedPane.add(bundle.getString("TAB_GRAPH_VIEW"), graphView);
+				tabbedPane.add(bundle.getString("TAB_GRAPH_VIEW"), dynamicGraphView);
 				
 				
         tabbedPane.setEnabledAt(TAB_SIMULATION_INDEX, true);

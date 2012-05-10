@@ -55,6 +55,21 @@ public class BIASComputation{
     }
     
     /**
+     * Linear regression through two given points (xLowerLimit, yLowerLimit) and
+     * (xUpperLimit, yUpperLimit).
+     * 
+     * @param lowerDataLimit
+     * @param upperDataLimit
+     * @return first index of array represents the slope, second index the
+     *         yintercept.
+     */
+    public static double[] computeBIAS(double xLowerLimit, double xUpperLimit, double yLowerLimit, double yUpperLimit){
+        double slope = (yUpperLimit-yLowerLimit) / (xUpperLimit - xLowerLimit);
+        double yintercept = yLowerLimit-slope*xLowerLimit;
+        return new double[] { slope, yintercept };
+    }
+    
+    /**
      * Returns the yintercept.
      * Only to use after {@link computeBIAS}.
      * @return yintercept if already computed, otherwise 0
