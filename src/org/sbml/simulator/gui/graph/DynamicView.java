@@ -128,8 +128,6 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         
         this.document = document;
         sbmlModel = document.getModel();
-        
-        graphManipulator = new ManipulatorOfNodeSize(graphPanel.getConverter()); //by default nodesize changer
     }
     
     /**
@@ -158,25 +156,28 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
          * noticible change in size or color the passed values have to be
          * conditioned. Therefore not absolute values will be passed (TODO).
          */
-        for (int i = 1; i <= updateThem.getColumnCount(); i++) {
-            String id = updateThem.getColumnIdentifier(i);
-            if (legend.getLegendTableModel().isSelected(id)) {
-                // only display dynamic features when selected
-                if (sbmlModel.getSpecies(id) != null) {
-                    /*
-                     * There's just one row because the core passes only the
-                     * necessary data for the particular timepoint
-                     */
-                    graphManipulator.dynamicChangeOfNode(id, updateThem.getValueAt(0, i),
-                            controlPanel.getSelectionStateOfLabels());
+        if (graphManipulator != null) {
+            for (int i = 1; i <= updateThem.getColumnCount(); i++) {
+                String id = updateThem.getColumnIdentifier(i);
+                if (legend.getLegendTableModel().isSelected(id)) {
+                    // only display dynamic features when selected
+                    if (sbmlModel.getSpecies(id) != null) {
+                        /*
+                         * There's just one row because the core passes only the
+                         * necessary data for the particular timepoint
+                         */
+                        graphManipulator.dynamicChangeOfNode(id,
+                                updateThem.getValueAt(0, i),
+                                controlPanel.getSelectionStateOfLabels());
 
-                } else if (sbmlModel.getReaction(id) != null) {
-                    // TODO adjust given values
-                    // graphManipulator.dynamicChangeOfReaction(id,
-                    // updateThem.getValueAt(0, i));
+                    } else if (sbmlModel.getReaction(id) != null) {
+                        // TODO adjust given values
+                        // graphManipulator.dynamicChangeOfReaction(id,
+                        // updateThem.getValueAt(0, i));
+                    }
+                } else {
+                    graphManipulator.revertChanges(id);
                 }
-            } else {
-                graphManipulator.revertChanges(id);
             }
         }
 
@@ -225,8 +226,13 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                     @Override
                     protected void done() {
                         super.done();
+                        //node size manipulator per default with default settings
+                        graphManipulator = new ManipulatorOfNodeSize(
+                                graphPanel.getConverter(),
+                                core.getMinDataSpecies(),
+                                core.getMaxDataSpecies());
+//                        graphManipulator = new ManipulatorOfNodeColor(graphPanel.getConverter(), core.getMinDataSpecies(), core.getMaxDataSpecies());
                         //activate controlpanel after computation of limits
-                        graphManipulator = new ManipulatorOfNodeSize(graphPanel.getConverter(), core.getMinDataSpecies(), core.getMaxDataSpecies());
                         controlPanel.setCore(core);
                         updateGraph();
                     }
