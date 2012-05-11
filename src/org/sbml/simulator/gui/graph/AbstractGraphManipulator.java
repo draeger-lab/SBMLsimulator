@@ -19,10 +19,20 @@ package org.sbml.simulator.gui.graph;
 
 import java.awt.Color;
 import java.text.MessageFormat;
+import java.util.LinkedList;
+import java.util.Map;
 
+import org.sbml.jsbml.Reaction;
+
+import y.base.Edge;
+import y.base.Node;
+import y.view.Arrow;
+import y.view.EdgeRealizer;
+import y.view.LineType;
 import y.view.NodeLabel;
 import y.view.NodeRealizer;
 import de.zbit.graph.io.SBML2GraphML;
+import de.zbit.graph.sbgn.ReactionNodeRealizer;
 
 
 /**
@@ -43,6 +53,11 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
      * Default node size used. Can be changed by derived classes.
      */
     protected double DEFAULT_NODE_SIZE = 8;
+    
+    /**
+     * Saves mapping from reactionIDs to related reaction nodes.
+     */
+    protected Map<String, Node> reactionID2reactionNode;
 
     /**
      * Constructs an abstract graph manipulator on the given {@link SBML2GraphML}.
@@ -50,6 +65,7 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
      */
     public AbstractGraphManipulator(SBML2GraphML graph){
         this.graph = graph;
+        reactionID2reactionNode = graph.getReactionID2reactionNode();
     }
     
     /**
@@ -87,6 +103,53 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
             nl.setPosition(NodeLabel.S); // South of node
             nl.setDistance(-3);
         }
+    }
+    
+    /* (non-Javadoc)
+     * @see org.sbml.simulator.gui.graph.GraphManipulator#dynamicChangeOfReaction(java.lang.String, double)
+     */
+    @Override
+    public void dynamicChangeOfReaction(String id, double value) {
+        System.out.println(value);
+        LinkedList<Edge> listOfEdges = graph.getId2edge()
+                .get(id);
+        
+        for(Edge e : listOfEdges){
+            EdgeRealizer er = graph.getSimpleGraph().getRealizer(e);
+            
+            if (value > 0) { // (!= 0), because computed data at timepoint 0.0 = 0
+                if (reactionID2reactionNode.get(id) == e.target()) {
+                    // reactants
+                    er.setSourceArrow(Arrow.NONE);
+                } else {
+                    // products
+                    er.setTargetArrow(Arrow.STANDARD);
+                }
+            } else {
+                if (reactionID2reactionNode.get(id) == e.target()) {
+                    // products
+                    er.setSourceArrow(Arrow.STANDARD);
+                } else {
+                    // reactants
+                    er.setTargetArrow(Arrow.NONE);
+                }
+            }
+        }
+        
+        //TODO 2 cases: value > 0 & value < 0
+//        for (Edge e : listOfEdges) {
+//            float valueF = (float) value;
+//            LineType currLinetype = graph.getSimpleGraph()
+//                    .getRealizer(e).getLineType();
+//            LineType newLineType = LineType.createLineType(valueF,
+//                    currLinetype.getEndCap(), currLinetype.getLineJoin(),
+//                    currLinetype.getMiterLimit(), currLinetype.getDashArray(),
+//                    currLinetype.getDashPhase());
+//            graph.getSimpleGraph().getRealizer(e)
+//                    .setLineType(newLineType);
+//        }
+
+        graph.getSimpleGraph().updateViews();
     }
     
     /* (non-Javadoc)

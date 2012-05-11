@@ -179,11 +179,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         currData = updateThem;
         //update JSlider (in case of "play")
         controlPanel.setTimepoint(timepoint);
-        /*
-         * To ensure that the dynamic change of graph rendering will make a
-         * noticible change in size or color the passed values have to be
-         * conditioned. Therefore not absolute values will be passed (TODO).
-         */
+        
         if (graphManipulator != null) {
             for (int i = 1; i <= updateThem.getColumnCount(); i++) {
                 String id = updateThem.getColumnIdentifier(i);
@@ -200,8 +196,8 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
 
                     } else if (sbmlModel.getReaction(id) != null) {
                         // TODO adjust given values
-                        // graphManipulator.dynamicChangeOfReaction(id,
-                        // updateThem.getValueAt(0, i));
+//                         graphManipulator.dynamicChangeOfReaction(id,
+//                         updateThem.getValueAt(0, i));
                     }
                 } else {
                     graphManipulator.revertChanges(id);
@@ -211,7 +207,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
 
         /*
          * Notifiy that graph update is finished. Ensures that play-thread in
-         * core doesn't overtravel the drawing.
+         * core doesn't overtravel drawing.
          */
         if(core != null) {
             core.graphUpdateFinished();

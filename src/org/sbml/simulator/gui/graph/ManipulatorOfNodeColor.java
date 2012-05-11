@@ -106,13 +106,4 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
         }
         graph.getSimpleGraph().updateViews();
     }
-
-    /* (non-Javadoc)
-     * @see org.sbml.simulator.gui.graph.GraphManipulator#dynamicChangeOfReaction(java.lang.String, double)
-     */
-    @Override
-    public void dynamicChangeOfReaction(String id, double value) {
-        // TODO Auto-generated method stub
-        
-    }
 }

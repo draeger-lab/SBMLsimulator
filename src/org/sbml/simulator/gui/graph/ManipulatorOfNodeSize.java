@@ -18,10 +18,7 @@
 package org.sbml.simulator.gui.graph;
 
 import java.awt.Color;
-import java.util.LinkedList;
 
-import y.base.Edge;
-import y.view.LineType;
 import y.view.NodeRealizer;
 import de.zbit.graph.io.SBML2GraphML;
 
@@ -111,27 +108,5 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
             nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
         }
         graph.getSimpleGraph().updateViews();
-    }
-
-    
-    
-    /* (non-Javadoc)
-     * @see org.sbml.simulator.gui.graph.GraphManipulator#dynamicChangeOfReaction(java.lang.String, double)
-     */
-    @Override
-    public void dynamicChangeOfReaction(String id, double value) {
-        LinkedList<Edge> listOfEdges = graph.getId2edge()
-                .get(id);
-        for (Edge e : listOfEdges) {
-            float valueF = (float) value;
-            LineType currLinetype = graph.getSimpleGraph()
-                    .getRealizer(e).getLineType();
-            LineType newLineType = LineType.createLineType(valueF,
-                    currLinetype.getEndCap(), currLinetype.getLineJoin(),
-                    currLinetype.getMiterLimit(), currLinetype.getDashArray(),
-                    currLinetype.getDashPhase());
-            graph.getSimpleGraph().getRealizer(e)
-                    .setLineType(newLineType);
-        }
     }
 }
