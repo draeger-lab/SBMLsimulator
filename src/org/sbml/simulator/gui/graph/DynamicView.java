@@ -20,6 +20,7 @@ package org.sbml.simulator.gui.graph;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.JSplitPane;
 import javax.swing.SwingWorker;
 
@@ -114,7 +115,8 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         
         //init
         controller = new DynamicController(this);
-        graphPanel = new TranslatorSBMLgraphPanel(document, false);
+        graphPanel = new TranslatorSBMLgraphPanel(document, false, false);
+        graphPanel.setBorder(BorderFactory.createLoweredBevelBorder());
         legend = new LegendPanel(document.getModel(), true);
         legend.addTableModelListener(controller);
         graphWithLegend = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, legend, graphPanel);
