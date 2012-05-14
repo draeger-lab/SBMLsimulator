@@ -19,6 +19,8 @@ package org.sbml.simulator.gui.graph;
 
 import java.awt.Color;
 
+import org.sbml.jsbml.SBMLDocument;
+
 import y.view.NodeRealizer;
 import de.zbit.graph.io.SBML2GraphML;
 
@@ -44,11 +46,16 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
     /**
      * Constructs node-color manipulator with a standard color.
      * @param graph
+     * @param document
      * @param lowerSpeciesLimit
      * @param upperSpeciesLimit
+     * @param lowerReactionLimit
+     * @param upperReactionLimit
      */
-    public ManipulatorOfNodeColor(SBML2GraphML graph, double lowerSpeciesLimit, double upperSpeciesLimit){
-        super(graph);
+    public ManipulatorOfNodeColor(SBML2GraphML graph, SBMLDocument document,
+            double lowerSpeciesLimit, double upperSpeciesLimit,
+            double lowerReactionLimit, double upperReactionLimit) {
+        super(graph, document, lowerReactionLimit, upperReactionLimit);
         DEFAULT_NODE_SIZE = 30;
         HSBcolor = Color.RGBtoHSB(176, 226, 255, null); //standard color
         getLinearRegression(0, 1, lowerSpeciesLimit, upperSpeciesLimit);
@@ -57,14 +64,20 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
     /**
      * Constructs node-color manipulator with the given RGB color.
      * @param graph
+     * @param document
      * @param r
      * @param g
      * @param b
      * @param lowerSpeciesLimit
      * @param upperSpeciesLimit
+     * @param lowerReactionLimit
+     * @param upperReactionLimit
      */
-    public ManipulatorOfNodeColor(SBML2GraphML graph, int r, int g, int b, double lowerSpeciesLimit, double upperSpeciesLimit){
-        super(graph);
+    public ManipulatorOfNodeColor(SBML2GraphML graph, SBMLDocument document,
+            int r, int g, int b, double lowerSpeciesLimit,
+            double upperSpeciesLimit, double lowerReactionLimit,
+            double upperReactionLimit) {
+        super(graph, document, lowerReactionLimit, upperReactionLimit);
         DEFAULT_NODE_SIZE = 30;
         HSBcolor = Color.RGBtoHSB(r, g, b, null);
         getLinearRegression(0, 1, lowerSpeciesLimit, upperSpeciesLimit);

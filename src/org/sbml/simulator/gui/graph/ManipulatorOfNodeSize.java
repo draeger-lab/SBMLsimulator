@@ -19,6 +19,8 @@ package org.sbml.simulator.gui.graph;
 
 import java.awt.Color;
 
+import org.sbml.jsbml.SBMLDocument;
+
 import y.view.NodeRealizer;
 import de.zbit.graph.io.SBML2GraphML;
 
@@ -49,11 +51,16 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
      * Constructs a new nodesize-manipulator on the given graph. Minimum node
      * size and maximum node size per default.
      * @param graph
-     * @param lowerDataLimit
-     * @param upperDataLimit
+     * @param document
+     * @param lowerSpeciesLimit
+     * @param upperSpeciesLimit
+     * @param lowerReactionLimit
+     * @param upperReactionLimit
      */
-    public ManipulatorOfNodeSize(SBML2GraphML graph, double lowerSpeciesLimit, double upperSpeciesLimit){
-        super(graph);
+    public ManipulatorOfNodeSize(SBML2GraphML graph, SBMLDocument document,
+            double lowerSpeciesLimit, double upperSpeciesLimit,
+            double lowerReactionLimit, double upperReactionLimit) {
+        super(graph, document, lowerReactionLimit, upperReactionLimit);
         getLinearRegression(minNodeSize, maxNodeSize, lowerSpeciesLimit, upperSpeciesLimit);
     }
     
@@ -61,13 +68,19 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
      * Constructs a new nodesize-manipulator on the given graph. Minimum node
      * size and maximum node size as given.
      * @param graph
+     * @param document
      * @param minNodeSize
      * @param maxNodeSize
-     * @param lowerDataLimit
-     * @param upperDataLimit
+     * @param lowerSpeciesLimit
+     * @param upperSpeciesLimit
+     * @param lowerReactionLimit
+     * @param upperReactionLimit
      */
-    public ManipulatorOfNodeSize(SBML2GraphML graph, double minNodeSize, double maxNodeSize, double lowerSpeciesLimit, double upperSpeciesLimit){
-        super(graph);
+    public ManipulatorOfNodeSize(SBML2GraphML graph, SBMLDocument document,
+            double minNodeSize, double maxNodeSize, double lowerSpeciesLimit,
+            double upperSpeciesLimit, double lowerReactionLimit,
+            double upperReactionLimit) {
+        super(graph, document);
         this.minNodeSize = minNodeSize;
         this.maxNodeSize = maxNodeSize;
         getLinearRegression(minNodeSize, maxNodeSize, lowerSpeciesLimit, upperSpeciesLimit);
