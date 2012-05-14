@@ -17,6 +17,9 @@
  */
 package org.sbml.simulator.fba.gui;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.JPanel;
 
 /**
@@ -25,7 +28,7 @@ import javax.swing.JPanel;
  * @date 07.05.2012
  * @since 1.0
  */
-public class FBASettingPanel extends JPanel{
+public class FBASettingPanel extends JPanel implements ActionListener{
 
 	/**
 	 * 
@@ -34,6 +37,12 @@ public class FBASettingPanel extends JPanel{
 	
 	public FBASettingPanel() {
 		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
