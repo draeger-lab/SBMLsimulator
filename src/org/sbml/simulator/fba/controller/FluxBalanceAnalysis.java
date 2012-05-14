@@ -26,22 +26,23 @@ package org.sbml.simulator.fba.controller;
 public class FluxBalanceAnalysis {
 
 	/**
-	 * FluxBalanceAnalysis has two attributes:
+	 * FluxBalanceAnalysis has these attributes:
 	 * - the target function targetFunc, which can be a FluxMinimization-object 
 	 *   or an other function for which the network has to be optimized
 	 * - the constraints, which contains e.g. Gibbs-energies
-	 * 
+	 * - a boolean linearProgramming, which is true for the request to solve 
+	 *   the problem with linear programming and false for quadratic programming.
 	 */
 	public TargetFunction targetFunc;
 	public Constraints constraints;
+	public Boolean linearProgramming;
 	
-	public FluxBalanceAnalysis(TargetFunction target, Constraints constraints) {
+	public FluxBalanceAnalysis(TargetFunction target, Constraints constraints, Boolean linearProgramming) {
 		this.targetFunc = target;
 		this.constraints = constraints;
-		
-		// TODO Auto-generated constructor stub
+		this.linearProgramming = linearProgramming;
+		// TODO
 	}
-	
 	
 
 }

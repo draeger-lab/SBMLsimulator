@@ -50,23 +50,16 @@
       <y="13"/>
    </type>
    <relationship>
-      <class="edu.buffalo.cse.green.relationship.generalization.GeneralizationPart"/>
-      <sourceType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{FBASettingPanel.java[FBASettingPanel"/>
-      <targetType="=SBMLsimulatorCore/C:\/Program Files\/Java\/jre6\/lib\/rt.jar<javax.swing(JPanel.class[JPanel"/>
-      <bendpoints>
-      </bendpoints>
-   </relationship>
-   <relationship>
-      <class="edu.buffalo.cse.green.relationship.generalization.GeneralizationPart"/>
-      <sourceType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{SettingPanel.java[SettingPanel"/>
-      <targetType="=SBMLsimulatorCore/C:\/Program Files\/Java\/jre6\/lib\/rt.jar<javax.swing(JPanel.class[JPanel"/>
-      <bendpoints>
-      </bendpoints>
-   </relationship>
-   <relationship>
-      <class="edu.buffalo.cse.green.relationship.generalization.GeneralizationPart"/>
+      <class="edu.buffalo.cse.green.relationship.composition.CompositionPart"/>
       <sourceType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{FBAPanel.java[FBAPanel"/>
-      <targetType="=SBMLsimulatorCore/C:\/Program Files\/Java\/jre6\/lib\/rt.jar<javax.swing(JPanel.class[JPanel"/>
+      <targetType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{SettingPanel.java[SettingPanel"/>
+      <bendpoints>
+      </bendpoints>
+   </relationship>
+   <relationship>
+      <class="edu.buffalo.cse.green.relationship.composition.CompositionPart"/>
+      <sourceType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{SettingPanel.java[SettingPanel"/>
+      <targetType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{VODSettingPanel.java[VODSettingPanel"/>
       <bendpoints>
       </bendpoints>
    </relationship>
@@ -80,21 +73,7 @@
    <relationship>
       <class="edu.buffalo.cse.green.relationship.composition.CompositionPart"/>
       <sourceType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{FBAPanel.java[FBAPanel"/>
-      <targetType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{ChartPanel.java[ChartPanel"/>
-      <bendpoints>
-      </bendpoints>
-   </relationship>
-   <relationship>
-      <class="edu.buffalo.cse.green.relationship.composition.CompositionPart"/>
-      <sourceType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{SettingPanel.java[SettingPanel"/>
-      <targetType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{VODSettingPanel.java[VODSettingPanel"/>
-      <bendpoints>
-      </bendpoints>
-   </relationship>
-   <relationship>
-      <class="edu.buffalo.cse.green.relationship.generalization.GeneralizationPart"/>
-      <sourceType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{VODPanel.java[VODPanel"/>
-      <targetType="=SBMLsimulatorCore/C:\/Program Files\/Java\/jre6\/lib\/rt.jar<javax.swing(JPanel.class[JPanel"/>
+      <targetType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{VODPanel.java[VODPanel"/>
       <bendpoints>
       </bendpoints>
    </relationship>
@@ -106,16 +85,30 @@
       </bendpoints>
    </relationship>
    <relationship>
-      <class="edu.buffalo.cse.green.relationship.composition.CompositionPart"/>
-      <sourceType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{FBAPanel.java[FBAPanel"/>
-      <targetType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{SettingPanel.java[SettingPanel"/>
+      <class="edu.buffalo.cse.green.relationship.generalization.GeneralizationPart"/>
+      <sourceType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{FBASettingPanel.java[FBASettingPanel"/>
+      <targetType="=SBMLsimulatorCore/C:\/Program Files\/Java\/jre6\/lib\/rt.jar<javax.swing(JPanel.class[JPanel"/>
+      <bendpoints>
+      </bendpoints>
+   </relationship>
+   <relationship>
+      <class="edu.buffalo.cse.green.relationship.generalization.GeneralizationPart"/>
+      <sourceType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{VODPanel.java[VODPanel"/>
+      <targetType="=SBMLsimulatorCore/C:\/Program Files\/Java\/jre6\/lib\/rt.jar<javax.swing(JPanel.class[JPanel"/>
       <bendpoints>
       </bendpoints>
    </relationship>
    <relationship>
       <class="edu.buffalo.cse.green.relationship.composition.CompositionPart"/>
       <sourceType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{FBAPanel.java[FBAPanel"/>
-      <targetType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{VODPanel.java[VODPanel"/>
+      <targetType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{ChartPanel.java[ChartPanel"/>
+      <bendpoints>
+      </bendpoints>
+   </relationship>
+   <relationship>
+      <class="edu.buffalo.cse.green.relationship.generalization.GeneralizationPart"/>
+      <sourceType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{SettingPanel.java[SettingPanel"/>
+      <targetType="=SBMLsimulatorCore/C:\/Program Files\/Java\/jre6\/lib\/rt.jar<javax.swing(JPanel.class[JPanel"/>
       <bendpoints>
       </bendpoints>
    </relationship>
@@ -123,6 +116,13 @@
       <class="edu.buffalo.cse.green.relationship.composition.CompositionPart"/>
       <sourceType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{SettingPanel.java[SettingPanel"/>
       <targetType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{FBASettingPanel.java[FBASettingPanel"/>
+      <bendpoints>
+      </bendpoints>
+   </relationship>
+   <relationship>
+      <class="edu.buffalo.cse.green.relationship.generalization.GeneralizationPart"/>
+      <sourceType="=SBMLsimulator/src<org.sbml.simulator.fba.gui{FBAPanel.java[FBAPanel"/>
+      <targetType="=SBMLsimulatorCore/C:\/Program Files\/Java\/jre6\/lib\/rt.jar<javax.swing(JPanel.class[JPanel"/>
       <bendpoints>
       </bendpoints>
    </relationship>
