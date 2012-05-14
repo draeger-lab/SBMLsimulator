@@ -28,5 +28,7 @@ public abstract class TargetFunction {
 	public TargetFunction() {
 		// TODO Auto-generated constructor stub
 	}
+	
+	//TODO: fill this class with methods for all target-functions
 
 }
