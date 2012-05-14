@@ -1,6 +1,6 @@
 /*
- * $Id:  FluxMinimization.java 16:15:22 Meike Aichele$
- * $URL: FluxMinimization.java $
+ * $Id:  FluxVector.java 16:25:58 Meike Aichele$
+ * $URL: FluxVector.java $
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -25,38 +25,12 @@ import org.sbml.simulator.stability.math.StoichiometricMatrix;
  * @date 07.05.2012
  * @since 1.0
  */
-public class FluxMinimization extends TargetFunction {
+public class FluxMinimizationUtils {
 	
-	/**
-	 * to compute a flux minimization, we need a flux vector 
-	 * in an array fluxVector and an error-value-array errorArray, 
-	 * which will be computed in Errorobject-class
-	 */
-	private double[] errorArray;
-	private double[] fluxVector;
-	private StoichiometricMatrix N;
-	
-	/*
-	 * default constructor
-	 */
-	public FluxMinimization(StoichiometricMatrix N) {
-		super();
-		this.errorArray = computeError();
-		this.fluxVector = FluxMinimizationUtils.computeFluxVector(N);
-		this.N = N;
-	}
-	
-	private double[] computeError() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
-	 * constructor that gets an error-array and a FluxVector-Array fluxvec.
-	 * 
-	 * @param error
-	 * @param fluxvec
-	 */
-	public FluxMinimization(double[] error,double[] fluxvec) {
+	public static double[] computeFluxVector(StoichiometricMatrix N) {
+		N.getSteadyStateFluxes();
+		double[] fluxVector = new double[N.getColumnDimension()];
+		// TODO: fill the fluxVector
+		return fluxVector;
 	}
 }
