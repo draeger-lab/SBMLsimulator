@@ -17,6 +17,7 @@
  */
 package org.sbml.simulator.fba.controller;
 
+import org.sbml.jsbml.SBMLDocument;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
 /**
@@ -46,11 +47,12 @@ public class FluxMinimization extends TargetFunction {
 		this.N = N;
 	}
 	
-	private double[] computeError() {
-		// TODO Auto-generated method stub
-		return null;
+	public FluxMinimization(SBMLDocument doc) {
+		// TODO compute a stoichiometric matrix from a SBMLDocument
+		this.errorArray = computeError();
+		this.fluxVector = FluxMinimizationUtils.computeFluxVector(computeStoichMatrixFromSBMLDocument(doc));
 	}
-
+	
 	/**
 	 * constructor that gets an error-array and a FluxVector-Array fluxvec.
 	 * 
@@ -58,5 +60,18 @@ public class FluxMinimization extends TargetFunction {
 	 * @param fluxvec
 	 */
 	public FluxMinimization(double[] error,double[] fluxvec) {
+		this.errorArray = error;
+		this.fluxVector = fluxvec;
 	}
+	
+	private double[] computeError() {
+		// TODO: compute the error
+		return null;
+	}
+
+	private StoichiometricMatrix computeStoichMatrixFromSBMLDocument(SBMLDocument doc) {
+		// TODO
+		return null;
+	}
+
 }

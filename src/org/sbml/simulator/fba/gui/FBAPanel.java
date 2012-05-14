@@ -19,6 +19,8 @@ package org.sbml.simulator.fba.gui;
 
 import javax.swing.JPanel;
 
+import org.sbml.jsbml.SBMLDocument;
+
 /**
  * @author Meike Aichele
  * @version $Rev$
@@ -37,13 +39,15 @@ public class FBAPanel extends JPanel{
 	private ChartPanel chart;
 	private SettingPanel settings;
 	private VODPanel vod;
+	private SBMLDocument document;
 	private static final long serialVersionUID = 1L;
 	
-	public FBAPanel() {
+	public FBAPanel (SBMLDocument document) {
 		this.chart = new ChartPanel();
 		this.settings = new SettingPanel();
 		this.vod = new VODPanel();
-		// TODO Auto-generated constructor stub
+		this.document = document;
+		// TODO: call FluxBalanceAnalysis
 	}
 
 	/**

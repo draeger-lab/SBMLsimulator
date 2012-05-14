@@ -17,6 +17,8 @@
  */
 package org.sbml.simulator.fba.controller;
 
+import org.sbml.jsbml.SBMLDocument;
+
 /**
  * @author Meike Aichele
  * @version $Rev$
@@ -37,12 +39,28 @@ public class FluxBalanceAnalysis {
 	public Constraints constraints;
 	public Boolean linearProgramming;
 	
+	/**
+	 * 
+	 * @param constraints
+	 * @param doc
+	 */
+	public FluxBalanceAnalysis(Constraints constraints, SBMLDocument doc) {
+		this.targetFunc = new FluxMinimization(doc);
+		this.constraints = constraints;
+		this.linearProgramming = true;
+	}
+	
+	/**
+	 * 
+	 * @param target
+	 * @param constraints
+	 * @param linearProgramming
+	 */
 	public FluxBalanceAnalysis(TargetFunction target, Constraints constraints, Boolean linearProgramming) {
 		this.targetFunc = target;
 		this.constraints = constraints;
 		this.linearProgramming = linearProgramming;
-		// TODO
 	}
 	
-
+	//TODO: call CPLEX or SCPSolver
 }
