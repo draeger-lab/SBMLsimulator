@@ -21,9 +21,7 @@ import java.util.ArrayList;
 
 import javax.swing.SwingWorker;
 
-import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.SBMLDocument;
-import org.sbml.jsbml.Species;
 import org.simulator.math.odes.MultiTable;
 
 /**
@@ -124,14 +122,14 @@ public class DynamicCore {
 	private double[] timePoints;
 	
 	/**
-	 * Lower limit of species data in given {@link MultiTable} if computed.
+	 * Lower/upper limit of species data in given {@link MultiTable} if computed.
 	 */
-	private double minDataSpecies;
+	private double minDataSpecies, maxDataSpecies;
 	
 	/**
-	 * Upper limit of species data in given {@link MultiTable} if computed.
+	 * Lower/upper limit of reactions data in given {@link MultiTable} if computed.
 	 */
-	private double maxDataSpecies;
+	private double minDataReactions, maxDataReactions;
 	
 	/**
      * Current status of limits whether computed or not. Not computed by default
@@ -239,6 +237,22 @@ public class DynamicCore {
 	}
 	
 	/**
+	 * Get the lower limit of the data in simulation data.
+	 * @return lower limit if already computed by computeLimits otherwise null
+	 */
+	public double getMinDataReactions(){
+	    return limitsComputed ? minDataReactions : null;
+	}
+	
+	/**
+	 * Get the upper limit of the data in simulation data.
+	 * @return upper limit if already computed by computeLimits otherwise null
+	 */
+	public double getMaxDataReactions(){
+	    return limitsComputed ? maxDataReactions : null;
+	}
+	
+	/**
 	 * Get the speed of cycling through all timepoints with the play method.
 	 * @return
 	 */
@@ -331,30 +345,39 @@ public class DynamicCore {
 	/**
 	 * Computation of min values in and max values in the simulation data. O(n^2).
 	 * @param document needed to distinguish between reactions and species.
-	 * TODO determine limits of reactions
 	 */
 	public void computeLimits(SBMLDocument document){
 	    //init
-	    ListOf<Species> speciesIDs = document.getModel().getListOfSpecies();
 	    maxDataSpecies = Double.MIN_VALUE;
+	    maxDataReactions = Double.MIN_VALUE;
 	    minDataSpecies = Double.MAX_VALUE;
+	    minDataReactions = Double.MAX_VALUE;
 	    
 	    //compute
 	    for (int i = 1; i < data.getColumnCount(); i++){
-            if (speciesIDs.get(data.getColumnIdentifier(i)) != null){
-                for (int j = 0; j < data.getRowCount(); j++){
-                    if (speciesIDs.get(data.getColumnIdentifier(i)) != null){
-                        double tmpValue = data.getValueAt(j, i);
-                        if (tmpValue < minDataSpecies){
-                            minDataSpecies = tmpValue;
-                        }else if (tmpValue > maxDataSpecies){
-                            maxDataSpecies = tmpValue;
-                        }
+	        /*
+	         * just look through species/reactions columns in particular
+	         */
+            if (document.getModel().getSpecies(data.getColumnIdentifier(i)) != null){
+                for (int j = 0; j < data.getRowCount(); j++) {
+                    double tmpValue = data.getValueAt(j, i);
+                    if (tmpValue < minDataSpecies) {
+                        minDataSpecies = tmpValue;
+                    } else if (tmpValue > maxDataSpecies) {
+                        maxDataSpecies = tmpValue;
+                    }
+                }
+            } else if (document.getModel().getReaction(data.getColumnIdentifier(i)) != null){
+                for (int j = 0; j < data.getRowCount(); j++) {
+                    double tmpValue = data.getValueAt(j, i);
+                    if (tmpValue < minDataReactions) {
+                        minDataReactions = tmpValue;
+                    } else if (tmpValue > maxDataReactions) {
+                        maxDataReactions = tmpValue;
                     }
                 }
             }
         }
-	    
 	    limitsComputed = true;
 	}
 }

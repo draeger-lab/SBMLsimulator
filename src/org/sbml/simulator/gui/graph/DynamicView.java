@@ -144,13 +144,15 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
             switch (i) {
             case 0:
                 graphManipulator = new ManipulatorOfNodeSize(
-                        graphPanel.getConverter(), core.getMinDataSpecies(),
-                        core.getMaxDataSpecies());
+                        graphPanel.getConverter(), document,
+                        core.getMinDataSpecies(), core.getMaxDataSpecies(),
+                        core.getMinDataReactions(), core.getMaxDataReactions());
                 break;
             case 1:
                 graphManipulator = new ManipulatorOfNodeColor(
-                        graphPanel.getConverter(), core.getMinDataSpecies(),
-                        core.getMaxDataSpecies());
+                        graphPanel.getConverter(), document,
+                        core.getMinDataSpecies(), core.getMaxDataSpecies(),
+                        core.getMinDataReactions(), core.getMaxDataReactions());
                 break;
             }
         }
@@ -195,9 +197,13 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                                 controlPanel.getSelectionStateOfLabels());
 
                     } else if (sbmlModel.getReaction(id) != null) {
-                        // TODO adjust given values
-//                         graphManipulator.dynamicChangeOfReaction(id,
-//                         updateThem.getValueAt(0, i));
+                        if (timepoint == 0.0){
+                            //there's no initial reaction data.
+                            graphManipulator.revertChanges(id);
+                        } else {
+                            graphManipulator.dynamicChangeOfReaction(id,
+                                    updateThem.getValueAt(0, i));
+                        }
                     }
                 } else {
                     graphManipulator.revertChanges(id);

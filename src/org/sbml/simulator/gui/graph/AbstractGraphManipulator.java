@@ -22,7 +22,7 @@ import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.sbml.jsbml.Reaction;
+import org.sbml.jsbml.SBMLDocument;
 
 import y.base.Edge;
 import y.base.Node;
@@ -32,7 +32,6 @@ import y.view.LineType;
 import y.view.NodeLabel;
 import y.view.NodeRealizer;
 import de.zbit.graph.io.SBML2GraphML;
-import de.zbit.graph.sbgn.ReactionNodeRealizer;
 
 
 /**
@@ -55,17 +54,71 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
     protected double DEFAULT_NODE_SIZE = 8;
     
     /**
+     * Default line width used. Can be changed by derived classes.
+     */
+    protected float DEFAULT_LINE_WIDTH = 1;
+    
+    /**
+     * Maximum line width for default DynamicChangeOfReaction.
+     */
+    private float maxLineWidth = 8;
+    
+    /**
+     * Minimum line width for default DynamicChangeOfReaction.
+     */
+    private float minLineWidth = (float) 0.1;
+    
+    /**
+     * Parameters for default DynamicChangeOfReaction.
+     */
+    private double m = 1, c = 0;
+    
+    /**
      * Saves mapping from reactionIDs to related reaction nodes.
      */
     protected Map<String, Node> reactionID2reactionNode;
+    
+    /**
+     * Saves the used {@link SBMLDocument}.
+     */
+    protected SBMLDocument document;
 
     /**
      * Constructs an abstract graph manipulator on the given {@link SBML2GraphML}.
      * @param graph
      */
-    public AbstractGraphManipulator(SBML2GraphML graph){
+    
+    /**
+     * Constructs an abstract graph manipulator on the given {@link SBML2GraphML} and {@link SBMLDocument}.
+     * @param graph
+     * @param document
+     */
+    public AbstractGraphManipulator(SBML2GraphML graph, SBMLDocument document){
         this.graph = graph;
         reactionID2reactionNode = graph.getReactionID2reactionNode();
+        this.document = document;
+    }
+    
+    /**
+     * Constructs an abstract graph manipulator on the given {@link SBML2GraphML} and {@link SBMLDocument}.
+     * Additionally this constructor provides a proper dynamicChangeofReaction method.
+     * 
+     * @param graph
+     * @param document
+     * @param minDataReaction
+     * @param maxDataReaction
+     */
+    public AbstractGraphManipulator(SBML2GraphML graph, SBMLDocument document, double minDataReaction, double maxDataReaction){
+        this(graph, document);
+        /*
+         * Take absolute higher limit as xMax and 0 as xLow for regression.
+         * Eventually reactions will end up in equillibrium.
+         */
+        double xHigh = Math.abs(minDataReaction) > Math.abs(maxDataReaction) ? Math
+                .abs(minDataReaction) : Math.abs(maxDataReaction);
+        double[] linearRegression = computeBIAS(0, xHigh, minLineWidth, maxLineWidth);
+        m = linearRegression[0];
+        c = linearRegression[1];
     }
     
     /**
@@ -90,14 +143,13 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
      * @param value
      */
     protected void labelNode(NodeRealizer nr, String id, double value){
+        String label = MessageFormat.format("{0}: {1,number,0.0000}",
+                new Object[] { document.getModel().getSpecies(id).isSetName() ? document.getModel().getSpecies(id).getName() : id , value });
+        
         if (nr.labelCount() > 1) {
-            nr.getLabel(nr.labelCount() - 1).setText(
-                    MessageFormat.format("{0}: {1,number,0.0000}",
-                            new Object[] { id, value }));
+            nr.getLabel(nr.labelCount() - 1).setText(label);
         } else {
-            nr.addLabel(new NodeLabel(MessageFormat.format(
-                    "{0}: {1,number,0.0000}",
-                    new Object[] { id, value })));
+            nr.addLabel(new NodeLabel(label));
             NodeLabel nl = nr.getLabel(nr.labelCount() - 1);
             nl.setModel(NodeLabel.SIDES);
             nl.setPosition(NodeLabel.S); // South of node
@@ -105,22 +157,49 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
         }
     }
     
+    protected void labelReaction(){
+        //TODO
+    }
+    
     /* (non-Javadoc)
      * @see org.sbml.simulator.gui.graph.GraphManipulator#dynamicChangeOfReaction(java.lang.String, double)
      */
     @Override
     public void dynamicChangeOfReaction(String id, double value) {
-        System.out.println(value);
-        LinkedList<Edge> listOfEdges = graph.getId2edge()
+        LinkedList<Edge> edgeList = graph.getId2edge()
                 .get(id);
         
-        for(Edge e : listOfEdges){
+        for(Edge e : edgeList){
             EdgeRealizer er = graph.getSimpleGraph().getRealizer(e);
+
+            /*
+             *  adjust lineWidth only if regression was computed, else use
+             *  standard linewidth.
+             */
+            double absvalue = Math.abs(value);
+            float lineWidth = (m != 1) ?  (float)(absvalue * m + c) : er.getLineType().getLineWidth();
+            //only line-width is supposed to change
+            LineType currLinetype = er.getLineType();
+            LineType newLineType = LineType.createLineType(
+                    lineWidth, currLinetype.getEndCap(),
+                    currLinetype.getLineJoin(), currLinetype.getMiterLimit(),
+                    currLinetype.getDashArray(), currLinetype.getDashPhase());
             
-            if (value > 0) { // (!= 0), because computed data at timepoint 0.0 = 0
+            er.setLineType(newLineType);
+            
+            /*
+             * determine arrowdirection
+             */
+            if (value > 0) { // (!= 0), because simulation data at timepoint 0.0 = 0
                 if (reactionID2reactionNode.get(id) == e.target()) {
                     // reactants
                     er.setSourceArrow(Arrow.NONE);
+                    //TODO own arrow for reversible
+//                    if(document.getModel().getReaction(id).isReversible()){
+//                        er.setSourceArrow(Arrow.PLAIN);
+//                    } else {
+//                        er.setSourceArrow(Arrow.NONE);
+//                    }
                 } else {
                     // products
                     er.setTargetArrow(Arrow.STANDARD);
@@ -132,23 +211,15 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
                 } else {
                     // reactants
                     er.setTargetArrow(Arrow.NONE);
+                    //TODO own arrow for reversible
+//                    if(document.getModel().getReaction(id).isReversible()){
+//                        er.setTargetArrow(Arrow.PLAIN);
+//                    } else {
+//                        er.setTargetArrow(Arrow.NONE);
+//                    }
                 }
             }
         }
-        
-        //TODO 2 cases: value > 0 & value < 0
-//        for (Edge e : listOfEdges) {
-//            float valueF = (float) value;
-//            LineType currLinetype = graph.getSimpleGraph()
-//                    .getRealizer(e).getLineType();
-//            LineType newLineType = LineType.createLineType(valueF,
-//                    currLinetype.getEndCap(), currLinetype.getLineJoin(),
-//                    currLinetype.getMiterLimit(), currLinetype.getDashArray(),
-//                    currLinetype.getDashPhase());
-//            graph.getSimpleGraph().getRealizer(e)
-//                    .setLineType(newLineType);
-//        }
-
         graph.getSimpleGraph().updateViews();
     }
     
@@ -157,6 +228,7 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
      */
     @Override
     public void revertChanges(String id) {
+        //revert nodes
         if (graph.getId2node().get(id) != null) {
             NodeRealizer nr = graph.getSimpleGraph().getRealizer(
                     graph.getId2node().get(id));
@@ -166,6 +238,28 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
             if (nr.labelCount() > 1) {
                 // if not selected disable label
                 nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
+            }
+        }
+        //revert lines
+        if(graph.getId2edge().get(id) != null){
+            LinkedList<Edge> listOfEdges = graph.getId2edge()
+                    .get(id);
+            for(Edge e : listOfEdges){
+                EdgeRealizer er = graph.getSimpleGraph().getRealizer(e);
+                er.setLineType(LineType.LINE_1);
+                if (document.getModel().getReaction(id).isReversible()) {
+                    if (reactionID2reactionNode.get(id) == e.target()){
+                        er.setSourceArrow(Arrow.STANDARD);
+                    } else {
+                        er.setTargetArrow(Arrow.STANDARD);
+                    }
+                } else {
+                    if (reactionID2reactionNode.get(id) == e.target()){
+                        er.setSourceArrow(Arrow.NONE);
+                    } else {
+                        er.setTargetArrow(Arrow.STANDARD);
+                    }
+                }
             }
         }
         graph.getSimpleGraph().updateViews();

@@ -169,7 +169,7 @@ public class DynamicControlPanel extends JPanel{
 		 */
 		controller.setCore(core);
 		setTimepoint(core.getCurrTimepoint());
-		Component[] elements = {play, video, searchBar, simVeloCombo, simVeloSpin, labelsCB};
+		Component[] elements = {play, video, searchBar, simVeloCombo, simVeloSpin, labelsCB, nodesize, nodecolor};
 		GUITools.setEnabledForAll(true, elements);
 	}
 	
@@ -242,7 +242,7 @@ public class DynamicControlPanel extends JPanel{
 		addComponent(gbl, labelsCB,     6, 2, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, manipulatorsPane, 7, 0, 3, 3, GridBagConstraints.CENTER,  GridBagConstraints.BOTH,        0, 0, new Insets(2,2,2,2));
 
-		Component[] elements = {play, pause, stop, video, searchBar, simVeloCombo, simVeloSpin, labelsCB};
+		Component[] elements = {play, pause, stop, video, searchBar, simVeloCombo, simVeloSpin, labelsCB, nodesize, nodecolor};
 		GUITools.setEnabledForAll(false, elements);
 		logger.fine("DynamicControlPanel initialized.");
 	}
