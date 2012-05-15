@@ -47,18 +47,16 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
      * Constructs node-color manipulator with a standard color.
      * @param graph
      * @param document
-     * @param lowerSpeciesLimit
-     * @param upperSpeciesLimit
-     * @param lowerReactionLimit
-     * @param upperReactionLimit
+     * @param minMaxOfSpeciesData
+     * @param minMaxOfReactionsData
      */
     public ManipulatorOfNodeColor(SBML2GraphML graph, SBMLDocument document,
-            double lowerSpeciesLimit, double upperSpeciesLimit,
-            double lowerReactionLimit, double upperReactionLimit) {
-        super(graph, document, lowerReactionLimit, upperReactionLimit);
+            double[] minMaxOfSpeciesData,
+            double[] minMaxOfReactionsData) {
+        super(graph, document, minMaxOfReactionsData[0], minMaxOfReactionsData[1]);
         DEFAULT_NODE_SIZE = 30;
         HSBcolor = Color.RGBtoHSB(176, 226, 255, null); //standard color
-        getLinearRegression(0, 1, lowerSpeciesLimit, upperSpeciesLimit);
+        computeSpeciesAdjusting(minMaxOfSpeciesData[0], minMaxOfSpeciesData[1]);
     }
     
     /**
@@ -68,30 +66,24 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
      * @param r
      * @param g
      * @param b
-     * @param lowerSpeciesLimit
-     * @param upperSpeciesLimit
-     * @param lowerReactionLimit
-     * @param upperReactionLimit
+     * @param minMaxOfSpeciesData
+     * @param minMaxOfReactionsData
      */
     public ManipulatorOfNodeColor(SBML2GraphML graph, SBMLDocument document,
-            int r, int g, int b, double lowerSpeciesLimit,
-            double upperSpeciesLimit, double lowerReactionLimit,
-            double upperReactionLimit) {
-        super(graph, document, lowerReactionLimit, upperReactionLimit);
+            int r, int g, int b, double[] minMaxOfSpeciesData, double[] minMaxOfReactionsData) {
+        super(graph, document, minMaxOfReactionsData[0], minMaxOfReactionsData[1]);
         DEFAULT_NODE_SIZE = 30;
         HSBcolor = Color.RGBtoHSB(r, g, b, null);
-        getLinearRegression(0, 1, lowerSpeciesLimit, upperSpeciesLimit);
+        computeSpeciesAdjusting(minMaxOfSpeciesData[0], minMaxOfSpeciesData[1]);
     }
     
     /**
-     * Compute linear regression for given values. 
-     * @param minNodeSize
-     * @param maxNodeSize
-     * @param lowerDataLimit
-     * @param upperDataLimit
+     * Computes adjusting values for given limits.
+     * @param lowerSpeciesLimit
+     * @param upperSpeciesLimit
      */
-    private void getLinearRegression(double yMin, double yMax, double lowerDataLimit, double upperDataLimit){
-        double[] linearRegression = computeBIAS(lowerDataLimit, upperDataLimit, yMin, yMax);
+    private void computeSpeciesAdjusting(double lowerSpeciesLimit, double upperSpeciesLimit){
+        double[] linearRegression = computeBIAS(lowerSpeciesLimit, upperSpeciesLimit, 0, 1);
         m = linearRegression[0];
         c = linearRegression[1];
     }

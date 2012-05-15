@@ -31,6 +31,8 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
+import org.sbml.simulator.gui.graph.DynamicControlPanel.Items;
+
 /**
  * Controller class for {@link DynamicControlPanel}. It represents the
  * controller in MVC-pattern and controls any user generated event due to the
@@ -55,14 +57,14 @@ public class DynamicController implements ChangeListener, ActionListener,
      * Pointer to asociated {@link DynamicView}.
      */
     private DynamicView view;
-    
+
     /**
      * Constructs a new {@link DynamicController} with the corresponding
      * {@link DynamicView}.
      * 
      * @param view
      */
-    public DynamicController(DynamicView view){
+    public DynamicController(DynamicView view) {
         this.view = view;
     }
 
@@ -78,6 +80,7 @@ public class DynamicController implements ChangeListener, ActionListener,
 
     /**
      * Sets the corresponding {@link DynamicControlPanel}.
+     * 
      * @param controlPanel
      */
     public void setControlPanel(DynamicControlPanel controlPanel) {
@@ -98,7 +101,6 @@ public class DynamicController implements ChangeListener, ActionListener,
                     core.setPlayspeed(controlPanel.getSimulationSpeed());
                     core.play();
                     setPlayStatus();
-                    // TODO: enable button when play finished
                 } else if (e.getActionCommand().equals("PAUSE")) {
                     core.pausePlay();
                     setPauseStatus();
@@ -113,13 +115,13 @@ public class DynamicController implements ChangeListener, ActionListener,
                 view.updateGraph();
             }
         }
-        if(e.getSource() instanceof JRadioButton){
-            if(e.getActionCommand().equals("NODESIZE")){
+        if (e.getSource() instanceof JRadioButton) {
+            if (e.getActionCommand().equals("NODESIZE")) {
                 view.setGraphManipulator(0);
                 controlPanel.setNodecolorSelectionState(false);
                 controlPanel.setNodesizeSelectionState(true);
                 view.updateGraph();
-            }else if(e.getActionCommand().equals("NODECOLOR")){
+            } else if (e.getActionCommand().equals("NODECOLOR")) {
                 view.setGraphManipulator(1);
                 controlPanel.setNodesizeSelectionState(false);
                 controlPanel.setNodecolorSelectionState(true);
@@ -127,7 +129,7 @@ public class DynamicController implements ChangeListener, ActionListener,
             }
         }
     }
-    
+
     /**
      * Enables {@link DynamicControlPanel} elements accordant to play status.
      */
@@ -140,7 +142,7 @@ public class DynamicController implements ChangeListener, ActionListener,
         controlPanel.enableSimVeloSpin(false);
         controlPanel.enableVideo(false);
     }
-    
+
     /**
      * Enables {@link DynamicControlPanel} elements accordant to pause status.
      */
@@ -165,6 +167,7 @@ public class DynamicController implements ChangeListener, ActionListener,
         controlPanel.enableSimVeloSpin(true);
         controlPanel.enableVideo(true);
     }
+
     /*
      * (non-Javadoc)
      * 
@@ -191,19 +194,21 @@ public class DynamicController implements ChangeListener, ActionListener,
     @Override
     public void itemStateChanged(ItemEvent ie) {
         if (ie.getStateChange() == ItemEvent.SELECTED) {
-            controlPanel.setSimVeloCombo(ie.getItem());
+            controlPanel
+                    .setSimVeloCombo(Items.getItem(ie.getItem().toString()));
         }
     }
 
-    /* (non-Javadoc)
-     * @see javax.swing.event.TableModelListener#tableChanged(javax.swing.event.TableModelEvent)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.swing.event.TableModelListener#tableChanged(javax.swing.event.
+     * TableModelEvent)
      */
     @Override
     public void tableChanged(TableModelEvent e) {
-        // TODO each time a checkbox gets changed, this method is invoked two
-        // times BUG?
-        if (core != null) {
-            // System.out.println("tablechange");
+        if(core != null){
+            view.setGraphManipulator(controlPanel.getSelectedManipulator());
             view.updateGraph();
         }
     }

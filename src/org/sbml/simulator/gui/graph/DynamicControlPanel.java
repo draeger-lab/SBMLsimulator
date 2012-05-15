@@ -64,11 +64,13 @@ public class DynamicControlPanel extends JPanel{
 	 */
 	private static final transient Logger logger = Logger.getLogger(DynamicControlPanel.class.getName());
 	
-	/**
+    /**
      * Localization support.
      */
-  private static final transient ResourceBundle bundle = ResourceManager
-      .getBundle("org.sbml.simulator.locales.Simulator");
+    private static final transient ResourceBundle bundle = ResourceManager
+            .getBundle("org.sbml.simulator.locales.Simulator");
+
+    // TODO
 	
 	/**
 	 * List of action commands.
@@ -94,6 +96,55 @@ public class DynamicControlPanel extends JPanel{
 		    return bundle.getString(this.toString() + "_TOOLTIP");
 		}
 	}
+	
+	/**
+	 * List of Controlpanel objects.
+	 * @author Fabian Schwarzkopf
+	 * @version $Rev$
+	 */
+	public enum Items {
+	    FAST, NORMAL, SLOW, NODESIZE, NODECOLOR;
+	    
+	    /**
+	     * Returns localized name of this Item.
+	     * @return
+	     */
+        public String getName(){
+            return bundle.getString(this.toString());
+        }
+        
+        /**
+         * Returns speed setting for given item.
+         * @param item
+         * @return
+         */
+        public int getSpeed(Items item) {
+            if (item == FAST) {
+                return 5;
+            } else if (item == NORMAL) {
+                return 25;
+            } else if (item == SLOW) {
+                return 80;
+            }
+            return 0;
+        }
+        
+        /**
+         * Returns item to given string.
+         * @param item
+         * @return
+         */
+        public static Items getItem(String item) {
+            if (item.equals(bundle.getString("FAST"))) {
+                return FAST;
+            } else if (item.equals(bundle.getString("NORMAL"))) {
+                return NORMAL;
+            } else if (item.equals(bundle.getString("SLOW"))) {
+                return SLOW;
+            }
+            return NORMAL;
+        }
+    }
 	
 	/**
 	 * Pointer to related {@link DynamicCore}.
@@ -208,18 +259,18 @@ public class DynamicControlPanel extends JPanel{
 		
 		simVelolbl = new JLabel(bundle.getString("SIMULATIONSPEED"));
 		simVeloCombo = new JComboBox();
-		simVeloCombo.addItem(bundle.getString("FAST"));
-		simVeloCombo.addItem(bundle.getString("NORMAL"));
-		simVeloCombo.addItem(bundle.getString("SLOW"));
+		simVeloCombo.addItem(Items.FAST.getName());
+		simVeloCombo.addItem(Items.NORMAL.getName());
+		simVeloCombo.addItem(Items.SLOW.getName());
 		simVeloCombo.addItemListener(controller);		
 		simVeloSpin = new JSpinner();
-		setSimVeloCombo(bundle.getString("NORMAL")); //by default 'normal speed'
+		setSimVeloCombo(Items.NORMAL); //by default 'normal speed'
 	
-		nodesize = new JRadioButton(bundle.getString("NODESIZE"));
+		nodesize = new JRadioButton(Buttons.NODESIZE.getName());
 		nodesize.setActionCommand(Buttons.NODESIZE.toString());
 		nodesize.addActionListener(controller);
 		nodesize.setSelected(true);
-		nodecolor = new JRadioButton(bundle.getString("NODECOLOR"));
+		nodecolor = new JRadioButton(Buttons.NODECOLOR.getName());
 		nodecolor.setActionCommand(Buttons.NODECOLOR.toString());
 		nodecolor.addActionListener(controller);
 		JPanel manipulatorsPane = new JPanel();
@@ -275,15 +326,9 @@ public class DynamicControlPanel extends JPanel{
 	 * Setting the simulation speed by {@link JComboBox} items.
 	 * @param item
 	 */
-	public void setSimVeloCombo(Object item) {
-	    simVeloCombo.setSelectedItem(item);
-	    if (item.equals(bundle.getString("FAST"))) {
-	        simVeloSpin.setValue(45);
-	    } else if (item.equals(bundle.getString("NORMAL"))) {
-	        simVeloSpin.setValue(150);
-	    } else if (item.equals(bundle.getString("SLOW"))) {
-	        simVeloSpin.setValue(400);
-	    }
+	public void setSimVeloCombo(Items item) {
+	    simVeloCombo.setSelectedItem(item.getName());
+	    simVeloSpin.setValue(item.getSpeed(item));
 	}
 	
 	/**

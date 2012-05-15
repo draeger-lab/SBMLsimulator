@@ -46,22 +46,19 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
      * Slope of linear regression m, and yintercept c. 
      */
     private double m = 1, c= 0;
-
+    
     /**
      * Constructs a new nodesize-manipulator on the given graph. Minimum node
      * size and maximum node size per default.
      * @param graph
      * @param document
-     * @param lowerSpeciesLimit
-     * @param upperSpeciesLimit
-     * @param lowerReactionLimit
-     * @param upperReactionLimit
+     * @param minMaxOfSpecies
+     * @param minMaxOfReactions
      */
     public ManipulatorOfNodeSize(SBML2GraphML graph, SBMLDocument document,
-            double lowerSpeciesLimit, double upperSpeciesLimit,
-            double lowerReactionLimit, double upperReactionLimit) {
-        super(graph, document, lowerReactionLimit, upperReactionLimit);
-        getLinearRegression(minNodeSize, maxNodeSize, lowerSpeciesLimit, upperSpeciesLimit);
+            double[] minMaxOfSpecies, double[] minMaxOfReactions) {
+        super(graph, document, minMaxOfReactions[0], minMaxOfReactions[1]);
+        computeSpeciesAdjusting(minMaxOfSpecies[0], minMaxOfSpecies[1]);
     }
     
     /**
@@ -71,29 +68,24 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
      * @param document
      * @param minNodeSize
      * @param maxNodeSize
-     * @param lowerSpeciesLimit
-     * @param upperSpeciesLimit
-     * @param lowerReactionLimit
-     * @param upperReactionLimit
+     * @param minMaxOfSpecies
+     * @param minMaxOfReactions
      */
     public ManipulatorOfNodeSize(SBML2GraphML graph, SBMLDocument document,
-            double minNodeSize, double maxNodeSize, double lowerSpeciesLimit,
-            double upperSpeciesLimit, double lowerReactionLimit,
-            double upperReactionLimit) {
-        super(graph, document);
+            double minNodeSize, double maxNodeSize, double[] minMaxOfSpecies,
+            double[] minMaxOfReactions) {
+        super(graph, document, minMaxOfReactions[0], minMaxOfReactions[1]);
         this.minNodeSize = minNodeSize;
-        this.maxNodeSize = maxNodeSize;
-        getLinearRegression(minNodeSize, maxNodeSize, lowerSpeciesLimit, upperSpeciesLimit);
+        this.maxNodeSize = maxNodeSize;  
+        computeSpeciesAdjusting(minMaxOfSpecies[0], minMaxOfSpecies[1]);
     }
     
     /**
-     * Compute linear regression for given values. 
-     * @param minNodeSize
-     * @param maxNodeSize
+     * Computes adjusting values for given limits.
      * @param lowerDataLimit
      * @param upperDataLimit
      */
-    private void getLinearRegression(double minNodeSize, double maxNodeSize, double lowerDataLimit, double upperDataLimit){
+    private void computeSpeciesAdjusting(double lowerDataLimit, double upperDataLimit){
         double[] linearRegression = computeBIAS(lowerDataLimit, upperDataLimit, minNodeSize, maxNodeSize);
         m = linearRegression[0];
         c = linearRegression[1];

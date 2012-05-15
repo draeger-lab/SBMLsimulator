@@ -19,13 +19,16 @@ package org.sbml.simulator.gui.graph;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JSplitPane;
 import javax.swing.SwingWorker;
 
 import org.sbml.jsbml.Model;
+import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
+import org.sbml.jsbml.Species;
 import org.sbml.simulator.gui.LegendPanel;
 import org.simulator.math.odes.MultiTable;
 
@@ -145,14 +148,14 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
             case 0:
                 graphManipulator = new ManipulatorOfNodeSize(
                         graphPanel.getConverter(), document,
-                        core.getMinDataSpecies(), core.getMaxDataSpecies(),
-                        core.getMinDataReactions(), core.getMaxDataReactions());
+                        core.getMinMaxOfIDs(getSelectedSpecies()),
+                        core.getMinMaxOfIDs(getSelectedReactions()));
                 break;
             case 1:
                 graphManipulator = new ManipulatorOfNodeColor(
                         graphPanel.getConverter(), document,
-                        core.getMinDataSpecies(), core.getMaxDataSpecies(),
-                        core.getMinDataReactions(), core.getMaxDataReactions());
+                        core.getMinMaxOfIDs(getSelectedSpecies()),
+                        core.getMinMaxOfIDs(getSelectedReactions()));
                 break;
             }
         }
@@ -166,6 +169,36 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         if(core != null){
             updateGraph(currTime, currData);
         }
+    }
+    
+    /**
+     * Workaround to get selected species.
+     * There's no way of getting selected items?!
+     * @return
+     */
+    private String[] getSelectedSpecies(){
+        ArrayList<String> selectedSpecies = new ArrayList<String>();
+        for(Species s : document.getModel().getListOfSpecies()){
+            if(legend.getLegendTableModel().isSelected(s.getId())){
+                selectedSpecies.add(s.getId());
+            }
+        }
+        return selectedSpecies.toArray(new String[selectedSpecies.size()]);
+    }
+    
+    /**
+     * Workaround to get selected reactions.
+     * There's no way of getting selected items?!
+     * @return
+     */
+    private String[] getSelectedReactions(){
+        ArrayList<String> selectedReactions = new ArrayList<String>();
+        for(Reaction r : document.getModel().getListOfReactions()){
+            if(legend.getLegendTableModel().isSelected(r.getId())){
+                selectedReactions.add(r.getId());
+            }
+        }
+        return selectedReactions.toArray(new String[selectedReactions.size()]);
     }
 
     /*
@@ -246,7 +279,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
 
                     @Override
                     protected Void doInBackground() throws Exception{
-                        core.computeLimits(document);
+                        core.computeSpecificLimits(document);
                         return null;
                     }
 
