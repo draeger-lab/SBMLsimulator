@@ -1,0 +1,81 @@
+package org.sbml.simulator.math;
+
+import java.io.IOException;
+
+import org.sbml.simulator.io.CSVDataImporter;
+import org.simulator.math.odes.MultiTable;
+import org.simulator.math.odes.MultiTable.Block.Column;
+
+import de.zbit.io.csv.CSVWriter;
+
+import eva2.tools.math.interpolation.BasicDataSet;
+import eva2.tools.math.interpolation.InterpolationException;
+import eva2.tools.math.interpolation.SplineInterpolation;
+
+public class SplineCalculation {
+	/**
+	 * 
+	 * @param table
+	 * @param inBetweenTimePoints
+	 * @return
+	 */
+	public static MultiTable calculateSplineValues(MultiTable table, int inBetweenTimePoints) {
+		SplineInterpolation sp = null;
+		try {
+			sp = new SplineInterpolation();
+		} catch (InterpolationException e) {
+			e.printStackTrace();
+		}
+		double[] timePoints = new double[table.getTimePoints().length + (table.getTimePoints().length-1) * inBetweenTimePoints];
+		int index=0;
+		for(int i=1; i!=table.getTimePoints().length; i++) {
+			for(int j=0; j<=inBetweenTimePoints; j++) {
+				timePoints[index] = table.getTimePoint(i-1) + ((table.getTimePoint(i) - table.getTimePoint(i-1))/(inBetweenTimePoints + 1)) * j;
+				index++;
+			}
+		}
+		timePoints[timePoints.length-1] = table.getTimePoint(table.getTimePoints().length-1);
+		
+		double[][] data = new double[timePoints.length][table.getBlock(0).getColumnCount()];
+		MultiTable result = new MultiTable(timePoints, data, table.getBlock(0).getIdentifiers(),table.getBlock(0).getColumnNames());
+		for(int col=1; col!=table.getColumnCount(); col++) {
+			Column c = table.getColumn(col);
+			double[] values = new double[table.getRowCount()];
+			for(int row=0; row!=table.getRowCount(); row++) {
+				values[row]=c.getValue(row);
+			}
+			
+			BasicDataSet dataset = new BasicDataSet(table.getTimePoints(),values,"Time","Y");
+			try {
+				sp.setAbstractDataSet(dataset);
+			} catch (InterpolationException e1) {
+				e1.printStackTrace();
+			}
+			for(int row=0; row!=result.getRowCount(); row++) {
+				try {
+					result.setValueAt(sp.getY(result.getTimePoint(row)), row, col);
+				} catch (InterpolationException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return result;
+	}
+	
+	public static void main(String[] args) {
+		MultiTable input = null;
+		int inBetweenSteps=5;
+		try {
+			input = (new CSVDataImporter()).convert(args[0]);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		MultiTable output = calculateSplineValues(input, inBetweenSteps);
+		
+		try {
+			(new CSVWriter()).write(output, "\t", args[1]);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+}

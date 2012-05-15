@@ -145,14 +145,16 @@ public abstract class QualityMeasure implements Serializable {
 	public double distance(MultiTable x, MultiTable expected) {
 		MultiTable left = x;
 		MultiTable right = expected;
-		if(x.isSetTimePoints() && expected.isSetTimePoints()) {
-		  left = x.filter(expected.getTimePoints());
-		  right = expected.filter(x.getTimePoints());
-		} 
-	  
-		ArrayList<Double> distances= new ArrayList<Double>();
-		for (int i = 0; i < Math.min(left.getBlockCount(), right.getBlockCount()); i++) {
-			distances.addAll(getColumnDistances(left.getBlock(i), right.getBlock(i)));
+		if (x.isSetTimePoints() && expected.isSetTimePoints()) {
+			left = x.filter(expected.getTimePoints());
+			right = expected.filter(x.getTimePoints());
+		}
+
+		ArrayList<Double> distances = new ArrayList<Double>();
+		for (int i = 0; i < Math.min(left.getBlockCount(),
+				right.getBlockCount()); i++) {
+			distances.addAll(getColumnDistances(left.getBlock(i),
+					right.getBlock(i)));
 		}
 		return meanFunction.computeMean(distances);
 	}
