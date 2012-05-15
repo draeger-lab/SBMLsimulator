@@ -18,6 +18,8 @@
 package org.sbml.simulator.gui.graph;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.SwingWorker;
 
@@ -122,14 +124,10 @@ public class DynamicCore {
 	private double[] timePoints;
 	
 	/**
-	 * Lower/upper limit of species data in given {@link MultiTable} if computed.
-	 */
-	private double minDataSpecies, maxDataSpecies;
-	
-	/**
-	 * Lower/upper limit of reactions data in given {@link MultiTable} if computed.
-	 */
-	private double minDataReactions, maxDataReactions;
+     * After computation of Limits this HashMap saves to each species or
+     * reaction min and max data value.
+     */
+	private Map<String, double[]> id2MinMaxData = new HashMap<String, double[]>();
 	
 	/**
      * Current status of limits whether computed or not. Not computed by default
@@ -221,38 +219,6 @@ public class DynamicCore {
 	}
 	
 	/**
-	 * Get the lower limit of the data in simulation data.
-	 * @return lower limit if already computed by {@link computeLimits} otherwise null
-	 */
-	public double getMinDataSpecies(){
-	    return limitsComputed ? minDataSpecies : null;
-	}
-	
-	/**
-	 * Get the upper limit of the data in simulation data.
-     * @return upper limit if already computed by {@link computeLimits} otherwise null
-	 */
-	public double getMaxDataSpecies(){
-	    return limitsComputed ? maxDataSpecies : null;
-	}
-	
-	/**
-	 * Get the lower limit of the data in simulation data.
-	 * @return lower limit if already computed by computeLimits otherwise null
-	 */
-	public double getMinDataReactions(){
-	    return limitsComputed ? minDataReactions : null;
-	}
-	
-	/**
-	 * Get the upper limit of the data in simulation data.
-	 * @return upper limit if already computed by computeLimits otherwise null
-	 */
-	public double getMaxDataReactions(){
-	    return limitsComputed ? maxDataReactions : null;
-	}
-	
-	/**
 	 * Get the speed of cycling through all timepoints with the play method.
 	 * @return
 	 */
@@ -266,6 +232,35 @@ public class DynamicCore {
 	 */
 	public void setPlayspeed(int speed){
 	    playspeed = speed;
+	}
+	
+    /**
+     * If limits computed it returns a double array whose first element is the
+     * minimum data of the given ids, and second element is the maximum data of
+     * given ids. Otherwise null.
+     * 
+     * @param ids
+     * @return
+     */
+    public double[] getMinMaxOfIDs(String... ids) {
+        if (limitsComputed) {
+            double minData = Double.MAX_VALUE;
+            double maxData = Double.MIN_VALUE;
+            for (String id : ids) {
+                if (id2MinMaxData.containsKey(id)) {
+                    double[] dataOfID = id2MinMaxData.get(id);
+                    if (dataOfID[0] < minData) {
+                        minData = dataOfID[0];
+                    }
+                    if (dataOfID[1] > maxData) {
+                        maxData = dataOfID[1];
+                    }
+                }
+            }
+            return new double[] { minData, maxData };
+        } else {
+            return null;
+        }
 	}
 	
 	/**
@@ -343,41 +338,46 @@ public class DynamicCore {
 	}
 	
 	/**
-	 * Computation of min values in and max values in the simulation data. O(n^2).
-	 * @param document needed to distinguish between reactions and species.
+	 * Computation of a Hashmap which saves for all species and references max/min values. O(n^2).
+	 * @param document document needed to distinguish between reactions and species.
 	 */
-	public void computeLimits(SBMLDocument document){
-	    //init
-	    maxDataSpecies = Double.MIN_VALUE;
-	    maxDataReactions = Double.MIN_VALUE;
-	    minDataSpecies = Double.MAX_VALUE;
-	    minDataReactions = Double.MAX_VALUE;
-	    
-	    //compute
-	    for (int i = 1; i < data.getColumnCount(); i++){
-	        /*
-	         * just look through species/reactions columns in particular
-	         */
-            if (document.getModel().getSpecies(data.getColumnIdentifier(i)) != null){
+    public void computeSpecificLimits(SBMLDocument document) {
+        for (int i = 1; i < data.getColumnCount(); i++) {
+            double maxData = Double.MIN_VALUE;
+            double minData = Double.MAX_VALUE;
+
+            /*
+             * only look through species/reactions columns in particular
+             */
+            if (document.getModel().getSpecies(data.getColumnIdentifier(i)) != null) {
                 for (int j = 0; j < data.getRowCount(); j++) {
                     double tmpValue = data.getValueAt(j, i);
-                    if (tmpValue < minDataSpecies) {
-                        minDataSpecies = tmpValue;
-                    } else if (tmpValue > maxDataSpecies) {
-                        maxDataSpecies = tmpValue;
+                    if (tmpValue < minData) {
+                        minData = tmpValue;
+                    } 
+                    if (tmpValue > maxData) {
+                        maxData = tmpValue;
                     }
                 }
-            } else if (document.getModel().getReaction(data.getColumnIdentifier(i)) != null){
+                // min/max saved for this specie
+                id2MinMaxData.put(data.getColumnIdentifier(i), new double[] {
+                        minData, maxData });
+            } else if (document.getModel().getReaction(
+                    data.getColumnIdentifier(i)) != null) {
                 for (int j = 0; j < data.getRowCount(); j++) {
                     double tmpValue = data.getValueAt(j, i);
-                    if (tmpValue < minDataReactions) {
-                        minDataReactions = tmpValue;
-                    } else if (tmpValue > maxDataReactions) {
-                        maxDataReactions = tmpValue;
+                    if (tmpValue < minData) {
+                        minData = tmpValue;
+                    } 
+                    if (tmpValue > maxData) {
+                        maxData = tmpValue;
                     }
                 }
+                // min/max saved for this reaction
+                id2MinMaxData.put(data.getColumnIdentifier(i), new double[] {
+                        minData, maxData });
             }
         }
-	    limitsComputed = true;
-	}
+        limitsComputed = true;
+    }
 }

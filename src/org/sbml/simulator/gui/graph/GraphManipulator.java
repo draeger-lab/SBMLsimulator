@@ -50,4 +50,5 @@ public interface GraphManipulator {
      * @param id
      */
     public void revertChanges(String id);    
+   
 }

@@ -61,7 +61,7 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
     /**
      * Maximum line width for default DynamicChangeOfReaction.
      */
-    private float maxLineWidth = 8;
+    private float maxLineWidth = 6;
     
     /**
      * Minimum line width for default DynamicChangeOfReaction.
@@ -114,8 +114,17 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
          * Take absolute higher limit as xMax and 0 as xLow for regression.
          * Eventually reactions will end up in equillibrium.
          */
-        double xHigh = Math.abs(minDataReaction) > Math.abs(maxDataReaction) ? Math
-                .abs(minDataReaction) : Math.abs(maxDataReaction);
+        computeReactionAdjusting(minDataReaction, minDataReaction);
+    }
+    
+    /**
+     * Computes the adjusting values for given limits.
+     * @param lowerReactionLimit
+     * @param upperReactionLimit
+     */
+    private void computeReactionAdjusting(double lowerReactionLimit, double upperReactionLimit){
+        double xHigh = Math.abs(lowerReactionLimit) > Math.abs(upperReactionLimit) ? Math
+                .abs(lowerReactionLimit) : Math.abs(upperReactionLimit);
         double[] linearRegression = computeBIAS(0, xHigh, minLineWidth, maxLineWidth);
         m = linearRegression[0];
         c = linearRegression[1];
@@ -125,8 +134,10 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
      * Linear regression through two given points (xLowerLimit, yLowerLimit) and
      * (xUpperLimit, yUpperLimit).
      * 
-     * @param lowerDataLimit
-     * @param upperDataLimit
+     * @param xLowerLimit
+     * @param xUpperLimit
+     * @param yLowerLimit
+     * @param yUpperLimit
      * @return first index of array represents the slope, second index the
      *         yintercept.
      */

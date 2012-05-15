@@ -43,6 +43,27 @@
   <entry key="ADDITIONAL_COLUMNS_ARE_IGNORED_TOOLTIP">Die Datei enthält einige Elemente, die kein zugehöriges Gegenstück im gegebenen Modell besitzen. Diese Elemente werden nicht im Diagramm erscheinen und in der weiteren Analyse ignoriert werden</entry>
   <entry key="TIME">Zeit</entry>
   
+   <!-- DynamicControlPanel -->
+  
+  <entry key="PLAY">Abspielen</entry>
+  <entry key="PLAY_TOOLTIP">Spielt die dynamische Visualisierung ab.</entry>
+  <entry key="PAUSE">Pause</entry>
+  <entry key="PAUSE_TOOLTIP">Pausiert die dynamische Visualisierung.</entry>
+  <entry key="STOP">Stop</entry>
+  <entry key="STOP_TOOLTIP">Stoppt die dynamische Visualisierung.</entry>
+  <entry key="TOVIDEO">Video</entry>
+  <entry key="TOVIDEO_TOOLTIP">Speichert die dynamische Visualisierung als Video.</entry>
+  <entry key="LABELS">Beschriftung</entry>
+  <entry key="FAST">Schnell</entry>
+  <entry key="NORMAL">Normal</entry>
+  <entry key="SLOW">Langsam</entry>
+  <entry key="FALSE_INPUT">Eingabe kein positiver Integer.</entry>
+  <entry key="TIMEPOINT">Zeitpunkt</entry>
+  <entry key="SIMULATIONSPEED">Simulationsgeschwindigkeit</entry>
+  <entry key="NODESIZE">Knotengröße</entry>
+  <entry key="NODECOLOR">Knotenfarbe</entry>
+  <entry key="MANIPULATORCHOOSER">Visualisierung</entry>
+  
   <!-- EstimationOptions -->
     
   <entry key="EstimationOptions">Schätzverfahren</entry>
