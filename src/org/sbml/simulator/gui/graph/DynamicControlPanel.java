@@ -174,8 +174,10 @@ public class DynamicControlPanel extends JPanel{
 	private JLabel simVelolbl;
 	private JComboBox simVeloCombo;
 	private JSpinner simVeloSpin;
-	private JLabel labelslbl;
-	private JCheckBox labelsCB;
+	private JLabel nodeLabelslbl;
+	private JCheckBox nodeLabelsCB;
+	private JLabel reactionLabelslbl;
+	private JCheckBox reactionLabelsCB;
 	private JRadioButton nodesize;
 	private JRadioButton nodecolor;
 	
@@ -220,7 +222,7 @@ public class DynamicControlPanel extends JPanel{
 		 */
 		controller.setCore(core);
 		setTimepoint(core.getCurrTimepoint());
-		Component[] elements = {play, video, searchBar, simVeloCombo, simVeloSpin, labelsCB, nodesize, nodecolor};
+		Component[] elements = {play, video, searchBar, simVeloCombo, simVeloSpin, nodeLabelsCB, reactionLabelsCB, nodesize, nodecolor};
 		GUITools.setEnabledForAll(true, elements);
 	}
 	
@@ -246,9 +248,12 @@ public class DynamicControlPanel extends JPanel{
 		searchBar.setPaintTicks(true);
 		searchBar.setValue(0);
 		
-		labelslbl = new JLabel(bundle.getString("LABELS"));
-		labelsCB = new JCheckBox();
-		labelsCB.addActionListener(controller);
+		nodeLabelslbl = new JLabel(bundle.getString("NODELABELS"));
+		nodeLabelsCB = new JCheckBox();
+		nodeLabelsCB.addActionListener(controller);
+		reactionLabelslbl = new JLabel(bundle.getString("REACTIONLABELS")); //TODO localization
+		reactionLabelsCB = new JCheckBox();
+		reactionLabelsCB.addActionListener(controller);
 		
 		searchBar.addChangeListener(controller);
 		timelbl = new JLabel(MessageFormat.format("{0}: {1}", new Object[]{bundle.getString("TIMEPOINT"), "N/A"}));
@@ -289,11 +294,13 @@ public class DynamicControlPanel extends JPanel{
 		addComponent(gbl, simVelolbl,	0, 2, 4, 1, GridBagConstraints.WEST,	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, simVeloCombo,	3, 2, 1, 1, GridBagConstraints.CENTER,  GridBagConstraints.HORIZONTAL,	1, 0, new Insets(2,2,2,2));
 		addComponent(gbl, simVeloSpin,	4, 2, 1, 1, GridBagConstraints.EAST, 	GridBagConstraints.BOTH, 		0, 0, new Insets(2,2,2,2));
-		addComponent(gbl, labelslbl,    5, 2, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.NONE,        0, 0, new Insets(2,8,2,0));
-		addComponent(gbl, labelsCB,     6, 2, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, reactionLabelslbl,5, 2, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.NONE,        0, 0, new Insets(2,8,2,0));
+        addComponent(gbl, reactionLabelsCB, 6, 2, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, nodeLabelslbl,    5, 1, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.NONE,        0, 0, new Insets(2,8,2,0));
+		addComponent(gbl, nodeLabelsCB,     6, 1, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, manipulatorsPane, 7, 0, 3, 3, GridBagConstraints.CENTER,  GridBagConstraints.BOTH,        0, 0, new Insets(2,2,2,2));
 
-		Component[] elements = {play, pause, stop, video, searchBar, simVeloCombo, simVeloSpin, labelsCB, nodesize, nodecolor};
+		Component[] elements = {play, pause, stop, video, searchBar, simVeloCombo, simVeloSpin, nodeLabelsCB, reactionLabelsCB, nodesize, nodecolor};
 		GUITools.setEnabledForAll(false, elements);
 		logger.fine("DynamicControlPanel initialized.");
 	}
@@ -391,7 +398,7 @@ public class DynamicControlPanel extends JPanel{
      * @param bool
      */
 	public void enableLabelsCB(boolean bool) {
-	    labelsCB.setEnabled(bool);
+	    nodeLabelsCB.setEnabled(bool);
 	}
 	
 	/**
@@ -404,12 +411,20 @@ public class DynamicControlPanel extends JPanel{
 	}
 	
 	/**
-	 * Returns selection state of labels-checkbox.
-	 * @return selections state of labels-checkbox
+	 * Returns selection state of nodelabels-checkbox.
+	 * @return selections state of nodelabels-checkbox
 	 */
-	public boolean getSelectionStateOfLabels() {
-	    return labelsCB.isSelected();
+	public boolean getSelectionStateOfNodeLabels() {
+	    return nodeLabelsCB.isSelected();
 	}
+	
+	/**
+     * Returns selection state of reactionlabels-checkbox.
+     * @return selections state of reactionlabels-checkbox
+     */
+    public boolean getSelectionStateOfReactionLabels() {
+        return reactionLabelsCB.isSelected();
+    }
 	
 	/**
 	 * Sets the selection state of the nodesize-radiobutton.

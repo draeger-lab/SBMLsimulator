@@ -43,7 +43,7 @@ public interface GraphManipulator {
      * @param id
      * @param value
      */
-    public void dynamicChangeOfReaction(String id, double value);
+    public void dynamicChangeOfReaction(String id, double value, boolean labels);
     
     /**
      * Reverts the changes for the given id.

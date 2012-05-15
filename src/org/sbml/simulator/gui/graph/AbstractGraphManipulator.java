@@ -154,8 +154,17 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
      * @param value
      */
     protected void labelNode(NodeRealizer nr, String id, double value){
+        String name = "";
+        if(document.getModel().getSpecies(id) != null){
+            name = document.getModel().getSpecies(id).isSetName() ? document
+                    .getModel().getSpecies(id).getName() : id;
+        }else if(document.getModel().getReaction(id) != null){
+            name = document.getModel().getReaction(id).isSetName() ? document
+                    .getModel().getReaction(id).getName() : id;
+        }
+        
         String label = MessageFormat.format("{0}: {1,number,0.0000}",
-                new Object[] { document.getModel().getSpecies(id).isSetName() ? document.getModel().getSpecies(id).getName() : id , value });
+                new Object[] { name , value });
         
         if (nr.labelCount() > 1) {
             nr.getLabel(nr.labelCount() - 1).setText(label);
@@ -168,15 +177,11 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
         }
     }
     
-    protected void labelReaction(){
-        //TODO
-    }
-    
     /* (non-Javadoc)
      * @see org.sbml.simulator.gui.graph.GraphManipulator#dynamicChangeOfReaction(java.lang.String, double)
      */
     @Override
-    public void dynamicChangeOfReaction(String id, double value) {
+    public void dynamicChangeOfReaction(String id, double value, boolean labels) {
         LinkedList<Edge> edgeList = graph.getId2edge()
                 .get(id);
         
@@ -231,6 +236,18 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
                 }
             }
         }
+        //TODO labels
+        /*
+         * Label Node with ID and real value at this timepoint. Last label will
+         * be treated as dynamic label
+         */
+        NodeRealizer nr = graph.getSimpleGraph().getRealizer(reactionID2reactionNode.get(id));
+        if (labels) {
+            labelNode(nr, id, value);
+        } else if (nr.labelCount() > 1) {
+            // labels switched off, therefore remove them, if there are any
+            nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
+        }
         graph.getSimpleGraph().updateViews();
     }
     
@@ -271,6 +288,12 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
                         er.setTargetArrow(Arrow.STANDARD);
                     }
                 }
+            }
+            
+            NodeRealizer nr = graph.getSimpleGraph().getRealizer(reactionID2reactionNode.get(id));
+            if (nr.labelCount() > 1) {
+                // if not selected disable label
+                nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
             }
         }
         graph.getSimpleGraph().updateViews();
