@@ -25,7 +25,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JSplitPane;
 import javax.swing.SwingWorker;
 
-import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.Species;
@@ -87,11 +86,6 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      * Used {@link SBMLDocument}.
      */
     private SBMLDocument document;
-
-    /**
-     * SBMLModel of this document.
-     */
-    private Model sbmlModel;
      
      /**
       * Saves the currently displayed time.
@@ -132,7 +126,6 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         setResizeWeight(1.0); //control panel has fixed size
         
         this.document = document;
-        sbmlModel = document.getModel();
     }
     
     /**
@@ -220,22 +213,22 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                 String id = updateThem.getColumnIdentifier(i);
                 if (legend.getLegendTableModel().isSelected(id)) {
                     // only display dynamic features when selected
-                    if (sbmlModel.getSpecies(id) != null) {
+                    if (document.getModel().getSpecies(id) != null) {
                         /*
                          * There's just one row because the core passes only the
                          * necessary data for the particular timepoint
                          */
                         graphManipulator.dynamicChangeOfNode(id,
                                 updateThem.getValueAt(0, i),
-                                controlPanel.getSelectionStateOfLabels());
-
-                    } else if (sbmlModel.getReaction(id) != null) {
+                                controlPanel.getSelectionStateOfNodeLabels());
+                    } else if (document.getModel().getReaction(id) != null) {
                         if (timepoint == 0.0){
                             //there's no initial reaction data.
                             graphManipulator.revertChanges(id);
                         } else {
                             graphManipulator.dynamicChangeOfReaction(id,
-                                    updateThem.getValueAt(0, i));
+                                    updateThem.getValueAt(0, i),
+                                    controlPanel.getSelectionStateOfReactionLabels());
                         }
                     }
                 } else {
@@ -289,6 +282,8 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                     @Override
                     protected void done() {
                         super.done();
+                        legend.getLegendTableModel().setSelected(Species.class, true);
+                        legend.getLegendTableModel().setSelected(Reaction.class, true);
                         setGraphManipulator(controlPanel.getSelectedManipulator()); 
                         //activate controlpanel after computation of limits
                         controlPanel.setCore(core);

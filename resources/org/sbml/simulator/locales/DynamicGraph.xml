@@ -19,7 +19,8 @@
   <entry key="STOP_TOOLTIP">Stop the dynamic visualization.</entry>
   <entry key="TOVIDEO">Video</entry>
   <entry key="TOVIDEO_TOOLTIP">Save the dynamic visualization as a video.</entry>
-  <entry key="LABELS">Labels</entry>
+  <entry key="NODELABELS">Nodelabels</entry>
+  <entry key="REACTIONLABELS">Reactionlabels</entry>
   <entry key="FAST">Fast</entry>
   <entry key="NORMAL">Normal</entry>
   <entry key="SLOW">Slow</entry>
