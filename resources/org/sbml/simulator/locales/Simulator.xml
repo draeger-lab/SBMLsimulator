@@ -41,29 +41,7 @@
   <entry key="FILE_NOT_CORRECTLY_FORMATTED_TOOLTIP">Cannot read this format, because no column identifiers are provided.</entry>
   <entry key="ADDITIONAL_COLUMNS_ARE_IGNORED">Some elements are ignored</entry>
   <entry key="ADDITIONAL_COLUMNS_ARE_IGNORED_TOOLTIP">The data file contains some elements that do not have a counterpart in the given model. These elements will not occur in the plot and are ignored in the analysis.</entry>
-  <entry key="TIME">Time</entry>
-  
-  <!-- DynamicControlPanel -->
-  
-  <entry key="PLAY">Play</entry>
-  <entry key="PLAY_TOOLTIP">Start the dynamic visualization.</entry>
-  <entry key="PAUSE">Pause</entry>
-  <entry key="PAUSE_TOOLTIP">Pause the dynamic visualization.</entry>
-  <entry key="STOP">Stop</entry>
-  <entry key="STOP_TOOLTIP">Stop the dynamic visualization.</entry>
-  <entry key="TOVIDEO">Video</entry>
-  <entry key="TOVIDEO_TOOLTIP">Save the dynamic visualization as a video.</entry>
-  <entry key="LABELS">Labels</entry>
-  <entry key="FAST">Fast</entry>
-  <entry key="NORMAL">Normal</entry>
-  <entry key="SLOW">Slow</entry>
-  <entry key="FALSE_INPUT">Input not a positive integer.</entry>
-  <entry key="TIMEPOINT">Timepoint</entry>
-  <entry key="SIMULATIONSPEED">Simulationspeed</entry>
-  <entry key="NODESIZE">Nodesize</entry>
-  <entry key="NODECOLOR">Nodecolor</entry>
-  <entry key="MANIPULATORCHOOSER">Visualization</entry>
-  
+  <entry key="TIME">Time</entry>  
   
   <!-- EstimationOptions -->
     
