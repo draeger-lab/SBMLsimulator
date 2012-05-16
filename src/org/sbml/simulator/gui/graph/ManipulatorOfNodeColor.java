@@ -33,10 +33,11 @@ import de.zbit.graph.io.SBML2GraphML;
  * @version $Rev$
  */
 public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
+    
     /**
-     * Field for the color.
+     * Field for the first color (high concentration) and second color (low concentration).
      */
-    private float[] HSBcolor;
+    private int[] RGBcolor1, RGBcolor2;
     
     /**
      * Slope of linear regression m, and yintercept c.
@@ -44,7 +45,9 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
     private double m, c;
     
     /**
-     * Constructs node-color manipulator with a standard color.
+     * Constructs node-color manipulator with default gradient red (high) ->
+     * blue (low).
+     * 
      * @param graph
      * @param document
      * @param minMaxOfSpeciesData
@@ -55,25 +58,27 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
             double[] minMaxOfReactionsData) {
         super(graph, document, minMaxOfReactionsData[0], minMaxOfReactionsData[1]);
         DEFAULT_NODE_SIZE = 30;
-        HSBcolor = Color.RGBtoHSB(176, 226, 255, null); //standard color
+        RGBcolor1 = new int[]{255, 0, 0};
+        RGBcolor2 = new int[]{0, 0, 255};
         computeSpeciesAdjusting(minMaxOfSpeciesData[0], minMaxOfSpeciesData[1]);
     }
     
     /**
-     * Constructs node-color manipulator with the given RGB color.
+     * Constructs node-color manipulator with the given RGB colors as color1 ->
+     * color2.
      * @param graph
      * @param document
-     * @param r
-     * @param g
-     * @param b
+     * @param color1
+     * @param color2
      * @param minMaxOfSpeciesData
      * @param minMaxOfReactionsData
      */
     public ManipulatorOfNodeColor(SBML2GraphML graph, SBMLDocument document,
-            int r, int g, int b, double[] minMaxOfSpeciesData, double[] minMaxOfReactionsData) {
+            int[] color1, int[] color2, double[] minMaxOfSpeciesData, double[] minMaxOfReactionsData) {
         super(graph, document, minMaxOfReactionsData[0], minMaxOfReactionsData[1]);
         DEFAULT_NODE_SIZE = 30;
-        HSBcolor = Color.RGBtoHSB(r, g, b, null);
+        RGBcolor1 = color1;
+        RGBcolor2 = color2;
         computeSpeciesAdjusting(minMaxOfSpeciesData[0], minMaxOfSpeciesData[1]);
     }
     
@@ -87,6 +92,22 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
         m = linearRegression[0];
         c = linearRegression[1];
     }
+    
+    /**
+     * Linear interpolation over two internally stored colors.
+     * @param percent double between 0 and 1
+     * @return color of the linear interpolation, null on false input.
+     */
+    private int[] linearColorInterpolation(double percent){
+        int[] outcolor = {0, 0, 0};
+        if(percent >= 0 && percent <= 1){
+            for(int i = 0; i < outcolor.length; i++){
+                outcolor[i] = (int)(RGBcolor1[i] * percent + RGBcolor2[i] * (1-percent));
+            }
+            return outcolor;
+        }
+        return null;
+    }
 
     /* (non-Javadoc)
      * @see org.sbml.simulator.gui.graph.GraphManipulator#dynamicChangeOfNode(java.lang.String, double, boolean)
@@ -96,8 +117,8 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
         NodeRealizer nr = graph.getSimpleGraph()
                 .getRealizer(graph.getId2node().get(id));
         nr.setSize(DEFAULT_NODE_SIZE, DEFAULT_NODE_SIZE); //standard node size
-        Color color = new Color(Color.HSBtoRGB(HSBcolor[0], (float)(value*m+c), HSBcolor[2]));
-        nr.setFillColor(color);
+        int[] RGBinterpolated = linearColorInterpolation(value*m+c);
+        nr.setFillColor(new Color(RGBinterpolated[0], RGBinterpolated[1], RGBinterpolated[2]));
         
         /*
          * Label Node with ID and real value at this timepoint. Last label will

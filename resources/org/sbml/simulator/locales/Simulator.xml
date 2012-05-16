@@ -61,9 +61,38 @@
   <entry key="FALSE_INPUT">Input not a positive integer.</entry>
   <entry key="TIMEPOINT">Timepoint</entry>
   <entry key="SIMULATIONSPEED">Simulationspeed</entry>
-  <entry key="NODESIZE">Nodesize</entry>
-  <entry key="NODECOLOR">Nodecolor</entry>
+  <entry key="NODESIZE">Node size</entry>
+  <entry key="NODECOLOR">Node color</entry>
   <entry key="MANIPULATORCHOOSER">Visualization</entry>  
+  
+  <!-- GraphOptions TODO: move-->
+  <entry key="GraphOptions">Network</entry>
+  <entry key="MIN_NODE_SIZE">Minimum node size</entry>
+  <entry key="MIN_NODE_SIZE_TOOLTIP">In case of dynamic change of node size, this determines the minimum node size.</entry>
+  <entry key="MAX_NODE_SIZE">Maximum node size</entry>
+  <entry key="MAX_NODE_SIZE_TOOLTIP">In case of dynamic change of node size, this determines the maximum node size.</entry>
+  <entry key="NODESIZE_GROUP">Node size</entry>
+  <entry key="NODESIZE_GROUP_TOOLTIP">Options for the dynamic change of node size.</entry>
+  <entry key="NODECOLOR_GROUP">Node color</entry>
+  <entry key="NODECOLOR_GROUP_TOOLTIP">Options for the dynamic change of node color.</entry>
+  <entry key="REACTION_GROUP">Reactions</entry>
+  <entry key="REACTION_GROUP_TOOLTIP">Options for the dynamic change of reactions.</entry>
+  <entry key="COLOR1">High concentration</entry>
+  <entry key="COLOR1_TOOLTIP">In case of dynamic change of node color, this determines the color for high concentration.</entry>
+  <entry key="COLOR2">Low concentration</entry>
+  <entry key="COLOR2_TOOLTIP">In case of dynamic change of node color, this determines the color for low concentration.</entry>
+  <entry key="MIN_LINE_WIDTH">Minimum line width</entry>
+  <entry key="MIN_LINE_WIDTH_TOOLTIP">Determines the minimum line width of dynamic reaction visualization.</entry> 
+  <entry key="MAX_LINE_WIDTH">Maximum line width</entry>
+  <entry key="MAX_LINE_WIDTH_TOOLTIP">Determines the maximum line width of dynamic reaction visualization.</entry>
+  <entry key="SHOW_NODE_LABELS">Node labels</entry>
+  <entry key="SHOW_NODE_LABELS_TOOLTIP">Enables/Disables node labels.</entry>
+  <entry key="SHOW_REACTION_LABELS">Reaction labels</entry>
+  <entry key="SHOW_REACTION_LABELS_TOOLTIP">Enables/Disables reaction labels.</entry>
+  <entry key="GRAPH_LABELS">Labeling</entry>
+  <entry key="GRAPH_LABELS_TOOLTIP">Enables/Disables labels.</entry>  
+   
+  
   
   <!-- EstimationOptions -->
     

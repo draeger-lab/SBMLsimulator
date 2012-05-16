@@ -65,6 +65,34 @@
   <entry key="NODECOLOR">Knotenfarbe</entry>
   <entry key="MANIPULATORCHOOSER">Visualisierung</entry>
   
+  <!-- GraphOptions TODO: move-->
+  <entry key="GraphOptions">Netzwerk</entry>
+  <entry key="MIN_NODE_SIZE">Minimale Knotengröße</entry>
+  <entry key="MIN_NODE_SIZE_TOOLTIP">Bei dynamischer Änderung der Knotengröße, definiert dies die minimale Knotengröße.</entry>
+  <entry key="MAX_NODE_SIZE">Maximale Knotengröße</entry>
+  <entry key="MAX_NODE_SIZE_TOOLTIP">Bei dynamischer Änderung der Knotengröße, definiert dies die maximale Knotengröße.</entry>
+  <entry key="NODESIZE_GROUP">Knotengröße</entry>
+  <entry key="NODESIZE_GROUP_TOOLTIP">Einstellungen für die dynamische Änderung der Knotengröße.</entry>
+  <entry key="NODECOLOR_GROUP">Knotenfarbe</entry>
+  <entry key="NODECOLOR_GROUP_TOOLTIP">Einstellungen für die dynamische Änderung der Knotenfarbe.</entry>
+  <entry key="REACTION_GROUP">Reaktionen</entry>
+  <entry key="REACTION_GROUP_TOOLTIP">Einstellungen für die dynamische Änderung der Reaktionen.</entry>
+  <entry key="COLOR1">Hohe Konzentration</entry>
+  <entry key="COLOR1_TOOLTIP">Bei dynamischer Änderung der Knotenfarbe, definiert dies die Farbe für hohe Konzentration.</entry>
+  <entry key="COLOR2">Niedrige Konzentration</entry>
+  <entry key="COLOR2_TOOLTIP">Bei dynamischer Änderung der Knotenfarbe, definiert dies die Farbe für niedrige Konzentration.</entry>
+  <entry key="MIN_LINE_WIDTH">Minimale Linienbreite</entry>
+  <entry key="MIN_LINE_WIDTH_TOOLTIP">Definiert die minimale Linienbreite der dynamischen Visualisierung von Reaktionen.</entry>    
+  <entry key="MAX_LINE_WIDTH">Maximale Linienbreite</entry>
+  <entry key="MAX_LINE_WIDTH_TOOLTIP">Definiert die maximale Linienbreite der dynamischen Visualisierung von Reaktionen.</entry>
+  <entry key="SHOW_NODE_LABELS">Knotenbeschriftung</entry>
+  <entry key="SHOW_NODE_LABELS_TOOLTIP">Aktiviert/Deaktiviert die Knotenbeschriftung.</entry>
+  <entry key="SHOW_REACTION_LABELS">Reaktionenbeschriftung</entry>
+  <entry key="SHOW_REACTION_LABELS_TOOLTIP">Aktiviert/Deaktiviert die Reaktionenbeschriftung.</entry>  
+  <entry key="GRAPH_LABELS">Beschriftung</entry>
+  <entry key="GRAPH_LABELS_TOOLTIP">Aktiviert/Deaktiviert die Beschriftungen.</entry>
+  
+  
   <!-- EstimationOptions -->
     
   <entry key="EstimationOptions">Schätzverfahren</entry>

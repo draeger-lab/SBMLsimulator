@@ -21,6 +21,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.prefs.PreferenceChangeEvent;
+import java.util.prefs.PreferenceChangeListener;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -42,7 +44,7 @@ import org.sbml.simulator.gui.graph.DynamicControlPanel.Items;
  * @version $Rev$
  */
 public class DynamicController implements ChangeListener, ActionListener,
-        ItemListener, TableModelListener {
+        ItemListener, TableModelListener, PreferenceChangeListener {
     /**
      * Pointer to associated {@link DynamicCore}.
      */
@@ -211,6 +213,15 @@ public class DynamicController implements ChangeListener, ActionListener,
             view.setGraphManipulator(controlPanel.getSelectedManipulator());
             view.updateGraph();
         }
+    }
+
+    /* (non-Javadoc)
+     * @see java.util.prefs.PreferenceChangeListener#preferenceChange(java.util.prefs.PreferenceChangeEvent)
+     */
+    @Override
+    public void preferenceChange(PreferenceChangeEvent evt) {
+        //TODO
+        System.out.println(evt.getKey());
     }
 
 }

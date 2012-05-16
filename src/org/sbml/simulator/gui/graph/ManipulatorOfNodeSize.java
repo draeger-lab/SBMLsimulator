@@ -63,7 +63,9 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
     
     /**
      * Constructs a new nodesize-manipulator on the given graph. Minimum node
-     * size and maximum node size as given.
+     * size and maximum node size as given. If minimum node size greater than
+     * maximum node size, default values will be used
+     * 
      * @param graph
      * @param document
      * @param minNodeSize
@@ -75,8 +77,10 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
             double minNodeSize, double maxNodeSize, double[] minMaxOfSpecies,
             double[] minMaxOfReactions) {
         super(graph, document, minMaxOfReactions[0], minMaxOfReactions[1]);
-        this.minNodeSize = minNodeSize;
-        this.maxNodeSize = maxNodeSize;  
+        if (minNodeSize < maxNodeSize) {
+            this.minNodeSize = minNodeSize;
+            this.maxNodeSize = maxNodeSize;
+        }
         computeSpeciesAdjusting(minMaxOfSpecies[0], minMaxOfSpecies[1]);
     }
     
