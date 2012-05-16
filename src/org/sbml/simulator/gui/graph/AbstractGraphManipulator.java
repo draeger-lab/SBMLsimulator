@@ -184,7 +184,8 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
     public void dynamicChangeOfReaction(String id, double value, boolean labels) {
         LinkedList<Edge> edgeList = graph.getId2edge()
                 .get(id);
-        
+        NodeRealizer nr = graph.getSimpleGraph().getRealizer(reactionID2reactionNode.get(id));
+    
         for(Edge e : edgeList){
             EdgeRealizer er = graph.getSimpleGraph().getRealizer(e);
 
@@ -236,12 +237,10 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
                 }
             }
         }
-        //TODO labels
         /*
          * Label Node with ID and real value at this timepoint. Last label will
          * be treated as dynamic label
          */
-        NodeRealizer nr = graph.getSimpleGraph().getRealizer(reactionID2reactionNode.get(id));
         if (labels) {
             labelNode(nr, id, value);
         } else if (nr.labelCount() > 1) {

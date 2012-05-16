@@ -155,6 +155,14 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     }
     
     /**
+     * Returns the registered {@link DynamicController}.
+     * @return {@link DynamicController} or null
+     */
+    public DynamicController getDynamicController(){
+        return controller != null ? controller : null; 
+    }
+    
+    /**
      * Updates the displayed graph with respect to the user chosen settings
      * (i.e. turning on/off labels).
      */

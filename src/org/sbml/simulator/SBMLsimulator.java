@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.simulator.gui.SimulatorUI;
+import org.sbml.simulator.gui.graph.GraphOptions;
 import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.simulator.io.SimulatorIOOptions;
 import org.sbml.simulator.math.QualityMeasure;
@@ -277,6 +278,7 @@ public class SBMLsimulator extends Launcher {
 		defAndKeys.add(SimulationOptions.class);
 		defAndKeys.add(EstimationOptions.class);
 		defAndKeys.add(PlotOptions.class);
+		defAndKeys.add(GraphOptions.class);
 		return defAndKeys;
 	}
 
