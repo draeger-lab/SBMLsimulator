@@ -71,9 +71,9 @@
   <entry key="MIN_NODE_SIZE_TOOLTIP">In case of dynamic change of node size, this determines the minimum node size.</entry>
   <entry key="MAX_NODE_SIZE">Maximum node size</entry>
   <entry key="MAX_NODE_SIZE_TOOLTIP">In case of dynamic change of node size, this determines the maximum node size.</entry>
-  <entry key="NODESIZE_GROUP">Node size</entry>
+  <entry key="NODESIZE_GROUP">Dynamic change of node size</entry>
   <entry key="NODESIZE_GROUP_TOOLTIP">Options for the dynamic change of node size.</entry>
-  <entry key="NODECOLOR_GROUP">Node color</entry>
+  <entry key="NODECOLOR_GROUP">Dynamic change of node color</entry>
   <entry key="NODECOLOR_GROUP_TOOLTIP">Options for the dynamic change of node color.</entry>
   <entry key="REACTION_GROUP">Reactions</entry>
   <entry key="REACTION_GROUP_TOOLTIP">Options for the dynamic change of reactions.</entry>
@@ -90,9 +90,9 @@
   <entry key="SHOW_REACTION_LABELS">Reaction labels</entry>
   <entry key="SHOW_REACTION_LABELS_TOOLTIP">Enables/Disables reaction labels.</entry>
   <entry key="GRAPH_LABELS">Labeling</entry>
-  <entry key="GRAPH_LABELS_TOOLTIP">Enables/Disables labels.</entry>  
-   
-  
+  <entry key="GRAPH_LABELS_TOOLTIP">Enables/Disables labels.</entry>
+  <entry key="COLOR_NODE_SIZE">Constant node size</entry>
+  <entry key="COLOR_NODE_SIZE_TOOLTIP">Determines the constant node size in case of dynamic change of node color.</entry>
   
   <!-- EstimationOptions -->
     

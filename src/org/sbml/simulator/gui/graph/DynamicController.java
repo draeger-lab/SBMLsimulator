@@ -17,6 +17,7 @@
  */
 package org.sbml.simulator.gui.graph;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -34,6 +35,9 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
 import org.sbml.simulator.gui.graph.DynamicControlPanel.Items;
+
+import de.zbit.util.prefs.Option;
+import de.zbit.util.prefs.SBPreferences;
 
 /**
  * Controller class for {@link DynamicControlPanel}. It represents the
@@ -102,13 +106,13 @@ public class DynamicController implements ChangeListener, ActionListener,
                 if (e.getActionCommand().equals("PLAY")) {
                     core.setPlayspeed(controlPanel.getSimulationSpeed());
                     core.play();
-                    setPlayStatus();
+                    controlPanel.setPlayStatus();
                 } else if (e.getActionCommand().equals("PAUSE")) {
                     core.pausePlay();
-                    setPauseStatus();
+                    controlPanel.setPauseStatus();
                 } else if (e.getActionCommand().equals("STOP")) {
                     core.stopPlay();
-                    setStopStatus();
+                    controlPanel.setStopStatus();
                 } else if (e.getActionCommand().equals("TOVIDEO")) {
                     // TODO save as video with maximum sim-speed
                 }
@@ -119,55 +123,61 @@ public class DynamicController implements ChangeListener, ActionListener,
         }
         if (e.getSource() instanceof JRadioButton) {
             if (e.getActionCommand().equals("NODESIZE")) {
-                view.setGraphManipulator(0);
                 controlPanel.setNodecolorSelectionState(false);
                 controlPanel.setNodesizeSelectionState(true);
+                view.setGraphManipulator(getSelectedGraphManipulator());
                 view.updateGraph();
             } else if (e.getActionCommand().equals("NODECOLOR")) {
-                view.setGraphManipulator(1);
                 controlPanel.setNodesizeSelectionState(false);
                 controlPanel.setNodecolorSelectionState(true);
+                view.setGraphManipulator(getSelectedGraphManipulator());
                 view.updateGraph();
             }
         }
     }
-
+    
     /**
-     * Enables {@link DynamicControlPanel} elements accordant to play status.
+     * Returns user selected {@link GraphManipulator} with selected options.
+     * If there isn't yet a {@link DynamicCore} assigned, return is null.
+     * @return
      */
-    public void setPlayStatus() {
-        controlPanel.enablePlay(false);
-        controlPanel.enableSearchBar(false);
-        controlPanel.enablePause(true);
-        controlPanel.enableStop(true);
-        controlPanel.enableSimVeloComboBox(false);
-        controlPanel.enableSimVeloSpin(false);
-        controlPanel.enableVideo(false);
-    }
+    public GraphManipulator getSelectedGraphManipulator(){
+        if (core != null) {
+            SBPreferences prefs = SBPreferences.getPreferencesFor(GraphOptions.class);
+            // get current options
+            float reactionsMinLineWidth = prefs.getFloat(GraphOptions.MIN_LINE_WIDTH);
+            float reactionsMaxLineWidth = prefs.getFloat(GraphOptions.MAX_LINE_WIDTH);
+            if (controlPanel.getSelectionStateOfNodesize()) {
+                // get current options
+                double minNodeSize = prefs.getDouble(GraphOptions.MIN_NODE_SIZE);
+                double maxNodeSize = prefs.getDouble(GraphOptions.MAX_NODE_SIZE);
+                return new ManipulatorOfNodeSize(view.getGraph(),
+                        view.getSBMLDocument(), core.getMinMaxOfIDs(view
+                                .getSelectedSpecies()),
+                        core.getMinMaxOfIDs(view.getSelectedReactions()),
+                        minNodeSize, maxNodeSize, reactionsMinLineWidth,
+                        reactionsMaxLineWidth);
+            } else if (controlPanel.getSelectionStateOfNodecolor()) {
+                //get current options
+                Color color1 = Option.parseOrCast(Color.class, prefs.get(GraphOptions.COLOR1));
+                Color color2 = Option.parseOrCast(Color.class, prefs.get(GraphOptions.COLOR2));
+                double nodeSize = prefs.getDouble(GraphOptions.COLOR_NODE_SIZE);
+                
+                return new ManipulatorOfNodeColor(view.getGraph(),
+                        view.getSBMLDocument(), core.getMinMaxOfIDs(view
+                                .getSelectedSpecies()),
+                        core.getMinMaxOfIDs(view.getSelectedReactions()),
+                        nodeSize, color1, color2, reactionsMinLineWidth,
+                        reactionsMaxLineWidth);
+            }
 
-    /**
-     * Enables {@link DynamicControlPanel} elements accordant to pause status.
-     */
-    public void setPauseStatus() {
-        controlPanel.enablePlay(true);
-        controlPanel.enableSearchBar(true);
-        controlPanel.enablePause(false);
-        controlPanel.enableSimVeloComboBox(true);
-        controlPanel.enableSimVeloSpin(true);
-        controlPanel.enableVideo(true);
-    }
-
-    /**
-     * Enables {@link DynamicControlPanel} elements accordant to stop status.
-     */
-    public void setStopStatus() {
-        controlPanel.enablePlay(true);
-        controlPanel.enableSearchBar(true);
-        controlPanel.enablePause(false);
-        controlPanel.enableStop(false);
-        controlPanel.enableSimVeloComboBox(true);
-        controlPanel.enableSimVeloSpin(true);
-        controlPanel.enableVideo(true);
+            // in any other case return nodesize manipulator per default.
+            return new ManipulatorOfNodeSize(view.getGraph(),
+                    view.getSBMLDocument(), core.getMinMaxOfIDs(view
+                            .getSelectedSpecies()), core.getMinMaxOfIDs(view
+                            .getSelectedReactions()));
+        }
+        return null;
     }
 
     /*
@@ -210,7 +220,7 @@ public class DynamicController implements ChangeListener, ActionListener,
     @Override
     public void tableChanged(TableModelEvent e) {
         if(core != null){
-            view.setGraphManipulator(controlPanel.getSelectedManipulator());
+            view.setGraphManipulator(getSelectedGraphManipulator());
             view.updateGraph();
         }
     }
@@ -220,8 +230,36 @@ public class DynamicController implements ChangeListener, ActionListener,
      */
     @Override
     public void preferenceChange(PreferenceChangeEvent evt) {
-        //TODO
-        System.out.println(evt.getKey());
+        // immediately change graph visualization
+        if (controlPanel.getSelectionStateOfNodesize()) {
+            if (evt.getKey().equals("MAX_NODE_SIZE")
+                    || evt.getKey().equals("MIN_NODE_SIZE")
+                    || evt.getKey().equals("MIN_LINE_WIDTH")
+                    || evt.getKey().equals("MAX_LINE_WIDTH")) {
+                view.setGraphManipulator(getSelectedGraphManipulator());
+            }
+        } else if (controlPanel.getSelectionStateOfNodecolor()) {
+            if (evt.getKey().equals("COLOR1") || evt.getKey().equals("COLOR2")
+                    || evt.getKey().equals("COLOR_NODE_SIZE")
+                    || evt.getKey().equals("MIN_LINE_WIDTH")
+                    || evt.getKey().equals("MAX_LINE_WIDTH")) {
+                view.setGraphManipulator(getSelectedGraphManipulator());
+            }
+        }
+
+        if (evt.getKey().equals("SHOW_NODE_LABELS")) {
+            controlPanel.setSelectionStateOfNodeLabels(SBPreferences
+                    .getPreferencesFor(GraphOptions.class).getBoolean(
+                            GraphOptions.SHOW_NODE_LABELS));
+            view.updateGraph();
+        }
+
+        if (evt.getKey().equals("SHOW_REACTION_LABELS")) {
+            controlPanel.setSelectionStateOfReactionLabels(SBPreferences
+                    .getPreferencesFor(GraphOptions.class).getBoolean(
+                            GraphOptions.SHOW_REACTION_LABELS));
+            view.updateGraph();
+        }
     }
 
 }

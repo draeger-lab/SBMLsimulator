@@ -46,7 +46,7 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
     
     /**
      * Constructs node-color manipulator with default gradient red (high) ->
-     * blue (low).
+     * blue (low) and default node size and default reactions linewidths.
      * 
      * @param graph
      * @param document
@@ -56,7 +56,7 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
     public ManipulatorOfNodeColor(SBML2GraphML graph, SBMLDocument document,
             double[] minMaxOfSpeciesData,
             double[] minMaxOfReactionsData) {
-        super(graph, document, minMaxOfReactionsData[0], minMaxOfReactionsData[1]);
+        super(graph, document, minMaxOfReactionsData, (float)0.1, 6);
         DEFAULT_NODE_SIZE = 30;
         RGBcolor1 = new int[]{255, 0, 0};
         RGBcolor2 = new int[]{0, 0, 255};
@@ -64,21 +64,29 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
     }
     
     /**
-     * Constructs node-color manipulator with the given RGB colors as color1 ->
-     * color2.
+     * Constructs node-color manipulator with the given RGB colors as color1 (high) ->
+     * color2 (low) and a constant node size.
      * @param graph
      * @param document
      * @param color1
      * @param color2
      * @param minMaxOfSpeciesData
      * @param minMaxOfReactionsData
+     * @param nodeSize
      */
     public ManipulatorOfNodeColor(SBML2GraphML graph, SBMLDocument document,
-            int[] color1, int[] color2, double[] minMaxOfSpeciesData, double[] minMaxOfReactionsData) {
-        super(graph, document, minMaxOfReactionsData[0], minMaxOfReactionsData[1]);
-        DEFAULT_NODE_SIZE = 30;
-        RGBcolor1 = color1;
-        RGBcolor2 = color2;
+            double[] minMaxOfSpeciesData, double[] minMaxOfReactionsData,
+            double nodeSize, Color color1, Color color2, float reactionsMinLineWidth, float reactionsMaxLineWidth) {
+        super(graph, document, minMaxOfReactionsData, reactionsMinLineWidth, reactionsMaxLineWidth);
+        DEFAULT_NODE_SIZE = nodeSize;
+        int r = color1.getRed();
+        int g = color1.getGreen();
+        int b = color1.getBlue();
+        RGBcolor1 = new int[] { r, g, b };
+        r = color2.getRed();
+        g = color2.getGreen();
+        b = color2.getBlue();
+        RGBcolor2 = new int[] { r, g, b };
         computeSpeciesAdjusting(minMaxOfSpeciesData[0], minMaxOfSpeciesData[1]);
     }
     

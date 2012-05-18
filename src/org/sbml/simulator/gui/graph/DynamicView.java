@@ -32,6 +32,7 @@ import org.sbml.simulator.gui.LegendPanel;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.graph.gui.TranslatorSBMLgraphPanel;
+import de.zbit.graph.io.SBML2GraphML;
 
 /**
  * This class gathers all elements concerning the dynamic visualization 
@@ -129,29 +130,12 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     }
     
     /**
-     * This functions changes the graph manipulator to the given index:<br>
-     * <ul><li>0: {@link ManipulatorOfNodeSize}.</li>
-     * <li>1: {@link ManipulatorOfNodeColor}.</li></ul>
-     * 
-     * @param i
+     * Sets the {@link GraphManipulator} for this {@link DynamicView}.
+     * @param gm
      */
-    public void setGraphManipulator(int i){
-        if (core != null){
-            switch (i) {
-            case 0:
-                graphManipulator = new ManipulatorOfNodeSize(
-                        graphPanel.getConverter(), document,
-                        core.getMinMaxOfIDs(getSelectedSpecies()),
-                        core.getMinMaxOfIDs(getSelectedReactions()));
-                break;
-            case 1:
-                graphManipulator = new ManipulatorOfNodeColor(
-                        graphPanel.getConverter(), document,
-                        core.getMinMaxOfIDs(getSelectedSpecies()),
-                        core.getMinMaxOfIDs(getSelectedReactions()));
-                break;
-            }
-        }
+    public void setGraphManipulator(GraphManipulator gm){
+        graphManipulator = gm;
+        updateGraph();
     }
     
     /**
@@ -177,7 +161,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      * There's no way of getting selected items?!
      * @return
      */
-    private String[] getSelectedSpecies(){
+    public String[] getSelectedSpecies(){
         ArrayList<String> selectedSpecies = new ArrayList<String>();
         for(Species s : document.getModel().getListOfSpecies()){
             if(legend.getLegendTableModel().isSelected(s.getId())){
@@ -192,7 +176,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      * There's no way of getting selected items?!
      * @return
      */
-    private String[] getSelectedReactions(){
+    public String[] getSelectedReactions(){
         ArrayList<String> selectedReactions = new ArrayList<String>();
         for(Reaction r : document.getModel().getListOfReactions()){
             if(legend.getLegendTableModel().isSelected(r.getId())){
@@ -200,6 +184,22 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
             }
         }
         return selectedReactions.toArray(new String[selectedReactions.size()]);
+    }
+    
+    /**
+     * Returns {@link SBML2GraphML} of this {@link DynamicView}.
+     * @return
+     */
+    public SBML2GraphML getGraph(){
+        return graphPanel.getConverter();
+    }
+    
+    /**
+     * Returns {@link SBMLDocument} of this {@link DynamicView}.
+     * @return
+     */
+    public SBMLDocument getSBMLDocument(){
+        return document;
     }
 
     /*
@@ -292,9 +292,9 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                         super.done();
                         legend.getLegendTableModel().setSelected(Species.class, true);
                         legend.getLegendTableModel().setSelected(Reaction.class, true);
-                        setGraphManipulator(controlPanel.getSelectedManipulator()); 
                         //activate controlpanel after computation of limits
                         controlPanel.setCore(core);
+                        graphManipulator = controller.getSelectedGraphManipulator();
                         updateGraph();
                     }
                 };
@@ -308,6 +308,6 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      */
     @Override
     public void donePlay() {
-        controller.setStopStatus();
+        controlPanel.setStopStatus();
     }
 }

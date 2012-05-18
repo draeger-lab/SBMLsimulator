@@ -291,7 +291,7 @@ public class DynamicControlPanel extends JPanel{
 		addComponent(gbl, stop, 		2, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, video, 		3, 1, 1, 1, GridBagConstraints.WEST,	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, timelbl, 		3, 1, 2, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
-		addComponent(gbl, simVelolbl,	0, 2, 4, 1, GridBagConstraints.WEST,	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, simVelolbl,	0, 2, 3, 1, GridBagConstraints.WEST,	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, simVeloCombo,	3, 2, 1, 1, GridBagConstraints.CENTER,  GridBagConstraints.HORIZONTAL,	1, 0, new Insets(2,2,2,2));
 		addComponent(gbl, simVeloSpin,	4, 2, 1, 1, GridBagConstraints.EAST, 	GridBagConstraints.BOTH, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, reactionLabelslbl,6, 2, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,0));
@@ -338,77 +338,43 @@ public class DynamicControlPanel extends JPanel{
 	    simVeloSpin.setValue(item.getSpeed(item));
 	}
 	
-	/**
-	 * Sets enable status for the searchbar.
-	 * (If the user presses play or toVideo, this method should be invoked by the controller).
-	 * @param bool
-	 */
-	public void enableSearchBar(boolean bool) {
-		searchBar.setEnabled(bool);
-	}
-	
-	/**
-	 * Sets enable status for the play button.
-	 * (If the user presses play or toVideo, this method should be invoked by the controller).
-	 * @param bool
-	 */
-	public void enablePlay(boolean bool) {
-		play.setEnabled(bool);
-	}
-
-	/**
-	 * Sets enable status for the stop button.
-	 * (If the user presses play or toVideo, this method should be invoked by the controller).
-	 * @param bool
-	 */
-	public void enableStop(boolean bool) {
-		stop.setEnabled(bool);
-	}
-	
-	/**
-	 * Sets enable status for the pause button.
-	 * (If the user presses play or toVideo, this method should be invoked by the controller).
-	 * @param bool
-	 */
-	public void enablePause(boolean bool) {
-		pause.setEnabled(bool);
-	}
-	
-	/**
-     * Sets enable status for the combobox to choose velocity.
-     * (If the user presses play or toVideo, this method should be invoked by the controller).
-	 * @param bool
-	 */
-	public void enableSimVeloComboBox(boolean bool) {
-	    simVeloCombo.setEnabled(bool);
-	}
-	
-	/**
-     * Sets enable status for the spinner to choose velocity.
-     * (If the user presses play or toVideo, this method should be invoked by the controller).
-     * @param bool
+    /**
+     * Enables {@link DynamicControlPanel} elements accordant to play status.
      */
-	public void enableSimVeloSpin(boolean bool) {
-	    simVeloSpin.setEnabled(bool);
-	}
+    public void setPlayStatus() {
+        play.setEnabled(false);
+        searchBar.setEnabled(false);
+        pause.setEnabled(true);
+        stop.setEnabled(true);
+        simVeloCombo.setEnabled(false);
+        simVeloSpin.setEnabled(false);
+        video.setEnabled(false);
+    }
 	
-	/**
-     * Sets enable status for the checkbox to enable labels.
-     * (If the user presses play or toVideo, this method should be invoked by the controller).
-     * @param bool
+    /**
+     * Enables {@link DynamicControlPanel} elements accordant to pause status.
      */
-	public void enableLabelsCB(boolean bool) {
-	    nodeLabelsCB.setEnabled(bool);
-	}
-	
-	/**
-     * Sets enable status for the video button.
-     * (If the user presses play or toVideo, this method should be invoked by the controller).
-     * @param bool
+    public void setPauseStatus() {
+        play.setEnabled(true);
+        searchBar.setEnabled(true);
+        pause.setEnabled(true);
+        simVeloCombo.setEnabled(true);
+        simVeloSpin.setEnabled(true);
+        video.setEnabled(true);
+    }
+    
+    /**
+     * Enables {@link DynamicControlPanel} elements accordant to stop status.
      */
-	public void enableVideo(boolean bool) {
-	    video.setEnabled(bool);
-	}
+    public void setStopStatus() {
+        play.setEnabled(true);
+        searchBar.setEnabled(true);
+        pause.setEnabled(true);
+        stop.setEnabled(true);
+        simVeloCombo.setEnabled(true);
+        simVeloSpin.setEnabled(true);
+        video.setEnabled(true);
+    }
 	
 	/**
 	 * Returns selection state of nodelabels-checkbox.
@@ -419,11 +385,27 @@ public class DynamicControlPanel extends JPanel{
 	}
 	
 	/**
+	 * Sets selection state of nodelabels-checkbox.
+	 * @param bool
+	 */
+	public void setSelectionStateOfNodeLabels(boolean bool){
+	    nodeLabelsCB.setSelected(bool);
+	}
+	
+	/**
      * Returns selection state of reactionlabels-checkbox.
      * @return selections state of reactionlabels-checkbox
      */
     public boolean getSelectionStateOfReactionLabels() {
         return reactionLabelsCB.isSelected();
+    }
+    
+    /**
+     * Sets selection state of reactionlabels-checkbox.
+     * @param bool
+     */
+    public void setSelectionStateOfReactionLabels(boolean bool){
+        reactionLabelsCB.setSelected(bool);
     }
 	
 	/**
@@ -435,11 +417,28 @@ public class DynamicControlPanel extends JPanel{
 	}
 	
 	/**
+	 * Returns selection state of nodesize-checkbox.
+	 * @return
+	 */
+	public boolean getSelectionStateOfNodesize(){
+	    return nodesize.isSelected();
+	}
+	
+	/**
 	 * Sets the selection state of the nodecolor-radiobutton.
 	 * @param bool
 	 */
 	public void setNodecolorSelectionState(boolean bool){
 	    nodecolor.setSelected(bool);
+	}
+	
+	/**
+	 * Returns selections state of nodecolor-checkbox.
+	 * @param bool
+	 * @return
+	 */
+	public boolean getSelectionStateOfNodecolor(){
+	    return nodecolor.isSelected();
 	}
 	
 	/**
