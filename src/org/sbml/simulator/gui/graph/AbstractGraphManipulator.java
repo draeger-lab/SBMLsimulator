@@ -59,16 +59,6 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
     protected float DEFAULT_LINE_WIDTH = 1;
     
     /**
-     * Maximum line width for default DynamicChangeOfReaction.
-     */
-    private float maxLineWidth = 6;
-    
-    /**
-     * Minimum line width for default DynamicChangeOfReaction.
-     */
-    private float minLineWidth = (float) 0.1;
-    
-    /**
      * Parameters for default DynamicChangeOfReaction.
      */
     private double m = 1, c = 0;
@@ -82,14 +72,9 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
      * Saves the used {@link SBMLDocument}.
      */
     protected SBMLDocument document;
-
-    /**
-     * Constructs an abstract graph manipulator on the given {@link SBML2GraphML}.
-     * @param graph
-     */
     
     /**
-     * Constructs an abstract graph manipulator on the given {@link SBML2GraphML} and {@link SBMLDocument}.
+     * Constructs an abstract graph manipulator.
      * @param graph
      * @param document
      */
@@ -100,32 +85,43 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
     }
     
     /**
-     * Constructs an abstract graph manipulator on the given {@link SBML2GraphML} and {@link SBMLDocument}.
-     * Additionally this constructor provides a proper dynamicChangeofReaction method.
+     * Constructs an abstract graph manipulator on the given
+     * {@link SBML2GraphML} and {@link SBMLDocument}. Additionally this
+     * constructor provides a basic implementation of dynamicChangeofReaction
+     * method with the given parameters.
      * 
      * @param graph
      * @param document
-     * @param minDataReaction
-     * @param maxDataReaction
+     * @param minMaxOfReactionsData
+     * @param reactionsMinLineWidth
+     * @param reactionsMaxLineWidth
      */
-    public AbstractGraphManipulator(SBML2GraphML graph, SBMLDocument document, double minDataReaction, double maxDataReaction){
+    public AbstractGraphManipulator(SBML2GraphML graph, SBMLDocument document,
+            double[] minMaxOfReactionsData, float reactionsMinLineWidth,
+            float reactionsMaxLineWidth) {
         this(graph, document);
         /*
          * Take absolute higher limit as xMax and 0 as xLow for regression.
          * Eventually reactions will end up in equillibrium.
          */
-        computeReactionAdjusting(minDataReaction, minDataReaction);
+        computeReactionAdjusting(minMaxOfReactionsData[0],
+                minMaxOfReactionsData[1], reactionsMinLineWidth, reactionsMaxLineWidth);
     }
     
     /**
      * Computes the adjusting values for given limits.
      * @param lowerReactionLimit
      * @param upperReactionLimit
+     * @param minLineWidth
+     * @param maxLineWidth
      */
-    private void computeReactionAdjusting(double lowerReactionLimit, double upperReactionLimit){
-        double xHigh = Math.abs(lowerReactionLimit) > Math.abs(upperReactionLimit) ? Math
-                .abs(lowerReactionLimit) : Math.abs(upperReactionLimit);
-        double[] linearRegression = computeBIAS(0, xHigh, minLineWidth, maxLineWidth);
+    private void computeReactionAdjusting(double lowerReactionLimit,
+            double upperReactionLimit, float minLineWidth, float maxLineWidth) {
+        double xHigh = Math.abs(lowerReactionLimit) > Math
+                .abs(upperReactionLimit) ? Math.abs(lowerReactionLimit) : Math
+                .abs(upperReactionLimit);
+        double[] linearRegression = computeBIAS(0, xHigh, minLineWidth,
+                maxLineWidth);
         m = linearRegression[0];
         c = linearRegression[1];
     }

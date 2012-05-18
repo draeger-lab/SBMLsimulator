@@ -72,11 +72,19 @@ public interface GraphOptions extends KeyProvider{
         "COLOR2", Color.class, bundle, Color.BLUE);
     
     /**
+     * Node size while color interpolation.
+     * TODO add to nodecolor_group
+     */
+    public static final Option<Double> COLOR_NODE_SIZE = new Option<Double>(
+            "COLOR_NODE_SIZE", Double.class, bundle, new Range<Double>(
+                    Double.class, "{(0, 1E3]}"), Double.valueOf(30d));
+    
+    /**
      * Settings in case of dynamic change of node color.
      */
-    @SuppressWarnings("unchecked")
-    public static final OptionGroup<Color> NODECOLOR_GROUP = new OptionGroup<Color>(
-        "NODECOLOR_GROUP", bundle, COLOR1, COLOR2);
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static final OptionGroup NODECOLOR_GROUP = new OptionGroup(
+        "NODECOLOR_GROUP", bundle, COLOR1, COLOR2, COLOR_NODE_SIZE);
     
     /**
      * Determines the minimum line width of dynamic reaction visualization.

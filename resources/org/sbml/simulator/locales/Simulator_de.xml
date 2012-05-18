@@ -43,7 +43,7 @@
   <entry key="ADDITIONAL_COLUMNS_ARE_IGNORED_TOOLTIP">Die Datei enthält einige Elemente, die kein zugehöriges Gegenstück im gegebenen Modell besitzen. Diese Elemente werden nicht im Diagramm erscheinen und in der weiteren Analyse ignoriert werden</entry>
   <entry key="TIME">Zeit</entry>
   
-   <!-- DynamicControlPanel -->
+  <!-- DynamicControlPanel -->
   
   <entry key="PLAY">Abspielen</entry>
   <entry key="PLAY_TOOLTIP">Spielt die dynamische Visualisierung ab.</entry>
@@ -71,9 +71,9 @@
   <entry key="MIN_NODE_SIZE_TOOLTIP">Bei dynamischer Änderung der Knotengröße, definiert dies die minimale Knotengröße.</entry>
   <entry key="MAX_NODE_SIZE">Maximale Knotengröße</entry>
   <entry key="MAX_NODE_SIZE_TOOLTIP">Bei dynamischer Änderung der Knotengröße, definiert dies die maximale Knotengröße.</entry>
-  <entry key="NODESIZE_GROUP">Knotengröße</entry>
+  <entry key="NODESIZE_GROUP">Dynamische Änderung der Knotengröße</entry>
   <entry key="NODESIZE_GROUP_TOOLTIP">Einstellungen für die dynamische Änderung der Knotengröße.</entry>
-  <entry key="NODECOLOR_GROUP">Knotenfarbe</entry>
+  <entry key="NODECOLOR_GROUP">Dynamische Änderung der Knotenfarbe</entry>
   <entry key="NODECOLOR_GROUP_TOOLTIP">Einstellungen für die dynamische Änderung der Knotenfarbe.</entry>
   <entry key="REACTION_GROUP">Reaktionen</entry>
   <entry key="REACTION_GROUP_TOOLTIP">Einstellungen für die dynamische Änderung der Reaktionen.</entry>
@@ -91,6 +91,8 @@
   <entry key="SHOW_REACTION_LABELS_TOOLTIP">Aktiviert/Deaktiviert die Reaktionenbeschriftung.</entry>  
   <entry key="GRAPH_LABELS">Beschriftung</entry>
   <entry key="GRAPH_LABELS_TOOLTIP">Aktiviert/Deaktiviert die Beschriftungen.</entry>
+  <entry key="COLOR_NODE_SIZE">Konstante Knotengröße</entry>
+  <entry key="COLOR_NODE_SIZE_TOOLTIP">Stellt die (konstante) Knotengröße, für die dynamische Änderung der Knotenfarbe, ein.</entry>
   
   
   <!-- EstimationOptions -->

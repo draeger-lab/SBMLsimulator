@@ -33,23 +33,15 @@ import de.zbit.graph.io.SBML2GraphML;
  */
 public class ManipulatorOfNodeSize extends AbstractGraphManipulator{    
     /**
-     * Default setting for the minimum node size.
-     */
-    private double minNodeSize = 8;
-    
-    /**
-     * Default setting for the maximum node size.
-     */
-    private double maxNodeSize = 50;
-    
-    /**
      * Slope of linear regression m, and yintercept c. 
      */
     private double m = 1, c= 0;
     
     /**
      * Constructs a new nodesize-manipulator on the given graph. Minimum node
-     * size and maximum node size per default.
+     * size and maximum node size per default and reactions line widths per
+     * default.
+     * 
      * @param graph
      * @param document
      * @param minMaxOfSpecies
@@ -57,39 +49,46 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
      */
     public ManipulatorOfNodeSize(SBML2GraphML graph, SBMLDocument document,
             double[] minMaxOfSpecies, double[] minMaxOfReactions) {
-        super(graph, document, minMaxOfReactions[0], minMaxOfReactions[1]);
-        computeSpeciesAdjusting(minMaxOfSpecies[0], minMaxOfSpecies[1]);
+        super(graph, document, minMaxOfReactions, (float)0.1, 6);
+        computeSpeciesAdjusting(minMaxOfSpecies[0], minMaxOfSpecies[1], 8, 50);
     }
     
     /**
      * Constructs a new nodesize-manipulator on the given graph. Minimum node
      * size and maximum node size as given. If minimum node size greater than
      * maximum node size, default values will be used
-     * 
      * @param graph
      * @param document
-     * @param minNodeSize
-     * @param maxNodeSize
      * @param minMaxOfSpecies
      * @param minMaxOfReactions
+     * @param minNodeSize
+     * @param maxNodeSize
+     * @param reactionsMinLinewidth
+     * @param reactionsMaxLineWidth
      */
     public ManipulatorOfNodeSize(SBML2GraphML graph, SBMLDocument document,
-            double minNodeSize, double maxNodeSize, double[] minMaxOfSpecies,
-            double[] minMaxOfReactions) {
-        super(graph, document, minMaxOfReactions[0], minMaxOfReactions[1]);
-        if (minNodeSize < maxNodeSize) {
-            this.minNodeSize = minNodeSize;
-            this.maxNodeSize = maxNodeSize;
+            double[] minMaxOfSpecies, double[] minMaxOfReactions,
+            double minNodeSize, double maxNodeSize,
+            float reactionsMinLinewidth, float reactionsMaxLineWidth) {
+        // no use of this() to avoid computation of adjusting twice
+        super(graph, document, minMaxOfReactions, reactionsMinLinewidth,
+                reactionsMaxLineWidth);
+        if (minNodeSize > maxNodeSize) {
+            minNodeSize = 8;
+            maxNodeSize = 50;
         }
-        computeSpeciesAdjusting(minMaxOfSpecies[0], minMaxOfSpecies[1]);
+        computeSpeciesAdjusting(minMaxOfSpecies[0], minMaxOfSpecies[1],
+                minNodeSize, maxNodeSize);
     }
-    
+
     /**
      * Computes adjusting values for given limits.
      * @param lowerDataLimit
      * @param upperDataLimit
+     * @param minNodeSize
+     * @param maxNodeSize
      */
-    private void computeSpeciesAdjusting(double lowerDataLimit, double upperDataLimit){
+    private void computeSpeciesAdjusting(double lowerDataLimit, double upperDataLimit, double minNodeSize, double maxNodeSize){
         double[] linearRegression = computeBIAS(lowerDataLimit, upperDataLimit, minNodeSize, maxNodeSize);
         m = linearRegression[0];
         c = linearRegression[1];
