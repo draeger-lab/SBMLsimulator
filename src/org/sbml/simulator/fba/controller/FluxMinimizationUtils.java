@@ -17,6 +17,12 @@
  */
 package org.sbml.simulator.fba.controller;
 
+import org.sbml.jsbml.ListOf;
+import org.sbml.jsbml.Reaction;
+import org.sbml.jsbml.SBMLDocument;
+import org.sbml.jsbml.Species;
+import org.sbml.jsbml.SpeciesReference;
+import org.sbml.jsbml.ListOf.Type;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
 /**
@@ -26,11 +32,84 @@ import org.sbml.simulator.stability.math.StoichiometricMatrix;
  * @since 1.0
  */
 public class FluxMinimizationUtils {
-	
+
+	/**
+	 * gets a {@link StoichiometricMatrix} and gives back the corresponding flux-vector
+	 * @param N
+	 * @return
+	 */
 	public static double[] computeFluxVector(StoichiometricMatrix N) {
 		N.getSteadyStateFluxes();
 		double[] fluxVector = new double[N.getColumnDimension()];
 		// TODO: fill the fluxVector
 		return fluxVector;
+	}
+
+	/**
+	 * gets a {@link SBMLDocument} and gives back the corresponding {@link StoichiometricMatrix}
+	 * @param doc
+	 * @return {@link StoichiometricMatrix}
+	 */
+	public static StoichiometricMatrix SBMLDocToStoichMatrix(SBMLDocument doc){
+		// build a new StoichiometricMatrix with the number of metabolites as the dimension of rows
+		// and the number of reactions as the dimension of columns
+		int metaboliteCount = doc.getModel().getSpeciesCount();
+		int reactionCount = doc.getModel().getReactionCount();
+		StoichiometricMatrix sMatrix = new StoichiometricMatrix (metaboliteCount, reactionCount);
+		
+		//fill the matrix with the stoichiometry of each reaction
+		for (int i = 0; i< metaboliteCount; i++) {
+			for (int j = 0; j< reactionCount; j++) {
+				SpeciesReference specRef = searchCorrespondingObjectInReaction(doc.getModel().getReaction(j), doc.getModel().getSpecies(i).getId());
+				if (specRef == null){
+					// if specRef is not in the reaction j
+					sMatrix.set(i, j, 0);
+				} else if (specRef.isSetParentSBMLObject()) {
+					// check if specRef is a product or a reactant in reaction j
+					if (((ListOf<?>)specRef.getParentSBMLObject()).getSBaseListType().equals(Type.listOfProducts)) {
+						// the stoichiometry of products is positive in the stoichiometricMatrix
+						if (specRef.isSetStoichiometry()) {
+							sMatrix.set(i, j, specRef.getStoichiometry());
+							// else the entry i,j stays 0 
+						}
+					}
+					else if (((ListOf<?>)specRef.getParentSBMLObject()).getSBaseListType().equals(Type.listOfReactants)) {
+						// the stoichiometry of reactants is negative in the stoichiometricMatrix
+						if (specRef.isSetStoichiometry()) {
+							sMatrix.set(i, j, - specRef.getStoichiometry());
+							// else the entry i,j stays 0 
+						}
+					}
+				}
+			}
+		}
+		return sMatrix;
+	}
+	
+	/**
+	 * gives the {@link SpeciesReference} back, when there is one with the given id in the given reaction
+	 * else this method returns null
+	 * 
+	 * @param r
+	 * @param id
+	 * @return
+	 */
+	private static SpeciesReference searchCorrespondingObjectInReaction(Reaction r, String id) {
+		// look if the given Species-ID is corresponding to a product in the given Reaction r
+		// or a reactant or not in the reaction
+		for (SpeciesReference specRef: r.getListOfProducts()) {
+			if (specRef.getId().equals(id)){
+				// it's a product
+				return specRef;
+			}
+		}
+		for (SpeciesReference specRef: r.getListOfReactants()) {
+			if (specRef.getId().equals(id)){
+				// it's a reactant
+				return specRef;
+			}
+		}
+		// it's not in this reaction
+		return null;
 	}
 }
