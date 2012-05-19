@@ -30,8 +30,8 @@ public class FluxMinimization extends TargetFunction {
 	
 	/**
 	 * to compute a flux minimization, we need a flux vector 
-	 * in an array fluxVector and an error-value-array errorArray, 
-	 * which will be computed in Errorobject-class
+	 * in an array fluxVector and an error-value-array errorArray. 
+	 * 
 	 */
 	private double[] errorArray;
 	private double[] fluxVector;
@@ -48,9 +48,9 @@ public class FluxMinimization extends TargetFunction {
 	}
 	
 	public FluxMinimization(SBMLDocument doc) {
-		// TODO compute a stoichiometric matrix from a SBMLDocument
 		this.errorArray = computeError();
-		this.fluxVector = FluxMinimizationUtils.computeFluxVector(computeStoichMatrixFromSBMLDocument(doc));
+		this.N = FluxMinimizationUtils.SBMLDocToStoichMatrix(doc);
+		this.fluxVector = FluxMinimizationUtils.computeFluxVector(N);
 	}
 	
 	/**
@@ -68,10 +68,4 @@ public class FluxMinimization extends TargetFunction {
 		// TODO: compute the error
 		return null;
 	}
-
-	private StoichiometricMatrix computeStoichMatrixFromSBMLDocument(SBMLDocument doc) {
-		// TODO
-		return null;
-	}
-
 }
