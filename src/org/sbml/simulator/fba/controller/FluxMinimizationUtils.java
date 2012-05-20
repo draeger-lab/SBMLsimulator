@@ -20,7 +20,6 @@ package org.sbml.simulator.fba.controller;
 import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
-import org.sbml.jsbml.Species;
 import org.sbml.jsbml.SpeciesReference;
 import org.sbml.jsbml.ListOf.Type;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
@@ -34,7 +33,7 @@ import org.sbml.simulator.stability.math.StoichiometricMatrix;
 public class FluxMinimizationUtils {
 
 	/**
-	 * gets a {@link StoichiometricMatrix} and gives back the corresponding flux-vector
+	 * Gets a {@link StoichiometricMatrix} and gives back the corresponding flux-vector.
 	 * @param N
 	 * @return
 	 */
@@ -46,7 +45,7 @@ public class FluxMinimizationUtils {
 	}
 
 	/**
-	 * gets a {@link SBMLDocument} and gives back the corresponding {@link StoichiometricMatrix}
+	 * Gets a {@link SBMLDocument} and gives back the corresponding {@link StoichiometricMatrix}.
 	 * @param doc
 	 * @return {@link StoichiometricMatrix}
 	 */
@@ -87,23 +86,23 @@ public class FluxMinimizationUtils {
 	}
 	
 	/**
-	 * gives the {@link SpeciesReference} back, when there is one with the given id in the given reaction
-	 * else this method returns null
+	 * Gives the {@link SpeciesReference} back, when there is one with the given id in the given {@link Reaction}
+	 * else this method returns null.
 	 * 
-	 * @param r
+	 * @param reac
 	 * @param id
-	 * @return
+	 * @return {@link SpeciesReference}
 	 */
-	private static SpeciesReference searchCorrespondingObjectInReaction(Reaction r, String id) {
+	private static SpeciesReference searchCorrespondingObjectInReaction(Reaction reac, String id) {
 		// look if the given Species-ID is corresponding to a product in the given Reaction r
 		// or a reactant or not in the reaction
-		for (SpeciesReference specRef: r.getListOfProducts()) {
+		for (SpeciesReference specRef: reac.getListOfProducts()) {
 			if (specRef.getId().equals(id)){
 				// it's a product
 				return specRef;
 			}
 		}
-		for (SpeciesReference specRef: r.getListOfReactants()) {
+		for (SpeciesReference specRef: reac.getListOfReactants()) {
 			if (specRef.getId().equals(id)){
 				// it's a reactant
 				return specRef;

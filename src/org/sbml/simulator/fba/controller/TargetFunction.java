@@ -26,9 +26,21 @@ package org.sbml.simulator.fba.controller;
 public abstract class TargetFunction {
 	
 	public TargetFunction() {
-		// TODO Auto-generated constructor stub
+		//TODO
 	}
 	
 	//TODO: fill this class with methods for all target-functions
+	
+	/**
+	 * This method gives an array back, which contains the different components for quadratic programming 
+	 * @return double[]
+	 */
+	public abstract double[][] computeTargetFunctionForQuadraticProgramming();
+	
+	/**
+	 * This method gives an array back, which contains the different components for linear programming 
+	 * @return double[]
+	 */
+	public abstract double[][] computeTargetFunctionForLinearProgramming();
 
 }
