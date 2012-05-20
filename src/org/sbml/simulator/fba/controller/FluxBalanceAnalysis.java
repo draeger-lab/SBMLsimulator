@@ -26,20 +26,25 @@ import org.sbml.jsbml.SBMLDocument;
  * @since 1.0
  */
 public class FluxBalanceAnalysis {
-
 	/**
-	 * FluxBalanceAnalysis has these attributes:
-	 * - the target function targetFunc, which can be a FluxMinimization-object 
-	 *   or an other function for which the network has to be optimized
-	 * - the constraints, which contains e.g. Gibbs-energies
-	 * - a boolean linearProgramming, which is true for the request to solve 
-	 *   the problem with linear programming and false for quadratic programming.
+	 * Can be a {@link FluxMinimization}-object 
+	 * or an other function for which the network has to be optimized
 	 */
 	public TargetFunction targetFunc;
-	public Constraints constraints;
-	public Boolean linearProgramming;
 	
 	/**
+	 * Contains e.g. Gibbs-energies
+	 */
+	public Constraints constraints;
+	
+	/**
+	 * Is true for the request to solve the problem with linear programming and false for quadratic programming.
+	 */
+	private Boolean linearProgramming;
+	
+	/**
+	 * Constructor that get's a {@link Constraints}-Object and a {@link SBMLDocument} 
+	 * and that set's the linearProgramming = true;
 	 * 
 	 * @param constraints
 	 * @param doc
@@ -47,10 +52,12 @@ public class FluxBalanceAnalysis {
 	public FluxBalanceAnalysis(Constraints constraints, SBMLDocument doc) {
 		this.targetFunc = new FluxMinimization(doc);
 		this.constraints = constraints;
-		this.linearProgramming = true;
+		this.setLinearProgramming(true);
 	}
 	
 	/**
+	 * Constructor that get's {@link TargetFunction}, {@link Constraints} and a Boolean, which
+	 * contains the information for linearProgramming (true) or quadraticProgramming (false)
 	 * 
 	 * @param target
 	 * @param constraints
@@ -59,8 +66,40 @@ public class FluxBalanceAnalysis {
 	public FluxBalanceAnalysis(TargetFunction target, Constraints constraints, Boolean linearProgramming) {
 		this.targetFunc = target;
 		this.constraints = constraints;
-		this.linearProgramming = linearProgramming;
+		this.setLinearProgramming(linearProgramming);
+	}
+
+	/**
+	 * Calls SCPsolver to solve the problem with linear programming
+	 */
+	public double[] SolveWithLinearProgramming() {
+		targetFunc.computeTargetFunctionForLinearProgramming();
+		// TODO: call SCPSolver
+		return null;
 	}
 	
-	//TODO: call CPLEX or SCPSolver
+	/**
+	 * Calls CPLEX to solve the problem with quadratic programming
+	 */
+	public double[] SolveWithQuadraticProgramming() {
+		targetFunc.computeTargetFunctionForQuadraticProgramming();
+		// TODO: call CPLEX
+		return null;
+	}
+
+	
+	
+	/**
+	 * @param linearProgramming the linearProgramming to set
+	 */
+	public void setLinearProgramming(Boolean linearProgramming) {
+		this.linearProgramming = linearProgramming;
+	}
+
+	/**
+	 * @return the linearProgramming
+	 */
+	public Boolean getLinearProgramming() {
+		return linearProgramming;
+	}
 }

@@ -29,16 +29,27 @@ import org.sbml.simulator.stability.math.StoichiometricMatrix;
 public class FluxMinimization extends TargetFunction {
 	
 	/**
-	 * to compute a flux minimization, we need a flux vector 
-	 * in an array fluxVector and an error-value-array errorArray. 
-	 * 
+	 * To compute a flux minimization, we need an error-value-array 
+	 * that contains the computed errors. 
 	 */
 	private double[] errorArray;
+	
+	/**
+	 * To compute a flux minimization, we need a flux-vector, that
+	 * contains the steady-state-fluxes in the model.
+	 */
 	private double[] fluxVector;
+	
+	/**
+	 * Contains the stoichiometry of the model.
+	 */
 	private StoichiometricMatrix N;
 	
-	/*
-	 * default constructor
+	/**
+	 * Constructor, that gets a {@link StoichiometricMatrix} and computes 
+	 * the fluxVector an the errorArray itself.
+	 * 
+	 * @param N
 	 */
 	public FluxMinimization(StoichiometricMatrix N) {
 		super();
@@ -47,6 +58,13 @@ public class FluxMinimization extends TargetFunction {
 		this.N = N;
 	}
 	
+	/**
+	 *  Constructor, that gets a {@link SBMLDocument} and computes the
+	 *  {@link StoichiometricMatrix} from the given document, the fluxVector
+	 *  from the computed StoichiometricMatrix and the errorArray itself.
+	 *  
+	 * @param doc
+	 */
 	public FluxMinimization(SBMLDocument doc) {
 		this.errorArray = computeError();
 		this.N = FluxMinimizationUtils.SBMLDocToStoichMatrix(doc);
@@ -54,7 +72,7 @@ public class FluxMinimization extends TargetFunction {
 	}
 	
 	/**
-	 * constructor that gets an error-array and a FluxVector-Array fluxvec.
+	 * Constructor that gets an error-array and a FluxVector-Array fluxvec.
 	 * 
 	 * @param error
 	 * @param fluxvec
@@ -66,6 +84,31 @@ public class FluxMinimization extends TargetFunction {
 	
 	private double[] computeError() {
 		// TODO: compute the error
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.fba.controller.TargetFunction#computeTargetFunctionForQuadraticProgramming()
+	 */
+	@Override
+	public double[][] computeTargetFunctionForQuadraticProgramming() {
+		// TODO fill the matrix with the needed vectors
+		double[][] target = new double[6][];
+		
+		target[0] = this.fluxVector;
+		target[1] = this.errorArray;
+		
+		return target;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.fba.controller.TargetFunction#computeTargetFunctionForLinearProgramming()
+	 */
+	@Override
+	public double[][] computeTargetFunctionForLinearProgramming() {
+		// TODO fill the matrix with the needed vectors
 		return null;
 	}
 }
