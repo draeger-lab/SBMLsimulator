@@ -1,6 +1,6 @@
 /*
  * $Id:  FluxMinimization.java 16:15:22 Meike Aichele$
- * $URL: FluxMinimization.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -66,9 +66,7 @@ public class FluxMinimization extends TargetFunction {
 	 * @param doc
 	 */
 	public FluxMinimization(SBMLDocument doc) {
-		this.errorArray = computeError();
-		this.N = FluxMinimizationUtils.SBMLDocToStoichMatrix(doc);
-		this.fluxVector = FluxMinimizationUtils.computeFluxVector(N);
+		this(FluxMinimizationUtils.SBMLDocToStoichMatrix(doc));
 	}
 	
 	/**

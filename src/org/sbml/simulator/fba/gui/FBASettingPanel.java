@@ -1,6 +1,6 @@
 /*
  * $Id:  FBASettingPanel.java 16:54:53 Meike Aichele$
- * $URL: FBASettingPanel.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.

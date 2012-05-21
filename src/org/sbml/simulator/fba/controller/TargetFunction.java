@@ -1,6 +1,6 @@
 /*
  * $Id:  TargetFunction.java 16:08:51 Meike Aichele$
- * $URL: TargetFunction.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.

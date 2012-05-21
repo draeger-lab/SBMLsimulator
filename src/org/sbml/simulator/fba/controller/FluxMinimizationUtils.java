@@ -55,7 +55,7 @@ public class FluxMinimizationUtils {
 		int metaboliteCount = doc.getModel().getSpeciesCount();
 		int reactionCount = doc.getModel().getReactionCount();
 		StoichiometricMatrix sMatrix = new StoichiometricMatrix (metaboliteCount, reactionCount);
-		
+
 		//fill the matrix with the stoichiometry of each reaction
 		for (int i = 0; i< metaboliteCount; i++) {
 			for (int j = 0; j< reactionCount; j++) {
