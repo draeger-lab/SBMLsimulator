@@ -32,6 +32,7 @@ import y.view.LineType;
 import y.view.NodeLabel;
 import y.view.NodeRealizer;
 import de.zbit.graph.io.SBML2GraphML;
+import de.zbit.graph.sbgn.ReactionNodeRealizer;
 
 
 /**
@@ -127,7 +128,7 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
     }
     
     /**
-     * Linear regression through two given points (xLowerLimit, yLowerLimit) and
+     * Linear regression for two given points (xLowerLimit, yLowerLimit) and
      * (xUpperLimit, yUpperLimit).
      * 
      * @param xLowerLimit
@@ -180,8 +181,18 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
     public void dynamicChangeOfReaction(String id, double value, boolean labels) {
         LinkedList<Edge> edgeList = graph.getId2edge()
                 .get(id);
-        NodeRealizer nr = graph.getSimpleGraph().getRealizer(reactionID2reactionNode.get(id));
-    
+//        NodeRealizer nr = graph.getSimpleGraph().getRealizer(reactionID2reactionNode.get(id));
+        ReactionNodeRealizer nr = (ReactionNodeRealizer) graph.getSimpleGraph().getRealizer(reactionID2reactionNode.get(id));
+        //TODO set ReactionNodeRealizer linewidth.
+        
+        //line width
+        double absvalue = Math.abs(value);
+        float lineWidth = (m != 1) ?  (float)(absvalue * m + c) : 1;
+        
+        //ReactionNode line width
+        nr.setLineWidth(lineWidth);
+        
+        //edges line width
         for(Edge e : edgeList){
             EdgeRealizer er = graph.getSimpleGraph().getRealizer(e);
 
@@ -189,8 +200,6 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
              *  adjust lineWidth only if regression was computed, else use
              *  standard linewidth.
              */
-            double absvalue = Math.abs(value);
-            float lineWidth = (m != 1) ?  (float)(absvalue * m + c) : er.getLineType().getLineWidth();
             //only line-width is supposed to change
             LineType currLinetype = er.getLineType();
             LineType newLineType = LineType.createLineType(
@@ -263,7 +272,7 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
                 nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
             }
         }
-        //revert lines
+        //revert reactions (lines and pseudonode)
         if(graph.getId2edge().get(id) != null){
             LinkedList<Edge> listOfEdges = graph.getId2edge()
                     .get(id);
@@ -285,7 +294,8 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
                 }
             }
             
-            NodeRealizer nr = graph.getSimpleGraph().getRealizer(reactionID2reactionNode.get(id));
+            ReactionNodeRealizer nr = (ReactionNodeRealizer) graph.getSimpleGraph().getRealizer(reactionID2reactionNode.get(id));
+            nr.setLineWidth(1);
             if (nr.labelCount() > 1) {
                 // if not selected disable label
                 nr.removeLabel(nr.getLabel(nr.labelCount() - 1));

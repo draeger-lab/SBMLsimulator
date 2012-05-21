@@ -108,13 +108,19 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
      */
     private int[] linearColorInterpolation(double percent){
         int[] outcolor = {0, 0, 0};
-        if(percent >= 0 && percent <= 1){
-            for(int i = 0; i < outcolor.length; i++){
-                outcolor[i] = (int)(RGBcolor1[i] * percent + RGBcolor2[i] * (1-percent));
+        if (percent >= 0 && percent <= 1) {
+            for (int i = 0; i < outcolor.length; i++) {
+                outcolor[i] = (int) (RGBcolor1[i] * percent + RGBcolor2[i]
+                        * (1 - percent));
             }
             return outcolor;
+        } else if (percent > 1) {
+            //maybe round-off error
+            return RGBcolor1;
+        } else {
+            //maybe round-off error
+            return RGBcolor2;
         }
-        return null;
     }
 
     /* (non-Javadoc)
