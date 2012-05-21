@@ -32,6 +32,7 @@
   <entry key="MANIPULATORCHOOSER">Visualisierung</entry>
   
   <!-- GraphOptions TODO: move-->
+
   <entry key="GraphOptions">Netzwerk</entry>
   <entry key="MIN_NODE_SIZE">Minimale Knotengröße</entry>
   <entry key="MIN_NODE_SIZE_TOOLTIP">Bei dynamischer Änderung der Knotengröße, definiert dies die minimale Knotengröße.</entry>
@@ -60,3 +61,4 @@
   <entry key="COLOR_NODE_SIZE">Konstante Knotengröße</entry>
   <entry key="COLOR_NODE_SIZE_TOOLTIP">Stellt die (konstante) Knotengröße, für die dynamische Änderung der Knotenfarbe, ein.</entry>
   
+</properties>
