@@ -309,5 +309,10 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     @Override
     public void donePlay() {
         controlPanel.setStopStatus();
+        double[] allTimepoints = core.getTimepoints();
+        //only if last timepoint reached, switch to first timepoint.
+        if(currTime == allTimepoints[allTimepoints.length-1]){
+            core.setCurrTimepoint(0);
+        }
     }
 }
