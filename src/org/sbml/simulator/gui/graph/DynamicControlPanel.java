@@ -162,6 +162,11 @@ public class DynamicControlPanel extends JPanel{
 	 */
 	private double maxTime;
 	
+    /**
+     * Field for the activation status of panel elements.
+     */
+	private boolean panelActivationStatus;
+	
 	/*
 	 * GUI elements
 	 */
@@ -222,8 +227,11 @@ public class DynamicControlPanel extends JPanel{
 		 */
 		controller.setCore(core);
 		setTimepoint(core.getCurrTimepoint());
-		Component[] elements = {play, video, searchBar, simVeloCombo, simVeloSpin, nodeLabelsCB, reactionLabelsCB, nodesize, nodecolor};
+        Component[] elements = { play, video, searchBar, simVeloCombo,
+                simVeloSpin, nodeLabelsCB, reactionLabelsCB, nodesize,
+                nodecolor, nodeLabelslbl, reactionLabelslbl };
 		GUITools.setEnabledForAll(true, elements);
+		panelActivationStatus = true;
 	}
 	
 	/**
@@ -249,9 +257,13 @@ public class DynamicControlPanel extends JPanel{
 		searchBar.setValue(0);
 		
 		nodeLabelslbl = new JLabel(bundle.getString("NODELABELS"));
+		nodeLabelslbl.setName("NODELABELS"); //name for mouselistener
+		nodeLabelslbl.addMouseListener(controller);
 		nodeLabelsCB = new JCheckBox();
 		nodeLabelsCB.addActionListener(controller);
-		reactionLabelslbl = new JLabel(bundle.getString("REACTIONLABELS")); //TODO localization
+		reactionLabelslbl = new JLabel(bundle.getString("REACTIONLABELS"));
+		reactionLabelslbl.setName("REACTIONLABELS");
+		reactionLabelslbl.addMouseListener(controller);
 		reactionLabelsCB = new JCheckBox();
 		reactionLabelsCB.addActionListener(controller);
 		
@@ -300,8 +312,11 @@ public class DynamicControlPanel extends JPanel{
 		addComponent(gbl, nodeLabelsCB,     5, 1, 1, 1, GridBagConstraints.EAST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, manipulatorsPane, 7, 0, 3, 3, GridBagConstraints.CENTER,  GridBagConstraints.BOTH,        0, 0, new Insets(2,2,2,2));
 
-		Component[] elements = {play, pause, stop, video, searchBar, simVeloCombo, simVeloSpin, nodeLabelsCB, reactionLabelsCB, nodesize, nodecolor};
+        Component[] elements = { play, pause, stop, video, searchBar,
+                simVeloCombo, simVeloSpin, nodeLabelsCB, reactionLabelsCB,
+                nodesize, nodecolor, nodeLabelslbl, reactionLabelslbl };
 		GUITools.setEnabledForAll(false, elements);
+		panelActivationStatus = false;
 		logger.fine("DynamicControlPanel initialized.");
 	}
 		
@@ -442,22 +457,11 @@ public class DynamicControlPanel extends JPanel{
 	}
 	
 	/**
-     * Returns index of the selected {@link GraphManipulator}.<br>
-     * <ul>
-     * <li>0: {@link ManipulatorOfNodeSize}</li>
-     * <li>1: {@link ManipulatorOfNodeColor}</li>
-     * </ul>
-     * <br>
-     * However, if none is selected, the index pf {@link ManipulatorOfNodeSize}
-     * is returned per default.
-     * 
-     * @return
-     */
-	public int getSelectedManipulator(){
-	    if(nodecolor.isSelected()){
-	        return 1;
-	    }
-	    return 0;
+	 * Returns the activation status of this {@link DynamicControlPanel}.
+	 * @return
+	 */
+	public boolean getPanelActivationStatus(){
+	    return panelActivationStatus;
 	}
 	
 	/**
