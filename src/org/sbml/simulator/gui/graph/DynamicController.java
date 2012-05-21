@@ -22,6 +22,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.prefs.PreferenceChangeEvent;
 import java.util.prefs.PreferenceChangeListener;
 
@@ -48,7 +50,8 @@ import de.zbit.util.prefs.SBPreferences;
  * @version $Rev$
  */
 public class DynamicController implements ChangeListener, ActionListener,
-        ItemListener, TableModelListener, PreferenceChangeListener {
+        MouseListener, ItemListener, TableModelListener,
+        PreferenceChangeListener {
     /**
      * Pointer to associated {@link DynamicCore}.
      */
@@ -135,22 +138,28 @@ public class DynamicController implements ChangeListener, ActionListener,
             }
         }
     }
-    
+
     /**
-     * Returns user selected {@link GraphManipulator} with selected options.
-     * If there isn't yet a {@link DynamicCore} assigned, return is null.
+     * Returns user selected {@link GraphManipulator} with selected options. If
+     * there isn't yet a {@link DynamicCore} assigned, return is null.
+     * 
      * @return
      */
-    public GraphManipulator getSelectedGraphManipulator(){
+    public GraphManipulator getSelectedGraphManipulator() {
         if (core != null) {
-            SBPreferences prefs = SBPreferences.getPreferencesFor(GraphOptions.class);
+            SBPreferences prefs = SBPreferences
+                    .getPreferencesFor(GraphOptions.class);
             // get current options
-            float reactionsMinLineWidth = prefs.getFloat(GraphOptions.MIN_LINE_WIDTH);
-            float reactionsMaxLineWidth = prefs.getFloat(GraphOptions.MAX_LINE_WIDTH);
+            float reactionsMinLineWidth = prefs
+                    .getFloat(GraphOptions.MIN_LINE_WIDTH);
+            float reactionsMaxLineWidth = prefs
+                    .getFloat(GraphOptions.MAX_LINE_WIDTH);
             if (controlPanel.getSelectionStateOfNodesize()) {
                 // get current options
-                double minNodeSize = prefs.getDouble(GraphOptions.MIN_NODE_SIZE);
-                double maxNodeSize = prefs.getDouble(GraphOptions.MAX_NODE_SIZE);
+                double minNodeSize = prefs
+                        .getDouble(GraphOptions.MIN_NODE_SIZE);
+                double maxNodeSize = prefs
+                        .getDouble(GraphOptions.MAX_NODE_SIZE);
                 return new ManipulatorOfNodeSize(view.getGraph(),
                         view.getSBMLDocument(), core.getMinMaxOfIDs(view
                                 .getSelectedSpecies()),
@@ -158,11 +167,13 @@ public class DynamicController implements ChangeListener, ActionListener,
                         minNodeSize, maxNodeSize, reactionsMinLineWidth,
                         reactionsMaxLineWidth);
             } else if (controlPanel.getSelectionStateOfNodecolor()) {
-                //get current options
-                Color color1 = Option.parseOrCast(Color.class, prefs.get(GraphOptions.COLOR1));
-                Color color2 = Option.parseOrCast(Color.class, prefs.get(GraphOptions.COLOR2));
+                // get current options
+                Color color1 = Option.parseOrCast(Color.class,
+                        prefs.get(GraphOptions.COLOR1));
+                Color color2 = Option.parseOrCast(Color.class,
+                        prefs.get(GraphOptions.COLOR2));
                 double nodeSize = prefs.getDouble(GraphOptions.COLOR_NODE_SIZE);
-                
+
                 return new ManipulatorOfNodeColor(view.getGraph(),
                         view.getSBMLDocument(), core.getMinMaxOfIDs(view
                                 .getSelectedSpecies()),
@@ -177,7 +188,7 @@ public class DynamicController implements ChangeListener, ActionListener,
                             .getSelectedSpecies()), core.getMinMaxOfIDs(view
                             .getSelectedReactions()));
         }
-        return null;
+        return null; //do nothing if core isn't set yet.
     }
 
     /*
@@ -219,14 +230,18 @@ public class DynamicController implements ChangeListener, ActionListener,
      */
     @Override
     public void tableChanged(TableModelEvent e) {
-        if(core != null){
+        if (core != null) {
             view.setGraphManipulator(getSelectedGraphManipulator());
             view.updateGraph();
         }
     }
 
-    /* (non-Javadoc)
-     * @see java.util.prefs.PreferenceChangeListener#preferenceChange(java.util.prefs.PreferenceChangeEvent)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * java.util.prefs.PreferenceChangeListener#preferenceChange(java.util.prefs
+     * .PreferenceChangeEvent)
      */
     @Override
     public void preferenceChange(PreferenceChangeEvent evt) {
@@ -260,6 +275,73 @@ public class DynamicController implements ChangeListener, ActionListener,
                             GraphOptions.SHOW_REACTION_LABELS));
             view.updateGraph();
         }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
+     */
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        if (controlPanel.getPanelActivationStatus()) {
+            String source = e.getComponent().getName();
+            if (source.equals("NODELABELS")) {
+                if (controlPanel.getSelectionStateOfNodeLabels()) {
+                    controlPanel.setSelectionStateOfNodeLabels(false);
+                } else {
+                    controlPanel.setSelectionStateOfNodeLabels(true);
+                }
+            } else if (source.equals("REACTIONLABELS")) {
+                if (controlPanel.getSelectionStateOfReactionLabels()) {
+                    controlPanel.setSelectionStateOfReactionLabels(false);
+                } else {
+                    controlPanel.setSelectionStateOfReactionLabels(true);
+                }
+            }
+            view.updateGraph();
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
+     */
+    @Override
+    public void mousePressed(MouseEvent e) {
+        // nothing
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
+     */
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        // nothing
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
+     */
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        // nothing
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
+     */
+    @Override
+    public void mouseExited(MouseEvent e) {
+        // nothing
     }
 
 }
