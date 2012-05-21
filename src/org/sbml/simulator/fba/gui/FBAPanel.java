@@ -1,6 +1,6 @@
 /*
  * $Id:  FBAPanel.java 16:38:58 Meike Aichele$
- * $URL: FBAPanel.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.

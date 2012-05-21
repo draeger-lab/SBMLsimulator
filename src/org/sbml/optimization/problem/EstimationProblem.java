@@ -56,6 +56,9 @@ import eva2.tools.ToolBox;
 public class EstimationProblem extends AbstractProblemDouble implements
 		InterfaceAdditionalPopulationInformer, InterfaceHasInitRange {
 	
+	/**
+	 * 
+	 */
 	private static final ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
 	
 	/**
@@ -196,7 +199,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		setSolver(solver);
 		setDistance(distance);
 		distance.setDefaultValue(1000);
-		if(distance instanceof PearsonCorrelation) {
+		if (distance instanceof PearsonCorrelation) {
 			negationOfDistance=true;
 		}
 		setModel(model);
@@ -223,7 +226,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		setSolver(problem.getSolver());
 		negationOfDistance=false;
 		setDistance(problem.getDistance());
-		if(distance instanceof PearsonCorrelation) {
+		if (distance instanceof PearsonCorrelation) {
 			negationOfDistance=true;
 		}
 		try {
@@ -277,7 +280,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 			  Integer pos = id2Index.get(name);
 			  if (pos != null) {
 			    double value = ((Double) reference.getValueAt(0, col)).doubleValue();
-			    if(!Double.isNaN(value)) {
+			    if (!Double.isNaN(value)) {
 			    	initialValues[pos] = value;
 			    }
 			  }
@@ -311,11 +314,11 @@ public class EstimationProblem extends AbstractProblemDouble implements
 				}
 				
 			}
-			if (bestPerGeneration == null
+			if ((bestPerGeneration == null)
 					|| (fitness[0] < bestPerGenerationDist)) {
 				bestPerGenerationDist = fitness[0];
 				bestPerGeneration = solution;
-				if(solution != null) {
+				if (solution != null) {
 					bestPerGeneration.setName(SIMULATION_DATA);
 				}
 			}

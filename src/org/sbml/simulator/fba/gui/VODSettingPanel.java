@@ -1,6 +1,6 @@
 /*
  * $Id:  VODSettingPanel.java 16:55:06 Meike Aichele$
- * $URL: VODSettingPanel.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.

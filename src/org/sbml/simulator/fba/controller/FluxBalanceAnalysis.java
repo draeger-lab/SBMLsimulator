@@ -1,6 +1,6 @@
 /*
  * $Id:  FluxBalanceAnalysis.java 16:07:08 Meike Aichele$
- * $URL: FluxBalanceAnalysis.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -50,9 +50,7 @@ public class FluxBalanceAnalysis {
 	 * @param doc
 	 */
 	public FluxBalanceAnalysis(Constraints constraints, SBMLDocument doc) {
-		this.targetFunc = new FluxMinimization(doc);
-		this.constraints = constraints;
-		this.setLinearProgramming(true);
+		this(new FluxMinimization(doc), constraints, true);
 	}
 	
 	/**
@@ -64,6 +62,7 @@ public class FluxBalanceAnalysis {
 	 * @param linearProgramming
 	 */
 	public FluxBalanceAnalysis(TargetFunction target, Constraints constraints, Boolean linearProgramming) {
+		super();
 		this.targetFunc = target;
 		this.constraints = constraints;
 		this.setLinearProgramming(linearProgramming);
@@ -72,7 +71,7 @@ public class FluxBalanceAnalysis {
 	/**
 	 * Calls SCPsolver to solve the problem with linear programming
 	 */
-	public double[] SolveWithLinearProgramming() {
+	public double[] solveWithLinearProgramming() {
 		targetFunc.computeTargetFunctionForLinearProgramming();
 		// TODO: call SCPSolver
 		return null;
@@ -81,25 +80,23 @@ public class FluxBalanceAnalysis {
 	/**
 	 * Calls CPLEX to solve the problem with quadratic programming
 	 */
-	public double[] SolveWithQuadraticProgramming() {
+	public double[] solveWithQuadraticProgramming() {
 		targetFunc.computeTargetFunctionForQuadraticProgramming();
 		// TODO: call CPLEX
 		return null;
 	}
 
-	
-	
 	/**
 	 * @param linearProgramming the linearProgramming to set
 	 */
-	public void setLinearProgramming(Boolean linearProgramming) {
-		this.linearProgramming = linearProgramming;
+	public void setLinearProgramming(boolean linearProgramming) {
+		this.linearProgramming = Boolean.valueOf(linearProgramming);
 	}
 
 	/**
 	 * @return the linearProgramming
 	 */
-	public Boolean getLinearProgramming() {
+	public Boolean isLinearProgramming() {
 		return linearProgramming;
 	}
 }

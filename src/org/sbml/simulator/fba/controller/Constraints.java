@@ -1,6 +1,6 @@
 /*
  * $Id:  Constraints.java 16:17:07 Meike Aichele$
- * $URL: Constraints.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -32,8 +32,8 @@ import org.sbml.jsbml.SBMLDocument;
 public class Constraints {
 	
 	/**
-	 * Contains the gibbs-energies and can be filled with
-	 * the method readGibbsFromFile(String file)
+	 * Contains the Gibbs-energies and can be filled with
+	 * the method {@link #readGibbsFromFile(String)}
 	 */
 	public double[] gibbsEnergies;
 	
@@ -45,8 +45,8 @@ public class Constraints {
 	
 	/**
 	 * Constructor, that gets a {@link SBMLDocument} and creates a new
-	 * array of gibbs-energies, that stays empty if the user doesn't check
-	 * in a gibbs-energy file.
+	 * array of Gibbs energies, that stays empty if the user doesn't check
+	 * in a Gibbs energy file.
 	 * 
 	 * @param doc
 	 */

@@ -1,6 +1,6 @@
 /*
  * $Id:  ChartPanel.java 16:42:12 Meike Aichele$
- * $URL: ChartPanel.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
