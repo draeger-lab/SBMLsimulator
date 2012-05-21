@@ -32,6 +32,7 @@
   <entry key="MANIPULATORCHOOSER">Visualization</entry>  
   
   <!-- GraphOptions TODO: move-->
+
   <entry key="GraphOptions">Network</entry>
   <entry key="MIN_NODE_SIZE">Minimum node size</entry>
   <entry key="MIN_NODE_SIZE_TOOLTIP">In case of dynamic change of node size, this determines the minimum node size.</entry>
@@ -59,3 +60,5 @@
   <entry key="GRAPH_LABELS_TOOLTIP">Enables/Disables labels.</entry>
   <entry key="COLOR_NODE_SIZE">Constant node size</entry>
   <entry key="COLOR_NODE_SIZE_TOOLTIP">Determines the constant node size in case of dynamic change of node color.</entry>
+  
+</properties>

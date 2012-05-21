@@ -17,10 +17,10 @@
  */
 package org.sbml.simulator.gui.graph;
 
+import org.sbml.simulator.math.SplineCalculation;
 import org.simulator.math.odes.MultiTable;
 
 import eva2.tools.math.interpolation.InterpolationException;
-import eva2.tools.math.interpolation.SplineInterpolation;
 
 
 /**
@@ -36,29 +36,14 @@ public class ExperimentalDataHandler {
     public ExperimentalDataHandler() throws InterpolationException{
     }
     
+    /**
+     * 
+     * @param expData
+     * @param steps
+     * @return
+     */
     public static MultiTable getInterpolateData(MultiTable expData, int steps) {
-        MultiTable interpolateData = expData;
-        //set timepoints
-        interpolateData.setTimePoints(generateTimepoints(expData.getTimePoints(), steps));
-        //TODO possible change of timepoints array? if not possible => new table from scratch
-        
-        //set interpolate data
-        for(int i = 1; i < interpolateData.getColumnCount(); i++){ //each column
-            //TODO compute interpolation for this particular column
-            //maybe just for reactions and species? --> sbmldocument needed
-            
-            /*
-             * Eingabewert/Rückgabewert double[]?
-            spline.spline(x, y, yp0, ypn);
-            */
-            
-            for(int j = 0; j < interpolateData.getTimePoints().length; j++){ //each timepoint
-                //interpolateData.setValueAt(spline.get(j), j, i);
-                //TODO spline
-            }
-        }
-        
-        return interpolateData;
+        return SplineCalculation.calculateSplineValues(expData, steps);
     }
 
     /**

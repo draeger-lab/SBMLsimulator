@@ -20,6 +20,7 @@ package org.sbml.simulator.gui.graph;
 import java.awt.Color;
 import java.util.ResourceBundle;
 
+import de.zbit.gui.ColorPalette;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.Option;
@@ -63,13 +64,13 @@ public interface GraphOptions extends KeyProvider{
      * Color for high concentration.
      */
     public static final Option<Color> COLOR1 = new Option<Color>(
-        "COLOR1", Color.class, bundle, Color.RED);
+        "COLOR1", Color.class, bundle, ColorPalette.CAMINE_RED);
     
     /**
      * Color for low concentration
      */
     public static final Option<Color> COLOR2 = new Option<Color>(
-        "COLOR2", Color.class, bundle, Color.BLUE);
+        "COLOR2", Color.class, bundle, ColorPalette.GOLD);
     
     /**
      * Node size while color interpolation.

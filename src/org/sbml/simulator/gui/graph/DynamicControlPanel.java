@@ -68,7 +68,7 @@ public class DynamicControlPanel extends JPanel{
      * Localization support.
      */
     private static final transient ResourceBundle bundle = ResourceManager
-            .getBundle("org.sbml.simulator.locales.Simulator");
+            .getBundle("org.sbml.simulator.gui.graph.DynamicGraph");
 
     // TODO
 	
@@ -256,6 +256,7 @@ public class DynamicControlPanel extends JPanel{
 		searchBar.setPaintTicks(true);
 		searchBar.setValue(0);
 		
+		// TODO: Remove Labels
 		nodeLabelslbl = new JLabel(bundle.getString("NODELABELS"));
 		nodeLabelslbl.setName("NODELABELS"); //name for mouselistener
 		nodeLabelslbl.addMouseListener(controller);
@@ -297,17 +298,17 @@ public class DynamicControlPanel extends JPanel{
 		manipulatorsPane.setBorder(BorderFactory.createTitledBorder(bundle.getString("MANIPULATORCHOOSER")));
 		manipulatorsPane.setMinimumSize(new Dimension(80, 20));
 		
-		addComponent(gbl, searchBar, 	0, 0, 7, 1, GridBagConstraints.CENTER, 	GridBagConstraints.HORIZONTAL, 	1, 0, new Insets(0,0,0,0));
-		addComponent(gbl, play, 		0, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
-		addComponent(gbl, pause, 		1, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
-		addComponent(gbl, stop, 		2, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
-		addComponent(gbl, video, 		3, 1, 1, 1, GridBagConstraints.WEST,	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
-		addComponent(gbl, timelbl, 		3, 1, 2, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
-		addComponent(gbl, simVelolbl,	0, 2, 3, 1, GridBagConstraints.WEST,	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
-		addComponent(gbl, simVeloCombo,	3, 2, 1, 1, GridBagConstraints.CENTER,  GridBagConstraints.HORIZONTAL,	1, 0, new Insets(2,2,2,2));
-		addComponent(gbl, simVeloSpin,	4, 2, 1, 1, GridBagConstraints.EAST, 	GridBagConstraints.BOTH, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, searchBar,        0, 0, 7, 1, GridBagConstraints.CENTER, 	GridBagConstraints.HORIZONTAL, 	1, 0, new Insets(0,0,0,0));
+		addComponent(gbl, play,             0, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, pause,            1, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, stop,             2, 1, 1, 1, GridBagConstraints.WEST,  	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, video,            3, 1, 1, 1, GridBagConstraints.WEST,	  GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, timelbl, 		      3, 1, 2, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, simVelolbl,	      0, 2, 3, 1, GridBagConstraints.WEST,	  GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, simVeloCombo,	    3, 2, 1, 1, GridBagConstraints.CENTER,  GridBagConstraints.HORIZONTAL,	1, 0, new Insets(2,2,2,2));
+		addComponent(gbl, simVeloSpin,	    4, 2, 1, 1, GridBagConstraints.EAST, 	  GridBagConstraints.BOTH, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, reactionLabelslbl,6, 2, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,0));
-        addComponent(gbl, reactionLabelsCB, 5, 2, 1, 1, GridBagConstraints.EAST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, reactionLabelsCB, 5, 2, 1, 1, GridBagConstraints.EAST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, nodeLabelslbl,    6, 1, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,0));
 		addComponent(gbl, nodeLabelsCB,     5, 1, 1, 1, GridBagConstraints.EAST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, manipulatorsPane, 7, 0, 3, 3, GridBagConstraints.CENTER,  GridBagConstraints.BOTH,        0, 0, new Insets(2,2,2,2));
