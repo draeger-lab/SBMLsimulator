@@ -302,6 +302,7 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
 		simVeloCombo.addItem(Items.SLOW.getName());
 		simVeloCombo.addItemListener(controller);		
 		simVeloSpin = new JSpinner();
+		simVeloSpin.setToolTipText(bundle.getString("SIMULATIONSPEED_SPINNER_TOOLTIP"));
 		setSimVeloCombo(Items.NORMAL); //by default 'normal speed'
 	
 		nodesize = new JRadioButton(Buttons.NODESIZE.getName());

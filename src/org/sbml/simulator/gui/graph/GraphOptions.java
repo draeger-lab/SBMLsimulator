@@ -54,17 +54,29 @@ public interface GraphOptions extends KeyProvider{
                     Double.class, "{(0, 1E3]}"), Double.valueOf(50d));
     
     /**
+     * Switch for uniform node colors.
+     */
+    public static final Option<Boolean> USE_UNIFORM_NODE_COLOR = new Option<Boolean>(
+        "USE_UNIFORM_NODE_COLOR", Boolean.class, bundle, Boolean.FALSE);
+    
+    /**
+     * Color for uniform node color.
+     */
+    public static final Option<Color> UNIFORM_NODE_COLOR = new Option<Color>(
+        "UNIFORM_NODE_COLOR", Color.class, bundle, ColorPalette.SECOND_292);
+    
+    /**
      * Settings in case of dynamic change of node size.
      */
-    @SuppressWarnings("unchecked")
-    public static final OptionGroup<Double> NODESIZE_GROUP = new OptionGroup<Double>(
-        "NODESIZE_GROUP", bundle, MIN_NODE_SIZE, MAX_NODE_SIZE);
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static final OptionGroup NODESIZE_GROUP = new OptionGroup(
+        "NODESIZE_GROUP", bundle, USE_UNIFORM_NODE_COLOR, UNIFORM_NODE_COLOR, MIN_NODE_SIZE, MAX_NODE_SIZE);
     
     /**
      * Color for high concentration.
      */
     public static final Option<Color> COLOR1 = new Option<Color>(
-        "COLOR1", Color.class, bundle, ColorPalette.CAMINE_RED);
+        "COLOR1", Color.class, bundle, ColorPalette.SECOND_180);
     
     /**
      * Color for middle concentration
@@ -76,7 +88,7 @@ public interface GraphOptions extends KeyProvider{
      * Color for low concentration
      */
     public static final Option<Color> COLOR3 = new Option<Color>(
-        "COLOR3", Color.class, bundle, ColorPalette.GOLD);
+        "COLOR3", Color.class, bundle, ColorPalette.SECOND_3015);
     
     /**
      * Node size while color interpolation.
