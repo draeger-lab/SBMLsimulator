@@ -20,7 +20,9 @@
   <entry key="TOVIDEO">Video</entry>
   <entry key="TOVIDEO_TOOLTIP">Save the dynamic visualization as a video.</entry>
   <entry key="NODELABELS">Nodelabels</entry>
+  <entry key="NODELABELS_TOOLTIP">Switch for node labels.</entry>
   <entry key="REACTIONLABELS">Reactionlabels</entry>
+  <entry key="REACTIONLABELS_TOOLTIP">Switch for reaction labels.</entry>
   <entry key="FAST">Fast</entry>
   <entry key="NORMAL">Normal</entry>
   <entry key="SLOW">Slow</entry>
@@ -46,8 +48,10 @@
   <entry key="REACTION_GROUP_TOOLTIP">Options for the dynamic change of reactions.</entry>
   <entry key="COLOR1">High concentration</entry>
   <entry key="COLOR1_TOOLTIP">In case of dynamic change of node color, this determines the color for high concentration.</entry>
-  <entry key="COLOR2">Low concentration</entry>
-  <entry key="COLOR2_TOOLTIP">In case of dynamic change of node color, this determines the color for low concentration.</entry>
+  <entry key="COLOR2">Middle concentration</entry>
+  <entry key="COLOR2_TOOLTIP">In case of dynamic change of node color, this determines the color for middle concentration.</entry>
+  <entry key="COLOR3">Low concentration</entry>
+  <entry key="COLOR3_TOOLTIP">In case of dynamic change of node color, this determines the color for low concentration.</entry>  
   <entry key="MIN_LINE_WIDTH">Minimum line width</entry>
   <entry key="MIN_LINE_WIDTH_TOOLTIP">Determines the minimum line width of dynamic reaction visualization.</entry> 
   <entry key="MAX_LINE_WIDTH">Maximum line width</entry>
@@ -60,5 +64,13 @@
   <entry key="GRAPH_LABELS_TOOLTIP">Enables/Disables labels.</entry>
   <entry key="COLOR_NODE_SIZE">Constant node size</entry>
   <entry key="COLOR_NODE_SIZE_TOOLTIP">Determines the constant node size in case of dynamic change of node color.</entry>
+  <entry key="SIM_SPEED_FAST">Fast play speed</entry>
+  <entry key="SIM_SPEED_FAST_TOOLTIP">Sets setting for fast play speed.</entry>
+  <entry key="SIM_SPEED_NORMAL">Normal play speed</entry>
+  <entry key="SIM_SPEED_NORMAL_TOOLTIP">Sets setting for normal play speed.</entry>  
+  <entry key="SIM_SPEED_SLOW">Slow play speed</entry>
+  <entry key="SIM_SPEED_SLOW_TOOLTIP">Sets setting for slow play speed.</entry>
+  <entry key="SIM_SPEED_GROUP">Play speed</entry>
+  <entry key="SIM_SPEED_GROUP_TOOLTIP">These settings control the play speed. The smaller the value, the faster the play speed.</entry>
   
 </properties>

@@ -37,7 +37,7 @@ public interface GraphOptions extends KeyProvider{
      * The bundle for the user's current language.
      */
     public static final ResourceBundle bundle = ResourceManager
-            .getBundle("org.sbml.simulator.locales.Simulator");
+            .getBundle("org.sbml.simulator.gui.graph.DynamicGraph");
 
     /**
      * In case of dynamic node size change, it defines the minimum node size.
@@ -67,14 +67,19 @@ public interface GraphOptions extends KeyProvider{
         "COLOR1", Color.class, bundle, ColorPalette.CAMINE_RED);
     
     /**
-     * Color for low concentration
+     * Color for middle concentration
      */
     public static final Option<Color> COLOR2 = new Option<Color>(
-        "COLOR2", Color.class, bundle, ColorPalette.GOLD);
+        "COLOR2", Color.class, bundle, Color.WHITE);
+    
+    /**
+     * Color for low concentration
+     */
+    public static final Option<Color> COLOR3 = new Option<Color>(
+        "COLOR3", Color.class, bundle, ColorPalette.GOLD);
     
     /**
      * Node size while color interpolation.
-     * TODO add to nodecolor_group
      */
     public static final Option<Double> COLOR_NODE_SIZE = new Option<Double>(
             "COLOR_NODE_SIZE", Double.class, bundle, new Range<Double>(
@@ -85,7 +90,7 @@ public interface GraphOptions extends KeyProvider{
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static final OptionGroup NODECOLOR_GROUP = new OptionGroup(
-        "NODECOLOR_GROUP", bundle, COLOR1, COLOR2, COLOR_NODE_SIZE);
+        "NODECOLOR_GROUP", bundle, COLOR1, COLOR2, COLOR3, COLOR_NODE_SIZE);
     
     /**
      * Determines the minimum line width of dynamic reaction visualization.
@@ -126,5 +131,36 @@ public interface GraphOptions extends KeyProvider{
     @SuppressWarnings("unchecked")
     public static final OptionGroup<Boolean> GRAPH_LABELS = new OptionGroup<Boolean>(
         "GRAPH_LABELS", bundle, SHOW_NODE_LABELS, SHOW_REACTION_LABELS);
+    
+    /**
+     * Sets the fast simulation speed.
+     */
+    public static final Option<Double> SIM_SPEED_FAST = new Option<Double>(
+            "SIM_SPEED_FAST", Double.class, bundle, new Range<Double>(
+                    Double.class, "{[1, 1E3]}"), Double.valueOf(5d));
+    
+    //TODO integer options?
+    
+    /**
+     * Sets the normal simulation speed.
+     */
+    public static final Option<Double> SIM_SPEED_NORMAL = new Option<Double>(
+            "SIM_SPEED_NORMAL", Double.class, bundle, new Range<Double>(
+                    Double.class, "{[1, 1E3]}"), Double.valueOf(25d));
   
+    /**
+     * Sets the slow simulation speed.
+     */
+    public static final Option<Double> SIM_SPEED_SLOW = new Option<Double>(
+            "SIM_SPEED_SLOW", Double.class, bundle, new Range<Double>(
+                    Double.class, "{[1, 1E3]}"), Double.valueOf(80d));
+    
+    /**
+     * Options for simulation speed.
+     */
+    @SuppressWarnings("unchecked")
+    public static final OptionGroup<Double> SIM_SPEED_GROUP = new OptionGroup<Double>(
+        "SIM_SPEED_GROUP", bundle, SIM_SPEED_FAST, SIM_SPEED_NORMAL, SIM_SPEED_SLOW);
+    
+    //TODO options for graphmanipulator
 }

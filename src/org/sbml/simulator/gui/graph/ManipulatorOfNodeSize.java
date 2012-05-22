@@ -80,6 +80,8 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
         computeSpeciesAdjusting(minMaxOfSpecies[0], minMaxOfSpecies[1],
                 minNodeSize, maxNodeSize);
     }
+    
+    //TODO constructor with additional hashmap(?) of colors from legend.
 
     /**
      * Computes adjusting values for given limits.

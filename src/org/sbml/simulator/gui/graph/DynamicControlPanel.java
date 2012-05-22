@@ -23,9 +23,12 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -44,6 +47,8 @@ import org.sbml.simulator.gui.SimulatorUI;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.actioncommand.ActionCommand;
 import de.zbit.util.ResourceManager;
+import de.zbit.util.prefs.KeyProvider;
+import de.zbit.util.prefs.SBPreferences;
 
 /**
  * This panel holds all elements to control the dynamic visualization.
@@ -52,7 +57,7 @@ import de.zbit.util.ResourceManager;
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
-public class DynamicControlPanel extends JPanel{
+public class DynamicControlPanel extends JPanel implements ItemListener{
 	
 	/**
 	 * 
@@ -70,8 +75,6 @@ public class DynamicControlPanel extends JPanel{
     private static final transient ResourceBundle bundle = ResourceManager
             .getBundle("org.sbml.simulator.gui.graph.DynamicGraph");
 
-    // TODO
-	
 	/**
 	 * List of action commands.
 	 * @author Fabian Schwarzkopf
@@ -106,6 +109,17 @@ public class DynamicControlPanel extends JPanel{
 	    FAST, NORMAL, SLOW, NODESIZE, NODECOLOR;
 	    
 	    /**
+	     * Play speeds.
+	     */
+        private static int FAST_SPEED = (int) SBPreferences.getPreferencesFor(
+                GraphOptions.class).getDouble(GraphOptions.SIM_SPEED_FAST);
+        private static int NORMAL_SPEED = (int) SBPreferences
+                .getPreferencesFor(GraphOptions.class).getDouble(
+                        GraphOptions.SIM_SPEED_NORMAL);
+        private static int SLOW_SPEED = (int) SBPreferences.getPreferencesFor(
+                GraphOptions.class).getDouble(GraphOptions.SIM_SPEED_SLOW);
+	    
+	    /**
 	     * Returns localized name of this Item.
 	     * @return
 	     */
@@ -120,13 +134,28 @@ public class DynamicControlPanel extends JPanel{
          */
         public int getSpeed(Items item) {
             if (item == FAST) {
-                return 5;
+                return FAST_SPEED;
             } else if (item == NORMAL) {
-                return 25;
+                return NORMAL_SPEED;
             } else if (item == SLOW) {
-                return 80;
+                return SLOW_SPEED;
             }
-            return 0;
+            return NORMAL_SPEED;
+        }
+        
+        /**
+         * Sets speed of different items.
+         * @param item
+         * @param speed
+         */
+        public static void setSpeed(Items item, int speed){
+            if (item == FAST) {
+                FAST_SPEED = speed;
+            } else if (item == NORMAL) {
+                NORMAL_SPEED = speed;
+            } else if (item == SLOW) {
+                SLOW_SPEED = speed;
+            }
         }
         
         /**
@@ -179,9 +208,7 @@ public class DynamicControlPanel extends JPanel{
 	private JLabel simVelolbl;
 	private JComboBox simVeloCombo;
 	private JSpinner simVeloSpin;
-	private JLabel nodeLabelslbl;
 	private JCheckBox nodeLabelsCB;
-	private JLabel reactionLabelslbl;
 	private JCheckBox reactionLabelsCB;
 	private JRadioButton nodesize;
 	private JRadioButton nodecolor;
@@ -227,9 +254,8 @@ public class DynamicControlPanel extends JPanel{
 		 */
 		controller.setCore(core);
 		setTimepoint(core.getCurrTimepoint());
-        Component[] elements = { play, video, searchBar, simVeloCombo,
-                simVeloSpin, nodeLabelsCB, reactionLabelsCB, nodesize,
-                nodecolor, nodeLabelslbl, reactionLabelslbl };
+        Component[] elements = { play, video, searchBar, simVeloCombo, nodeLabelsCB, reactionLabelsCB, nodesize,
+                nodecolor };
 		GUITools.setEnabledForAll(true, elements);
 		panelActivationStatus = true;
 	}
@@ -256,16 +282,10 @@ public class DynamicControlPanel extends JPanel{
 		searchBar.setPaintTicks(true);
 		searchBar.setValue(0);
 		
-		// TODO: Remove Labels
-		nodeLabelslbl = new JLabel(bundle.getString("NODELABELS"));
-		nodeLabelslbl.setName("NODELABELS"); //name for mouselistener
-		nodeLabelslbl.addMouseListener(controller);
-		nodeLabelsCB = new JCheckBox();
+		SBPreferences prefs = SBPreferences.getPreferencesFor(GraphOptions.class);
+		nodeLabelsCB = GUITools.createJCheckBox(GraphOptions.SHOW_NODE_LABELS, prefs, this);
 		nodeLabelsCB.addActionListener(controller);
-		reactionLabelslbl = new JLabel(bundle.getString("REACTIONLABELS"));
-		reactionLabelslbl.setName("REACTIONLABELS");
-		reactionLabelslbl.addMouseListener(controller);
-		reactionLabelsCB = new JCheckBox();
+		reactionLabelsCB = GUITools.createJCheckBox(GraphOptions.SHOW_REACTION_LABELS, prefs, this);
 		reactionLabelsCB.addActionListener(controller);
 		
 		searchBar.addChangeListener(controller);
@@ -303,19 +323,17 @@ public class DynamicControlPanel extends JPanel{
 		addComponent(gbl, pause,            1, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, stop,             2, 1, 1, 1, GridBagConstraints.WEST,  	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, video,            3, 1, 1, 1, GridBagConstraints.WEST,	  GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
-		addComponent(gbl, timelbl, 		      3, 1, 2, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, timelbl, 		      5, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.HORIZONTAL,1, 0, new Insets(2,2,2,2));
 		addComponent(gbl, simVelolbl,	      0, 2, 3, 1, GridBagConstraints.WEST,	  GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
-		addComponent(gbl, simVeloCombo,	    3, 2, 1, 1, GridBagConstraints.CENTER,  GridBagConstraints.HORIZONTAL,	1, 0, new Insets(2,2,2,2));
-		addComponent(gbl, simVeloSpin,	    4, 2, 1, 1, GridBagConstraints.EAST, 	  GridBagConstraints.BOTH, 		0, 0, new Insets(2,2,2,2));
-		addComponent(gbl, reactionLabelslbl,6, 2, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,0));
-		addComponent(gbl, reactionLabelsCB, 5, 2, 1, 1, GridBagConstraints.EAST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,2));
-		addComponent(gbl, nodeLabelslbl,    6, 1, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,0));
-		addComponent(gbl, nodeLabelsCB,     5, 1, 1, 1, GridBagConstraints.EAST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, simVeloCombo,	    3, 2, 1, 1, GridBagConstraints.CENTER,  GridBagConstraints.NONE,	0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, simVeloSpin,	    4, 2, 1, 1, GridBagConstraints.EAST, 	  GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, reactionLabelsCB, 6, 2, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, nodeLabelsCB,     6, 1, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, manipulatorsPane, 7, 0, 3, 3, GridBagConstraints.CENTER,  GridBagConstraints.BOTH,        0, 0, new Insets(2,2,2,2));
 
         Component[] elements = { play, pause, stop, video, searchBar,
                 simVeloCombo, simVeloSpin, nodeLabelsCB, reactionLabelsCB,
-                nodesize, nodecolor, nodeLabelslbl, reactionLabelslbl };
+                nodesize, nodecolor};
 		GUITools.setEnabledForAll(false, elements);
 		panelActivationStatus = false;
 		logger.fine("DynamicControlPanel initialized.");
@@ -363,7 +381,7 @@ public class DynamicControlPanel extends JPanel{
         pause.setEnabled(true);
         stop.setEnabled(true);
         simVeloCombo.setEnabled(false);
-        simVeloSpin.setEnabled(false);
+//        simVeloSpin.setEnabled(false);
         video.setEnabled(false);
     }
 	
@@ -375,7 +393,7 @@ public class DynamicControlPanel extends JPanel{
         searchBar.setEnabled(true);
         pause.setEnabled(true);
         simVeloCombo.setEnabled(true);
-        simVeloSpin.setEnabled(true);
+//        simVeloSpin.setEnabled(true);
         video.setEnabled(true);
     }
     
@@ -388,7 +406,7 @@ public class DynamicControlPanel extends JPanel{
         pause.setEnabled(true);
         stop.setEnabled(true);
         simVeloCombo.setEnabled(true);
-        simVeloSpin.setEnabled(true);
+//        simVeloSpin.setEnabled(true);
         video.setEnabled(true);
     }
 	
@@ -493,4 +511,28 @@ public class DynamicControlPanel extends JPanel{
 		gbl.setConstraints(c, gbc);
 		add(c);
 	}
+
+    /* (non-Javadoc)
+     * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
+     */
+    @Override
+    public void itemStateChanged(ItemEvent e) {
+        if (e.getSource() instanceof JCheckBox) {
+            JCheckBox cb = (JCheckBox) e.getSource();
+            if (cb.getName() != null) {
+                String name = cb.getName();
+                if (KeyProvider.Tools.providesOption(GraphOptions.class, name)) {
+                    SBPreferences prefs = SBPreferences
+                            .getPreferencesFor(GraphOptions.class);
+                    logger.fine(name + "=" + cb.isSelected());
+                    prefs.put(name, cb.isSelected());
+                    try {
+                        prefs.flush();
+                    } catch (BackingStoreException exc) {
+                        logger.fine(exc.getLocalizedMessage());
+                    }
+                }
+            }
+        }
+    }
 }

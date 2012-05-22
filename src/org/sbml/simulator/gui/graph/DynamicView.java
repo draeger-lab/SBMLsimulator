@@ -159,6 +159,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     /**
      * Workaround to get selected species.
      * There's no way of getting selected items?!
+     * TODO user objects and hashmaps
      * @return
      */
     public String[] getSelectedSpecies(){
@@ -174,6 +175,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     /**
      * Workaround to get selected reactions.
      * There's no way of getting selected items?!
+     * TODO user objects and hashmaps
      * @return
      */
     public String[] getSelectedReactions(){

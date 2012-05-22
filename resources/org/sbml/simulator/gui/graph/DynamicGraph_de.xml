@@ -20,7 +20,9 @@
   <entry key="TOVIDEO">Video</entry>
   <entry key="TOVIDEO_TOOLTIP">Speichert die dynamische Visualisierung als Video.</entry>
   <entry key="NODELABELS">Knotenbeschriftung</entry>
-  <entry key="REACTIONLABELS">Reaktionenbeschr.</entry>
+  <entry key="NODELABELS_TOOLTIP">Schält die Knotenbeschriftung ein/aus.</entry>
+  <entry key="REACTIONLABELS">Reaktionenbeschriftung</entry>
+  <entry key="REACTIONLABELS_TOOLTIP">Schält die Reaktionenbeschriftung ein/aus.</entry>
   <entry key="FAST">Schnell</entry>
   <entry key="NORMAL">Normal</entry>
   <entry key="SLOW">Langsam</entry>
@@ -31,7 +33,7 @@
   <entry key="NODECOLOR">Knotenfarbe</entry>
   <entry key="MANIPULATORCHOOSER">Visualisierung</entry>
   
-  <!-- GraphOptions TODO: move-->
+  <!-- GraphOptions -->
 
   <entry key="GraphOptions">Netzwerk</entry>
   <entry key="MIN_NODE_SIZE">Minimale Knotengröße</entry>
@@ -46,8 +48,10 @@
   <entry key="REACTION_GROUP_TOOLTIP">Einstellungen für die dynamische Änderung der Reaktionen.</entry>
   <entry key="COLOR1">Hohe Konzentration</entry>
   <entry key="COLOR1_TOOLTIP">Bei dynamischer Änderung der Knotenfarbe, definiert dies die Farbe für hohe Konzentration.</entry>
-  <entry key="COLOR2">Niedrige Konzentration</entry>
-  <entry key="COLOR2_TOOLTIP">Bei dynamischer Änderung der Knotenfarbe, definiert dies die Farbe für niedrige Konzentration.</entry>
+  <entry key="COLOR2">Mittlere Konzentration</entry>
+  <entry key="COLOR2_TOOLTIP">Bei dynamischer Änderung der Knotenfarbe, definiert dies die Farbe für mittlere Konzentration.</entry>
+  <entry key="COLOR3">Niedrige Konzentration</entry>
+  <entry key="COLOR3_TOOLTIP">Bei dynamischer Änderung der Knotenfarbe, definiert dies die Farbe für niedrige Konzentration.</entry>
   <entry key="MIN_LINE_WIDTH">Minimale Linienbreite</entry>
   <entry key="MIN_LINE_WIDTH_TOOLTIP">Definiert die minimale Linienbreite der dynamischen Visualisierung von Reaktionen.</entry>    
   <entry key="MAX_LINE_WIDTH">Maximale Linienbreite</entry>
@@ -60,5 +64,13 @@
   <entry key="GRAPH_LABELS_TOOLTIP">Aktiviert/Deaktiviert die Beschriftungen.</entry>
   <entry key="COLOR_NODE_SIZE">Konstante Knotengröße</entry>
   <entry key="COLOR_NODE_SIZE_TOOLTIP">Stellt die (konstante) Knotengröße, für die dynamische Änderung der Knotenfarbe, ein.</entry>
+  <entry key="SIM_SPEED_FAST">Schnelle Abspielgeschwindigkeit</entry>
+  <entry key="SIM_SPEED_FAST_TOOLTIP">Stellt die schnelle Abspielgeschwindigkeit ein.</entry>
+  <entry key="SIM_SPEED_NORMAL">Normale Abspielgeschwindigkeit</entry>
+  <entry key="SIM_SPEED_NORMAL_TOOLTIP">Stellt die normale Abspielgeschwindigkeit ein.</entry>  
+  <entry key="SIM_SPEED_SLOW">Langsame Abspielgeschwindigkeit</entry>
+  <entry key="SIM_SPEED_SLOW_TOOLTIP">Stellt die langsame Abspielgeschwindigkeit ein.</entry>
+  <entry key="SIM_SPEED_GROUP">Abspielgeschwindigkeit</entry>
+  <entry key="SIM_SPEED_GROUP_TOOLTIP">Diese Eisntellungen steuern die Abspielgeschwindigkeit. Je kleiner der Wert, desto schneller die Geschwindigkeit.</entry>
   
 </properties>
