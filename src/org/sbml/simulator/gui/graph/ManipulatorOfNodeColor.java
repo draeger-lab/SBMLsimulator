@@ -23,6 +23,7 @@ import org.sbml.jsbml.SBMLDocument;
 
 import y.view.NodeRealizer;
 import de.zbit.graph.io.SBML2GraphML;
+import de.zbit.gui.ColorPalette;
 
 
 /**
@@ -35,9 +36,10 @@ import de.zbit.graph.io.SBML2GraphML;
 public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
     
     /**
-     * Field for the first color (high concentration) and second color (low concentration).
+     * Field for the first color (high concentration), second color (mid
+     * concentration), third color (low concentration).
      */
-    private int[] RGBcolor1, RGBcolor2;
+    private int[] RGBcolor1, RGBcolor2, RGBcolor3;
     
     /**
      * Slope of linear regression m, and yintercept c.
@@ -45,8 +47,9 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
     private double m, c;
     
     /**
-     * Constructs node-color manipulator with default gradient red (high) ->
-     * blue (low) and default node size and default reactions linewidths.
+     * Constructs node-color manipulator with default gradient camine red (high)
+     * -> white (mid) -> gold (low) and default node size and default reactions
+     * linewidths.
      * 
      * @param graph
      * @param document
@@ -58,25 +61,33 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
             double[] minMaxOfReactionsData) {
         super(graph, document, minMaxOfReactionsData, (float)0.1, 6);
         DEFAULT_NODE_SIZE = 30;
-        RGBcolor1 = new int[]{255, 0, 0};
-        RGBcolor2 = new int[]{0, 0, 255};
+        RGBcolor1 = new int[] { ColorPalette.CAMINE_RED.getRed(),
+                ColorPalette.CAMINE_RED.getGreen(),
+                ColorPalette.CAMINE_RED.getBlue() };
+        RGBcolor2 = new int[]{255, 255, 255}; //white
+        RGBcolor3 = new int[]{ ColorPalette.GOLD.getRed(),
+                ColorPalette.GOLD.getGreen(),
+                ColorPalette.GOLD.getBlue() };
         computeSpeciesAdjusting(minMaxOfSpeciesData[0], minMaxOfSpeciesData[1]);
     }
     
     /**
      * Constructs node-color manipulator with the given RGB colors as color1 (high) ->
-     * color2 (low) and a constant node size.
+     * color2 (mid) -> color3 (low) and a constant node size.
      * @param graph
      * @param document
-     * @param color1
-     * @param color2
      * @param minMaxOfSpeciesData
      * @param minMaxOfReactionsData
      * @param nodeSize
+     * @param color1
+     * @param color2
+     * @param color3
+     * @param reactionsMinLineWidth
+     * @param reactionsMaxLineWidth
      */
     public ManipulatorOfNodeColor(SBML2GraphML graph, SBMLDocument document,
             double[] minMaxOfSpeciesData, double[] minMaxOfReactionsData,
-            double nodeSize, Color color1, Color color2, float reactionsMinLineWidth, float reactionsMaxLineWidth) {
+            double nodeSize, Color color1, Color color2, Color color3, float reactionsMinLineWidth, float reactionsMaxLineWidth) {
         super(graph, document, minMaxOfReactionsData, reactionsMinLineWidth, reactionsMaxLineWidth);
         DEFAULT_NODE_SIZE = nodeSize;
         int r = color1.getRed();
@@ -87,6 +98,10 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
         g = color2.getGreen();
         b = color2.getBlue();
         RGBcolor2 = new int[] { r, g, b };
+        r = color3.getRed();
+        g = color3.getGreen();
+        b = color3.getBlue();
+        RGBcolor3 = new int[] { r, g, b }; 
         computeSpeciesAdjusting(minMaxOfSpeciesData[0], minMaxOfSpeciesData[1]);
     }
     
@@ -102,24 +117,50 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
     }
     
     /**
-     * Linear interpolation over two internally stored colors.
-     * @param percent double between 0 and 1
-     * @return color of the linear interpolation, null on false input.
+     * Linear interpolation over two given colors.
+     * @param percent
+     * @param color1
+     * @param color2
+     * @return
      */
-    private int[] linearColorInterpolation(double percent){
+    private int[] linearColorInterpolation(double percent, int[] color1, int[] color2){
         int[] outcolor = {0, 0, 0};
         if (percent >= 0 && percent <= 1) {
             for (int i = 0; i < outcolor.length; i++) {
-                outcolor[i] = (int) (RGBcolor1[i] * percent + RGBcolor2[i]
+                outcolor[i] = (int) (color1[i] * percent + color2[i]
                         * (1 - percent));
             }
             return outcolor;
         } else if (percent > 1) {
             //maybe round-off error
-            return RGBcolor1;
+            return color1;
         } else {
             //maybe round-off error
-            return RGBcolor2;
+            return color2;
+        }
+    }
+    
+    /**
+     * Linear interpolation over three internally stored colors.
+     * @param percent
+     * @return
+     */
+    private int[] linearColorInterpolationForThree(double percent){
+        if (percent >= 0 && percent <= 0.5) {
+            // color interpolation between color2 (mid concentration) and color3
+            // (low concentration)
+            double[] tmpRegr = computeBIAS(0, 0.5, 0, 1);
+            return linearColorInterpolation(percent*tmpRegr[0]+tmpRegr[1], RGBcolor2, RGBcolor3);
+        } else if (percent > 0.5 && percent < 1.0){
+            //color interpolation between color1 (high concentration) and color2 (mid concentration)
+            double[] tmpRegr = computeBIAS(0.5, 1, 0, 1);
+            return linearColorInterpolation(percent*tmpRegr[0]+tmpRegr[1], RGBcolor1, RGBcolor2);
+        } else if (percent > 1) {
+            // maybe round-off error
+            return RGBcolor1;
+        } else {
+            // maybe round-off error
+            return RGBcolor3;
         }
     }
 
@@ -131,7 +172,7 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
         NodeRealizer nr = graph.getSimpleGraph()
                 .getRealizer(graph.getId2node().get(id));
         nr.setSize(DEFAULT_NODE_SIZE, DEFAULT_NODE_SIZE); //standard node size
-        int[] RGBinterpolated = linearColorInterpolation(value*m+c);
+        int[] RGBinterpolated = linearColorInterpolationForThree(value*m+c);
         nr.setFillColor(new Color(RGBinterpolated[0], RGBinterpolated[1], RGBinterpolated[2]));
         
         /*
