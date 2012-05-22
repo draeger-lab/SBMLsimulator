@@ -42,59 +42,7 @@
   <entry key="ADDITIONAL_COLUMNS_ARE_IGNORED">Einige Elemente werden ignoriert.</entry>
   <entry key="ADDITIONAL_COLUMNS_ARE_IGNORED_TOOLTIP">Die Datei enthält einige Elemente, die kein zugehöriges Gegenstück im gegebenen Modell besitzen. Diese Elemente werden nicht im Diagramm erscheinen und in der weiteren Analyse ignoriert werden</entry>
   <entry key="TIME">Zeit</entry>
-  
-  <!-- DynamicControlPanel -->
-  
-  <entry key="PLAY">Abspielen</entry>
-  <entry key="PLAY_TOOLTIP">Spielt die dynamische Visualisierung ab.</entry>
-  <entry key="PAUSE">Pause</entry>
-  <entry key="PAUSE_TOOLTIP">Pausiert die dynamische Visualisierung.</entry>
-  <entry key="STOP">Stop</entry>
-  <entry key="STOP_TOOLTIP">Stoppt die dynamische Visualisierung.</entry>
-  <entry key="TOVIDEO">Video</entry>
-  <entry key="TOVIDEO_TOOLTIP">Speichert die dynamische Visualisierung als Video.</entry>
-  <entry key="NODELABELS">Knotenbeschriftung</entry>
-  <entry key="REACTIONLABELS">Reaktionenbeschr.</entry>
-  <entry key="FAST">Schnell</entry>
-  <entry key="NORMAL">Normal</entry>
-  <entry key="SLOW">Langsam</entry>
-  <entry key="FALSE_INPUT">Eingabe kein positiver Integer.</entry>
-  <entry key="TIMEPOINT">Zeitpunkt</entry>
-  <entry key="SIMULATIONSPEED">Simulationsgeschwindigkeit</entry>
-  <entry key="NODESIZE">Knotengröße</entry>
-  <entry key="NODECOLOR">Knotenfarbe</entry>
-  <entry key="MANIPULATORCHOOSER">Visualisierung</entry>
-  
-  <!-- GraphOptions TODO: move-->
-  <entry key="GraphOptions">Netzwerk</entry>
-  <entry key="MIN_NODE_SIZE">Minimale Knotengröße</entry>
-  <entry key="MIN_NODE_SIZE_TOOLTIP">Bei dynamischer Änderung der Knotengröße, definiert dies die minimale Knotengröße.</entry>
-  <entry key="MAX_NODE_SIZE">Maximale Knotengröße</entry>
-  <entry key="MAX_NODE_SIZE_TOOLTIP">Bei dynamischer Änderung der Knotengröße, definiert dies die maximale Knotengröße.</entry>
-  <entry key="NODESIZE_GROUP">Dynamische Änderung der Knotengröße</entry>
-  <entry key="NODESIZE_GROUP_TOOLTIP">Einstellungen für die dynamische Änderung der Knotengröße.</entry>
-  <entry key="NODECOLOR_GROUP">Dynamische Änderung der Knotenfarbe</entry>
-  <entry key="NODECOLOR_GROUP_TOOLTIP">Einstellungen für die dynamische Änderung der Knotenfarbe.</entry>
-  <entry key="REACTION_GROUP">Reaktionen</entry>
-  <entry key="REACTION_GROUP_TOOLTIP">Einstellungen für die dynamische Änderung der Reaktionen.</entry>
-  <entry key="COLOR1">Hohe Konzentration</entry>
-  <entry key="COLOR1_TOOLTIP">Bei dynamischer Änderung der Knotenfarbe, definiert dies die Farbe für hohe Konzentration.</entry>
-  <entry key="COLOR2">Niedrige Konzentration</entry>
-  <entry key="COLOR2_TOOLTIP">Bei dynamischer Änderung der Knotenfarbe, definiert dies die Farbe für niedrige Konzentration.</entry>
-  <entry key="MIN_LINE_WIDTH">Minimale Linienbreite</entry>
-  <entry key="MIN_LINE_WIDTH_TOOLTIP">Definiert die minimale Linienbreite der dynamischen Visualisierung von Reaktionen.</entry>    
-  <entry key="MAX_LINE_WIDTH">Maximale Linienbreite</entry>
-  <entry key="MAX_LINE_WIDTH_TOOLTIP">Definiert die maximale Linienbreite der dynamischen Visualisierung von Reaktionen.</entry>
-  <entry key="SHOW_NODE_LABELS">Knotenbeschriftung</entry>
-  <entry key="SHOW_NODE_LABELS_TOOLTIP">Aktiviert/Deaktiviert die Knotenbeschriftung.</entry>
-  <entry key="SHOW_REACTION_LABELS">Reaktionenbeschriftung</entry>
-  <entry key="SHOW_REACTION_LABELS_TOOLTIP">Aktiviert/Deaktiviert die Reaktionenbeschriftung.</entry>  
-  <entry key="GRAPH_LABELS">Beschriftung</entry>
-  <entry key="GRAPH_LABELS_TOOLTIP">Aktiviert/Deaktiviert die Beschriftungen.</entry>
-  <entry key="COLOR_NODE_SIZE">Konstante Knotengröße</entry>
-  <entry key="COLOR_NODE_SIZE_TOOLTIP">Stellt die (konstante) Knotengröße, für die dynamische Änderung der Knotenfarbe, ein.</entry>
-  
-  
+    
   <!-- EstimationOptions -->
     
   <entry key="EstimationOptions">Schätzverfahren</entry>
