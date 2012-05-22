@@ -121,6 +121,42 @@ public interface EstimationOptions extends KeyProvider {
 		"EST_MULTI_SHOOT", Boolean.class, bundle, Boolean.TRUE);
 	
 	/**
+	 * If this is selected, splines will be calculated from given experimental data
+	 * and the parameter estimation procedure will fit the system to the splines instead
+	 * of the original values. The advantage of this procedure is that the amount of available
+	 * data is increased due to this form of interpolation, also ensuring that the shape of
+	 * the resulting curves comes close to what could be expected. The disadvantage is that
+	 * the influence of potential outliers on the overall fitness is increased. 
+	 */
+	public static final Option<Boolean> FIT_TO_SPLINES = new Option<Boolean>(
+		"FIT_TO_SPLINES", Boolean.class, bundle, Boolean.FALSE);
+
+	/**
+	 * Range that is used to decide whether or not spline fitting is enabled.
+	 */
+	public static final ValuePairUncomparable<Option<Boolean>, Range<Boolean>> SPLINE_FITTING_SELECTED = new ValuePairUncomparable<Option<Boolean>, Range<Boolean>>(
+		FIT_TO_SPLINES, new Range<Boolean>(Boolean.class, Boolean.TRUE));
+
+	/**
+	 * This defines the number of additional spline sampling points between the
+	 * measurement data. If you select zero, only the real sampling points will be
+	 * used.
+	 */
+	@SuppressWarnings("unchecked")
+	public static final Option<Integer> NUMBER_OF_SPLINE_SAMPLES = new Option<Integer>(
+		"NUMBER_OF_SPLINE_SAMPLES", Integer.class, bundle, Integer.valueOf(50),
+		SPLINE_FITTING_SELECTED);
+
+	/**
+	 * These options allow you to estimate parameters with respect to spline
+	 * interpolation values between given measurement data and to configure how to
+	 * calculate these splines.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static final OptionGroup SPLINE_FITTING = new OptionGroup(
+		"SPLINE_FITTING", bundle, FIT_TO_SPLINES, NUMBER_OF_SPLINE_SAMPLES);
+	
+	/**
    * 
    */
 	@SuppressWarnings("unchecked")

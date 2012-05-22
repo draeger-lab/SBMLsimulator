@@ -66,6 +66,7 @@
   <entry key="MANIPULATORCHOOSER">Visualization</entry>  
   
   <!-- GraphOptions TODO: move-->
+  
   <entry key="GraphOptions">Network</entry>
   <entry key="MIN_NODE_SIZE">Minimum node size</entry>
   <entry key="MIN_NODE_SIZE_TOOLTIP">In case of dynamic change of node size, this determines the minimum node size.</entry>
@@ -115,6 +116,12 @@
   <entry key="EST_MIN_VALUE_TOOLTIP">The minimal value in the absolute allowable range in a parameter estimation procedure.</entry>
   <entry key="EST_MULTI_SHOOT">Use multiple shooting integration</entry>
   <entry key="EST_MULTI_SHOOT_TOOLTIP">Decide whether a model calibration should be done using multiple shoot technique. This should be the default. The other possibility is the so-called single shoot technique. This means that only one initial value is taken to integrate the ordinary differential equation system, whereas the multiple shoot technique restarts the integration in each time step given the values in this step. The aim is then to come as close as possible to the start value in the next time step. In many cases the fitness landscape becomes much more friendly when using a multiple shoot strategy.</entry>
+  <entry key="FIT_TO_SPLINES">Fit the system to spline interpolations.</entry>
+  <entry key="FIT_TO_SPLINES_TOOLTIP">If this is selected, splines will be calculated from given experimental data and the parameter estimation procedure will fit the system to the splines instead of the original values. The advantage of this procedure is that the amount of available data is increased due to this form of interpolation, also ensuring that the shape of the resulting curves comes close to what could be expected. The disadvantage is that the influence of potential outliers on the overall fitness is increased. </entry>
+  <entry key="NUMBER_OF_SPLINE_SAMPLES">Number of spline samples</entry>
+  <entry key="NUMBER_OF_SPLINE_SAMPLES_TOOLTIP">This defines the number of additional spline sampling points between the measurement data. If you select zero, only the real sampling points will be used.</entry>
+  <entry key="SPLINE_FITTING">Spline approximation</entry>
+  <entry key="SPLINE_FITTING_TOOLTIP">These options allow you to estimate parameters with respect to spline interpolation values between given measurement data and to configure how to calculate these splines.</entry>
   <entry key="OPTIMIZATION_TARGETS">Default optimization targets</entry>
   <entry key="OPTIMIZATION_TARGETS_TOOLTIP">Select the default optimization targets.</entry>
   <entry key="OPTIMIZATION_RANGES">Ranges of all optimization targets</entry>

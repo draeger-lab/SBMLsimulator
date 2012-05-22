@@ -59,6 +59,7 @@ import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.io.CSVReadingTask;
 import org.sbml.simulator.io.SimulatorIOOptions;
+import org.sbml.simulator.math.SplineCalculation;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.AppConf;
@@ -585,6 +586,15 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 				final WindowListener wl = EventHandler.create(WindowListener.class,
 					this, "optimizationFinished", "source", "windowClosed");
 				final BaseFrame ui = this;
+				final List<MultiTable> experimentalData = simPanel.getExperimentalData();
+				SBPreferences prefs = SBPreferences.getPreferencesFor(EstimationOptions.class);
+				if (prefs.getBoolean(EstimationOptions.FIT_TO_SPLINES)) {
+					for (int i = experimentalData.size() - 1; i >= 0; i--) {
+						experimentalData.set(i, SplineCalculation.calculateSplineValues(
+							experimentalData.get(i),
+							prefs.getInt(EstimationOptions.NUMBER_OF_SPLINE_SAMPLES)));
+					}
+				}
 				new Thread(new Runnable() {
 					/* (non-Javadoc)
 					 * @see java.lang.Runnable#run()
@@ -596,8 +606,8 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 									.getPreferencesFor(EstimationOptions.class);
 							simPanel.refreshStepSize();
 							EstimationProblem estimationProblem = new EstimationProblem(
-								simPanel.getSolver(), simPanel.getDistance(), model, simPanel
-										.getExperimentalData(), prefs
+								simPanel.getSolver(), simPanel.getDistance(), model,
+								experimentalData, prefs
 										.getBoolean(EstimationOptions.EST_MULTI_SHOOT), panel
 										.getSelectedQuantityRanges());
 							EvA2GUIStarter.init(estimationProblem, ui, simPanel, wl);
