@@ -29,6 +29,7 @@
   <entry key="FALSE_INPUT">Eingabe kein positiver Integer.</entry>
   <entry key="TIMEPOINT">Zeitpunkt</entry>
   <entry key="SIMULATIONSPEED">Simulationsgeschwindigkeit</entry>
+  <entry key="SIMULATIONSPEED_SPINNER_TOOLTIP">Zeigt die aktuelle Simulationsgeschwindigkeit als Wert an. Kann in den Optionen unter Netzwerk geändert werden.</entry>
   <entry key="NODESIZE">Knotengröße</entry>
   <entry key="NODECOLOR">Knotenfarbe</entry>
   <entry key="MANIPULATORCHOOSER">Visualisierung</entry>
@@ -40,6 +41,10 @@
   <entry key="MIN_NODE_SIZE_TOOLTIP">Bei dynamischer Änderung der Knotengröße, definiert dies die minimale Knotengröße.</entry>
   <entry key="MAX_NODE_SIZE">Maximale Knotengröße</entry>
   <entry key="MAX_NODE_SIZE_TOOLTIP">Bei dynamischer Änderung der Knotengröße, definiert dies die maximale Knotengröße.</entry>
+  <entry key="USE_UNIFORM_NODE_COLOR">Einheitliche Knotenfarbe</entry>
+  <entry key="USE_UNIFORM_NODE_COLOR_TOOLTIP">Benutzt eine einheitliche Knotenfarbe, anstatt den Farben in der Legende.</entry>
+  <entry key="UNIFORM_NODE_COLOR">Knotenfarbe</entry>
+  <entry key="UNIFORM_NODE_COLOR_TOOLTIP">Farbeinstellung für die einheitliche Knotenfarbe.</entry>
   <entry key="NODESIZE_GROUP">Dynamische Änderung der Knotengröße</entry>
   <entry key="NODESIZE_GROUP_TOOLTIP">Einstellungen für die dynamische Änderung der Knotengröße.</entry>
   <entry key="NODECOLOR_GROUP">Dynamische Änderung der Knotenfarbe</entry>

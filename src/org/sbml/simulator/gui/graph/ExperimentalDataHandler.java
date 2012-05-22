@@ -31,7 +31,7 @@ import eva2.tools.math.interpolation.InterpolationException;
  */
 public class ExperimentalDataHandler {
     
-//    private static SplineInterpolation spline = new SplineInterpolation(); //TODO ??
+//    private static SplineInterpolation spline = new SplineInterpolation(); //TODO 
     
     public ExperimentalDataHandler() throws InterpolationException{
     }

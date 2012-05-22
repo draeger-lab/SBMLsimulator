@@ -20,6 +20,7 @@ package org.sbml.simulator.gui.graph;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.JSplitPane;
@@ -29,6 +30,7 @@ import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.Species;
 import org.sbml.simulator.gui.LegendPanel;
+import org.sbml.simulator.gui.table.LegendTableModel;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.graph.gui.TranslatorSBMLgraphPanel;
@@ -87,21 +89,31 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      * Used {@link SBMLDocument}.
      */
     private SBMLDocument document;
-     
+    
+    /**
+     * Selection states of species IDs according to {@link LegendTableModel}.
+     */
+    private HashMap<String, Boolean> speciesSelectionStates = new HashMap<String, Boolean>();
+
+    /**
+     * Selection states of reactions IDs according to {@link LegendTableModel}.
+     */
+    private HashMap<String, Boolean> reactionsSelectionStates = new HashMap<String, Boolean>();
+    
      /**
-      * Saves the currently displayed time.
-      */
-     private double currTime;
+     * Saves the currently displayed time.
+     */
+    private double currTime;
      
-     /**
-      * Saves the currently displayed data.
-      */
-     private MultiTable currData;
-     
-     /**
-      * This field contains the current {@link GraphManipulator}.
-      */
-     private GraphManipulator graphManipulator;
+    /**
+     * Saves the currently displayed data.
+     */
+    private MultiTable currData;
+
+    /**
+     * This field contains the current {@link GraphManipulator}.
+     */
+    private GraphManipulator graphManipulator;
 
     /**
      * Constructs all necessary elements.
@@ -147,7 +159,15 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     }
     
     /**
-     * Updates the displayed graph with respect to the user chosen settings
+     * Returns legend panel of this {@link DynamicView}.
+     * @return
+     */
+    public LegendPanel getLegendPanel(){
+        return legend;
+    }
+    
+    /**
+     * Updates the displayed graph with respect to the user chosen settings.
      * (i.e. turning on/off labels).
      */
     public void updateGraph() {
@@ -157,32 +177,43 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     }
     
     /**
-     * Workaround to get selected species.
-     * There's no way of getting selected items?!
-     * TODO user objects and hashmaps
+     * Saves selection state of id, whether specie or reaction, in corresponding
+     * hashmap.
+     * Method should be invoked on changes in {@link LegendTableModel}.
+     * @param id
+     * @param bool
+     */
+    public void putSelectionState(String id, boolean bool){
+        if (document.getModel().getSpecies(id) != null) {
+            speciesSelectionStates.put(id, bool);
+        } else if (document.getModel().getReaction(id) != null) {
+            reactionsSelectionStates.put(id, bool);
+        }
+    }
+    
+    /**
+     * Returns selected species.
      * @return
      */
     public String[] getSelectedSpecies(){
         ArrayList<String> selectedSpecies = new ArrayList<String>();
-        for(Species s : document.getModel().getListOfSpecies()){
-            if(legend.getLegendTableModel().isSelected(s.getId())){
-                selectedSpecies.add(s.getId());
+        for(String id : speciesSelectionStates.keySet()){
+            if(speciesSelectionStates.get(id)){
+                selectedSpecies.add(id);
             }
         }
         return selectedSpecies.toArray(new String[selectedSpecies.size()]);
     }
     
     /**
-     * Workaround to get selected reactions.
-     * There's no way of getting selected items?!
-     * TODO user objects and hashmaps
+     * Returns selected reactions.
      * @return
      */
     public String[] getSelectedReactions(){
         ArrayList<String> selectedReactions = new ArrayList<String>();
-        for(Reaction r : document.getModel().getListOfReactions()){
-            if(legend.getLegendTableModel().isSelected(r.getId())){
-                selectedReactions.add(r.getId());
+        for(String id : reactionsSelectionStates.keySet()){
+            if(reactionsSelectionStates.get(id)){
+                selectedReactions.add(id);
             }
         }
         return selectedReactions.toArray(new String[selectedReactions.size()]);
@@ -292,6 +323,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                     @Override
                     protected void done() {
                         super.done();
+                        //selections are saved implicit in hashmaps due to TableModelListener
                         legend.getLegendTableModel().setSelected(Species.class, true);
                         legend.getLegendTableModel().setSelected(Reaction.class, true);
                         //activate controlpanel after computation of limits

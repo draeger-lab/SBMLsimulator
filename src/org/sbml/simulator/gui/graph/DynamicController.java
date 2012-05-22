@@ -35,6 +35,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
 import org.sbml.simulator.gui.graph.DynamicControlPanel.Items;
+import org.sbml.simulator.gui.table.LegendTableModel;
 
 import de.zbit.util.prefs.Option;
 import de.zbit.util.prefs.SBPreferences;
@@ -151,18 +152,32 @@ public class DynamicController implements ChangeListener, ActionListener,
                     .getFloat(GraphOptions.MIN_LINE_WIDTH);
             float reactionsMaxLineWidth = prefs
                     .getFloat(GraphOptions.MAX_LINE_WIDTH);
+            
             if (controlPanel.getSelectionStateOfNodesize()) {
                 // get current options
                 double minNodeSize = prefs
                         .getDouble(GraphOptions.MIN_NODE_SIZE);
                 double maxNodeSize = prefs
                         .getDouble(GraphOptions.MAX_NODE_SIZE);
-                return new ManipulatorOfNodeSize(view.getGraph(),
-                        view.getSBMLDocument(), core.getMinMaxOfIDs(view
-                                .getSelectedSpecies()),
-                        core.getMinMaxOfIDs(view.getSelectedReactions()),
-                        minNodeSize, maxNodeSize, reactionsMinLineWidth,
-                        reactionsMaxLineWidth);
+                if (prefs.getBoolean(GraphOptions.USE_UNIFORM_NODE_COLOR)) {
+                    return new ManipulatorOfNodeSize(
+                            view.getGraph(),
+                            view.getSBMLDocument(),
+                            Option.parseOrCast(Color.class,
+                                    prefs.get(GraphOptions.UNIFORM_NODE_COLOR)),
+                            core.getMinMaxOfIDs(view.getSelectedSpecies()),
+                            core.getMinMaxOfIDs(view.getSelectedReactions()),
+                            minNodeSize, maxNodeSize, reactionsMinLineWidth,
+                            reactionsMaxLineWidth);
+                } else {
+                    return new ManipulatorOfNodeSize(view.getGraph(),
+                            view.getSBMLDocument(), view.getLegendPanel()
+                                    .getLegendTableModel(),
+                            core.getMinMaxOfIDs(view.getSelectedSpecies()),
+                            core.getMinMaxOfIDs(view.getSelectedReactions()),
+                            minNodeSize, maxNodeSize, reactionsMinLineWidth,
+                            reactionsMaxLineWidth);
+                }
             } else if (controlPanel.getSelectionStateOfNodecolor()) {
                 // get current options
                 Color color1 = Option.parseOrCast(Color.class,
@@ -229,8 +244,17 @@ public class DynamicController implements ChangeListener, ActionListener,
     @Override
     public void tableChanged(TableModelEvent e) {
         if (core != null) {
+            /*
+             * Is not uselessly invoked many times while initial startup,
+             * because core is set afterwards.
+             */
             view.setGraphManipulator(getSelectedGraphManipulator());
             view.updateGraph();
+        }
+        if (e.getSource() instanceof LegendTableModel) {
+            //save selection changes
+            LegendTableModel ltm = (LegendTableModel) e.getSource();
+            view.putSelectionState(ltm.getId(e.getFirstRow()), ltm.isSelected(e.getFirstRow()));
         }
     }
 
@@ -248,7 +272,9 @@ public class DynamicController implements ChangeListener, ActionListener,
             if (evt.getKey().equals("MAX_NODE_SIZE")
                     || evt.getKey().equals("MIN_NODE_SIZE")
                     || evt.getKey().equals("MIN_LINE_WIDTH")
-                    || evt.getKey().equals("MAX_LINE_WIDTH")) {
+                    || evt.getKey().equals("MAX_LINE_WIDTH")
+                    || evt.getKey().equals("USE_UNIFORM_NODE_COLOR")
+                    || evt.getKey().equals("UNIFORM_NODE_COLOR")) {
                 view.setGraphManipulator(getSelectedGraphManipulator());
             }
         } else if (controlPanel.getSelectionStateOfNodecolor()) {

@@ -20,6 +20,7 @@ package org.sbml.simulator.gui.graph;
 import java.awt.Color;
 
 import org.sbml.jsbml.SBMLDocument;
+import org.sbml.simulator.gui.table.LegendTableModel;
 
 import y.view.NodeRealizer;
 import de.zbit.graph.io.SBML2GraphML;
@@ -38,9 +39,20 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
     private double m = 1, c= 0;
     
     /**
+     * If provided, colors of {@link LegendTableModel} are used as node colors.
+     */
+    private LegendTableModel legendTable = null;
+    
+    /**
+     * determines default node color.
+     */
+    private Color DEFAULT_NODE_COLOR;
+    
+    /**
      * Constructs a new nodesize-manipulator on the given graph. Minimum node
      * size and maximum node size per default and reactions line widths per
      * default.
+     * Node colors per default value.
      * 
      * @param graph
      * @param document
@@ -50,13 +62,15 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
     public ManipulatorOfNodeSize(SBML2GraphML graph, SBMLDocument document,
             double[] minMaxOfSpecies, double[] minMaxOfReactions) {
         super(graph, document, minMaxOfReactions, (float)0.1, 6);
+        DEFAULT_NODE_COLOR = new Color(176, 226, 255);
         computeSpeciesAdjusting(minMaxOfSpecies[0], minMaxOfSpecies[1], 8, 50);
     }
     
     /**
      * Constructs a new nodesize-manipulator on the given graph. Minimum node
      * size and maximum node size as given. If minimum node size greater than
-     * maximum node size, default values will be used
+     * maximum node size, default values will be used.
+     * Node colors uniform as user given.
      * @param graph
      * @param document
      * @param minMaxOfSpecies
@@ -67,8 +81,8 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
      * @param reactionsMaxLineWidth
      */
     public ManipulatorOfNodeSize(SBML2GraphML graph, SBMLDocument document,
-            double[] minMaxOfSpecies, double[] minMaxOfReactions,
-            double minNodeSize, double maxNodeSize,
+            Color uniformNodeColor, double[] minMaxOfSpecies,
+            double[] minMaxOfReactions, double minNodeSize, double maxNodeSize,
             float reactionsMinLinewidth, float reactionsMaxLineWidth) {
         // no use of this() to avoid computation of adjusting twice
         super(graph, document, minMaxOfReactions, reactionsMinLinewidth,
@@ -77,12 +91,42 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
             minNodeSize = 8;
             maxNodeSize = 50;
         }
+        DEFAULT_NODE_COLOR = uniformNodeColor;
         computeSpeciesAdjusting(minMaxOfSpecies[0], minMaxOfSpecies[1],
                 minNodeSize, maxNodeSize);
     }
     
-    //TODO constructor with additional hashmap(?) of colors from legend.
-
+    /**
+     * Constructs a new nodesize-manipulator on the given graph. Minimum node
+     * size and maximum node size as given. If minimum node size greater than
+     * maximum node size, default values will be used.
+     * Nodecolors as in given {@link LegendTableModel}.
+     * @param graph
+     * @param document
+     * @param legendTableModel
+     * @param minMaxOfSpecies
+     * @param minMaxOfReactions
+     * @param minNodeSize
+     * @param maxNodeSize
+     * @param reactionsMinLinewidth
+     * @param reactionsMaxLineWidth
+     */
+    public ManipulatorOfNodeSize(SBML2GraphML graph, SBMLDocument document, LegendTableModel legendTableModel,
+            double[] minMaxOfSpecies, double[] minMaxOfReactions,
+            double minNodeSize, double maxNodeSize,
+            float reactionsMinLinewidth, float reactionsMaxLineWidth) {
+        // no use of this() to avoid computation of adjusting twice
+        super(graph, document, minMaxOfReactions, reactionsMinLinewidth,
+                reactionsMaxLineWidth);
+        this.legendTable = legendTableModel;
+        if (minNodeSize > maxNodeSize) {
+            minNodeSize = 8;
+            maxNodeSize = 50;
+        }
+        computeSpeciesAdjusting(minMaxOfSpecies[0], minMaxOfSpecies[1],
+                minNodeSize, maxNodeSize);
+    }
+    
     /**
      * Computes adjusting values for given limits.
      * @param lowerDataLimit
@@ -105,7 +149,15 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
         NodeRealizer nr = graph.getSimpleGraph()
                 .getRealizer(graph.getId2node().get(id));
         nr.setSize(size, size);
-        nr.setFillColor(new Color(176, 226, 255)); //standard color
+        //use standard color if no legendTableModel is provided
+        Color color = null;
+        if(legendTable != null){
+            color = legendTable.getColorFor(id);
+        }else if (color == null){
+            //ensure that color is never null in case of wrong LegendTableModel
+            color = DEFAULT_NODE_COLOR;
+        }
+        nr.setFillColor(color);
 
         /*
          * Label Node with ID and real value at this timepoint. Last label will

@@ -29,17 +29,22 @@
   <entry key="FALSE_INPUT">Input not a positive integer.</entry>
   <entry key="TIMEPOINT">Timepoint</entry>
   <entry key="SIMULATIONSPEED">Simulationspeed</entry>
+  <entry key="SIMULATIONSPEED_SPINNER_TOOLTIP">Displays the current simulation speed as value. Changeable in Options/Network.</entry>
   <entry key="NODESIZE">Node size</entry>
   <entry key="NODECOLOR">Node color</entry>
   <entry key="MANIPULATORCHOOSER">Visualization</entry>  
   
-  <!-- GraphOptions TODO: move-->
+  <!-- GraphOptions -->
 
   <entry key="GraphOptions">Network</entry>
   <entry key="MIN_NODE_SIZE">Minimum node size</entry>
   <entry key="MIN_NODE_SIZE_TOOLTIP">In case of dynamic change of node size, this determines the minimum node size.</entry>
   <entry key="MAX_NODE_SIZE">Maximum node size</entry>
   <entry key="MAX_NODE_SIZE_TOOLTIP">In case of dynamic change of node size, this determines the maximum node size.</entry>
+  <entry key="USE_UNIFORM_NODE_COLOR">Uniform node color</entry>
+  <entry key="USE_UNIFORM_NODE_COLOR_TOOLTIP">Enable/Disable uniform node colors instead of node colors given in legend.</entry>
+  <entry key="UNIFORM_NODE_COLOR">Color for uniform node color</entry>
+  <entry key="UNIFORM_NODE_COLOR_TOOLTIP">Sets the color for uniform node color.</entry>
   <entry key="NODESIZE_GROUP">Dynamic change of node size</entry>
   <entry key="NODESIZE_GROUP_TOOLTIP">Options for the dynamic change of node size.</entry>
   <entry key="NODECOLOR_GROUP">Dynamic change of node color</entry>
