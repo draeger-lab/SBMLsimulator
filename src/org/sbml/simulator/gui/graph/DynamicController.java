@@ -22,11 +22,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.ResourceBundle;
 import java.util.prefs.PreferenceChangeEvent;
 import java.util.prefs.PreferenceChangeListener;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
@@ -37,6 +39,7 @@ import javax.swing.event.TableModelListener;
 import org.sbml.simulator.gui.graph.DynamicControlPanel.Items;
 import org.sbml.simulator.gui.table.LegendTableModel;
 
+import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.Option;
 import de.zbit.util.prefs.SBPreferences;
 
@@ -50,6 +53,38 @@ import de.zbit.util.prefs.SBPreferences;
  */
 public class DynamicController implements ChangeListener, ActionListener,
         ItemListener, TableModelListener, PreferenceChangeListener {
+    
+    /**
+     * Localization support.
+     */
+    private static final transient ResourceBundle bundle = ResourceManager
+            .getBundle("org.sbml.simulator.gui.graph.DynamicGraph");
+    
+    /**
+     * Stores  {@link GraphManipulator}s.
+     * @author Fabian Schwarzkopf
+     * @version $Rev$
+     */
+    public enum Manipulators{
+        NODESIZE, NODECOLOR;
+        
+        /**
+         * Returns localized name of this Item.
+         * @return
+         */
+        public String getName(){
+            return bundle.getString(this.toString());
+        }
+        
+        /**
+         * Returns a string array of all manipulators.
+         * @return
+         */
+        public static String[] getAllManipulators(){
+            return new String[]{NODESIZE.getName(), NODECOLOR.getName()};
+        }
+    }
+    
     /**
      * Pointer to associated {@link DynamicCore}.
      */
@@ -229,10 +264,15 @@ public class DynamicController implements ChangeListener, ActionListener,
      */
     @Override
     public void itemStateChanged(ItemEvent ie) {
-        if (ie.getStateChange() == ItemEvent.SELECTED) {
-            controlPanel
-                    .setSimVeloCombo(Items.getItem(ie.getItem().toString()));
+        if ((ie.getSource() instanceof JComboBox)
+                && (ie.getStateChange() == ItemEvent.SELECTED)) {
+            JComboBox cb = (JComboBox) ie.getSource();
+            if (cb.getName().equals(GraphOptions.SIM_SPEED_CHOOSER.toString())) {
+                controlPanel.setSimVeloCombo(Items.getItem(ie.getItem()
+                        .toString()));
+            }
         }
+        //TODO compare to toolpanel
     }
 
     /*
@@ -319,6 +359,12 @@ public class DynamicController implements ChangeListener, ActionListener,
                     (int) SBPreferences.getPreferencesFor(GraphOptions.class)
                             .getDouble(GraphOptions.SIM_SPEED_SLOW));
             controlPanel.setSimVeloCombo(Items.SLOW);
+        }
+        
+        if (evt.getKey().equals("SIM_SPEED_CHOOSER")){
+            controlPanel.setSimVeloCombo(Items.getItem(SBPreferences
+                    .getPreferencesFor(GraphOptions.class).getString(
+                            GraphOptions.SIM_SPEED_CHOOSER)));
         }
     }
 }
