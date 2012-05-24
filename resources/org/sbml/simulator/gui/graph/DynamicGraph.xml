@@ -49,7 +49,7 @@
   <entry key="NODESIZE_GROUP_TOOLTIP">Options for the dynamic change of node size.</entry>
   <entry key="NODECOLOR_GROUP">Dynamic change of node color</entry>
   <entry key="NODECOLOR_GROUP_TOOLTIP">Options for the dynamic change of node color.</entry>
-  <entry key="REACTION_GROUP">Reactions</entry>
+  <entry key="REACTION_GROUP">Dynamical change of reactions</entry>
   <entry key="REACTION_GROUP_TOOLTIP">Options for the dynamic change of reactions.</entry>
   <entry key="COLOR1">High concentration</entry>
   <entry key="COLOR1_TOOLTIP">In case of dynamic change of node color, this determines the color for high concentration.</entry>
@@ -75,6 +75,8 @@
   <entry key="SIM_SPEED_NORMAL_TOOLTIP">Sets setting for normal play speed.</entry>  
   <entry key="SIM_SPEED_SLOW">Slow play speed</entry>
   <entry key="SIM_SPEED_SLOW_TOOLTIP">Sets setting for slow play speed.</entry>
+  <entry key="SIM_SPEED_CHOOSER">Choose play speed</entry>
+  <entry key="SIM_SPEED_CHOOSER_TOOLTIP">This options determines the play speed.</entry>  
   <entry key="SIM_SPEED_GROUP">Play speed</entry>
   <entry key="SIM_SPEED_GROUP_TOOLTIP">These settings control the play speed. The smaller the value, the faster the play speed.</entry>
   

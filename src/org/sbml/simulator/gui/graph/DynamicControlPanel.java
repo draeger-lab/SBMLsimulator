@@ -43,6 +43,7 @@ import javax.swing.JSpinner;
 import javax.swing.UIManager;
 
 import org.sbml.simulator.gui.SimulatorUI;
+import org.sbml.simulator.gui.graph.DynamicController.Manipulators;
 
 import de.zbit.gui.GUITools;
 import de.zbit.gui.actioncommand.ActionCommand;
@@ -159,7 +160,7 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
         }
         
         /**
-         * Returns item to given string.
+         * Returns item for given string.
          * @param item
          * @return
          */
@@ -172,6 +173,15 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
                 return SLOW;
             }
             return NORMAL;
+        }
+        
+        /**
+         * Returns a string array of all speed items.
+         * @return
+         */
+        public static String[] getAllSpeedItems(){
+            return new String[] { Items.FAST.getName(), Items.NORMAL.getName(),
+                    Items.SLOW.getName() };
         }
     }
 	
@@ -207,6 +217,8 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
 	private JButton video;
 	private JLabel simVelolbl;
 	private JComboBox simVeloCombo;
+	private JComboBox manipulatorsCombo;
+	private JComboBox dataCombo;
 	private JSpinner simVeloSpin;
 	private JCheckBox nodeLabelsCB;
 	private JCheckBox reactionLabelsCB;
@@ -295,16 +307,17 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
 		stop = GUITools.createButton(stopIcon, controller, Buttons.STOP, Buttons.STOP.getToolTip());
 		video = GUITools.createButton(toVideoIcon, controller, Buttons.TOVIDEO, Buttons.TOVIDEO.getToolTip());
 		
-		simVelolbl = new JLabel(bundle.getString("SIMULATIONSPEED"));
+		simVelolbl = new JLabel(GraphOptions.SIM_SPEED_CHOOSER.getDisplayName());
 		simVeloCombo = new JComboBox();
+		simVeloCombo.setName(GraphOptions.SIM_SPEED_CHOOSER.toString());
 		simVeloCombo.addItem(Items.FAST.getName());
 		simVeloCombo.addItem(Items.NORMAL.getName());
 		simVeloCombo.addItem(Items.SLOW.getName());
-		simVeloCombo.addItemListener(controller);		
+		simVeloCombo.addItemListener(controller);	
 		simVeloSpin = new JSpinner();
 		simVeloSpin.setToolTipText(bundle.getString("SIMULATIONSPEED_SPINNER_TOOLTIP"));
-		setSimVeloCombo(Items.NORMAL); //by default 'normal speed'
-	
+	    setSimVeloCombo(Items.getItem(prefs.getString(GraphOptions.SIM_SPEED_CHOOSER)));
+		
 		nodesize = new JRadioButton(Buttons.NODESIZE.getName());
 		nodesize.setActionCommand(Buttons.NODESIZE.toString());
 		nodesize.addActionListener(controller);
@@ -312,8 +325,16 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
 		nodecolor = new JRadioButton(Buttons.NODECOLOR.getName());
 		nodecolor.setActionCommand(Buttons.NODECOLOR.toString());
 		nodecolor.addActionListener(controller);
+		
+		//TODO change to comobobox with layouthelper
+//		manipulatorsCombo = new JComboBox(Manipulators.getAllManipulators());
+//		dataCombo = new JComboBox(); //TODO
+//		
 		JPanel manipulatorsPane = new JPanel();
 		manipulatorsPane.setLayout(new BorderLayout());
+		
+//		manipulatorsPane.add(manipulatorsCombo, BorderLayout.LINE_START);
+		
 		manipulatorsPane.add(nodesize, BorderLayout.LINE_START);
 		manipulatorsPane.add(nodecolor, BorderLayout.AFTER_LAST_LINE);
 		manipulatorsPane.setBorder(BorderFactory.createTitledBorder(bundle.getString("MANIPULATORCHOOSER")));
@@ -369,8 +390,14 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
 	 * @param item
 	 */
 	public void setSimVeloCombo(Items item) {
+//	    System.out.println("fire");
+//        firePropertyChange(GraphOptions.SIM_SPEED_CHOOSER.toString(),
+//                Items.getItem(simVeloCombo.getSelectedItem().toString()).getName(),
+//                item.getName());
+	    //TODO change options respectively
 	    simVeloCombo.setSelectedItem(item.getName());
 	    simVeloSpin.setValue(item.getSpeed(item));
+	    
 	}
 	
     /**
@@ -382,7 +409,6 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
         pause.setEnabled(true);
         stop.setEnabled(true);
         simVeloCombo.setEnabled(false);
-//        simVeloSpin.setEnabled(false);
         video.setEnabled(false);
     }
 	
@@ -394,7 +420,6 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
         searchBar.setEnabled(true);
         pause.setEnabled(true);
         simVeloCombo.setEnabled(true);
-//        simVeloSpin.setEnabled(true);
         video.setEnabled(true);
     }
     
@@ -407,7 +432,6 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
         pause.setEnabled(true);
         stop.setEnabled(true);
         simVeloCombo.setEnabled(true);
-//        simVeloSpin.setEnabled(true);
         video.setEnabled(true);
     }
 	

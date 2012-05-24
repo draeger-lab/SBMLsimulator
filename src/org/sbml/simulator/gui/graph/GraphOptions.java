@@ -20,6 +20,8 @@ package org.sbml.simulator.gui.graph;
 import java.awt.Color;
 import java.util.ResourceBundle;
 
+import org.sbml.simulator.gui.graph.DynamicControlPanel.Items;
+
 import de.zbit.gui.ColorPalette;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.KeyProvider;
@@ -168,11 +170,18 @@ public interface GraphOptions extends KeyProvider{
                     Double.class, "{[1, 1E3]}"), Double.valueOf(80d));
     
     /**
+     * Choose simulation speed.
+     */
+  public static final Option<String> SIM_SPEED_CHOOSER = new Option<String>(
+    "SIM_SPEED_CHOOSER", String.class, bundle, new Range<String>(String.class,
+      Items.getAllSpeedItems()), Items.NORMAL.getName());
+    
+    /**
      * Options for simulation speed.
      */
-    @SuppressWarnings("unchecked")
-    public static final OptionGroup<Double> SIM_SPEED_GROUP = new OptionGroup<Double>(
-        "SIM_SPEED_GROUP", bundle, SIM_SPEED_FAST, SIM_SPEED_NORMAL, SIM_SPEED_SLOW);
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static final OptionGroup SIM_SPEED_GROUP = new OptionGroup(
+        "SIM_SPEED_GROUP", bundle, SIM_SPEED_FAST, SIM_SPEED_NORMAL, SIM_SPEED_SLOW, SIM_SPEED_CHOOSER);
     
     //TODO options for graphmanipulator
 }

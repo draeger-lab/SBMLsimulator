@@ -49,7 +49,7 @@
   <entry key="NODESIZE_GROUP_TOOLTIP">Einstellungen für die dynamische Änderung der Knotengröße.</entry>
   <entry key="NODECOLOR_GROUP">Dynamische Änderung der Knotenfarbe</entry>
   <entry key="NODECOLOR_GROUP_TOOLTIP">Einstellungen für die dynamische Änderung der Knotenfarbe.</entry>
-  <entry key="REACTION_GROUP">Reaktionen</entry>
+  <entry key="REACTION_GROUP">Dynamische Änderung der Reaktionen</entry>
   <entry key="REACTION_GROUP_TOOLTIP">Einstellungen für die dynamische Änderung der Reaktionen.</entry>
   <entry key="COLOR1">Hohe Konzentration</entry>
   <entry key="COLOR1_TOOLTIP">Bei dynamischer Änderung der Knotenfarbe, definiert dies die Farbe für hohe Konzentration.</entry>
@@ -75,7 +75,9 @@
   <entry key="SIM_SPEED_NORMAL_TOOLTIP">Stellt die normale Abspielgeschwindigkeit ein.</entry>  
   <entry key="SIM_SPEED_SLOW">Langsame Abspielgeschwindigkeit</entry>
   <entry key="SIM_SPEED_SLOW_TOOLTIP">Stellt die langsame Abspielgeschwindigkeit ein.</entry>
+  <entry key="SIM_SPEED_CHOOSER">Abspielgeschwindigkeit</entry>
+  <entry key="SIM_SPEED_CHOOSER_TOOLTIP">Hiermit kann die Abspielgeschwindigkeit gewählt werden.</entry>
   <entry key="SIM_SPEED_GROUP">Abspielgeschwindigkeit</entry>
-  <entry key="SIM_SPEED_GROUP_TOOLTIP">Diese Eisntellungen steuern die Abspielgeschwindigkeit. Je kleiner der Wert, desto schneller die Geschwindigkeit.</entry>
+  <entry key="SIM_SPEED_GROUP_TOOLTIP">Diese Einstellungen steuern die Abspielgeschwindigkeit. Je kleiner der Wert, desto schneller die Geschwindigkeit.</entry>
   
 </properties>
