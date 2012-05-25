@@ -32,6 +32,7 @@ import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.Species;
 import org.sbml.simulator.gui.LegendPanel;
 import org.sbml.simulator.gui.table.LegendTableModel;
+import org.sbml.simulator.math.SplineCalculation;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.graph.gui.TranslatorSBMLgraphPanel;
@@ -136,12 +137,14 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     private DynamicCore visualizedCore;
     
     /**
-     * Pointer to simulation data {@link DynamicCore}.
+     * Pointer to simulation data {@link DynamicCore}. Once computed, store that
+     * core for immediate change of data set.
      */
     private DynamicCore simulationCore;
     
     /**
-     * Pointer to experimental data {@link DynamicCore}.
+     * Pointer to experimental data {@link DynamicCore}. Once computed, store that
+     * core for immediate change of data set.
      */
     private DynamicCore experimentalCore;
 
@@ -213,32 +216,6 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     }
     
     /**
-     * If simulation data is available, it gets visualized.
-     * @return true, if simulation data is visualized<br>
-     *          false, if simulation data not available.
-     */
-    public boolean visualizeSimulationData(){
-        if (simulationCore != null){
-            visualizedCore = simulationCore;
-            return true;
-        }
-        return false;
-    }
-    
-    /**
-     * If experimental data is available, it gets visualized.
-     * @return true, if simulation data is visualized<br>
-     *          false, if simulation data not available.
-     */
-    public boolean visualizeExperimentalData(){
-        if (experimentalCore != null){
-            visualizedCore = experimentalCore;
-            return true;
-        }
-        return false;
-    }
-    
-    /**
      * Changes visualization to given data set name.
      * @param dataName
      * @return true, if data could be visualized<br>
@@ -246,10 +223,19 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      */
     public boolean visualizeData(String dataName){
         if (dataName.equals(bundle.getString("SIMULATION_DATA"))){
-            return visualizeSimulationData();
+            if (simulationCore != null){
+                activateView(simulationCore);
+                return true;
+            }
+            return false;
         } else if (dataName.equals(bundle.getString("EXPERIMENTAL_DATA"))){
-            return visualizeExperimentalData();
+            if (experimentalCore != null){
+                activateView(experimentalCore);
+                return true;
+            }
+            return false;
         }
+        
         return false;
     }
 
@@ -343,6 +329,31 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     public SBMLDocument getSBMLDocument() {
         return document;
     }
+    
+    /**
+     * This methods activates {@link DynamicView} and implicit associated
+     * {@link DynamicControlPanel} on the given {@link DynamicCore}.
+     * @param core
+     */
+    private void activateView(DynamicCore core){
+        /*
+         * Default selections. selections are saved implicit in hashmaps due to
+         * TableModelListener
+         */
+        legend.getLegendTableModel().setSelected(Species.class,
+                true);
+        legend.getLegendTableModel().setSelected(
+                Reaction.class, true);
+        
+        visualizedCore = core;
+        // activate controlpanel
+        controlPanel.setCore(visualizedCore);
+        
+        //get user chosen graphmanipulator
+        graphManipulator = controller
+                .getSelectedGraphManipulator();
+        updateGraph();
+    }
 
     /*
      * (non-Javadoc)
@@ -408,21 +419,23 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     @Override
     public void propertyChange(PropertyChangeEvent e) {
         if (e.getPropertyName().equals("done")) {
-            // simulation done
             final MultiTable data = (MultiTable) e.getNewValue();
             final DynamicView thisView = this;
+            // simulation done
             if (data != null) {
-                // core = new DynamicCore(this, data);
                 /*
                  * Computation of limits in own swingworker because of O(n^2).
                  * Ensures that UI doesn't get blocked in case of bigger data
                  * sets.
                  */
                 SwingWorker<Void, Void> computationOfLimits = new SwingWorker<Void, Void>() {
-
+                    
+                    /*
+                     * (non-Javadoc)
+                     * @see javax.swing.SwingWorker#doInBackground()
+                     */
                     @Override
                     protected Void doInBackground() throws Exception {
-                        // core.computeSpecificLimits(document);
                         /*
                          * As a new core is constructed and assigned every time
                          * the simulation is finished, the control panel is
@@ -434,25 +447,52 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
 
                     /*
                      * (non-Javadoc)
-                     * 
                      * @see javax.swing.SwingWorker#done()
                      */
                     @Override
                     protected void done() {
                         super.done();
-                        // selections are saved implicit in hashmaps due to
-                        // TableModelListener
-                        legend.getLegendTableModel().setSelected(Species.class,
-                                true);
-                        legend.getLegendTableModel().setSelected(
-                                Reaction.class, true);
                         controlPanel.addToDataList(bundle.getString("SIMULATION_DATA"));
-                        visualizedCore = simulationCore;
-                        // activate controlpanel after computation of limits
-                        controlPanel.setCore(visualizedCore);
-                        graphManipulator = controller
-                                .getSelectedGraphManipulator();
-                        updateGraph();
+                        activateView(simulationCore);
+                    }
+                };
+                computationOfLimits.execute();
+            }
+        } else if (e.getPropertyName().equals("measurement")){
+            //experimental data added
+            MultiTable expData = (MultiTable) e.getNewValue();
+            //TODO check working
+            if (expData != null){
+                final MultiTable data;
+                final DynamicView thisView = this;
+                if (expData.getTimePoints().length < 100) {
+                    data = SplineCalculation.calculateSplineValues(expData, 100);
+                } else {
+                    data = expData;
+                }
+                
+                //computation of limits in own swingworker
+                SwingWorker<Void, Void> computationOfLimits = new SwingWorker<Void, Void>() {
+                    
+                    /*
+                     * (non-Javadoc)
+                     * @see javax.swing.SwingWorker#doInBackground()
+                     */
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        experimentalCore = new DynamicCore(thisView, data, document);
+                        return null;
+                    }
+                    
+                    /*
+                     * (non-Javadoc)
+                     * @see javax.swing.SwingWorker#done()
+                     */
+                    @Override
+                    protected void done() {
+                        super.done();
+                        controlPanel.addToDataList(bundle.getString("EXPERIMENTAL_DATA"));
+                        activateView(experimentalCore);
                     }
                 };
                 computationOfLimits.execute();

@@ -301,6 +301,7 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
 		searchBar.setMajorTickSpacing(1);
 		searchBar.setPaintTicks(true);
 		searchBar.setValue(0);
+		searchBar.setToolTipText(bundle.getString("SEARCHBAR_TOOLTIP"));
 		
 		nodeLabelsCB = GUITools.createJCheckBox(GraphOptions.SHOW_NODE_LABELS, prefs, this);
 		nodeLabelsCB.addActionListener(controller);
@@ -317,6 +318,7 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
 		simVelolbl = new JLabel(GraphOptions.SIM_SPEED_CHOOSER.getDisplayName());
 		simVeloCombo = new JComboBox();
 		simVeloCombo.setName(GraphOptions.SIM_SPEED_CHOOSER.toString());
+		simVeloCombo.setToolTipText(bundle.getString("SIM_SPEED_CHOOSER_TOOLTIP"));
 		simVeloCombo.addItem(Items.FAST.getName());
 		simVeloCombo.addItem(Items.NORMAL.getName());
 		simVeloCombo.addItem(Items.SLOW.getName());
@@ -327,12 +329,15 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
 		
 		manipulatorsCombo = new JComboBox(Manipulators.getAllManipulators());
 		manipulatorsCombo.setName(MANIPULATORS_LIST);
+		manipulatorsCombo.setToolTipText(bundle.getString("VISUALIZATION_STYLE_TOOLTIP"));
 		manipulatorsCombo.addItemListener(controller);
 		manipulatorsCombo.setSelectedItem(prefs.getString(GraphOptions.VISUALIZATION_STYLE));
 		dataCombo = new JComboBox();
 		dataCombo.setName(DATA_LIST);
+		dataCombo.setToolTipText(bundle.getString("VISUALIZATION_DATA_TOOLTIP"));
 		dataCombo.addItemListener(controller);
 		JPanel manipulatorsPane = new JPanel();
+		manipulatorsPane.setToolTipText(bundle.getString("VISUALIZATION_TOOLTIP"));
 		LayoutHelper lh = new LayoutHelper(manipulatorsPane);
 		lh.add(manipulatorsCombo, true);
 		lh.add(dataCombo);
