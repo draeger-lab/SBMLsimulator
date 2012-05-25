@@ -35,6 +35,7 @@
   <entry key="VISUALIZATION">Visualization</entry> 
   <entry key="SIMULATION_DATA">Simulation Data</entry> 
   <entry key="EXPERIMENTAL_DATA">Experimental Data</entry>   
+  <entry key="SEARCHBAR_TOOLTIP">Choose time point of visualization.</entry>
   
   <!-- GraphOptions -->
 

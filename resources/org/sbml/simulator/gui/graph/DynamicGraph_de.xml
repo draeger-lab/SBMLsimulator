@@ -20,9 +20,7 @@
   <entry key="TOVIDEO">Video</entry>
   <entry key="TOVIDEO_TOOLTIP">Speichert die dynamische Visualisierung als Video.</entry>
   <entry key="NODELABELS">Knotenbeschriftung</entry>
-  <entry key="NODELABELS_TOOLTIP">Schält die Knotenbeschriftung ein/aus.</entry>
   <entry key="REACTIONLABELS">Reaktionenbeschriftung</entry>
-  <entry key="REACTIONLABELS_TOOLTIP">Schält die Reaktionenbeschriftung ein/aus.</entry>
   <entry key="FAST">Schnell</entry>
   <entry key="NORMAL">Normal</entry>
   <entry key="SLOW">Langsam</entry>
@@ -33,8 +31,10 @@
   <entry key="NODESIZE">Knotengröße</entry>
   <entry key="NODECOLOR">Knotenfarbe</entry>
   <entry key="VISUALIZATION">Visualisierung</entry>
+  <entry key="VISUALIZATION_TOOLTIP">Wählen Sie die Art der dynamischen Visualisierung und die zu visualisierenden Daten aus.</entry>
   <entry key="SIMULATION_DATA">Simulationdaten</entry> 
   <entry key="EXPERIMENTAL_DATA">Experimentelle Daten</entry>   
+  <entry key="SEARCHBAR_TOOLTIP">Stellen Sie den Zeitpunkt der Visualisierung ein.</entry>
   
   <!-- GraphOptions -->
 
@@ -44,7 +44,7 @@
   <entry key="MAX_NODE_SIZE">Maximale Knotengröße</entry>
   <entry key="MAX_NODE_SIZE_TOOLTIP">Bei dynamischer Änderung der Knotengröße, definiert dies die maximale Knotengröße.</entry>
   <entry key="USE_UNIFORM_NODE_COLOR">Einheitliche Knotenfarbe</entry>
-  <entry key="USE_UNIFORM_NODE_COLOR_TOOLTIP">Benutzt eine einheitliche Knotenfarbe, anstatt den Farben in der Legende.</entry>
+  <entry key="USE_UNIFORM_NODE_COLOR_TOOLTIP">Einheitliche Knotenfarbe, anstatt den Farben in der Legende.</entry>
   <entry key="UNIFORM_NODE_COLOR">Knotenfarbe</entry>
   <entry key="UNIFORM_NODE_COLOR_TOOLTIP">Farbeinstellung für die einheitliche Knotenfarbe.</entry>
   <entry key="NODESIZE_GROUP">Dynamische Änderung der Knotengröße</entry>
@@ -70,21 +70,21 @@
   <entry key="GRAPH_LABELS">Beschriftung</entry>
   <entry key="GRAPH_LABELS_TOOLTIP">Aktiviert/Deaktiviert die Beschriftungen.</entry>
   <entry key="COLOR_NODE_SIZE">Konstante Knotengröße</entry>
-  <entry key="COLOR_NODE_SIZE_TOOLTIP">Stellt die (konstante) Knotengröße, für die dynamische Änderung der Knotenfarbe, ein.</entry>
+  <entry key="COLOR_NODE_SIZE_TOOLTIP">Wählen Sie die (konstante) Knotengröße, bei der dynamischen Änderung der Knotenfarbe.</entry>
   <entry key="SIM_SPEED_FAST">Schnelle Abspielgeschwindigkeit</entry>
-  <entry key="SIM_SPEED_FAST_TOOLTIP">Stellt die schnelle Abspielgeschwindigkeit ein.</entry>
+  <entry key="SIM_SPEED_FAST_TOOLTIP">Modifiziert die schnelle Abspielgeschwindigkeit ein.</entry>
   <entry key="SIM_SPEED_NORMAL">Normale Abspielgeschwindigkeit</entry>
-  <entry key="SIM_SPEED_NORMAL_TOOLTIP">Stellt die normale Abspielgeschwindigkeit ein.</entry>  
+  <entry key="SIM_SPEED_NORMAL_TOOLTIP">Modifiziert die normale Abspielgeschwindigkeit ein.</entry>  
   <entry key="SIM_SPEED_SLOW">Langsame Abspielgeschwindigkeit</entry>
-  <entry key="SIM_SPEED_SLOW_TOOLTIP">Stellt die langsame Abspielgeschwindigkeit ein.</entry>
+  <entry key="SIM_SPEED_SLOW_TOOLTIP">Modifiziert die langsame Abspielgeschwindigkeit ein.</entry>
   <entry key="SIM_SPEED_CHOOSER">Abspielgeschwindigkeit</entry>
-  <entry key="SIM_SPEED_CHOOSER_TOOLTIP">Hiermit kann die Abspielgeschwindigkeit gewählt werden.</entry>
+  <entry key="SIM_SPEED_CHOOSER_TOOLTIP">Stellen Sie die Abspielgeschwindigkeit ein.</entry>
   <entry key="SIM_SPEED_GROUP">Abspielgeschwindigkeit</entry>
-  <entry key="SIM_SPEED_GROUP_TOOLTIP">Diese Einstellungen steuern die Abspielgeschwindigkeit. Je kleiner der Wert, desto schneller die Geschwindigkeit.</entry>
+  <entry key="SIM_SPEED_GROUP_TOOLTIP">Stellen Sie die Abspielgeschwindigkeiten ein. Je kleiner der Wert, desto schneller die Geschwindigkeit.</entry>
   <entry key="VISUALIZATION_STYLE">Visualisierungsart</entry>
-  <entry key="VISUALIZATION_STYLE_TOOLTIP">Diese Einstellung steuert die Art der Visualisierung.</entry>    
+  <entry key="VISUALIZATION_STYLE_TOOLTIP">Wählen Sie die Art der Visualisierung.</entry>    
   <entry key="VISUALIZATION_DATA">Visualisierte Daten</entry>
-  <entry key="VISUALIZATION_DATA_TOOLTIP">Wähle die zu visualisierende Daten aus.</entry>
+  <entry key="VISUALIZATION_DATA_TOOLTIP">Wählen Sie die zu visualisierende Daten aus.</entry>
   <entry key="DATA_NOT_AVAILABLE">Der zur Visualisierung ausgewählte Datensatz steht momentan nicht zur Verfügung.</entry>
   
 </properties>
