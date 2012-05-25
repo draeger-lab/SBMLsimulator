@@ -29,7 +29,6 @@ import java.util.prefs.PreferenceChangeListener;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -37,8 +36,10 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
 import org.sbml.simulator.gui.graph.DynamicControlPanel.Items;
+import org.sbml.simulator.gui.graph.DynamicView.Manipulators;
 import org.sbml.simulator.gui.table.LegendTableModel;
 
+import de.zbit.gui.GUITools;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.Option;
 import de.zbit.util.prefs.SBPreferences;
@@ -59,31 +60,6 @@ public class DynamicController implements ChangeListener, ActionListener,
      */
     private static final transient ResourceBundle bundle = ResourceManager
             .getBundle("org.sbml.simulator.gui.graph.DynamicGraph");
-    
-    /**
-     * Stores  {@link GraphManipulator}s.
-     * @author Fabian Schwarzkopf
-     * @version $Rev$
-     */
-    public enum Manipulators{
-        NODESIZE, NODECOLOR;
-        
-        /**
-         * Returns localized name of this Item.
-         * @return
-         */
-        public String getName(){
-            return bundle.getString(this.toString());
-        }
-        
-        /**
-         * Returns a string array of all manipulators.
-         * @return
-         */
-        public static String[] getAllManipulators(){
-            return new String[]{NODESIZE.getName(), NODECOLOR.getName()};
-        }
-    }
     
     /**
      * Pointer to associated {@link DynamicCore}.
@@ -157,19 +133,6 @@ public class DynamicController implements ChangeListener, ActionListener,
                 view.updateGraph();
             }
         }
-        if (e.getSource() instanceof JRadioButton) {
-            if (e.getActionCommand().equals("NODESIZE")) {
-                controlPanel.setNodecolorSelectionState(false);
-                controlPanel.setNodesizeSelectionState(true);
-                view.setGraphManipulator(getSelectedGraphManipulator());
-                view.updateGraph();
-            } else if (e.getActionCommand().equals("NODECOLOR")) {
-                controlPanel.setNodesizeSelectionState(false);
-                controlPanel.setNodecolorSelectionState(true);
-                view.setGraphManipulator(getSelectedGraphManipulator());
-                view.updateGraph();
-            }
-        }
     }
 
     /**
@@ -188,7 +151,7 @@ public class DynamicController implements ChangeListener, ActionListener,
             float reactionsMaxLineWidth = prefs
                     .getFloat(GraphOptions.MAX_LINE_WIDTH);
             
-            if (controlPanel.getSelectionStateOfNodesize()) {
+            if (controlPanel.getSelectedManipulator().equals(Manipulators.NODESIZE.getName())) {
                 // get current options
                 double minNodeSize = prefs
                         .getDouble(GraphOptions.MIN_NODE_SIZE);
@@ -213,7 +176,7 @@ public class DynamicController implements ChangeListener, ActionListener,
                             minNodeSize, maxNodeSize, reactionsMinLineWidth,
                             reactionsMaxLineWidth);
                 }
-            } else if (controlPanel.getSelectionStateOfNodecolor()) {
+            } else if (controlPanel.getSelectedManipulator().equals(Manipulators.NODECOLOR.getName())) {
                 // get current options
                 Color color1 = Option.parseOrCast(Color.class,
                         prefs.get(GraphOptions.COLOR1));
@@ -270,9 +233,25 @@ public class DynamicController implements ChangeListener, ActionListener,
             if (cb.getName().equals(GraphOptions.SIM_SPEED_CHOOSER.toString())) {
                 controlPanel.setSimVeloCombo(Items.getItem(ie.getItem()
                         .toString()));
+                //update preferences on change
+                SBPreferences.getPreferencesFor(GraphOptions.class).put(
+                        cb.getName(),
+                        Items.getItem(ie.getItem().toString()).getName()); 
+            }else if (cb.getName().equals(controlPanel.MANIPULATORS_LIST)){
+                view.setGraphManipulator(getSelectedGraphManipulator());
+                //update preferences on change
+                SBPreferences.getPreferencesFor(GraphOptions.class).put(
+                        cb.getName(),
+                        Manipulators.getManipulator(ie.getItem().toString()).getName());
+            }else if (cb.getName().equals(controlPanel.DATA_LIST)){
+                //TODO
+                view.visualizeData(ie.getItem().toString());
+                // update preferences on change
+                SBPreferences.getPreferencesFor(GraphOptions.class).put(
+                        cb.getName(),
+                        ie.getItem().toString());
             }
         }
-        //TODO compare to toolpanel
     }
 
     /*
@@ -308,7 +287,8 @@ public class DynamicController implements ChangeListener, ActionListener,
     @Override
     public void preferenceChange(PreferenceChangeEvent evt) {
         // immediately change graph visualization
-        if (controlPanel.getSelectionStateOfNodesize()) {
+        SBPreferences prefs = SBPreferences.getPreferencesFor(GraphOptions.class);
+        if (controlPanel.getSelectedManipulator().equals(Manipulators.NODESIZE.getName())) {
             if (evt.getKey().equals("MAX_NODE_SIZE")
                     || evt.getKey().equals("MIN_NODE_SIZE")
                     || evt.getKey().equals("MIN_LINE_WIDTH")
@@ -317,8 +297,9 @@ public class DynamicController implements ChangeListener, ActionListener,
                     || evt.getKey().equals("UNIFORM_NODE_COLOR")) {
                 view.setGraphManipulator(getSelectedGraphManipulator());
             }
-        } else if (controlPanel.getSelectionStateOfNodecolor()) {
+        } else if (controlPanel.getSelectedManipulator().equals(Manipulators.NODECOLOR.getName())) {
             if (evt.getKey().equals("COLOR1") || evt.getKey().equals("COLOR2")
+                    || evt.getKey().equals("COLOR3")
                     || evt.getKey().equals("COLOR_NODE_SIZE")
                     || evt.getKey().equals("MIN_LINE_WIDTH")
                     || evt.getKey().equals("MAX_LINE_WIDTH")) {
@@ -327,44 +308,55 @@ public class DynamicController implements ChangeListener, ActionListener,
         }
 
         if (evt.getKey().equals("SHOW_NODE_LABELS")) {
-            controlPanel.setSelectionStateOfNodeLabels(SBPreferences
-                    .getPreferencesFor(GraphOptions.class).getBoolean(
-                            GraphOptions.SHOW_NODE_LABELS));
+            controlPanel.setSelectionStateOfNodeLabels(prefs
+                    .getBoolean(GraphOptions.SHOW_NODE_LABELS));
             view.updateGraph();
         }
 
         if (evt.getKey().equals("SHOW_REACTION_LABELS")) {
-            controlPanel.setSelectionStateOfReactionLabels(SBPreferences
-                    .getPreferencesFor(GraphOptions.class).getBoolean(
-                            GraphOptions.SHOW_REACTION_LABELS));
+            controlPanel.setSelectionStateOfReactionLabels(prefs
+                    .getBoolean(GraphOptions.SHOW_REACTION_LABELS));
             view.updateGraph();
         }
 
         if (evt.getKey().equals("SIM_SPEED_FAST")) {
             Items.setSpeed(Items.FAST,
-                    (int) SBPreferences.getPreferencesFor(GraphOptions.class)
-                            .getDouble(GraphOptions.SIM_SPEED_FAST));
+                    (int) prefs.getDouble(GraphOptions.SIM_SPEED_FAST));
             controlPanel.setSimVeloCombo(Items.FAST);
         }
 
         if (evt.getKey().equals("SIM_SPEED_NORMAL")) {
             Items.setSpeed(Items.NORMAL,
-                    (int) SBPreferences.getPreferencesFor(GraphOptions.class)
-                            .getDouble(GraphOptions.SIM_SPEED_NORMAL));
+                    (int) prefs.getDouble(GraphOptions.SIM_SPEED_NORMAL));
             controlPanel.setSimVeloCombo(Items.NORMAL);
         }
 
         if (evt.getKey().equals("SIM_SPEED_SLOW")) {
             Items.setSpeed(Items.SLOW,
-                    (int) SBPreferences.getPreferencesFor(GraphOptions.class)
-                            .getDouble(GraphOptions.SIM_SPEED_SLOW));
+                    (int) prefs.getDouble(GraphOptions.SIM_SPEED_SLOW));
             controlPanel.setSimVeloCombo(Items.SLOW);
         }
+
+        if (evt.getKey().equals("SIM_SPEED_CHOOSER")) {
+            controlPanel.setSimVeloCombo(Items.getItem(prefs
+                    .getString(GraphOptions.SIM_SPEED_CHOOSER)));
+        }
         
-        if (evt.getKey().equals("SIM_SPEED_CHOOSER")){
-            controlPanel.setSimVeloCombo(Items.getItem(SBPreferences
-                    .getPreferencesFor(GraphOptions.class).getString(
-                            GraphOptions.SIM_SPEED_CHOOSER)));
+        if (evt.getKey().equals("VISUALIZATION_STYLE")) {
+            controlPanel.setSelectedManipulator(Manipulators
+                    .getManipulator(prefs
+                            .getString(GraphOptions.VISUALIZATION_STYLE)));
+        }
+        
+        if (evt.getKey().equals("VISUALIZATION_DATA")){
+            if (!view.visualizeData(prefs
+                    .getString(GraphOptions.VISUALIZATION_DATA))) {
+                //back to default
+                prefs.put(GraphOptions.VISUALIZATION_DATA,
+                        GraphOptions.VISUALIZATION_DATA.getDefaultValue());
+                GUITools.showErrorMessage(view,
+                        bundle.getString("DATA_NOT_AVAILABLE"));
+            }
         }
     }
 }

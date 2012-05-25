@@ -32,7 +32,9 @@
   <entry key="SIMULATIONSPEED_SPINNER_TOOLTIP">Zeigt die aktuelle Simulationsgeschwindigkeit als Wert an. Kann in den Optionen unter Netzwerk geändert werden.</entry>
   <entry key="NODESIZE">Knotengröße</entry>
   <entry key="NODECOLOR">Knotenfarbe</entry>
-  <entry key="MANIPULATORCHOOSER">Visualisierung</entry>
+  <entry key="VISUALIZATION">Visualisierung</entry>
+  <entry key="SIMULATION_DATA">Simulationdaten</entry> 
+  <entry key="EXPERIMENTAL_DATA">Experimentelle Daten</entry>   
   
   <!-- GraphOptions -->
 
@@ -79,5 +81,10 @@
   <entry key="SIM_SPEED_CHOOSER_TOOLTIP">Hiermit kann die Abspielgeschwindigkeit gewählt werden.</entry>
   <entry key="SIM_SPEED_GROUP">Abspielgeschwindigkeit</entry>
   <entry key="SIM_SPEED_GROUP_TOOLTIP">Diese Einstellungen steuern die Abspielgeschwindigkeit. Je kleiner der Wert, desto schneller die Geschwindigkeit.</entry>
+  <entry key="VISUALIZATION_STYLE">Visualisierungsart</entry>
+  <entry key="VISUALIZATION_STYLE_TOOLTIP">Diese Einstellung steuert die Art der Visualisierung.</entry>    
+  <entry key="VISUALIZATION_DATA">Visualisierte Daten</entry>
+  <entry key="VISUALIZATION_DATA_TOOLTIP">Wähle die zu visualisierende Daten aus.</entry>
+  <entry key="DATA_NOT_AVAILABLE">Der zur Visualisierung ausgewählte Datensatz steht momentan nicht zur Verfügung.</entry>
   
 </properties>

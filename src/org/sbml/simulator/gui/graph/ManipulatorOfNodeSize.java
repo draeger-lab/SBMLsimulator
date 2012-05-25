@@ -148,7 +148,8 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
         double size = value*m + c; //adjust value by linear regression
         NodeRealizer nr = graph.getSimpleGraph()
                 .getRealizer(graph.getId2node().get(id));
-        nr.setSize(size, size);
+        double ratio = nr.getHeight() / nr.getWidth(); //keep ratio in case of elliptic nodes
+        nr.setSize(size*ratio, size);
         //use standard color if no legendTableModel is provided
         Color color = null;
         if(legendTable != null){

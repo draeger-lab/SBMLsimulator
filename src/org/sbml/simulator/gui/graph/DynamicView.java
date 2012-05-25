@@ -21,6 +21,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
 import javax.swing.JSplitPane;
@@ -35,36 +36,85 @@ import org.simulator.math.odes.MultiTable;
 
 import de.zbit.graph.gui.TranslatorSBMLgraphPanel;
 import de.zbit.graph.io.SBML2GraphML;
+import de.zbit.util.ResourceManager;
 
 /**
- * This class gathers all elements concerning the dynamic visualization 
- * and ensures that every part is consistent with each other, i.e. search bar
- * with visualized values. (This is ensured by the implementation of
- * {@link DynamicGraph}. Every change of the slider goes through this class).
- * It represents the view in MVC-Pattern and therefore listenes for
- * change notifies of associated {@link DynamicCore}.
+ * This class gathers all elements concerning the dynamic visualization and
+ * ensures that every part is consistent with each other, i.e. search bar with
+ * visualized values. (This is ensured by the implementation of
+ * {@link DynamicGraph}. Every change of the slider goes through this class). It
+ * represents the view in MVC-Pattern and therefore listenes for change notifies
+ * of associated {@link DynamicCore}.
  * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
 public class DynamicView extends JSplitPane implements DynamicGraph,
-        PropertyChangeListener{
-    
+        PropertyChangeListener {
+
     /**
      * 
      */
     private static final long serialVersionUID = 4111494340467647183L;
 
     /**
+     * Localization support.
+     */
+    private static final transient ResourceBundle bundle = ResourceManager
+            .getBundle("org.sbml.simulator.gui.graph.DynamicGraph");
+
+    /**
+     * Stores {@link GraphManipulator}s.
+     * 
+     * @author Fabian Schwarzkopf
+     * @version $Rev$
+     */
+    public enum Manipulators {
+        NODESIZE, NODECOLOR;
+
+        /**
+         * Returns localized name of this Item.
+         * 
+         * @return
+         */
+        public String getName() {
+            return bundle.getString(this.toString());
+        }
+        
+        /**
+         * Returns {@link Manipulators} to given ManipulatorName.
+         * @param manipulatorName
+         * @return
+         */
+        public static Manipulators getManipulator(String manipulatorName){
+            if(manipulatorName.equals(bundle.getString("NODESIZE"))){
+                return NODESIZE;
+            }else if(manipulatorName.equals(bundle.getString("NODECOLOR"))){
+                return NODECOLOR;
+            }
+            return null;
+        }
+
+        /**
+         * Returns a string array of all manipulators.
+         * 
+         * @return
+         */
+        public static String[] getAllManipulators() {
+            return new String[] { NODESIZE.getName(), NODECOLOR.getName() };
+        }
+    }
+
+    /**
      * Panel for the graph representation.
      */
     private TranslatorSBMLgraphPanel graphPanel;
-    
+
     /**
      * Legend.
      */
     private LegendPanel legend;
-    
+
     /**
      * Field for the splitpane wrapping graph and legend.
      */
@@ -74,22 +124,32 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      * Panel for the controls of the dynamic visualization.
      */
     private DynamicControlPanel controlPanel;
-    
+
     /**
      * Pointer to associated {@link DynamicController}.
      */
     private DynamicController controller;
 
     /**
-     * Pointer to the used {@link DynamicCore}.
+     * Pointer to actually visualized {@link DynamicCore}.
      */
-    private DynamicCore core;
+    private DynamicCore visualizedCore;
     
+    /**
+     * Pointer to simulation data {@link DynamicCore}.
+     */
+    private DynamicCore simulationCore;
+    
+    /**
+     * Pointer to experimental data {@link DynamicCore}.
+     */
+    private DynamicCore experimentalCore;
+
     /**
      * Used {@link SBMLDocument}.
      */
     private SBMLDocument document;
-    
+
     /**
      * Selection states of species IDs according to {@link LegendTableModel}.
      */
@@ -99,12 +159,12 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      * Selection states of reactions IDs according to {@link LegendTableModel}.
      */
     private HashMap<String, Boolean> reactionsSelectionStates = new HashMap<String, Boolean>();
-    
-     /**
+
+    /**
      * Saves the currently displayed time.
      */
     private double currTime;
-     
+
     /**
      * Saves the currently displayed data.
      */
@@ -122,116 +182,165 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      */
     public DynamicView(SBMLDocument document) {
         super(JSplitPane.VERTICAL_SPLIT, false);
-        
-        //init
+
+        // init
         controller = new DynamicController(this);
         graphPanel = new TranslatorSBMLgraphPanel(document, false, false);
         graphPanel.setBorder(BorderFactory.createLoweredBevelBorder());
         legend = new LegendPanel(document.getModel(), true);
         legend.addTableModelListener(controller);
-        graphWithLegend = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, legend, graphPanel);
+        graphWithLegend = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, legend,
+                graphPanel);
         graphWithLegend.setDividerLocation(330);
         controlPanel = new DynamicControlPanel(this, controller);
 
         add(graphWithLegend);
         add(controlPanel);
 
-        setResizeWeight(1.0); //control panel has fixed size
-        
+        setResizeWeight(1.0); // control panel has fixed size
+
         this.document = document;
     }
-    
+
     /**
      * Sets the {@link GraphManipulator} for this {@link DynamicView}.
+     * 
      * @param gm
      */
-    public void setGraphManipulator(GraphManipulator gm){
+    public void setGraphManipulator(GraphManipulator gm) {
         graphManipulator = gm;
         updateGraph();
     }
     
     /**
-     * Returns the registered {@link DynamicController}.
-     * @return {@link DynamicController} or null
+     * If simulation data is available, it gets visualized.
+     * @return true, if simulation data is visualized<br>
+     *          false, if simulation data not available.
      */
-    public DynamicController getDynamicController(){
-        return controller != null ? controller : null; 
+    public boolean visualizeSimulationData(){
+        if (simulationCore != null){
+            visualizedCore = simulationCore;
+            return true;
+        }
+        return false;
     }
     
     /**
-     * Returns legend panel of this {@link DynamicView}.
-     * @return
+     * If experimental data is available, it gets visualized.
+     * @return true, if simulation data is visualized<br>
+     *          false, if simulation data not available.
      */
-    public LegendPanel getLegendPanel(){
-        return legend;
+    public boolean visualizeExperimentalData(){
+        if (experimentalCore != null){
+            visualizedCore = experimentalCore;
+            return true;
+        }
+        return false;
     }
     
+    /**
+     * Changes visualization to given data set name.
+     * @param dataName
+     * @return true, if data could be visualized<br>
+     *          false, if data could not be visualized.
+     */
+    public boolean visualizeData(String dataName){
+        if (dataName.equals(bundle.getString("SIMULATION_DATA"))){
+            return visualizeSimulationData();
+        } else if (dataName.equals(bundle.getString("EXPERIMENTAL_DATA"))){
+            return visualizeExperimentalData();
+        }
+        return false;
+    }
+
+    /**
+     * Returns the registered {@link DynamicController}.
+     * 
+     * @return {@link DynamicController} or null
+     */
+    public DynamicController getDynamicController() {
+        return controller != null ? controller : null;
+    }
+
+    /**
+     * Returns legend panel of this {@link DynamicView}.
+     * 
+     * @return
+     */
+    public LegendPanel getLegendPanel() {
+        return legend;
+    }
+
     /**
      * Updates the displayed graph with respect to the user chosen settings.
      * (i.e. turning on/off labels).
      */
     public void updateGraph() {
-        if(core != null){
+        if (visualizedCore != null) {
             updateGraph(currTime, currData);
         }
     }
-    
+
     /**
      * Saves selection state of id, whether specie or reaction, in corresponding
-     * hashmap.
-     * Method should be invoked on changes in {@link LegendTableModel}.
+     * hashmap. Method should be invoked on changes in {@link LegendTableModel}.
+     * 
      * @param id
      * @param bool
      */
-    public void putSelectionState(String id, boolean bool){
+    public void putSelectionState(String id, boolean bool) {
         if (document.getModel().getSpecies(id) != null) {
             speciesSelectionStates.put(id, bool);
         } else if (document.getModel().getReaction(id) != null) {
             reactionsSelectionStates.put(id, bool);
         }
     }
-    
+
     /**
      * Returns selected species.
+     * 
      * @return
      */
-    public String[] getSelectedSpecies(){
+    public String[] getSelectedSpecies() {
         ArrayList<String> selectedSpecies = new ArrayList<String>();
-        for(String id : speciesSelectionStates.keySet()){
-            if(speciesSelectionStates.get(id)){
+        for (String id : speciesSelectionStates.keySet()) {
+            if (speciesSelectionStates.get(id)) {
                 selectedSpecies.add(id);
             }
         }
         return selectedSpecies.toArray(new String[selectedSpecies.size()]);
     }
-    
+
     /**
      * Returns selected reactions.
+     * 
      * @return
      */
-    public String[] getSelectedReactions(){
+    public String[] getSelectedReactions() {
         ArrayList<String> selectedReactions = new ArrayList<String>();
-        for(String id : reactionsSelectionStates.keySet()){
-            if(reactionsSelectionStates.get(id)){
+        for (String id : reactionsSelectionStates.keySet()) {
+            if (reactionsSelectionStates.get(id)) {
                 selectedReactions.add(id);
             }
         }
         return selectedReactions.toArray(new String[selectedReactions.size()]);
     }
-    
+
     /**
      * Returns {@link SBML2GraphML} of this {@link DynamicView}.
+     * 
      * @return
      */
-    public SBML2GraphML getGraph(){
+    public SBML2GraphML getGraph() {
         return graphPanel.getConverter();
     }
-    
+
     /**
      * Returns {@link SBMLDocument} of this {@link DynamicView}.
+     * 
      * @return
      */
-    public SBMLDocument getSBMLDocument(){
+    public SBMLDocument getSBMLDocument() {
         return document;
     }
 
@@ -243,12 +352,12 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      */
     @Override
     public void updateGraph(double timepoint, MultiTable updateThem) {
-        //save currently displayed properties
+        // save currently displayed properties
         currTime = timepoint;
         currData = updateThem;
-        //update JSlider (in case of "play")
+        // update JSlider (in case of "play")
         controlPanel.setTimepoint(timepoint);
-        
+
         if (graphManipulator != null) {
             for (int i = 1; i <= updateThem.getColumnCount(); i++) {
                 String id = updateThem.getColumnIdentifier(i);
@@ -263,13 +372,16 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                                 updateThem.getValueAt(0, i),
                                 controlPanel.getSelectionStateOfNodeLabels());
                     } else if (document.getModel().getReaction(id) != null) {
-                        if (timepoint == 0.0){
-                            //there's no initial reaction data.
+                        if (timepoint == 0.0) {
+                            // there's no initial reaction data.
                             graphManipulator.revertChanges(id);
                         } else {
-                            graphManipulator.dynamicChangeOfReaction(id,
-                                    updateThem.getValueAt(0, i),
-                                    controlPanel.getSelectionStateOfReactionLabels());
+                            graphManipulator
+                                    .dynamicChangeOfReaction(
+                                            id,
+                                            updateThem.getValueAt(0, i),
+                                            controlPanel
+                                                    .getSelectionStateOfReactionLabels());
                         }
                     }
                 } else {
@@ -282,13 +394,14 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
          * Notifiy that graph update is finished. Ensures that play-thread in
          * core doesn't overtravel drawing.
          */
-        if(core != null) {
-            core.graphUpdateFinished();
+        if (visualizedCore != null) {
+            visualizedCore.graphUpdateFinished();
         }
     }
 
     /*
      * (non-Javadoc)
+     * 
      * @see java.beans.PropertyChangeListener#propertyChange(java.beans.
      * PropertyChangeEvent)
      */
@@ -296,39 +409,49 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     public void propertyChange(PropertyChangeEvent e) {
         if (e.getPropertyName().equals("done")) {
             // simulation done
-            MultiTable data = (MultiTable) e.getNewValue();
+            final MultiTable data = (MultiTable) e.getNewValue();
+            final DynamicView thisView = this;
             if (data != null) {
-                /*
-                 * As a new core is constructed every time the simulation is
-                 * finished, the control panel is consistent with the simulated
-                 * data.
-                 */
-                core = new DynamicCore(this, data);
-                
+                // core = new DynamicCore(this, data);
                 /*
                  * Computation of limits in own swingworker because of O(n^2).
-                 * Ensures that UI doesn't get blocked in case of bigger data sets.
+                 * Ensures that UI doesn't get blocked in case of bigger data
+                 * sets.
                  */
                 SwingWorker<Void, Void> computationOfLimits = new SwingWorker<Void, Void>() {
 
                     @Override
-                    protected Void doInBackground() throws Exception{
-                        core.computeSpecificLimits(document);
+                    protected Void doInBackground() throws Exception {
+                        // core.computeSpecificLimits(document);
+                        /*
+                         * As a new core is constructed and assigned every time
+                         * the simulation is finished, the control panel is
+                         * consistent with the simulated data.
+                         */
+                        simulationCore = new DynamicCore(thisView, data, document);
                         return null;
                     }
 
-                    /* (non-Javadoc)
+                    /*
+                     * (non-Javadoc)
+                     * 
                      * @see javax.swing.SwingWorker#done()
                      */
                     @Override
                     protected void done() {
                         super.done();
-                        //selections are saved implicit in hashmaps due to TableModelListener
-                        legend.getLegendTableModel().setSelected(Species.class, true);
-                        legend.getLegendTableModel().setSelected(Reaction.class, true);
-                        //activate controlpanel after computation of limits
-                        controlPanel.setCore(core);
-                        graphManipulator = controller.getSelectedGraphManipulator();
+                        // selections are saved implicit in hashmaps due to
+                        // TableModelListener
+                        legend.getLegendTableModel().setSelected(Species.class,
+                                true);
+                        legend.getLegendTableModel().setSelected(
+                                Reaction.class, true);
+                        controlPanel.addToDataList(bundle.getString("SIMULATION_DATA"));
+                        visualizedCore = simulationCore;
+                        // activate controlpanel after computation of limits
+                        controlPanel.setCore(visualizedCore);
+                        graphManipulator = controller
+                                .getSelectedGraphManipulator();
                         updateGraph();
                     }
                 };
@@ -337,16 +460,18 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.sbml.simulator.gui.graph.DynamicGraph#donePlay()
      */
     @Override
     public void donePlay() {
         controlPanel.setStopStatus();
-        double[] allTimepoints = core.getTimepoints();
-        //only if last timepoint reached, switch to first timepoint.
-        if(currTime == allTimepoints[allTimepoints.length-1]){
-            core.setCurrTimepoint(0);
+        double[] allTimepoints = visualizedCore.getTimepoints();
+        // only if last timepoint reached, switch to first timepoint.
+        if (currTime == allTimepoints[allTimepoints.length - 1]) {
+            visualizedCore.setCurrTimepoint(0);
         }
     }
 }

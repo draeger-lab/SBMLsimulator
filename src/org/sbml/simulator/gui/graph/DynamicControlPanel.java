@@ -17,7 +17,6 @@
  */
 package org.sbml.simulator.gui.graph;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -37,16 +36,16 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.UIManager;
 
 import org.sbml.simulator.gui.SimulatorUI;
-import org.sbml.simulator.gui.graph.DynamicController.Manipulators;
+import org.sbml.simulator.gui.graph.DynamicView.Manipulators;
 
 import de.zbit.gui.GUITools;
 import de.zbit.gui.actioncommand.ActionCommand;
+import de.zbit.gui.layout.LayoutHelper;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.SBPreferences;
@@ -206,6 +205,16 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
      */
 	private boolean panelActivationStatus;
 	
+	/**
+	 * Refers to {@link JComboBox} name of available manipulators.
+	 */
+	public final String MANIPULATORS_LIST = GraphOptions.VISUALIZATION_STYLE.toString();
+	
+	/**
+	 * Refers to {@link JComboBox} name of available data.
+	 */
+	public final String DATA_LIST = GraphOptions.VISUALIZATION_DATA.toString();
+	
 	/*
 	 * GUI elements
 	 */
@@ -222,8 +231,6 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
 	private JSpinner simVeloSpin;
 	private JCheckBox nodeLabelsCB;
 	private JCheckBox reactionLabelsCB;
-	private JRadioButton nodesize;
-	private JRadioButton nodecolor;
 	
 	/**
 	 * Constructs a new control panel.
@@ -266,8 +273,8 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
 		 */
 		controller.setCore(core);
 		setTimepoint(core.getCurrTimepoint());
-        Component[] elements = { play, video, searchBar, simVeloCombo, nodeLabelsCB, reactionLabelsCB, nodesize,
-                nodecolor };
+        Component[] elements = { play, video, searchBar, simVeloCombo,
+                nodeLabelsCB, reactionLabelsCB, manipulatorsCombo, dataCombo };
 		GUITools.setEnabledForAll(true, elements);
 		panelActivationStatus = true;
 	}
@@ -279,6 +286,7 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
 		logger.fine("Entering init method");
 		GridBagLayout gbl = new GridBagLayout();
 		setLayout(gbl);
+		SBPreferences prefs = SBPreferences.getPreferencesFor(GraphOptions.class);
 		
 		ImageIcon playIcon = new ImageIcon(SimulatorUI.class.getResource("graph/GPL_PLAY_16.png"));
 		UIManager.put("GPL_PLAY_16", playIcon);
@@ -294,7 +302,6 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
 		searchBar.setPaintTicks(true);
 		searchBar.setValue(0);
 		
-		SBPreferences prefs = SBPreferences.getPreferencesFor(GraphOptions.class);
 		nodeLabelsCB = GUITools.createJCheckBox(GraphOptions.SHOW_NODE_LABELS, prefs, this);
 		nodeLabelsCB.addActionListener(controller);
 		reactionLabelsCB = GUITools.createJCheckBox(GraphOptions.SHOW_REACTION_LABELS, prefs, this);
@@ -318,26 +325,18 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
 		simVeloSpin.setToolTipText(bundle.getString("SIMULATIONSPEED_SPINNER_TOOLTIP"));
 	    setSimVeloCombo(Items.getItem(prefs.getString(GraphOptions.SIM_SPEED_CHOOSER)));
 		
-		nodesize = new JRadioButton(Buttons.NODESIZE.getName());
-		nodesize.setActionCommand(Buttons.NODESIZE.toString());
-		nodesize.addActionListener(controller);
-		nodesize.setSelected(true);
-		nodecolor = new JRadioButton(Buttons.NODECOLOR.getName());
-		nodecolor.setActionCommand(Buttons.NODECOLOR.toString());
-		nodecolor.addActionListener(controller);
-		
-		//TODO change to comobobox with layouthelper
-//		manipulatorsCombo = new JComboBox(Manipulators.getAllManipulators());
-//		dataCombo = new JComboBox(); //TODO
-//		
+		manipulatorsCombo = new JComboBox(Manipulators.getAllManipulators());
+		manipulatorsCombo.setName(MANIPULATORS_LIST);
+		manipulatorsCombo.addItemListener(controller);
+		manipulatorsCombo.setSelectedItem(prefs.getString(GraphOptions.VISUALIZATION_STYLE));
+		dataCombo = new JComboBox();
+		dataCombo.setName(DATA_LIST);
+		dataCombo.addItemListener(controller);
 		JPanel manipulatorsPane = new JPanel();
-		manipulatorsPane.setLayout(new BorderLayout());
-		
-//		manipulatorsPane.add(manipulatorsCombo, BorderLayout.LINE_START);
-		
-		manipulatorsPane.add(nodesize, BorderLayout.LINE_START);
-		manipulatorsPane.add(nodecolor, BorderLayout.AFTER_LAST_LINE);
-		manipulatorsPane.setBorder(BorderFactory.createTitledBorder(bundle.getString("MANIPULATORCHOOSER")));
+		LayoutHelper lh = new LayoutHelper(manipulatorsPane);
+		lh.add(manipulatorsCombo, true);
+		lh.add(dataCombo);
+		manipulatorsPane.setBorder(BorderFactory.createTitledBorder(bundle.getString("VISUALIZATION")));
 		manipulatorsPane.setMinimumSize(new Dimension(80, 20));
 		
 		addComponent(gbl, searchBar,        0, 0, 7, 1, GridBagConstraints.CENTER, 	GridBagConstraints.HORIZONTAL, 	1, 0, new Insets(0,0,0,0));
@@ -355,7 +354,7 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
 
         Component[] elements = { play, pause, stop, video, searchBar,
                 simVeloCombo, simVeloSpin, nodeLabelsCB, reactionLabelsCB,
-                nodesize, nodecolor};
+                manipulatorsCombo, dataCombo };
 		GUITools.setEnabledForAll(false, elements);
 		panelActivationStatus = false;
 		logger.fine("DynamicControlPanel initialized.");
@@ -390,14 +389,24 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
 	 * @param item
 	 */
 	public void setSimVeloCombo(Items item) {
-//	    System.out.println("fire");
-//        firePropertyChange(GraphOptions.SIM_SPEED_CHOOSER.toString(),
-//                Items.getItem(simVeloCombo.getSelectedItem().toString()).getName(),
-//                item.getName());
-	    //TODO change options respectively
 	    simVeloCombo.setSelectedItem(item.getName());
 	    simVeloSpin.setValue(item.getSpeed(item));
-	    
+	}
+	
+	/**
+	 * Sets selected manipulator in {@link JComboBox}.
+	 * @param manipulator
+	 */
+	public void setSelectedManipulator(Manipulators manipulator){
+	    manipulatorsCombo.setSelectedItem(manipulator.getName());
+	}
+	
+	/**
+	 * Returns the current selected manipulator.
+	 * @return
+	 */
+	public String getSelectedManipulator(){
+	    return manipulatorsCombo.getSelectedItem().toString();
 	}
 	
     /**
@@ -468,44 +477,19 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
     }
 	
 	/**
-	 * Sets the selection state of the nodesize-radiobutton.
-	 * @param bool
-	 */
-	public void setNodesizeSelectionState(boolean bool){
-	    nodesize.setSelected(bool);
-	}
-	
-	/**
-	 * Returns selection state of nodesize-checkbox.
-	 * @return
-	 */
-	public boolean getSelectionStateOfNodesize(){
-	    return nodesize.isSelected();
-	}
-	
-	/**
-	 * Sets the selection state of the nodecolor-radiobutton.
-	 * @param bool
-	 */
-	public void setNodecolorSelectionState(boolean bool){
-	    nodecolor.setSelected(bool);
-	}
-	
-	/**
-	 * Returns selections state of nodecolor-checkbox.
-	 * @param bool
-	 * @return
-	 */
-	public boolean getSelectionStateOfNodecolor(){
-	    return nodecolor.isSelected();
-	}
-	
-	/**
 	 * Returns the activation status of this {@link DynamicControlPanel}.
 	 * @return
 	 */
 	public boolean getPanelActivationStatus(){
 	    return panelActivationStatus;
+	}
+	
+	/**
+	 * Adds an item to the data-list.
+	 * @param item
+	 */
+	public void addToDataList(String item){
+	    dataCombo.addItem(item);
 	}
 	
 	/**
