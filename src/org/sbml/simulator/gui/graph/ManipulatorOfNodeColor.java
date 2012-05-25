@@ -171,7 +171,8 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
     public void dynamicChangeOfNode(String id, double value, boolean labels) {
         NodeRealizer nr = graph.getSimpleGraph()
                 .getRealizer(graph.getId2node().get(id));
-        nr.setSize(DEFAULT_NODE_SIZE, DEFAULT_NODE_SIZE); //standard node size
+        double ratio = nr.getHeight() / nr.getWidth(); //keep ratio in case of elliptic nodes
+        nr.setSize(DEFAULT_NODE_SIZE*ratio, DEFAULT_NODE_SIZE); //standard node size
         int[] RGBinterpolated = linearColorInterpolationForThree(value*m+c);
         nr.setFillColor(new Color(RGBinterpolated[0], RGBinterpolated[1], RGBinterpolated[2]));
         

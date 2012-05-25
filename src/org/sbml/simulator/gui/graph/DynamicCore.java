@@ -147,13 +147,29 @@ public class DynamicCore {
 	private int playspeed = 700;
 	
 	/**
-	 * Construstructs the core with an observer and simulation data.
+	 * Constructs the core with an observer and simulation data.
+	 * Does not provide any data limits.
+	 * 
 	 * @param observer
 	 * @param data
 	 */
 	public DynamicCore(DynamicGraph observer, MultiTable data){
 		observers.add(observer);
 		setData(data);
+	}
+	
+	/**
+     * Constructs the core with an observer and simulation data. Does provide
+     * data limits, which will be implicit computed, therefore this constructor
+     * is in O(n^2).
+     * 
+     * @param observer
+     * @param data
+     * @param document
+     */
+	public DynamicCore(DynamicGraph observer, MultiTable data, SBMLDocument document){
+	    this(observer, data);
+	    computeSpecificLimits(document);
 	}
 	
     /**
