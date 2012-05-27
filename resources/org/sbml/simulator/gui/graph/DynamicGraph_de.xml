@@ -32,8 +32,8 @@
   <entry key="NODECOLOR">Knotenfarbe</entry>
   <entry key="VISUALIZATION">Visualisierung</entry>
   <entry key="VISUALIZATION_TOOLTIP">Wählen Sie die Art der dynamischen Visualisierung und die zu visualisierenden Daten aus.</entry>
-  <entry key="SIMULATION_DATA">Simulationdaten</entry> 
-  <entry key="EXPERIMENTAL_DATA">Experimentelle Daten</entry>   
+  <entry key="SIMULATION_DATA">Simulationdaten 1</entry> 
+  <entry key="EXPERIMENTAL_DATA">Experimentelle Daten 1</entry>   
   <entry key="SEARCHBAR_TOOLTIP">Stellen Sie den Zeitpunkt der Visualisierung ein.</entry>
   
   <!-- GraphOptions -->

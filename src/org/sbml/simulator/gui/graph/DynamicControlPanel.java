@@ -272,7 +272,7 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
 		 * (Does not cause inconsistency but leads to a change of the first setted curr core value).
 		 */
 		controller.setCore(core);
-		setTimepoint(core.getCurrTimepoint());
+		setSearchbar(core.getCurrTimepoint());
         Component[] elements = { play, video, searchBar, simVeloCombo,
                 nodeLabelsCB, reactionLabelsCB, manipulatorsCombo, dataCombo };
 		GUITools.setEnabledForAll(true, elements);
@@ -369,11 +369,22 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
 	 * Sets the {@link JSlider} to the given timepoint and updates the time label.
 	 * @param timepoint
 	 */
-	public void setTimepoint(double timepoint) {
+	public void setSearchbar(double timepoint) {
 	    if (core != null) {
     		searchBar.setValue(core.getIndexOfTimepoint(timepoint));
     		timelbl.setText(MessageFormat.format("{0}: {1,number,0.00} / {2,number,0.00}", new Object[]{bundle.getString("TIMEPOINT"), timepoint, maxTime}));
 	    }
+	}
+	
+    /**
+     * Sets {@link JComboBox} containing visualization data to given dataName.
+     * Ensure that {@link JComboBox} listener changes visualized data
+     * respectively.
+     * 
+     * @param dataName
+     */
+	public void setSelectedVisualizationData(String dataName){
+	   dataCombo.setSelectedItem(dataName); 
 	}
 	
 	/**

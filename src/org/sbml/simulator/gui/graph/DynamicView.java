@@ -140,7 +140,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      * Pointer to simulation data {@link DynamicCore}. Once computed, store that
      * core for immediate change of data set.
      */
-    private DynamicCore simulationCore;
+    private ArrayList<DynamicCore> simulationCores;
     
     /**
      * Pointer to experimental data {@link DynamicCore}. Once computed, store that
@@ -196,7 +196,8 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                 graphPanel);
         graphWithLegend.setDividerLocation(330);
         controlPanel = new DynamicControlPanel(this, controller);
-
+        simulationCores = new ArrayList<DynamicCore>(5);
+        
         add(graphWithLegend);
         add(controlPanel);
 
@@ -222,9 +223,10 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      *          false, if data could not be visualized.
      */
     public boolean visualizeData(String dataName){
-        if (dataName.equals(bundle.getString("SIMULATION_DATA"))){
-            if (simulationCore != null){
-                activateView(simulationCore);
+        int index = Integer.valueOf(String.valueOf(dataName.charAt(dataName.length()-1))) - 1;
+        if (dataName.contains(bundle.getString("SIMULATION_DATA"))){
+            if (!simulationCores.isEmpty()){
+                activateView(simulationCores.get(index));
                 return true;
             }
             return false;
@@ -262,7 +264,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      * (i.e. turning on/off labels).
      */
     public void updateGraph() {
-        if (visualizedCore != null) {
+        if (visualizedCore != null && currData != null) {
             updateGraph(currTime, currData);
         }
     }
@@ -336,23 +338,30 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      * @param core
      */
     private void activateView(DynamicCore core){
-        /*
-         * Default selections. selections are saved implicit in hashmaps due to
-         * TableModelListener
-         */
-        legend.getLegendTableModel().setSelected(Species.class,
-                true);
-        legend.getLegendTableModel().setSelected(
-                Reaction.class, true);
-        
-        visualizedCore = core;
-        // activate controlpanel
-        controlPanel.setCore(visualizedCore);
-        
-        //get user chosen graphmanipulator
-        graphManipulator = controller
-                .getSelectedGraphManipulator();
-        updateGraph();
+        //only activate if it is not activated yet
+        if (visualizedCore != core) {
+            //init view
+            currData = null;
+            currTime = 0;
+
+            /*
+             * Default selections. selections are saved implicit in hashmaps due
+             * to TableModelListener
+             */
+            legend.getLegendTableModel().setSelected(Species.class, true);
+            legend.getLegendTableModel().setSelected(Reaction.class, true);
+
+            visualizedCore = core;
+
+            // activate controlpanel
+            controlPanel.setCore(visualizedCore);
+
+            // get user chosen graphmanipulator
+            graphManipulator = controller.getSelectedGraphManipulator();
+            //show core's current timepoint
+            visualizedCore.fireTimepointChanged(visualizedCore
+                    .getCurrTimepoint());
+        }
     }
 
     /*
@@ -367,7 +376,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         currTime = timepoint;
         currData = updateThem;
         // update JSlider (in case of "play")
-        controlPanel.setTimepoint(timepoint);
+        controlPanel.setSearchbar(timepoint);
 
         if (graphManipulator != null) {
             for (int i = 1; i <= updateThem.getColumnCount(); i++) {
@@ -441,7 +450,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                          * the simulation is finished, the control panel is
                          * consistent with the simulated data.
                          */
-                        simulationCore = new DynamicCore(thisView, data, document);
+                        simulationCores.add(new DynamicCore(thisView, data, document));
                         return null;
                     }
 
@@ -452,8 +461,15 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                     @Override
                     protected void done() {
                         super.done();
-                        controlPanel.addToDataList(bundle.getString("SIMULATION_DATA"));
-                        activateView(simulationCore);
+                        String dataName = bundle
+                                .getString("SIMULATION_DATA")
+                                + " "
+                                + simulationCores.size();
+                        controlPanel.addToDataList(dataName);
+                        // SBPreferences.getPreferencesFor(GraphOptions.class)
+                        // .put(GraphOptions.VISUALIZATION_DATA, dataName);
+                        //TODO add to options?!
+                        controlPanel.setSelectedVisualizationData(dataName);
                     }
                 };
                 computationOfLimits.execute();
@@ -491,8 +507,9 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                     @Override
                     protected void done() {
                         super.done();
-                        controlPanel.addToDataList(bundle.getString("EXPERIMENTAL_DATA"));
-                        activateView(experimentalCore);
+                        String dataName = bundle.getString("EXPERIMENTAL_DATA");
+                        controlPanel.addToDataList(dataName);
+                        controlPanel.setSelectedVisualizationData(dataName);
                     }
                 };
                 computationOfLimits.execute();

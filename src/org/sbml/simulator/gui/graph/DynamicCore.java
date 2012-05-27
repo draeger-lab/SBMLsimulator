@@ -182,7 +182,8 @@ public class DynamicCore {
 		timePoints = data.getTimePoints();
 		minTime = data.getTimePoint(0);
 		maxTime = data.getTimePoint(data.getRowCount()-1);
-		setCurrTimepoint(data.getTimePoint(0));
+//		setCurrTimepoint(data.getTimePoint(0));
+		currTimepoint = data.getTimePoint(0);
 	}
 	
 	/**
@@ -201,7 +202,7 @@ public class DynamicCore {
 	public void setCurrTimepoint(double time){
 		if(currTimepoint != time && time >= minTime && time <= maxTime){
 			this.currTimepoint = time;
-			currTimepointChanged(time);
+			fireTimepointChanged(time);
 		}
 	}
 	
@@ -214,7 +215,7 @@ public class DynamicCore {
         if (currTimepoint != incomingTimepoint && incomingTimepoint >= minTime
                 && incomingTimepoint <= maxTime){
             this.currTimepoint = incomingTimepoint;
-            currTimepointChanged(incomingTimepoint);
+            fireTimepointChanged(incomingTimepoint);
         }
 	}
 	
@@ -296,9 +297,10 @@ public class DynamicCore {
 	}
 	
 	/**
-	 * Notifies all observers about the change and delivers changed species & reactions.
-	 */
-	private void currTimepointChanged(double changedTo){
+     * Notifies all observers about the change and delivers changed species &
+     * reactions to all registered {@link DynamicView}s.
+     */
+	public void fireTimepointChanged(double changedTo){
 		double[] currTimePoints = {currTimepoint};
 		for(DynamicGraph dg : observers){
 			dg.updateGraph(currTimepoint, data.filter(currTimePoints));
@@ -335,7 +337,7 @@ public class DynamicCore {
 			playWorker = null;
 		}
 		currTimepoint = data.getTimePoint(0);
-		currTimepointChanged(data.getTimePoint(0));
+		fireTimepointChanged(data.getTimePoint(0));
 	}
 	
 	/**
