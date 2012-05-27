@@ -351,7 +351,7 @@ public class DynamicController implements ChangeListener, ActionListener,
         if (evt.getKey().equals("VISUALIZATION_DATA")){
             if (!view.visualizeData(prefs
                     .getString(GraphOptions.VISUALIZATION_DATA))) {
-                //back to default
+                //on error back to default
                 prefs.put(GraphOptions.VISUALIZATION_DATA,
                         GraphOptions.VISUALIZATION_DATA.getDefaultValue());
                 GUITools.showErrorMessage(view,

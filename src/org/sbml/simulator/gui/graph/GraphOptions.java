@@ -41,6 +41,31 @@ public interface GraphOptions extends KeyProvider{
      */
     public static final ResourceBundle bundle = ResourceManager
             .getBundle("org.sbml.simulator.gui.graph.DynamicGraph");
+    
+    /**
+     * Choose visualization-style.
+     */
+    public static final Option<String> VISUALIZATION_STYLE = new Option<String>(
+            "VISUALIZATION_STYLE", String.class, bundle, new Range<String>(
+                    String.class, Manipulators.getAllManipulators()),
+            Manipulators.NODESIZE.getName());
+  
+    /**
+     * Choose visualization-data.
+     */
+    public static final Option<String> VISUALIZATION_DATA = new Option<String>(
+            "VISUALIZATION_DATA", String.class, bundle, new Range<String>(
+                    String.class, new String[] {
+                            bundle.getString("SIMULATION_DATA"),
+                            bundle.getString("EXPERIMENTAL_DATA")}),
+            bundle.getString("SIMULATION_DATA"));
+    
+    /**
+     * Options for visualization.
+     */
+    @SuppressWarnings({ "unchecked" })
+    public static final OptionGroup<String> VISUALIZATION = new OptionGroup<String>(
+            "VISUALIZATION", bundle, VISUALIZATION_STYLE, VISUALIZATION_DATA);
 
     /**
      * In case of dynamic node size change, it defines the minimum node size.
@@ -183,31 +208,4 @@ public interface GraphOptions extends KeyProvider{
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static final OptionGroup SIM_SPEED_GROUP = new OptionGroup(
         "SIM_SPEED_GROUP", bundle, SIM_SPEED_FAST, SIM_SPEED_NORMAL, SIM_SPEED_SLOW, SIM_SPEED_CHOOSER);
-    
-    //TODO options for graphmanipulator
-    /**
-     * Choose visualization-style.
-     */
-    public static final Option<String> VISUALIZATION_STYLE = new Option<String>(
-            "VISUALIZATION_STYLE", String.class, bundle, new Range<String>(
-                    String.class, Manipulators.getAllManipulators()),
-            Manipulators.NODESIZE.getName());
-  
-    /**
-     * Choose visualization-data.
-     */
-    public static final Option<String> VISUALIZATION_DATA = new Option<String>(
-            "VISUALIZATION_DATA", String.class, bundle, new Range<String>(
-                    String.class, new String[] {
-                            bundle.getString("SIMULATION_DATA"),
-                            bundle.getString("EXPERIMENTAL_DATA") }),
-            bundle.getString("SIMULATION_DATA"));
-    
-    /**
-     * Options for visualization.
-     */
-    @SuppressWarnings({ "unchecked" })
-    public static final OptionGroup<String> VISUALIZATION = new OptionGroup<String>(
-            "VISUALIZATION", bundle, VISUALIZATION_STYLE, VISUALIZATION_DATA);
-    
 }
