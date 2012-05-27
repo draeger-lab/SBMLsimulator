@@ -261,6 +261,13 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
 	public void setCore(DynamicCore core) {
 		this.core = core;
 		double[] timepointsOfSimulation = core.getTimepoints();
+        /*
+         * Bugfix: controller has to be unassigned to change boundries of
+         * JSlider, otherwise boundrie changing will invoke change of JSlider
+         * stateChange thus invoking timepointchange in core. Maybe timepoint of
+         * that core is set to 0 if timepoint doesn't exist.
+         */
+		controller.setCore(null);
 		searchBar.setMinimum(0);
 		searchBar.setMaximum(timepointsOfSimulation.length-1);
 		maxTime = core.getMaxTime();
@@ -268,11 +275,10 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
 		/*
 		 * Controller needs to be assigned after setting the boundries of JSlider.
 		 * Otherwise the current JSlider-value will change, thus invoking a change of the 
-		 * current saved timepoint of the core.
-		 * (Does not cause inconsistency but leads to a change of the first setted curr core value).
+		 * current saved timepoint of the core (same as above).
 		 */
 		controller.setCore(core);
-		setSearchbar(core.getCurrTimepoint());
+		setSearchbarValue(core.getCurrTimepoint());
         Component[] elements = { play, video, searchBar, simVeloCombo,
                 nodeLabelsCB, reactionLabelsCB, manipulatorsCombo, dataCombo };
 		GUITools.setEnabledForAll(true, elements);
@@ -369,7 +375,7 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
 	 * Sets the {@link JSlider} to the given timepoint and updates the time label.
 	 * @param timepoint
 	 */
-	public void setSearchbar(double timepoint) {
+	public void setSearchbarValue(double timepoint) {
 	    if (core != null) {
     		searchBar.setValue(core.getIndexOfTimepoint(timepoint));
     		timelbl.setText(MessageFormat.format("{0}: {1,number,0.00} / {2,number,0.00}", new Object[]{bundle.getString("TIMEPOINT"), timepoint, maxTime}));

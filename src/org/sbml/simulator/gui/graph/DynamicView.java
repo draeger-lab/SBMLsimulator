@@ -376,7 +376,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         currTime = timepoint;
         currData = updateThem;
         // update JSlider (in case of "play")
-        controlPanel.setSearchbar(timepoint);
+        controlPanel.setSearchbarValue(timepoint);
 
         if (graphManipulator != null) {
             for (int i = 1; i <= updateThem.getColumnCount(); i++) {
