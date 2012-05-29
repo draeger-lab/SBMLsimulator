@@ -301,6 +301,13 @@ public class SimulationPanel extends JPanel implements
   }
   
   /**
+   * @return
+   */
+  public SimulationVisualizationPanel getVisualizationPanel() {
+    return visualizationPanel;
+  }
+  
+  /**
    * 
    * @return
    */

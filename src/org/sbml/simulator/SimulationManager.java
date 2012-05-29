@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 import org.apache.commons.math.ode.DerivativeException;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
+import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.gui.SimulationWorker;
 import org.simulator.math.odes.MultiTable;
 import org.simulator.sbml.SBMLinterpreter;
@@ -86,6 +87,25 @@ public class SimulationManager implements PropertyChangeListener {
    */
   private MultiTable solution;
   
+  /**
+   * The problem to estimate parameters for.
+   */
+  private EstimationProblem estimationProblem;
+  
+  /**
+	 * @return the estimationProblem
+	 */
+	public EstimationProblem getEstimationProblem() {
+		return estimationProblem;
+	}
+
+	/**
+	 * @param estimationProblem the estimationProblem to set
+	 */
+	public void setEstimationProblem(EstimationProblem estimationProblem) {
+		this.estimationProblem = estimationProblem;
+	}
+	
   /**
    * Creates a new simulation manager with the given simulation configuration
    * and quality measurement.
