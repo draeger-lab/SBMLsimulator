@@ -20,9 +20,7 @@ package org.sbml.optimization.problem;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
@@ -103,7 +101,14 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * Memorizes the original values of all given {@link Quantity}s to restore
 	 * the original state.
 	 */
-	private double originalValues[] = null;
+	private double originalValues[] = null, bestSolutionFound[] = null;
+
+	/**
+	 * @return the bestSolutionFound
+	 */
+	public double[] getBestSolutionFound() {
+		return bestSolutionFound;
+	}
 
 	/**
 	 * 
@@ -132,11 +137,6 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * Switch to decide whether or not to use a multiple shooting strategy.
 	 */
 	private boolean multishoot;
-
-	/**
-	 * 
-	 */
-	private Map<String,Integer> id2Index;
 
 	/**
 	 * 
@@ -205,16 +205,6 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		setModel(model);
 		setReferenceData(list.toArray(new MultiTable[0]));
 		setQuantityRanges(quantityRanges);
-		if (id2Index == null) {
-			id2Index = new HashMap<String, Integer>();
-			String ids[] = interpreter.getIdentifiers();
-			for (int i = 0; i < ids.length; i++) {
-				id2Index.put(ids[i], Integer.valueOf(i));
-			}
-			for (int i = 0; i < quantityRanges.length; i++) {
-				id2Index.remove(quantityRanges[i].getQuantity().getId());
-			}
-		}
 	}
 
 	/**
@@ -265,27 +255,16 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * @see eva2.server.go.problems.AbstractProblemDouble#eval(double[])
 	 */
 	public double[] eval(double[] x) {
-	  
-	  for (int i = 0; i < x.length; i++) {
+		
+		for (int i = 0; i < x.length; i++) {
 			quantityRanges[i].getQuantity().setValue(x[i]);
 		}
 		
 		try {
-		  interpreter.init(false);
+			interpreter.init(false);
 			
-		  double[] initialValues = interpreter.getInitialValues();
-			MultiTable reference = getInitialConditions();
-			for (int col = 0; col < reference.getColumnCount(); col++) {
-			  String name = reference.getColumnIdentifier(col);
-			  Integer pos = id2Index.get(name);
-			  if (pos != null) {
-			    double value = ((Double) reference.getValueAt(0, col)).doubleValue();
-			    if (!Double.isNaN(value)) {
-			    	initialValues[pos] = value;
-			    }
-			  }
-			}
-			MultiTable solution = null; 
+			double[] initialValues = interpreter.getInitialValues();
+			MultiTable solution = null;
 			try {
 				if (multishoot) {
 					solution = solver.solve(interpreter,
@@ -314,15 +293,15 @@ public class EstimationProblem extends AbstractProblemDouble implements
 				}
 				
 			}
-			if ((bestPerGeneration == null)
-					|| (fitness[0] < bestPerGenerationDist)) {
+			if (bestPerGeneration == null || (fitness[0] < bestPerGenerationDist)) {
 				bestPerGenerationDist = fitness[0];
 				bestPerGeneration = solution;
+				bestSolutionFound = x;
 				if (solution != null) {
 					bestPerGeneration.setName(SIMULATION_DATA);
 				}
 			}
-
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			fitness[0] = Double.POSITIVE_INFINITY;

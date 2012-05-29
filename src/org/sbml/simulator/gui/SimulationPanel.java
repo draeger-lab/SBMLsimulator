@@ -315,6 +315,13 @@ public class SimulationPanel extends JPanel implements
 		return dataTableView.getTableCount();
 	}
   
+	/**
+   * @return
+   */
+  public SimulationVisualizationPanel getVisualizationPanel() {
+    return visualizationPanel;
+  }
+	
   /**
    * @return
    */
@@ -435,32 +442,25 @@ public class SimulationPanel extends JPanel implements
    * @see eva2.server.stat.InterfaceStatisticsListener#notifyGenerationPerformed(java.lang.String[], java.lang.Object[], java.lang.Double[])
    */
   public void notifyGenerationPerformed(String[] header, Object[] statObjects, Double[] statDoubles) {
-    SimulationToolPanel tools = (SimulationToolPanel) simulationToolPanel.getComponent(0);
-    if((simulationDataIndex == 0) && (runBestIndex == 0)) {
-    	this.notifyRunStarted(0, 1, header, null);
-    }
-    
-    double currentDistance = tools.getCurrentQuality();
-    //if (Double.isNaN(currentDistance)) {
-        //|| (currentDistance > statDoubles[runBestIndex].doubleValue())) {
-      if (statObjects[simulationDataIndex] instanceof MultiTable) {
-      	setSimulationData((MultiTable) statObjects[simulationDataIndex]);
-      }
-      double newValue = statDoubles[runBestIndex].doubleValue();
-      if (getSimulationToolPanel().getQualityMeasure() instanceof PearsonCorrelation) {
-      	newValue = Math.abs(newValue);
-      }
-      firePropertyChange("quality", getSimulationToolPanel().getCurrentQuality(), newValue);
-      String[] solutionString = statObjects[solutionIndex].toString().replace("{","").replace("}","").split(", ");
-      for (int i = 0; i < selectedQuantityIds.length; i++) {
-    	  if(solutionString.length == selectedQuantityIds.length) {
-    		  visualizationPanel.updateQuantity(selectedQuantityIds[i], Double.parseDouble(solutionString[i].replace(',', '.')));
-    	  }
-    	  else {
-    		  System.out.println();
-    	  }
-      }
-    //}
+		if ((simulationDataIndex == 0) && (runBestIndex == 0)) {
+			this.notifyRunStarted(0, 1, header, null);
+		}
+		if (statObjects[simulationDataIndex] instanceof MultiTable) {
+			setSimulationData((MultiTable) statObjects[simulationDataIndex]);
+		}
+		double newValue = statDoubles[runBestIndex].doubleValue();
+		if (getSimulationToolPanel().getQualityMeasure() instanceof PearsonCorrelation) {
+			newValue = Math.abs(newValue);
+		}
+		firePropertyChange("quality", getSimulationToolPanel().getCurrentQuality(),
+			newValue);
+		double[] quantities = getSimulationManager().getEstimationProblem().getBestSolutionFound();
+		if ((quantities != null) && (quantities.length == selectedQuantityIds.length)) {
+			for (int i = 0; i < selectedQuantityIds.length; i++) {
+				visualizationPanel.updateQuantity(selectedQuantityIds[i],
+					quantities[i]);
+			}
+		}
   }
   
   /* (non-Javadoc)
@@ -468,12 +468,12 @@ public class SimulationPanel extends JPanel implements
    */
   public boolean notifyMultiRunFinished(String[] header, List<Object[]> multiRunFinalObjectData) {
     for (Object[] obj: multiRunFinalObjectData) {
-      String[] solutionString = obj[solutionIndex].toString().replace("{","").replace("}","").split(", ");
+      //String[] solutionString = obj[solutionIndex].toString().replace("{","").replace("}","").split(", ");
       logger.info("Fitness: " + ((Double) obj[1]));
+      double[] quantities = getSimulationManager().getEstimationProblem().getBestSolutionFound();
       for (int i = 0; i < selectedQuantityIds.length; i++) {
-        double currentQuantity=Double.parseDouble(solutionString[i].replace(',', '.'));
-        visualizationPanel.updateQuantity(selectedQuantityIds[i], currentQuantity);
-        logger.info(selectedQuantityIds[i] + ": " + currentQuantity);
+        visualizationPanel.updateQuantity(selectedQuantityIds[i], quantities[i]);
+        logger.info(selectedQuantityIds[i] + ": " + quantities[i]);
       }
     }
     return true;
