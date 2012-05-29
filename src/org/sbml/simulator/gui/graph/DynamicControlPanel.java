@@ -308,13 +308,13 @@ public class DynamicControlPanel extends JPanel implements ItemListener{
 		searchBar.setPaintTicks(true);
 		searchBar.setValue(0);
 		searchBar.setToolTipText(bundle.getString("SEARCHBAR_TOOLTIP"));
+		searchBar.addChangeListener(controller);
 		
 		nodeLabelsCB = GUITools.createJCheckBox(GraphOptions.SHOW_NODE_LABELS, prefs, this);
 		nodeLabelsCB.addActionListener(controller);
 		reactionLabelsCB = GUITools.createJCheckBox(GraphOptions.SHOW_REACTION_LABELS, prefs, this);
 		reactionLabelsCB.addActionListener(controller);
 		
-		searchBar.addChangeListener(controller);
 		timelbl = new JLabel(MessageFormat.format("{0}: {1}", new Object[]{bundle.getString("TIMEPOINT"), "N/A"}));
 		play = GUITools.createButton(playIcon, controller, Buttons.PLAY, Buttons.PLAY.getToolTip());
 		pause = GUITools.createButton(pauseIcon, controller, Buttons.PAUSE, Buttons.PAUSE.getToolTip());

@@ -21,6 +21,7 @@ import java.awt.Color;
 import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.sbml.jsbml.SBMLDocument;
 
@@ -43,6 +44,11 @@ import de.zbit.graph.sbgn.ReactionNodeRealizer;
  * @version $Rev$
  */
 public abstract class AbstractGraphManipulator implements GraphManipulator{
+    
+    /**
+     * A {@link Logger} for this class.
+     */
+    private static final transient Logger logger = Logger.getLogger(AbstractGraphManipulator.class.getName());
     
     /**
      * Pointer to the graph.
@@ -181,78 +187,86 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
     public void dynamicChangeOfReaction(String id, double value, boolean labels) {
         LinkedList<Edge> edgeList = graph.getId2edge()
                 .get(id);
-//        NodeRealizer nr = graph.getSimpleGraph().getRealizer(reactionID2reactionNode.get(id));
-        ReactionNodeRealizer nr = (ReactionNodeRealizer) graph.getSimpleGraph().getRealizer(reactionID2reactionNode.get(id));
-        //TODO set ReactionNodeRealizer linewidth.
-        
-        //line width
-        double absvalue = Math.abs(value);
-        float lineWidth = (m != 1) ?  (float)(absvalue * m + c) : 1;
-        
-        //ReactionNode line width
-        nr.setLineWidth(lineWidth);
-        
-        //edges line width
-        for(Edge e : edgeList){
-            EdgeRealizer er = graph.getSimpleGraph().getRealizer(e);
+        if (reactionID2reactionNode.get(id) != null) {
+            ReactionNodeRealizer nr = (ReactionNodeRealizer) graph.getSimpleGraph().getRealizer(reactionID2reactionNode.get(id));
+            // line width
+            double absvalue = Math.abs(value);
+            float lineWidth = (m != 1) ? (float) (absvalue * m + c) : 1;
+            logger.finer(MessageFormat
+                    .format("Reaction {0}: Abs. value={1}, m={2}, c={3}, computes to line width={4}",
+                            new Object[] { id, absvalue, m, c, lineWidth }));
+            
+            // ReactionNode line width
+            nr.setLineWidth(lineWidth);
 
-            /*
-             *  adjust lineWidth only if regression was computed, else use
-             *  standard linewidth.
-             */
-            //only line-width is supposed to change
-            LineType currLinetype = er.getLineType();
-            LineType newLineType = LineType.createLineType(
-                    lineWidth, currLinetype.getEndCap(),
-                    currLinetype.getLineJoin(), currLinetype.getMiterLimit(),
-                    currLinetype.getDashArray(), currLinetype.getDashPhase());
-            
-            er.setLineType(newLineType);
-            
-            /*
-             * determine arrowdirection
-             */
-            if (value > 0) { // (!= 0), because simulation data at timepoint 0.0 = 0
-                if (reactionID2reactionNode.get(id) == e.target()) {
-                    // reactants
-                    er.setSourceArrow(Arrow.NONE);
-                    //TODO own arrow for reversible
-//                    if(document.getModel().getReaction(id).isReversible()){
-//                        er.setSourceArrow(Arrow.PLAIN);
-//                    } else {
-//                        er.setSourceArrow(Arrow.NONE);
-//                    }
+            // edges line width
+            for (Edge e : edgeList) {
+                EdgeRealizer er = graph.getSimpleGraph().getRealizer(e);
+
+                /*
+                 * adjust lineWidth only if regression was computed, else use
+                 * standard linewidth.
+                 */
+                // only line-width is supposed to change
+                LineType currLinetype = er.getLineType();
+                LineType newLineType = LineType.createLineType(lineWidth,
+                        currLinetype.getEndCap(), currLinetype.getLineJoin(),
+                        currLinetype.getMiterLimit(),
+                        currLinetype.getDashArray(),
+                        currLinetype.getDashPhase());
+
+                er.setLineType(newLineType);
+
+                /*
+                 * determine arrowdirection
+                 */
+                if (value > 0) { // (!= 0), because simulation data at timepoint
+                                 // 0.0 = 0
+                    if (reactionID2reactionNode.get(id) == e.target()) {
+                        // reactants
+                        er.setSourceArrow(Arrow.NONE);
+                        // TODO own arrow for reversible
+                        // if(document.getModel().getReaction(id).isReversible()){
+                        // er.setSourceArrow(Arrow.PLAIN);
+                        // } else {
+                        // er.setSourceArrow(Arrow.NONE);
+                        // }
+                    } else {
+                        // products
+                        er.setTargetArrow(Arrow.STANDARD);
+                    }
                 } else {
-                    // products
-                    er.setTargetArrow(Arrow.STANDARD);
-                }
-            } else {
-                if (reactionID2reactionNode.get(id) == e.target()) {
-                    // products
-                    er.setSourceArrow(Arrow.STANDARD);
-                } else {
-                    // reactants
-                    er.setTargetArrow(Arrow.NONE);
-                    //TODO own arrow for reversible
-//                    if(document.getModel().getReaction(id).isReversible()){
-//                        er.setTargetArrow(Arrow.PLAIN);
-//                    } else {
-//                        er.setTargetArrow(Arrow.NONE);
-//                    }
+                    if (reactionID2reactionNode.get(id) == e.target()) {
+                        // products
+                        er.setSourceArrow(Arrow.STANDARD);
+                    } else {
+                        // reactants
+                        er.setTargetArrow(Arrow.NONE);
+                        // TODO own arrow for reversible
+                        // if(document.getModel().getReaction(id).isReversible()){
+                        // er.setTargetArrow(Arrow.PLAIN);
+                        // } else {
+                        // er.setTargetArrow(Arrow.NONE);
+                        // }
+                    }
                 }
             }
+            /*
+             * Label Node with ID and real value at this timepoint. Last label
+             * will be treated as dynamic label
+             */
+            if (labels) {
+                labelNode(nr, id, value);
+            } else if (nr.labelCount() > 1) {
+                // labels switched off, therefore remove them, if there are any
+                nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
+            }
+            graph.getSimpleGraph().updateViews();
+        } else {
+            logger.finer(MessageFormat.format(
+                    "No ReactionNodeRealizer for ReactionID: {0}",
+                    new Object[] { id }));
         }
-        /*
-         * Label Node with ID and real value at this timepoint. Last label will
-         * be treated as dynamic label
-         */
-        if (labels) {
-            labelNode(nr, id, value);
-        } else if (nr.labelCount() > 1) {
-            // labels switched off, therefore remove them, if there are any
-            nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
-        }
-        graph.getSimpleGraph().updateViews();
     }
     
     /* (non-Javadoc)
@@ -264,7 +278,8 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
         if (graph.getId2node().get(id) != null) {
             NodeRealizer nr = graph.getSimpleGraph().getRealizer(
                     graph.getId2node().get(id));
-            nr.setSize(DEFAULT_NODE_SIZE, DEFAULT_NODE_SIZE);
+            double ratio = nr.getHeight() / nr.getWidth(); //keep ratio in case of elliptic nodes
+            nr.setSize(DEFAULT_NODE_SIZE, DEFAULT_NODE_SIZE*ratio);
             nr.setFillColor(Color.LIGHT_GRAY);
 
             if (nr.labelCount() > 1) {
@@ -294,11 +309,19 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
                 }
             }
             
-            ReactionNodeRealizer nr = (ReactionNodeRealizer) graph.getSimpleGraph().getRealizer(reactionID2reactionNode.get(id));
-            nr.setLineWidth(1);
-            if (nr.labelCount() > 1) {
-                // if not selected disable label
-                nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
+            if (reactionID2reactionNode.get(id) != null) { 
+                ReactionNodeRealizer nr = (ReactionNodeRealizer) graph
+                        .getSimpleGraph().getRealizer(
+                                reactionID2reactionNode.get(id));
+                nr.setLineWidth(1);
+                if (nr.labelCount() > 1) {
+                    // if not selected disable label
+                    nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
+                }
+            } else {
+                logger.finer(MessageFormat.format(
+                        "No ReactionNodeRealizer for ReactionID: {0}",
+                        new Object[] { id }));
             }
         }
         graph.getSimpleGraph().updateViews();
