@@ -23,6 +23,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 import java.util.prefs.PreferenceChangeEvent;
 import java.util.prefs.PreferenceChangeListener;
 
@@ -54,6 +55,11 @@ import de.zbit.util.prefs.SBPreferences;
  */
 public class DynamicController implements ChangeListener, ActionListener,
         ItemListener, TableModelListener, PreferenceChangeListener {
+    
+    /**
+     * A {@link Logger} for this class.
+     */
+    private static final transient Logger logger = Logger.getLogger(DynamicController.class.getName());
     
     /**
      * Localization support.
@@ -150,7 +156,8 @@ public class DynamicController implements ChangeListener, ActionListener,
                     .getFloat(GraphOptions.MIN_LINE_WIDTH);
             float reactionsMaxLineWidth = prefs
                     .getFloat(GraphOptions.MAX_LINE_WIDTH);
-            
+            logger.finer("#selected species: " + view.getSelectedSpecies().length);
+            logger.finer("#selected reactions: " + view.getSelectedReactions().length);
             if (controlPanel.getSelectedManipulator().equals(Manipulators.NODESIZE.getName())) {
                 // get current options
                 double minNodeSize = prefs
@@ -262,6 +269,24 @@ public class DynamicController implements ChangeListener, ActionListener,
      */
     @Override
     public void tableChanged(TableModelEvent e) {
+        //update selections
+        if (e.getSource() instanceof LegendTableModel) {
+            //save selection changes
+            if (e.getFirstRow() == e.getLastRow()) {
+                //just one element changed
+                LegendTableModel ltm = (LegendTableModel) e.getSource();
+                view.putSelectionState(ltm.getId(e.getFirstRow()),
+                        ltm.isSelected(e.getFirstRow()));
+            } else {
+                /*
+                 * more than one element changed simultaneous (i.e. de-select
+                 * all)
+                 */
+                view.retrieveSelectionStates();
+            }
+        }
+        
+        //get new graphmanipulator
         if (core != null) {
             /*
              * Is not uselessly invoked many times while initial startup,
@@ -269,11 +294,6 @@ public class DynamicController implements ChangeListener, ActionListener,
              */
             view.setGraphManipulator(getSelectedGraphManipulator());
             view.updateGraph();
-        }
-        if (e.getSource() instanceof LegendTableModel) {
-            //save selection changes
-            LegendTableModel ltm = (LegendTableModel) e.getSource();
-            view.putSelectionState(ltm.getId(e.getFirstRow()), ltm.isSelected(e.getFirstRow()));
         }
     }
 
@@ -349,6 +369,7 @@ public class DynamicController implements ChangeListener, ActionListener,
         }
         
         if (evt.getKey().equals("VISUALIZATION_DATA")){
+            //TODO lists of data sets
             if (!view.visualizeData(prefs
                     .getString(GraphOptions.VISUALIZATION_DATA))) {
                 //on error back to default

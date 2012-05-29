@@ -18,6 +18,8 @@
 package org.sbml.simulator.gui.graph;
 
 import java.awt.Color;
+import java.text.MessageFormat;
+import java.util.logging.Logger;
 
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.simulator.gui.table.LegendTableModel;
@@ -32,7 +34,13 @@ import de.zbit.graph.io.SBML2GraphML;
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
-public class ManipulatorOfNodeSize extends AbstractGraphManipulator{    
+public class ManipulatorOfNodeSize extends AbstractGraphManipulator{   
+    
+    /**
+     * A {@link Logger} for this class.
+     */
+    private static final transient Logger logger = Logger.getLogger(ManipulatorOfNodeSize.class.getName());
+    
     /**
      * Slope of linear regression m, and yintercept c. 
      */
@@ -146,10 +154,14 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
     @Override
     public void dynamicChangeOfNode(String id, double value, boolean labels) {
         double size = value*m + c; //adjust value by linear regression
+        logger.finer(MessageFormat
+                .format("Specie {0}: value={1}, m={2}, c={3}, computes to node size={4}",
+                        new Object[] { id, value, m, c, size }));
+        
         NodeRealizer nr = graph.getSimpleGraph()
                 .getRealizer(graph.getId2node().get(id));
         double ratio = nr.getHeight() / nr.getWidth(); //keep ratio in case of elliptic nodes
-        nr.setSize(size*ratio, size);
+        nr.setSize(size, size*ratio);
         //use standard color if no legendTableModel is provided
         Color color = null;
         if(legendTable != null){

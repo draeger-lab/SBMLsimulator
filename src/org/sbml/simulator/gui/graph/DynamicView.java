@@ -291,11 +291,14 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      */
     public String[] getSelectedSpecies() {
         ArrayList<String> selectedSpecies = new ArrayList<String>();
+//        System.out.println("selected Species:");
         for (String id : speciesSelectionStates.keySet()) {
             if (speciesSelectionStates.get(id)) {
+//                System.out.print(id + " ");
                 selectedSpecies.add(id);
             }
         }
+//        System.out.println("\nEnd selected Species");
         return selectedSpecies.toArray(new String[selectedSpecies.size()]);
     }
 
@@ -312,6 +315,29 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
             }
         }
         return selectedReactions.toArray(new String[selectedReactions.size()]);
+    }
+    
+    /**
+     * updates all selection states of IDs saved in corresponding hashmap
+     * (reactions & species)
+     */
+    public void retrieveSelectionStates(){
+        //update species
+        for(String id : speciesSelectionStates.keySet()){
+            if(legend.getLegendTableModel().isSelected(id)){
+                speciesSelectionStates.put(id, true);
+            } else {
+                speciesSelectionStates.put(id, false);
+            }
+        }
+        //update reactions
+        for(String id : reactionsSelectionStates.keySet()){
+            if(legend.getLegendTableModel().isSelected(id)){
+                reactionsSelectionStates.put(id, true);
+            } else {
+                reactionsSelectionStates.put(id, false);
+            }
+        }
     }
 
     /**
