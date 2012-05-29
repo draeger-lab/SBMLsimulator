@@ -51,8 +51,11 @@ import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 
+import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.Model;
+import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.SBMLDocument;
+import org.sbml.jsbml.Species;
 import org.sbml.optimization.EvA2GUIStarter;
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.optimization.problem.EstimationProblem;
@@ -581,10 +584,42 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 			bundle.getString("SELECT_QUANTITIES_FOR_OPTIMIZATION"), JOptionPane.OK_CANCEL_OPTION,
 			JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
 			try {
-				simPanel.notifyQuantitiesSelected(panel.getSelectedQuantityIds());
+				String[] selectedQuantityIds = panel.getSelectedQuantityIds();
+				simPanel.notifyQuantitiesSelected(selectedQuantityIds);
 				final WindowListener wl = EventHandler.create(WindowListener.class,
 					this, "optimizationFinished", "source", "windowClosed");
 				final BaseFrame ui = this;
+				
+				MultiTable reference = simPanel.getExperimentalData(0);
+				for (int col = 0; col < reference.getColumnCount(); col++) {
+					String id = reference.getColumnIdentifier(col);
+					if (Arrays.binarySearch(selectedQuantityIds, id) < 0) {
+						double value = ((Double) reference.getValueAt(0, col))
+								.doubleValue();
+						if (!Double.isNaN(value)) {
+							Species sp = model.getSpecies(id);
+							if (sp != null) {
+								sp.setValue(value);
+								simPanel.getVisualizationPanel().updateQuantity(id, value);
+								continue;
+							}
+							Compartment c = model.getCompartment(id);
+							if (c != null) {
+								c.setValue(value);
+								simPanel.getVisualizationPanel().updateQuantity(id, value);
+								continue;
+							}
+							Parameter p = model.getParameter(id);
+							if (p != null) {
+								p.setValue(value);
+								simPanel.getVisualizationPanel().updateQuantity(id, value);
+								continue;
+							}
+
+						}
+					}
+				}
+				
 				new Thread(new Runnable() {
 					/* (non-Javadoc)
 					 * @see java.lang.Runnable#run()
@@ -600,6 +635,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 										.getExperimentalData(), prefs
 										.getBoolean(EstimationOptions.EST_MULTI_SHOOT), panel
 										.getSelectedQuantityRanges());
+							simPanel.getSimulationManager().setEstimationProblem(estimationProblem);
 							EvA2GUIStarter.init(estimationProblem, ui, simPanel, wl);
 						} catch (Throwable exc) {
 							GUITools.showErrorMessage(ui, exc);
