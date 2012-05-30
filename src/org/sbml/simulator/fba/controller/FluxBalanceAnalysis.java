@@ -72,7 +72,7 @@ public class FluxBalanceAnalysis {
 	 * Calls SCPsolver to solve the problem with linear programming
 	 */
 	public double[] solveWithLinearProgramming() {
-		targetFunc.computeTargetFunctionForLinearProgramming();
+		double[] target = targetFunc.computeTargetFunctionForLinearProgramming();
 		// TODO: call SCPSolver
 		return null;
 	}
@@ -81,7 +81,7 @@ public class FluxBalanceAnalysis {
 	 * Calls CPLEX to solve the problem with quadratic programming
 	 */
 	public double[] solveWithQuadraticProgramming() {
-		targetFunc.computeTargetFunctionForQuadraticProgramming();
+		double[] target = targetFunc.computeTargetFunctionForQuadraticProgramming();
 		// TODO: call CPLEX
 		return null;
 	}

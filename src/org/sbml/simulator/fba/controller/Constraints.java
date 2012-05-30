@@ -32,10 +32,9 @@ import org.sbml.jsbml.SBMLDocument;
 public class Constraints {
 	
 	/**
-	 * Contains the Gibbs-energies and can be filled with
-	 * the method {@link #readGibbsFromFile(String)}
+	 * Contains the Gibbs energies 
 	 */
-	public double[] gibbsEnergies;
+	private double[] gibbsEnergies;
 	
 	/**
 	 * Contains the opened {@link SBMLDocument}
@@ -50,32 +49,34 @@ public class Constraints {
 	 * 
 	 * @param doc
 	 */
-	public Constraints(SBMLDocument doc) {
+	public Constraints (SBMLDocument doc) {
 		this.document = doc;
-		this.gibbsEnergies = new double[doc.getModel().getReactionCount()];
+		this.setGibbsEnergies(new double[doc.getModel().getReactionCount()]);
 	}
 	
 	/**
-	 * Reads out the gibbs-energies from a given file and writes it in the array gibbsEnergies
-	 * @param file
-	 * @throws IOException
+	 * 
+	 * @param doc
+	 * @param gibbs
 	 */
-	public void readGibbsFromFile(String file) throws IOException {
-		BufferedReader read = new BufferedReader(new FileReader(file));
-		String line;
-		String k[] = new String[2];
-		
-		// While there is a line to read, this method writes the gibbs-energy, to the
-		// corresponding reaction in the model, in the same array-index, so that the indices match
-		// and the reaction document.getModel().getReaction(3) has the gibbs-energy gibbsEnergies[3].
-		while ((line = read.readLine()) != null) {
-			k = line.split("\t");
-			for (int i = 0; i < document.getModel().getReactionCount(); i++){
-				if (k[0].equals(document.getModel().getReaction(i).getId())) {
-					gibbsEnergies[i] = Double.valueOf(k[1]);
-				}
-			}
-		}
+	public Constraints (SBMLDocument doc, double[] gibbs) {
+		this.document = doc;
+		this.setGibbsEnergies(gibbs);
+	}
+
+	
+	/**
+	 * @param gibbsEnergies the gibbsEnergies to set
+	 */
+	public void setGibbsEnergies(double[] gibbsEnergies) {
+		this.gibbsEnergies = gibbsEnergies;
+	}
+
+	/**
+	 * @return the gibbsEnergies
+	 */
+	public double[] getGibbsEnergies() {
+		return gibbsEnergies;
 	}
 	
 }

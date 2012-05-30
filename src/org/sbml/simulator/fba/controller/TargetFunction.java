@@ -23,24 +23,26 @@ package org.sbml.simulator.fba.controller;
  * @date 07.05.2012
  * @since 1.0
  */
-public abstract class TargetFunction {
+public interface TargetFunction {
 	
-	public TargetFunction() {
-		//TODO
-	}
+	public static double lambda1 = 10;
+	public static double lambda2 = 10;
+	public static double lambda3 = 0.01;
+	public static double lambda4 = 1.0;
 	
+
 	//TODO: fill this class with methods for all target-functions
 	
 	/**
-	 * This method gives an array back, which contains the different components for quadratic programming 
+	 * This method gives an array back, which contains the target function for quadratic programming 
 	 * @return double[]
 	 */
-	public abstract double[][] computeTargetFunctionForQuadraticProgramming();
+	public double[] computeTargetFunctionForQuadraticProgramming();
 	
 	/**
-	 * This method gives an array back, which contains the different components for linear programming 
+	 * This method gives an array back, which contains the target function for linear programming 
 	 * @return double[]
 	 */
-	public abstract double[][] computeTargetFunctionForLinearProgramming();
+	public double[] computeTargetFunctionForLinearProgramming();
 
 }
