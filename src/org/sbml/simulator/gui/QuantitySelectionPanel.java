@@ -23,9 +23,14 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
@@ -46,6 +51,7 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
 
+import org.sbml.jsbml.KineticLaw;
 import org.sbml.jsbml.LocalParameter;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Parameter;
@@ -61,6 +67,7 @@ import de.zbit.gui.layout.LayoutHelper;
 import de.zbit.gui.table.AbstractDocumentFilterListener;
 import de.zbit.gui.table.renderer.ColoredBooleanRenderer;
 import de.zbit.gui.table.renderer.DecimalCellRenderer;
+import de.zbit.io.csv.CSVReader;
 import de.zbit.sbml.gui.UnitDefinitionCellRenderer;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
@@ -391,7 +398,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	/**
 	 * Values for {@link JSpinner}s of the initialization range
 	 */
-	private double initMinValue = 0d, initMaxValue = 5d;
+	private double initMinValue = 0d, initMaxValue = 1d;
 	
 	/**
 	 * Values for {@link JSpinner}s for the absolute ranges
@@ -478,6 +485,10 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		
 		LayoutHelper lh = new LayoutHelper(this);
 		lh.add(new JLabel(StringUtil.toHTMLToolTip(bundle.getString("EXPLANATION"))), 1d, 0d);
+		JButton fileButton = GUITools.createButton(
+			"Load preferences from file", null, this, "loadFromFile",
+			null);
+		lh.add(fileButton);
 		lh.add(tabs);
 	}
 	
@@ -490,6 +501,20 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 			return; 
 		}
 		JButton button = (JButton) e.getSource();
+		if(button.getActionCommand().equals("loadFromFile")) {
+			String file = GUITools.openFileDialog(null, "Choose file with preferences", false); 
+			
+			try {
+				if(file != null) {
+					this.refreshQuantityRangesWithRangesFromFile(file);
+				}
+			} catch (IOException e1) {
+				//TODO warning
+			}
+			tabs.getSelectedComponent().validate();
+			tabs.getSelectedComponent().repaint();
+			return;
+		}
 		int i = 0, begin = 0, end = quantityBlocks.length;
 		while (!GUITools.contains(tabs.getComponentAt(i), button)) {
 			i++;
@@ -743,6 +768,87 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		}
 		return quantityList.toArray(new QuantityRange[0]);
 	}
+	
+	/**
+	 * 
+	 * @param file
+	 * @return
+	 * @throws IOException
+	 */
+	public QuantityRange[] readQuantityRangesFromFile(String file) throws IOException {
+		CSVReader reader = new CSVReader(file);
+		String[][] data = reader.read();
+		
+		List<QuantityRange> ranges = new ArrayList<QuantityRange>();
+		for (int i = 0; i != data.length; i++) {
+			if (data[i].length >= 5) {
+				String id = data[i][0];
+				Quantity quantity = null;
+				if (!id.contains(":")) {
+					quantity = model.findQuantity(id);
+				} else {
+					String[] splits = id.split(":");
+					Reaction reaction = model.getReaction(splits[0]);
+					if (reaction != null) {
+						KineticLaw kl = reaction.getKineticLaw();
+						if (kl != null) {
+							quantity = kl.getLocalParameter(splits[1]);
+						}
+					}
+				}
+				if (quantity != null) {
+					try {
+						QuantityRange range = new QuantityRange(quantity, true,
+							Double.valueOf(data[i][1]), Double.valueOf(data[i][2]),
+							Double.valueOf(data[i][3]), Double.valueOf(data[i][4]));
+						if (data[i].length >= 7) {
+							range.setInitialGaussianValue(Double.valueOf(data[i][5]));
+							range.setGaussianStandardDeviation(Double.valueOf(data[i][6]));
+						}
+						ranges.add(range);
+						
+					} catch (Exception e) {
+						//TODO message
+					}
+				}
+			}
+		}
+		return ranges.toArray(new QuantityRange[ranges.size()]);
+	}
+	
+	/**
+	 * 
+	 * @param file
+	 * @throws IOException 
+	 */
+	public void refreshQuantityRangesWithRangesFromFile(String file) throws IOException {
+		QuantityRange[] refreshedRanges = readQuantityRangesFromFile(file);
+		Map<Quantity, QuantityRange> quantities = new HashMap<Quantity, QuantityRange>();
+		for(QuantityRange range: refreshedRanges) {
+			quantities.put(range.getQuantity(), range);
+		}
+		
+		for(QuantityRange quantityRange: quantityBlocks) {
+			QuantityRange found = quantities.get(quantityRange.getQuantity());
+			if(found != null) {
+				quantityRange.setInitialMaximum(found.getInitialMaximum());
+				quantityRange.setInitialMinimum(found.getInitialMinimum());
+				quantityRange.setMaximum(found.getMaximum());
+				quantityRange.setMinimum(found.getMinimum());
+				quantityRange.setMinimum(found.getMinimum());
+				if(found.isGaussianInitialization()) {
+					quantityRange.setInitialGaussianValue(found.getInitialGaussianValue());
+					quantityRange.setGaussianStandardDeviation(found.getGaussianStandardDeviation());
+				}
+				quantityRange.setSelected(true);
+			}
+			else {
+				quantityRange.setSelected(false);
+			}
+		}
+		
+	}
+	
 	
 	/**
 	 * @return the stepSize
