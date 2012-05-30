@@ -22,6 +22,7 @@ import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SpeciesReference;
 import org.sbml.jsbml.ListOf.Type;
+import org.sbml.simulator.stability.math.StabilityMatrix;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
 /**
@@ -33,14 +34,17 @@ import org.sbml.simulator.stability.math.StoichiometricMatrix;
 public class FluxMinimizationUtils {
 
 	/**
-	 * Gets a {@link StoichiometricMatrix} and gives back the corresponding flux-vector.
+	 * Gets a {@link StoichiometricMatrix} and gives back the corresponding flux-vector in Manhattan-Norm.
 	 * @param N
-	 * @return
+	 * @return double[] flux vector
 	 */
 	public static double[] computeFluxVector(StoichiometricMatrix N) {
-		N.getSteadyStateFluxes();
-		double[] fluxVector = new double[N.getColumnDimension()];
-		// TODO: fill the fluxVector
+		StabilityMatrix steadyStateMatrix = N.getSteadyStateFluxes();
+		double[] fluxVector = new double[steadyStateMatrix.getColumnDimension()];
+		// fill the fluxVector
+		for (int column=0; column < N.getSteadyStateFluxes().getColumnDimension(); column++) {
+			fluxVector[column] = computeManhattenNorm(steadyStateMatrix.getColumn(column));
+		}
 		return fluxVector;
 	}
 
@@ -109,6 +113,31 @@ public class FluxMinimizationUtils {
 			}
 		}
 		// it's not in this reaction
+		return null;
+	}
+	
+	/**
+	 * Computes the Manhattan-Norm ||vector|| = sum up from 1 to |vector|: |v_i|        
+	 * e.g.:
+	 * vector = (1,-2,3) than ||vector|| = ||(1,-2,3)|| = |1| + |-2| + |3| = 1 + 2 + 3 = 6
+	 * 
+	 * @param vector
+	 * @return Manhattan-Norm of the vector
+	 */
+	public static double computeManhattenNorm(double[] vector) {
+		double norm = 0;
+		for (int i = 0; i < vector.length; i++) {
+			norm += Math.abs(vector[i]);
+		}
+		return norm;
+	}
+	
+	/**
+	 * Computes the error for the target function
+	 * @return double[]
+	 */
+	public static double[] computeError() {
+		// TODO: compute the error
 		return null;
 	}
 }
