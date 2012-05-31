@@ -23,10 +23,10 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -68,6 +68,7 @@ import de.zbit.gui.table.AbstractDocumentFilterListener;
 import de.zbit.gui.table.renderer.ColoredBooleanRenderer;
 import de.zbit.gui.table.renderer.DecimalCellRenderer;
 import de.zbit.io.csv.CSVReader;
+import de.zbit.io.csv.CSVWriter;
 import de.zbit.sbml.gui.UnitDefinitionCellRenderer;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
@@ -488,7 +489,11 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		JButton fileButton = GUITools.createButton(
 			"Load preferences from file", null, this, "loadFromFile",
 			null);
+		JButton saveButton = GUITools.createButton(
+			"Save preferences to file", null, this, "saveToFile",
+			null);
 		lh.add(fileButton);
+		lh.add(saveButton);
 		lh.add(tabs);
 	}
 	
@@ -501,11 +506,12 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 			return; 
 		}
 		JButton button = (JButton) e.getSource();
-		if(button.getActionCommand().equals("loadFromFile")) {
-			String file = GUITools.openFileDialog(null, "Choose file with preferences", false); 
+		if (button.getActionCommand().equals("loadFromFile")) {
+			String file = GUITools.openFileDialog(null,
+				"Choose file with preferences", false);
 			
 			try {
-				if(file != null) {
+				if (file != null) {
 					this.refreshQuantityRangesWithRangesFromFile(file);
 				}
 			} catch (IOException e1) {
@@ -514,7 +520,19 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 			tabs.getSelectedComponent().validate();
 			tabs.getSelectedComponent().repaint();
 			return;
+		} else if (button.getActionCommand().equals("saveToFile")) {
+			File file = GUITools.saveFileDialog(null);
+			
+			try {
+				if (file != null) {
+					this.saveQuantityRanges(file);
+				}
+			} catch (IOException e1) {
+				//TODO warning
+			}
+			return;
 		}
+		
 		int i = 0, begin = 0, end = quantityBlocks.length;
 		while (!GUITools.contains(tabs.getComponentAt(i), button)) {
 			i++;
@@ -801,7 +819,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 						QuantityRange range = new QuantityRange(quantity, true,
 							Double.valueOf(data[i][1]), Double.valueOf(data[i][2]),
 							Double.valueOf(data[i][3]), Double.valueOf(data[i][4]));
-						if (data[i].length >= 7) {
+						if ((data[i].length >= 7) && (data[i][5] != null)) {
 							range.setInitialGaussianValue(Double.valueOf(data[i][5]));
 							range.setGaussianStandardDeviation(Double.valueOf(data[i][6]));
 						}
@@ -847,6 +865,43 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 			}
 		}
 		
+	}
+	
+	/**
+	 * 
+	 * @param file
+	 * @throws IOException
+	 */
+	public void saveQuantityRanges(File file) throws IOException {
+		CSVWriter writer = new CSVWriter();
+		String[] header = {"id", "initMin", "initMax", "minValue", "maxValue", "initialGaussianValue", "gaussianStandardDeviation"};
+		QuantityRange[] ranges = this.getSelectedQuantityRanges();
+		String[][] data = new String[ranges.length][];
+		for(int i=0; i!=ranges.length; i++) {
+			data[i] = new String[7];
+			Quantity q = ranges[i].getQuantity();
+			if(q instanceof LocalParameter) {
+				Reaction r = (Reaction)((LocalParameter)q).getParent().getParent().getParent();
+				data[i][0] = r.getId() + ":" + q.getId();
+			}
+			else {
+				data[i][0] = q.getId();
+			}
+			data[i][1] = String.valueOf(ranges[i].getInitialMinimum());
+			data[i][2] = String.valueOf(ranges[i].getInitialMaximum());
+			data[i][3] = String.valueOf(ranges[i].getMinimum());
+			data[i][4] = String.valueOf(ranges[i].getMaximum());
+			
+			if(ranges[i].isGaussianInitialization()) {
+				data[i][5] = String.valueOf(ranges[i].getInitialGaussianValue());
+				data[i][6] = String.valueOf(ranges[i].getGaussianStandardDeviation());
+			}
+			else {
+				data[i][5] = null;
+				data[i][6] = null;
+			}
+		}
+		writer.write(data, header, file);
 	}
 	
 	
