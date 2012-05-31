@@ -24,14 +24,13 @@ import eva2.tools.math.interpolation.InterpolationException;
 
 
 /**
- * work in progress...
+ * work in progress... TODO not needed yet?!
  * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
 public class ExperimentalDataHandler {
     
-//    private static SplineInterpolation spline = new SplineInterpolation(); //TODO 
     
     public ExperimentalDataHandler() throws InterpolationException{
     }
@@ -73,12 +72,4 @@ public class ExperimentalDataHandler {
         
         return timepoints;
     }
-
-//    public static void main(String args[]){
-//        double[] testTimepoints = generateTimepoints(new double[]{2}, 3);
-//        for(double d : testTimepoints){
-//            System.out.print(d + " ");
-//        }
-//    }
-    
 }

@@ -32,7 +32,7 @@
   <entry key="NODECOLOR">Knotenfarbe</entry>
   <entry key="VISUALIZATION">Visualisierung</entry>
   <entry key="VISUALIZATION_TOOLTIP">Wählen Sie die Art der dynamischen Visualisierung und die zu visualisierenden Daten aus.</entry>
-  <entry key="SIMULATION_DATA">Simulierte Daten</entry> 
+  <entry key="SIMULATION_DATA">Simulierte Daten 1</entry> 
   <entry key="EXPERIMENTAL_DATA">Experimentelle Daten</entry>   
   <entry key="SEARCHBAR_TOOLTIP">Stellen Sie den Zeitpunkt der Visualisierung ein.</entry>
   
@@ -86,5 +86,14 @@
   <entry key="VISUALIZATION_DATA">Visualisierte Daten</entry>
   <entry key="VISUALIZATION_DATA_TOOLTIP">Wählen Sie die zu visualisierende Daten aus.</entry>
   <entry key="DATA_NOT_AVAILABLE">Der zur Visualisierung ausgewählte Datensatz steht momentan nicht zur Verfügung.</entry>
+  <entry key="VIDEO_ENCODING">Videoerstellung</entry>
+  <entry key="VIDEO_ENCODING_TOOLTIP">Diese Optionen beeinflussen die Videoerstellung.</entry>
+  <entry key="VIDEO_FRAMERATE">Framerate</entry>
+  <entry key="VIDEO_FRAMERATE_TOOLTIP">Je niedriger die Framerate, desto langsamer spielt das Video die Simulation ab.</entry>
+  <entry key="VIDEO_IMAGE_STEPSIZE">Bilderschrittweite</entry>
+  <entry key="VIDEO_IMAGE_STEPSIZE_TOOLTIP">Hier können Sie einstellen, wie viele Bilder von der Simulation gemacht werden sollen. Je geringer die Bilderschrittweite, desto weniger Bilder werden gemacht.</entry>    
+  <entry key="VIDEO_RESOLUTION_MULTIPLIER">Auflösungsmultiplikator</entry>
+  <entry key="VIDEO_RESOLUTION_MULTIPLIER_TOOLTIP">Je größer der Multiplikator, desto besser ist die Videoauflösung, aber desto größer ist die Dateigröße.</entry>
+
   
 </properties>

@@ -17,14 +17,18 @@
  */
 package org.sbml.simulator.gui.graph;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
 
 import org.sbml.jsbml.SBMLDocument;
 import org.simulator.math.odes.MultiTable;
+
+import com.xuggle.mediatool.IMediaWriter;
+import com.xuggle.mediatool.ToolFactory;
 
 /**
  * Represents the core of the dynamic visualization and therefore
@@ -35,19 +39,59 @@ import org.simulator.math.odes.MultiTable;
  * @version $Rev$
  */
 public class DynamicCore {
-	/**
+    
+    /**
 	 * Own thread to cycle through timepoints.
 	 * 
 	 * @author Fabian Schwarzkopf
 	 * @version $Rev$
 	 */
 	private class PlayWorker extends SwingWorker<Void, Void>{
-
+	    
+	    /**
+	     * Enable/Disable video encoding.
+	     */
+	    private boolean generateVideo = false;
+	    
+	    /**
+	     * Video encoder.
+	     */
+	    private IMediaWriter encoder;
+	    
+	    /**
+	     * Framerate and step size to capture images.
+	     */
+	    private int framerate, captureStepSize;
+	    
+	    /**
+	     * Construct {@link PlayWorker} without video encoding.
+	     */
+	    public PlayWorker(){
+	    }
+	    
+	    /**
+	     * Construct {@link PlayWorker} with implicit video encoding.
+	     * @param generateVideo
+	     * @param width
+	     * @param height
+	     * @param captureStepSize
+	     * @param destinationFile
+	     */
+        public PlayWorker(boolean generateVideo, int width, int height,
+                int framerate, int captureEveryXStep, String destinationFile) {
+            this.generateVideo = generateVideo;
+            this.captureStepSize = captureEveryXStep;
+            this.framerate = framerate;
+            encoder = ToolFactory.makeWriter(destinationFile);
+            encoder.addVideoStream(0, 0, width, height);
+        }
+	    
 		/* (non-Javadoc)
 		 * @see javax.swing.SwingWorker#doInBackground()
 		 */
 		@Override
 		protected Void doInBackground() throws Exception {
+		    int frame = 0, image = 0;
 			for(int i = getIndexOfTimepoint(currTimepoint)+1; i < timePoints.length; i++){
 				graphIsDrawn = false;
 				setCurrTimepoint(timePoints[i]);
@@ -59,6 +103,15 @@ public class DynamicCore {
 				while(!graphIsDrawn){
 					Thread.sleep(AWAITING);
 				}
+				
+				if(generateVideo){
+				    frame += framerate;
+				    if (i % captureStepSize == 0) { //take picture now
+				        logger.fine("Processing image " + image);
+                        encoder.encodeVideo(0, observer.takeGraphshot(), frame, TimeUnit.MILLISECONDS);
+    				    image++;
+				    }
+				}
 			}
 			return null;
 		}
@@ -69,9 +122,11 @@ public class DynamicCore {
 		@Override
 		protected void done() {
 			super.done();
-			for(DynamicGraph dg : observers){
-			    dg.donePlay();
+			if (encoder != null) {
+			    encoder.close();
+			    logger.fine("Videoencoding successful");
 			}
+            observer.donePlay();
 			
 			/*
 			 * Ensure that only one playWorker is active
@@ -79,6 +134,11 @@ public class DynamicCore {
 			playWorker = null;
 		}
 	}
+    
+	/**
+     * A {@link Logger} for this class.
+     */
+    private static final transient Logger logger = Logger.getLogger(DynamicCore.class.getName());
 	
 	/**
 	 * Play thread worker.
@@ -124,7 +184,7 @@ public class DynamicCore {
 	private double[] timePoints;
 	
 	/**
-     * After computation of Limits this HashMap saves to each species or
+     * After computation of Limits this HashMap saves for each species or
      * reaction min and max data value.
      */
 	private Map<String, double[]> id2MinMaxData = new HashMap<String, double[]>();
@@ -136,9 +196,9 @@ public class DynamicCore {
 	private boolean limitsComputed = false;
 	
 	/**
-	 * List of all listeners, which will be notified, when the current timestep changes.
+	 * Listener, which will be notified, when the current timestep changes.
 	 */
-	private ArrayList<DynamicGraph> observers = new ArrayList<DynamicGraph>();
+	private DynamicGraph observer;
 	
 	/**
 	 * Determines the speed of the the play method.
@@ -148,13 +208,13 @@ public class DynamicCore {
 	
 	/**
 	 * Constructs the core with an observer and simulation data.
-	 * Does not provide any data limits.
+	 * Does not provide any data limits directly after construction.
 	 * 
 	 * @param observer
 	 * @param data
 	 */
 	public DynamicCore(DynamicGraph observer, MultiTable data){
-		observers.add(observer);
+	    this.observer = observer;
 		setData(data);
 	}
 	
@@ -173,189 +233,6 @@ public class DynamicCore {
 	}
 	
     /**
-     * Set simulated data and the current timepoint to the first entry of the
-     * given data.
-     * @param data
-     */
-	public void setData(MultiTable data){
-		this.data = data;
-		timePoints = data.getTimePoints();
-		minTime = data.getTimePoint(0);
-		maxTime = data.getTimePoint(data.getRowCount()-1);
-//		setCurrTimepoint(data.getTimePoint(0));
-		currTimepoint = data.getTimePoint(0);
-	}
-	
-	/**
-	 * Get timepoints of the simulation.
-	 * @return
-	 */
-	public double[] getTimepoints(){
-		return timePoints;
-	}
-	
-	
-	/**
-	 * Set the current time displayed by the graph.
-	 * @param time
-	 */
-	public void setCurrTimepoint(double time){
-		if(currTimepoint != time && time >= minTime && time <= maxTime){
-			this.currTimepoint = time;
-			fireTimepointChanged(time);
-		}
-	}
-	
-	/**
-	 * Set the current time displayed by the graph to the given rowIndex of the data.
-	 * @param time
-	 */
-	public void setCurrTimepoint(int rowIndex){
-		double incomingTimepoint = data.getTimePoint(rowIndex);
-        if (currTimepoint != incomingTimepoint && incomingTimepoint >= minTime
-                && incomingTimepoint <= maxTime){
-            this.currTimepoint = incomingTimepoint;
-            fireTimepointChanged(incomingTimepoint);
-        }
-	}
-	
-	/**
-	 * Get the current timepoint of the core.
-	 * @return
-	 */
-	public double getCurrTimepoint(){
-		return currTimepoint;
-	}
-	
-	/**
-	 * Get the maximum timepoint of the core.
-	 * @return
-	 */
-	public double getMaxTime(){
-	    return maxTime;
-	}
-	
-	/**
-	 * Get the speed of cycling through all timepoints with the play method.
-	 * @return
-	 */
-	public int getPlayspeed(){
-	    return playspeed;
-	}
-	
-	/**
-	 * Set the speed of cycling through all timepoints with the play method.
-	 * @param speed
-	 */
-	public void setPlayspeed(int speed){
-	    playspeed = speed;
-	}
-	
-    /**
-     * If limits computed it returns a double array whose first element is the
-     * minimum data of the given ids, and second element is the maximum data of
-     * given ids. Otherwise null.
-     * 
-     * @param ids
-     * @return
-     */
-    public double[] getMinMaxOfIDs(String... ids) {
-        if (limitsComputed) {
-            double minData = Double.MAX_VALUE;
-            double maxData = Double.MIN_VALUE;
-            for (String id : ids) {
-                if (id2MinMaxData.containsKey(id)) {
-                    double[] dataOfID = id2MinMaxData.get(id);
-                    if (dataOfID[0] < minData) {
-                        minData = dataOfID[0];
-                    }
-                    if (dataOfID[1] > maxData) {
-                        maxData = dataOfID[1];
-                    }
-                }
-            }
-            return new double[] { minData, maxData };
-        } else {
-            return null;
-        }
-	}
-	
-	/**
-	 * Add an observer.
-	 * @param observer
-	 */
-	public void addObserver(DynamicGraph observer){
-		observers.add(observer);
-	}
-	
-	/**
-     * Notifies the play worker, that the graph is ready for the next timepoint.
-     * (Graph drawing completed).
-     */
-	public void graphUpdateFinished(){
-		graphIsDrawn = true;
-	}
-	
-	/**
-     * Notifies all observers about the change and delivers changed species &
-     * reactions to all registered {@link DynamicView}s.
-     */
-	public void fireTimepointChanged(double changedTo){
-		double[] currTimePoints = {currTimepoint};
-		for(DynamicGraph dg : observers){
-			dg.updateGraph(currTimepoint, data.filter(currTimePoints));
-		}
-	}
-	
-	/**
-	 * Cycles through all saved timepoints (ongoing from the current timepoint)
-	 * and additionally updates the graph.
-	 */
-	public void play(){
-		if(playWorker == null){
-			playWorker = new PlayWorker();
-			playWorker.execute();
-		}
-	}	
-	
-	/**
-	 * Pauses the play worker.
-	 */
-	public void pausePlay(){
-		if(playWorker != null){
-			playWorker.cancel(true);
-			playWorker = null;
-		}
-	}
-	
-	/**
-	 * Stops the play worker.
-	 */
-	public void stopPlay(){
-		if(playWorker != null){
-			playWorker.cancel(true);
-			playWorker = null;
-		}
-		currTimepoint = data.getTimePoint(0);
-		fireTimepointChanged(data.getTimePoint(0));
-	}
-	
-	/**
-	 * Searches the index of a given timepoint.
-	 * @param timepoint
-	 * @return index of the timepoint, if not found, then -1
-	 */
-	public int getIndexOfTimepoint(double timepoint) {
-		int searchedIndex = -1;
-		for(int i = 0; i < timePoints.length; i++){
-			if(timepoint == timePoints[i]){
-				searchedIndex = i;
-			}
-		}
-		return searchedIndex;
-	}
-	
-	/**
 	 * Computation of a Hashmap which saves for all species and references max/min values. O(n^2).
 	 * @param document document needed to distinguish between reactions and species.
 	 */
@@ -398,4 +275,202 @@ public class DynamicCore {
         }
         limitsComputed = true;
     }
+	
+	/**
+     * Notifies all observers about the change and delivers changed species &
+     * reactions to all registered {@link DynamicView}s.
+     */
+	public void fireTimepointChanged(double changedTo){
+		double[] currTimePoints = {currTimepoint};
+        observer.updateGraph(currTimepoint, data.filter(currTimePoints));
+	}
+	
+	
+	/**
+     * Generates a video by cycling through every timestep and taking graphshots
+     * at given capturepoints.
+     * 
+     * @param width
+     * @param height
+     * @param framerate
+     * @param captureEveryXstep
+     * @param destinationFile
+     */
+    public void generateVideo(int width, int height, int framerate,
+            int captureEveryXstep, String destinationFile) {
+	    //start off by zero time
+	    currTimepoint = data.getTimePoint(0);
+        fireTimepointChanged(data.getTimePoint(0));
+        playspeed = 5; //as fast as possible
+        
+        if(playWorker == null){
+            //generate video
+            playWorker = new PlayWorker(true, width, height, framerate,
+                    captureEveryXstep,
+                    destinationFile);
+            playWorker.execute();
+        }
+	}
+	
+	/**
+	 * Get the current timepoint of the core.
+	 * @return
+	 */
+	public double getCurrTimepoint(){
+		return currTimepoint;
+	}
+	
+	/**
+	 * Searches the index of a given timepoint.
+	 * @param timepoint
+	 * @return index of the timepoint, if not found, then -1
+	 */
+	public int getIndexOfTimepoint(double timepoint) {
+		int searchedIndex = -1;
+		for(int i = 0; i < timePoints.length; i++){
+			if(timepoint == timePoints[i]){
+				searchedIndex = i;
+			}
+		}
+		return searchedIndex;
+	}
+	
+	/**
+	 * Get the maximum timepoint of the core.
+	 * @return
+	 */
+	public double getMaxTime(){
+	    return maxTime;
+	}
+	
+	/**
+     * If limits computed it returns a double array whose first element is the
+     * minimum data of the given ids, and second element is the maximum data of
+     * given ids. Otherwise null.
+     * 
+     * @param ids
+     * @return
+     */
+    public double[] getMinMaxOfIDs(String... ids) {
+        if (limitsComputed) {
+            double minData = Double.MAX_VALUE;
+            double maxData = Double.MIN_VALUE;
+            for (String id : ids) {
+                if (id2MinMaxData.containsKey(id)) {
+                    double[] dataOfID = id2MinMaxData.get(id);
+                    if (dataOfID[0] < minData) {
+                        minData = dataOfID[0];
+                    }
+                    if (dataOfID[1] > maxData) {
+                        maxData = dataOfID[1];
+                    }
+                }
+            }
+            return new double[] { minData, maxData };
+        } else {
+            return null;
+        }
+	}
+	
+	/**
+	 * Get the speed of cycling through all timepoints with the play method.
+	 * @return
+	 */
+	public int getPlayspeed(){
+	    return playspeed;
+	}
+	
+    /**
+	 * Get timepoints of the simulation.
+	 * @return
+	 */
+	public double[] getTimepoints(){
+		return timePoints;
+	}
+	
+	/**
+     * Notifies the play worker, that the graph is ready for the next timepoint.
+     * (Graph drawing completed).
+     */
+	public void graphUpdateFinished(){
+		graphIsDrawn = true;
+	}
+	
+	/**
+	 * Pauses the play worker.
+	 */
+	public void pausePlay(){
+		if(playWorker != null){
+			playWorker.cancel(true);
+			playWorker = null;
+		}
+	}
+	
+	/**
+	 * Cycles through all saved timepoints (ongoing from the current timepoint)
+	 * and additionally updates the graph.
+	 */
+	public void play(){
+		if(playWorker == null){
+			playWorker = new PlayWorker();
+			playWorker.execute();
+		}
+	}	
+	
+	/**
+	 * Set the current time displayed by the graph.
+	 * @param time
+	 */
+	public void setCurrTimepoint(double time){
+		if(currTimepoint != time && time >= minTime && time <= maxTime){
+			this.currTimepoint = time;
+			fireTimepointChanged(time);
+		}
+	}
+	
+	/**
+	 * Set the current time displayed by the graph to the given rowIndex of the data.
+	 * @param time
+	 */
+	public void setCurrTimepoint(int rowIndex){
+		double incomingTimepoint = data.getTimePoint(rowIndex);
+        if (currTimepoint != incomingTimepoint && incomingTimepoint >= minTime
+                && incomingTimepoint <= maxTime){
+            this.currTimepoint = incomingTimepoint;
+            fireTimepointChanged(incomingTimepoint);
+        }
+	}
+	
+	/**
+     * Set simulated data and the current timepoint to the first entry of the
+     * given data.
+     * @param data
+     */
+	public void setData(MultiTable data){
+		this.data = data;
+		timePoints = data.getTimePoints();
+		minTime = data.getTimePoint(0);
+		maxTime = data.getTimePoint(data.getRowCount()-1);
+		currTimepoint = data.getTimePoint(0);
+	}
+	
+	/**
+	 * Set the speed of cycling through all timepoints with the play method.
+	 * @param speed
+	 */
+	public void setPlayspeed(int speed){
+	    playspeed = speed;
+	}
+	
+	/**
+	 * Stops the play worker.
+	 */
+	public void stopPlay(){
+		if(playWorker != null){
+			playWorker.cancel(true);
+			playWorker = null;
+		}
+		currTimepoint = data.getTimePoint(0);
+		fireTimepointChanged(data.getTimePoint(0));
+	}
 }

@@ -208,4 +208,34 @@ public interface GraphOptions extends KeyProvider{
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static final OptionGroup SIM_SPEED_GROUP = new OptionGroup(
         "SIM_SPEED_GROUP", bundle, SIM_SPEED_FAST, SIM_SPEED_NORMAL, SIM_SPEED_SLOW, SIM_SPEED_CHOOSER);
+    
+    
+    /**
+     * Sets framerate.
+     */
+    public static final Option<Double> VIDEO_FRAMERATE = new Option<Double>(
+            "VIDEO_FRAMERATE", Double.class, bundle, new Range<Double>(
+                    Double.class, "{[1, 1E2]}"), Double.valueOf(25d));
+    
+    /**
+     * Sets step size for image taking.
+     */
+    public static final Option<Double> VIDEO_IMAGE_STEPSIZE = new Option<Double>(
+            "VIDEO_IMAGE_STEPSIZE", Double.class, bundle, new Range<Double>(
+                    Double.class, "{[1, 1E2]}"), Double.valueOf(5d));
+    
+    /**
+     * Sets resolution multiplier.
+     */
+    public static final Option<Double> VIDEO_RESOLUTION_MULTIPLIER = new Option<Double>(
+            "VIDEO_RESOLUTION_MULTIPLIER", Double.class, bundle, new Range<Double>(
+                    Double.class, "{[1, 1E2]}"), Double.valueOf(2d));
+    
+    /**
+     * Settings for video encoding.
+     */
+    @SuppressWarnings("unchecked")
+    public static final OptionGroup<Double> VIDEO_ENCODING = new OptionGroup<Double>(
+        "VIDEO_ENCODING", bundle, VIDEO_RESOLUTION_MULTIPLIER, VIDEO_FRAMERATE, VIDEO_IMAGE_STEPSIZE);
+    
 }

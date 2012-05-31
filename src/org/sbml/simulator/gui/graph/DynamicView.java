@@ -17,6 +17,8 @@
  */
 package org.sbml.simulator.gui.graph;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -35,6 +37,7 @@ import org.sbml.simulator.gui.table.LegendTableModel;
 import org.sbml.simulator.math.SplineCalculation;
 import org.simulator.math.odes.MultiTable;
 
+import y.view.Graph2DView;
 import de.zbit.graph.gui.TranslatorSBMLgraphPanel;
 import de.zbit.graph.io.SBML2GraphML;
 import de.zbit.util.ResourceManager;
@@ -177,7 +180,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      * This field contains the current {@link GraphManipulator}.
      */
     private GraphManipulator graphManipulator;
-
+    
     /**
      * Constructs all necessary elements.
      * 
@@ -197,6 +200,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         graphWithLegend.setDividerLocation(330);
         controlPanel = new DynamicControlPanel(this, controller);
         simulationCores = new ArrayList<DynamicCore>(5);
+        //TODO maybe experimentalCores as lists.
         
         add(graphWithLegend);
         add(controlPanel);
@@ -205,7 +209,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
 
         this.document = document;
     }
-
+    
     /**
      * Sets the {@link GraphManipulator} for this {@link DynamicView}.
      * 
@@ -291,14 +295,11 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      */
     public String[] getSelectedSpecies() {
         ArrayList<String> selectedSpecies = new ArrayList<String>();
-//        System.out.println("selected Species:");
         for (String id : speciesSelectionStates.keySet()) {
             if (speciesSelectionStates.get(id)) {
-//                System.out.print(id + " ");
                 selectedSpecies.add(id);
             }
         }
-//        System.out.println("\nEnd selected Species");
         return selectedSpecies.toArray(new String[selectedSpecies.size()]);
     }
 
@@ -398,6 +399,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      */
     @Override
     public void updateGraph(double timepoint, MultiTable updateThem) {
+        
         // save currently displayed properties
         currTime = timepoint;
         currData = updateThem;
@@ -435,7 +437,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                 }
             }
         }
-
+        
         /*
          * Notifiy that graph update is finished. Ensures that play-thread in
          * core doesn't overtravel drawing.
@@ -556,5 +558,16 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         if (currTime == allTimepoints[allTimepoints.length - 1]) {
             visualizedCore.setCurrTimepoint(0);
         }
+    }
+
+    /* (non-Javadoc)
+     * @see org.sbml.simulator.gui.graph.DynamicGraph#takeGraphshot()
+     */
+    @Override
+    public BufferedImage takeGraphshot() {
+        Graph2DView viewPort = (Graph2DView) graphPanel.getConverter().getSimpleGraph().getCurrentView();
+        BufferedImage image = new BufferedImage(viewPort.getWidth(), viewPort.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
+        viewPort.paintVisibleContent((Graphics2D)image.getGraphics());
+        return image;
     }
 }

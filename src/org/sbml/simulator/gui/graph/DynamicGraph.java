@@ -17,6 +17,8 @@
  */
 package org.sbml.simulator.gui.graph;
 
+import java.awt.image.BufferedImage;
+
 import org.simulator.math.odes.MultiTable;
 
 /**
@@ -39,5 +41,11 @@ public interface DynamicGraph {
 	 * Method envoked by related {@link DynamicCore} when playthread is done.
 	 */
 	public void donePlay();
+	
+	/**
+	 * Return a {@link BufferedImage} of currently displayed Graph.
+	 * @return
+	 */
+	public BufferedImage takeGraphshot();
 	
 }
