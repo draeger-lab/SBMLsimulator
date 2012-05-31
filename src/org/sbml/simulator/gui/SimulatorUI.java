@@ -63,6 +63,8 @@ import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.io.CSVReadingTask;
 import org.sbml.simulator.io.SimulatorIOOptions;
 import org.sbml.simulator.math.SplineCalculation;
+import org.simulator.math.odes.AdaptiveStepsizeIntegrator;
+import org.simulator.math.odes.DESSolver;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.AppConf;
@@ -638,8 +640,14 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 							SBPreferences prefs = SBPreferences
 									.getPreferencesFor(EstimationOptions.class);
 							simPanel.refreshStepSize();
+							DESSolver solver = simPanel.getSolver();
+							if (solver instanceof AdaptiveStepsizeIntegrator) {
+					    	AdaptiveStepsizeIntegrator integrator = (AdaptiveStepsizeIntegrator) solver;
+					    	integrator.setAbsTol(simPanel.getSimulationManager().getSimulationConfiguration().getAbsTol());
+					    	integrator.setRelTol(simPanel.getSimulationManager().getSimulationConfiguration().getRelTol());
+					    }
 							EstimationProblem estimationProblem = new EstimationProblem(
-								simPanel.getSolver(), simPanel.getDistance(), model,
+								solver, simPanel.getDistance(), model,
 								experimentalData, prefs
 										.getBoolean(EstimationOptions.EST_MULTI_SHOOT), panel
 										.getSelectedQuantityRanges());

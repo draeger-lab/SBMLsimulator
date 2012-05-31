@@ -29,6 +29,7 @@ import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
+import org.sbml.optimization.EstimationInitOperator;
 import org.sbml.optimization.QuantityRange;
 import org.sbml.simulator.math.PearsonCorrelation;
 import org.sbml.simulator.math.QualityMeasure;
@@ -39,6 +40,7 @@ import org.simulator.sbml.SBMLinterpreter;
 
 import de.zbit.util.ResourceManager;
 import eva2.server.go.PopulationInterface;
+import eva2.server.go.individuals.AbstractEAIndividual;
 import eva2.server.go.populations.Population;
 import eva2.server.go.problems.AbstractProblemDouble;
 import eva2.server.go.problems.InterfaceAdditionalPopulationInformer;
@@ -516,6 +518,26 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	@Override
 	public double getRangeUpperBound(int dim) {
 		return quantityRanges[dim].getMaximum();
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see eva2.server.go.problems.AbstractProblemDouble#initPopulation(eva2.server.go.populations.Population)
+	 */
+	public void initPopulation(Population population) {
+			initTemplate();
+			AbstractEAIndividual tmpIndy;
+			population.clear();
+     
+     for (int i = 0; i < population.getTargetSize(); i++) {
+         tmpIndy = (AbstractEAIndividual)((AbstractEAIndividual)m_Template).clone();
+         tmpIndy.setInitOperator(new EstimationInitOperator(quantityRanges));
+         tmpIndy.init(this);
+         population.add(tmpIndy);
+     }
+     // population init must be last
+     // it sets fitcalls and generation to zero
+     population.init();
 	}
 
 	/**
