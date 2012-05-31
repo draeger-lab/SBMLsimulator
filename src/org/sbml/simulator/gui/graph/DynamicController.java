@@ -22,14 +22,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.PreferenceChangeEvent;
 import java.util.prefs.PreferenceChangeListener;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -40,8 +43,10 @@ import org.sbml.simulator.gui.graph.DynamicControlPanel.Items;
 import org.sbml.simulator.gui.graph.DynamicView.Manipulators;
 import org.sbml.simulator.gui.table.LegendTableModel;
 
+import y.view.Graph2DView;
 import de.zbit.gui.GUITools;
 import de.zbit.util.ResourceManager;
+import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.Option;
 import de.zbit.util.prefs.SBPreferences;
 
@@ -122,9 +127,9 @@ public class DynamicController implements ChangeListener, ActionListener,
         if (core != null) {
             if (e.getSource() instanceof JButton) {
                 if (e.getActionCommand().equals("PLAY")) {
+                    controlPanel.setPlayStatus();
                     core.setPlayspeed(controlPanel.getSimulationSpeed());
                     core.play();
-                    controlPanel.setPlayStatus();
                 } else if (e.getActionCommand().equals("PAUSE")) {
                     core.pausePlay();
                     controlPanel.setPauseStatus();
@@ -132,7 +137,29 @@ public class DynamicController implements ChangeListener, ActionListener,
                     core.stopPlay();
                     controlPanel.setStopStatus();
                 } else if (e.getActionCommand().equals("TOVIDEO")) {
-                    // TODO save as video with maximum sim-speed
+                    controlPanel.setVideoStatus();
+                    Graph2DView viewPort = (Graph2DView) view.getGraph().getSimpleGraph().getCurrentView();
+                    /*
+                     * resolutions have to be even and can't be user chosen,
+                     * otherwise video image will get stretched.
+                     */
+                    int width = (viewPort.getWidth() % 2) == 1 ? viewPort.getWidth()-1 : viewPort.getWidth();
+                    int height = (viewPort.getHeight() % 2) == 1 ? viewPort.getHeight()-1 : viewPort.getHeight();
+                    int resolutionMultiplier = (int) SBPreferences
+                            .getPreferencesFor(GraphOptions.class).getDouble(
+                                    GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
+                    int framerate = (int) SBPreferences.getPreferencesFor(
+                            GraphOptions.class).getDouble(
+                            GraphOptions.VIDEO_FRAMERATE);
+                    int captureStepSize = (int) SBPreferences.getPreferencesFor(
+                            GraphOptions.class).getDouble(
+                            GraphOptions.VIDEO_IMAGE_STEPSIZE);
+                    File destinationFile = GUITools.saveFileDialog(view,
+                            System.getProperty("user.home"), true, false,
+                            JFileChooser.FILES_ONLY);
+                    core.generateVideo(width * resolutionMultiplier, height
+                            * resolutionMultiplier, framerate, captureStepSize,
+                            destinationFile.getAbsolutePath());
                 }
             } else if (e.getSource() instanceof JCheckBox) {
                 // labels switched on/off
@@ -257,6 +284,22 @@ public class DynamicController implements ChangeListener, ActionListener,
                 SBPreferences.getPreferencesFor(GraphOptions.class).put(
                         cb.getName(),
                         ie.getItem().toString());
+            }
+        } else if (ie.getSource() instanceof JCheckBox) {
+            JCheckBox cb = (JCheckBox) ie.getSource();
+            if (cb.getName() != null) {
+                String name = cb.getName();
+                if (KeyProvider.Tools.providesOption(GraphOptions.class, name)) {
+                    SBPreferences prefs = SBPreferences
+                            .getPreferencesFor(GraphOptions.class);
+                    logger.fine(name + "=" + cb.isSelected());
+                    prefs.put(name, cb.isSelected());
+                    try {
+                        prefs.flush();
+                    } catch (BackingStoreException exc) {
+                        logger.fine(exc.getLocalizedMessage());
+                    }
+                }
             }
         }
     }

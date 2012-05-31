@@ -33,7 +33,7 @@
   <entry key="NODESIZE">Node size</entry>
   <entry key="NODECOLOR">Node color</entry>
   <entry key="VISUALIZATION">Visualization</entry> 
-  <entry key="SIMULATION_DATA">Simulation Data</entry> 
+  <entry key="SIMULATION_DATA">Simulation Data 1</entry> 
   <entry key="EXPERIMENTAL_DATA">Experimental Data</entry>   
   <entry key="SEARCHBAR_TOOLTIP">Choose time point of visualization.</entry>
   
@@ -87,5 +87,13 @@
   <entry key="VISUALIZATION_DATA">Data for visualization</entry>
   <entry key="VISUALIZATION_DATA_TOOLTIP">Choose the data to visualize.</entry>  
   <entry key="DATA_NOT_AVAILABLE">Chosen data set for visualization is not available by now.</entry>
+  <entry key="VIDEO_ENCODING">Video encoding</entry>
+  <entry key="VIDEO_ENCODING_TOOLTIP">These settings control video encoding.</entry>
+  <entry key="VIDEO_FRAMERATE">Framerate</entry>
+  <entry key="VIDEO_FRAMERATE_TOOLTIP">The lower the framerate, the slower the video play speed.</entry>
+  <entry key="VIDEO_IMAGE_STEPSIZE">Steps between two images</entry>
+  <entry key="VIDEO_IMAGE_STEPSIZE_TOOLTIP">The less steps are chosen, the less images are taken to encode the video.</entry>    
+  <entry key="VIDEO_RESOLUTION_MULTIPLIER">Resolution multiplier</entry>
+  <entry key="VIDEO_RESOLUTION_MULTIPLIER_TOOLTIP">The higher this multiplier, the better the resolution but the higher the outcoming file size.</entry>
   
 </properties>
