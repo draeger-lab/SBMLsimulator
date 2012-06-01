@@ -19,8 +19,10 @@ package org.sbml.simulator;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,6 +34,7 @@ import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLException;
+import org.sbml.jsbml.SBMLWriter;
 import org.sbml.jsbml.Species;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.jsbml.xml.stax.SBMLReader;
@@ -43,8 +46,10 @@ import org.sbml.simulator.io.SimulatorIOOptions;
 import org.sbml.simulator.math.N_Metric;
 import org.sbml.simulator.math.QualityMeasure;
 import org.sbml.simulator.math.Relative_N_Metric;
+import org.sbml.simulator.math.SplineCalculation;
 import org.simulator.math.odes.AbstractDESSolver;
 import org.simulator.math.odes.MultiTable;
+import org.simulator.math.odes.RosenbrockSolver;
 
 import de.zbit.AppConf;
 import de.zbit.io.csv.CSVOptions;
@@ -161,146 +166,151 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 		SimulationConfiguration simulationConfiguration;
 		double simEndTime, simStepSize, absTol, relTol;
 		SBProperties props = appConf.getCmdArgs();
-
+		
 		if (props.containsKey(SimulationOptions.SIM_END_TIME)) {
-			simEndTime = Double.valueOf(props
-					.get(SimulationOptions.SIM_END_TIME));
+			simEndTime = Double.valueOf(props.get(SimulationOptions.SIM_END_TIME));
 		} else {
 			simEndTime = prefs.getDouble(SimulationOptions.SIM_END_TIME);
 		}
-
+		
 		if (props.containsKey(SimulationOptions.SIM_STEP_SIZE)) {
-			simStepSize = Double.valueOf(props
-					.get(SimulationOptions.SIM_STEP_SIZE));
+			simStepSize = Double.valueOf(props.get(SimulationOptions.SIM_STEP_SIZE));
 		} else {
 			simStepSize = prefs.getDouble(SimulationOptions.SIM_STEP_SIZE);
 		}
-
+		
+		Model model = null;
+		try {
+			model = (new SBMLReader()).readSBML(openFile).getModel();
+		} catch (XMLStreamException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			if (props.containsKey(SimulationOptions.ODE_SOLVER)) {
+				solver = (AbstractDESSolver) Class.forName(
+					props.get(SimulationOptions.ODE_SOLVER)).newInstance();
+			} else {
+				solver = (AbstractDESSolver) Class.forName(
+					prefs.get(SimulationOptions.ODE_SOLVER)).newInstance();
+			}
+			
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			solver = new RosenbrockSolver();
+		}
+		
+		//TODO set default values
+		double defaultCompartmentValue, defaultSpeciesValue, defaultParameterValue;
+		
+		if (props.containsKey(SimulationOptions.DEFAULT_INIT_COMPARTMENT_SIZE)) {
+			defaultCompartmentValue = Double.valueOf(props
+					.get(SimulationOptions.DEFAULT_INIT_COMPARTMENT_SIZE));
+		} else {
+			defaultCompartmentValue = Double.valueOf(prefs
+					.get(SimulationOptions.DEFAULT_INIT_COMPARTMENT_SIZE));
+		}
+		
+		if (props.containsKey(SimulationOptions.DEFAULT_INIT_SPECIES_VALUE)) {
+			defaultSpeciesValue = Double.valueOf(props
+					.get(SimulationOptions.DEFAULT_INIT_SPECIES_VALUE));
+		} else {
+			defaultSpeciesValue = Double.valueOf(prefs
+					.get(SimulationOptions.DEFAULT_INIT_SPECIES_VALUE));
+		}
+		
+		if (props.containsKey(SimulationOptions.DEFAULT_INIT_PARAMETER_VALUE)) {
+			defaultParameterValue = Double.valueOf(props
+					.get(SimulationOptions.DEFAULT_INIT_PARAMETER_VALUE));
+		} else {
+			defaultParameterValue = Double.valueOf(prefs
+					.get(SimulationOptions.DEFAULT_INIT_PARAMETER_VALUE));
+		}
+		
+		if (props.containsKey(SimulationOptions.ABS_TOL)) {
+			absTol = Double.valueOf(props.get(SimulationOptions.ABS_TOL));
+		} else {
+			absTol = Double.valueOf(prefs.get(SimulationOptions.ABS_TOL));
+		}
+		
+		if (props.containsKey(SimulationOptions.REL_TOL)) {
+			relTol = Double.valueOf(props.get(SimulationOptions.REL_TOL));
+		} else {
+			relTol = Double.valueOf(prefs.get(SimulationOptions.REL_TOL));
+		}
+		
+		simulationConfiguration = new SimulationConfiguration(model, solver, 0,
+			simEndTime, simStepSize, false, absTol, relTol);
+		
+		prefs = SBPreferences
+				.getPreferencesFor(EstimationOptions.class);
 		double defaultQualityValue;
 		if (props.containsKey(EstimationOptions.QUALITY_DEFAULT_VALUE)) {
-				defaultQualityValue = Double.valueOf(props
-						.get(EstimationOptions.QUALITY_DEFAULT_VALUE));
-			} else {
-				defaultQualityValue = prefs.getDouble(EstimationOptions.QUALITY_DEFAULT_VALUE);
-			}
+			defaultQualityValue = Double.valueOf(props
+					.get(EstimationOptions.QUALITY_DEFAULT_VALUE));
+		} else {
+			defaultQualityValue = prefs
+					.getDouble(EstimationOptions.QUALITY_DEFAULT_VALUE);
+		}
+		
+		double root;
+		if (props.containsKey(EstimationOptions.QUALITY_N_METRIC_ROOT)) {
+			root = Double.valueOf(props.get(EstimationOptions.QUALITY_N_METRIC_ROOT));
+		} else {
+			root = prefs.getDouble(EstimationOptions.QUALITY_N_METRIC_ROOT);
+		}
+		
+		try {
+			qualityMeasure = (QualityMeasure) Class.forName(
+				prefs.getString(EstimationOptions.QUALITY_MEASURE)).newInstance();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		if (qualityMeasure != null) {
+			qualityMeasure.setDefaultValue(defaultQualityValue);
 			
-			double root;
-			if (props.containsKey(EstimationOptions.QUALITY_N_METRIC_ROOT)) {
-				root = Double.valueOf(props
-						.get(EstimationOptions.QUALITY_N_METRIC_ROOT));
-			} else {
-				root = prefs.getDouble(EstimationOptions.QUALITY_N_METRIC_ROOT);
+			if (qualityMeasure instanceof N_Metric) {
+				((N_Metric) qualityMeasure).setRoot(root);
+			} else if (qualityMeasure instanceof Relative_N_Metric) {
+				((Relative_N_Metric) qualityMeasure).setRoot(root);
 			}
-			
+		}
+		
+		QualityMeasurement measurement = null;
+		if (timeSeriesFile != null) {
+			CSVDataImporter csvimporter = new CSVDataImporter();
+			MultiTable experimentalData = null;
 			try {
-				qualityMeasure = (QualityMeasure) Class.forName(
-						prefs.getString(EstimationOptions.QUALITY_MEASURE))
-						.newInstance();
-			} catch (InstantiationException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-			
-			if (qualityMeasure != null) {
-				qualityMeasure.setDefaultValue(defaultQualityValue);
-			
-				if (qualityMeasure instanceof N_Metric) {
-					((N_Metric)qualityMeasure).setRoot(root);
-				}
-				else if (qualityMeasure instanceof Relative_N_Metric) {
-					((Relative_N_Metric)qualityMeasure).setRoot(root);
-				}
-			}
-
-			Model model = null;
-			try {
-				model = (new SBMLReader()).readSBML(openFile).getModel();
-			} catch (XMLStreamException e) {
-				e.printStackTrace();
+				experimentalData = csvimporter.convert(model, timeSeriesFile);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-
-			try {
-				solver = (AbstractDESSolver) Class.forName(
-						prefs.getString(SimulationOptions.ODE_SOLVER))
-						.newInstance();
-			} catch (InstantiationException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
+			List<MultiTable> measurements = new LinkedList<MultiTable>();
+			if (experimentalData != null) {
+				measurements.add(experimentalData);
 			}
-
-			double defaultCompartmentValue, defaultSpeciesValue, defaultParameterValue;
-	      
-	    if (props.containsKey(SimulationOptions.DEFAULT_INIT_COMPARTMENT_SIZE)) {
-				defaultCompartmentValue=Double.valueOf(props.get(SimulationOptions.DEFAULT_INIT_COMPARTMENT_SIZE));
-			}
-			else {
-				defaultCompartmentValue=Double.valueOf(prefs.get(SimulationOptions.DEFAULT_INIT_COMPARTMENT_SIZE));
-			}
-			
-			if (props.containsKey(SimulationOptions.DEFAULT_INIT_SPECIES_VALUE)) {
-				defaultSpeciesValue=Double.valueOf(props.get(SimulationOptions.DEFAULT_INIT_SPECIES_VALUE));
-			}
-			else {
-				defaultSpeciesValue=Double.valueOf(prefs.get(SimulationOptions.DEFAULT_INIT_SPECIES_VALUE));
-			}
-			
-			if (props.containsKey(SimulationOptions.DEFAULT_INIT_PARAMETER_VALUE)) {
-				defaultParameterValue=Double.valueOf(props.get(SimulationOptions.DEFAULT_INIT_PARAMETER_VALUE));
-			}
-			else {
-				defaultParameterValue=Double.valueOf(prefs.get(SimulationOptions.DEFAULT_INIT_PARAMETER_VALUE));
-			}
-			
-			if (props.containsKey(SimulationOptions.ABS_TOL)) {
-				absTol = Double.valueOf(props.get(SimulationOptions.ABS_TOL));
-			}
-			else {
-				absTol = Double.valueOf(prefs.get(SimulationOptions.ABS_TOL));
-			}
-			
-			if (props.containsKey(SimulationOptions.REL_TOL)) {
-				relTol = Double.valueOf(props.get(SimulationOptions.REL_TOL));
-			}
-			else {
-				relTol = Double.valueOf(prefs.get(SimulationOptions.REL_TOL));
-			}
-			
-			simulationConfiguration = new SimulationConfiguration(model,
-					solver, 0, simEndTime, simStepSize, false, absTol, relTol);
-
-			QualityMeasurement measurement = null;
-			if (timeSeriesFile != null) {
-				CSVDataImporter csvimporter = new CSVDataImporter();
-				MultiTable experimentalData = null;
-				try {
-					experimentalData = csvimporter.convert(model, timeSeriesFile);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				List<MultiTable> measurements = new LinkedList<MultiTable>();
-				if (experimentalData != null) {
-					measurements.add(experimentalData);
-				}
-				measurement = new QualityMeasurement(qualityMeasure, measurements);
-			}
-			else {
-				measurement = new QualityMeasurement(qualityMeasure);
-			}
-			simulationManager = new SimulationManager(measurement,
-					simulationConfiguration);
-			simulationManager.addPropertyChangeListener(this);
-			
-			if (timeSeriesFile != null) {
-				initializeEstimationPreferences();
-			}
+			measurement = new QualityMeasurement(qualityMeasure, measurements);
+		} else {
+			measurement = new QualityMeasurement(qualityMeasure);
+		}
+		simulationManager = new SimulationManager(measurement,
+			simulationConfiguration);
+		simulationManager.addPropertyChangeListener(this);
+		
+		if (timeSeriesFile != null) {
+			initializeEstimationPreferences();
+		}
 		
 	}
 		
@@ -318,35 +328,6 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 		}
 		SBPreferences prefsEst = SBPreferences.getPreferencesFor(EstimationOptions.class);
 		
-		double initMax, initMin, min, max;
-		if (props.containsKey(EstimationOptions.EST_INIT_MAX_VALUE)) {
-			initMax = Double.valueOf(props.get(EstimationOptions.EST_INIT_MAX_VALUE));
-		}
-		else {
-			initMax = Double.valueOf(prefsEst.get(EstimationOptions.EST_INIT_MAX_VALUE));
-		}
-		
-		if (props.containsKey(EstimationOptions.EST_INIT_MIN_VALUE)) {
-			initMin = Double.valueOf(props.get(EstimationOptions.EST_INIT_MIN_VALUE));
-		}
-		else {
-			initMin = Double.valueOf(prefsEst.get(EstimationOptions.EST_INIT_MIN_VALUE));
-		}
-		
-		if (props.containsKey(EstimationOptions.EST_MAX_VALUE)) {
-			max = Double.valueOf(props.get(EstimationOptions.EST_MAX_VALUE));
-		}
-		else {
-			max = Double.valueOf(prefsEst.get(EstimationOptions.EST_MAX_VALUE));
-		}
-		
-		if (props.containsKey(EstimationOptions.EST_MIN_VALUE)) {
-			min = Double.valueOf(props.get(EstimationOptions.EST_MIN_VALUE));
-		}
-		else {
-			min = Double.valueOf(prefsEst.get(EstimationOptions.EST_MIN_VALUE));
-		}
-		
 		boolean multiShoot;
 		if (props.containsKey(EstimationOptions.EST_MULTI_SHOOT)) {
 			multiShoot = Boolean.valueOf(props.get(EstimationOptions.EST_MULTI_SHOOT));
@@ -354,47 +335,119 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 		else {
 			multiShoot = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_MULTI_SHOOT));
 		}
-		
-		boolean allGlobalParameters;
-		if (props.containsKey(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS)) {
-			allGlobalParameters = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS));
-		}
-		else {
-			allGlobalParameters = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS));
-		}
-		
-		boolean allLocalParameters;
-		if (props.containsKey(EstimationOptions.EST_ALL_LOCAL_PARAMETERS)) {
-			allLocalParameters = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_LOCAL_PARAMETERS));
-		}
-		else {
-			allLocalParameters = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_LOCAL_PARAMETERS));
-		}
-		
-		boolean allSpecies=false;
-		if (props.containsKey(EstimationOptions.EST_ALL_SPECIES)) {
-			allSpecies = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_SPECIES));
-		}
-		else {
-			allSpecies = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_SPECIES));
-		}
-		
-		boolean allCompartments = false;
-		if (props.containsKey(EstimationOptions.EST_ALL_COMPARTMENTS)) {
-			allCompartments = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_COMPARTMENTS));
-		}
-		else {
-			allCompartments = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_COMPARTMENTS));
-		}
-		
 		Model clonedModel = simulationManager.getSimulationConfiguration().getModel().clone();
-		try {
-			estimationProblem = new EstimationProblem(simulationManager.getSimulationConfiguration().getSolver(), simulationManager.getQualityMeasurement().getDistance(), clonedModel, simulationManager.getQualityMeasurement().getMeasurements(),
-				multiShoot, createQuantityRanges(clonedModel, allGlobalParameters, allLocalParameters, allSpecies, allCompartments, initMin, initMax, min, max));
-		} catch (SBMLException e) {
-			e.printStackTrace();
-		} catch (ModelOverdeterminedException e) {
-			e.printStackTrace();
+		
+		//Create quantity ranges from file or with standard preferences
+		QuantityRange[] quantityRanges = null;
+		if(props.contains(EstimationOptions.EST_TARGETS)) {
+			String file = String.valueOf(props.get(EstimationOptions.EST_TARGETS));
+			try {
+				quantityRanges = EstimationProblem.readQuantityRangesFromFile(file, clonedModel);
+  			
+  		} catch (Exception e) {
+  			e.printStackTrace();
+  		}
+		}
+		else {
+			double initMax, initMin, min, max;
+  		if (props.containsKey(EstimationOptions.EST_INIT_MAX_VALUE)) {
+  			initMax = Double.valueOf(props.get(EstimationOptions.EST_INIT_MAX_VALUE));
+  		}
+  		else {
+  			initMax = Double.valueOf(prefsEst.get(EstimationOptions.EST_INIT_MAX_VALUE));
+  		}
+  		
+  		if (props.containsKey(EstimationOptions.EST_INIT_MIN_VALUE)) {
+  			initMin = Double.valueOf(props.get(EstimationOptions.EST_INIT_MIN_VALUE));
+  		}
+  		else {
+  			initMin = Double.valueOf(prefsEst.get(EstimationOptions.EST_INIT_MIN_VALUE));
+  		}
+  		
+  		if (props.containsKey(EstimationOptions.EST_MAX_VALUE)) {
+  			max = Double.valueOf(props.get(EstimationOptions.EST_MAX_VALUE));
+  		}
+  		else {
+  			max = Double.valueOf(prefsEst.get(EstimationOptions.EST_MAX_VALUE));
+  		}
+  		
+  		if (props.containsKey(EstimationOptions.EST_MIN_VALUE)) {
+  			min = Double.valueOf(props.get(EstimationOptions.EST_MIN_VALUE));
+  		}
+  		else {
+  			min = Double.valueOf(prefsEst.get(EstimationOptions.EST_MIN_VALUE));
+  		}
+  		
+  		
+  		
+  		boolean allGlobalParameters;
+  		if (props.containsKey(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS)) {
+  			allGlobalParameters = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS));
+  		}
+  		else {
+  			allGlobalParameters = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS));
+  		}
+  		
+  		boolean allLocalParameters;
+  		if (props.containsKey(EstimationOptions.EST_ALL_LOCAL_PARAMETERS)) {
+  			allLocalParameters = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_LOCAL_PARAMETERS));
+  		}
+  		else {
+  			allLocalParameters = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_LOCAL_PARAMETERS));
+  		}
+  		
+  		boolean allSpecies=false;
+  		if (props.containsKey(EstimationOptions.EST_ALL_SPECIES)) {
+  			allSpecies = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_SPECIES));
+  		}
+  		else {
+  			allSpecies = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_SPECIES));
+  		}
+  		
+  		boolean allCompartments = false;
+  		if (props.containsKey(EstimationOptions.EST_ALL_COMPARTMENTS)) {
+  			allCompartments = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_COMPARTMENTS));
+  		}
+  		else {
+  			allCompartments = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_COMPARTMENTS));
+  		}
+  		try {
+  			quantityRanges = createQuantityRanges(clonedModel, allGlobalParameters, allLocalParameters, allSpecies, allCompartments, initMin, initMax, min, max);
+  		} catch (Exception e) {
+  			e.printStackTrace();
+  		} 
+		}
+		boolean fitToSplines = false;
+		if (props.containsKey(EstimationOptions.FIT_TO_SPLINES)) {
+			fitToSplines = Boolean.valueOf(props.get(EstimationOptions.FIT_TO_SPLINES));
+		}
+		else {
+			fitToSplines = Boolean.valueOf(prefsEst.get(EstimationOptions.FIT_TO_SPLINES));
+		}
+		
+		int numSplineSamples = 0;
+		if (props.containsKey(EstimationOptions.NUMBER_OF_SPLINE_SAMPLES)) {
+			numSplineSamples = Integer.valueOf(props.get(EstimationOptions.NUMBER_OF_SPLINE_SAMPLES));
+		}
+		else {
+			numSplineSamples = Integer.valueOf(prefsEst.get(EstimationOptions.NUMBER_OF_SPLINE_SAMPLES));
+		}
+		if (fitToSplines) {
+			for (int i = simulationManager.getQualityMeasurement().getMeasurements().size() - 1; i >= 0; i--) {
+				simulationManager.getQualityMeasurement().getMeasurements().set(i, SplineCalculation.calculateSplineValues(
+					simulationManager.getQualityMeasurement().getMeasurements().get(i),
+					numSplineSamples));
+			}
+		}
+		if((quantityRanges != null) && (quantityRanges.length >= 0)) {
+			try {
+				estimationProblem = new EstimationProblem(simulationManager.getSimulationConfiguration().getSolver(), simulationManager.getQualityMeasurement().getDistance(), clonedModel, simulationManager.getQualityMeasurement().getMeasurements(),
+				multiShoot, quantityRanges);
+			} catch (SBMLException e) {
+				e.printStackTrace();
+			} catch (ModelOverdeterminedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -415,6 +468,39 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 	 * @param props
 	 */
 	private void performOptimization() {
+		//Set initial values to values given in experimental data.
+		String[] quantityIds = new String[estimationProblem.getQuantities().length];
+		for (int i = 0; i < estimationProblem.getQuantities().length; i++) {
+			quantityIds[i] = estimationProblem.getQuantities()[i].getId();
+		}
+		
+		MultiTable reference = estimationProblem.getReferenceData()[0];
+		for (int col = 0; col < reference.getColumnCount(); col++) {
+			String id = reference.getColumnIdentifier(col);
+			if (Arrays.binarySearch(quantityIds, id) < 0) {
+				double value = ((Double) reference.getValueAt(0, col))
+						.doubleValue();
+				if (!Double.isNaN(value)) {
+					Species sp = estimationProblem.getModel().getSpecies(id);
+					if (sp != null) {
+						sp.setValue(value);
+						continue;
+					}
+					Compartment c = estimationProblem.getModel().getCompartment(id);
+					if (c != null) {
+						c.setValue(value);
+						continue;
+					}
+					Parameter p = estimationProblem.getModel().getParameter(id);
+					if (p != null) {
+						p.setValue(value);
+						continue;
+					}
+
+				}
+			}
+		}
+		
 		
 		GOParameters goParams = new GOParameters(); // Instance for the general
 		// Genetic Optimization
@@ -439,11 +525,24 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 			System.out.println(estimationProblem.getQuantityRanges()[i].getQuantity().getName() + ": " + estimations[i]);
 		}
 		
-  	
+		//Refresh model
+  	for(int i=0; i!=estimations.length; i++) {
+  		estimationProblem.getQuantities()[i].setValue(estimations[i]);
+  	}
 		
-  		//TODO add listener
-  		//TODO refresh model
-			//TODO output to file
+  	//Save model to file
+		if (outSBMLFile != null) {
+			try {
+				(new SBMLWriter()).write(
+					estimationProblem.getModel().getSBMLDocument(), outSBMLFile);
+			} catch (SBMLException e) {
+				e.printStackTrace();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (XMLStreamException e) {
+				e.printStackTrace();
+			}
+		}
 		
 	}
 

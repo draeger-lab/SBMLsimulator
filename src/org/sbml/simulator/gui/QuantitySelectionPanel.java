@@ -59,6 +59,7 @@ import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.UnitDefinition;
 import org.sbml.optimization.QuantityRange;
+import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.gui.table.LegendTableCellRenderer;
 
 import de.zbit.gui.GUITools;
@@ -787,52 +788,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		return quantityList.toArray(new QuantityRange[0]);
 	}
 	
-	/**
-	 * 
-	 * @param file
-	 * @return
-	 * @throws IOException
-	 */
-	public QuantityRange[] readQuantityRangesFromFile(String file) throws IOException {
-		CSVReader reader = new CSVReader(file);
-		String[][] data = reader.read();
-		
-		List<QuantityRange> ranges = new ArrayList<QuantityRange>();
-		for (int i = 0; i != data.length; i++) {
-			if (data[i].length >= 5) {
-				String id = data[i][0];
-				Quantity quantity = null;
-				if (!id.contains(":")) {
-					quantity = model.findQuantity(id);
-				} else {
-					String[] splits = id.split(":");
-					Reaction reaction = model.getReaction(splits[0]);
-					if (reaction != null) {
-						KineticLaw kl = reaction.getKineticLaw();
-						if (kl != null) {
-							quantity = kl.getLocalParameter(splits[1]);
-						}
-					}
-				}
-				if (quantity != null) {
-					try {
-						QuantityRange range = new QuantityRange(quantity, true,
-							Double.valueOf(data[i][1]), Double.valueOf(data[i][2]),
-							Double.valueOf(data[i][3]), Double.valueOf(data[i][4]));
-						if ((data[i].length >= 7) && (data[i][5] != null)) {
-							range.setInitialGaussianValue(Double.valueOf(data[i][5]));
-							range.setGaussianStandardDeviation(Double.valueOf(data[i][6]));
-						}
-						ranges.add(range);
-						
-					} catch (Exception e) {
-						//TODO message
-					}
-				}
-			}
-		}
-		return ranges.toArray(new QuantityRange[ranges.size()]);
-	}
+	
 	
 	/**
 	 * 
@@ -840,7 +796,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	 * @throws IOException 
 	 */
 	public void refreshQuantityRangesWithRangesFromFile(String file) throws IOException {
-		QuantityRange[] refreshedRanges = readQuantityRangesFromFile(file);
+		QuantityRange[] refreshedRanges = EstimationProblem.readQuantityRangesFromFile(file, model);
 		Map<Quantity, QuantityRange> quantities = new HashMap<Quantity, QuantityRange>();
 		for(QuantityRange range: refreshedRanges) {
 			quantities.put(range.getQuantity(), range);
