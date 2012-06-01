@@ -46,6 +46,7 @@
   <!-- EstimationOptions -->
     
   <entry key="EstimationOptions">Estimation Options</entry>
+  <entry key="EST_TARGETS">File with parameters to optimize</entry>
   <entry key="EST_ALL_COMPARTMENTS">Compartment sizes</entry>
   <entry key="EST_ALL_COMPARTMENTS_TOOLTIP">Decide whether or not by default all compartments in a model should be considered the target of an optimization, i.e., value estimation.</entry>
   <entry key="EST_ALL_GLOBAL_PARAMETERS">Global parameter values</entry>
