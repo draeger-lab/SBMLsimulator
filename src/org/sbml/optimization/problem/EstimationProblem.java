@@ -17,6 +17,7 @@
  */
 package org.sbml.optimization.problem;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.math.ode.DerivativeException;
 import org.sbml.jsbml.KineticLaw;
+import org.sbml.jsbml.LocalParameter;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.Reaction;
@@ -42,6 +44,7 @@ import org.simulator.math.odes.MultiTable;
 import org.simulator.sbml.SBMLinterpreter;
 
 import de.zbit.io.csv.CSVReader;
+import de.zbit.io.csv.CSVWriter;
 import de.zbit.util.ResourceManager;
 import eva2.server.go.PopulationInterface;
 import eva2.server.go.individuals.AbstractEAIndividual;
@@ -686,6 +689,17 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	/**
 	 * 
 	 * @param file
+	 * @param model
+	 * @return
+	 * @throws IOException
+	 */
+	public static QuantityRange[] readQuantityRangesFromFile(File file, Model model) throws IOException {
+		return readQuantityRangesFromFile(file.getAbsolutePath(), model);
+	}
+	
+	/**
+	 * 
+	 * @param file
 	 * @return
 	 * @throws IOException
 	 */
@@ -728,6 +742,44 @@ public class EstimationProblem extends AbstractProblemDouble implements
 			}
 		}
 		return ranges.toArray(new QuantityRange[ranges.size()]);
+	}
+	
+	/**
+	 * 
+	 * @param file
+	 * @throws IOException
+	 */
+	public static void saveQuantityRanges(File file, QuantityRange[] ranges) throws IOException {
+    String comment = "In this file the parameters to estimate are given with their id, the initial minimum and maximum values and the minimum and maximum values for the estimation.\n"
+    		+ "If the initial gaussian value and the standard deviation are set, the initial value is determined from a gaussian distribution based on these values.\n";
+		String[] header = {"id", "initMin", "initMax", "minValue", "maxValue", "[initialGaussianValue]", "[gaussianStandardDeviation]"};
+		String[][] data = new String[ranges.length][];
+		for(int i=0; i!=ranges.length; i++) {
+			data[i] = new String[7];
+			Quantity q = ranges[i].getQuantity();
+			if(q instanceof LocalParameter) {
+				Reaction r = (Reaction)((LocalParameter)q).getParent().getParent().getParent();
+				data[i][0] = r.getId() + ":" + q.getId();
+			}
+			else {
+				data[i][0] = q.getId();
+			}
+			data[i][1] = String.valueOf(ranges[i].getInitialMinimum());
+			data[i][2] = String.valueOf(ranges[i].getInitialMaximum());
+			data[i][3] = String.valueOf(ranges[i].getMinimum());
+			data[i][4] = String.valueOf(ranges[i].getMaximum());
+			
+			if(ranges[i].isGaussianInitialization()) {
+				data[i][5] = String.valueOf(ranges[i].getInitialGaussianValue());
+				data[i][6] = String.valueOf(ranges[i].getGaussianStandardDeviation());
+			}
+			else {
+				data[i][5] = null;
+				data[i][6] = null;
+			}
+		}
+		CSVWriter writer = new CSVWriter();
+		writer.write(data, header, comment, file);
 	}
 
 }

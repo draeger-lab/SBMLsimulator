@@ -207,8 +207,8 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 				solver = (AbstractDESSolver) Class.forName(
 					props.get(SimulationOptions.ODE_SOLVER)).newInstance();
 			} else {
-				solver = (AbstractDESSolver) Class.forName(
-					prefs.get(SimulationOptions.ODE_SOLVER)).newInstance();
+				solver = (AbstractDESSolver) 
+					prefs.getClass(SimulationOptions.ODE_SOLVER).newInstance();
 			}
 			
 		} catch (InstantiationException e) {
@@ -217,7 +217,6 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
-			solver = new RosenbrockSolver();
 		}
 		
 		if (props.containsKey(SimulationOptions.DEFAULT_INIT_COMPARTMENT_SIZE)) {
