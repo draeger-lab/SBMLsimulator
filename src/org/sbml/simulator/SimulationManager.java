@@ -311,10 +311,10 @@ public class SimulationManager implements PropertyChangeListener {
    * 
    * @throws Exception
    */
-	public void simulateWithoutGUI() throws Exception {
+	public void simulateWithoutGUI(double defaultCompartmentValue, double defaultSpeciesValue, double defaultParameterValue) throws Exception {
 		// TODO: The purpose of the SimulationManager is to be independent from any GUI!
 		SBMLinterpreter interpreter = new SBMLinterpreter(
-			simulationConfiguration.getModel());
+			simulationConfiguration.getModel(), defaultCompartmentValue, defaultSpeciesValue, defaultParameterValue);
 		solution = SimulationWorker.solveByStepSize(
 			simulationConfiguration.getSolver(), interpreter,
 			interpreter.getInitialValues(), simulationConfiguration.getStart(),

@@ -63,7 +63,7 @@ import eva2.server.go.strategies.InterfaceOptimizer;
 import eva2.server.modules.GOParameters;
 
 /**
- * This class handels
+ * This class handles the command line mode of the simulator
  * 
  * @author Alexander D&ouml;rr
  * @version $Rev$
@@ -92,6 +92,20 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 	 */
 	private AppConf appConf;
 	
+	/**
+	 * 
+	 */
+	private double defaultSpeciesValue;
+	
+	/**
+	 * 
+	 */
+	private double defaultParameterValue;
+	
+	/**
+	 * 
+	 */
+	private double defaultCompartmentValue;
 	/**
 	 * 
 	 */
@@ -205,9 +219,6 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 			e.printStackTrace();
 			solver = new RosenbrockSolver();
 		}
-		
-		//TODO set default values
-		double defaultCompartmentValue, defaultSpeciesValue, defaultParameterValue;
 		
 		if (props.containsKey(SimulationOptions.DEFAULT_INIT_COMPARTMENT_SIZE)) {
 			defaultCompartmentValue = Double.valueOf(props
@@ -457,8 +468,8 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 	 * 
 	 * @throws Exception
 	 */
-	private void simulate() throws Exception {
-		simulationManager.simulateWithoutGUI();
+	private void simulate(double defaultSpeciesValue, double defaultParameterValue, double defaultCompartmentValue) throws Exception {
+		simulationManager.simulateWithoutGUI(defaultSpeciesValue, defaultParameterValue, defaultCompartmentValue);
 	}
 	
 	/**
@@ -599,7 +610,7 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 				performOptimization();				
 			}	
 			else {
-				simulate();
+				simulate(defaultSpeciesValue, defaultParameterValue, defaultCompartmentValue);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();				
