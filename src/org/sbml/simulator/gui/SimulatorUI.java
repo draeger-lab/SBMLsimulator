@@ -31,6 +31,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -54,8 +55,8 @@ import javax.swing.UIManager;
 import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Parameter;
-import org.sbml.jsbml.Species;
 import org.sbml.jsbml.SBMLDocument;
+import org.sbml.jsbml.Species;
 import org.sbml.optimization.EvA2GUIStarter;
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.optimization.problem.EstimationProblem;
@@ -217,10 +218,12 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 			Command.SIMULATION_START, Command.SIMULATION_STOP);
 		SBProperties props = appConf.getCmdArgs();
 		if (props.containsKey(SimulatorIOOptions.SBML_INPUT_FILE)) {
-			open(new File(props.get(SimulatorIOOptions.SBML_INPUT_FILE).toString()));
+			ArrayList<File> listOfFilesToBeOpened = new ArrayList<File>(2);
+			listOfFilesToBeOpened.add(new File(props.get(SimulatorIOOptions.SBML_INPUT_FILE).toString()));
 			if (props.containsKey(SimulatorIOOptions.TIME_SERIES_FILE)) {
-				open(new File(props.get(SimulatorIOOptions.TIME_SERIES_FILE).toString()));
+				listOfFilesToBeOpened.add(new File(props.get(SimulatorIOOptions.TIME_SERIES_FILE).toString()));
 			}
+			open(listOfFilesToBeOpened.toArray(new File[] {}));
 		}
 	}
 

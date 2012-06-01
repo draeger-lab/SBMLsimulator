@@ -33,7 +33,9 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -60,16 +62,18 @@ import org.sbml.optimization.QuantityRange;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.gui.table.LegendTableCellRenderer;
 
+import de.zbit.gui.GUIOptions;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.actioncommand.ActionCommand;
 import de.zbit.gui.layout.LayoutHelper;
 import de.zbit.gui.table.AbstractDocumentFilterListener;
 import de.zbit.gui.table.renderer.ColoredBooleanRenderer;
 import de.zbit.gui.table.renderer.DecimalCellRenderer;
-import de.zbit.io.csv.CSVWriter;
+import de.zbit.io.filefilter.SBFileFilter;
 import de.zbit.sbml.gui.UnitDefinitionCellRenderer;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
+import de.zbit.util.prefs.SBPreferences;
 
 /**
  * With this element the user can decide which model components should be
@@ -484,14 +488,18 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		
 		LayoutHelper lh = new LayoutHelper(this);
 		lh.add(new JLabel(StringUtil.toHTMLToolTip(bundle.getString("EXPLANATION"))), 1d, 0d);
+		// TODO: Localize
 		JButton fileButton = GUITools.createButton(
-			"Load preferences from file", null, this, "loadFromFile",
-			null);
+			"Load", UIManager.getIcon("ICON_OPEN_16"), this, "loadFromFile",
+			"Load preferences from file");
 		JButton saveButton = GUITools.createButton(
-			"Save preferences to file", null, this, "saveToFile",
-			null);
-		lh.add(fileButton);
-		lh.add(saveButton);
+			"Save", UIManager.getIcon("ICON_SAVE_16"), this, "saveToFile",
+			"Save preferences to file");
+		JPanel p = new JPanel();
+		p.setBorder(BorderFactory.createTitledBorder(" Load or save configuration "));
+		p.add(fileButton);
+		p.add(saveButton);
+		lh.add(p);
 		lh.add(tabs);
 	}
 	
@@ -505,25 +513,30 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		}
 		JButton button = (JButton) e.getSource();
 		if (button.getActionCommand().equals("loadFromFile")) {
-			String file = GUITools.openFileDialog(null,
-				"Choose file with preferences", false);
+			SBPreferences prefs = SBPreferences.getPreferencesFor(GUIOptions.class);
+			File file[] = GUITools.openFileDialog(this,
+				prefs.getFile(GUIOptions.OPEN_DIR).getAbsolutePath(), false, false,
+				JFileChooser.FILES_ONLY, SBFileFilter.createCSVFileFilter());
 			
 			try {
-				if (file != null) {
-					this.refreshQuantityRangesWithRangesFromFile(file);
+				if ((file != null) && (file.length == 1)) {
+					refreshQuantityRangesWithRangesFromFile(file[0]);
+					tabs.getSelectedComponent().validate();
+					tabs.getSelectedComponent().repaint();
 				}
-			} catch (IOException e1) {
+			} catch (IOException exc) {
 				//TODO warning
 			}
-			tabs.getSelectedComponent().validate();
-			tabs.getSelectedComponent().repaint();
 			return;
 		} else if (button.getActionCommand().equals("saveToFile")) {
-			File file = GUITools.saveFileDialog(null);
+			SBPreferences prefs = SBPreferences.getPreferencesFor(GUIOptions.class);
+			File file = GUITools.saveFileDialog(this,
+				prefs.getFile(GUIOptions.OPEN_DIR).getAbsolutePath(), false, false,
+				true, JFileChooser.FILES_ONLY, SBFileFilter.createCSVFileFilter());
 			
 			try {
 				if (file != null) {
-					this.saveQuantityRanges(file);
+					EstimationProblem.saveQuantityRanges(file, this.getSelectedQuantityRanges());
 				}
 			} catch (IOException e1) {
 				//TODO warning
@@ -792,7 +805,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	 * @param file
 	 * @throws IOException 
 	 */
-	public void refreshQuantityRangesWithRangesFromFile(String file) throws IOException {
+	public void refreshQuantityRangesWithRangesFromFile(File file) throws IOException {
 		QuantityRange[] refreshedRanges = EstimationProblem.readQuantityRangesFromFile(file, model);
 		Map<Quantity, QuantityRange> quantities = new HashMap<Quantity, QuantityRange>();
 		for(QuantityRange range: refreshedRanges) {
@@ -820,42 +833,7 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		
 	}
 	
-	/**
-	 * 
-	 * @param file
-	 * @throws IOException
-	 */
-	public void saveQuantityRanges(File file) throws IOException {
-		CSVWriter writer = new CSVWriter();
-		String[] header = {"id", "initMin", "initMax", "minValue", "maxValue", "initialGaussianValue", "gaussianStandardDeviation"};
-		QuantityRange[] ranges = this.getSelectedQuantityRanges();
-		String[][] data = new String[ranges.length][];
-		for(int i=0; i!=ranges.length; i++) {
-			data[i] = new String[7];
-			Quantity q = ranges[i].getQuantity();
-			if(q instanceof LocalParameter) {
-				Reaction r = (Reaction)((LocalParameter)q).getParent().getParent().getParent();
-				data[i][0] = r.getId() + ":" + q.getId();
-			}
-			else {
-				data[i][0] = q.getId();
-			}
-			data[i][1] = String.valueOf(ranges[i].getInitialMinimum());
-			data[i][2] = String.valueOf(ranges[i].getInitialMaximum());
-			data[i][3] = String.valueOf(ranges[i].getMinimum());
-			data[i][4] = String.valueOf(ranges[i].getMaximum());
-			
-			if(ranges[i].isGaussianInitialization()) {
-				data[i][5] = String.valueOf(ranges[i].getInitialGaussianValue());
-				data[i][6] = String.valueOf(ranges[i].getGaussianStandardDeviation());
-			}
-			else {
-				data[i][5] = null;
-				data[i][6] = null;
-			}
-		}
-		writer.write(data, header, file);
-	}
+	
 	
 	
 	/**
