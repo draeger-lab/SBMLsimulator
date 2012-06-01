@@ -17,6 +17,7 @@
  */
 package org.sbml.optimization.problem;
 
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,8 +26,10 @@ import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 import org.apache.commons.math.ode.DerivativeException;
+import org.sbml.jsbml.KineticLaw;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Quantity;
+import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.optimization.EstimationInitOperator;
@@ -38,6 +41,7 @@ import org.simulator.math.odes.DESSolver;
 import org.simulator.math.odes.MultiTable;
 import org.simulator.sbml.SBMLinterpreter;
 
+import de.zbit.io.csv.CSVReader;
 import de.zbit.util.ResourceManager;
 import eva2.server.go.PopulationInterface;
 import eva2.server.go.individuals.AbstractEAIndividual;
@@ -677,6 +681,53 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 */
 	public void unsetReferenceData() {
 		referenceData = null;
+	}
+	
+	/**
+	 * 
+	 * @param file
+	 * @return
+	 * @throws IOException
+	 */
+	public static QuantityRange[] readQuantityRangesFromFile(String file, Model model) throws IOException {
+		CSVReader reader = new CSVReader(file);
+		String[][] data = reader.read();
+		
+		List<QuantityRange> ranges = new ArrayList<QuantityRange>();
+		for (int i = 0; i != data.length; i++) {
+			if (data[i].length >= 5) {
+				String id = data[i][0];
+				Quantity quantity = null;
+				if (!id.contains(":")) {
+					quantity = model.findQuantity(id);
+				} else {
+					String[] splits = id.split(":");
+					Reaction reaction = model.getReaction(splits[0]);
+					if (reaction != null) {
+						KineticLaw kl = reaction.getKineticLaw();
+						if (kl != null) {
+							quantity = kl.getLocalParameter(splits[1]);
+						}
+					}
+				}
+				if (quantity != null) {
+					try {
+						QuantityRange range = new QuantityRange(quantity, true,
+							Double.valueOf(data[i][1]), Double.valueOf(data[i][2]),
+							Double.valueOf(data[i][3]), Double.valueOf(data[i][4]));
+						if ((data[i].length >= 7) && (data[i][5] != null)) {
+							range.setInitialGaussianValue(Double.valueOf(data[i][5]));
+							range.setGaussianStandardDeviation(Double.valueOf(data[i][6]));
+						}
+						ranges.add(range);
+						
+					} catch (Exception e) {
+						//TODO message
+					}
+				}
+			}
+		}
+		return ranges.toArray(new QuantityRange[ranges.size()]);
 	}
 
 }

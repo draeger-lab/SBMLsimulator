@@ -52,6 +52,12 @@ public interface EstimationOptions extends KeyProvider {
 	static ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
 	
 	/**
+	 * The file with the values to estimate and their initial setting
+	 */
+	public static final Option<String> EST_TARGETS = new Option<String>(
+		"EST_TARGETS", String.class, bundle, null);
+	
+	/**
 	 * Decide whether or not by default all compartments in a model should be
 	 * considered the target of an optimization, i.e., value estimation.
 	 */
