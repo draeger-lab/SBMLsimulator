@@ -54,6 +54,7 @@ import org.sbml.jsbml.SBase;
 import org.sbml.jsbml.Species;
 import org.sbml.jsbml.UnitDefinition;
 import org.sbml.jsbml.util.TreeNodeChangeListener;
+import org.sbml.jsbml.util.TreeNodeRemovedEvent;
 import org.sbml.jsbml.util.compilers.HTMLFormula;
 import org.sbml.simulator.SimulationOptions;
 
@@ -439,9 +440,11 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
   }
   
   /* (non-Javadoc)
-   * @see org.sbml.jsbml.util.TreeNodeChangeListener#nodeRemoved(javax.swing.tree.TreeNode)
+   * @see org.sbml.jsbml.util.TreeNodeChangeListener#nodeRemoved(org.sbml.jsbml.util.TreeNodeRemovedEvent)
    */
-  public void nodeRemoved(TreeNode node) {
+  //@Override
+  public void nodeRemoved(TreeNodeRemovedEvent evt) {
+  	TreeNode node = evt.getSource();
     if (node instanceof SBase) {
     	SBase sb = (SBase) node;
       tab.removeAll();
