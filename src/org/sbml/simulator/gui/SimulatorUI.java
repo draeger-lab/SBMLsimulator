@@ -31,6 +31,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -702,8 +703,8 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 			if (obj == null) {
 				logger.fine("Cannot set the SBMLDocument to a null value.");
 			} else {
-				logger.fine(String.format(
-				  "The given object of type %s is ignored because it cannot be cast to SBMLDocument.",
+				logger.fine(MessageFormat.format(
+				  "The given object of type {0} is ignored because it cannot be cast to SBMLDocument.",
 					obj.getClass().getName()));
 			}
 		} else {
