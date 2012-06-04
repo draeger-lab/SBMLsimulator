@@ -19,6 +19,7 @@ package org.sbml.simulator.fba.controller;
 
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
+import org.sbml.jsbml.SBO;
 import org.sbml.jsbml.Species;
 import org.sbml.simulator.stability.math.StabilityMatrix;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
@@ -51,7 +52,8 @@ public class FluxMinimizationUtils {
 	 * @param doc
 	 * @return {@link StoichiometricMatrix}
 	 */
-	public static StoichiometricMatrix SBMLDocToStoichMatrix(SBMLDocument doc){
+	public static StoichiometricMatrix SBMLDocToStoichMatrix(SBMLDocument document){
+		SBMLDocument doc = eliminateTransports(document);
 		// build a new StoichiometricMatrix with the number of metabolites as the dimension of rows
 		// and the number of reactions as the dimension of columns
 		int metaboliteCount = doc.getModel().getSpeciesCount();
@@ -80,6 +82,21 @@ public class FluxMinimizationUtils {
 		return sMatrix;
 	}
 
+	/**
+	 * Eliminates the transport-reactions and gives back the new {@link SBMLDocument}.
+	 * @param doc
+	 * @return a new SBMLDocument without transport reactions
+	 */
+	private static SBMLDocument eliminateTransports(SBMLDocument doc) {
+		SBMLDocument newDoc = doc;
+		for (int i = 0; i < doc.getModel().getReactionCount(); i++) {
+			if (SBO.isChildOf(doc.getModel().getReaction(i).getSBOTerm(), SBO.getTransport())) {
+				newDoc.getModel().removeReaction(i);
+			}
+		}
+		return newDoc;
+	}
+	
 	/**
 	 * Computes the Manhattan-Norm ||vector|| = sum up from 1 to |vector|: |v_i|        
 	 * e.g.:
