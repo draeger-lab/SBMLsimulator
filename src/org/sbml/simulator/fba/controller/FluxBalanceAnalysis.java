@@ -17,6 +17,12 @@
  */
 package org.sbml.simulator.fba.controller;
 
+import ilog.concert.IloException;
+import ilog.concert.IloLinearNumExpr;
+import ilog.concert.IloNumExpr;
+import ilog.concert.IloNumVar;
+import ilog.cplex.IloCplex;
+
 import org.sbml.jsbml.SBMLDocument;
 
 import scpsolver.lpsolver.LinearProgramSolver;
@@ -79,8 +85,9 @@ public class FluxBalanceAnalysis {
 	 * Calls a method to solve the problem with linear programming if the boolean
 	 * {@link# linearProgramming} is set and true, else it calls a method for quadratic programming.
 	 * @return double[]
+	 * @throws IloException 
 	 */
-	public double[] solve() {
+	public double[] solve() throws IloException {
 		if (this.isSetLinearProgramming()) {
 			if (this.isLinearProgramming()) {
 				return solveWithLinearProgramming();
@@ -94,10 +101,16 @@ public class FluxBalanceAnalysis {
 
 	/**
 	 * Calls SCPsolver to solve the problem with linear programming
+	 * @throws IloException 
 	 */
-	private double[] solveWithLinearProgramming() {
+	private double[] solveWithLinearProgramming() throws IloException {
 		double[] target = targetFunc.computeTargetFunctionForLinearProgramming();
 		// TODO: add the constraints
+		IloCplex cplex = new IloCplex();
+		IloLinearNumExpr lin = cplex.scalProd(target, cplex.numVarArray(target.length, 0, 100));
+		cplex.addMinimize(lin);
+		
+		
 		LinearProgramSolver solver  = SolverFactory.newDefault();
 
 		LinearProgram lp = new LinearProgram(target);

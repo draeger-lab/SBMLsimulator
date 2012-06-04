@@ -19,6 +19,7 @@ package org.sbml.simulator.fba.controller;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLDocument;
+import org.sbml.simulator.stability.math.ConservationRelations;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
 import eva2.tools.math.Jama.Matrix;
@@ -77,15 +78,14 @@ public class FluxMinimization implements TargetFunction {
 	public FluxMinimization(SBMLDocument doc, StoichiometricMatrix N, double[] c_eq, double[] gibbs) {
 		this.errorArray = FluxMinimizationUtils.computeError(gibbs.length);
 		this.fluxVector = FluxMinimizationUtils.computeFluxVector(N);
-
-		if(gibbs != null && N != null) {
-			this.L = computeL(N,gibbs);
-		} else {
-			this.L = null;
-		}
 		this.c_eq = c_eq;
 		this.gibbs = gibbs;
 		this.concentrations = computeConcentrations(doc);
+		if(gibbs != null && N != null) {
+			this.L = computeL(N);
+		} else {
+			this.L = null;
+		}
 	}
 
 
@@ -101,15 +101,13 @@ public class FluxMinimization implements TargetFunction {
 	}
 
 	/**
-	 * computes the transposed kernel matrix of the reduced stoichiometric matrix N
+	 * Computes the transposed kernel matrix of the reduced stoichiometric matrix N
 	 * multiplied with the reaction Gibbs energy values for the internal reactions of the system.
-	 * @param n
-	 * @param gibbs2
+	 * @param N
 	 * @return L = (K_int^T) * (Delta_r(gibbs))_int
 	 */
-	private double[] computeL(StoichiometricMatrix n, double[] gibbs2) {
-		// TODO: L = (K_int^T) * (Delta_r(gibbs))_int
-		Matrix K_int = n.getReducedMatrix().svd().getV().transpose();
+	private double[] computeL(StoichiometricMatrix N) {
+		Matrix K_int = ConservationRelations.calculateConsRelations(N).transpose();
 		double[] erg = new double[gibbs.length];
 		for (int i = 0; i< gibbs.length; i++) {
 			for (int j = 0; j < K_int.getColumnDimension(); j++) {
@@ -132,7 +130,7 @@ public class FluxMinimization implements TargetFunction {
 				concentrations[i] = model.getSpecies(i).getInitialConcentration();
 			} else if (model.getSpecies(i).isSetInitialAmount()){
 				//TODO: Ist initialAmount gesetzt, muessen wir durch das umgebende Kompartiment teilen
-				concentrations[i] = model.getSpecies(i).getInitialAmount();
+				concentrations[i] = model.getSpecies(i).getInitialAmount() / model.getSpecies(i).getCompartmentInstance().getSize();
 			} else {
 				concentrations[i] = 0.0;
 			}
@@ -253,6 +251,10 @@ public class FluxMinimization implements TargetFunction {
 		this.gibbs = gibbs;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.fba.controller.TargetFunction#isMinProblem()
+	 */
 	@Override
 	public boolean isMinProblem() {
 		return true;
