@@ -24,6 +24,9 @@ import scpsolver.lpsolver.SolverFactory;
 import scpsolver.problems.LinearProgram;
 
 /**
+ * Contains all components for flux balance analysis and solves the optimization problem
+ * for the incoming target function and constraints with linear or quadratic programming.
+ * 
  * @author Meike Aichele
  * @version $Rev$
  * @date 07.05.2012
@@ -35,20 +38,20 @@ public class FluxBalanceAnalysis {
 	 * or an other function for which the network has to be optimized
 	 */
 	public TargetFunction targetFunc;
-	
+
 	/**
 	 * Contains e.g. Gibbs-energies
 	 */
 	public Constraints constraints;
-	
+
 	/**
 	 * Is true for the request to solve the problem with linear programming and false for quadratic programming.
 	 */
 	private Boolean linearProgramming;
-	
+
 	/**
 	 * Constructor that get's a {@link Constraints}-Object and a {@link SBMLDocument} 
-	 * and that set's the linearProgramming = true;
+	 * and that set's the {@link# linearProgramming} true.
 	 * 
 	 * @param constraints
 	 * @param doc
@@ -56,10 +59,10 @@ public class FluxBalanceAnalysis {
 	public FluxBalanceAnalysis(double[] c_eq, Constraints constraints, SBMLDocument doc) {
 		this(new FluxMinimization(doc, c_eq, constraints.getGibbsEnergies()), constraints, true);
 	}
-	
+
 	/**
 	 * Constructor that get's {@link TargetFunction}, {@link Constraints} and a Boolean, which
-	 * contains the information for linearProgramming (true) or quadraticProgramming (false)
+	 * contains the information for linearProgramming (true) or quadraticProgramming (false).
 	 * 
 	 * @param target
 	 * @param constraints
@@ -73,24 +76,41 @@ public class FluxBalanceAnalysis {
 	}
 
 	/**
+	 * Calls a method to solve the problem with linear programming if the boolean
+	 * {@link# linearProgramming} is set and true, else it calls a method for quadratic programming.
+	 * @return double[]
+	 */
+	public double[] solve() {
+		if (this.isSetLinearProgramming()) {
+			if (this.isLinearProgramming()) {
+				return solveWithLinearProgramming();
+			} else {
+				return solveWithQuadraticProgramming();
+			}
+		}
+		return null;
+	}
+
+
+	/**
 	 * Calls SCPsolver to solve the problem with linear programming
 	 */
-	public double[] solveWithLinearProgramming() {
+	private double[] solveWithLinearProgramming() {
 		double[] target = targetFunc.computeTargetFunctionForLinearProgramming();
 		// TODO: add the constraints
 		LinearProgramSolver solver  = SolverFactory.newDefault();
-		
+
 		LinearProgram lp = new LinearProgram(target);
 		lp.setMinProblem(targetFunc.isMinProblem());
-		
+
 		double[] erg = solver.solve(lp);
 		return erg;
 	}
-	
+
 	/**
 	 * Calls CPLEX to solve the problem with quadratic programming
 	 */
-	public double[] solveWithQuadraticProgramming() {
+	private double[] solveWithQuadraticProgramming() {
 		double[] target = targetFunc.computeTargetFunctionForQuadraticProgramming();
 		// TODO: call CPLEX
 		return null;
@@ -108,5 +128,14 @@ public class FluxBalanceAnalysis {
 	 */
 	public Boolean isLinearProgramming() {
 		return linearProgramming;
+	}
+	
+
+	/**
+	 * true if the boolean linearProgramming is set, else false
+	 * @return
+	 */
+	public boolean isSetLinearProgramming() {
+		return (isLinearProgramming() != null);
 	}
 }

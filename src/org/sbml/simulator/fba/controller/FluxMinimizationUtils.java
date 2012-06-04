@@ -17,12 +17,9 @@
  */
 package org.sbml.simulator.fba.controller;
 
-import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.Species;
-import org.sbml.jsbml.SpeciesReference;
-import org.sbml.jsbml.ListOf.Type;
 import org.sbml.simulator.stability.math.StabilityMatrix;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
@@ -100,11 +97,16 @@ public class FluxMinimizationUtils {
 	}
 
 	/**
-	 * Computes the error for the target function
+	 * Computes the error for the target function with the given dimension
+	 * @param length 
 	 * @return double[]
 	 */
-	public static double[] computeError() {
-		// TODO: compute the error
-		return null;
+	public static double[] computeError(int length) {
+		double[] error = new double[length];
+		// fill the error-vector with ones, so that it only consists of the variables
+		for (int i = 0; i < error.length; i++) {
+			error[i] = 1;
+		}
+		return error;
 	}
 }
