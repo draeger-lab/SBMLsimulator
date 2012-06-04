@@ -45,4 +45,9 @@ public interface TargetFunction {
 	 */
 	public double[] computeTargetFunctionForLinearProgramming();
 
+	/**
+	 * @return true, if the target function belongs to a minimization problem
+	 */
+	public boolean isMinProblem();
+
 }

@@ -17,10 +17,6 @@
  */
 package org.sbml.simulator.fba.controller;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-
 import org.sbml.jsbml.SBMLDocument;
 
 /**
@@ -41,6 +37,11 @@ public class Constraints {
 	 */
 	public SBMLDocument document;
 	
+	/**
+	 * Contains the concentrations in equilibrium / steady state
+	 */
+	private double[] equilibriumConcentrations;
+	
 	
 	/**
 	 * Constructor, that gets a {@link SBMLDocument} and creates a new
@@ -52,16 +53,19 @@ public class Constraints {
 	public Constraints (SBMLDocument doc) {
 		this.document = doc;
 		this.setGibbsEnergies(new double[doc.getModel().getReactionCount()]);
+		this.setEquilibriumConcentrations(new double[doc.getModel().getSpeciesCount()]);
 	}
 	
+
 	/**
 	 * 
 	 * @param doc
 	 * @param gibbs
 	 */
-	public Constraints (SBMLDocument doc, double[] gibbs) {
+	public Constraints (SBMLDocument doc, double[] gibbs, double[] c_eq) {
 		this.document = doc;
 		this.setGibbsEnergies(gibbs);
+		this.setEquilibriumConcentrations(c_eq);
 	}
 
 	
@@ -77,6 +81,20 @@ public class Constraints {
 	 */
 	public double[] getGibbsEnergies() {
 		return gibbsEnergies;
+	}
+
+	/**
+	 * @param c_eq the equilibrium concentrations to set
+	 */
+	public void setEquilibriumConcentrations(double[] c_eq) {
+		this.equilibriumConcentrations = c_eq;
+	}
+	
+	/**
+	 * @return the equilibrium concentrations
+	 */
+	public double[] getEquilibriumConcentrations() {
+		return equilibriumConcentrations;
 	}
 	
 }

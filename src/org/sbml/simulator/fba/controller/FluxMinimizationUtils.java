@@ -20,6 +20,7 @@ package org.sbml.simulator.fba.controller;
 import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
+import org.sbml.jsbml.Species;
 import org.sbml.jsbml.SpeciesReference;
 import org.sbml.jsbml.ListOf.Type;
 import org.sbml.simulator.stability.math.StabilityMatrix;
@@ -61,61 +62,27 @@ public class FluxMinimizationUtils {
 		StoichiometricMatrix sMatrix = new StoichiometricMatrix (metaboliteCount, reactionCount);
 
 		//fill the matrix with the stoichiometry of each reaction
-		for (int i = 0; i< metaboliteCount; i++) {
-			for (int j = 0; j< reactionCount; j++) {
-				SpeciesReference specRef = searchCorrespondingObjectInReaction(doc.getModel().getReaction(j), doc.getModel().getSpecies(i).getId());
-				if (specRef == null){
-					// if specRef is not in the reaction j
-					sMatrix.set(i, j, 0);
-				} else if (specRef.isSetParentSBMLObject()) {
-					// check if specRef is a product or a reactant in reaction j
-					if (((ListOf<?>)specRef.getParentSBMLObject()).getSBaseListType().equals(Type.listOfProducts)) {
-						// the stoichiometry of products is positive in the stoichiometricMatrix
-						if (specRef.isSetStoichiometry()) {
-							sMatrix.set(i, j, specRef.getStoichiometry());
-							// else the entry i,j stays 0 
-						}
+		for (int i = 0; i < reactionCount; i++) {
+			for (int j = 0; j < metaboliteCount; j++) {
+				Reaction reac = doc.getModel().getReaction(i);
+				Species metabolit = doc.getModel().getSpecies(j);
+				if (reac.hasProduct(metabolit)) {
+					// the stoichiometry of products is positive in the stoichiometricMatrix
+					if (reac.getProduct(metabolit.getId()).isSetStoichiometry()) {
+						sMatrix.set(i, j, reac.getProduct(metabolit.getId()).getStoichiometry());
 					}
-					else if (((ListOf<?>)specRef.getParentSBMLObject()).getSBaseListType().equals(Type.listOfReactants)) {
-						// the stoichiometry of reactants is negative in the stoichiometricMatrix
-						if (specRef.isSetStoichiometry()) {
-							sMatrix.set(i, j, - specRef.getStoichiometry());
-							// else the entry i,j stays 0 
-						}
+				} else if (reac.hasReactant(metabolit)) {
+					// the stoichiometry of reactants is negative in the stoichiometricMatrix
+					if (reac.getReactant(metabolit.getId()).isSetStoichiometry()) {
+						sMatrix.set(i, j, - reac.getReactant(metabolit.getId()).getStoichiometry());
 					}
 				}
 			}
 		}
+
 		return sMatrix;
 	}
-	
-	/**
-	 * Gives the {@link SpeciesReference} back, when there is one with the given id in the given {@link Reaction}
-	 * else this method returns null.
-	 * 
-	 * @param reac
-	 * @param id
-	 * @return {@link SpeciesReference}
-	 */
-	private static SpeciesReference searchCorrespondingObjectInReaction(Reaction reac, String id) {
-		// look if the given Species-ID is corresponding to a product in the given Reaction r
-		// or a reactant or not in the reaction
-		for (SpeciesReference specRef: reac.getListOfProducts()) {
-			if (specRef.getId().equals(id)){
-				// it's a product
-				return specRef;
-			}
-		}
-		for (SpeciesReference specRef: reac.getListOfReactants()) {
-			if (specRef.getId().equals(id)){
-				// it's a reactant
-				return specRef;
-			}
-		}
-		// it's not in this reaction
-		return null;
-	}
-	
+
 	/**
 	 * Computes the Manhattan-Norm ||vector|| = sum up from 1 to |vector|: |v_i|        
 	 * e.g.:
@@ -131,7 +98,7 @@ public class FluxMinimizationUtils {
 		}
 		return norm;
 	}
-	
+
 	/**
 	 * Computes the error for the target function
 	 * @return double[]

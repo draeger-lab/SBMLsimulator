@@ -19,6 +19,10 @@ package org.sbml.simulator.fba.controller;
 
 import org.sbml.jsbml.SBMLDocument;
 
+import scpsolver.lpsolver.LinearProgramSolver;
+import scpsolver.lpsolver.SolverFactory;
+import scpsolver.problems.LinearProgram;
+
 /**
  * @author Meike Aichele
  * @version $Rev$
@@ -49,8 +53,8 @@ public class FluxBalanceAnalysis {
 	 * @param constraints
 	 * @param doc
 	 */
-	public FluxBalanceAnalysis(Constraints constraints, SBMLDocument doc) {
-		this(new FluxMinimization(doc), constraints, true);
+	public FluxBalanceAnalysis(double[] c_eq, Constraints constraints, SBMLDocument doc) {
+		this(new FluxMinimization(doc, c_eq, constraints.getGibbsEnergies()), constraints, true);
 	}
 	
 	/**
@@ -73,8 +77,14 @@ public class FluxBalanceAnalysis {
 	 */
 	public double[] solveWithLinearProgramming() {
 		double[] target = targetFunc.computeTargetFunctionForLinearProgramming();
-		// TODO: call SCPSolver
-		return null;
+		// TODO: add the constraints
+		LinearProgramSolver solver  = SolverFactory.newDefault();
+		
+		LinearProgram lp = new LinearProgram(target);
+		lp.setMinProblem(targetFunc.isMinProblem());
+		
+		double[] erg = solver.solve(lp);
+		return erg;
 	}
 	
 	/**
