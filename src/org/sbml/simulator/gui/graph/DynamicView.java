@@ -443,7 +443,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
          * core doesn't overtravel drawing.
          */
         if (visualizedCore != null) {
-            visualizedCore.graphUpdateFinished();
+            visualizedCore.operationsDone();
         }
     }
 
@@ -568,6 +568,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         Graph2DView viewPort = (Graph2DView) graphPanel.getConverter().getSimpleGraph().getCurrentView();
         BufferedImage image = new BufferedImage(viewPort.getWidth(), viewPort.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
         viewPort.paintVisibleContent((Graphics2D)image.getGraphics());
+        // visualizedCore.operationsDone();
         return image;
     }
 }

@@ -33,9 +33,10 @@
   <entry key="NODESIZE">Node size</entry>
   <entry key="NODECOLOR">Node color</entry>
   <entry key="VISUALIZATION">Visualization</entry> 
-  <entry key="SIMULATION_DATA">Simulation Data 1</entry> 
+  <entry key="SIMULATION_DATA">Simulation Data</entry> 
   <entry key="EXPERIMENTAL_DATA">Experimental Data</entry>   
   <entry key="SEARCHBAR_TOOLTIP">Choose time point of visualization.</entry>
+  <entry key="VIDEO_CODEC_NOT_FOUND">Couldn't guess video codec. Stated file ending/format correct?</entry>
   
   <!-- GraphOptions -->
 

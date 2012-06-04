@@ -93,14 +93,14 @@ public class DynamicCore {
 		protected Void doInBackground() throws Exception {
 		    int frame = 0, image = 0;
 			for(int i = getIndexOfTimepoint(currTimepoint)+1; i < timePoints.length; i++){
-				graphIsDrawn = false;
+				operationsDone = false;
 				setCurrTimepoint(timePoints[i]);
 				Thread.sleep(playspeed);
 				
 				/*
 				 * Wait till graph drawing is finished in case of large data
 				 */
-				while(!graphIsDrawn){
+				while(!operationsDone){
 					Thread.sleep(AWAITING);
 				}
 				
@@ -149,7 +149,7 @@ public class DynamicCore {
 	 * Notification if graph is updated.
 	 * Gets changed by to threads, therefore volatile.
 	 */
-	private volatile boolean graphIsDrawn;
+	private volatile boolean operationsDone;
 	
 	/**
 	 * Sleeptime while waiting for notification.
@@ -392,8 +392,8 @@ public class DynamicCore {
      * Notifies the play worker, that the graph is ready for the next timepoint.
      * (Graph drawing completed).
      */
-	public void graphUpdateFinished(){
-		graphIsDrawn = true;
+	public void operationsDone(){
+		operationsDone = true;
 	}
 	
 	/**

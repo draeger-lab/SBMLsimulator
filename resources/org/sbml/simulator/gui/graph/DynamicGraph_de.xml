@@ -32,9 +32,10 @@
   <entry key="NODECOLOR">Knotenfarbe</entry>
   <entry key="VISUALIZATION">Visualisierung</entry>
   <entry key="VISUALIZATION_TOOLTIP">Wählen Sie die Art der dynamischen Visualisierung und die zu visualisierenden Daten aus.</entry>
-  <entry key="SIMULATION_DATA">Simulierte Daten 1</entry> 
+  <entry key="SIMULATION_DATA">Simulierte Daten</entry> 
   <entry key="EXPERIMENTAL_DATA">Experimentelle Daten</entry>   
   <entry key="SEARCHBAR_TOOLTIP">Stellen Sie den Zeitpunkt der Visualisierung ein.</entry>
+  <entry key="VIDEO_CODEC_NOT_FOUND">Videocodec wurde nicht erkannt. Möglicherweise existiert dieser Videocodec auf Ihrem System nicht, oder die angegeben Dateiendung ist falsch.</entry>
   
   <!-- GraphOptions -->
 
