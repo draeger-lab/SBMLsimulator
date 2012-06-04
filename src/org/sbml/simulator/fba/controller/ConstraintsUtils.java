@@ -36,6 +36,9 @@ import de.zbit.gui.SerialWorker;
  */
 public class ConstraintsUtils {
 
+	//TODO: method to read equilibrium concentrations
+	// should be similar to gibbs-file-reader, perhaps write one method for both tasks
+	
 	/**
 	 * Reads out the Gibbs energies from a given file and writes it in the array gibbsEnergies
 	 * @param file

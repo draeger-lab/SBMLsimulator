@@ -17,6 +17,7 @@
  */
 package org.sbml.simulator.fba.controller;
 
+import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
@@ -48,7 +49,7 @@ public class FluxMinimization implements TargetFunction {
 	 */
 	private double[] concentrations;
 
-	private double c_eq;
+	private double[] c_eq;
 
 	private double[] gibbs;
 
@@ -60,7 +61,7 @@ public class FluxMinimization implements TargetFunction {
 	 * 
 	 * @param N
 	 */
-	public FluxMinimization(StoichiometricMatrix N, double c_eq, double[] gibbs) {
+	public FluxMinimization(SBMLDocument doc, StoichiometricMatrix N, double[] c_eq, double[] gibbs) {
 		this.errorArray = FluxMinimizationUtils.computeError();
 		this.fluxVector = FluxMinimizationUtils.computeFluxVector(N);
 
@@ -71,7 +72,7 @@ public class FluxMinimization implements TargetFunction {
 		}
 		this.c_eq = c_eq;
 		this.gibbs = gibbs;
-		this.concentrations = computeConcentrations(N);
+		this.concentrations = computeConcentrations(doc);
 	}
 
 
@@ -82,8 +83,8 @@ public class FluxMinimization implements TargetFunction {
 	 *  
 	 * @param doc
 	 */
-	public FluxMinimization(SBMLDocument doc) {
-		this(FluxMinimizationUtils.SBMLDocToStoichMatrix(doc), 0, null);
+	public FluxMinimization(SBMLDocument doc, double[] c_eq, double[] gibbs) {
+		this(doc,FluxMinimizationUtils.SBMLDocToStoichMatrix(doc), c_eq, gibbs);
 	}
 
 	/**
@@ -106,17 +107,26 @@ public class FluxMinimization implements TargetFunction {
 	}
 
 	/**
-	 * 
-	 * @param n
-	 * @return
+	 * Fills the concentrations-array with the initial concentrations/amounts of
+	 * the {@link Species} in this {@link Model}.
+	 * @param document
+	 * @return concentrations-array
 	 */
-	private double[] computeConcentrations(StoichiometricMatrix n) {
-		// TODO Auto-generated method stub
-		SBMLDocument doc= null;
-		doc.getModel().getSpecies(0).getInitialConcentration(); //??
-		return null;
+	private double[] computeConcentrations(SBMLDocument document) {
+		Model model = document.getModel();
+		for (int i = 0; i < model.getSpeciesCount(); i++) {
+			if (model.getSpecies(i).isSetInitialConcentration()){
+				concentrations[i] = model.getSpecies(i).getInitialConcentration();
+			} else if (model.getSpecies(i).isSetInitialAmount()){
+				//TODO: Ist initialAmount gesetzt, muessen wir durch das umgebende Kompartiment teilen
+				concentrations[i] = model.getSpecies(i).getInitialAmount();
+			} else {
+				concentrations[i] = 0.0;
+			}
+		}
+		return concentrations;
 	}
-	
+
 
 	/*
 	 * (non-Javadoc)
@@ -151,6 +161,7 @@ public class FluxMinimization implements TargetFunction {
 		// the weighted gibbs energy: lambda4*||G||
 		for (int l = 0; l < this.gibbs.length; l++) {
 			target[counter] = lambda4 * gibbs[l];
+			counter++;
 		}
 
 		return target;
@@ -175,7 +186,7 @@ public class FluxMinimization implements TargetFunction {
 		}
 		// then the weighted concentrations: lambda1*sum((c_i - c_eq)^2)
 		for (int j = 0; j < this.concentrations.length; j++) {
-			target[counter] = lambda3 * Math.pow((concentrations[j] - c_eq),2);
+			target[counter] = lambda3 * Math.pow((concentrations[j] - c_eq[j]),2);
 			counter++;
 		}
 		// the weighted error: lambda3*||E||
@@ -204,14 +215,14 @@ public class FluxMinimization implements TargetFunction {
 	/**
 	 * @return the c_eq
 	 */
-	public double getC_eq() {
+	public double[] getC_eq() {
 		return c_eq;
 	}
 
 	/**
 	 * @param c_eq the c_eq to set
 	 */
-	public void setC_eq(double c_eq) {
+	public void setC_eq(double[] c_eq) {
 		this.c_eq = c_eq;
 	}
 
@@ -227,6 +238,11 @@ public class FluxMinimization implements TargetFunction {
 	 */
 	public void setGibbs(double[] gibbs) {
 		this.gibbs = gibbs;
+	}
+
+	@Override
+	public boolean isMinProblem() {
+		return true;
 	}
 
 
