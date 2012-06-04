@@ -157,9 +157,27 @@ public class DynamicController implements ChangeListener, ActionListener,
                     File destinationFile = GUITools.saveFileDialog(view,
                             System.getProperty("user.home"), true, false,
                             JFileChooser.FILES_ONLY);
-                    core.generateVideo(width * resolutionMultiplier, height
-                            * resolutionMultiplier, framerate, captureStepSize,
-                            destinationFile.getAbsolutePath());
+                    
+                    //catch errors
+                    try {
+                        core.generateVideo(width * resolutionMultiplier, height
+                                * resolutionMultiplier, framerate, captureStepSize,
+                                destinationFile.getAbsolutePath());
+                    } catch (UnsupportedOperationException uoe) {
+                        GUITools.showErrorMessage(
+                                view,
+                                bundle.getString("VIDEO_CODEC_NOT_FOUND")
+                                        + "\n >> "
+                                        + destinationFile.getName());
+                        controlPanel.setStopStatus();
+                    } catch (IllegalArgumentException iae) {
+                        GUITools.showErrorMessage(
+                                view,
+                                bundle.getString("VIDEO_CODEC_NOT_FOUND")
+                                        + "\n >> "
+                                        + destinationFile.getName());
+                        controlPanel.setStopStatus();
+                    }
                 }
             } else if (e.getSource() instanceof JCheckBox) {
                 // labels switched on/off
