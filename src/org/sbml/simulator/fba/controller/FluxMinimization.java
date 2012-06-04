@@ -19,6 +19,7 @@ package org.sbml.simulator.fba.controller;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLDocument;
+import org.sbml.jsbml.SBO;
 import org.sbml.simulator.stability.math.ConservationRelations;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
@@ -186,7 +187,7 @@ public class FluxMinimization implements TargetFunction {
 	public double[] computeTargetFunctionForLinearProgramming() {
 		// the target function is: ||J|| + lambda1*sum((c_i - c_eq)^2) + lambda3*||E||
 
-		double[] target = new double[(fluxVector.length-1) + 
+		double[] target = new double[(fluxVector.length - 1) + 
 		                             (concentrations.length-1) + 
 		                             (errorArray.length -1)];
 		int counter = 0;

@@ -94,7 +94,7 @@ public class CSVReadingTask extends SwingWorker<SortedMap<String, MultiTable>, V
 	@Override
 	protected void done() {
 		if (openDir != null) {
-			SBPreferences prefs = SBPreferences.getPreferencesFor(simulator.getClass());
+			SBPreferences prefs = SBPreferences.getPreferencesFor(SimulatorUI.class);
 			prefs.put(CSVOptions.CSV_FILES_OPEN_DIR, openDir);
 			try {
 				prefs.flush();

@@ -18,6 +18,7 @@
 package org.sbml.simulator.gui.graph;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -46,7 +47,7 @@ public class DynamicCore {
 	 * @author Fabian Schwarzkopf
 	 * @version $Rev$
 	 */
-	private class PlayWorker extends SwingWorker<Void, Void>{
+	private class PlayWorker extends SwingWorker<Void, Double>{
 	    
 	    /**
 	     * Enable/Disable video encoding.
@@ -66,7 +67,7 @@ public class DynamicCore {
 	    /**
 	     * Construct {@link PlayWorker} without video encoding.
 	     */
-	    public PlayWorker(){
+	    public PlayWorker() {
 	    }
 	    
 	    /**
@@ -94,6 +95,7 @@ public class DynamicCore {
 		    int frame = 0, image = 0;
 			for(int i = getIndexOfTimepoint(currTimepoint)+1; i < timePoints.length; i++){
 				operationsDone = false;
+//				publish(timePoints[i]);
 				setCurrTimepoint(timePoints[i]);
 				Thread.sleep(playspeed);
 				
@@ -115,6 +117,16 @@ public class DynamicCore {
 			}
 			return null;
 		}
+
+		/* (non-Javadoc)
+		 * @see javax.swing.SwingWorker#process(java.util.List)
+		 */
+//		@Override
+//		protected void process(List<Double> chunks) {
+//			for (Double timePoint : chunks) {
+//				setCurrTimepoint(timePoint);
+//			}
+//		}
 
 		/* (non-Javadoc)
 		 * @see javax.swing.SwingWorker#done()
@@ -280,9 +292,9 @@ public class DynamicCore {
      * Notifies all observers about the change and delivers changed species &
      * reactions to all registered {@link DynamicView}s.
      */
-	public void fireTimepointChanged(double changedTo){
+	public void fireTimepointChanged(double changedTo) {
 		double[] currTimePoints = {currTimepoint};
-        observer.updateGraph(currTimepoint, data.filter(currTimePoints));
+		observer.updateGraph(currTimepoint, data.filter(currTimePoints));
 	}
 	
 	
@@ -422,7 +434,7 @@ public class DynamicCore {
 	 * @param time
 	 */
 	public void setCurrTimepoint(double time){
-		if(currTimepoint != time && time >= minTime && time <= maxTime){
+		if (currTimepoint != time && time >= minTime && time <= maxTime){
 			this.currTimepoint = time;
 			fireTimepointChanged(time);
 		}
