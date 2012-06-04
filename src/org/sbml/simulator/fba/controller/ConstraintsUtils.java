@@ -43,7 +43,7 @@ public class ConstraintsUtils {
 	 * @throws InterruptedException
 	 * @throws ExecutionException
 	 */
-	public static double[] readConcentrationsFromFile (SimulatorUI ui, File[] files) throws InterruptedException, ExecutionException {
+	public static double[] readConcentrationsFromFile (SimulatorUI ui, File files) throws InterruptedException, ExecutionException {
 		return readFromFile(ui, files, false);
 	}
 
@@ -56,7 +56,7 @@ public class ConstraintsUtils {
 	 * @throws ExecutionException 
 	 * @throws InterruptedException 
 	 */
-	public static double[] readGibbsFromFile(SimulatorUI ui, File[] files) throws InterruptedException, ExecutionException {
+	public static double[] readGibbsFromFile(SimulatorUI ui, File files) throws InterruptedException, ExecutionException {
 
 		return readFromFile(ui, files, true);
 
@@ -70,7 +70,7 @@ public class ConstraintsUtils {
 		//		// and the reaction document.getModel().getReaction(3) has the gibbs-energy gibbsEnergies[3].
 		//		while ((line = read.readLine()) != null) {
 		//			k = line.split("\t");
-		//			for (int i = 0; i < document.getModel().getReactionCount(); i++){
+		//			for (int i = 0; i < document.getModel().getReactionCount(); i++) {
 		//				if (k[0].equals(document.getModel().getReaction(i).getId())) {
 		//					gibbsEnergies[i] = Double.valueOf(k[1]);
 		//				}
@@ -88,15 +88,15 @@ public class ConstraintsUtils {
 	 * @throws InterruptedException
 	 * @throws ExecutionException
 	 */
-	private static double[] readFromFile(SimulatorUI ui, File[] files, Boolean gibbs) throws InterruptedException, ExecutionException {
+	private static double[] readFromFile(SimulatorUI ui, File files, boolean gibbs) throws InterruptedException, ExecutionException {
 		SerialWorker worker = new SerialWorker();
 		double[] erg = null;
-		if ((files != null) && (files.length > 0)){
+		if (files != null) {
 			CSVReadingTask task = new CSVReadingTask(ui, files);
 			task.addPropertyChangeListener(EventHandler.create(PropertyChangeListener.class, ui, "addExperimentalData", "newValue"));
 			worker.add(task);
 
-			if(task.isDone()){
+			if (task.isDone()) {
 				if (gibbs) {
 				String[] values = task.get().values().toArray(new String[ui.getModel().getReactionCount()]);
 				String[] keys = task.get().keySet().toArray(new String[ui.getModel().getReactionCount()]);

@@ -268,7 +268,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      * (i.e. turning on/off labels).
      */
     public void updateGraph() {
-        if (visualizedCore != null && currData != null) {
+        if ((visualizedCore != null) && (currData != null)) {
             updateGraph(currTime, currData);
         }
     }
