@@ -25,6 +25,9 @@ import eva2.tools.math.Jama.Matrix;
 
 
 /**
+ * Computes and contains all components you need for a flux minimization target function for FBA (flux balance analysis),
+ * like the error, the flux vector, the concentrations (in steady-state and at the beginning) and the gibbs energies
+ * for the reactions in the model. 
  * @author Meike Aichele
  * @version $Rev$
  * @date 07.05.2012
@@ -34,7 +37,7 @@ public class FluxMinimization implements TargetFunction {
 
 	/**
 	 * To compute a flux minimization, we need an error-value-array 
-	 * that contains the computed errors. 
+	 * that contains the computed errors, which will be minimized in FBA. 
 	 */
 	private double[] errorArray;
 
@@ -49,10 +52,20 @@ public class FluxMinimization implements TargetFunction {
 	 */
 	private double[] concentrations;
 
+	/**
+	 * Contains the concentrations in the model in steady-state.
+	 */
 	private double[] c_eq;
 
+	/**
+	 * Contains the gibbs energies in the model.
+	 */
 	private double[] gibbs;
 
+	/**
+	 * Vector that is made up of the transposed null space matrix K and
+	 * the corresponding gibbs energies.
+	 */
 	private double[] L;
 
 	/**
@@ -62,7 +75,7 @@ public class FluxMinimization implements TargetFunction {
 	 * @param N
 	 */
 	public FluxMinimization(SBMLDocument doc, StoichiometricMatrix N, double[] c_eq, double[] gibbs) {
-		this.errorArray = FluxMinimizationUtils.computeError();
+		this.errorArray = FluxMinimizationUtils.computeError(gibbs.length);
 		this.fluxVector = FluxMinimizationUtils.computeFluxVector(N);
 
 		if(gibbs != null && N != null) {
