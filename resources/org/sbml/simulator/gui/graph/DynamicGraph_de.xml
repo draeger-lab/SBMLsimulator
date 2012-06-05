@@ -30,7 +30,7 @@
   <entry key="SIMULATIONSPEED_SPINNER_TOOLTIP">Zeigt die aktuelle Simulationsgeschwindigkeit als Wert an. Kann in den Optionen unter Netzwerk geändert werden.</entry>
   <entry key="NODESIZE">Knotengröße</entry>
   <entry key="NODECOLOR">Knotenfarbe</entry>
-  <entry key="VISUALIZATION">Visualisierung</entry>
+  <entry key="GROUP_VISUALIZATION">Visualisierung</entry>
   <entry key="VISUALIZATION_TOOLTIP">Wählen Sie die Art der dynamischen Visualisierung und die zu visualisierenden Daten aus.</entry>
   <entry key="SIMULATION_DATA">Simulierte Daten</entry> 
   <entry key="EXPERIMENTAL_DATA">Experimentelle Daten</entry>   

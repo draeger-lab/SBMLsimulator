@@ -65,6 +65,11 @@ public class DynamicCore {
 	    private int framerate, captureStepSize;
 	    
 	    /**
+	     * Some control elements for video encoding.
+	     */
+	    private int frame, image;
+	    
+	    /**
 	     * Construct {@link PlayWorker} without video encoding.
 	     */
 	    public PlayWorker() {
@@ -81,8 +86,10 @@ public class DynamicCore {
         public PlayWorker(boolean generateVideo, int width, int height,
                 int framerate, int captureEveryXStep, String destinationFile) {
             this.generateVideo = generateVideo;
-            this.captureStepSize = captureEveryXStep;
+            captureStepSize = captureEveryXStep;
             this.framerate = framerate;
+            frame = 0;
+            image = 0;
             encoder = ToolFactory.makeWriter(destinationFile);
             encoder.addVideoStream(0, 0, width, height);
         }
@@ -92,28 +99,9 @@ public class DynamicCore {
 		 */
 		@Override
 		protected Void doInBackground() throws Exception {
-		    int frame = 0, image = 0;
 			for(int i = getIndexOfTimepoint(currTimepoint)+1; i < timePoints.length; i++){
-				operationsDone = false;
-//				publish(timePoints[i]);
-				setCurrTimepoint(timePoints[i]);
+				publish(timePoints[i]);
 				Thread.sleep(playspeed);
-				
-				/*
-				 * Wait till graph drawing is finished in case of large data
-				 */
-				while(!operationsDone){
-					Thread.sleep(AWAITING);
-				}
-				
-				if(generateVideo){
-				    frame += framerate;
-				    if (i % captureStepSize == 0) { //take picture now
-				        logger.fine("Processing image " + image);
-                        encoder.encodeVideo(0, observer.takeGraphshot(), frame, TimeUnit.MILLISECONDS);
-    				    image++;
-				    }
-				}
 			}
 			return null;
 		}
@@ -121,12 +109,45 @@ public class DynamicCore {
 		/* (non-Javadoc)
 		 * @see javax.swing.SwingWorker#process(java.util.List)
 		 */
-//		@Override
-//		protected void process(List<Double> chunks) {
-//			for (Double timePoint : chunks) {
-//				setCurrTimepoint(timePoint);
-//			}
-//		}
+		@Override
+		protected void process(List<Double> chunks) {
+            /*
+             * Ensures that there are not set any more timepoints after calling
+             * stopPlay() such that the timepoint remains on the first given
+             * timepoint like stopPlay() is intented.
+             */
+            if (!isCancelled()) { 
+                for (Double timePoint : chunks) {
+                    operationsDone = false;
+                    setCurrTimepoint(timePoint);
+                    
+                    /*
+                     * Wait till graph drawing is finished in case of large data.
+                     * (Observer has to invoke operationsDone() after finished graph drawing).
+                     */
+                    while (!operationsDone) {
+                        try {
+                            logger.fine("Waiting for graph drawing to be completed.");
+                            Thread.sleep(AWAITING);
+                        } catch (InterruptedException e) {
+                            logger.fine("Could not wait for graph drawing to be completed.");
+                            e.printStackTrace();
+                        }
+                    }
+                    
+                    if (generateVideo) {
+                        frame += framerate; //control timestamp for video encoding
+                        if (getIndexOfTimepoint(timePoint) % captureStepSize == 0) {
+                            // take picture now
+                            logger.fine("Processing image " + image);
+                            encoder.encodeVideo(0, observer.takeGraphshot(),
+                                    frame, TimeUnit.MILLISECONDS);
+                            image++;
+                        }
+                    }
+                }
+		    }
+		}
 
 		/* (non-Javadoc)
 		 * @see javax.swing.SwingWorker#done()
@@ -138,6 +159,10 @@ public class DynamicCore {
 			    encoder.close();
 			    logger.fine("Videoencoding successful");
 			}
+			
+			/*
+			 * Notify observer.
+			 */
             observer.donePlay();
 			
 			/*
@@ -289,10 +314,10 @@ public class DynamicCore {
     }
 	
 	/**
-     * Notifies all observers about the change and delivers changed species &
+     * Notifies observer about the change and delivers changed species &
      * reactions to all registered {@link DynamicView}s.
      */
-	public void fireTimepointChanged(double changedTo) {
+	public void fireTimepointChanged() {
 		double[] currTimePoints = {currTimepoint};
 		observer.updateGraph(currTimepoint, data.filter(currTimePoints));
 	}
@@ -312,8 +337,8 @@ public class DynamicCore {
             int captureEveryXstep, String destinationFile) {
 	    //start off by zero time
 	    currTimepoint = data.getTimePoint(0);
-        fireTimepointChanged(data.getTimePoint(0));
-        playspeed = 5; //as fast as possible
+        fireTimepointChanged();
+        playspeed = 1; //as fast as possible
         
         if(playWorker == null){
             //generate video
@@ -436,7 +461,7 @@ public class DynamicCore {
 	public void setCurrTimepoint(double time){
 		if (currTimepoint != time && time >= minTime && time <= maxTime){
 			this.currTimepoint = time;
-			fireTimepointChanged(time);
+			fireTimepointChanged();
 		}
 	}
 	
@@ -449,7 +474,7 @@ public class DynamicCore {
         if (currTimepoint != incomingTimepoint && incomingTimepoint >= minTime
                 && incomingTimepoint <= maxTime){
             this.currTimepoint = incomingTimepoint;
-            fireTimepointChanged(incomingTimepoint);
+            fireTimepointChanged();
         }
 	}
 	
@@ -474,15 +499,16 @@ public class DynamicCore {
 	    playspeed = speed;
 	}
 	
-	/**
-	 * Stops the play worker.
-	 */
+    /**
+     * Stops the play worker if working, and/or sets timepoint to first
+     * timepoint in data
+     */
 	public void stopPlay(){
 		if(playWorker != null){
 			playWorker.cancel(true);
 			playWorker = null;
 		}
 		currTimepoint = data.getTimePoint(0);
-		fireTimepointChanged(data.getTimePoint(0));
+		fireTimepointChanged();
 	}
 }

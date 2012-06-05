@@ -149,7 +149,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      * Pointer to experimental data {@link DynamicCore}. Once computed, store that
      * core for immediate change of data set.
      */
-    private DynamicCore experimentalCore;
+    private ArrayList<DynamicCore> experimentalCores;
 
     /**
      * Used {@link SBMLDocument}.
@@ -199,8 +199,13 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                 graphPanel);
         graphWithLegend.setDividerLocation(330);
         controlPanel = new DynamicControlPanel(this, controller);
+        
+        /*
+         * initial capacity will get bigger, if there are more datasets added
+         * than 5.
+         */
         simulationCores = new ArrayList<DynamicCore>(5);
-        //TODO maybe experimentalCores as lists.
+        experimentalCores = new ArrayList<DynamicCore>(5);
         
         add(graphWithLegend);
         add(controlPanel);
@@ -222,9 +227,12 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     
     /**
      * Changes visualization to given data set name.
+     * 
      * @param dataName
+     *            last character has to be an integer, representing the dataset
+     *            number
      * @return true, if data could be visualized<br>
-     *          false, if data could not be visualized.
+     *         false, if data could not be visualized.
      */
     public boolean visualizeData(String dataName){
         int index = Integer.valueOf(String.valueOf(dataName.charAt(dataName.length()-1))) - 1;
@@ -234,9 +242,9 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                 return true;
             }
             return false;
-        } else if (dataName.equals(bundle.getString("EXPERIMENTAL_DATA"))){
-            if (experimentalCore != null){
-                activateView(experimentalCore);
+        } else if (dataName.contains(bundle.getString("EXPERIMENTAL_DATA"))){
+            if (!experimentalCores.isEmpty()){
+                activateView(experimentalCores.get(index));
                 return true;
             }
             return false;
@@ -367,12 +375,27 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     private void activateView(DynamicCore core){
         //only activate if it is not activated yet
         if (visualizedCore != core) {
+            /*
+             * Clear graph view if there have been manipulations before.
+             */
+            if (graphManipulator != null) {
+                for (int i = 0; i < document.getModel().getSpeciesCount(); i++) {
+                    graphManipulator.revertChanges(document.getModel()
+                            .getSpecies(i).getId());
+                }
+
+                for (int i = 0; i < document.getModel().getReactionCount(); i++) {
+                    graphManipulator.revertChanges(document.getModel()
+                            .getReaction(i).getId());
+                }
+            }
+            
             //init view
             currData = null;
             currTime = 0;
 
             /*
-             * Default selections. selections are saved implicit in hashmaps due
+             * Default selections. Selections are saved implicit in hashmaps due
              * to TableModelListener
              */
             legend.getLegendTableModel().setSelected(Species.class, true);
@@ -386,8 +409,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
             // get user chosen graphmanipulator
             graphManipulator = controller.getSelectedGraphManipulator();
             //show core's current timepoint
-            visualizedCore.fireTimepointChanged(visualizedCore
-                    .getCurrTimepoint());
+            visualizedCore.fireTimepointChanged();
         }
     }
 
@@ -494,21 +516,18 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                                 + " "
                                 + simulationCores.size();
                         controlPanel.addToDataList(dataName);
-                        // SBPreferences.getPreferencesFor(GraphOptions.class)
-                        // .put(GraphOptions.VISUALIZATION_DATA, dataName);
-                        //TODO add to options?!
                         controlPanel.setSelectedVisualizationData(dataName);
                     }
                 };
                 computationOfLimits.execute();
             }
-        } else if (e.getPropertyName().equals("measurement")){
+        } else if (e.getPropertyName().equals("measurements")){
             //experimental data added
             MultiTable expData = (MultiTable) e.getNewValue();
-            //TODO check working
             if (expData != null){
                 final MultiTable data;
                 final DynamicView thisView = this;
+                //TODO options for inbetween timepoints
                 if (expData.getTimePoints().length < 100) {
                     data = SplineCalculation.calculateSplineValues(expData, 100);
                 } else {
@@ -524,7 +543,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                      */
                     @Override
                     protected Void doInBackground() throws Exception {
-                        experimentalCore = new DynamicCore(thisView, data, document);
+                        experimentalCores.add(new DynamicCore(thisView, data, document));
                         return null;
                     }
                     
@@ -535,7 +554,10 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                     @Override
                     protected void done() {
                         super.done();
-                        String dataName = bundle.getString("EXPERIMENTAL_DATA");
+                        String dataName = bundle
+                                .getString("EXPERIMENTAL_DATA")
+                                + " "
+                                + experimentalCores.size();
                         controlPanel.addToDataList(dataName);
                         controlPanel.setSelectedVisualizationData(dataName);
                     }

@@ -209,7 +209,7 @@ public class DynamicControlPanel extends JPanel {
 	/**
 	 * Refers to {@link JComboBox} name of available data.
 	 */
-	public final String DATA_LIST = GraphOptions.VISUALIZATION_DATA.toString();
+	public final String DATA_LIST = bundle.getString("VISUALIZATION_DATA");
 	
 	/*
 	 * GUI elements
@@ -391,7 +391,7 @@ public class DynamicControlPanel extends JPanel {
 		LayoutHelper lh = new LayoutHelper(manipulatorsPane);
 		lh.add(manipulatorsCombo, true);
 		lh.add(dataCombo);
-		manipulatorsPane.setBorder(BorderFactory.createTitledBorder(bundle.getString("VISUALIZATION")));
+		manipulatorsPane.setBorder(BorderFactory.createTitledBorder(bundle.getString("GROUP_VISUALIZATION")));
 		manipulatorsPane.setMinimumSize(new Dimension(80, 20));
 		
 		addComponent(gbl, searchBar,        0, 0, 7, 1, GridBagConstraints.CENTER, 	GridBagConstraints.HORIZONTAL, 	1, 0, new Insets(0,0,0,0));
