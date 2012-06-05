@@ -137,46 +137,51 @@ public class DynamicController implements ChangeListener, ActionListener,
                     core.stopPlay();
                     controlPanel.setStopStatus();
                 } else if (e.getActionCommand().equals("TOVIDEO")) {
-                    controlPanel.setVideoStatus();
-                    Graph2DView viewPort = (Graph2DView) view.getGraph().getSimpleGraph().getCurrentView();
-                    /*
-                     * resolutions have to be even and can't be user chosen,
-                     * otherwise video image will get stretched.
-                     */
-                    int width = (viewPort.getWidth() % 2) == 1 ? viewPort.getWidth()-1 : viewPort.getWidth();
-                    int height = (viewPort.getHeight() % 2) == 1 ? viewPort.getHeight()-1 : viewPort.getHeight();
-                    int resolutionMultiplier = (int) SBPreferences
-                            .getPreferencesFor(GraphOptions.class).getDouble(
-                                    GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
-                    int framerate = (int) SBPreferences.getPreferencesFor(
-                            GraphOptions.class).getDouble(
-                            GraphOptions.VIDEO_FRAMERATE);
-                    int captureStepSize = (int) SBPreferences.getPreferencesFor(
-                            GraphOptions.class).getDouble(
-                            GraphOptions.VIDEO_IMAGE_STEPSIZE);
                     File destinationFile = GUITools.saveFileDialog(view,
                             System.getProperty("user.home"), true, false,
                             JFileChooser.FILES_ONLY);
                     
-                    //catch errors
-                    try {
-                        core.generateVideo(width * resolutionMultiplier, height
-                                * resolutionMultiplier, framerate, captureStepSize,
-                                destinationFile.getAbsolutePath());
-                    } catch (UnsupportedOperationException uoe) {
-                        GUITools.showErrorMessage(
-                                view,
-                                bundle.getString("VIDEO_CODEC_NOT_FOUND")
-                                        + "\n >> "
-                                        + destinationFile.getName());
-                        controlPanel.setStopStatus();
-                    } catch (IllegalArgumentException iae) {
-                        GUITools.showErrorMessage(
-                                view,
-                                bundle.getString("VIDEO_CODEC_NOT_FOUND")
-                                        + "\n >> "
-                                        + destinationFile.getName());
-                        controlPanel.setStopStatus();
+                    if (destinationFile != null){
+                        controlPanel.setVideoStatus();
+                        
+                        Graph2DView viewPort = (Graph2DView) view.getGraph().getSimpleGraph().getCurrentView();
+                        /*
+                         * resolutions have to be even and can't be user chosen,
+                         * otherwise video image will get stretched. Therefore just a resolution multiplier to get higher resolutions.
+                         */
+                        int width = (viewPort.getWidth() % 2) == 1 ? viewPort.getWidth()-1 : viewPort.getWidth();
+                        int height = (viewPort.getHeight() % 2) == 1 ? viewPort.getHeight()-1 : viewPort.getHeight();
+                        logger.fine("Viewport Resolution = " + width + "x" + height);
+                        int resolutionMultiplier = (int) SBPreferences
+                                .getPreferencesFor(GraphOptions.class).getDouble(
+                                        GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
+                        int framerate = (int) SBPreferences.getPreferencesFor(
+                                GraphOptions.class).getDouble(
+                                GraphOptions.VIDEO_FRAMERATE);
+                        int captureStepSize = (int) SBPreferences.getPreferencesFor(
+                                GraphOptions.class).getDouble(
+                                GraphOptions.VIDEO_IMAGE_STEPSIZE);
+                        
+                        //catch errors while videoencoding
+                        try {
+                            core.generateVideo(width * resolutionMultiplier, height
+                                    * resolutionMultiplier, framerate, captureStepSize,
+                                    destinationFile.getAbsolutePath());
+                        } catch (UnsupportedOperationException uoe) {
+                            GUITools.showErrorMessage(
+                                    view,
+                                    bundle.getString("VIDEO_CODEC_NOT_FOUND")
+                                            + "\n >> "
+                                            + destinationFile.getName());
+                            controlPanel.setStopStatus();
+                        } catch (IllegalArgumentException iae) {
+                            GUITools.showErrorMessage(
+                                    view,
+                                    bundle.getString("VIDEO_CODEC_NOT_FOUND")
+                                            + "\n >> "
+                                            + destinationFile.getName());
+                            controlPanel.setStopStatus();
+                        }
                     }
                 }
             } else if (e.getSource() instanceof JCheckBox) {
@@ -296,12 +301,7 @@ public class DynamicController implements ChangeListener, ActionListener,
                         cb.getName(),
                         Manipulators.getManipulator(ie.getItem().toString()).getName());
             }else if (cb.getName().equals(controlPanel.DATA_LIST)){
-                //TODO
                 view.visualizeData(ie.getItem().toString());
-                // update preferences on change
-                SBPreferences.getPreferencesFor(GraphOptions.class).put(
-                        cb.getName(),
-                        ie.getItem().toString());
             }
         } else if (ie.getSource() instanceof JCheckBox) {
             JCheckBox cb = (JCheckBox) ie.getSource();
@@ -427,18 +427,6 @@ public class DynamicController implements ChangeListener, ActionListener,
             controlPanel.setSelectedManipulator(Manipulators
                     .getManipulator(prefs
                             .getString(GraphOptions.VISUALIZATION_STYLE)));
-        }
-        
-        if (evt.getKey().equals("VISUALIZATION_DATA")){
-            //TODO lists of data sets
-            if (!view.visualizeData(prefs
-                    .getString(GraphOptions.VISUALIZATION_DATA))) {
-                //on error back to default
-                prefs.put(GraphOptions.VISUALIZATION_DATA,
-                        GraphOptions.VISUALIZATION_DATA.getDefaultValue());
-                GUITools.showErrorMessage(view,
-                        bundle.getString("DATA_NOT_AVAILABLE"));
-            }
         }
     }
 }
