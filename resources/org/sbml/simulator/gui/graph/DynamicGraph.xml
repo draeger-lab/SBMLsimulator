@@ -19,6 +19,8 @@
   <entry key="STOP_TOOLTIP">Stop the dynamic visualization.</entry>
   <entry key="TOVIDEO">Video</entry>
   <entry key="TOVIDEO_TOOLTIP">Save the dynamic visualization as a video.</entry>
+  <entry key="GRAPHSHOT">Image</entry>
+  <entry key="GRAPHSHOT_TOOLTIP">Take a screenshot of the whole graph.</entry>  
   <entry key="NODELABELS">Nodelabels</entry>
   <entry key="NODELABELS_TOOLTIP">Switch for node labels.</entry>
   <entry key="REACTIONLABELS">Reactionlabels</entry>

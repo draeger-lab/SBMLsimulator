@@ -43,7 +43,6 @@ import org.sbml.simulator.gui.graph.DynamicControlPanel.Items;
 import org.sbml.simulator.gui.graph.DynamicView.Manipulators;
 import org.sbml.simulator.gui.table.LegendTableModel;
 
-import y.view.Graph2DView;
 import de.zbit.gui.GUITools;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.KeyProvider;
@@ -143,18 +142,27 @@ public class DynamicController implements ChangeListener, ActionListener,
                     
                     if (destinationFile != null){
                         controlPanel.setVideoStatus();
+                        //ensure dividers don't get moved
+                        view.setEnabled(false);
                         
-                        Graph2DView viewPort = (Graph2DView) view.getGraph().getSimpleGraph().getCurrentView();
                         /*
-                         * resolutions have to be even and can't be user chosen,
-                         * otherwise video image will get stretched. Therefore just a resolution multiplier to get higher resolutions.
+                         * Resolution has to be even and can't be user chosen,
+                         * otherwise video image will get stretched. Therefore
+                         * just a resolution multiplier to get higher
+                         * resolutions. Using Graphsize as base for video
+                         * resolution ensures that the black margin in video
+                         * is minimum.
                          */
-                        int width = (viewPort.getWidth() % 2) == 1 ? viewPort.getWidth()-1 : viewPort.getWidth();
-                        int height = (viewPort.getHeight() % 2) == 1 ? viewPort.getHeight()-1 : viewPort.getHeight();
-                        logger.fine("Viewport Resolution = " + width + "x" + height);
                         int resolutionMultiplier = (int) SBPreferences
                                 .getPreferencesFor(GraphOptions.class).getDouble(
                                         GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
+                        int[] size = view.getScreenshotResolution();
+                        int width = size[0] * resolutionMultiplier;
+                        int height = size[1] * resolutionMultiplier;
+                        
+                        width = (width % 2) == 1 ? width-1 : width;
+                        height = (height % 2) == 1 ? height-1 : height;
+                        logger.fine("Video out resolution = " + width + "x" + height);
                         int framerate = (int) SBPreferences.getPreferencesFor(
                                 GraphOptions.class).getDouble(
                                 GraphOptions.VIDEO_FRAMERATE);
@@ -164,8 +172,8 @@ public class DynamicController implements ChangeListener, ActionListener,
                         
                         //catch errors while videoencoding
                         try {
-                            core.generateVideo(width * resolutionMultiplier, height
-                                    * resolutionMultiplier, framerate, captureStepSize,
+                            core.generateVideo(width, height, framerate,
+                                    captureStepSize,
                                     destinationFile.getAbsolutePath());
                         } catch (UnsupportedOperationException uoe) {
                             GUITools.showErrorMessage(

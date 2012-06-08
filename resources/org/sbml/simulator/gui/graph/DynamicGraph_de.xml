@@ -19,6 +19,8 @@
   <entry key="STOP_TOOLTIP">Stoppt die dynamische Visualisierung.</entry>
   <entry key="TOVIDEO">Video</entry>
   <entry key="TOVIDEO_TOOLTIP">Speichert die dynamische Visualisierung als Video.</entry>
+  <entry key="GRAPHSHOT">Bild</entry>
+  <entry key="GRAPHSHOT_TOOLTIP">Speichert das aktuelle Netzwerk als Bilddatei.</entry>   
   <entry key="NODELABELS">Knotenbeschriftung</entry>
   <entry key="REACTIONLABELS">Reaktionenbeschriftung</entry>
   <entry key="FAST">Schnell</entry>
