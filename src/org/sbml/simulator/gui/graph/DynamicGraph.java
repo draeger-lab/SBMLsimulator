@@ -43,9 +43,12 @@ public interface DynamicGraph {
 	public void donePlay();
 	
 	/**
-	 * Return a {@link BufferedImage} of currently displayed Graph.
-	 * @return
-	 */
-	public BufferedImage takeGraphshot();
+     * Return a {@link BufferedImage} with given resolution of currently
+     * displayed Graph.
+     * @param width
+     * @param height
+     * @return
+     */
+	public BufferedImage takeGraphshot(int width, int height);
 	
 }

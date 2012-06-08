@@ -67,7 +67,7 @@ public class DynamicCore {
 	    /**
 	     * Some control elements for video encoding.
 	     */
-	    private int frame, image;
+	    private int width, height, frame, image;
 	    
 	    /**
 	     * Construct {@link PlayWorker} without video encoding.
@@ -88,9 +88,12 @@ public class DynamicCore {
             this.generateVideo = generateVideo;
             captureStepSize = captureEveryXStep;
             this.framerate = framerate;
+            this.width = width;
+            this.height = height;
             frame = 0;
             image = 0;
             encoder = ToolFactory.makeWriter(destinationFile);
+            logger.fine("Added " + width +"x" + height + " videostream");
             encoder.addVideoStream(0, 0, width, height);
         }
 	    
@@ -136,11 +139,11 @@ public class DynamicCore {
                     }
                     
                     if (generateVideo) {
-                        frame += framerate; //control timestamp for video encoding
+                        frame += framerate; //timestamp for video encoding
                         if (getIndexOfTimepoint(timePoint) % captureStepSize == 0) {
                             // take picture now
                             logger.fine("Processing image " + image);
-                            encoder.encodeVideo(0, observer.takeGraphshot(),
+                            encoder.encodeVideo(0, observer.takeGraphshot(width, height),
                                     frame, TimeUnit.MILLISECONDS);
                             image++;
                         }

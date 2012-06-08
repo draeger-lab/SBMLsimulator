@@ -61,7 +61,7 @@ public class DynamicControlPanel extends JPanel {
 	 * @version $Rev$
 	 */
 	public enum Buttons implements ActionCommand{
-		PLAY, PAUSE, STOP, TOVIDEO, NODESIZE, NODECOLOR;
+		PLAY, PAUSE, STOP, TOVIDEO, GRAPHSHOT, NODESIZE, NODECOLOR;
 
 		/* (non-Javadoc)
 		 * @see de.zbit.gui.actioncommand.ActionCommand#getName()
@@ -220,6 +220,7 @@ public class DynamicControlPanel extends JPanel {
 	private JButton pause;
 	private JButton stop;
 	private JButton video;
+	private JButton graphShot;
 	private JLabel simVelolbl;
 	private JComboBox simVeloCombo;
 	private JComboBox manipulatorsCombo;
@@ -338,6 +339,7 @@ public class DynamicControlPanel extends JPanel {
 		setLayout(gbl);
 		SBPreferences prefs = SBPreferences.getPreferencesFor(GraphOptions.class);
 		
+		//init icons
 		ImageIcon playIcon = new ImageIcon(SimulatorUI.class.getResource("graph/GPL_PLAY_16.png"));
 		UIManager.put("GPL_PLAY_16", playIcon);
 		ImageIcon pauseIcon = new ImageIcon(SimulatorUI.class.getResource("graph/GPL_PAUSE_16.png"));
@@ -345,8 +347,11 @@ public class DynamicControlPanel extends JPanel {
 		ImageIcon stopIcon = new ImageIcon(SimulatorUI.class.getResource("graph/GPL_STOP_16.png"));
 		UIManager.put("GPL_STOP_16", stopIcon);
 		ImageIcon toVideoIcon = new ImageIcon(SimulatorUI.class.getResource("graph/GPL_VIDEO_16.png"));
-		UIManager.put("GPL_VIDEO_16", stopIcon);
+		UIManager.put("GPL_VIDEO_16", toVideoIcon);
+		ImageIcon toImageIcon = new ImageIcon(SimulatorUI.class.getResource("graph/GPL_IMAGE_16.png"));
+        UIManager.put("GPL_IMAGE_16", toImageIcon);
 		
+        //init searchbar
 		searchBar = new JSlider();
 		searchBar.setMajorTickSpacing(1);
 		searchBar.setPaintTicks(true);
@@ -354,17 +359,21 @@ public class DynamicControlPanel extends JPanel {
 		searchBar.setToolTipText(bundle.getString("SEARCHBAR_TOOLTIP"));
 		searchBar.addChangeListener(controller);
 		
+		//init checkboxes
 		nodeLabelsCB = GUITools.createJCheckBox(GraphOptions.SHOW_NODE_LABELS, prefs, controller);
 		nodeLabelsCB.addActionListener(controller);
 		reactionLabelsCB = GUITools.createJCheckBox(GraphOptions.SHOW_REACTION_LABELS, prefs, controller);
 		reactionLabelsCB.addActionListener(controller);
 		
+		//init buttons
 		timelbl = new JLabel(MessageFormat.format("{0}: {1}", new Object[]{bundle.getString("TIMEPOINT"), "N/A"}));
 		play = GUITools.createButton(playIcon, controller, Buttons.PLAY, Buttons.PLAY.getToolTip());
 		pause = GUITools.createButton(pauseIcon, controller, Buttons.PAUSE, Buttons.PAUSE.getToolTip());
 		stop = GUITools.createButton(stopIcon, controller, Buttons.STOP, Buttons.STOP.getToolTip());
 		video = GUITools.createButton(toVideoIcon, controller, Buttons.TOVIDEO, Buttons.TOVIDEO.getToolTip());
+		graphShot = GUITools.createButton(toImageIcon, controller, Buttons.GRAPHSHOT, Buttons.GRAPHSHOT.getToolTip());
 		
+		//init speedcontrol
 		simVelolbl = new JLabel(GraphOptions.SIM_SPEED_CHOOSER.getDisplayName());
 		simVeloCombo = new JComboBox();
 		simVeloCombo.setName(GraphOptions.SIM_SPEED_CHOOSER.toString());
@@ -377,6 +386,7 @@ public class DynamicControlPanel extends JPanel {
 		simVeloSpin.setToolTipText(bundle.getString("SIMULATIONSPEED_SPINNER_TOOLTIP"));
 	    setSimVeloCombo(Items.getItem(prefs.getString(GraphOptions.SIM_SPEED_CHOOSER)));
 		
+	    //init visualizer control
 		manipulatorsCombo = new JComboBox(Manipulators.getAllManipulators());
 		manipulatorsCombo.setName(MANIPULATORS_LIST);
 		manipulatorsCombo.setToolTipText(bundle.getString("VISUALIZATION_STYLE_TOOLTIP"));
@@ -394,22 +404,26 @@ public class DynamicControlPanel extends JPanel {
 		manipulatorsPane.setBorder(BorderFactory.createTitledBorder(bundle.getString("GROUP_VISUALIZATION")));
 		manipulatorsPane.setMinimumSize(new Dimension(80, 20));
 		
+		//layout components
 		addComponent(gbl, searchBar,        0, 0, 7, 1, GridBagConstraints.CENTER, 	GridBagConstraints.HORIZONTAL, 	1, 0, new Insets(0,0,0,0));
 		addComponent(gbl, play,             0, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, pause,            1, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, stop,             2, 1, 1, 1, GridBagConstraints.WEST,  	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
-		addComponent(gbl, video,            3, 1, 1, 1, GridBagConstraints.WEST,	  GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
-		addComponent(gbl, timelbl, 		      5, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.HORIZONTAL,1, 0, new Insets(2,2,2,2));
-		addComponent(gbl, simVelolbl,	      0, 2, 3, 1, GridBagConstraints.WEST,	  GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
-		addComponent(gbl, simVeloCombo,	    3, 2, 1, 1, GridBagConstraints.CENTER,  GridBagConstraints.NONE,	0, 0, new Insets(2,2,2,2));
-		addComponent(gbl, simVeloSpin,	    4, 2, 1, 1, GridBagConstraints.EAST, 	  GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, video,            3, 1, 1, 1, GridBagConstraints.EAST,	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, graphShot,        4, 1, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, timelbl, 	        5, 1, 1, 1, GridBagConstraints.CENTER, 	GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, simVelolbl,       0, 2, 3, 1, GridBagConstraints.WEST,	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, simVeloCombo,	    3, 2, 1, 1, GridBagConstraints.CENTER,  GridBagConstraints.NONE,	    0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, simVeloSpin,	    4, 2, 1, 1, GridBagConstraints.WEST, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
+		addComponent(gbl, new JLabel(),     5, 2, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.HORIZONTAL,  1, 0, new Insets(2,2,2,2));
 		addComponent(gbl, reactionLabelsCB, 6, 2, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, nodeLabelsCB,     6, 1, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, manipulatorsPane, 7, 0, 3, 3, GridBagConstraints.CENTER,  GridBagConstraints.BOTH,        0, 0, new Insets(2,2,2,2));
 
-        Component[] elements = { play, pause, stop, video, searchBar,
-                simVeloCombo, simVeloSpin, nodeLabelsCB, reactionLabelsCB,
-                manipulatorsCombo, dataCombo };
+		//disable components as long as there is no data core
+        Component[] elements = { play, pause, stop, video, graphShot,
+                searchBar, simVeloCombo, simVeloSpin, nodeLabelsCB,
+                reactionLabelsCB, manipulatorsCombo, dataCombo };
 		GUITools.setEnabledForAll(false, elements);
 		panelActivationStatus = false;
 		logger.fine("DynamicControlPanel initialized.");
@@ -443,8 +457,9 @@ public class DynamicControlPanel extends JPanel {
 		 */
 		controller.setCore(core);
 		setSearchbarValue(core.getCurrTimepoint());
-        Component[] elements = { play, pause, stop, video, searchBar, simVeloCombo,
-                nodeLabelsCB, reactionLabelsCB, manipulatorsCombo, dataCombo };
+        Component[] elements = { play, pause, stop, video, graphShot,
+                searchBar, simVeloCombo, nodeLabelsCB, reactionLabelsCB,
+                manipulatorsCombo, dataCombo };
 		GUITools.setEnabledForAll(true, elements);
 		panelActivationStatus = true;
 	}

@@ -17,13 +17,13 @@
  */
 package org.sbml.simulator.gui.graph;
 
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.JSplitPane;
@@ -37,6 +37,9 @@ import org.sbml.simulator.gui.table.LegendTableModel;
 import org.sbml.simulator.math.SplineCalculation;
 import org.simulator.math.odes.MultiTable;
 
+import y.io.JPGIOHandler;
+import y.io.ViewPortConfigurator;
+import y.view.Graph2D;
 import y.view.Graph2DView;
 import de.zbit.graph.gui.TranslatorSBMLgraphPanel;
 import de.zbit.graph.io.SBML2GraphML;
@@ -60,6 +63,11 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      * 
      */
     private static final long serialVersionUID = 4111494340467647183L;
+    
+    /**
+     * A {@link Logger} for this class.
+     */
+    private static final transient Logger logger = Logger.getLogger(DynamicView.class.getName());
 
     /**
      * Localization support.
@@ -580,17 +588,88 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         if (currTime == allTimepoints[allTimepoints.length - 1]) {
             visualizedCore.setCurrTimepoint(0);
         }
+        setEnabled(true); //ensure that view is enabled
     }
+    
+    /**
+     * Returns an array {width, height} of the graph size independent of current
+     * view.
+     * @return {width, height}
+     */
+    public int[] getScreenshotResolution(){
+        Graph2D graph = graphPanel.getConverter().getSimpleGraph();
 
+        //create dedicated view
+        JPGIOHandler ioh = new JPGIOHandler();
+        Graph2DView imageView = ioh.createDefaultGraph2DView(graph);
+        
+        //configure imageView such that whole graph is contained
+        ViewPortConfigurator vpc = new ViewPortConfigurator();
+        vpc.setGraph2D(imageView.getGraph2D());
+        vpc.setClipType(ViewPortConfigurator.CLIP_GRAPH);
+        vpc.setSizeType(ViewPortConfigurator.SIZE_USE_ORIGINAL);
+        vpc.configure(imageView);
+        
+        int width = imageView.getWidth();
+        int height = imageView.getHeight();
+        
+        return new int[]{width, height};
+    }
+    
     /* (non-Javadoc)
      * @see org.sbml.simulator.gui.graph.DynamicGraph#takeGraphshot()
      */
     @Override
-    public BufferedImage takeGraphshot() {
-        Graph2DView viewPort = (Graph2DView) graphPanel.getConverter().getSimpleGraph().getCurrentView();
-        BufferedImage image = new BufferedImage(viewPort.getWidth(), viewPort.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
-        viewPort.paintVisibleContent((Graphics2D)image.getGraphics());
-        // visualizedCore.operationsDone();
+    public BufferedImage takeGraphshot(int width, int height) {
+        /*
+         * Take screenshot in dedicated view to ensure that nothing is cut off
+         * and to change screenshotresolution independent of actual view (this
+         * allows higher screenshot resolutions without users noticing the
+         * necessary scaling).
+         */
+        Graph2D graph = graphPanel.getConverter().getSimpleGraph();
+        
+        //save current view
+        Graph2DView originalViewPort = (Graph2DView) graph.getCurrentView();
+        
+        //create dedicated view for graphshot
+        JPGIOHandler ioh = new JPGIOHandler();
+        Graph2DView imageView = ioh.createDefaultGraph2DView(graph);
+        
+        //use original render settings
+        imageView.setGraph2DRenderer(originalViewPort.getGraph2DRenderer());
+        imageView.setRenderingHints(originalViewPort.getRenderingHints());
+        
+        //set dedicated view
+        graph.setCurrentView(imageView);
+        
+        //settings for dedicated view
+        ViewPortConfigurator vpc = new ViewPortConfigurator();
+        vpc.setGraph2D(imageView.getGraph2D());
+        //do not cut off anything not in view
+        vpc.setClipType(ViewPortConfigurator.CLIP_GRAPH);
+        //scale image to video size
+        vpc.setSizeType(ViewPortConfigurator.SIZE_USE_CUSTOM_WIDTH);
+        vpc.setCustomWidth(width);
+        //configure dedicated view with settings
+        vpc.configure(imageView);
+        
+        //take screenshot
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+        imageView.paintVisibleContent(image.createGraphics());
+        
+        //TODO screenshot function
+//        File outputfile = new File("saved.png");
+//        try {
+//            ImageIO.write(image, "png", outputfile);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+        
+        //restore original view
+        graph.removeView(graph.getCurrentView());
+        graph.setCurrentView(originalViewPort);
+        
         return image;
     }
 }

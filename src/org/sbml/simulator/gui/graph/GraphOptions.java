@@ -212,7 +212,7 @@ public interface GraphOptions extends KeyProvider{
      */
     public static final Option<Double> VIDEO_RESOLUTION_MULTIPLIER = new Option<Double>(
             "VIDEO_RESOLUTION_MULTIPLIER", Double.class, bundle, new Range<Double>(
-                    Double.class, "{[1, 1E2]}"), Double.valueOf(2d));
+                    Double.class, "{[1, 1E2]}"), Double.valueOf(3d));
     
     /**
      * Settings for video encoding.
