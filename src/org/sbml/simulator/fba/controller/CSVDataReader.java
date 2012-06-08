@@ -1,6 +1,6 @@
 /*
  * $Id:  CSVDataReader.java 16:16:00 Meike Aichele$
- * $URL: CSVDataReader.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -60,7 +60,8 @@ public class CSVDataReader extends SwingWorker<String[][], Void>{
 		return null;
 	}
 	
-	/* (non-Javadoc)
+	/* 
+	 * (non-Javadoc)
 	 * @see javax.swing.SwingWorker#done()
 	 */
 	@Override

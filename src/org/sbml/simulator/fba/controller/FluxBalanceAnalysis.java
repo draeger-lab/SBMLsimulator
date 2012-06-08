@@ -19,8 +19,6 @@ package org.sbml.simulator.fba.controller;
 
 import ilog.concert.IloException;
 import ilog.concert.IloLinearNumExpr;
-import ilog.concert.IloNumExpr;
-import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
 
 import org.sbml.jsbml.SBMLDocument;

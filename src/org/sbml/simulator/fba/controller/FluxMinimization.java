@@ -19,7 +19,7 @@ package org.sbml.simulator.fba.controller;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLDocument;
-import org.sbml.jsbml.SBO;
+import org.sbml.jsbml.Species;
 import org.sbml.simulator.stability.math.ConservationRelations;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
@@ -60,7 +60,7 @@ public class FluxMinimization implements TargetFunction {
 	private double[] c_eq;
 
 	/**
-	 * Contains the gibbs energies in the model.
+	 * Contains the computed gibbs energies in the model.
 	 */
 	private double[] gibbs;
 
@@ -76,14 +76,15 @@ public class FluxMinimization implements TargetFunction {
 	 * 
 	 * @param N
 	 */
-	public FluxMinimization(SBMLDocument doc, StoichiometricMatrix N, double[] c_eq, double[] gibbs) {
+	public FluxMinimization(SBMLDocument doc, StoichiometricMatrix N, double[] c_eq, double[] gibbs_eq) {
 		this.errorArray = FluxMinimizationUtils.computeError(gibbs.length);
 		this.fluxVector = FluxMinimizationUtils.computeFluxVector(N);
 		this.c_eq = c_eq;
-		this.gibbs = gibbs;
+		Constraints c = new Constraints(doc, gibbs_eq, c_eq);
+		this.gibbs = c.getGibbsEnergies();
 		this.concentrations = computeConcentrations(doc);
-		if(gibbs != null && N != null) {
-			this.L = computeL(N);
+		if(gibbs != null && doc != null) {
+			this.L = computeL(doc);
 		} else {
 			this.L = null;
 		}
@@ -97,8 +98,8 @@ public class FluxMinimization implements TargetFunction {
 	 *  
 	 * @param doc
 	 */
-	public FluxMinimization(SBMLDocument doc, double[] c_eq, double[] gibbs) {
-		this(doc,FluxMinimizationUtils.SBMLDocToStoichMatrix(doc), c_eq, gibbs);
+	public FluxMinimization(SBMLDocument doc, double[] c_eq, double[] gibbs_eq) {
+		this(doc,FluxMinimizationUtils.SBMLDocToStoichMatrix(doc), c_eq, gibbs_eq);
 	}
 
 	/**
@@ -107,8 +108,8 @@ public class FluxMinimization implements TargetFunction {
 	 * @param N
 	 * @return L = (K_int^T) * (Delta_r(gibbs))_int
 	 */
-	private double[] computeL(StoichiometricMatrix N) {
-		Matrix K_int = ConservationRelations.calculateConsRelations(N).transpose();
+	private double[] computeL(SBMLDocument doc) {
+		Matrix K_int = ConservationRelations.calculateConsRelations(FluxMinimizationUtils.SBMLDocToStoichMatrix(doc)).transpose();
 		double[] erg = new double[gibbs.length];
 		for (int i = 0; i< gibbs.length; i++) {
 			for (int j = 0; j < K_int.getColumnDimension(); j++) {
@@ -118,6 +119,7 @@ public class FluxMinimization implements TargetFunction {
 		return erg;
 	}
 
+
 	/**
 	 * Fills the concentrations-array with the initial concentrations/amounts of
 	 * the {@link Species} in this {@link Model}.
@@ -126,14 +128,25 @@ public class FluxMinimization implements TargetFunction {
 	 */
 	private double[] computeConcentrations(SBMLDocument document) {
 		Model model = document.getModel();
+		Species currentSpecies;
 		for (int i = 0; i < model.getSpeciesCount(); i++) {
-			if (model.getSpecies(i).isSetInitialConcentration()){
-				concentrations[i] = model.getSpecies(i).getInitialConcentration();
-			} else if (model.getSpecies(i).isSetInitialAmount()){
-				//TODO: Ist initialAmount gesetzt, muessen wir durch das umgebende Kompartiment teilen
-				concentrations[i] = model.getSpecies(i).getInitialAmount() / model.getSpecies(i).getCompartmentInstance().getSize();
+			currentSpecies = model.getSpecies(i);
+			if (currentSpecies.hasOnlySubstanceUnits()) {
+				if (currentSpecies.isSetInitialConcentration()){
+					// multiply with the volume of the compartment
+					concentrations[i] = currentSpecies.getInitialConcentration()* currentSpecies.getCompartmentInstance().getSize();
+				} else if (currentSpecies.isSetInitialAmount()){
+					// do nothing
+					concentrations[i] = currentSpecies.getInitialAmount();
+				}
 			} else {
-				concentrations[i] = 0.0;
+				if (currentSpecies.isSetInitialConcentration()){
+					// do nothing
+					concentrations[i] = currentSpecies.getInitialConcentration();
+				} else if (currentSpecies.isSetInitialAmount()){
+					// divide through the volume of the compartment
+					concentrations[i] = currentSpecies.getInitialAmount() / currentSpecies.getCompartmentInstance().getSize();
+				}
 			}
 		}
 		return concentrations;
