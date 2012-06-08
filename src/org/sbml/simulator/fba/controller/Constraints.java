@@ -18,6 +18,7 @@
 package org.sbml.simulator.fba.controller;
 
 import org.sbml.jsbml.SBMLDocument;
+import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
 /**
  * @author Meike Aichele
@@ -28,7 +29,12 @@ import org.sbml.jsbml.SBMLDocument;
 public class Constraints {
 	
 	/**
-	 * Contains the Gibbs energies 
+	 * Contains the Gibbs energies in steady state
+	 */
+	private double[] equilibriumGibbsEnergies;
+	
+	/**
+	 * Contains the computed Gibbs energies
 	 */
 	private double[] gibbsEnergies;
 	
@@ -42,6 +48,15 @@ public class Constraints {
 	 */
 	private double[] equilibriumConcentrations;
 	
+	/**
+	 * Contains the temperature in Kelvin under standard conditions (25 degree Celsius)
+	 */
+	private double T = 298.15;
+	
+	/**
+	 * The ideal gas constant R in J/(mol * K)
+	 */
+	private double R = 8.3144621;
 	
 	/**
 	 * Constructor, that gets a {@link SBMLDocument} and creates a new
@@ -52,7 +67,7 @@ public class Constraints {
 	 */
 	public Constraints (SBMLDocument doc) {
 		this.document = doc;
-		this.setGibbsEnergies(new double[doc.getModel().getReactionCount()]);
+		this.setEquilibriumGibbsEnergies(new double[doc.getModel().getReactionCount()]);
 		this.setEquilibriumConcentrations(new double[doc.getModel().getSpeciesCount()]);
 	}
 	
@@ -62,25 +77,44 @@ public class Constraints {
 	 * @param doc
 	 * @param gibbs
 	 */
-	public Constraints (SBMLDocument doc, double[] gibbs, double[] c_eq) {
+	public Constraints (SBMLDocument doc, double[] gibbs_eq, double[] c_eq) {
 		this.document = doc;
-		this.setGibbsEnergies(gibbs);
+		this.setEquilibriumGibbsEnergies(gibbs_eq);
 		this.setEquilibriumConcentrations(c_eq);
+		computeGibbsEnergies(gibbs_eq);
 	}
 
+	/**
+	 * Computes the Gibbs energies with the formula delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum( N[j][i] * c_eq[j] )
+	 * @param steadyStateGibbs
+	 */
+	private double[] computeGibbsEnergies(double[] steadyStateGibbs) {
+		if (steadyStateGibbs != null && this.document != null) {
+			StoichiometricMatrix N = FluxMinimizationUtils.SBMLDocToStoichMatrix(document);
+			gibbsEnergies = new double[steadyStateGibbs.length];
+			for (int i=0; i< steadyStateGibbs.length; i++) {
+				double sum = 0;
+				for (int j=0; j< N.getRowDimension(); j++) {
+					sum += N.get(j, i) * equilibriumConcentrations[j];
+				}
+				gibbsEnergies[i] = steadyStateGibbs[i] + R*T*Math.log(sum);
+			}
+		}
+		return gibbsEnergies;
+	}
 	
 	/**
 	 * @param gibbsEnergies the gibbsEnergies to set
 	 */
-	public void setGibbsEnergies(double[] gibbsEnergies) {
-		this.gibbsEnergies = gibbsEnergies;
+	public void setEquilibriumGibbsEnergies(double[] gibbsEnergies) {
+		this.equilibriumGibbsEnergies = gibbsEnergies;
 	}
 
 	/**
 	 * @return the gibbsEnergies
 	 */
-	public double[] getGibbsEnergies() {
-		return gibbsEnergies;
+	public double[] getEquilibriumGibbsEnergiesGibbsEnergies() {
+		return equilibriumGibbsEnergies;
 	}
 
 	/**
@@ -95,6 +129,13 @@ public class Constraints {
 	 */
 	public double[] getEquilibriumConcentrations() {
 		return equilibriumConcentrations;
+	}
+
+	/**
+	 * @return the gibbsEnergies
+	 */
+	public double[] getGibbsEnergies() {
+		return gibbsEnergies;
 	}
 	
 }

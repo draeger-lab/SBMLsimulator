@@ -20,12 +20,8 @@ package org.sbml.simulator.fba.controller;
 import java.beans.EventHandler;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.concurrent.ExecutionException;
 
-import org.sbml.simulator.gui.SimulatorUI;
-import org.sbml.simulator.io.CSVReadingTask;
-
-import de.zbit.gui.SerialWorker;
+import org.sbml.jsbml.SBMLDocument;
 
 /**
  * @author Meike Aichele
@@ -35,30 +31,40 @@ import de.zbit.gui.SerialWorker;
  */
 public class ConstraintsUtils {
 
+	boolean gibbs;
+	private SBMLDocument document;
+	private double[] solutionArray;
+
+	/**
+	 * Constructor
+	 * @param doc
+	 */
+	public ConstraintsUtils(SBMLDocument doc) {
+		this.document = doc;
+	}
+	
 	/**
 	 * Method to read equilibrium concentrations from a file.
-	 * @param ui
+	 * 
 	 * @param files
-	 * @return double[] concentrations
-	 * @throws InterruptedException
-	 * @throws ExecutionException
+	 * @return
 	 */
-	public static double[] readConcentrationsFromFile (SimulatorUI ui, File files) throws InterruptedException, ExecutionException {
-		return readFromFile(ui, files, false);
+	public double[] readConcentrationsFromFile (File files) {
+		readFromFile(files, false);
+		return null;
 	}
 
 
 	/**
 	 * Reads out the Gibbs energies from a given file and writes it in the array gibbsEnergies
-	 * @param ui
-	 * @param file
-	 * @return double[] gibbs
-	 * @throws ExecutionException 
-	 * @throws InterruptedException 
+	 *
+	 * @param files
+	 * @return
 	 */
-	public static double[] readGibbsFromFile(SimulatorUI ui, File files) throws InterruptedException, ExecutionException {
-
-		return readFromFile(ui, files, true);
+	public double[] readGibbsFromFile(File files) {
+		readFromFile(files, true);
+		return solutionArray;
+		
 
 		//		BufferedReader read = new BufferedReader(new FileReader(file));
 		//		gibbsEnergies = new double[document.getModel().getReactionCount()];
@@ -70,7 +76,7 @@ public class ConstraintsUtils {
 		//		// and the reaction document.getModel().getReaction(3) has the gibbs-energy gibbsEnergies[3].
 		//		while ((line = read.readLine()) != null) {
 		//			k = line.split("\t");
-		//			for (int i = 0; i < document.getModel().getReactionCount(); i++) {
+		//			for (int i = 0; i < document.getModel().getReactionCount(); i++){
 		//				if (k[0].equals(document.getModel().getReaction(i).getId())) {
 		//					gibbsEnergies[i] = Double.valueOf(k[1]);
 		//				}
@@ -81,52 +87,49 @@ public class ConstraintsUtils {
 	/**
 	 * Reads out the Gibbs energies or concentrations from a given file and writes it in an array, that the method returns.
 	 * 
-	 * @param ui
 	 * @param files
 	 * @param gibbs
-	 * @return double[]
-	 * @throws InterruptedException
-	 * @throws ExecutionException
 	 */
-	private static double[] readFromFile(SimulatorUI ui, File files, boolean gibbs) throws InterruptedException, ExecutionException {
-		SerialWorker worker = new SerialWorker();
-		double[] erg = null;
-		if (files != null) {
-			CSVReadingTask task = new CSVReadingTask(ui, files);
-			task.addPropertyChangeListener(EventHandler.create(PropertyChangeListener.class, ui, "addExperimentalData", "newValue"));
-			worker.add(task);
+	private void readFromFile(File files, Boolean gibbs) {
+		this.gibbs = gibbs;
+		CSVDataReader reader = new CSVDataReader(files);
+		reader.addPropertyChangeListener(EventHandler.create(PropertyChangeListener.class, this, "writeDataInArray", "newValue"));
 
-			if (task.isDone()) {
-				if (gibbs) {
-				String[] values = task.get().values().toArray(new String[ui.getModel().getReactionCount()]);
-				String[] keys = task.get().keySet().toArray(new String[ui.getModel().getReactionCount()]);
+	}
 
-				erg = new double[values.length-1];
-				
-					for(int i = 0; i< values.length; i++) {
-						erg[i] = Double.parseDouble(values[i]);
-						if (ui.getModel().getReaction(keys[i]) != null) {
-							ui.getModel().getReaction(keys[i]).putUserObject("gibbs", erg[i]);
-						}
+	/**
+	 * Writes the incoming data from the csv-file in {@link# solutionArray}.
+	 * @param obj
+	 */
+	public void writeDataInArray(Object obj) {
+		if (obj instanceof String[][]) {
+            String[][] data = (String[][]) obj;
+            String[] values = data[1];
+			String[] keys = data[0];
+			solutionArray = new double[values.length-1];
+			if (gibbs) {
+				for(int i = 0; i< values.length; i++) {
+					solutionArray[i] = Double.parseDouble(values[i]);
+					if (document.getModel().getReaction(keys[i]) != null) {
+						document.getModel().getReaction(keys[i]).putUserObject("gibbs", solutionArray[i]);
 					}
-				} else {
-					String[] values = task.get().values().toArray(new String[ui.getModel().getSpeciesCount()]);
-					String[] keys = task.get().keySet().toArray(new String[ui.getModel().getSpeciesCount()]);
-
-					erg = new double[values.length-1];
-					
-					for(int i = 0; i< values.length; i++) {
-						erg[i] = Double.parseDouble(values[i]);
-						if (ui.getModel().getSpecies(keys[i]) != null) {
-							ui.getModel().getSpecies(keys[i]).putUserObject("concentration", erg[i]);
-						}
+				}
+			} else {
+				for(int i = 0; i< values.length; i++) {
+					solutionArray[i] = Double.parseDouble(values[i]);
+					if (document.getModel().getSpecies(keys[i]) != null) {
+						document.getModel().getSpecies(keys[i]).putUserObject("concentration", solutionArray[i]);
 					}
 				}
 			}
 		}
+	}
 
-		worker.execute();
-		return erg;
+	/**
+	 * @return the solutionArray
+	 */
+	public double[] getSolutionArray() {
+		return solutionArray;
 	}
 
 }
