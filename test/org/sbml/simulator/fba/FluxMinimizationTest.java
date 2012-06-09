@@ -1,6 +1,6 @@
 /*
  * $Id:  FluxMinimizationTest.java 12:30:10 Meike Aichele$
- * $URL: FluxMinimizationTest.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.

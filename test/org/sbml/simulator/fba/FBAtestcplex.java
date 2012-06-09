@@ -1,5 +1,10 @@
 package org.sbml.simulator.fba;
 
+import ilog.concert.IloException;
+import ilog.concert.IloNumExpr;
+import ilog.concert.IloNumVar;
+import ilog.cplex.IloCplex;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
