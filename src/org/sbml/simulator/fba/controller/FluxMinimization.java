@@ -74,11 +74,15 @@ public class FluxMinimization implements TargetFunction {
 	 * Constructor, that gets a {@link StoichiometricMatrix} and computes 
 	 * the fluxVector an the errorArray itself.
 	 * 
+	 * @param doc
 	 * @param N
+	 * @param c_eq
+	 * @param gibbs_eq
+	 * @param targetFluxes
 	 */
-	public FluxMinimization(SBMLDocument doc, StoichiometricMatrix N, double[] c_eq, double[] gibbs_eq) {
+	public FluxMinimization(SBMLDocument doc, StoichiometricMatrix N, double[] c_eq, double[] gibbs_eq, String[] targetFluxes) {
 		this.errorArray = FluxMinimizationUtils.computeError(gibbs.length);
-		this.fluxVector = FluxMinimizationUtils.computeFluxVector(N);
+		this.fluxVector = FluxMinimizationUtils.computeFluxVector(N, targetFluxes, doc);
 		this.c_eq = c_eq;
 		Constraints c = new Constraints(doc, gibbs_eq, c_eq);
 		this.gibbs = c.getGibbsEnergies();
@@ -92,20 +96,23 @@ public class FluxMinimization implements TargetFunction {
 
 
 	/**
-	 *  Constructor, that gets a {@link SBMLDocument} and computes the
+	 * Constructor, that gets a {@link SBMLDocument} and computes the
 	 *  {@link StoichiometricMatrix} from the given document, the fluxVector
 	 *  from the computed StoichiometricMatrix and the errorArray itself.
-	 *  
+	 * 
 	 * @param doc
+	 * @param c_eq
+	 * @param gibbs_eq
+	 * @param targetFluxes
 	 */
-	public FluxMinimization(SBMLDocument doc, double[] c_eq, double[] gibbs_eq) {
-		this(doc,FluxMinimizationUtils.SBMLDocToStoichMatrix(doc), c_eq, gibbs_eq);
+	public FluxMinimization(SBMLDocument doc, double[] c_eq, double[] gibbs_eq, String[] targetFluxes) {
+		this(doc,FluxMinimizationUtils.SBMLDocToStoichMatrix(doc), c_eq, gibbs_eq, targetFluxes);
 	}
 
 	/**
 	 * Computes the transposed kernel matrix of the reduced stoichiometric matrix N
 	 * multiplied with the reaction Gibbs energy values for the internal reactions of the system.
-	 * @param N
+	 * @param doc
 	 * @return L = (K_int^T) * (Delta_r(gibbs))_int
 	 */
 	private double[] computeL(SBMLDocument doc) {

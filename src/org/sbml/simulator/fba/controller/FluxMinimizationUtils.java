@@ -33,19 +33,46 @@ import org.sbml.simulator.stability.math.StoichiometricMatrix;
 public class FluxMinimizationUtils {
 
 	/**
-	 * Gets a {@link StoichiometricMatrix} and gives back the corresponding flux-vector in Manhattan-Norm.
+	 * Gets a {@link StoichiometricMatrix} and gives back the corresponding flux-vector in Manhattan-Norm, without the given 
+	 * target fluxes.
+	 * 
 	 * @param N
+	 * @param targetFluxes 
+	 * @param doc 
 	 * @return double[] flux vector
 	 */
-	public static double[] computeFluxVector(StoichiometricMatrix N) {
+	public static double[] computeFluxVector(StoichiometricMatrix N, String[] targetFluxes, SBMLDocument doc) {
 		StabilityMatrix steadyStateMatrix = N.getSteadyStateFluxes();
 		double[] fluxVector = new double[steadyStateMatrix.getColumnDimension()];
 		// fill the fluxVector
 		for (int column=0; column < N.getSteadyStateFluxes().getColumnDimension(); column++) {
-			fluxVector[column] = computeManhattenNorm(steadyStateMatrix.getColumn(column));
+			if (targetFluxes == null || isNoTargetFlux(column, targetFluxes, doc)) {
+				fluxVector[column] = computeManhattenNorm(steadyStateMatrix.getColumn(column));
+			}
 		}
 		return fluxVector;
 	}
+
+
+
+	/**
+	 * Looks if the 
+	 * @param column
+	 * @param targetFluxes
+	 * @param doc
+	 * @return
+	 */
+	private static boolean isNoTargetFlux(int column, String[] targetFluxes, SBMLDocument doc) {
+		Reaction r = doc.getModel().getReaction(column);
+			for (int i = 0; i < targetFluxes.length; i++) {
+				if (r.getId().equals(targetFluxes[i])) {
+					return false;
+				}
+			}
+		return true;
+	}
+
+
 
 	/**
 	 * Gets a {@link SBMLDocument} and gives back the corresponding {@link StoichiometricMatrix}.
@@ -96,7 +123,7 @@ public class FluxMinimizationUtils {
 		}
 		return newDoc;
 	}
-	
+
 	/**
 	 * Computes the Manhattan-Norm ||vector|| = sum up from 1 to |vector|: |v_i|        
 	 * e.g.:
