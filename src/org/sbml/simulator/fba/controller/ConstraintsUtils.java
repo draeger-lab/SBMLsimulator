@@ -24,6 +24,8 @@ import java.io.File;
 import org.sbml.jsbml.SBMLDocument;
 
 /**
+ * Class for reading the concentrations and Gibbs energies in steady state from a file.
+ * 
  * @author Meike Aichele
  * @version $Rev$
  * @date 21.05.2012
@@ -31,9 +33,26 @@ import org.sbml.jsbml.SBMLDocument;
  */
 public class ConstraintsUtils {
 
-	boolean gibbs;
+	/**
+	 * Contains the information about the sort of the file:
+	 * true if it is a Gibbs-file, false if it's not.
+	 */
+	boolean isGibbsFile;
+	
+	/**
+	 * Containing the corresponding {@link SBMLDocument}.
+	 */
 	private SBMLDocument document;
+	
+	/**
+	 * Containing the read Gibbs energies.
+	 */
 	private double[] gibbsArray;
+	
+	/**
+	 * Containing the read concentrations.
+	 */
+	private double[] concentrationsArray;
 
 	/**
 	 * Constructor
@@ -51,7 +70,7 @@ public class ConstraintsUtils {
 	 */
 	public double[] readConcentrationsFromFile (File files) {
 		readFromFile(files, false);
-		return null;
+		return concentrationsArray;
 	}
 
 
@@ -90,8 +109,8 @@ public class ConstraintsUtils {
 	 * @param files
 	 * @param gibbs
 	 */
-	private void readFromFile(File files, Boolean gibbs) {
-		this.gibbs = gibbs;
+	private void readFromFile(File files, Boolean isGibbs) {
+		this.isGibbsFile = isGibbs;
 		CSVDataReader reader = new CSVDataReader(files);
 		reader.addPropertyChangeListener(EventHandler.create(PropertyChangeListener.class, this, "writeDataInArray", "newValue"));
 
@@ -106,8 +125,8 @@ public class ConstraintsUtils {
             String[][] data = (String[][]) obj;
             String[] values = data[1];
 			String[] keys = data[0];
-			gibbsArray = new double[values.length-1];
-			if (gibbs) {
+			if (isGibbsFile) {
+				gibbsArray = new double[values.length];
 				for(int i = 0; i< values.length; i++) {
 					gibbsArray[i] = Double.parseDouble(values[i]);
 					if (document.getModel().getReaction(keys[i]) != null) {
@@ -115,10 +134,11 @@ public class ConstraintsUtils {
 					}
 				}
 			} else {
+				concentrationsArray = new double[values.length];
 				for(int i = 0; i< values.length; i++) {
-					gibbsArray[i] = Double.parseDouble(values[i]);
+					concentrationsArray[i] = Double.parseDouble(values[i]);
 					if (document.getModel().getSpecies(keys[i]) != null) {
-						document.getModel().getSpecies(keys[i]).putUserObject("concentration", gibbsArray[i]);
+						document.getModel().getSpecies(keys[i]).putUserObject("concentration", concentrationsArray[i]);
 					}
 				}
 			}

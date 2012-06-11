@@ -21,6 +21,10 @@ import org.sbml.jsbml.SBMLDocument;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
 /**
+ * Containing the read equilibrium Gibbs energies and the computed Gibbs energies 
+ * and the concentrations in steady state. Also it contains the temperature in Kelvin under standard conditions (T)
+ * and ideal gas constant R in J/(mol * K).
+ * 
  * @author Meike Aichele
  * @version $Rev$
  * @date 07.05.2012
@@ -71,9 +75,10 @@ public class Constraints {
 	
 
 	/**
-	 * 
+	 * Constructor that computes the GibbsEnergies from the incoming gibbs_eq
 	 * @param doc
-	 * @param gibbs
+	 * @param gibbs_eq
+	 * @param c_eq
 	 */
 	public Constraints (SBMLDocument doc, double[] gibbs_eq, double[] c_eq) {
 		this.document = doc;
@@ -83,7 +88,7 @@ public class Constraints {
 	}
 
 	/**
-	 * Computes the Gibbs energies with the formula delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum( N[j][i] * c_eq[j] )
+	 * Computes the Gibbs energies with the formula delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * ln(sum( N[j][i] * c_eq[j] ))
 	 * @param steadyStateGibbs
 	 */
 	private double[] computeGibbsEnergies(double[] steadyStateGibbs) {
@@ -92,12 +97,15 @@ public class Constraints {
 			gibbsEnergies = new double[steadyStateGibbs.length];
 			for (int i=0; i< steadyStateGibbs.length; i++) {
 				double sum = 0;
+				// compute sum( N[j][i] * c_eq[j] )
 				for (int j=0; j< N.getRowDimension(); j++) {
 					sum += N.get(j, i) * equilibriumConcentrations[j];
 				}
+				// delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * ln(sum( N[j][i] * c_eq[j] ))
 				gibbsEnergies[i] = steadyStateGibbs[i] + R*T*Math.log(sum);
 			}
 		}
+		// return the computed Gibbs energies
 		return gibbsEnergies;
 	}
 	
@@ -130,7 +138,7 @@ public class Constraints {
 	}
 
 	/**
-	 * @return the gibbsEnergies
+	 * @return the computed gibbsEnergies
 	 */
 	public double[] getGibbsEnergies() {
 		return gibbsEnergies;

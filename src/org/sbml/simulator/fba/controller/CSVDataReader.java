@@ -30,6 +30,8 @@ import de.zbit.gui.csv.ExpectedColumn;
 import de.zbit.io.csv.CSVReader;
 
 /**
+ * Reads the csv files in background.
+ * 
  * @author Meike Aichele
  * @version $Rev$
  * @date 04.06.2012

@@ -144,8 +144,9 @@ public class FluxBalanceAnalysis {
 
 		// contraint J_i * G_i < 0
 		double[] flux = targetFunc.getFluxVector();
-		double[] gibbs = targetFunc.getGibbs();
+		double[] gibbs = constraints.getGibbsEnergies();
 		for (int i = 0; i< counter[1]; i++) {
+			//jg is the expression for J_i * G_i
 			IloNumExpr jg = cplex.prod(cplex.prod(flux[i], x[i]),gibbs[i]);
 			cplex.addLe(jg, 0);
 		}
@@ -157,6 +158,7 @@ public class FluxBalanceAnalysis {
 		// now solve the problem and get the solution array for the variables x
 		double[] solution = null;
 		if (cplex.solve()) {
+			// get the from cplex computed values for the variables x
 			solution = cplex.getValues(x);
 		}
 		cplex.end();
