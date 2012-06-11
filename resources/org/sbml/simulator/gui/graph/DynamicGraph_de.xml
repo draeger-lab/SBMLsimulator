@@ -38,6 +38,8 @@
   <entry key="EXPERIMENTAL_DATA">Experimentelle Daten</entry>   
   <entry key="SEARCHBAR_TOOLTIP">Stellen Sie den Zeitpunkt der Visualisierung ein.</entry>
   <entry key="VIDEO_CODEC_NOT_FOUND">Videocodec wurde nicht erkannt. Möglicherweise existiert dieser Videocodec auf Ihrem System nicht, oder die angegeben Dateiendung ist falsch.</entry>
+  <entry key="COULD_NOT_WRITE_SCREENSHOT">Bilddatei konnte nicht produziert werden.</entry>
+  <entry key="FILEFILTER_SCREENSHOT">Portable Network Graphics (.png)</entry>  
   
   <!-- GraphOptions -->
 
@@ -50,12 +52,12 @@
   <entry key="USE_UNIFORM_NODE_COLOR_TOOLTIP">Einheitliche Knotenfarbe, anstatt den Farben in der Legende.</entry>
   <entry key="UNIFORM_NODE_COLOR">Knotenfarbe</entry>
   <entry key="UNIFORM_NODE_COLOR_TOOLTIP">Farbeinstellung für die einheitliche Knotenfarbe.</entry>
-  <entry key="NODESIZE_GROUP">Dynamische Änderung der Knotengröße</entry>
-  <entry key="NODESIZE_GROUP_TOOLTIP">Einstellungen für die dynamische Änderung der Knotengröße.</entry>
-  <entry key="NODECOLOR_GROUP">Dynamische Änderung der Knotenfarbe</entry>
-  <entry key="NODECOLOR_GROUP_TOOLTIP">Einstellungen für die dynamische Änderung der Knotenfarbe.</entry>
-  <entry key="REACTION_GROUP">Dynamische Änderung der Reaktionen</entry>
-  <entry key="REACTION_GROUP_TOOLTIP">Einstellungen für die dynamische Änderung der Reaktionen.</entry>
+  <entry key="GROUP_NODESIZE">Dynamische Änderung der Knotengröße</entry>
+  <entry key="GROUP_NODESIZE_TOOLTIP">Einstellungen für die dynamische Änderung der Knotengröße.</entry>
+  <entry key="GROUP_NODECOLOR">Dynamische Änderung der Knotenfarbe</entry>
+  <entry key="GROUP_NODECOLOR_TOOLTIP">Einstellungen für die dynamische Änderung der Knotenfarbe.</entry>
+  <entry key="GROUP_REACTION">Dynamische Änderung der Reaktionen</entry>
+  <entry key="GROUP_REACTION_TOOLTIP">Einstellungen für die dynamische Änderung der Reaktionen.</entry>
   <entry key="COLOR1">Hohe Konzentration</entry>
   <entry key="COLOR1_TOOLTIP">Bei dynamischer Änderung der Knotenfarbe, definiert dies die Farbe für hohe Konzentration.</entry>
   <entry key="COLOR2">Mittlere Konzentration</entry>
@@ -82,15 +84,15 @@
   <entry key="SIM_SPEED_SLOW_TOOLTIP">Modifiziert die langsame Abspielgeschwindigkeit ein.</entry>
   <entry key="SIM_SPEED_CHOOSER">Abspielgeschwindigkeit</entry>
   <entry key="SIM_SPEED_CHOOSER_TOOLTIP">Stellen Sie die Abspielgeschwindigkeit ein.</entry>
-  <entry key="SIM_SPEED_GROUP">Abspielgeschwindigkeit</entry>
-  <entry key="SIM_SPEED_GROUP_TOOLTIP">Stellen Sie die Abspielgeschwindigkeiten ein. Je kleiner der Wert, desto schneller die Geschwindigkeit.</entry>
+  <entry key="GROUP_SIM_SPEED">Abspielgeschwindigkeit</entry>
+  <entry key="GROUP_SIM_SPEED_TOOLTIP">Stellen Sie die Abspielgeschwindigkeiten ein. Je kleiner der Wert, desto schneller die Geschwindigkeit.</entry>
   <entry key="VISUALIZATION_STYLE">Visualisierungsart</entry>
   <entry key="VISUALIZATION_STYLE_TOOLTIP">Wählen Sie die Art der Visualisierung.</entry>    
   <entry key="VISUALIZATION_DATA">Visualisierte Daten</entry>
   <entry key="VISUALIZATION_DATA_TOOLTIP">Wählen Sie die zu visualisierende Daten aus.</entry>
   <entry key="DATA_NOT_AVAILABLE">Der zur Visualisierung ausgewählte Datensatz steht momentan nicht zur Verfügung.</entry>
-  <entry key="VIDEO_ENCODING">Videoerstellung</entry>
-  <entry key="VIDEO_ENCODING_TOOLTIP">Diese Optionen beeinflussen die Videoerstellung.</entry>
+  <entry key="GROUP_VIDEO_ENCODING">Videoerstellung</entry>
+  <entry key="GROUP_VIDEO_ENCODING_TOOLTIP">Diese Optionen beeinflussen die Videoerstellung.</entry>
   <entry key="VIDEO_FRAMERATE">Framerate</entry>
   <entry key="VIDEO_FRAMERATE_TOOLTIP">Je niedriger die Framerate, desto langsamer spielt das Video die Simulation ab.</entry>
   <entry key="VIDEO_IMAGE_STEPSIZE">Bilderschrittweite</entry>

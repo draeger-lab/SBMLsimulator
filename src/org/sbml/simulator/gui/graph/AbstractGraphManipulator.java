@@ -116,24 +116,6 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
     }
     
     /**
-     * Computes the adjusting values for given limits.
-     * @param lowerReactionLimit
-     * @param upperReactionLimit
-     * @param minLineWidth
-     * @param maxLineWidth
-     */
-    private void computeReactionAdjusting(double lowerReactionLimit,
-            double upperReactionLimit, float minLineWidth, float maxLineWidth) {
-        double xHigh = Math.abs(lowerReactionLimit) > Math
-                .abs(upperReactionLimit) ? Math.abs(lowerReactionLimit) : Math
-                .abs(upperReactionLimit);
-        double[] linearRegression = computeBIAS(0, xHigh, minLineWidth,
-                maxLineWidth);
-        m = linearRegression[0];
-        c = linearRegression[1];
-    }
-    
-    /**
      * Linear regression for two given points (xLowerLimit, yLowerLimit) and
      * (xUpperLimit, yUpperLimit).
      * 
@@ -151,33 +133,21 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
     }
     
     /**
-     * Labels the given node of this {@link NodeRealizer} with the given ID and value.
-     * @param nr
-     * @param id
-     * @param value
+     * Computes the adjusting values for given limits.
+     * @param lowerReactionLimit
+     * @param upperReactionLimit
+     * @param minLineWidth
+     * @param maxLineWidth
      */
-    protected void labelNode(NodeRealizer nr, String id, double value){
-        String name = "";
-        if(document.getModel().getSpecies(id) != null){
-            name = document.getModel().getSpecies(id).isSetName() ? document
-                    .getModel().getSpecies(id).getName() : id;
-        }else if(document.getModel().getReaction(id) != null){
-            name = document.getModel().getReaction(id).isSetName() ? document
-                    .getModel().getReaction(id).getName() : id;
-        }
-        
-        String label = MessageFormat.format("{0}: {1,number,0.0000}",
-                new Object[] { name , value });
-        
-        if (nr.labelCount() > 1) {
-            nr.getLabel(nr.labelCount() - 1).setText(label);
-        } else {
-            nr.addLabel(new NodeLabel(label));
-            NodeLabel nl = nr.getLabel(nr.labelCount() - 1);
-            nl.setModel(NodeLabel.SIDES);
-            nl.setPosition(NodeLabel.S); // South of node
-            nl.setDistance(-3);
-        }
+    private void computeReactionAdjusting(double lowerReactionLimit,
+            double upperReactionLimit, float minLineWidth, float maxLineWidth) {
+        double xHigh = Math.abs(lowerReactionLimit) > Math
+                .abs(upperReactionLimit) ? Math.abs(lowerReactionLimit) : Math
+                .abs(upperReactionLimit);
+        double[] linearRegression = computeBIAS(0, xHigh, minLineWidth,
+                maxLineWidth);
+        m = linearRegression[0];
+        c = linearRegression[1];
     }
     
     /* (non-Javadoc)
@@ -266,6 +236,36 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
             logger.finer(MessageFormat.format(
                     "No ReactionNodeRealizer for ReactionID: {0}",
                     new Object[] { id }));
+        }
+    }
+    
+    /**
+     * Labels the given node of this {@link NodeRealizer} with the given ID and value.
+     * @param nr
+     * @param id
+     * @param value
+     */
+    protected void labelNode(NodeRealizer nr, String id, double value){
+        String name = "";
+        if(document.getModel().getSpecies(id) != null){
+            name = document.getModel().getSpecies(id).isSetName() ? document
+                    .getModel().getSpecies(id).getName() : id;
+        }else if(document.getModel().getReaction(id) != null){
+            name = document.getModel().getReaction(id).isSetName() ? document
+                    .getModel().getReaction(id).getName() : id;
+        }
+        
+        String label = MessageFormat.format("{0}: {1,number,0.0000}",
+                new Object[] { name , value });
+        
+        if (nr.labelCount() > 1) {
+            nr.getLabel(nr.labelCount() - 1).setText(label);
+        } else {
+            nr.addLabel(new NodeLabel(label));
+            NodeLabel nl = nr.getLabel(nr.labelCount() - 1);
+            nl.setModel(NodeLabel.SIDES);
+            nl.setPosition(NodeLabel.S); // South of node
+            nl.setDistance(-3);
         }
     }
     

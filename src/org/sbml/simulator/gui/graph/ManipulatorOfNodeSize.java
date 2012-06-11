@@ -58,24 +58,6 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
     
     /**
      * Constructs a new nodesize-manipulator on the given graph. Minimum node
-     * size and maximum node size per default and reactions line widths per
-     * default.
-     * Node colors per default value.
-     * 
-     * @param graph
-     * @param document
-     * @param minMaxOfSpecies
-     * @param minMaxOfReactions
-     */
-    public ManipulatorOfNodeSize(SBML2GraphML graph, SBMLDocument document,
-            double[] minMaxOfSpecies, double[] minMaxOfReactions) {
-        super(graph, document, minMaxOfReactions, (float)0.1, 6);
-        DEFAULT_NODE_COLOR = new Color(176, 226, 255);
-        computeSpeciesAdjusting(minMaxOfSpecies[0], minMaxOfSpecies[1], 8, 50);
-    }
-    
-    /**
-     * Constructs a new nodesize-manipulator on the given graph. Minimum node
      * size and maximum node size as given. If minimum node size greater than
      * maximum node size, default values will be used.
      * Node colors uniform as user given.
@@ -102,6 +84,24 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
         DEFAULT_NODE_COLOR = uniformNodeColor;
         computeSpeciesAdjusting(minMaxOfSpecies[0], minMaxOfSpecies[1],
                 minNodeSize, maxNodeSize);
+    }
+    
+    /**
+     * Constructs a new nodesize-manipulator on the given graph. Minimum node
+     * size and maximum node size per default and reactions line widths per
+     * default.
+     * Node colors per default value.
+     * 
+     * @param graph
+     * @param document
+     * @param minMaxOfSpecies
+     * @param minMaxOfReactions
+     */
+    public ManipulatorOfNodeSize(SBML2GraphML graph, SBMLDocument document,
+            double[] minMaxOfSpecies, double[] minMaxOfReactions) {
+        super(graph, document, minMaxOfReactions, (float)0.1, 6);
+        DEFAULT_NODE_COLOR = new Color(176, 226, 255);
+        computeSpeciesAdjusting(minMaxOfSpecies[0], minMaxOfSpecies[1], 8, 50);
     }
     
     /**

@@ -116,54 +116,6 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
         c = linearRegression[1];
     }
     
-    /**
-     * Linear interpolation over two given colors.
-     * @param percent
-     * @param color1
-     * @param color2
-     * @return
-     */
-    private int[] linearColorInterpolation(double percent, int[] color1, int[] color2){
-        int[] outcolor = {0, 0, 0};
-        if (percent >= 0 && percent <= 1) {
-            for (int i = 0; i < outcolor.length; i++) {
-                outcolor[i] = (int) (color1[i] * percent + color2[i]
-                        * (1 - percent));
-            }
-            return outcolor;
-        } else if (percent > 1) {
-            //maybe round-off error
-            return color1;
-        } else {
-            //maybe round-off error
-            return color2;
-        }
-    }
-    
-    /**
-     * Linear interpolation over three internally stored colors.
-     * @param percent
-     * @return
-     */
-    private int[] linearColorInterpolationForThree(double percent){
-        if (percent >= 0 && percent <= 0.5) {
-            // color interpolation between color2 (mid concentration) and color3
-            // (low concentration)
-            double[] tmpRegr = computeBIAS(0, 0.5, 0, 1);
-            return linearColorInterpolation(percent*tmpRegr[0]+tmpRegr[1], RGBcolor2, RGBcolor3);
-        } else if (percent > 0.5 && percent < 1.0){
-            //color interpolation between color1 (high concentration) and color2 (mid concentration)
-            double[] tmpRegr = computeBIAS(0.5, 1, 0, 1);
-            return linearColorInterpolation(percent*tmpRegr[0]+tmpRegr[1], RGBcolor1, RGBcolor2);
-        } else if (percent > 1) {
-            // maybe round-off error
-            return RGBcolor1;
-        } else {
-            // maybe round-off error
-            return RGBcolor3;
-        }
-    }
-
     /* (non-Javadoc)
      * @see org.sbml.simulator.gui.graph.GraphManipulator#dynamicChangeOfNode(java.lang.String, double, boolean)
      */
@@ -187,5 +139,53 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
             nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
         }
         graph.getSimpleGraph().updateViews();
+    }
+    
+    /**
+     * Linear interpolation over two given colors.
+     * @param percent
+     * @param color1
+     * @param color2
+     * @return
+     */
+    private int[] linearColorInterpolation(double percent, int[] color1, int[] color2){
+        int[] outcolor = {0, 0, 0};
+        if (percent >= 0 && percent <= 1) {
+            for (int i = 0; i < outcolor.length; i++) {
+                outcolor[i] = (int) (color1[i] * percent + color2[i]
+                        * (1 - percent));
+            }
+            return outcolor;
+        } else if (percent > 1) {
+            //maybe round-off error
+            return color1;
+        } else {
+            //maybe round-off error
+            return color2;
+        }
+    }
+
+    /**
+     * Linear interpolation over three internally stored colors.
+     * @param percent
+     * @return
+     */
+    private int[] linearColorInterpolationForThree(double percent){
+        if (percent >= 0 && percent <= 0.5) {
+            // color interpolation between color2 (mid concentration) and color3
+            // (low concentration)
+            double[] tmpRegr = computeBIAS(0, 0.5, 0, 1);
+            return linearColorInterpolation(percent*tmpRegr[0]+tmpRegr[1], RGBcolor2, RGBcolor3);
+        } else if (percent > 0.5 && percent < 1.0){
+            //color interpolation between color1 (high concentration) and color2 (mid concentration)
+            double[] tmpRegr = computeBIAS(0.5, 1, 0, 1);
+            return linearColorInterpolation(percent*tmpRegr[0]+tmpRegr[1], RGBcolor1, RGBcolor2);
+        } else if (percent > 1) {
+            // maybe round-off error
+            return RGBcolor1;
+        } else {
+            // maybe round-off error
+            return RGBcolor3;
+        }
     }
 }

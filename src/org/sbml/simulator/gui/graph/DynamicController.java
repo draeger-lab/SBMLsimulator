@@ -23,12 +23,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.PreferenceChangeEvent;
 import java.util.prefs.PreferenceChangeListener;
 
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -38,6 +40,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.filechooser.FileFilter;
 
 import org.sbml.simulator.gui.graph.DynamicControlPanel.Items;
 import org.sbml.simulator.gui.graph.DynamicView.Manipulators;
@@ -96,25 +99,6 @@ public class DynamicController implements ChangeListener, ActionListener,
         this.view = view;
     }
 
-    /**
-     * Sets the {@link DynamicCore} of this controller.
-     * 
-     * @param core
-     *            {@link DynamicCore}
-     */
-    public void setCore(DynamicCore core) {
-        this.core = core;
-    }
-
-    /**
-     * Sets the corresponding {@link DynamicControlPanel}.
-     * 
-     * @param controlPanel
-     */
-    public void setControlPanel(DynamicControlPanel controlPanel) {
-        this.controlPanel = controlPanel;
-    }
-
     /*
      * (non-Javadoc)
      * 
@@ -124,6 +108,8 @@ public class DynamicController implements ChangeListener, ActionListener,
     @Override
     public void actionPerformed(ActionEvent e) {
         if (core != null) {
+            SBPreferences prefs = SBPreferences
+                    .getPreferencesFor(GraphOptions.class);
             if (e.getSource() instanceof JButton) {
                 if (e.getActionCommand().equals("PLAY")) {
                     controlPanel.setPlayStatus();
@@ -140,7 +126,7 @@ public class DynamicController implements ChangeListener, ActionListener,
                             System.getProperty("user.home"), true, false,
                             JFileChooser.FILES_ONLY);
                     
-                    if (destinationFile != null){
+                    if (destinationFile != null) {
                         controlPanel.setVideoStatus();
                         //ensure dividers don't get moved
                         view.setEnabled(false);
@@ -153,9 +139,8 @@ public class DynamicController implements ChangeListener, ActionListener,
                          * resolution ensures that the black margin in video
                          * is minimum.
                          */
-                        int resolutionMultiplier = (int) SBPreferences
-                                .getPreferencesFor(GraphOptions.class).getDouble(
-                                        GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
+                        int resolutionMultiplier = (int) prefs
+                                .getDouble(GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
                         int[] size = view.getScreenshotResolution();
                         int width = size[0] * resolutionMultiplier;
                         int height = size[1] * resolutionMultiplier;
@@ -163,12 +148,10 @@ public class DynamicController implements ChangeListener, ActionListener,
                         width = (width % 2) == 1 ? width-1 : width;
                         height = (height % 2) == 1 ? height-1 : height;
                         logger.fine("Video out resolution = " + width + "x" + height);
-                        int framerate = (int) SBPreferences.getPreferencesFor(
-                                GraphOptions.class).getDouble(
-                                GraphOptions.VIDEO_FRAMERATE);
-                        int captureStepSize = (int) SBPreferences.getPreferencesFor(
-                                GraphOptions.class).getDouble(
-                                GraphOptions.VIDEO_IMAGE_STEPSIZE);
+                        int framerate = (int) prefs
+                                .getDouble(GraphOptions.VIDEO_FRAMERATE);
+                        int captureStepSize = (int) prefs
+                                .getDouble(GraphOptions.VIDEO_IMAGE_STEPSIZE);
                         
                         //catch errors while videoencoding
                         try {
@@ -189,6 +172,38 @@ public class DynamicController implements ChangeListener, ActionListener,
                                             + "\n >> "
                                             + destinationFile.getName());
                             controlPanel.setStopStatus();
+                        }
+                    }
+                } else if (e.getActionCommand().equals("GRAPHSHOT")) {
+                    File destinationFile = GUITools.saveFileDialog(view,
+                            System.getProperty("user.home"), true, false,
+                            JFileChooser.FILES_ONLY, new FileFilter() {
+                                
+                                @Override
+                                public boolean accept(File f) {
+                                    return f.getName().endsWith(".png");
+                                }
+                                
+                                @Override
+                                public String getDescription() {
+                                    return bundle.getString("FILEFILTER_SCREENSHOT");
+                                }
+                            });
+                    
+                    if (destinationFile != null) {
+                        int resolutionMultiplier = (int) prefs
+                                .getDouble(GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
+                        int[] size = view.getScreenshotResolution();
+                        int width = size[0] * resolutionMultiplier;
+                        int height = size[1] * resolutionMultiplier;
+
+                        try {
+                            ImageIO.write(view.takeGraphshot(width, height),
+                                    "png", destinationFile);
+                            logger.fine("Writing screenshot successful.");
+                        } catch (IOException ioe) {
+                            logger.warning(bundle
+                                    .getString("COULD_NOT_WRITE_SCREENSHOT"));
                         }
                     }
                 }
@@ -271,23 +286,6 @@ public class DynamicController implements ChangeListener, ActionListener,
      * (non-Javadoc)
      * 
      * @see
-     * javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent
-     * )
-     */
-    @Override
-    public void stateChanged(ChangeEvent e) {
-        if (core != null) {
-            if (e.getSource() instanceof JSlider) {
-                int timepoint = ((JSlider) e.getSource()).getValue();
-                core.setCurrTimepoint(timepoint);
-            }
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
      * java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
      */
     @Override
@@ -327,42 +325,6 @@ public class DynamicController implements ChangeListener, ActionListener,
                     }
                 }
             }
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.swing.event.TableModelListener#tableChanged(javax.swing.event.
-     * TableModelEvent)
-     */
-    @Override
-    public void tableChanged(TableModelEvent e) {
-        //update selections
-        if (e.getSource() instanceof LegendTableModel) {
-            //save selection changes
-            if (e.getFirstRow() == e.getLastRow()) {
-                //just one element changed
-                LegendTableModel ltm = (LegendTableModel) e.getSource();
-                view.putSelectionState(ltm.getId(e.getFirstRow()),
-                        ltm.isSelected(e.getFirstRow()));
-            } else {
-                /*
-                 * more than one element changed simultaneous (i.e. de-select
-                 * all)
-                 */
-                view.retrieveSelectionStates();
-            }
-        }
-        
-        //get new graphmanipulator
-        if (core != null) {
-            /*
-             * Is not uselessly invoked many times while initial startup,
-             * because core is set afterwards.
-             */
-            view.setGraphManipulator(getSelectedGraphManipulator());
-            view.updateGraph();
         }
     }
 
@@ -435,6 +397,78 @@ public class DynamicController implements ChangeListener, ActionListener,
             controlPanel.setSelectedManipulator(Manipulators
                     .getManipulator(prefs
                             .getString(GraphOptions.VISUALIZATION_STYLE)));
+        }
+    }
+
+    /**
+     * Sets the corresponding {@link DynamicControlPanel}.
+     * 
+     * @param controlPanel
+     */
+    public void setControlPanel(DynamicControlPanel controlPanel) {
+        this.controlPanel = controlPanel;
+    }
+
+    /**
+     * Sets the {@link DynamicCore} of this controller.
+     * 
+     * @param core
+     *            {@link DynamicCore}
+     */
+    public void setCore(DynamicCore core) {
+        this.core = core;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent
+     * )
+     */
+    @Override
+    public void stateChanged(ChangeEvent e) {
+        if (core != null) {
+            if (e.getSource() instanceof JSlider) {
+                int timepoint = ((JSlider) e.getSource()).getValue();
+                core.setCurrTimepoint(timepoint);
+            }
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.swing.event.TableModelListener#tableChanged(javax.swing.event.
+     * TableModelEvent)
+     */
+    @Override
+    public void tableChanged(TableModelEvent e) {
+        //update selections
+        if (e.getSource() instanceof LegendTableModel) {
+            //save selection changes
+            if (e.getFirstRow() == e.getLastRow()) {
+                //just one element changed
+                LegendTableModel ltm = (LegendTableModel) e.getSource();
+                view.putSelectionState(ltm.getId(e.getFirstRow()),
+                        ltm.isSelected(e.getFirstRow()));
+            } else {
+                /*
+                 * more than one element changed simultaneous (i.e. de-select
+                 * all)
+                 */
+                view.retrieveSelectionStates();
+            }
+        }
+        
+        //get new graphmanipulator
+        if (core != null) {
+            /*
+             * Is not uselessly invoked many times while initial startup,
+             * because core is set afterwards.
+             */
+            view.setGraphManipulator(getSelectedGraphManipulator());
+            view.updateGraph();
         }
     }
 }
