@@ -25,6 +25,9 @@ import org.sbml.simulator.stability.math.StabilityMatrix;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
 /**
+ * Contains methods to compute the flux vector for FBA and a method to get the {@link StoichiometricMatrix} of an incoming {@link SBMLDocument}.
+ * It also contains a method to compute the Error array for FluxMinimization.
+ * 
  * @author Meike Aichele
  * @version $Rev$
  * @date 07.05.2012
@@ -56,11 +59,13 @@ public class FluxMinimizationUtils {
 
 
 	/**
-	 * Looks if the 
+	 * Looks if the reaction with the index column is one of the target fluxes. Therefore
+	 * this method looks if the id of the reaction is in the String-array targetFluxes.
+	 * 
 	 * @param column
 	 * @param targetFluxes
 	 * @param doc
-	 * @return
+	 * @return true if the reaction with the index column is a target flux, false if not.
 	 */
 	private static boolean isNoTargetFlux(int column, String[] targetFluxes, SBMLDocument doc) {
 		Reaction r = doc.getModel().getReaction(column);
@@ -118,6 +123,7 @@ public class FluxMinimizationUtils {
 		SBMLDocument newDoc = doc;
 		for (int i = 0; i < doc.getModel().getReactionCount(); i++) {
 			if (SBO.isChildOf(doc.getModel().getReaction(i).getSBOTerm(), SBO.getTransport())) {
+				// reaction i is a transport reaction: remove it
 				newDoc.getModel().removeReaction(i);
 			}
 		}
