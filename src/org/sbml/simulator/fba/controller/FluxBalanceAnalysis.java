@@ -19,13 +19,11 @@ package org.sbml.simulator.fba.controller;
 
 import ilog.concert.IloException;
 import ilog.concert.IloLinearNumExpr;
+import ilog.concert.IloNumExpr;
+import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
 
 import org.sbml.jsbml.SBMLDocument;
-
-import scpsolver.lpsolver.LinearProgramSolver;
-import scpsolver.lpsolver.SolverFactory;
-import scpsolver.problems.LinearProgram;
 
 /**
  * Contains all components for flux balance analysis and solves the optimization problem
@@ -53,6 +51,10 @@ public class FluxBalanceAnalysis {
 	 */
 	private Boolean linearProgramming;
 
+	public double[] lb;
+	public double[] ub;
+	private double[] target;
+
 	/**
 	 * Constructor that get's a {@link Constraints}-Object and a {@link SBMLDocument} 
 	 * and that set's the {@link# linearProgramming} true.
@@ -60,8 +62,8 @@ public class FluxBalanceAnalysis {
 	 * @param constraints
 	 * @param doc
 	 */
-	public FluxBalanceAnalysis(double[] c_eq, Constraints constraints, SBMLDocument doc) {
-		this(new FluxMinimization(doc, c_eq, constraints.getGibbsEnergies()), constraints, true);
+	public FluxBalanceAnalysis(double[] c_eq, Constraints constraints, SBMLDocument doc, String[] targetFluxes) {
+		this(new FluxMinimization(doc, c_eq, constraints.getGibbsEnergies(), targetFluxes), constraints, true);
 	}
 
 	/**
@@ -77,6 +79,15 @@ public class FluxBalanceAnalysis {
 		this.targetFunc = target;
 		this.constraints = constraints;
 		this.setLinearProgramming(linearProgramming);
+		if (linearProgramming) {
+			int length = targetFunc.computeTargetFunctionForLinearProgramming().length;
+			lb = new double[length];
+			ub = new double[length];
+		} else {
+			int length = targetFunc.computeTargetFunctionForQuadraticProgramming().length;
+			lb = new double[length];
+			ub = new double[length];
+		}
 	}
 
 	/**
@@ -88,8 +99,10 @@ public class FluxBalanceAnalysis {
 	public double[] solve() throws IloException {
 		if (this.isSetLinearProgramming()) {
 			if (this.isLinearProgramming()) {
+				target = targetFunc.computeTargetFunctionForLinearProgramming();
 				return solveWithLinearProgramming();
 			} else {
+				target = targetFunc.computeTargetFunctionForQuadraticProgramming();
 				return solveWithQuadraticProgramming();
 			}
 		}
@@ -102,29 +115,87 @@ public class FluxBalanceAnalysis {
 	 * @throws IloException 
 	 */
 	private double[] solveWithLinearProgramming() throws IloException {
-		double[] target = targetFunc.computeTargetFunctionForLinearProgramming();
-		// TODO: add the constraints
+		// create the cplex solver
 		IloCplex cplex = new IloCplex();
-		IloLinearNumExpr lin = cplex.scalProd(target, cplex.numVarArray(target.length, 0, 100));
-		cplex.addMinimize(lin);
+
+		// TARGET
+		// create upper bounds (ub) and lower bounds (lb) for the variables x
+		int[] counter = targetFunc.getCounterArray();
+		// counter[1] contains the length of the flux vector
+		for (int i = counter[1]; i< target.length; i++) {
+			lb[i]= 0.0; 
+			ub[i] = Double.MAX_VALUE;
+		}
+		// create variables with upper bounds and lower bounds
+		IloNumVar[] x = cplex.numVarArray(target.length, lb, ub);
+
+		//compute the target function for cplex with the scalar product (lin)
+		IloLinearNumExpr lin = cplex.scalProd(target, x);
+
+		// only for FluxMinimization has the target function be minimized
+		if (targetFunc instanceof FluxMinimization) {
+			cplex.addMinimize(lin);
+		} else {
+			cplex.addMaximize(lin);
+		}
+
+		//CONTRAINTS
+		//TODO
+
+		// contraint J_i * G_i < 0
+		double[] flux = targetFunc.getFluxVector();
+		double[] gibbs = targetFunc.getGibbs();
+		for (int i = 0; i< counter[1]; i++) {
+			IloNumExpr jg = cplex.prod(cplex.prod(flux[i], x[i]),gibbs[i]);
+			cplex.addLe(jg, 0);
+		}
+		
+		//contraint gibbs errors: delta_r(G_j^0) - E_j + R * T * sum(n_ij * ln[S_i]) = delta_r(G_j)
+		//TODO
 		
 		
-		LinearProgramSolver solver  = SolverFactory.newDefault();
-
-		LinearProgram lp = new LinearProgram(target);
-		lp.setMinProblem(targetFunc.isMinProblem());
-
-		double[] erg = solver.solve(lp);
-		return erg;
+		// now solve the problem and get the solution array for the variables x
+		double[] solution = null;
+		if (cplex.solve()) {
+			solution = cplex.getValues(x);
+		}
+		cplex.end();
+		return solution;
 	}
 
 	/**
 	 * Calls CPLEX to solve the problem with quadratic programming
+	 * @throws IloException 
 	 */
-	private double[] solveWithQuadraticProgramming() {
-		double[] target = targetFunc.computeTargetFunctionForQuadraticProgramming();
-		// TODO: call CPLEX
-		return null;
+	private double[] solveWithQuadraticProgramming() throws IloException {
+		IloCplex cplex = new IloCplex();
+
+		// TARGET
+		// create upper bounds (ub) and lower bounds (lb) for the variables x
+		int[] count = targetFunc.getCounterArray();
+		// counter[1] contains the length of the flux vector
+		for (int i = count[1]; i< target.length; i++) {
+			lb[i]= 0.0; 
+			ub [i] = Double.MAX_VALUE;
+		}
+		// create variables with upper bounds and lower bounds
+		IloNumVar[] x = cplex.numVarArray(target.length, lb, ub);
+		
+		
+		
+		// TODO concentrations are now quadratic!!
+
+
+		//TODO CONSTRAINTS
+
+		
+		// now solve the problem and get the solution array for the variables x
+		double[] solution = null;
+		if (cplex.solve()) {
+			solution = cplex.getValues(x);
+		}
+		cplex.end();
+		return solution;
 	}
 
 	/**
@@ -140,7 +211,7 @@ public class FluxBalanceAnalysis {
 	public Boolean isLinearProgramming() {
 		return linearProgramming;
 	}
-	
+
 
 	/**
 	 * true if the boolean linearProgramming is set, else false
@@ -148,5 +219,30 @@ public class FluxBalanceAnalysis {
 	 */
 	public boolean isSetLinearProgramming() {
 		return (isLinearProgramming() != null);
+	}
+
+	public boolean setUbOfReactionJ(double ubValue, int j) {
+		if (j < targetFunc.getFluxVector().length) {
+			ub[j] = ubValue;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+
+	/**
+	 * Puts for reaction j the lower bound on the given lbValue
+	 * @param lbValue
+	 * @param j (index of reaction)
+	 * @return true if lbValue was set successfully
+	 */
+	public boolean setLbOfReactionJ(double lbValue, int j) {
+		if (j < targetFunc.getFluxVector().length) {
+			lb[j] = lbValue;
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

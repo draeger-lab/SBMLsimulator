@@ -71,6 +71,11 @@ public class FluxMinimization implements TargetFunction {
 	private double[] L;
 
 	/**
+	 * counts the lengths of the components in the target array
+	 */
+	private int[] counterArray;
+
+	/**
 	 * Constructor, that gets a {@link StoichiometricMatrix} and computes 
 	 * the fluxVector an the errorArray itself.
 	 * 
@@ -171,7 +176,7 @@ public class FluxMinimization implements TargetFunction {
 		// create the target vector 
 		double[] target = new double[(fluxVector.length-1) + 
 		                             (concentrations.length-1) + 
-		                             (L.length -1) + (errorArray.length -1) + 
+		                             (errorArray.length -1) + (L.length -1) +
 		                             (gibbs.length -1)];
 		// this is a pointer, which counts in the target vector the actually position
 		int counter = 0;
@@ -180,6 +185,8 @@ public class FluxMinimization implements TargetFunction {
 		// the L vector and the gibbs vector: therefore we can call first the linear method and add
 		// the additional ones
 		double[] lineartarget = computeTargetFunctionForLinearProgramming();
+		counterArray[3] = counterArray[2] + errorArray.length;
+		counterArray[4] = counterArray[3] + L.length;
 		for (int i = 0; i < lineartarget.length; i++) {
 			target[counter] = lineartarget[i];
 			counter++;
@@ -199,6 +206,8 @@ public class FluxMinimization implements TargetFunction {
 		return target;
 	}
 
+
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.sbml.simulator.fba.controller.TargetFunction#computeTargetFunctionForLinearProgramming()
@@ -210,6 +219,8 @@ public class FluxMinimization implements TargetFunction {
 		double[] target = new double[(fluxVector.length - 1) + 
 		                             (concentrations.length-1) + 
 		                             (errorArray.length -1)];
+		counterArray = new int[5];
+		fillCounterArray(fluxVector.length, concentrations.length, errorArray.length);
 		int counter = 0;
 		// fill it with the flux vector: ||J||
 		for (int i=0; i< this.fluxVector.length; i++) {
@@ -230,8 +241,9 @@ public class FluxMinimization implements TargetFunction {
 		return target;
 	}
 
-	/**
-	 * @return the concentrations
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.fba.controller.TargetFunction#getConcentrations()
 	 */
 	public double[] getConcentrations() {
 		return concentrations;
@@ -258,8 +270,9 @@ public class FluxMinimization implements TargetFunction {
 		this.c_eq = c_eq;
 	}
 
-	/**
-	 * @return the gibbs
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.fba.controller.TargetFunction#getGibbs()
 	 */
 	public double[] getGibbs() {
 		return gibbs;
@@ -282,5 +295,36 @@ public class FluxMinimization implements TargetFunction {
 	}
 
 
+	/**
+	 * 
+	 * @param length
+	 * @param length2
+	 * @param length3
+	 * @param length4
+	 * @param length5
+	 */
+	private void fillCounterArray(int length, int length2, int length3) {
+		counterArray[0] = 0;
+		counterArray[1] = length;
+		counterArray[2] = length + length2;
+	}
+
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.fba.controller.TargetFunction#getFluxVector()
+	 */
+	@Override
+	public double[] getFluxVector() {
+		return this.fluxVector;
+	}
+
+
+	/**
+	 * @return the counterArray
+	 */
+	public int[] getCounterArray() {
+		return counterArray;
+	}
 
 }
