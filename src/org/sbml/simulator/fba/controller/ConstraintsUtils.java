@@ -33,7 +33,7 @@ public class ConstraintsUtils {
 
 	boolean gibbs;
 	private SBMLDocument document;
-	private double[] solutionArray;
+	private double[] gibbsArray;
 
 	/**
 	 * Constructor
@@ -63,7 +63,7 @@ public class ConstraintsUtils {
 	 */
 	public double[] readGibbsFromFile(File files) {
 		readFromFile(files, true);
-		return solutionArray;
+		return gibbsArray;
 		
 
 		//		BufferedReader read = new BufferedReader(new FileReader(file));
@@ -106,19 +106,19 @@ public class ConstraintsUtils {
             String[][] data = (String[][]) obj;
             String[] values = data[1];
 			String[] keys = data[0];
-			solutionArray = new double[values.length-1];
+			gibbsArray = new double[values.length-1];
 			if (gibbs) {
 				for(int i = 0; i< values.length; i++) {
-					solutionArray[i] = Double.parseDouble(values[i]);
+					gibbsArray[i] = Double.parseDouble(values[i]);
 					if (document.getModel().getReaction(keys[i]) != null) {
-						document.getModel().getReaction(keys[i]).putUserObject("gibbs", solutionArray[i]);
+						document.getModel().getReaction(keys[i]).putUserObject("gibbs", gibbsArray[i]);
 					}
 				}
 			} else {
 				for(int i = 0; i< values.length; i++) {
-					solutionArray[i] = Double.parseDouble(values[i]);
+					gibbsArray[i] = Double.parseDouble(values[i]);
 					if (document.getModel().getSpecies(keys[i]) != null) {
-						document.getModel().getSpecies(keys[i]).putUserObject("concentration", solutionArray[i]);
+						document.getModel().getSpecies(keys[i]).putUserObject("concentration", gibbsArray[i]);
 					}
 				}
 			}
@@ -128,8 +128,8 @@ public class ConstraintsUtils {
 	/**
 	 * @return the solutionArray
 	 */
-	public double[] getSolutionArray() {
-		return solutionArray;
+	public double[] getGibbsArray() {
+		return gibbsArray;
 	}
 
 }

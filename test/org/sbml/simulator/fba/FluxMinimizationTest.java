@@ -47,7 +47,6 @@ public class FluxMinimizationTest {
 
 		sbml = (new SBMLReader()).readSBML(args[0]);
 
-
 		FluxMinimization fm = new FluxMinimization(sbml, c_eq, gibbs_eq, targetFluxes);
 		System.out.println(fm);
 

@@ -66,9 +66,7 @@ public class Constraints {
 	 * @param doc
 	 */
 	public Constraints (SBMLDocument doc) {
-		this.document = doc;
-		this.setEquilibriumGibbsEnergies(new double[doc.getModel().getReactionCount()]);
-		this.setEquilibriumConcentrations(new double[doc.getModel().getSpeciesCount()]);
+		this(doc, null, null);
 	}
 	
 

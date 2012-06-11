@@ -30,9 +30,6 @@ public interface TargetFunction {
 	public static double lambda3 = 0.01;
 	public static double lambda4 = 1.0;
 	
-
-	//TODO: fill this class with methods for all target-functions
-	
 	/**
 	 * This method gives an array back, which contains the target function for quadratic programming 
 	 * @return double[]
@@ -49,5 +46,25 @@ public interface TargetFunction {
 	 * @return true, if the target function belongs to a minimization problem
 	 */
 	public boolean isMinProblem();
+	
+	/**
+	 * @return the computed flux vector
+	 */
+	public double[] getFluxVector();
+	
+	/**
+	 * @return the computed Gibbs energies
+	 */
+	public double[] getGibbs();
 
+	/**
+	 * @return the computed concentrations
+	 */
+	public double[] getConcentrations();
+	
+	/**
+	 * @return the counter array to see where in the target array the different components 
+	 * like the flux vector are.
+	 */
+	public int[] getCounterArray();
 }
