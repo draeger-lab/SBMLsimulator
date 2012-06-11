@@ -39,6 +39,8 @@
   <entry key="EXPERIMENTAL_DATA">Experimental Data</entry>   
   <entry key="SEARCHBAR_TOOLTIP">Choose time point of visualization.</entry>
   <entry key="VIDEO_CODEC_NOT_FOUND">Couldn't guess video codec. Stated file ending/format correct?</entry>
+  <entry key="COULD_NOT_WRITE_SCREENSHOT">Couldn't write screenshot file.</entry>
+  <entry key="FILEFILTER_SCREENSHOT">Portable Network Graphics (.png)</entry>
   
   <!-- GraphOptions -->
 
@@ -51,12 +53,12 @@
   <entry key="USE_UNIFORM_NODE_COLOR_TOOLTIP">Enable/Disable uniform node colors instead of node colors given in legend.</entry>
   <entry key="UNIFORM_NODE_COLOR">Color for uniform node color</entry>
   <entry key="UNIFORM_NODE_COLOR_TOOLTIP">Sets the color for uniform node color.</entry>
-  <entry key="NODESIZE_GROUP">Dynamic change of node size</entry>
-  <entry key="NODESIZE_GROUP_TOOLTIP">Options for the dynamic change of node size.</entry>
-  <entry key="NODECOLOR_GROUP">Dynamic change of node color</entry>
-  <entry key="NODECOLOR_GROUP_TOOLTIP">Options for the dynamic change of node color.</entry>
-  <entry key="REACTION_GROUP">Dynamical change of reactions</entry>
-  <entry key="REACTION_GROUP_TOOLTIP">Options for the dynamic change of reactions.</entry>
+  <entry key="GROUP_NODESIZE">Dynamic change of node size</entry>
+  <entry key="GROUP_NODESIZE_TOOLTIP">Options for the dynamic change of node size.</entry>
+  <entry key="GROUP_NODECOLOR">Dynamic change of node color</entry>
+  <entry key="GROUP_NODECOLOR_TOOLTIP">Options for the dynamic change of node color.</entry>
+  <entry key="GROUP_REACTION">Dynamical change of reactions</entry>
+  <entry key="GROUP_REACTION_TOOLTIP">Options for the dynamic change of reactions.</entry>
   <entry key="COLOR1">High concentration</entry>
   <entry key="COLOR1_TOOLTIP">In case of dynamic change of node color, this determines the color for high concentration.</entry>
   <entry key="COLOR2">Middle concentration</entry>
@@ -83,15 +85,15 @@
   <entry key="SIM_SPEED_SLOW_TOOLTIP">Sets setting for slow play speed.</entry>
   <entry key="SIM_SPEED_CHOOSER">Choose play speed</entry>
   <entry key="SIM_SPEED_CHOOSER_TOOLTIP">This options determines the play speed.</entry>  
-  <entry key="SIM_SPEED_GROUP">Play speed</entry>
-  <entry key="SIM_SPEED_GROUP_TOOLTIP">These settings control the play speed. The smaller the value, the faster the play speed.</entry>
+  <entry key="GROUP_SIM_SPEED">Play speed</entry>
+  <entry key="GROUP_SIM_SPEED_TOOLTIP">These settings control the play speed. The smaller the value, the faster the play speed.</entry>
   <entry key="VISUALIZATION_STYLE">Visualization style</entry>
   <entry key="VISUALIZATION_STYLE_TOOLTIP">This options determines the visualization style.</entry>  
   <entry key="VISUALIZATION_DATA">Data for visualization</entry>
   <entry key="VISUALIZATION_DATA_TOOLTIP">Choose the data to visualize.</entry>  
   <entry key="DATA_NOT_AVAILABLE">Chosen data set for visualization is not available by now.</entry>
-  <entry key="VIDEO_ENCODING">Video encoding</entry>
-  <entry key="VIDEO_ENCODING_TOOLTIP">These settings control video encoding.</entry>
+  <entry key="GROUP_VIDEO_ENCODING">Video encoding</entry>
+  <entry key="GROUP_VIDEO_ENCODING_TOOLTIP">These settings control video encoding.</entry>
   <entry key="VIDEO_FRAMERATE">Framerate</entry>
   <entry key="VIDEO_FRAMERATE_TOOLTIP">The lower the framerate, the slower the video play speed.</entry>
   <entry key="VIDEO_IMAGE_STEPSIZE">Steps between two images</entry>

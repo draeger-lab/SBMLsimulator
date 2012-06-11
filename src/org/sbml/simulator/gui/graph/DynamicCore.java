@@ -110,6 +110,28 @@ public class DynamicCore {
 		}
 
 		/* (non-Javadoc)
+		 * @see javax.swing.SwingWorker#done()
+		 */
+		@Override
+		protected void done() {
+			super.done();
+			if (encoder != null) {
+			    encoder.close();
+			    logger.fine("Videoencoding successful");
+			}
+			
+			/*
+			 * Notify observer.
+			 */
+            observer.donePlay();
+			
+			/*
+			 * Ensure that only one playWorker is active
+			 */
+			playWorker = null;
+		}
+
+		/* (non-Javadoc)
 		 * @see javax.swing.SwingWorker#process(java.util.List)
 		 */
 		@Override
@@ -150,28 +172,6 @@ public class DynamicCore {
                     }
                 }
 		    }
-		}
-
-		/* (non-Javadoc)
-		 * @see javax.swing.SwingWorker#done()
-		 */
-		@Override
-		protected void done() {
-			super.done();
-			if (encoder != null) {
-			    encoder.close();
-			    logger.fine("Videoencoding successful");
-			}
-			
-			/*
-			 * Notify observer.
-			 */
-            observer.donePlay();
-			
-			/*
-			 * Ensure that only one playWorker is active
-			 */
-			playWorker = null;
 		}
 	}
     

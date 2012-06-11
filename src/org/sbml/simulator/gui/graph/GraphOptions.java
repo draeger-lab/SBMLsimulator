@@ -32,6 +32,8 @@ import de.zbit.util.prefs.Range;
 
 
 /**
+ * Options for dynamic visualization.
+ * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
@@ -61,13 +63,6 @@ public interface GraphOptions extends KeyProvider{
      */
     public static final Option<Boolean> SHOW_REACTION_LABELS = new Option<Boolean>(
         "SHOW_REACTION_LABELS", Boolean.class, bundle, Boolean.FALSE);
-    
-    /**
-     * Options for visualization.
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static final OptionGroup GROUP_VISUALIZATION = new OptionGroup(
-        "GROUP_VISUALIZATION", bundle, SHOW_NODE_LABELS, SHOW_REACTION_LABELS, VISUALIZATION_STYLE);
 
     /**
      * In case of dynamic node size change, it defines the minimum node size.
@@ -96,13 +91,6 @@ public interface GraphOptions extends KeyProvider{
         "UNIFORM_NODE_COLOR", Color.class, bundle, ColorPalette.SECOND_292);
     
     /**
-     * Settings in case of dynamic change of node size.
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static final OptionGroup NODESIZE_GROUP = new OptionGroup(
-        "NODESIZE_GROUP", bundle, USE_UNIFORM_NODE_COLOR, UNIFORM_NODE_COLOR, MIN_NODE_SIZE, MAX_NODE_SIZE);
-    
-    /**
      * Color for high concentration.
      */
     public static final Option<Color> COLOR1 = new Option<Color>(
@@ -128,13 +116,6 @@ public interface GraphOptions extends KeyProvider{
                     Double.class, "{(0, 1E3]}"), Double.valueOf(30d));
     
     /**
-     * Settings in case of dynamic change of node color.
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static final OptionGroup NODECOLOR_GROUP = new OptionGroup(
-        "NODECOLOR_GROUP", bundle, COLOR1, COLOR2, COLOR3, COLOR_NODE_SIZE);
-    
-    /**
      * Determines the minimum line width of dynamic reaction visualization.
      */
     public static final Option<Double> MIN_LINE_WIDTH = new Option<Double>(
@@ -149,20 +130,11 @@ public interface GraphOptions extends KeyProvider{
                     Double.class, "{(0, 1E3]}"), Double.valueOf(6d));
     
     /**
-     * Settings for dynamic reaction visualization.
-     */
-    @SuppressWarnings("unchecked")
-    public static final OptionGroup<Double> REACTION_GROUP = new OptionGroup<Double>(
-        "REACTION_GROUP", bundle, MIN_LINE_WIDTH, MAX_LINE_WIDTH);
-    
-    /**
      * Sets the fast simulation speed.
      */
     public static final Option<Double> SIM_SPEED_FAST = new Option<Double>(
             "SIM_SPEED_FAST", Double.class, bundle, new Range<Double>(
                     Double.class, "{[1, 1E3]}"), Double.valueOf(5d));
-    
-    //TODO integer options?
     
     /**
      * Sets the normal simulation speed.
@@ -186,14 +158,6 @@ public interface GraphOptions extends KeyProvider{
       Items.getAllSpeedItems()), Items.NORMAL.getName());
     
     /**
-     * Options for simulation speed.
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static final OptionGroup SIM_SPEED_GROUP = new OptionGroup(
-        "SIM_SPEED_GROUP", bundle, SIM_SPEED_FAST, SIM_SPEED_NORMAL, SIM_SPEED_SLOW, SIM_SPEED_CHOOSER);
-    
-    
-    /**
      * Sets framerate.
      */
     public static final Option<Double> VIDEO_FRAMERATE = new Option<Double>(
@@ -215,10 +179,45 @@ public interface GraphOptions extends KeyProvider{
                     Double.class, "{[1, 1E2]}"), Double.valueOf(3d));
     
     /**
+     * Options for visualization.
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static final OptionGroup GROUP_VISUALIZATION = new OptionGroup(
+        "GROUP_VISUALIZATION", bundle, SHOW_NODE_LABELS, SHOW_REACTION_LABELS, VISUALIZATION_STYLE);
+    
+    /**
+     * Settings in case of dynamic change of node size.
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static final OptionGroup GROUP_NODESIZE = new OptionGroup(
+        "GROUP_NODESIZE", bundle, USE_UNIFORM_NODE_COLOR, UNIFORM_NODE_COLOR, MIN_NODE_SIZE, MAX_NODE_SIZE);
+    
+    /**
+     * Settings in case of dynamic change of node color.
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static final OptionGroup GROUP_NODECOLOR = new OptionGroup(
+        "GROUP_NODECOLOR", bundle, COLOR1, COLOR2, COLOR3, COLOR_NODE_SIZE);
+    
+    /**
+     * Settings for dynamic reaction visualization.
+     */
+    @SuppressWarnings("unchecked")
+    public static final OptionGroup<Double> GROUP_REACTION = new OptionGroup<Double>(
+        "GROUP_REACTION", bundle, MIN_LINE_WIDTH, MAX_LINE_WIDTH);
+    
+    /**
+     * Options for simulation speed.
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static final OptionGroup GROUP_SIM_SPEED = new OptionGroup(
+        "GROUP_SIM_SPEED", bundle, SIM_SPEED_FAST, SIM_SPEED_NORMAL, SIM_SPEED_SLOW, SIM_SPEED_CHOOSER);
+    
+    /**
      * Settings for video encoding.
      */
     @SuppressWarnings("unchecked")
-    public static final OptionGroup<Double> VIDEO_ENCODING = new OptionGroup<Double>(
-        "VIDEO_ENCODING", bundle, VIDEO_RESOLUTION_MULTIPLIER, VIDEO_FRAMERATE, VIDEO_IMAGE_STEPSIZE);
+    public static final OptionGroup<Double> GROUP_VIDEO_ENCODING = new OptionGroup<Double>(
+        "GROUP_VIDEO_ENCODING", bundle, VIDEO_RESOLUTION_MULTIPLIER, VIDEO_FRAMERATE, VIDEO_IMAGE_STEPSIZE);
     
 }

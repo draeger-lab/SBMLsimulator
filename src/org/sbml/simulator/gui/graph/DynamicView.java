@@ -60,22 +60,6 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         PropertyChangeListener {
 
     /**
-     * 
-     */
-    private static final long serialVersionUID = 4111494340467647183L;
-    
-    /**
-     * A {@link Logger} for this class.
-     */
-    private static final transient Logger logger = Logger.getLogger(DynamicView.class.getName());
-
-    /**
-     * Localization support.
-     */
-    private static final transient ResourceBundle bundle = ResourceManager
-            .getBundle("org.sbml.simulator.gui.graph.DynamicGraph");
-
-    /**
      * Stores {@link GraphManipulator}s.
      * 
      * @author Fabian Schwarzkopf
@@ -85,12 +69,12 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         NODESIZE, NODECOLOR;
 
         /**
-         * Returns localized name of this Item.
+         * Returns a string array of all manipulators.
          * 
          * @return
          */
-        public String getName() {
-            return bundle.getString(this.toString());
+        public static String[] getAllManipulators() {
+            return new String[] { NODESIZE.getName(), NODECOLOR.getName() };
         }
         
         /**
@@ -108,14 +92,30 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         }
 
         /**
-         * Returns a string array of all manipulators.
+         * Returns localized name of this Item.
          * 
          * @return
          */
-        public static String[] getAllManipulators() {
-            return new String[] { NODESIZE.getName(), NODECOLOR.getName() };
+        public String getName() {
+            return bundle.getString(this.toString());
         }
     }
+    
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 4111494340467647183L;
+
+    /**
+     * A {@link Logger} for this class.
+     */
+    private static final transient Logger logger = Logger.getLogger(DynamicView.class.getName());
+
+    /**
+     * Localization support.
+     */
+    private static final transient ResourceBundle bundle = ResourceManager
+            .getBundle("org.sbml.simulator.gui.graph.DynamicGraph");
 
     /**
      * Panel for the graph representation.
@@ -224,158 +224,6 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     }
     
     /**
-     * Sets the {@link GraphManipulator} for this {@link DynamicView}.
-     * 
-     * @param gm
-     */
-    public void setGraphManipulator(GraphManipulator gm) {
-        graphManipulator = gm;
-        updateGraph();
-    }
-    
-    /**
-     * Changes visualization to given data set name.
-     * 
-     * @param dataName
-     *            last character has to be an integer, representing the dataset
-     *            number
-     * @return true, if data could be visualized<br>
-     *         false, if data could not be visualized.
-     */
-    public boolean visualizeData(String dataName){
-        int index = Integer.valueOf(String.valueOf(dataName.charAt(dataName.length()-1))) - 1;
-        if (dataName.contains(bundle.getString("SIMULATION_DATA"))){
-            if (!simulationCores.isEmpty()){
-                activateView(simulationCores.get(index));
-                return true;
-            }
-            return false;
-        } else if (dataName.contains(bundle.getString("EXPERIMENTAL_DATA"))){
-            if (!experimentalCores.isEmpty()){
-                activateView(experimentalCores.get(index));
-                return true;
-            }
-            return false;
-        }
-        
-        return false;
-    }
-
-    /**
-     * Returns the registered {@link DynamicController}.
-     * 
-     * @return {@link DynamicController} or null
-     */
-    public DynamicController getDynamicController() {
-        return controller != null ? controller : null;
-    }
-
-    /**
-     * Returns legend panel of this {@link DynamicView}.
-     * 
-     * @return
-     */
-    public LegendPanel getLegendPanel() {
-        return legend;
-    }
-
-    /**
-     * Updates the displayed graph with respect to the user chosen settings.
-     * (i.e. turning on/off labels).
-     */
-    public void updateGraph() {
-        if ((visualizedCore != null) && (currData != null)) {
-            updateGraph(currTime, currData);
-        }
-    }
-
-    /**
-     * Saves selection state of id, whether specie or reaction, in corresponding
-     * hashmap. Method should be invoked on changes in {@link LegendTableModel}.
-     * 
-     * @param id
-     * @param bool
-     */
-    public void putSelectionState(String id, boolean bool) {
-        if (document.getModel().getSpecies(id) != null) {
-            speciesSelectionStates.put(id, bool);
-        } else if (document.getModel().getReaction(id) != null) {
-            reactionsSelectionStates.put(id, bool);
-        }
-    }
-
-    /**
-     * Returns selected species.
-     * 
-     * @return
-     */
-    public String[] getSelectedSpecies() {
-        ArrayList<String> selectedSpecies = new ArrayList<String>();
-        for (String id : speciesSelectionStates.keySet()) {
-            if (speciesSelectionStates.get(id)) {
-                selectedSpecies.add(id);
-            }
-        }
-        return selectedSpecies.toArray(new String[selectedSpecies.size()]);
-    }
-
-    /**
-     * Returns selected reactions.
-     * 
-     * @return
-     */
-    public String[] getSelectedReactions() {
-        ArrayList<String> selectedReactions = new ArrayList<String>();
-        for (String id : reactionsSelectionStates.keySet()) {
-            if (reactionsSelectionStates.get(id)) {
-                selectedReactions.add(id);
-            }
-        }
-        return selectedReactions.toArray(new String[selectedReactions.size()]);
-    }
-    
-    /**
-     * updates all selection states of IDs saved in corresponding hashmap
-     * (reactions & species)
-     */
-    public void retrieveSelectionStates(){
-        //update species
-        for(String id : speciesSelectionStates.keySet()){
-            if(legend.getLegendTableModel().isSelected(id)){
-                speciesSelectionStates.put(id, true);
-            } else {
-                speciesSelectionStates.put(id, false);
-            }
-        }
-        //update reactions
-        for(String id : reactionsSelectionStates.keySet()){
-            if(legend.getLegendTableModel().isSelected(id)){
-                reactionsSelectionStates.put(id, true);
-            } else {
-                reactionsSelectionStates.put(id, false);
-            }
-        }
-    }
-
-    /**
-     * Returns {@link SBML2GraphML} of this {@link DynamicView}.
-     * 
-     * @return
-     */
-    public SBML2GraphML getGraph() {
-        return graphPanel.getConverter();
-    }
-
-    /**
-     * Returns {@link SBMLDocument} of this {@link DynamicView}.
-     * 
-     * @return
-     */
-    public SBMLDocument getSBMLDocument() {
-        return document;
-    }
-    
-    /**
      * This methods activates {@link DynamicView} and implicit associated
      * {@link DynamicControlPanel} on the given {@link DynamicCore}.
      * @param core
@@ -418,63 +266,115 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
             graphManipulator = controller.getSelectedGraphManipulator();
             //show core's current timepoint
             visualizedCore.fireTimepointChanged();
+            logger.fine("Activated/changed visualized data.");
         }
     }
-
+    
     /*
      * (non-Javadoc)
      * 
-     * @see org.sbml.simulator.gui.graph.DynamicGraph#updateGraph(double,
-     * org.simulator.math.odes.MultiTable)
+     * @see org.sbml.simulator.gui.graph.DynamicGraph#donePlay()
      */
     @Override
-    public void updateGraph(double timepoint, MultiTable updateThem) {
-        
-        // save currently displayed properties
-        currTime = timepoint;
-        currData = updateThem;
-        // update JSlider (in case of "play")
-        controlPanel.setSearchbarValue(timepoint);
+    public void donePlay() {
+        controlPanel.setStopStatus();
+        double[] allTimepoints = visualizedCore.getTimepoints();
+        // only if last timepoint reached, switch to first timepoint.
+        if (currTime == allTimepoints[allTimepoints.length - 1]) {
+            visualizedCore.setCurrTimepoint(0);
+        }
+        setEnabled(true); //ensure that view is enabled
+    }
 
-        if (graphManipulator != null) {
-            for (int i = 1; i <= updateThem.getColumnCount(); i++) {
-                String id = updateThem.getColumnIdentifier(i);
-                if (legend.getLegendTableModel().isSelected(id)) {
-                    // only display dynamic features when selected
-                    if (document.getModel().getSpecies(id) != null) {
-                        /*
-                         * There's just one row because the core passes only the
-                         * necessary data for the particular timepoint
-                         */
-                        graphManipulator.dynamicChangeOfNode(id,
-                                updateThem.getValueAt(0, i),
-                                controlPanel.getSelectionStateOfNodeLabels());
-                    } else if (document.getModel().getReaction(id) != null) {
-                        if (timepoint == 0.0) {
-                            // there's no initial reaction data.
-                            graphManipulator.revertChanges(id);
-                        } else {
-                            graphManipulator
-                                    .dynamicChangeOfReaction(
-                                            id,
-                                            updateThem.getValueAt(0, i),
-                                            controlPanel
-                                                    .getSelectionStateOfReactionLabels());
-                        }
-                    }
-                } else {
-                    graphManipulator.revertChanges(id);
-                }
+    /**
+     * Returns the registered {@link DynamicController}.
+     * 
+     * @return {@link DynamicController} or null
+     */
+    public DynamicController getDynamicController() {
+        return controller != null ? controller : null;
+    }
+
+    /**
+     * Returns {@link SBML2GraphML} of this {@link DynamicView}.
+     * 
+     * @return
+     */
+    public SBML2GraphML getGraph() {
+        return graphPanel.getConverter();
+    }
+
+    /**
+     * Returns legend panel of this {@link DynamicView}.
+     * 
+     * @return
+     */
+    public LegendPanel getLegendPanel() {
+        return legend;
+    }
+
+    /**
+     * Returns {@link SBMLDocument} of this {@link DynamicView}.
+     * 
+     * @return
+     */
+    public SBMLDocument getSBMLDocument() {
+        return document;
+    }
+
+    /**
+     * Returns an array {width, height} of the graph size independent of current
+     * view.
+     * @return {width, height}
+     */
+    public int[] getScreenshotResolution(){
+        Graph2D graph = graphPanel.getConverter().getSimpleGraph();
+
+        //create dedicated view
+        JPGIOHandler ioh = new JPGIOHandler();
+        Graph2DView imageView = ioh.createDefaultGraph2DView(graph);
+        
+        //configure imageView such that whole graph is contained
+        ViewPortConfigurator vpc = new ViewPortConfigurator();
+        vpc.setGraph2D(imageView.getGraph2D());
+        vpc.setClipType(ViewPortConfigurator.CLIP_GRAPH);
+        vpc.setSizeType(ViewPortConfigurator.SIZE_USE_ORIGINAL);
+        vpc.configure(imageView);
+        
+        int width = imageView.getWidth();
+        int height = imageView.getHeight();
+        
+        return new int[]{width, height};
+    }
+
+    /**
+     * Returns selected reactions.
+     * 
+     * @return
+     */
+    public String[] getSelectedReactions() {
+        ArrayList<String> selectedReactions = new ArrayList<String>();
+        for (String id : reactionsSelectionStates.keySet()) {
+            if (reactionsSelectionStates.get(id)) {
+                selectedReactions.add(id);
             }
         }
-        
-        /*
-         * Notifiy that graph update is finished. Ensures that play-thread in
-         * core doesn't overtravel drawing.
-         */
-        if (visualizedCore != null) {
-            visualizedCore.operationsDone();
+        return selectedReactions.toArray(new String[selectedReactions.size()]);
+    }
+    
+    /**
+     * Returns selected species.
+     * 
+     * @return
+     */
+    public String[] getSelectedSpecies() {
+        ArrayList<String> selectedSpecies = new ArrayList<String>();
+        for (String id : speciesSelectionStates.keySet()) {
+            if (speciesSelectionStates.get(id)) {
+                selectedSpecies.add(id);
+            }
         }
+        return selectedSpecies.toArray(new String[selectedSpecies.size()]);
     }
 
     /*
@@ -575,47 +475,54 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Saves selection state of id, whether specie or reaction, in corresponding
+     * hashmap. Method should be invoked on changes in {@link LegendTableModel}.
      * 
-     * @see org.sbml.simulator.gui.graph.DynamicGraph#donePlay()
+     * @param id
+     * @param bool
      */
-    @Override
-    public void donePlay() {
-        controlPanel.setStopStatus();
-        double[] allTimepoints = visualizedCore.getTimepoints();
-        // only if last timepoint reached, switch to first timepoint.
-        if (currTime == allTimepoints[allTimepoints.length - 1]) {
-            visualizedCore.setCurrTimepoint(0);
+    public void putSelectionState(String id, boolean bool) {
+        if (document.getModel().getSpecies(id) != null) {
+            speciesSelectionStates.put(id, bool);
+        } else if (document.getModel().getReaction(id) != null) {
+            reactionsSelectionStates.put(id, bool);
         }
-        setEnabled(true); //ensure that view is enabled
     }
     
     /**
-     * Returns an array {width, height} of the graph size independent of current
-     * view.
-     * @return {width, height}
+     * updates all selection states of IDs saved in corresponding hashmap
+     * (reactions & species)
      */
-    public int[] getScreenshotResolution(){
-        Graph2D graph = graphPanel.getConverter().getSimpleGraph();
-
-        //create dedicated view
-        JPGIOHandler ioh = new JPGIOHandler();
-        Graph2DView imageView = ioh.createDefaultGraph2DView(graph);
-        
-        //configure imageView such that whole graph is contained
-        ViewPortConfigurator vpc = new ViewPortConfigurator();
-        vpc.setGraph2D(imageView.getGraph2D());
-        vpc.setClipType(ViewPortConfigurator.CLIP_GRAPH);
-        vpc.setSizeType(ViewPortConfigurator.SIZE_USE_ORIGINAL);
-        vpc.configure(imageView);
-        
-        int width = imageView.getWidth();
-        int height = imageView.getHeight();
-        
-        return new int[]{width, height};
+    public void retrieveSelectionStates(){
+        //update species
+        for(String id : speciesSelectionStates.keySet()){
+            if(legend.getLegendTableModel().isSelected(id)){
+                speciesSelectionStates.put(id, true);
+            } else {
+                speciesSelectionStates.put(id, false);
+            }
+        }
+        //update reactions
+        for(String id : reactionsSelectionStates.keySet()){
+            if(legend.getLegendTableModel().isSelected(id)){
+                reactionsSelectionStates.put(id, true);
+            } else {
+                reactionsSelectionStates.put(id, false);
+            }
+        }
     }
-    
+
+    /**
+     * Sets the {@link GraphManipulator} for this {@link DynamicView}.
+     * 
+     * @param gm
+     */
+    public void setGraphManipulator(GraphManipulator gm) {
+        graphManipulator = gm;
+        updateGraph();
+    }
+
     /* (non-Javadoc)
      * @see org.sbml.simulator.gui.graph.DynamicGraph#takeGraphshot()
      */
@@ -658,18 +565,103 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
         imageView.paintVisibleContent(image.createGraphics());
         
-        //TODO screenshot function
-//        File outputfile = new File("saved.png");
-//        try {
-//            ImageIO.write(image, "png", outputfile);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-        
         //restore original view
         graph.removeView(graph.getCurrentView());
         graph.setCurrentView(originalViewPort);
         
         return image;
+    }
+
+    /**
+     * Updates the displayed graph with respect to the user chosen settings.
+     * (i.e. turning on/off labels).
+     */
+    public void updateGraph() {
+        if ((visualizedCore != null) && (currData != null)) {
+            updateGraph(currTime, currData);
+        }
+    }
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.sbml.simulator.gui.graph.DynamicGraph#updateGraph(double,
+     * org.simulator.math.odes.MultiTable)
+     */
+    @Override
+    public void updateGraph(double timepoint, MultiTable updateThem) {
+        // save currently displayed properties
+        currTime = timepoint;
+        currData = updateThem;
+        // update JSlider (in case of "play")
+        controlPanel.setSearchbarValue(timepoint);
+
+        if (graphManipulator != null) {
+            for (int i = 1; i <= updateThem.getColumnCount(); i++) {
+                String id = updateThem.getColumnIdentifier(i);
+                if (legend.getLegendTableModel().isSelected(id)) {
+                    // only display dynamic features when selected
+                    if (document.getModel().getSpecies(id) != null) {
+                        /*
+                         * There's just one row because the core passes only the
+                         * necessary data for the particular timepoint
+                         */
+                        graphManipulator.dynamicChangeOfNode(id,
+                                updateThem.getValueAt(0, i),
+                                controlPanel.getSelectionStateOfNodeLabels());
+                    } else if (document.getModel().getReaction(id) != null) {
+                        if (timepoint == 0.0) {
+                            // there's no initial reaction data.
+                            graphManipulator.revertChanges(id);
+                        } else {
+                            graphManipulator
+                                    .dynamicChangeOfReaction(
+                                            id,
+                                            updateThem.getValueAt(0, i),
+                                            controlPanel
+                                                    .getSelectionStateOfReactionLabels());
+                        }
+                    }
+                } else {
+                    graphManipulator.revertChanges(id);
+                }
+            }
+        }
+        
+        /*
+         * Notifiy that graph update is finished. Ensures that play-thread in
+         * core doesn't overtravel drawing.
+         */
+        if (visualizedCore != null) {
+            visualizedCore.operationsDone();
+        }
+    }
+    
+    /**
+     * Changes visualization to given data set name.
+     * 
+     * @param dataName
+     *            last character has to be an integer, representing the dataset
+     *            number
+     * @return true, if data could be visualized<br>
+     *         false, if data could not be visualized.
+     */
+    public boolean visualizeData(String dataName){
+        int index = Integer.valueOf(String.valueOf(dataName.charAt(dataName.length()-1))) - 1;
+        if (dataName.contains(bundle.getString("SIMULATION_DATA"))){
+            if (!simulationCores.isEmpty()){
+                activateView(simulationCores.get(index));
+                return true;
+            }
+            return false;
+        } else if (dataName.contains(bundle.getString("EXPERIMENTAL_DATA"))){
+            if (!experimentalCores.isEmpty()){
+                activateView(experimentalCores.get(index));
+                return true;
+            }
+            return false;
+        }
+        
+        return false;
     }
 }

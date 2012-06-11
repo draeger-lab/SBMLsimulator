@@ -31,13 +31,6 @@ import org.simulator.math.odes.MultiTable;
 public interface DynamicGraph {
 
     /**
-     * Method envoked by related {@link DynamicCore} when timepoint changes.
-     * @param timepoint
-     * @param updateThem
-     */
-	public void updateGraph(double timepoint, MultiTable updateThem);
-	
-	/**
 	 * Method envoked by related {@link DynamicCore} when playthread is done.
 	 */
 	public void donePlay();
@@ -50,5 +43,12 @@ public interface DynamicGraph {
      * @return
      */
 	public BufferedImage takeGraphshot(int width, int height);
+	
+	/**
+     * Method envoked by related {@link DynamicCore} when timepoint changes.
+     * @param timepoint
+     * @param updateThem
+     */
+	public void updateGraph(double timepoint, MultiTable updateThem);
 	
 }
