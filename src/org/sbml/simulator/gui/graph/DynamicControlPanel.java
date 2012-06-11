@@ -473,6 +473,7 @@ public class DynamicControlPanel extends JPanel {
         pause.setEnabled(true);
         simVeloCombo.setEnabled(true);
         video.setEnabled(true);
+        graphShot.setEnabled(true);
     }
     
     /**
@@ -485,6 +486,7 @@ public class DynamicControlPanel extends JPanel {
         stop.setEnabled(true);
         simVeloCombo.setEnabled(false);
         video.setEnabled(false);
+        graphShot.setEnabled(false);
     }
     
     /**
@@ -546,8 +548,8 @@ public class DynamicControlPanel extends JPanel {
      * Enables {@link DynamicControlPanel} elements accordant to stop status.
      */
     public void setStopStatus() {
-        Component[] elements = { play, pause, stop, video, searchBar,
-                simVeloCombo, nodeLabelsCB, reactionLabelsCB,
+        Component[] elements = { play, pause, stop, video, graphShot,
+                searchBar, simVeloCombo, nodeLabelsCB, reactionLabelsCB,
                 manipulatorsCombo, dataCombo };
         GUITools.setEnabledForAll(true, elements);
     }
@@ -556,8 +558,8 @@ public class DynamicControlPanel extends JPanel {
      * Enables {@link DynamicControlPanel} elements accordant to video status.
      */
     public void setVideoStatus(){
-        Component[] elements = { play, pause, stop, video, searchBar,
-                simVeloCombo, nodeLabelsCB, reactionLabelsCB,
+        Component[] elements = { play, pause, stop, video, graphShot,
+                searchBar, simVeloCombo, nodeLabelsCB, reactionLabelsCB,
                 manipulatorsCombo, dataCombo };
         GUITools.setEnabledForAll(false, elements);
     }
