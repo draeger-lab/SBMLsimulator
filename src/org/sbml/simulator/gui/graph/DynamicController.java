@@ -183,7 +183,7 @@ public class DynamicController implements ChangeListener, ActionListener,
                     }
                 } else if (e.getActionCommand().equals("GRAPHSHOT")) {
                     File destinationFile = GUITools.saveFileDialog(view,
-                            System.getProperty("user.home"), true, false,
+                            System.getProperty("user.home"), false, false,
                             JFileChooser.FILES_ONLY, SBFileFilter.createPNGFileFilter());
                     
                     if (destinationFile != null) {
