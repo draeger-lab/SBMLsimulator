@@ -18,9 +18,9 @@
   <entry key="STOP">Stop</entry>
   <entry key="STOP_TOOLTIP">Stop the dynamic visualization.</entry>
   <entry key="TOVIDEO">Video</entry>
-  <entry key="TOVIDEO_TOOLTIP">Save the dynamic visualization as a video.</entry>
+  <entry key="TOVIDEO_TOOLTIP">Save the dynamic visualization as a video. Resolution can be adjusted with resolution multiplier in options.</entry>
   <entry key="GRAPHSHOT">Image</entry>
-  <entry key="GRAPHSHOT_TOOLTIP">Take a screenshot of the whole graph.</entry>  
+  <entry key="GRAPHSHOT_TOOLTIP">Take a screenshot of the whole graph. Resolution can be adjusted with resolution multiplier in options.</entry>  
   <entry key="NODELABELS">Nodelabels</entry>
   <entry key="NODELABELS_TOOLTIP">Switch for node labels.</entry>
   <entry key="REACTIONLABELS">Reactionlabels</entry>
@@ -38,9 +38,11 @@
   <entry key="SIMULATION_DATA">Simulation Data</entry> 
   <entry key="EXPERIMENTAL_DATA">Experimental Data</entry>   
   <entry key="SEARCHBAR_TOOLTIP">Choose time point of visualization.</entry>
+  
+  <!-- Error Messages -->
+  
   <entry key="VIDEO_CODEC_NOT_FOUND">Couldn't guess video codec. Stated file ending/format correct?</entry>
   <entry key="COULD_NOT_WRITE_SCREENSHOT">Couldn't write screenshot file.</entry>
-  <entry key="FILEFILTER_SCREENSHOT">Portable Network Graphics (.png)</entry>
   
   <!-- GraphOptions -->
 

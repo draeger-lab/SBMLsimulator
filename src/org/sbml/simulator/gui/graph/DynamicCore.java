@@ -452,6 +452,11 @@ public class DynamicCore {
 	 */
 	public void play(){
 		if(playWorker == null){
+		    
+		    //start from the beginning, if currently the last timepoint is set.
+		    if (currTimepoint == timePoints[timePoints.length - 1]) {
+		        setCurrTimepoint(0);
+		    }
 			playWorker = new PlayWorker();
 			playWorker.execute();
 		}

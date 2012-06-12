@@ -18,9 +18,9 @@
   <entry key="STOP">Stop</entry>
   <entry key="STOP_TOOLTIP">Stoppt die dynamische Visualisierung.</entry>
   <entry key="TOVIDEO">Video</entry>
-  <entry key="TOVIDEO_TOOLTIP">Speichert die dynamische Visualisierung als Video.</entry>
+  <entry key="TOVIDEO_TOOLTIP">Speichert die dynamische Visualisierung als Video. Die Auflösung kann über den Auflösungsmultiplikator in den Optionen angepasst werden.</entry>
   <entry key="GRAPHSHOT">Bild</entry>
-  <entry key="GRAPHSHOT_TOOLTIP">Speichert das aktuelle Netzwerk als Bilddatei.</entry>   
+  <entry key="GRAPHSHOT_TOOLTIP">Speichert das aktuelle Netzwerk als Bilddatei. Die Auflösung kann über den Auflösungsmultiplikator in den Optionen angepasst werden.</entry>   
   <entry key="NODELABELS">Knotenbeschriftung</entry>
   <entry key="REACTIONLABELS">Reaktionenbeschriftung</entry>
   <entry key="FAST">Schnell</entry>
@@ -37,9 +37,11 @@
   <entry key="SIMULATION_DATA">Simulierte Daten</entry> 
   <entry key="EXPERIMENTAL_DATA">Experimentelle Daten</entry>   
   <entry key="SEARCHBAR_TOOLTIP">Stellen Sie den Zeitpunkt der Visualisierung ein.</entry>
+  
+  <!-- Error Messages -->
+  
   <entry key="VIDEO_CODEC_NOT_FOUND">Videocodec wurde nicht erkannt. Möglicherweise existiert dieser Videocodec auf Ihrem System nicht, oder die angegeben Dateiendung ist falsch.</entry>
-  <entry key="COULD_NOT_WRITE_SCREENSHOT">Bilddatei konnte nicht produziert werden.</entry>
-  <entry key="FILEFILTER_SCREENSHOT">Portable Network Graphics (.png)</entry>  
+  <entry key="COULD_NOT_WRITE_SCREENSHOT">Bilddatei konnte nicht produziert werden.</entry>  
   
   <!-- GraphOptions -->
 

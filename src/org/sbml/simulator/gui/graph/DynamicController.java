@@ -40,13 +40,13 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.filechooser.FileFilter;
 
 import org.sbml.simulator.gui.graph.DynamicControlPanel.Items;
 import org.sbml.simulator.gui.graph.DynamicView.Manipulators;
 import org.sbml.simulator.gui.table.LegendTableModel;
 
 import de.zbit.gui.GUITools;
+import de.zbit.io.filefilter.SBFileFilter;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.Option;
@@ -137,23 +137,30 @@ public class DynamicController implements ChangeListener, ActionListener,
                          * just a resolution multiplier to get higher
                          * resolutions. Using Graphsize as base for video
                          * resolution ensures that the black margin in video
-                         * is minimum.
+                         * is at minimum.
                          */
                         int resolutionMultiplier = (int) prefs
                                 .getDouble(GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
+                        
+                        //determine raw graph size
                         int[] size = view.getScreenshotResolution();
                         int width = size[0] * resolutionMultiplier;
                         int height = size[1] * resolutionMultiplier;
                         
+                        //determine fixpoints to prevent pixeljumping in videos
+                        view.determineFixPoints(width);
+                        
+                        //even resolution
                         width = (width % 2) == 1 ? width-1 : width;
                         height = (height % 2) == 1 ? height-1 : height;
                         logger.fine("Video out resolution = " + width + "x" + height);
+                        
                         int framerate = (int) prefs
                                 .getDouble(GraphOptions.VIDEO_FRAMERATE);
                         int captureStepSize = (int) prefs
                                 .getDouble(GraphOptions.VIDEO_IMAGE_STEPSIZE);
                         
-                        //catch errors while videoencoding
+                        //catch errors due to videoencoding
                         try {
                             core.generateVideo(width, height, framerate,
                                     captureStepSize,
@@ -177,26 +184,22 @@ public class DynamicController implements ChangeListener, ActionListener,
                 } else if (e.getActionCommand().equals("GRAPHSHOT")) {
                     File destinationFile = GUITools.saveFileDialog(view,
                             System.getProperty("user.home"), true, false,
-                            JFileChooser.FILES_ONLY, new FileFilter() {
-                                
-                                @Override
-                                public boolean accept(File f) {
-                                    return f.getName().endsWith(".png");
-                                }
-                                
-                                @Override
-                                public String getDescription() {
-                                    return bundle.getString("FILEFILTER_SCREENSHOT");
-                                }
-                            });
+                            JFileChooser.FILES_ONLY, SBFileFilter.createPNGFileFilter());
                     
                     if (destinationFile != null) {
+                        //add extenion if missing
+                        if (!destinationFile.getName().toLowerCase().endsWith(".png")) {
+                            destinationFile = new File(destinationFile.getAbsolutePath() + ".png");
+                        }
+                        
                         int resolutionMultiplier = (int) prefs
                                 .getDouble(GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
+                        
+                        //determine raw graphsize
                         int[] size = view.getScreenshotResolution();
                         int width = size[0] * resolutionMultiplier;
                         int height = size[1] * resolutionMultiplier;
-
+                        
                         try {
                             ImageIO.write(view.takeGraphshot(width, height),
                                     "png", destinationFile);
