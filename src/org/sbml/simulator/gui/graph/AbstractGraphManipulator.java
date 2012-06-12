@@ -19,10 +19,12 @@ package org.sbml.simulator.gui.graph;
 
 import java.awt.Color;
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLDocument;
 
 import y.base.Edge;
@@ -87,7 +89,15 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
      */
     public AbstractGraphManipulator(SBML2GraphML graph, SBMLDocument document){
         this.graph = graph;
-        reactionID2reactionNode = graph.getReactionID2reactionNode();
+        reactionID2reactionNode = new HashMap<String, Node>();
+        if (document.isSetModel()) {
+        	Model m = document.getModel();
+        	for (Map.Entry<String, Node> entry : graph.getId2node().entrySet()) {
+        		if (m.containsReaction(entry.getKey())) {
+        			reactionID2reactionNode.put(entry.getKey(), entry.getValue());
+        		}
+        	}
+        }
         this.document = document;
     }
     
