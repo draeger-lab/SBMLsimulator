@@ -17,6 +17,7 @@
  */
 package org.sbml.simulator.gui.graph;
 
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -190,6 +191,16 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     private GraphManipulator graphManipulator;
     
     /**
+     * Internal variable (fixpoint for video).
+     */
+    private Point viewPoint;
+    
+    /**
+     * Internal variable (fixpoint for video).
+     */
+    private double zoomLevel;
+    
+    /**
      * Constructs all necessary elements.
      * 
      * @param document
@@ -270,6 +281,38 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         }
     }
     
+    /**
+     * This function determines the fixpoints to generate videos. It ensures
+     * that graph elements will stay on their location even if the graphsize
+     * changes during visualization (i. e. nodes getting bigger/smaller).
+     * 
+     * @param width
+     *            of the video stream
+     */
+    public void determineFixPoints(int width){
+        Graph2D graph = graphPanel.getConverter().getSimpleGraph();
+
+        //create dedicated view
+        JPGIOHandler ioh = new JPGIOHandler();
+        Graph2DView imageView = ioh.createDefaultGraph2DView(graph);
+        
+        //configure imageView such that whole graph is contained
+        ViewPortConfigurator vpc = new ViewPortConfigurator();
+        vpc.setGraph2D(imageView.getGraph2D());
+        vpc.setClipType(ViewPortConfigurator.CLIP_GRAPH);
+        vpc.setSizeType(ViewPortConfigurator.SIZE_USE_CUSTOM_WIDTH);
+        vpc.setCustomWidth(width);
+        vpc.configure(imageView);
+        
+        //save initial viewpoint
+        viewPoint = imageView.getViewPoint();
+        //save initial zoomlevel
+        zoomLevel = imageView.getZoom();
+        
+        logger.fine("Fixpoints set. Viewpoint: " + viewPoint + "; Zoomlevel: "
+                + zoomLevel);
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -278,11 +321,6 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     @Override
     public void donePlay() {
         controlPanel.setStopStatus();
-        double[] allTimepoints = visualizedCore.getTimepoints();
-        // only if last timepoint reached, switch to first timepoint.
-        if (currTime == allTimepoints[allTimepoints.length - 1]) {
-            visualizedCore.setCurrTimepoint(0);
-        }
         setEnabled(true); //ensure that view is enabled
     }
 
@@ -321,10 +359,10 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     public SBMLDocument getSBMLDocument() {
         return document;
     }
-
+    
     /**
      * Returns an array {width, height} of the graph size independent of current
-     * view.
+     * view. Returned width and height represent the raw resolution of this graph. 
      * @return {width, height}
      */
     public int[] getScreenshotResolution(){
@@ -435,7 +473,6 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
             if (expData != null){
                 final MultiTable data;
                 final DynamicView thisView = this;
-                //TODO options for inbetween timepoints
                 if (expData.getTimePoints().length < 100) {
                     data = SplineCalculation.calculateSplineValues(expData, 100);
                 } else {
@@ -560,6 +597,18 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         vpc.setCustomWidth(width);
         //configure dedicated view with settings
         vpc.configure(imageView);
+        
+        /*
+         * fix zoomlevel and viewpoint to prevent pixel jumping during video
+         * generating. Make sure to call determineFixePoints(int width) before calling
+         * this function.
+         */
+        if (zoomLevel != 0 && viewPoint != null) {
+            imageView.setZoom(zoomLevel);
+            imageView.setViewPoint(viewPoint.x, viewPoint.y);
+        } else {
+            logger.fine("No Fixpoints available. There might be some pixel jumping in videos.");
+        }
         
         //take screenshot
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
