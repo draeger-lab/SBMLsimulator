@@ -45,6 +45,7 @@ import org.sbml.simulator.gui.graph.DynamicControlPanel.Items;
 import org.sbml.simulator.gui.graph.DynamicView.Manipulators;
 import org.sbml.simulator.gui.table.LegendTableModel;
 
+import de.zbit.gui.GUIOptions;
 import de.zbit.gui.GUITools;
 import de.zbit.io.filefilter.SBFileFilter;
 import de.zbit.util.ResourceManager;
@@ -182,9 +183,11 @@ public class DynamicController implements ChangeListener, ActionListener,
                         }
                     }
                 } else if (e.getActionCommand().equals("GRAPHSHOT")) {
-                    File destinationFile = GUITools.saveFileDialog(view,
-                            System.getProperty("user.home"), false, false,
-                            JFileChooser.FILES_ONLY, SBFileFilter.createPNGFileFilter());
+                	SBPreferences guiPrefs = SBPreferences
+                			.getPreferencesFor(GUIOptions.class);
+                	File destinationFile = GUITools.saveFileDialog(view,
+                		guiPrefs.get(GUIOptions.SAVE_DIR), false, false,
+                		JFileChooser.FILES_ONLY, SBFileFilter.createPNGFileFilter());
                     
                     if (destinationFile != null) {
                         //add extenion if missing
@@ -201,12 +204,19 @@ public class DynamicController implements ChangeListener, ActionListener,
                         int height = size[1] * resolutionMultiplier;
                         
                         try {
-                            ImageIO.write(view.takeGraphshot(width, height),
-                                    "png", destinationFile);
-                            logger.fine("Writing screenshot successful.");
+                        	if (!destinationFile.getName().toLowerCase().endsWith(".png")) {
+                        		destinationFile = new File(destinationFile.getAbsolutePath() + ".png");
+                        	}
+                        	ImageIO.write(view.takeGraphshot(width, height),
+                        		"png", destinationFile);
+                        	guiPrefs.put(GUIOptions.SAVE_DIR, destinationFile.getParent());
+                        	guiPrefs.flush();
+                        	logger.fine("Writing screenshot successful.");
                         } catch (IOException ioe) {
                             logger.warning(bundle
                                     .getString("COULD_NOT_WRITE_SCREENSHOT"));
+                        } catch (BackingStoreException exc) {
+													logger.warning(exc.getLocalizedMessage());
                         }
                     }
                 }
