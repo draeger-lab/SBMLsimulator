@@ -55,6 +55,18 @@ public class FluxMinimizationUtils {
 		}
 		return fluxVector;
 	}
+	
+	/**
+	 * Gets a {@link StoichiometricMatrix} and gives back the corresponding flux-vector in Manhattan-Norm, without the given 
+	 * target fluxes.
+	 * 
+	 * @param targetFluxes
+	 * @param doc
+	 * @return
+	 */
+	public static double[] computeFluxVector(String[] targetFluxes, SBMLDocument doc) {
+		return computeFluxVector(SBMLDocToStoichMatrix(doc), targetFluxes, doc);
+	}
 
 
 
@@ -99,13 +111,13 @@ public class FluxMinimizationUtils {
 				Species metabolit = doc.getModel().getSpecies(j);
 				if (reac.hasProduct(metabolit)) {
 					// the stoichiometry of products is positive in the stoichiometricMatrix
-					if (reac.getProduct(metabolit.getId()).isSetStoichiometry()) {
-						sMatrix.set(i, j, reac.getProduct(metabolit.getId()).getStoichiometry());
+					if (reac.getProductForSpecies(metabolit.getId()).isSetStoichiometry()) {
+						sMatrix.set(i, j, reac.getProductForSpecies(metabolit.getId()).getStoichiometry());
 					}
 				} else if (reac.hasReactant(metabolit)) {
 					// the stoichiometry of reactants is negative in the stoichiometricMatrix
-					if (reac.getReactant(metabolit.getId()).isSetStoichiometry()) {
-						sMatrix.set(i, j, - reac.getReactant(metabolit.getId()).getStoichiometry());
+					if (reac.getReactantForSpecies(metabolit.getId()).isSetStoichiometry()) {
+						sMatrix.set(i, j, - reac.getReactantForSpecies(metabolit.getId()).getStoichiometry());
 					}
 				}
 			}
@@ -119,7 +131,7 @@ public class FluxMinimizationUtils {
 	 * @param doc
 	 * @return a new SBMLDocument without transport reactions
 	 */
-	private static SBMLDocument eliminateTransports(SBMLDocument doc) {
+	public static SBMLDocument eliminateTransports(SBMLDocument doc) {
 		SBMLDocument newDoc = doc;
 		for (int i = 0; i < doc.getModel().getReactionCount(); i++) {
 			if (SBO.isChildOf(doc.getModel().getReaction(i).getSBOTerm(), SBO.getTransport())) {

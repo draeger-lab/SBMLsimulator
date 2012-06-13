@@ -144,4 +144,17 @@ public class Constraints {
 		return gibbsEnergies;
 	}
 	
+	/**
+	 * Computes the maximum of J_i / G_i for every reaction i in the model
+	 * @param fluxVector
+	 * @return
+	 */
+	public double computeR_max(double[] fluxVector) {
+		double r_max = 0;
+		for(int i = 0; i < fluxVector.length; i++) {
+			r_max = Math.max(r_max,(fluxVector[i]/gibbsEnergies[i]));
+		}
+		return r_max;
+	}
+	
 }

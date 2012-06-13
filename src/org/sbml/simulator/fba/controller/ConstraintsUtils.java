@@ -20,6 +20,7 @@ package org.sbml.simulator.fba.controller;
 import java.beans.EventHandler;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.IOException;
 
 import org.sbml.jsbml.SBMLDocument;
 
@@ -32,6 +33,10 @@ import org.sbml.jsbml.SBMLDocument;
  * @since 1.0
  */
 public class ConstraintsUtils {
+
+	private static final String KEY_CONCENTRATIONS = "concentration";
+
+	private static final String KEY_GIBBS = "gibbs";
 
 	/**
 	 * Contains the information about the sort of the file:
@@ -67,8 +72,9 @@ public class ConstraintsUtils {
 	 * 
 	 * @param files
 	 * @return
+	 * @throws IOException 
 	 */
-	public double[] readConcentrationsFromFile (File files) {
+	public double[] readConcentrationsFromFile (File files) throws IOException {
 		readFromFile(files, false);
 		return concentrationsArray;
 	}
@@ -79,8 +85,9 @@ public class ConstraintsUtils {
 	 *
 	 * @param files
 	 * @return
+	 * @throws IOException 
 	 */
-	public double[] readGibbsFromFile(File files) {
+	public double[] readGibbsFromFile(File files) throws IOException {
 		readFromFile(files, true);
 		return gibbsArray;
 		
@@ -108,10 +115,11 @@ public class ConstraintsUtils {
 	 * 
 	 * @param files
 	 * @param gibbs
+	 * @throws IOException 
 	 */
-	private void readFromFile(File files, Boolean isGibbs) {
+	private void readFromFile(File files, Boolean isGibbs) throws IOException {
 		this.isGibbsFile = isGibbs;
-		CSVDataReader reader = new CSVDataReader(files);
+		CSVDataReader reader = new CSVDataReader(files,null);
 		reader.addPropertyChangeListener(EventHandler.create(PropertyChangeListener.class, this, "writeDataInArray", "newValue"));
 
 	}
@@ -130,7 +138,7 @@ public class ConstraintsUtils {
 				for(int i = 0; i< values.length; i++) {
 					gibbsArray[i] = Double.parseDouble(values[i]);
 					if (document.getModel().getReaction(keys[i]) != null) {
-						document.getModel().getReaction(keys[i]).putUserObject("gibbs", gibbsArray[i]);
+						document.getModel().getReaction(keys[i]).putUserObject(KEY_GIBBS, gibbsArray[i]);
 					}
 				}
 			} else {
@@ -138,7 +146,7 @@ public class ConstraintsUtils {
 				for(int i = 0; i< values.length; i++) {
 					concentrationsArray[i] = Double.parseDouble(values[i]);
 					if (document.getModel().getSpecies(keys[i]) != null) {
-						document.getModel().getSpecies(keys[i]).putUserObject("concentration", concentrationsArray[i]);
+						document.getModel().getSpecies(keys[i]).putUserObject(KEY_CONCENTRATIONS, concentrationsArray[i]);
 					}
 				}
 			}

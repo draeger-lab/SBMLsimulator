@@ -140,21 +140,26 @@ public class FluxBalanceAnalysis {
 		}
 
 		//CONTRAINTS
-		//TODO
 
-		// contraint J_i * G_i < 0
 		double[] flux = targetFunc.getFluxVector();
 		double[] gibbs = constraints.getGibbsEnergies();
+		double r_max = constraints.computeR_max(flux);
 		for (int i = 0; i< counter[1]; i++) {
 			//jg is the expression for J_i * G_i
-			IloNumExpr jg = cplex.prod(cplex.prod(flux[i], x[i]),gibbs[i]);
-			cplex.addLe(jg, 0);
+			//and jr_maxg the expression for |J_i| - r_max * |G_i|
+			for (int k = 0; k < counter[counter.length-1]; k++) {
+				// contraint |J_i| - r_max * |G_i| < 0
+				IloNumExpr j_i = cplex.abs(cplex.prod(flux[i], x[i]));
+				IloNumExpr g_i = cplex.abs(cplex.prod(gibbs[i], x[k]));
+				IloNumExpr jr_maxg = cplex.sum(j_i, (cplex.prod(-1, cplex.prod(r_max, g_i))));
+				cplex.addLe(jr_maxg, 0);
+				
+				// contraint J_i * G_i < 0
+				IloNumExpr jg = cplex.prod(cplex.prod(flux[i], x[i]),cplex.prod(gibbs[i],x[k]));
+				cplex.addLe(jg, 0);
+			}
 		}
-		
-		//contraint gibbs errors: delta_r(G_j^0) - E_j + R * T * sum(n_ij * ln[S_i]) = delta_r(G_j)
-		//TODO
-		
-		
+
 		// now solve the problem and get the solution array for the variables x
 		double[] solution = null;
 		if (cplex.solve()) {
@@ -182,15 +187,15 @@ public class FluxBalanceAnalysis {
 		}
 		// create variables with upper bounds and lower bounds
 		IloNumVar[] x = cplex.numVarArray(target.length, lb, ub);
-		
-		
-		
+
+
+
 		// TODO concentrations are now quadratic!!
 
 
 		//TODO CONSTRAINTS
 
-		
+
 		// now solve the problem and get the solution array for the variables x
 		double[] solution = null;
 		if (cplex.solve()) {

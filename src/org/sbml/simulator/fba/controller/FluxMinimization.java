@@ -87,11 +87,13 @@ public class FluxMinimization implements TargetFunction {
 	 * @param targetFluxes
 	 */
 	public FluxMinimization(SBMLDocument doc, StoichiometricMatrix N, double[] c_eq, double[] gibbs_eq, String[] targetFluxes) {
-		this.errorArray = FluxMinimizationUtils.computeError(gibbs.length);
 		this.fluxVector = FluxMinimizationUtils.computeFluxVector(N, targetFluxes, doc);
 		this.c_eq = c_eq;
 		Constraints c = new Constraints(doc, gibbs_eq, c_eq);
 		this.gibbs = c.getGibbsEnergies();
+		if (gibbs != null) {
+			this.errorArray = FluxMinimizationUtils.computeError(gibbs.length);
+		}
 		this.concentrations = computeConcentrations(doc);
 		if(gibbs != null && doc != null) {
 			this.L = computeL(doc);
@@ -141,13 +143,14 @@ public class FluxMinimization implements TargetFunction {
 	 */
 	private double[] computeConcentrations(SBMLDocument document) {
 		Model model = document.getModel();
+		concentrations = new double[model.getSpeciesCount()];
 		Species currentSpecies;
 		for (int i = 0; i < model.getSpeciesCount(); i++) {
 			currentSpecies = model.getSpecies(i);
 			if (currentSpecies.hasOnlySubstanceUnits()) {
 				if (currentSpecies.isSetInitialConcentration()){
 					// multiply with the volume of the compartment
-					concentrations[i] = currentSpecies.getInitialConcentration()* currentSpecies.getCompartmentInstance().getSize();
+					concentrations[i] = currentSpecies.getInitialConcentration()* document.getModel().getCompartment(currentSpecies.getCompartment()).getSize();
 				} else if (currentSpecies.isSetInitialAmount()){
 					// do nothing
 					concentrations[i] = currentSpecies.getInitialAmount();
@@ -302,8 +305,6 @@ public class FluxMinimization implements TargetFunction {
 	 * @param length
 	 * @param length2
 	 * @param length3
-	 * @param length4
-	 * @param length5
 	 */
 	private void fillCounterArray(int length, int length2, int length3) {
 		counterArray[0] = 0;
