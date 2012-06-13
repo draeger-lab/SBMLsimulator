@@ -24,6 +24,7 @@ import javax.xml.stream.XMLStreamException;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
 import org.sbml.simulator.fba.controller.FluxMinimization;
+import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 
 /**
  * @author Meike Aichele
@@ -48,8 +49,11 @@ public class FluxMinimizationTest {
 		sbml = (new SBMLReader()).readSBML(args[0]);
 
 		FluxMinimization fm = new FluxMinimization(sbml, c_eq, gibbs_eq, targetFluxes);
-		System.out.println(fm);
-
+		double[] flux = fm.getFluxVector();
+		for (int i = 0; i< fm.getFluxVector().length; i++) {
+			//System.out.println(flux[i]);
+		}
+		
 	}
 
 }
