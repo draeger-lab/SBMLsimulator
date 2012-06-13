@@ -41,34 +41,34 @@ public class FluxMinimizationUtilsTest {
 	 */
 	public static void main(String[] args) throws XMLStreamException, IOException {
 		final SBMLDocument sbml = (new SBMLReader()).readSBML(args[0]);
-		
+
 		System.out.println("Manhattan-Norm of the vector (1,-1,2):");
 		double[] vector = {1, -1, 2};
 		System.out.println(FluxMinimizationUtils.computeManhattenNorm(vector));
-		
-		
-//		System.out.println("stoichiometric matrix:");
+
+
+		System.out.println("stoichiometric matrix:");
 		StoichiometricMatrix testMatrix = FluxMinimizationUtils.SBMLDocToStoichMatrix(sbml);
-//		for(int i = 0 ; i < testMatrix.getColumnDimension(); i++) {
-//			for (int j = 0 ; j < testMatrix.getRowDimension(); j++) {
-//				System.out.print(testMatrix.get(j, i) + " ");
-//			}
-//			System.out.println();
-//		}
-		
+		for(int i = 0 ; i < testMatrix.getColumnDimension(); i++) {
+			for (int j = 0 ; j < testMatrix.getRowDimension(); j++) {
+				System.out.print(testMatrix.get(j, i) + " ");
+			}
+			System.out.println();
+		}
+
 		System.out.println();
 		System.out.println("Flux vector:");
 		double[] fluxvector = FluxMinimizationUtils.computeFluxVector(null, sbml);
 		for (int i= 0; i < fluxvector.length; i++) {
 			System.out.print(fluxvector[i] + " ");
 		}
-		
+
 		System.out.println();
 		System.out.println();
 		System.out.println("Test eliminating target reactions");
 		SBMLDocument new_Doc = FluxMinimizationUtils.eliminateTransports(sbml);
 		System.out.println(new_Doc.equals(sbml));
-		
+
 	}
 
 }
