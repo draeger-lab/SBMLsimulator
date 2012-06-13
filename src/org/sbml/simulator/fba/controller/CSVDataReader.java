@@ -19,11 +19,10 @@ package org.sbml.simulator.fba.controller;
 
 import java.awt.Component;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.SwingWorker;
-
-import org.sbml.jsbml.Model;
 
 import de.zbit.gui.csv.CSVImporterV2;
 import de.zbit.gui.csv.ExpectedColumn;
@@ -39,11 +38,13 @@ import de.zbit.io.csv.CSVReader;
  */
 public class CSVDataReader extends SwingWorker<String[][], Void>{
 
-	private File file;
 	private String[][] stringData;
-	
-	public CSVDataReader(File file) {
-		this.file = file;
+	private boolean doRead;
+	private CSVImporterV2 converter;
+
+	public CSVDataReader(File file, Component parent) throws IOException {
+		converter = new CSVImporterV2(file.getAbsolutePath(), new ArrayList<ExpectedColumn>(2));
+		doRead = CSVImporterV2.showDialog(parent, converter);
 	}
 
 	/*
@@ -52,16 +53,13 @@ public class CSVDataReader extends SwingWorker<String[][], Void>{
 	 */
 	@Override
 	protected String[][] doInBackground() throws Exception {
-		Component parent;
-		CSVImporterV2 converter = new CSVImporterV2(file.getAbsolutePath(), new ArrayList<ExpectedColumn>(2));
-		if ((parent == null) || CSVImporterV2.showDialog(parent, converter)) {
-		      CSVReader reader = converter.getCSVReader();
-		      stringData = reader.getData();
-		      return stringData;
+		if (doRead) {
+		CSVReader reader = converter.getCSVReader();
+		stringData = reader.getData();
 		}
-		return null;
+		return stringData;
 	}
-	
+
 	/* 
 	 * (non-Javadoc)
 	 * @see javax.swing.SwingWorker#done()
