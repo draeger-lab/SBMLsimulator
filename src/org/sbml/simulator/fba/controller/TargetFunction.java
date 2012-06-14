@@ -35,12 +35,6 @@ public interface TargetFunction {
 	 * @return double[]
 	 */
 	public double[] computeTargetFunctionForQuadraticProgramming();
-	
-	/**
-	 * This method gives an array back, which contains the target function for linear programming 
-	 * @return double[]
-	 */
-	public double[] computeTargetFunctionForLinearProgramming();
 
 	/**
 	 * @return true, if the target function belongs to a minimization problem
