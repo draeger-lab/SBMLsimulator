@@ -153,34 +153,36 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
      */
     @Override
     public void dynamicChangeOfNode(String id, double value, boolean labels) {
-        double size = value*m + c; //adjust value by linear regression
-        logger.finer(MessageFormat
-                .format("Specie {0}: value={1}, m={2}, c={3}, computes to node size={4}",
-                        new Object[] { id, value, m, c, size }));
-        
-        NodeRealizer nr = graph.getSimpleGraph()
-                .getRealizer(graph.getId2node().get(id));
-        double ratio = nr.getHeight() / nr.getWidth(); //keep ratio in case of elliptic nodes
-        nr.setSize(size, size*ratio);
-        //use standard color if no legendTableModel is provided
-        Color color = null;
-        if(legendTable != null){
-            color = legendTable.getColorFor(id);
-        }else if (color == null){
-            //ensure that color is never null in case of wrong LegendTableModel
-            color = DEFAULT_NODE_COLOR;
-        }
-        nr.setFillColor(color);
-
-        /*
-         * Label Node with ID and real value at this timepoint. Last label will
-         * be treated as dynamic label
-         */
-        if (labels) {
-            labelNode(nr, id, value);
-        } else if (nr.labelCount() > 1) {
-            // labels switched off, therefore remove them, if there are any
-            nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
+        if (id2speciesNode.get(id) != null) {
+            double size = value*m + c; //adjust value by linear regression
+            logger.finer(MessageFormat
+                    .format("Specie {0}: value={1}, m={2}, c={3}, computes to node size={4}",
+                            new Object[] { id, value, m, c, size }));
+            
+            NodeRealizer nr = graph.getSimpleGraph()
+                    .getRealizer(graph.getId2node().get(id));
+            double ratio = nr.getHeight() / nr.getWidth(); //keep ratio in case of elliptic nodes
+            nr.setSize(size, size*ratio);
+            //use standard color if no legendTableModel is provided
+            Color color = null;
+            if(legendTable != null){
+                color = legendTable.getColorFor(id);
+            }else if (color == null){
+                //ensure that color is never null in case of wrong LegendTableModel
+                color = DEFAULT_NODE_COLOR;
+            }
+            nr.setFillColor(color);
+    
+            /*
+             * Label Node with ID and real value at this timepoint. Last label will
+             * be treated as dynamic label
+             */
+            if (labels) {
+                labelNode(nr, id, value);
+            } else if (nr.labelCount() > 1) {
+                // labels switched off, therefore remove them, if there are any
+                nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
+            }
         }
         graph.getSimpleGraph().updateViews();
     }

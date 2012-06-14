@@ -78,6 +78,11 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
     protected Map<String, Node> reactionID2reactionNode;
     
     /**
+     * Saves mapping from speciesID to related species nodes.
+     */
+    protected Map<String, Node> id2speciesNode;
+    
+    /**
      * Saves the used {@link SBMLDocument}.
      */
     protected SBMLDocument document;
@@ -90,11 +95,17 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
     public AbstractGraphManipulator(SBML2GraphML graph, SBMLDocument document){
         this.graph = graph;
         reactionID2reactionNode = new HashMap<String, Node>();
+        id2speciesNode = new HashMap<String, Node>();
         if (document.isSetModel()) {
         	Model m = document.getModel();
         	for (Map.Entry<String, Node> entry : graph.getId2node().entrySet()) {
+        	    //generate mapping from id to reactionnode
         		if (m.containsReaction(entry.getKey())) {
         			reactionID2reactionNode.put(entry.getKey(), entry.getValue());
+        		}
+        		//generate mapping from id to speciesnode
+        		if (m.containsSpecies(entry.getKey())) {
+        		    id2speciesNode.put(entry.getKey(), entry.getValue());
         		}
         	}
         }
@@ -285,7 +296,7 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
     @Override
     public void revertChanges(String id) {
         //revert nodes
-        if (graph.getId2node().get(id) != null) {
+        if (id2speciesNode.get(id) != null) {
             NodeRealizer nr = graph.getSimpleGraph().getRealizer(
                     graph.getId2node().get(id));
             double ratio = nr.getHeight() / nr.getWidth(); //keep ratio in case of elliptic nodes

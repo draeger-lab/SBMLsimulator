@@ -121,22 +121,24 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
      */
     @Override
     public void dynamicChangeOfNode(String id, double value, boolean labels) {
-        NodeRealizer nr = graph.getSimpleGraph()
-                .getRealizer(graph.getId2node().get(id));
-        double ratio = nr.getHeight() / nr.getWidth(); //keep ratio in case of elliptic nodes
-        nr.setSize(DEFAULT_NODE_SIZE, DEFAULT_NODE_SIZE*ratio); //standard node size
-        int[] RGBinterpolated = linearColorInterpolationForThree(value*m+c);
-        nr.setFillColor(new Color(RGBinterpolated[0], RGBinterpolated[1], RGBinterpolated[2]));
-        
-        /*
-         * Label Node with ID and real value at this timepoint. Last label will
-         * be treated as dynamic label
-         */
-        if (labels) {
-            labelNode(nr, id, value);
-        } else if (nr.labelCount() > 1) {
-            // labels switched off, therefore remove them, if there are any
-            nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
+        if (id2speciesNode.get(id) != null) {
+            NodeRealizer nr = graph.getSimpleGraph()
+                    .getRealizer(graph.getId2node().get(id));
+            double ratio = nr.getHeight() / nr.getWidth(); //keep ratio in case of elliptic nodes
+            nr.setSize(DEFAULT_NODE_SIZE, DEFAULT_NODE_SIZE*ratio); //standard node size
+            int[] RGBinterpolated = linearColorInterpolationForThree(value*m+c);
+            nr.setFillColor(new Color(RGBinterpolated[0], RGBinterpolated[1], RGBinterpolated[2]));
+            
+            /*
+             * Label Node with ID and real value at this timepoint. Last label will
+             * be treated as dynamic label
+             */
+            if (labels) {
+                labelNode(nr, id, value);
+            } else if (nr.labelCount() > 1) {
+                // labels switched off, therefore remove them, if there are any
+                nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
+            }
         }
         graph.getSimpleGraph().updateViews();
     }
