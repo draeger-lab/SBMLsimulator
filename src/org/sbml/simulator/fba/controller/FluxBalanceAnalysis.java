@@ -18,7 +18,6 @@
 package org.sbml.simulator.fba.controller;
 
 import ilog.concert.IloException;
-import ilog.concert.IloLinearNumExpr;
 import ilog.concert.IloNumExpr;
 import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
@@ -47,13 +46,34 @@ public class FluxBalanceAnalysis {
 	public Constraints constraints;
 
 	/**
-	 * Is true for the request to solve the problem with linear programming and false for quadratic programming.
+	 * lower bound for cplex variables
 	 */
-	private Boolean linearProgramming;
-
 	public double[] lb;
+	
+	/**
+	 * upper bounds for cplex variables
+	 */
 	public double[] ub;
+	
+	/**
+	 * Contains the target array for cplex.
+	 */
 	private double[] target;
+
+	/**
+	 * Contains the concentrations computed in the targetFunc.
+	 */
+	private double[] concentrations;
+
+	/**
+	 * Contains the solutions of cplex for the concentrations.
+	 */
+	public double[] solution_concentrations;
+
+	/**
+	 * Contains the solutions of cplex for the fluxes.
+	 */
+	public double[] solution_fluxVector;
 
 	/**
 	 * Constructor that get's a {@link Constraints}-Object and a {@link SBMLDocument} 
@@ -63,7 +83,7 @@ public class FluxBalanceAnalysis {
 	 * @param doc
 	 */
 	public FluxBalanceAnalysis(double[] c_eq, Constraints constraints, SBMLDocument doc, String[] targetFluxes) {
-		this(new FluxMinimization(doc, c_eq, constraints.getGibbsEnergies(), targetFluxes), constraints, true);
+		this(new FluxMinimization(doc, c_eq, constraints.getGibbsEnergies(), targetFluxes), constraints);
 	}
 
 	/**
@@ -72,22 +92,15 @@ public class FluxBalanceAnalysis {
 	 * 
 	 * @param target
 	 * @param constraints
-	 * @param linearProgramming
 	 */
-	public FluxBalanceAnalysis(TargetFunction target, Constraints constraints, Boolean linearProgramming) {
+	public FluxBalanceAnalysis(TargetFunction target, Constraints constraints) {
 		super();
 		this.targetFunc = target;
 		this.constraints = constraints;
-		this.setLinearProgramming(linearProgramming);
-		if (linearProgramming) {
-			int length = targetFunc.computeTargetFunctionForLinearProgramming().length;
-			lb = new double[length];
-			ub = new double[length];
-		} else {
-			int length = targetFunc.computeTargetFunctionForQuadraticProgramming().length;
-			lb = new double[length];
-			ub = new double[length];
-		}
+		int length = targetFunc.computeTargetFunctionForQuadraticProgramming().length;
+		lb = new double[length];
+		ub = new double[length];
+		this.solution_fluxVector = new double[target.getFluxVector().length];
 	}
 
 	/**
@@ -97,24 +110,17 @@ public class FluxBalanceAnalysis {
 	 * @throws IloException 
 	 */
 	public double[] solve() throws IloException {
-		if (this.isSetLinearProgramming()) {
-			if (this.isLinearProgramming()) {
-				target = targetFunc.computeTargetFunctionForLinearProgramming();
-				return solveWithLinearProgramming();
-			} else {
-				target = targetFunc.computeTargetFunctionForQuadraticProgramming();
-				return solveWithQuadraticProgramming();
-			}
-		}
-		return null;
+		target = targetFunc.computeTargetFunctionForQuadraticProgramming();
+		concentrations = targetFunc.getConcentrations();
+		return solveWithQuadraticProgramming();
 	}
 
 
 	/**
-	 * Calls SCPsolver to solve the problem with linear programming
+	 * Calls CPLEX to solve the problem with quadratic programming
 	 * @throws IloException 
 	 */
-	private double[] solveWithLinearProgramming() throws IloException {
+	private double[] solveWithQuadraticProgramming() throws IloException {
 		// create the cplex solver
 		IloCplex cplex = new IloCplex();
 
@@ -130,15 +136,31 @@ public class FluxBalanceAnalysis {
 		IloNumVar[] x = cplex.numVarArray(target.length, lb, ub);
 
 		//compute the target function for cplex with the scalar product (lin)
-		IloLinearNumExpr lin = cplex.scalProd(target, x);
+		IloNumExpr lin = cplex.scalProd(target, x);
+		
+		
+		//lambda1*sum((c_i - c_eq)^2)
+		double[] c_eq = constraints.getEquilibriumConcentrations();
+		IloNumVar[] c = cplex.numVarArray(concentrations.length, lb, ub);
+		IloNumExpr sum = null;
+		for (int i = 0; i< c.length; i++) {
+			IloNumExpr temp = sum;
+			IloNumExpr c_i = cplex.prod(c[i], concentrations[i]);
+			sum = cplex.sum(temp, cplex.prod(cplex.sum(c_i, (-1 * c_eq[i])), cplex.sum(c_i, (-1 * c_eq[i]))));
+		}
+	
+		// now put the variables together  
+		IloNumExpr cplex_target = cplex.sum(lin, cplex.prod(TargetFunction.lambda1, sum));
+		
 
 		// only for FluxMinimization has the target function be minimized
 		if (targetFunc instanceof FluxMinimization) {
-			cplex.addMinimize(lin);
+			cplex.addMinimize(cplex_target);
 		} else {
-			cplex.addMaximize(lin);
+			cplex.addMaximize(cplex_target);
 		}
-
+		
+		
 		//CONTRAINTS
 
 		double[] flux = targetFunc.getFluxVector();
@@ -153,79 +175,27 @@ public class FluxBalanceAnalysis {
 				IloNumExpr g_i = cplex.abs(cplex.prod(gibbs[i], x[k]));
 				IloNumExpr jr_maxg = cplex.sum(j_i, (cplex.prod(-1, cplex.prod(r_max, g_i))));
 				cplex.addLe(jr_maxg, 0);
-				
+
 				// contraint J_i * G_i < 0
 				IloNumExpr jg = cplex.prod(cplex.prod(flux[i], x[i]),cplex.prod(gibbs[i],x[k]));
 				cplex.addLe(jg, 0);
 			}
 		}
+		
 
 		// now solve the problem and get the solution array for the variables x
 		double[] solution = null;
 		if (cplex.solve()) {
-			// get the from cplex computed values for the variables x
+			// get the from cplex computed values for the variables x and c
 			solution = cplex.getValues(x);
+			for (int i = 0; i < counter[1]; i++) {
+				solution_fluxVector[i] = solution[i];
+			}
+			solution_concentrations = cplex.getValues(c);
 		}
 		cplex.end();
 		return solution;
-	}
 
-	/**
-	 * Calls CPLEX to solve the problem with quadratic programming
-	 * @throws IloException 
-	 */
-	private double[] solveWithQuadraticProgramming() throws IloException {
-		IloCplex cplex = new IloCplex();
-
-		// TARGET
-		// create upper bounds (ub) and lower bounds (lb) for the variables x
-		int[] count = targetFunc.getCounterArray();
-		// counter[1] contains the length of the flux vector
-		for (int i = count[1]; i< target.length; i++) {
-			lb[i]= 0.0; 
-			ub [i] = Double.MAX_VALUE;
-		}
-		// create variables with upper bounds and lower bounds
-		IloNumVar[] x = cplex.numVarArray(target.length, lb, ub);
-
-
-
-		// TODO concentrations are now quadratic!!
-
-
-		//TODO CONSTRAINTS
-
-
-		// now solve the problem and get the solution array for the variables x
-		double[] solution = null;
-		if (cplex.solve()) {
-			solution = cplex.getValues(x);
-		}
-		cplex.end();
-		return solution;
-	}
-
-	/**
-	 * @param linearProgramming the linearProgramming to set
-	 */
-	public void setLinearProgramming(boolean linearProgramming) {
-		this.linearProgramming = Boolean.valueOf(linearProgramming);
-	}
-
-	/**
-	 * @return the linearProgramming
-	 */
-	public Boolean isLinearProgramming() {
-		return linearProgramming;
-	}
-
-
-	/**
-	 * true if the boolean linearProgramming is set, else false
-	 * @return
-	 */
-	public boolean isSetLinearProgramming() {
-		return (isLinearProgramming() != null);
 	}
 
 	public boolean setUbOfReactionJ(double ubValue, int j) {

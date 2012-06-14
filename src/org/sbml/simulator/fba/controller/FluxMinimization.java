@@ -178,70 +178,41 @@ public class FluxMinimization implements TargetFunction {
 		// the function to minimize is: ||J|| + lambda1*sum((c_i - c_eq)^2) + lambda2*||L|| + lambda3*||E|| + lambda4*||G||
 
 		// create the target vector 
-		double[] target = new double[(fluxVector.length-1) + 
-		                             (concentrations.length-1) + 
-		                             (errorArray.length -1) + (L.length -1) +
-		                             (gibbs.length -1)];
+		double[] target = new double[fluxVector.length + 
+		                             concentrations.length + 
+		                             errorArray.length + L.length +
+		                             gibbs.length];
 		// this is a pointer, which counts in the target vector the actually position
+		counterArray = new int[5];
+		fillCounterArray(fluxVector.length, errorArray.length, L.length, gibbs.length);
 		int counter = 0;
-
-		// the quadratic target function is like the linear one with two additional vectors: 
-		// the L vector and the gibbs vector: therefore we can call first the linear method and add
-		// the additional ones
-		double[] lineartarget = computeTargetFunctionForLinearProgramming();
-		counterArray[3] = counterArray[2] + errorArray.length;
-		counterArray[4] = counterArray[3] + L.length;
-		for (int i = 0; i < lineartarget.length; i++) {
-			target[counter] = lineartarget[i];
+		
+		// fill it with the flux vector: ||J||
+		for (int i=0; i< this.fluxVector.length; i++) {
+			target[counter] = fluxVector[i];
 			counter++;
 		}
-
+		
+		// the weighted error: lambda3*||E||
+		for (int k = 0; k < this.errorArray.length; k++) {
+			target[counter] = lambda1 * errorArray[k];
+			counter++;
+		}
+		
 		// ||L||: lambda2*||L||
 		for (int h = 0; h < this.L.length; h++) {
 			target[counter] = lambda2 * L[h];
 			counter++;
 		}
+		
 		// the weighted gibbs energy: lambda4*||G||
 		for (int l = 0; l < this.gibbs.length; l++) {
 			target[counter] = lambda4 * gibbs[l];
 			counter++;
 		}
 
-		return target;
-	}
-
-
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.sbml.simulator.fba.controller.TargetFunction#computeTargetFunctionForLinearProgramming()
-	 */
-	@Override
-	public double[] computeTargetFunctionForLinearProgramming() {
-		// the target function is: ||J|| + lambda1*sum((c_i - c_eq)^2) + lambda3*||E||
-
-		double[] target = new double[(fluxVector.length - 1) + 
-		                             (concentrations.length-1) + 
-		                             (errorArray.length -1)];
-		counterArray = new int[5];
-		fillCounterArray(fluxVector.length, concentrations.length, errorArray.length);
-		int counter = 0;
-		// fill it with the flux vector: ||J||
-		for (int i=0; i< this.fluxVector.length; i++) {
-			target[counter] = fluxVector[i];
-			counter++;
-		}
-		// then the weighted concentrations: lambda1*sum((c_i - c_eq)^2)
-		for (int j = 0; j < this.concentrations.length; j++) {
-			target[counter] = lambda3 * Math.pow((concentrations[j] - c_eq[j]),2);
-			counter++;
-		}
-		// the weighted error: lambda3*||E||
-		for (int k = 0; k < this.errorArray.length; k++) {
-			target[counter] = lambda1 * errorArray[k];
-			counter++;
-		}
-
+		// concentrations left out because they are quadratic and must be computed in 
+		// FluxBalanceAnalysis
 		return target;
 	}
 
@@ -302,14 +273,16 @@ public class FluxMinimization implements TargetFunction {
 	/**
 	 * Fills the {@link# counterArray} to save the indices of the components in the target array.
 	 * 
-	 * @param length
-	 * @param length2
-	 * @param length3
+	 * @param length1: fluxVector length
+	 * @param length2: errorArray length
+	 * @param length3: L array length
+	 * @param length4: Gibbs array length 
 	 */
-	private void fillCounterArray(int length, int length2, int length3) {
+	private void fillCounterArray(int length1, int length2, int length3, int length4) {
 		counterArray[0] = 0;
-		counterArray[1] = length;
-		counterArray[2] = length + length2;
+		counterArray[1] = length1;
+		counterArray[2] = length1 + length2;
+		counterArray[3] = counterArray[2] + length3;
 	}
 
 
@@ -324,6 +297,11 @@ public class FluxMinimization implements TargetFunction {
 
 
 	/**
+	 * counterArray[0] = fluxvector index;
+	 * counterArray[1] = errorArray index;
+	 * counterArray[2] = L array index;
+	 * counterArray[3] = Gibbs array index;
+	 * 
 	 * @return the counterArray
 	 */
 	public int[] getCounterArray() {

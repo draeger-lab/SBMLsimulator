@@ -39,12 +39,14 @@ import de.zbit.io.csv.CSVReader;
 public class CSVDataReader extends SwingWorker<String[][], Void>{
 
 	private String[][] stringData;
-	private boolean doRead;
+	private boolean doRead = true;
 	private CSVImporterV2 converter;
 
 	public CSVDataReader(File file, Component parent) throws IOException {
 		converter = new CSVImporterV2(file.getAbsolutePath(), new ArrayList<ExpectedColumn>(2));
-		doRead = CSVImporterV2.showDialog(parent, converter);
+		if(parent != null) {
+			doRead = CSVImporterV2.showDialog(parent, converter);
+		}
 	}
 
 	/*
@@ -54,8 +56,8 @@ public class CSVDataReader extends SwingWorker<String[][], Void>{
 	@Override
 	protected String[][] doInBackground() throws Exception {
 		if (doRead) {
-		CSVReader reader = converter.getCSVReader();
-		stringData = reader.getData();
+			CSVReader reader = converter.getCSVReader();
+			stringData = reader.read();
 		}
 		return stringData;
 	}
