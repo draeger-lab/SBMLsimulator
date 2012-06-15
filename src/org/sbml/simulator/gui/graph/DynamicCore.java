@@ -17,9 +17,11 @@
  */
 package org.sbml.simulator.gui.graph;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -30,6 +32,8 @@ import org.simulator.math.odes.MultiTable;
 
 import com.xuggle.mediatool.IMediaWriter;
 import com.xuggle.mediatool.ToolFactory;
+
+import de.zbit.util.ResourceManager;
 
 /**
  * Represents the core of the dynamic visualization and therefore
@@ -42,12 +46,23 @@ import com.xuggle.mediatool.ToolFactory;
 public class DynamicCore {
     
     /**
+     * Localization support.
+     */
+    private static final transient ResourceBundle bundle = ResourceManager
+            .getBundle("org.sbml.simulator.gui.graph.DynamicGraph");
+    
+    /**
 	 * Own thread to cycle through timepoints.
 	 * 
 	 * @author Fabian Schwarzkopf
 	 * @version $Rev$
 	 */
 	private class PlayWorker extends SwingWorker<Void, Double>{
+	    
+	    /**
+	     * Sleeptime while waiting for notification.
+	     */
+	    private final long AWAITING_GRAPH_DRAWING = 20;
 	    
 	    /**
 	     * Enable/Disable video encoding.
@@ -67,7 +82,7 @@ public class DynamicCore {
 	    /**
 	     * Some control elements for video encoding.
 	     */
-	    private int width, height, frame, image;
+	    private int width, height, frame, image, totalimages;
 	    
 	    /**
 	     * Construct {@link PlayWorker} without video encoding.
@@ -91,7 +106,8 @@ public class DynamicCore {
             this.width = width;
             this.height = height;
             frame = 0;
-            image = 0;
+            image = 1;
+            totalimages = data.getRowCount()-1/captureEveryXStep;
             encoder = ToolFactory.makeWriter(destinationFile);
             logger.fine("Added " + width +"x" + height + " videostream");
             encoder.addVideoStream(0, 0, width, height);
@@ -153,7 +169,7 @@ public class DynamicCore {
                     while (!operationsDone) {
                         try {
                             logger.fine("Waiting for graph drawing to be completed.");
-                            Thread.sleep(AWAITING);
+                            Thread.sleep(AWAITING_GRAPH_DRAWING);
                         } catch (InterruptedException e) {
                             logger.fine("Could not wait for graph drawing to be completed.");
                             e.printStackTrace();
@@ -164,7 +180,9 @@ public class DynamicCore {
                         frame += framerate; //timestamp for video encoding
                         if (getIndexOfTimepoint(timePoint) % captureStepSize == 0) {
                             // take picture now
-                            logger.fine("Processing image " + image);
+                            logger.info(MessageFormat.format(
+                                    bundle.getString("PROCESSING_IMAGE"),
+                                    new Object[] { image, totalimages }));
                             encoder.encodeVideo(0, observer.takeGraphshot(width, height),
                                     frame, TimeUnit.MILLISECONDS);
                             image++;
@@ -190,11 +208,6 @@ public class DynamicCore {
 	 * Gets changed by to threads, therefore volatile.
 	 */
 	private volatile boolean operationsDone;
-	
-	/**
-	 * Sleeptime while waiting for notification.
-	 */
-	private final long AWAITING = 20;
 	
 	/**
      * Saves the currently displayed timestep. To ensure that the first
