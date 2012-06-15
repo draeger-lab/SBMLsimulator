@@ -1,6 +1,6 @@
 /*
- * $Id:  FluxMinimizationTest.java 12:30:10 Meike Aichele$
- * $URL$
+ * $Id:  ContraintsUtilsTest.java 18:43:52 Meike Aichele$
+ * $URL: ContraintsUtilsTest.java $
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -18,44 +18,42 @@
 package org.sbml.simulator.fba;
 
 import java.io.File;
-import java.io.IOException;
-
-import javax.xml.stream.XMLStreamException;
 
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
-import org.sbml.simulator.fba.controller.FluxMinimization;
+import org.sbml.simulator.fba.controller.CSVDataConverter;
 
 /**
  * @author Meike Aichele
  * @version $Rev$
- * @date 09.06.2012
+ * @date 13.06.2012
  * @since 1.0
  */
-public class FluxMinimizationTest {
+public class CSVDataConverterTest {
 
 	/**
 	 * @param args
-	 * @throws IOException 
-	 * @throws XMLStreamException 
 	 */
 	static double[] c_eq = null;
 	static double[] gibbs_eq = null;
 	static String[] targetFluxes = null;
 	static SBMLDocument sbml = null;
-	
-	public static void main(String[] args) throws XMLStreamException, IOException {
 
+	public static void main(String[] args) throws Exception {
 		sbml = (new SBMLReader()).readSBML(args[0]);
-		File file_g = new File(args[1]);
-		File file_c = new File(args[2]);
 
-		FluxMinimization fm = new FluxMinimization(sbml, c_eq, gibbs_eq, targetFluxes);
-		double[] flux = fm.getFluxVector();
-		for (int i = 0; i< fm.getFluxVector().length; i++) {
-			System.out.println(flux[i]);
+		CSVDataConverter cu = new CSVDataConverter(sbml);
+		File file = new File(args[1]);
+		cu.readGibbsFromFile(file);
+
+		while(cu.getGibbsArray() == null){
+			//wait
 		}
-		
+		System.out.println("done");
+		gibbs_eq = cu.getGibbsArray();
+		for (int i = 0; i < gibbs_eq.length; i++) {
+			System.out.print(gibbs_eq[i] + " ");
+		}
 	}
 
 }
