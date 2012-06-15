@@ -183,8 +183,8 @@ public class FluxMinimization implements TargetFunction {
 		                             errorArray.length + L.length +
 		                             gibbs.length];
 		// this is a pointer, which counts in the target vector the actually position
-		counterArray = new int[5];
-		fillCounterArray(fluxVector.length, errorArray.length, L.length, gibbs.length);
+		counterArray = new int[4];
+		fillCounterArray(fluxVector.length, errorArray.length, L.length);
 		int counter = 0;
 		
 		// fill it with the flux vector: ||J||
@@ -276,9 +276,8 @@ public class FluxMinimization implements TargetFunction {
 	 * @param length1: fluxVector length
 	 * @param length2: errorArray length
 	 * @param length3: L array length
-	 * @param length4: Gibbs array length 
 	 */
-	private void fillCounterArray(int length1, int length2, int length3, int length4) {
+	private void fillCounterArray(int length1, int length2, int length3) {
 		counterArray[0] = 0;
 		counterArray[1] = length1;
 		counterArray[2] = length1 + length2;

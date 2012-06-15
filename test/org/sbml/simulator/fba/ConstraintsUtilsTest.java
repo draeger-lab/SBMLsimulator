@@ -18,9 +18,6 @@
 package org.sbml.simulator.fba;
 
 import java.io.File;
-import java.io.IOException;
-
-import javax.xml.stream.XMLStreamException;
 
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
@@ -41,20 +38,22 @@ public class ConstraintsUtilsTest {
 	static double[] gibbs_eq = null;
 	static String[] targetFluxes = null;
 	static SBMLDocument sbml = null;
-	
-	public static void main(String[] args) throws XMLStreamException, IOException {
+
+	public static void main(String[] args) throws Exception {
 		sbml = (new SBMLReader()).readSBML(args[0]);
-		
+
 		ConstraintsUtils cu = new ConstraintsUtils(sbml);
 		File file = new File(args[1]);
-		gibbs_eq = cu.readGibbsFromFile(file);
-		
-		//TODO: no gibbs-file after this method-call...
-		System.out.println(gibbs_eq);
-		
-//		for (int i = 0; i < gibbs_eq.length; i++) {
-//			System.out.print(gibbs_eq[i] + " ");
-//		}
+		cu.readGibbsFromFile(file);
+
+		while(cu.getGibbsArray() == null){
+			//wait
+		}
+		System.out.println("done");
+		gibbs_eq = cu.getGibbsArray();
+		for (int i = 0; i < gibbs_eq.length; i++) {
+			System.out.print(gibbs_eq[i] + " ");
+		}
 	}
 
 }
