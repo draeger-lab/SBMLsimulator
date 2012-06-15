@@ -21,8 +21,8 @@ import java.io.File;
 
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
+import org.sbml.simulator.fba.controller.CSVDataConverter;
 import org.sbml.simulator.fba.controller.Constraints;
-import org.sbml.simulator.fba.controller.ConstraintsUtils;
 import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 
 /**
@@ -45,7 +45,7 @@ public class ConstraintsTest {
 		sbml = (new SBMLReader()).readSBML(args[0]);
 		
 		//ConstraintsUtils:
-		ConstraintsUtils cu = new ConstraintsUtils(sbml);
+		CSVDataConverter cu = new CSVDataConverter(sbml);
 		File file_g = new File(args[1]);
 		File file_c = new File(args[2]);
 		cu.readGibbsFromFile(file_g);

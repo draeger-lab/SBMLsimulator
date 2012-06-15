@@ -116,6 +116,7 @@ public class FluxMinimization implements TargetFunction {
 	public FluxMinimization(SBMLDocument doc, double[] c_eq, double[] gibbs_eq, String[] targetFluxes) {
 		this(doc,FluxMinimizationUtils.SBMLDocToStoichMatrix(doc), c_eq, gibbs_eq, targetFluxes);
 	}
+	
 
 	/**
 	 * Computes the transposed kernel matrix of the reduced stoichiometric matrix N
