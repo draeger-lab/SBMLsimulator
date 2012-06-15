@@ -1,6 +1,6 @@
 /*
  * $Id:  ConstraintsTest.java 19:03:59 Meike Aichele$
- * $URL: ConstraintsTest.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
