@@ -20,7 +20,6 @@ package org.sbml.simulator.fba.controller;
 import java.beans.EventHandler;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.io.IOException;
 
 import org.sbml.jsbml.SBMLDocument;
 
@@ -72,9 +71,9 @@ public class ConstraintsUtils {
 	 * 
 	 * @param files
 	 * @return
-	 * @throws IOException 
+	 * @throws Exception 
 	 */
-	public double[] readConcentrationsFromFile (File files) throws IOException {
+	public double[] readConcentrationsFromFile (File files) throws Exception {
 		readFromFile(files, false);
 		return concentrationsArray;
 	}
@@ -85,9 +84,9 @@ public class ConstraintsUtils {
 	 *
 	 * @param files
 	 * @return
-	 * @throws IOException 
+	 * @throws Exception 
 	 */
-	public double[] readGibbsFromFile(File files) throws IOException {
+	public double[] readGibbsFromFile(File files) throws Exception {
 		readFromFile(files, true);
 		return gibbsArray;
 		
@@ -115,9 +114,9 @@ public class ConstraintsUtils {
 	 * 
 	 * @param files
 	 * @param gibbs
-	 * @throws IOException 
+	 * @throws Exception 
 	 */
-	private void readFromFile(File files, Boolean isGibbs) throws IOException {
+	private void readFromFile(File files, Boolean isGibbs) throws Exception {
 		this.isGibbsFile = isGibbs;
 		CSVDataReader reader = new CSVDataReader(files,null);
 		reader.addPropertyChangeListener(EventHandler.create(PropertyChangeListener.class, this, "writeDataInArray", "newValue"));
@@ -131,8 +130,14 @@ public class ConstraintsUtils {
 	public void writeDataInArray(Object obj) {
 		if (obj instanceof String[][]) {
             String[][] data = (String[][]) obj;
-            String[] values = data[1];
-			String[] keys = data[0];
+            String[] values = new String[data.length];
+			String[] keys = new String[data.length];
+			// values are in the second column and keys in the first column
+			for(int i = 0; i < data.length; i++) {
+				values[i] = data[i][1];
+				keys[i] = data[i][0];
+			}
+			
 			if (isGibbsFile) {
 				gibbsArray = new double[values.length];
 				for(int i = 0; i< values.length; i++) {

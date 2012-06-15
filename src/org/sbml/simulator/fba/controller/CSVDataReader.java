@@ -19,7 +19,6 @@ package org.sbml.simulator.fba.controller;
 
 import java.awt.Component;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.SwingWorker;
@@ -42,11 +41,12 @@ public class CSVDataReader extends SwingWorker<String[][], Void>{
 	private boolean doRead = true;
 	private CSVImporterV2 converter;
 
-	public CSVDataReader(File file, Component parent) throws IOException {
+	public CSVDataReader(File file, Component parent) throws Exception {
 		converter = new CSVImporterV2(file.getAbsolutePath(), new ArrayList<ExpectedColumn>(2));
 		if(parent != null) {
 			doRead = CSVImporterV2.showDialog(parent, converter);
 		}
+		doInBackground();
 	}
 
 	/*
@@ -57,8 +57,9 @@ public class CSVDataReader extends SwingWorker<String[][], Void>{
 	protected String[][] doInBackground() throws Exception {
 		if (doRead) {
 			CSVReader reader = converter.getCSVReader();
-			stringData = reader.read();
+			stringData = reader.getData();
 		}
+		done();
 		return stringData;
 	}
 
