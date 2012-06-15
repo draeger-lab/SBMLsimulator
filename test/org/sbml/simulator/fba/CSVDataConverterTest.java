@@ -1,6 +1,6 @@
 /*
  * $Id:  ContraintsUtilsTest.java 18:43:52 Meike Aichele$
- * $URL: ContraintsUtilsTest.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
