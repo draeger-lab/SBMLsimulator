@@ -31,37 +31,37 @@ import org.sbml.simulator.stability.math.StoichiometricMatrix;
  * @since 1.0
  */
 public class Constraints {
-	
+
 	/**
 	 * Contains the Gibbs energies in steady state
 	 */
 	private double[] equilibriumGibbsEnergies;
-	
+
 	/**
 	 * Contains the computed Gibbs energies
 	 */
 	private double[] gibbsEnergies;
-	
+
 	/**
 	 * Contains the opened {@link SBMLDocument}
 	 */
 	public SBMLDocument document;
-	
+
 	/**
 	 * Contains the concentrations in equilibrium / steady state
 	 */
 	private double[] equilibriumConcentrations;
-	
+
 	/**
 	 * Contains the temperature in Kelvin under standard conditions (25 degree Celsius)
 	 */
 	private double T = 298.15;
-	
+
 	/**
 	 * The ideal gas constant R in J/(mol * K)
 	 */
 	private double R = 8.3144621;
-	
+
 	/**
 	 * Constructor, that gets a {@link SBMLDocument} and creates a new
 	 * array of Gibbs energies, that stays empty if the user doesn't check
@@ -72,7 +72,7 @@ public class Constraints {
 	public Constraints (SBMLDocument doc) {
 		this(doc, null, null);
 	}
-	
+
 
 	/**
 	 * Constructor that computes the GibbsEnergies from the incoming gibbs_eq
@@ -98,7 +98,7 @@ public class Constraints {
 			for (int i=0; i< steadyStateGibbs.length; i++) {
 				double sum = 0;
 				// compute sum( N[j][i] * c_eq[j] )
-				for (int j=0; j< N.getRowDimension(); j++) {
+				for (int j=0; j< equilibriumConcentrations.length; j++) {
 					sum += N.get(j, i) * equilibriumConcentrations[j];
 				}
 				// delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * ln(sum( N[j][i] * c_eq[j] ))
@@ -108,12 +108,13 @@ public class Constraints {
 		// return the computed Gibbs energies
 		return gibbsEnergies;
 	}
-	
+
 	/**
 	 * @param gibbsEnergies the gibbsEnergies to set
 	 */
 	public void setEquilibriumGibbsEnergies(double[] gibbsEnergies) {
 		this.equilibriumGibbsEnergies = gibbsEnergies;
+		computeGibbsEnergies(gibbsEnergies);
 	}
 
 	/**
@@ -129,7 +130,7 @@ public class Constraints {
 	public void setEquilibriumConcentrations(double[] c_eq) {
 		this.equilibriumConcentrations = c_eq;
 	}
-	
+
 	/**
 	 * @return the equilibrium concentrations
 	 */
@@ -143,7 +144,7 @@ public class Constraints {
 	public double[] getGibbsEnergies() {
 		return gibbsEnergies;
 	}
-	
+
 	/**
 	 * Computes the maximum of J_i / G_i for every reaction i in the model
 	 * @param fluxVector
@@ -151,10 +152,18 @@ public class Constraints {
 	 */
 	public double computeR_max(double[] fluxVector) {
 		double r_max = 0;
-		for(int i = 0; i < fluxVector.length; i++) {
-			r_max = Math.max(r_max,(fluxVector[i]/gibbsEnergies[i]));
+		if (gibbsEnergies != null) {
+			if (fluxVector.length <= gibbsEnergies.length) {
+				for(int i = 0; i < fluxVector.length; i++) {
+					r_max = Math.max(r_max,(fluxVector[i]/gibbsEnergies[i]));
+				}
+			} else {
+				for (int i = 0; i < gibbsEnergies.length; i++) {
+					r_max = Math.max(r_max,(fluxVector[i]/gibbsEnergies[i]));
+				}
+			}
 		}
 		return r_max;
 	}
-	
+
 }

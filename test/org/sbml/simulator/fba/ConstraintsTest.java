@@ -18,9 +18,6 @@
 package org.sbml.simulator.fba;
 
 import java.io.File;
-import java.io.IOException;
-
-import javax.xml.stream.XMLStreamException;
 
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
@@ -44,23 +41,34 @@ public class ConstraintsTest {
 	static String[] targetFluxes = null;
 	static SBMLDocument sbml = null;
 	
-	public static void main(String[] args) throws XMLStreamException, IOException {
+	public static void main(String[] args) throws Exception {
 		sbml = (new SBMLReader()).readSBML(args[0]);
 		
 		//ConstraintsUtils:
 		ConstraintsUtils cu = new ConstraintsUtils(sbml);
 		File file_g = new File(args[1]);
 		File file_c = new File(args[2]);
-		gibbs_eq = cu.readGibbsFromFile(file_g);
-		c_eq = cu.readConcentrationsFromFile(file_c);
+		cu.readGibbsFromFile(file_g);
 		
-		//TODO: no gibbs-values read after this method-call...
-		System.out.println(gibbs_eq);
+		while(cu.getGibbsArray() == null) {
+			//wait
+		}
+		System.out.println("-> done gibbs");
+		gibbs_eq = cu.getGibbsArray();
 		
-//		for (int i = 0; i < gibbs_eq.length; i++) {
-//			System.out.print(gibbs_eq[i] + " ");
-//		}
+		cu.readConcentrationsFromFile(file_c);
+		while(cu.getConcentrationsArray() == null) {
+			//wait
+		}
+		System.out.println("-> done concentrations");
+		c_eq = cu.getConcentrationsArray();
 		
+		System.out.print("gibbs array: [");
+		for (int i = 0; i < gibbs_eq.length; i++) {
+			System.out.print(gibbs_eq[i] + " ");
+		}
+		System.out.print("]");
+		System.out.println();
 		
 		//Constraints:
 		Constraints con = new Constraints(sbml);
