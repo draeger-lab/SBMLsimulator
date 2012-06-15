@@ -35,11 +35,16 @@
   <entry key="NODESIZE">Node size</entry>
   <entry key="NODECOLOR">Node color</entry>
   <entry key="GROUP_VISUALIZATION">Visualization</entry> 
-  <entry key="SIMULATION_DATA">Simulation Data</entry> 
-  <entry key="EXPERIMENTAL_DATA">Experimental Data</entry>   
   <entry key="SEARCHBAR_TOOLTIP">Choose time point of visualization.</entry>
   
+  <!-- DynamicView -->
+  
+  <entry key="SIMULATION_DATA">Simulation Data</entry> 
+  <entry key="EXPERIMENTAL_DATA">Experimental Data</entry>
+  <entry key="FLUXBILANCE_DATA">Experimental Data</entry>      
+  
   <!-- DynamicCore -->
+  
   <entry key="PROCESSING_IMAGE">Processing image {0} of {1}</entry>
   
   <!-- Error Messages -->

@@ -75,9 +75,9 @@ public class DynamicCore {
 	    private IMediaWriter encoder;
 	    
 	    /**
-	     * Framerate and step size to capture images.
+	     * Timestamp and step size to capture images.
 	     */
-	    private int framerate, captureStepSize;
+	    private int timestamp, captureStepSize;
 	    
 	    /**
 	     * Some control elements for video encoding.
@@ -99,10 +99,10 @@ public class DynamicCore {
 	     * @param destinationFile
 	     */
         public PlayWorker(boolean generateVideo, int width, int height,
-                int framerate, int captureEveryXStep, String destinationFile) {
+                int timestamp, int captureEveryXStep, String destinationFile) {
             this.generateVideo = generateVideo;
             captureStepSize = captureEveryXStep;
-            this.framerate = framerate;
+            this.timestamp = timestamp;
             this.width = width;
             this.height = height;
             frame = 0;
@@ -177,7 +177,7 @@ public class DynamicCore {
                     }
                     
                     if (generateVideo) {
-                        frame += framerate; //timestamp for video encoding
+                        frame += timestamp; //timestamp for video encoding
                         if (getIndexOfTimepoint(timePoint) % captureStepSize == 0) {
                             // take picture now
                             logger.info(MessageFormat.format(

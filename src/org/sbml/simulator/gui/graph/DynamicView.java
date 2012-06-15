@@ -159,6 +159,12 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      * core for immediate change of data set.
      */
     private ArrayList<DynamicCore> experimentalCores;
+    
+    /**
+     * Pointer to fluxbilance data {@link DynamicCore}. Once computed, store that
+     * core for immediate change of data set.
+     */
+    private ArrayList<DynamicCore> fluxbilanceCores;
 
     /**
      * Used {@link SBMLDocument}.
@@ -282,6 +288,48 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     }
     
     /**
+     * Add Fluxbilance data to display it in the graph.
+     * @param data containing fluxbilance for this graph
+     */
+    public void addFluxbilance(MultiTable data) {
+        final DynamicView thisView = this;
+        final MultiTable fluxbilance = data;
+        SwingWorker<Void, Void> computationOfLimits = new SwingWorker<Void, Void>() {
+            
+            /*
+             * (non-Javadoc)
+             * @see javax.swing.SwingWorker#doInBackground()
+             */
+            @Override
+            protected Void doInBackground() throws Exception {
+                /*
+                 * As a new core is constructed and assigned every time
+                 * the simulation is finished, the control panel is
+                 * consistent with the simulated data.
+                 */
+                fluxbilanceCores.add(new DynamicCore(thisView, fluxbilance, document));
+                return null;
+            }
+
+            /*
+             * (non-Javadoc)
+             * @see javax.swing.SwingWorker#done()
+             */
+            @Override
+            protected void done() {
+                super.done();
+                String dataName = bundle
+                        .getString("FLUXBILANCE_DATA")
+                        + " "
+                        + fluxbilanceCores.size();
+                controlPanel.addToDataList(dataName);
+                controlPanel.setSelectedVisualizationData(dataName);
+            }
+        };
+        computationOfLimits.execute();
+    }
+
+    /**
      * This function determines the fixpoints to generate videos. It ensures
      * that graph elements will stay on their location even if the graphsize
      * changes during visualization (i. e. nodes getting bigger/smaller).
@@ -350,7 +398,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     public LegendPanel getLegendPanel() {
         return legend;
     }
-
+    
     /**
      * Returns {@link SBMLDocument} of this {@link DynamicView}.
      * 
@@ -359,7 +407,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     public SBMLDocument getSBMLDocument() {
         return document;
     }
-    
+
     /**
      * Returns an array {width, height} of the graph size independent of current
      * view. Returned width and height represent the raw resolution of this graph. 
@@ -384,7 +432,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         
         return new int[]{width, height};
     }
-
+    
     /**
      * Returns selected reactions.
      * 
@@ -399,7 +447,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         }
         return selectedReactions.toArray(new String[selectedReactions.size()]);
     }
-    
+
     /**
      * Returns selected species.
      * 
@@ -414,7 +462,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
         }
         return selectedSpecies.toArray(new String[selectedSpecies.size()]);
     }
-
+    
     /*
      * (non-Javadoc)
      * 
@@ -697,18 +745,23 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      */
     public boolean visualizeData(String dataName){
         int index = Integer.valueOf(String.valueOf(dataName.charAt(dataName.length()-1))) - 1;
-        if (dataName.contains(bundle.getString("SIMULATION_DATA"))){
-            if (!simulationCores.isEmpty()){
+        if (dataName.contains(bundle.getString("SIMULATION_DATA"))) {
+            if (!simulationCores.isEmpty()) {
                 activateView(simulationCores.get(index));
                 return true;
             }
             return false;
-        } else if (dataName.contains(bundle.getString("EXPERIMENTAL_DATA"))){
-            if (!experimentalCores.isEmpty()){
+        } else if (dataName.contains(bundle.getString("EXPERIMENTAL_DATA"))) {
+            if (!experimentalCores.isEmpty()) {
                 activateView(experimentalCores.get(index));
                 return true;
             }
             return false;
+        } else if (dataName.contains(bundle.getString("FLUXBILANCE_DATA"))) {
+            if (!fluxbilanceCores.isEmpty()) {
+                activateView(fluxbilanceCores.get(index));
+                return true;
+            }
         }
         
         return false;

@@ -34,11 +34,16 @@
   <entry key="NODECOLOR">Knotenfarbe</entry>
   <entry key="GROUP_VISUALIZATION">Visualisierung</entry>
   <entry key="VISUALIZATION_TOOLTIP">Wählen Sie die Art der dynamischen Visualisierung und die zu visualisierenden Daten aus.</entry>
-  <entry key="SIMULATION_DATA">Simulierte Daten</entry> 
-  <entry key="EXPERIMENTAL_DATA">Experimentelle Daten</entry>   
   <entry key="SEARCHBAR_TOOLTIP">Stellen Sie den Zeitpunkt der Visualisierung ein.</entry>
   
+  <!-- DynamicView -->
+  
+  <entry key="SIMULATION_DATA">Simulierte Daten</entry> 
+  <entry key="EXPERIMENTAL_DATA">Experimentelle Daten</entry> 
+  <entry key="FLUXBILANCE_DATA">Flussbilanz</entry>
+  
   <!-- DynamicCore -->
+  
   <entry key="PROCESSING_IMAGE">Bearbeite Bild {0} von {1}</entry>
   
   <!-- Error Messages -->
