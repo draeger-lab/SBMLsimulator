@@ -120,7 +120,7 @@ public class ConstraintsUtils {
 		this.isGibbsFile = isGibbs;
 		CSVDataReader reader = new CSVDataReader(files,null);
 		reader.addPropertyChangeListener(EventHandler.create(PropertyChangeListener.class, this, "writeDataInArray", "newValue"));
-
+		reader.execute();
 	}
 
 	/**
@@ -163,6 +163,13 @@ public class ConstraintsUtils {
 	 */
 	public double[] getGibbsArray() {
 		return gibbsArray;
+	}
+
+	/**
+	 * @return the concentrationsArray
+	 */
+	public double[] getConcentrationsArray() {
+		return concentrationsArray;
 	}
 
 }
