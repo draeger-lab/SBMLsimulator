@@ -38,6 +38,9 @@
   <entry key="EXPERIMENTAL_DATA">Experimentelle Daten</entry>   
   <entry key="SEARCHBAR_TOOLTIP">Stellen Sie den Zeitpunkt der Visualisierung ein.</entry>
   
+  <!-- DynamicCore -->
+  <entry key="PROCESSING_IMAGE">Bearbeite Bild {0} von {1}</entry>
+  
   <!-- Error Messages -->
   
   <entry key="VIDEO_CODEC_NOT_FOUND">Videocodec wurde nicht erkannt. Möglicherweise existiert dieser Videocodec auf Ihrem System nicht, oder die angegeben Dateiendung ist falsch.</entry>
@@ -96,7 +99,7 @@
   <entry key="GROUP_VIDEO_ENCODING">Videoerstellung</entry>
   <entry key="GROUP_VIDEO_ENCODING_TOOLTIP">Diese Optionen beeinflussen die Videoerstellung.</entry>
   <entry key="VIDEO_FRAMERATE">Framerate</entry>
-  <entry key="VIDEO_FRAMERATE_TOOLTIP">Je niedriger die Framerate, desto langsamer spielt das Video die Simulation ab.</entry>
+  <entry key="VIDEO_FRAMERATE_TOOLTIP">Je niedriger diese Einstellung, desto schneller wird das resultierende Video.</entry>
   <entry key="VIDEO_IMAGE_STEPSIZE">Bilderschrittweite</entry>
   <entry key="VIDEO_IMAGE_STEPSIZE_TOOLTIP">Hier können Sie einstellen, wie viele Bilder von der Simulation gemacht werden sollen. Je geringer die Bilderschrittweite, desto weniger Bilder werden gemacht.</entry>    
   <entry key="VIDEO_RESOLUTION_MULTIPLIER">Auflösungsmultiplikator</entry>
