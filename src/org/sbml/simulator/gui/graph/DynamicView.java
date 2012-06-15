@@ -762,6 +762,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                 activateView(fluxbilanceCores.get(index));
                 return true;
             }
+            return false;
         }
         
         return false;
