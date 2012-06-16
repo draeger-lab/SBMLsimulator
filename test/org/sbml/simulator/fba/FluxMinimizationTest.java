@@ -24,6 +24,7 @@ import javax.xml.stream.XMLStreamException;
 
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
+import org.sbml.simulator.fba.controller.CSVDataConverter;
 import org.sbml.simulator.fba.controller.FluxMinimization;
 
 /**
@@ -44,12 +45,28 @@ public class FluxMinimizationTest {
 	static String[] targetFluxes = null;
 	static SBMLDocument sbml = null;
 	
-	public static void main(String[] args) throws XMLStreamException, IOException {
+	public static void main(String[] args) throws Exception {
 
+		// read
 		sbml = (new SBMLReader()).readSBML(args[0]);
 		File file_g = new File(args[1]);
 		File file_c = new File(args[2]);
+		CSVDataConverter converter = new CSVDataConverter(sbml);
+		converter.readGibbsFromFile(file_g);
+		converter.readConcentrationsFromFile(file_c);
+		while(converter.getGibbsArray() == null) {
+			//wait
+		}
+		while(converter.getConcentrationsArray() == null) {
+			//wait
+		}
+		System.out.println("done reading");
 
+		// set gibbs and concentrations
+		gibbs_eq = converter.getGibbsArray();
+		c_eq = converter.getConcentrationsArray();
+		
+		//test
 		FluxMinimization fm = new FluxMinimization(sbml, c_eq, gibbs_eq, targetFluxes);
 		double[] flux = fm.getFluxVector();
 		for (int i = 0; i< fm.getFluxVector().length; i++) {

@@ -56,7 +56,9 @@ public class ConstraintsTest {
 		System.out.println("-> done gibbs");
 		gibbs_eq = cu.getGibbsArray();
 		
+		System.out.println(cu.getReader().getState());
 		cu.readConcentrationsFromFile(file_c);
+		System.out.println(cu.getReader().getState());
 		while(cu.getConcentrationsArray() == null) {
 			//wait
 		}

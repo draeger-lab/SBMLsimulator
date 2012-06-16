@@ -49,7 +49,7 @@ public class CSVDataConverterTest {
 		while(cu.getGibbsArray() == null){
 			//wait
 		}
-		System.out.println("done");
+		System.out.println("done reading");
 		gibbs_eq = cu.getGibbsArray();
 		for (int i = 0; i < gibbs_eq.length; i++) {
 			System.out.print(gibbs_eq[i] + " ");

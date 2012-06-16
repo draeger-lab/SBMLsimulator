@@ -58,6 +58,12 @@ public class CSVDataConverter {
 	 */
 	private double[] concentrationsArray;
 
+
+	/**
+	 * Containing the reader to read the csv files
+	 */
+	private CSVDataReader reader;
+
 	/**
 	 * Constructor
 	 * @param doc
@@ -118,9 +124,9 @@ public class CSVDataConverter {
 	 */
 	private void readFromFile(File files, Boolean isGibbs) throws Exception {
 		this.isGibbsFile = isGibbs;
-		CSVDataReader reader = new CSVDataReader(files,null);
+		reader = new CSVDataReader(files,null);
 		reader.addPropertyChangeListener(EventHandler.create(PropertyChangeListener.class, this, "writeDataInArray", "newValue"));
-		reader.execute();
+		reader.cancel(true);
 	}
 
 	/**
@@ -159,7 +165,7 @@ public class CSVDataConverter {
 	}
 
 	/**
-	 * @return the solutionArray
+	 * @return the gibbsArray
 	 */
 	public double[] getGibbsArray() {
 		return gibbsArray;
@@ -171,5 +177,9 @@ public class CSVDataConverter {
 	public double[] getConcentrationsArray() {
 		return concentrationsArray;
 	}
+	
 
+	public CSVDataReader getReader(){
+		return reader;
+	}
 }
