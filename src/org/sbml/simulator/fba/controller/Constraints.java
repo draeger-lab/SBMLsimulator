@@ -82,8 +82,8 @@ public class Constraints {
 	 */
 	public Constraints (SBMLDocument doc, double[] gibbs_eq, double[] c_eq) {
 		this.document = doc;
-		this.setEquilibriumGibbsEnergies(gibbs_eq);
-		this.setEquilibriumConcentrations(c_eq);
+		equilibriumConcentrations = gibbs_eq;
+		equilibriumConcentrations = c_eq;
 		computeGibbsEnergies(gibbs_eq);
 	}
 
@@ -92,7 +92,8 @@ public class Constraints {
 	 * @param steadyStateGibbs
 	 */
 	private double[] computeGibbsEnergies(double[] steadyStateGibbs) {
-		if (steadyStateGibbs != null && this.document != null) {
+
+		if (steadyStateGibbs != null && this.document != null && equilibriumConcentrations != null) {
 			StoichiometricMatrix N = FluxMinimizationUtils.SBMLDocToStoichMatrix(document);
 			gibbsEnergies = new double[steadyStateGibbs.length];
 			for (int i=0; i< steadyStateGibbs.length; i++) {

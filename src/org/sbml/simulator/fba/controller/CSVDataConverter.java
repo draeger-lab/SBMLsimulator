@@ -95,24 +95,6 @@ public class CSVDataConverter {
 	public double[] readGibbsFromFile(File files) throws Exception {
 		readFromFile(files, true);
 		return gibbsArray;
-		
-
-		//		BufferedReader read = new BufferedReader(new FileReader(file));
-		//		gibbsEnergies = new double[document.getModel().getReactionCount()];
-		//		String line;
-		//		String k[] = new String[2];
-		//		
-		//		// While there is a line to read, this method writes the gibbs-energy, to the
-		//		// corresponding reaction in the model, in the same array-index, so that the indices match
-		//		// and the reaction document.getModel().getReaction(3) has the gibbs-energy gibbsEnergies[3].
-		//		while ((line = read.readLine()) != null) {
-		//			k = line.split("\t");
-		//			for (int i = 0; i < document.getModel().getReactionCount(); i++){
-		//				if (k[0].equals(document.getModel().getReaction(i).getId())) {
-		//					gibbsEnergies[i] = Double.valueOf(k[1]);
-		//				}
-		//			}
-		//		}
 	}
 
 	/**
@@ -132,12 +114,14 @@ public class CSVDataConverter {
 	/**
 	 * Writes the incoming data from the csv-file in {@link# solutionArray}.
 	 * @param obj
+	 * @throws Exception 
 	 */
-	public void writeDataInArray(Object obj) {
+	public void writeDataInArray(Object obj) throws Exception {
 		if (obj instanceof String[][]) {
             String[][] data = (String[][]) obj;
             String[] values = new String[data.length];
 			String[] keys = new String[data.length];
+			int fileMatchToDocument = 0;
 			// values are in the second column and keys in the first column
 			for(int i = 0; i < data.length; i++) {
 				values[i] = data[i][1];
@@ -150,6 +134,7 @@ public class CSVDataConverter {
 					gibbsArray[i] = Double.parseDouble(values[i]);
 					if (document.getModel().getReaction(keys[i]) != null) {
 						document.getModel().getReaction(keys[i]).putUserObject(KEY_GIBBS, gibbsArray[i]);
+					fileMatchToDocument++;
 					}
 				}
 			} else {
@@ -158,8 +143,12 @@ public class CSVDataConverter {
 					concentrationsArray[i] = Double.parseDouble(values[i]);
 					if (document.getModel().getSpecies(keys[i]) != null) {
 						document.getModel().getSpecies(keys[i]).putUserObject(KEY_CONCENTRATIONS, concentrationsArray[i]);
+					fileMatchToDocument++;
 					}
 				}
+			}
+			if (fileMatchToDocument == 0) {
+				throw new Exception("given file does not match with opend SBMLDocument");				
 			}
 		}
 	}
@@ -179,6 +168,10 @@ public class CSVDataConverter {
 	}
 	
 
+	/**
+	 * 
+	 * @return the csv-Reader
+	 */
 	public CSVDataReader getReader(){
 		return reader;
 	}

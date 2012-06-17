@@ -129,7 +129,7 @@ public class FluxMinimization implements TargetFunction {
 		double[] erg = new double[gibbs.length];
 		for (int i = 0; i< gibbs.length; i++) {
 			for (int j = 0; j < K_int_t.getColumnDimension(); j++) {
-				erg[i] += K_int_t.get(i, j)*gibbs[j];
+				erg[i] += K_int_t.get(i, j)*gibbs[i];
 			}
 		}
 		return erg;
