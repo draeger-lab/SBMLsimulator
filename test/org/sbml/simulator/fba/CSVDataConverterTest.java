@@ -31,17 +31,18 @@ import org.sbml.simulator.fba.controller.CSVDataConverter;
  */
 public class CSVDataConverterTest {
 
-	/**
-	 * @param args
-	 */
 	static double[] c_eq = null;
 	static double[] gibbs_eq = null;
 	static String[] targetFluxes = null;
 	static SBMLDocument sbml = null;
-
+	
+	/**
+	 * @param args
+	 */
 	public static void main(String[] args) throws Exception {
 		sbml = (new SBMLReader()).readSBML(args[0]);
 
+		// read the gibbs file
 		CSVDataConverter cu = new CSVDataConverter(sbml);
 		File file = new File(args[1]);
 		cu.readGibbsFromFile(file);
@@ -50,6 +51,8 @@ public class CSVDataConverterTest {
 			//wait
 		}
 		System.out.println("done reading");
+		
+		// test if it is written in an array
 		gibbs_eq = cu.getGibbsArray();
 		for (int i = 0; i < gibbs_eq.length; i++) {
 			System.out.print(gibbs_eq[i] + " ");
