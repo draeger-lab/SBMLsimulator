@@ -373,6 +373,16 @@ public class DynamicCore {
 		return currTimepoint;
 	}
 	
+    /**
+     * Returns mapping from every species or reactions id to their specific
+     * minimum value and maximum value, if computed.
+     * 
+     * @return
+     */
+	public Map<String, double[]> getId2minMaxData(){
+	    return limitsComputed ? id2MinMaxData : null;
+	}
+	
 	/**
 	 * Searches the index of a given timepoint.
 	 * @param timepoint

@@ -44,7 +44,7 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
     /**
      * Slope of linear regression m, and yintercept c. 
      */
-    private double m = 1, c= 0;
+//    private double m = 1, c= 0;
     
     /**
      * If provided, colors of {@link LegendTableModel} are used as node colors.
@@ -54,37 +54,19 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
     /**
      * determines default node color.
      */
-    private Color DEFAULT_NODE_COLOR;
+    private Color DEFAULT_NODE_COLOR = new Color(176, 226, 255);
     
     /**
-     * Constructs a new nodesize-manipulator on the given graph. Minimum node
-     * size and maximum node size as given. If minimum node size greater than
-     * maximum node size, default values will be used.
-     * Node colors uniform as user given.
-     * @param graph
-     * @param document
-     * @param minMaxOfSpecies
-     * @param minMaxOfReactions
-     * @param minNodeSize
-     * @param maxNodeSize
-     * @param reactionsMinLinewidth
-     * @param reactionsMaxLineWidth
+     * Saves minimum and maximum value of selected Species to save computation
+     * time.
      */
-    public ManipulatorOfNodeSize(SBML2GraphML graph, SBMLDocument document,
-            Color uniformNodeColor, double[] minMaxOfSpecies,
-            double[] minMaxOfReactions, double minNodeSize, double maxNodeSize,
-            float reactionsMinLinewidth, float reactionsMaxLineWidth) {
-        // no use of this() to avoid computation of adjusting twice
-        super(graph, document, minMaxOfReactions, reactionsMinLinewidth,
-                reactionsMaxLineWidth);
-        if (minNodeSize > maxNodeSize) {
-            minNodeSize = 8;
-            maxNodeSize = 50;
-        }
-        DEFAULT_NODE_COLOR = uniformNodeColor;
-        computeSpeciesAdjusting(minMaxOfSpecies[0], minMaxOfSpecies[1],
-                minNodeSize, maxNodeSize);
-    }
+    private double[] minMaxOfSelectedSpecies;
+    
+    /**
+     * Minimum and maximum Node Size with default initialization.
+     */
+    private double minNodeSize = DEFAULT_MIN_NODE_SIZE,
+            maxNodeSize = DEFAULT_MAX_NODE_SIZE;
     
     /**
      * Constructs a new nodesize-manipulator on the given graph. Minimum node
@@ -94,14 +76,51 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
      * 
      * @param graph
      * @param document
+     * @param core
      * @param minMaxOfSpecies
      * @param minMaxOfReactions
      */
     public ManipulatorOfNodeSize(SBML2GraphML graph, SBMLDocument document,
-            double[] minMaxOfSpecies, double[] minMaxOfReactions) {
-        super(graph, document, minMaxOfReactions, (float)0.1, 6);
-        DEFAULT_NODE_COLOR = new Color(176, 226, 255);
-        computeSpeciesAdjusting(minMaxOfSpecies[0], minMaxOfSpecies[1], 8, 50);
+            DynamicCore core, String[] selectedSpecies,
+            String[] selectedReactions) {
+        super(graph, document, core, selectedReactions, DEFAULT_MIN_LINEWIDTH,
+                DEFAULT_MAX_LINEWIDTH);
+        minMaxOfSelectedSpecies = core.getMinMaxOfIDs(selectedSpecies);
+//        computeSpeciesAdjusting(minMaxOfSelectedSpecies[0], minMaxOfSelectedSpecies[1], minNodeSize, maxNodeSize);
+    }
+    
+    /**
+     * Constructs a new nodesize-manipulator on the given graph. Minimum node
+     * size and maximum node size as given. If minimum node size greater than
+     * maximum node size, default values will be used.
+     * Node colors uniform as user given.
+     * 
+     * @param graph
+     * @param document
+     * @param core
+     * @param minMaxOfSpecies
+     * @param minMaxOfReactions
+     * @param minNodeSize
+     * @param maxNodeSize
+     * @param reactionsMinLinewidth
+     * @param reactionsMaxLineWidth
+     */
+    public ManipulatorOfNodeSize(SBML2GraphML graph, SBMLDocument document,
+            DynamicCore core, Color uniformNodeColor, String[] selectedSpecies,
+            String[] selectedReactions, double minNodeSize, double maxNodeSize,
+            float reactionsMinLinewidth, float reactionsMaxLineWidth) {
+        // no use of this() to avoid computation of adjusting twice
+        super(graph, document, core, selectedReactions, reactionsMinLinewidth,
+                reactionsMaxLineWidth);
+        if (minNodeSize < maxNodeSize) {
+            this.minNodeSize = minNodeSize;
+            this.maxNodeSize = maxNodeSize;
+        } // else ignore input and use default node sizes
+        DEFAULT_NODE_COLOR = uniformNodeColor;
+        REVERT_NODE_SIZE = DEFAULT_MIN_NODE_SIZE;
+        minMaxOfSelectedSpecies = core.getMinMaxOfIDs(selectedSpecies);
+//        computeSpeciesAdjusting(minMaxOfSelectedSpecies[0], minMaxOfSelectedSpecies[1],
+//                minNodeSize, maxNodeSize);
     }
     
     /**
@@ -109,8 +128,10 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
      * size and maximum node size as given. If minimum node size greater than
      * maximum node size, default values will be used.
      * Nodecolors as in given {@link LegendTableModel}.
+     * 
      * @param graph
      * @param document
+     * @param core
      * @param legendTableModel
      * @param minMaxOfSpecies
      * @param minMaxOfReactions
@@ -119,20 +140,22 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
      * @param reactionsMinLinewidth
      * @param reactionsMaxLineWidth
      */
-    public ManipulatorOfNodeSize(SBML2GraphML graph, SBMLDocument document, LegendTableModel legendTableModel,
-            double[] minMaxOfSpecies, double[] minMaxOfReactions,
+    public ManipulatorOfNodeSize(SBML2GraphML graph, SBMLDocument document,
+            DynamicCore core, LegendTableModel legendTableModel,
+            String[] selectedSpecies, String[] selectedReactions,
             double minNodeSize, double maxNodeSize,
             float reactionsMinLinewidth, float reactionsMaxLineWidth) {
         // no use of this() to avoid computation of adjusting twice
-        super(graph, document, minMaxOfReactions, reactionsMinLinewidth,
+        super(graph, document, core, selectedReactions, reactionsMinLinewidth,
                 reactionsMaxLineWidth);
         this.legendTable = legendTableModel;
-        if (minNodeSize > maxNodeSize) {
-            minNodeSize = 8;
-            maxNodeSize = 50;
-        }
-        computeSpeciesAdjusting(minMaxOfSpecies[0], minMaxOfSpecies[1],
-                minNodeSize, maxNodeSize);
+        if (minNodeSize < maxNodeSize) {
+            this.minNodeSize = minNodeSize;
+            this.maxNodeSize = maxNodeSize;
+        } // else ignore input and use default node sizes
+        minMaxOfSelectedSpecies = core.getMinMaxOfIDs(selectedSpecies);
+//        computeSpeciesAdjusting(minMaxOfSelectedSpecies[0], minMaxOfSelectedSpecies[1],
+//                minNodeSize, maxNodeSize);
     }
     
     /**
@@ -142,11 +165,11 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
      * @param minNodeSize
      * @param maxNodeSize
      */
-    private void computeSpeciesAdjusting(double lowerDataLimit, double upperDataLimit, double minNodeSize, double maxNodeSize){
-        double[] linearRegression = computeBIAS(lowerDataLimit, upperDataLimit, minNodeSize, maxNodeSize);
-        m = linearRegression[0];
-        c = linearRegression[1];
-    }
+//    private void computeSpeciesAdjusting(double lowerDataLimit, double upperDataLimit, double minNodeSize, double maxNodeSize){
+//        double[] linearRegression = computeBIAS(lowerDataLimit, upperDataLimit, minNodeSize, maxNodeSize);
+//        m = linearRegression[0];
+//        c = linearRegression[1];
+//    }
 
     /* (non-Javadoc)
      * @see org.sbml.simulator.gui.graph.GraphManipulator#dynamicChangeOfNode(java.lang.String, double, double, boolean)
@@ -154,11 +177,11 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
     @Override
     public void dynamicChangeOfNode(String id, double value, boolean labels) {
         if (id2speciesNode.get(id) != null) {
-            double size = value*m + c; //adjust value by linear regression
-            logger.finer(MessageFormat
-                    .format("Specie {0}: value={1}, m={2}, c={3}, computes to node size={4}",
-                            new Object[] { id, value, m, c, size }));
-            
+            double size = adjustValue(minMaxOfSelectedSpecies[0],
+                    minMaxOfSelectedSpecies[1], minNodeSize, maxNodeSize, value);
+            logger.finer(MessageFormat.format(
+                    "Species {0}: value={1}, results in node size={2}",
+                    new Object[] { id, value, size }));
             NodeRealizer nr = graph.getSimpleGraph()
                     .getRealizer(graph.getId2node().get(id));
             double ratio = nr.getHeight() / nr.getWidth(); //keep ratio in case of elliptic nodes

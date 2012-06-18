@@ -58,19 +58,24 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
     protected SBML2GraphML graph;
     
     /**
-     * Default node size used. Can be changed by derived classes.
+     * Default node size to revert changes of nodes.
      */
-    protected double DEFAULT_NODE_SIZE = 8;
+    protected double REVERT_NODE_SIZE = 8;
     
     /**
-     * Default line width used. Can be changed by derived classes.
+     * Default min/max node size used. Can be changed by derived classes.
      */
-    protected float DEFAULT_LINE_WIDTH = 1;
+    protected static double DEFAULT_MIN_NODE_SIZE = 8, DEFAULT_MAX_NODE_SIZE = 50;
+    
+    /**
+     * Default min/max line width used. Can be changed by derived classes.
+     */
+    protected static float DEFAULT_MIN_LINEWIDTH = 1, DEFAULT_MAX_LINEWIDTH = 6;
     
     /**
      * Parameters for default DynamicChangeOfReaction.
      */
-    private double m = 1, c = 0;
+//    private double m = 1, c = 0;
     
     /**
      * Saves mapping from reactionIDs to related reaction nodes.
@@ -88,11 +93,35 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
     protected SBMLDocument document;
     
     /**
+     * Saves the used {@link DynamicCore}.
+     */
+    protected DynamicCore core;
+    
+    /**
+     * Saves a mapping from every core element to it's specific min and max
+     * value.
+     */
+    protected Map<String, double[]> id2minMaxData;
+    
+    /**
+     * Saves minimum and maximum value of selected Reactions to save computation
+     * time.
+     */
+    private double[] minMaxOfselectedReactions;
+    
+    /**
+     * Used linewidth for dynamic visualization of reactions.
+     */
+    private float minLineWidth = DEFAULT_MIN_LINEWIDTH,
+            maxLineWidth = DEFAULT_MAX_LINEWIDTH;
+    
+    /**
      * Constructs an abstract graph manipulator.
      * @param graph
      * @param document
+     * @param core
      */
-    public AbstractGraphManipulator(SBML2GraphML graph, SBMLDocument document){
+    public AbstractGraphManipulator(SBML2GraphML graph, SBMLDocument document, DynamicCore core){
         this.graph = graph;
         reactionID2reactionNode = new HashMap<String, Node>();
         id2speciesNode = new HashMap<String, Node>();
@@ -110,6 +139,8 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
         	}
         }
         this.document = document;
+        this.core = core;
+        id2minMaxData = core.getId2minMaxData();
     }
     
     /**
@@ -124,16 +155,61 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
      * @param reactionsMinLineWidth
      * @param reactionsMaxLineWidth
      */
+//    public AbstractGraphManipulator(SBML2GraphML graph, SBMLDocument document,
+//            double[] minMaxOfReactionsData, float reactionsMinLineWidth,
+//            float reactionsMaxLineWidth) {
+//        this(graph, document);
+//        /*
+//         * Take absolute higher limit as xMax and 0 as xLow for regression.
+//         * Eventually reactions will end up in equillibrium.
+//         */
+//        computeReactionAdjusting(minMaxOfReactionsData[0],
+//                minMaxOfReactionsData[1], reactionsMinLineWidth, reactionsMaxLineWidth);
+//    }
+    
+    /**
+     * Constructs an abstract graph manipulator on the given
+     * {@link SBML2GraphML} and {@link SBMLDocument}. Additionally this
+     * constructor provides a basic implementation of dynamicChangeofReaction
+     * method with the given parameters.
+     * 
+     * @param graph
+     * @param document
+     * @param core
+     * @param selectedReactions
+     * @param reactionsMinLineWidth
+     * @param reactionsMaxLineWidth
+     */
     public AbstractGraphManipulator(SBML2GraphML graph, SBMLDocument document,
-            double[] minMaxOfReactionsData, float reactionsMinLineWidth,
-            float reactionsMaxLineWidth) {
-        this(graph, document);
-        /*
-         * Take absolute higher limit as xMax and 0 as xLow for regression.
-         * Eventually reactions will end up in equillibrium.
-         */
-        computeReactionAdjusting(minMaxOfReactionsData[0],
-                minMaxOfReactionsData[1], reactionsMinLineWidth, reactionsMaxLineWidth);
+            DynamicCore core, String[] selectedReactions,
+            float reactionsMinLineWidth, float reactionsMaxLineWidth) {
+        this(graph, document, core);
+        
+        minMaxOfselectedReactions = core.getMinMaxOfIDs(selectedReactions);
+        this.minLineWidth = reactionsMinLineWidth;
+        this.maxLineWidth = reactionsMaxLineWidth;
+//        computeReactionAdjusting(minMaxOfselectedReactions[0],
+//                minMaxOfselectedReactions[1], reactionsMinLineWidth,
+//                reactionsMaxLineWidth);
+    }
+    
+    /**
+     * Maps the given value which has to be within [xLowerLimit, xUpperLimit] to
+     * codomain [yLowerLimit, yUpperLimit]. This is done implicit by a linear
+     * regression through the points (xLowerLimit, yLowerLimit) and
+     * (xUpperLimit, yUpperLimit).
+     * 
+     * @param xLowerLimit
+     * @param xUpperLimit
+     * @param yLowerLimit
+     * @param yUpperLimit
+     * @param value
+     * @return
+     */
+    protected double adjustValue(double xLowerLimit, double xUpperLimit,
+            double yLowerLimit, double yUpperLimit, double value) {
+        return ((1 / (xUpperLimit - xLowerLimit)) * (value - xLowerLimit))
+                * (yUpperLimit - yLowerLimit) + yLowerLimit;
     }
     
     /**
@@ -147,11 +223,11 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
      * @return first index of array represents the slope, second index the
      *         yintercept.
      */
-    protected double[] computeBIAS(double xLowerLimit, double xUpperLimit, double yLowerLimit, double yUpperLimit){
-        double slope = (yUpperLimit-yLowerLimit) / (xUpperLimit - xLowerLimit);
-        double yintercept = yLowerLimit-slope*xLowerLimit;
-        return new double[] { slope, yintercept };
-    }
+//    protected double[] computeBIAS(double xLowerLimit, double xUpperLimit, double yLowerLimit, double yUpperLimit){
+//        double slope = (yUpperLimit-yLowerLimit) / (xUpperLimit - xLowerLimit);
+//        double yintercept = yLowerLimit-slope*xLowerLimit;
+//        return new double[] { slope, yintercept };
+//    }
     
     /**
      * Computes the adjusting values for given limits.
@@ -160,16 +236,20 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
      * @param minLineWidth
      * @param maxLineWidth
      */
-    private void computeReactionAdjusting(double lowerReactionLimit,
-            double upperReactionLimit, float minLineWidth, float maxLineWidth) {
-        double xHigh = Math.abs(lowerReactionLimit) > Math
-                .abs(upperReactionLimit) ? Math.abs(lowerReactionLimit) : Math
-                .abs(upperReactionLimit);
-        double[] linearRegression = computeBIAS(0, xHigh, minLineWidth,
-                maxLineWidth);
-        m = linearRegression[0];
-        c = linearRegression[1];
-    }
+//    private void computeReactionAdjusting(double lowerReactionLimit,
+//            double upperReactionLimit, float minLineWidth, float maxLineWidth) {
+//        /*
+//         * Take absolute higher limit as xMax and 0 as xLow for regression.
+//         * Eventually reactions will end up in equillibrium.
+//         */
+//        double xHigh = Math.abs(lowerReactionLimit) > Math
+//                .abs(upperReactionLimit) ? Math.abs(lowerReactionLimit) : Math
+//                .abs(upperReactionLimit);
+//        double[] linearRegression = computeBIAS(0, xHigh, minLineWidth,
+//                maxLineWidth);
+//        m = linearRegression[0];
+//        c = linearRegression[1];
+//    }
     
     /* (non-Javadoc)
      * @see org.sbml.simulator.gui.graph.GraphManipulator#dynamicChangeOfReaction(java.lang.String, double)
@@ -182,10 +262,23 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
             ReactionNodeRealizer nr = (ReactionNodeRealizer) graph.getSimpleGraph().getRealizer(reactionID2reactionNode.get(id));
             // line width
             double absvalue = Math.abs(value);
-            float lineWidth = (m != 1) ? (float) (absvalue * m + c) : 1;
+            
+            /*
+             * Take absolute higher limit as xMax and 0 as xLow for regression.
+             * Eventually reactions will end up in equillibrium.
+             */
+            double xHigh = Math.abs(minMaxOfselectedReactions[0]) > Math
+                    .abs(minMaxOfselectedReactions[1]) ? Math.abs(minMaxOfselectedReactions[0]) : Math
+                    .abs(minMaxOfselectedReactions[1]);
+            float lineWidth = (float) adjustValue(0, xHigh, minLineWidth, maxLineWidth, absvalue);
             logger.finer(MessageFormat
-                    .format("Reaction {0}: Abs. value={1}, m={2}, c={3}, computes to line width={4}",
-                            new Object[] { id, absvalue, m, c, lineWidth }));
+                    .format("Reaction {0}: Abs. value={1}, computes to line width={2}",
+                            new Object[] { id, absvalue, lineWidth }));
+            
+//            float lineWidth = (m != 1) ? (float) (absvalue * m + c) : 1;
+//            logger.finer(MessageFormat
+//                    .format("INDIRECT: Reaction {0}: Abs. value={1}, m={2}, c={3}, computes to line width={4}",
+//                            new Object[] { id, absvalue, m, c, lineWidth }));
             
             // ReactionNode line width
             nr.setLineWidth(lineWidth);
@@ -300,7 +393,7 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
             NodeRealizer nr = graph.getSimpleGraph().getRealizer(
                     graph.getId2node().get(id));
             double ratio = nr.getHeight() / nr.getWidth(); //keep ratio in case of elliptic nodes
-            nr.setSize(DEFAULT_NODE_SIZE, DEFAULT_NODE_SIZE*ratio);
+            nr.setSize(REVERT_NODE_SIZE, REVERT_NODE_SIZE*ratio);
             nr.setFillColor(Color.LIGHT_GRAY);
 
             if (nr.labelCount() > 1) {
