@@ -18,6 +18,8 @@
 package org.sbml.simulator.gui.graph;
 
 import java.awt.Color;
+import java.text.MessageFormat;
+import java.util.logging.Logger;
 
 import org.sbml.jsbml.SBMLDocument;
 
@@ -36,6 +38,11 @@ import de.zbit.gui.ColorPalette;
 public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
     
     /**
+     * A {@link Logger} for this class.
+     */
+    private static final transient Logger logger = Logger.getLogger(ManipulatorOfNodeColor.class.getName());
+    
+    /**
      * Field for the first color (high concentration), second color (mid
      * concentration), third color (low concentration).
      */
@@ -44,7 +51,18 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
     /**
      * Slope of linear regression m, and yintercept c.
      */
-    private double m, c;
+//    private double m, c;
+    
+    /**
+     * Saves minimum and maximum value of selected Species to save computation
+     * time.
+     */
+    private double[] minMaxOfSelectedSpecies;
+    
+    /**
+     * Node size per default 30.
+     */
+    private double nodeSize = 30;
     
     /**
      * Constructs node-color manipulator with default gradient camine red (high)
@@ -53,14 +71,15 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
      * 
      * @param graph
      * @param document
+     * @param core
      * @param minMaxOfSpeciesData
      * @param minMaxOfReactionsData
      */
-    public ManipulatorOfNodeColor(SBML2GraphML graph, SBMLDocument document,
-            double[] minMaxOfSpeciesData,
-            double[] minMaxOfReactionsData) {
-        super(graph, document, minMaxOfReactionsData, (float)0.1, 6);
-        DEFAULT_NODE_SIZE = 30;
+    public ManipulatorOfNodeColor(SBML2GraphML graph, SBMLDocument document, DynamicCore core,
+            String[] selectedSpecies,
+            String[] selectedReactions) {
+        super(graph, document, core, selectedReactions, DEFAULT_MIN_LINEWIDTH, DEFAULT_MAX_LINEWIDTH);
+        REVERT_NODE_SIZE = nodeSize;
         RGBcolor1 = new int[] { ColorPalette.CAMINE_RED.getRed(),
                 ColorPalette.CAMINE_RED.getGreen(),
                 ColorPalette.CAMINE_RED.getBlue() };
@@ -68,14 +87,17 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
         RGBcolor3 = new int[]{ ColorPalette.GOLD.getRed(),
                 ColorPalette.GOLD.getGreen(),
                 ColorPalette.GOLD.getBlue() };
-        computeSpeciesAdjusting(minMaxOfSpeciesData[0], minMaxOfSpeciesData[1]);
+        minMaxOfSelectedSpecies = core.getMinMaxOfIDs(selectedSpecies);
+//        computeSpeciesAdjusting(minMaxOfSelectedSpecies[0], minMaxOfSelectedSpecies[1]);
     }
     
     /**
      * Constructs node-color manipulator with the given RGB colors as color1 (high) ->
      * color2 (mid) -> color3 (low) and a constant node size.
+     * 
      * @param graph
      * @param document
+     * @param core
      * @param minMaxOfSpeciesData
      * @param minMaxOfReactionsData
      * @param nodeSize
@@ -86,10 +108,12 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
      * @param reactionsMaxLineWidth
      */
     public ManipulatorOfNodeColor(SBML2GraphML graph, SBMLDocument document,
-            double[] minMaxOfSpeciesData, double[] minMaxOfReactionsData,
-            double nodeSize, Color color1, Color color2, Color color3, float reactionsMinLineWidth, float reactionsMaxLineWidth) {
-        super(graph, document, minMaxOfReactionsData, reactionsMinLineWidth, reactionsMaxLineWidth);
-        DEFAULT_NODE_SIZE = nodeSize;
+            DynamicCore core, String[] selectedSpecies,
+            String[] selectedReactions, double nodeSize, Color color1,
+            Color color2, Color color3, float reactionsMinLineWidth, float reactionsMaxLineWidth) {
+        super(graph, document, core, selectedReactions, reactionsMinLineWidth, reactionsMaxLineWidth);
+        this.nodeSize = nodeSize;
+        REVERT_NODE_SIZE = nodeSize;
         int r = color1.getRed();
         int g = color1.getGreen();
         int b = color1.getBlue();
@@ -102,7 +126,8 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
         g = color3.getGreen();
         b = color3.getBlue();
         RGBcolor3 = new int[] { r, g, b }; 
-        computeSpeciesAdjusting(minMaxOfSpeciesData[0], minMaxOfSpeciesData[1]);
+        minMaxOfSelectedSpecies = core.getMinMaxOfIDs(selectedSpecies);
+//        computeSpeciesAdjusting(minMaxOfSelectedSpecies[0], minMaxOfSelectedSpecies[1]);
     }
     
     /**
@@ -110,11 +135,11 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
      * @param lowerSpeciesLimit
      * @param upperSpeciesLimit
      */
-    private void computeSpeciesAdjusting(double lowerSpeciesLimit, double upperSpeciesLimit){
-        double[] linearRegression = computeBIAS(lowerSpeciesLimit, upperSpeciesLimit, 0, 1);
-        m = linearRegression[0];
-        c = linearRegression[1];
-    }
+//    private void computeSpeciesAdjusting(double lowerSpeciesLimit, double upperSpeciesLimit){
+//        double[] linearRegression = computeBIAS(lowerSpeciesLimit, upperSpeciesLimit, 0, 1);
+//        m = linearRegression[0];
+//        c = linearRegression[1];
+//    }
     
     /* (non-Javadoc)
      * @see org.sbml.simulator.gui.graph.GraphManipulator#dynamicChangeOfNode(java.lang.String, double, boolean)
@@ -125,8 +150,21 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
             NodeRealizer nr = graph.getSimpleGraph()
                     .getRealizer(graph.getId2node().get(id));
             double ratio = nr.getHeight() / nr.getWidth(); //keep ratio in case of elliptic nodes
-            nr.setSize(DEFAULT_NODE_SIZE, DEFAULT_NODE_SIZE*ratio); //standard node size
-            int[] RGBinterpolated = linearColorInterpolationForThree(value*m+c);
+            nr.setSize(nodeSize, nodeSize*ratio); //standard node size
+            
+            int[] RGBinterpolated = linearColorInterpolationForThree(adjustValue(
+                    minMaxOfSelectedSpecies[0], minMaxOfSelectedSpecies[1], 0,
+                    1, value));
+            logger.finer(MessageFormat.format(
+                    "Species {0}: value={1}, results in r={2}, g={3}, b={4}",
+                    new Object[] { id, value, RGBinterpolated[0],
+                            RGBinterpolated[1], RGBinterpolated[2] }));
+            
+//            int[] RGBinterpolated = linearColorInterpolationForThree(value*m+c);
+//            logger.finer(MessageFormat.format(
+//                    "INTERPOLATE: Species {0}: value={1}, results in r={2}, g={3}, b={4}",
+//                    new Object[] { id, value, RGBinterpolated[0],
+//                            RGBinterpolated[1], RGBinterpolated[2] }));
             nr.setFillColor(new Color(RGBinterpolated[0], RGBinterpolated[1], RGBinterpolated[2]));
             
             /*
@@ -176,12 +214,12 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
         if (percent >= 0 && percent <= 0.5) {
             // color interpolation between color2 (mid concentration) and color3
             // (low concentration)
-            double[] tmpRegr = computeBIAS(0, 0.5, 0, 1);
-            return linearColorInterpolation(percent*tmpRegr[0]+tmpRegr[1], RGBcolor2, RGBcolor3);
+            double resPercent = adjustValue(0, 0.5, 0, 1, percent);
+            return linearColorInterpolation(resPercent, RGBcolor2, RGBcolor3);
         } else if (percent > 0.5 && percent < 1.0){
             //color interpolation between color1 (high concentration) and color2 (mid concentration)
-            double[] tmpRegr = computeBIAS(0.5, 1, 0, 1);
-            return linearColorInterpolation(percent*tmpRegr[0]+tmpRegr[1], RGBcolor1, RGBcolor2);
+            double resPercent = adjustValue(0.5, 1, 0, 1, percent);
+            return linearColorInterpolation(resPercent, RGBcolor1, RGBcolor2);
         } else if (percent > 1) {
             // maybe round-off error
             return RGBcolor1;
