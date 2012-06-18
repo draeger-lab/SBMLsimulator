@@ -49,12 +49,12 @@ public class FluxBalanceAnalysis {
 	 * lower bound for cplex variables
 	 */
 	public double[] lb;
-	
+
 	/**
 	 * upper bounds for cplex variables
 	 */
 	public double[] ub;
-	
+
 	/**
 	 * Contains the target array for cplex.
 	 */
@@ -137,8 +137,8 @@ public class FluxBalanceAnalysis {
 
 		//compute the target function for cplex with the scalar product (lin)
 		IloNumExpr lin = cplex.scalProd(target, x);
-		
-		
+
+
 		//lambda1*sum((c_i - c_eq)^2)
 		double[] c_eq = constraints.getEquilibriumConcentrations();
 		IloNumVar[] c = cplex.numVarArray(concentrations.length, lb, ub);
@@ -148,10 +148,10 @@ public class FluxBalanceAnalysis {
 			IloNumExpr c_i = cplex.prod(c[i], concentrations[i]);
 			sum = cplex.sum(temp, cplex.prod(cplex.sum(c_i, (-1 * c_eq[i])), cplex.sum(c_i, (-1 * c_eq[i]))));
 		}
-	
+
 		// now put the variables together  
 		IloNumExpr cplex_target = cplex.sum(lin, cplex.prod(TargetFunction.lambda1, sum));
-		
+
 
 		// only for FluxMinimization has the target function be minimized
 		if (targetFunc instanceof FluxMinimization) {
@@ -159,9 +159,9 @@ public class FluxBalanceAnalysis {
 		} else {
 			cplex.addMaximize(cplex_target);
 		}
-		
-		
-		//CONTRAINTS
+
+
+		//CONSTRAINTS
 
 		double[] flux = targetFunc.getFluxVector();
 		double[] gibbs = constraints.getGibbsEnergies();
@@ -170,18 +170,29 @@ public class FluxBalanceAnalysis {
 			//jg is the expression for J_i * G_i
 			//and jr_maxg the expression for |J_i| - r_max * |G_i|
 			for (int k = 0; k < counter[counter.length-1]; k++) {
-				// contraint |J_i| - r_max * |G_i| < 0
+				// constraint |J_i| - r_max * |G_i| < 0
 				IloNumExpr j_i = cplex.abs(cplex.prod(flux[i], x[i]));
 				IloNumExpr g_i = cplex.abs(cplex.prod(gibbs[i], x[k]));
 				IloNumExpr jr_maxg = cplex.sum(j_i, (cplex.prod(-1, cplex.prod(r_max, g_i))));
 				cplex.addLe(jr_maxg, 0);
 
-				// contraint J_i * G_i < 0
+				// constraint J_i * G_i < 0
 				IloNumExpr jg = cplex.prod(cplex.prod(flux[i], x[i]),cplex.prod(gibbs[i],x[k]));
 				cplex.addLe(jg, 0);
 			}
 		}
-		
+		// constraint N * J = 0
+		double[][] N = targetFunc.getStoichiometricMatrix();
+		IloNumExpr sumOfNJ = null;
+		for (int i = 0; i < constraints.document.getModel().getReactionCount() ; i++) {
+			for (int j = 0; j < N[0].length; j++) {
+				IloNumExpr temp = sumOfNJ;
+				sumOfNJ = cplex.sum(cplex.prod(N[i][j], cplex.prod(flux[i], x[i])), temp);
+			}
+			cplex.addEq(sumOfNJ, 0);
+		}
+
+
 
 		// now solve the problem and get the solution array for the variables x
 		double[] solution = null;
