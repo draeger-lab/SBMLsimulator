@@ -32,16 +32,16 @@ import org.sbml.simulator.fba.controller.FluxMinimization;
  */
 public class FluxMinimizationTest {
 
-	/**
-	 * @param args
-	 * @throws IOException 
-	 * @throws XMLStreamException 
-	 */
 	static double[] c_eq = null;
 	static double[] gibbs_eq = null;
 	static String[] targetFluxes = null;
 	static SBMLDocument sbml = null;
 	
+	/**
+	 * @param args
+	 * @throws IOException 
+	 * @throws XMLStreamException 
+	 */
 	public static void main(String[] args) throws Exception {
 
 		// read
@@ -63,7 +63,7 @@ public class FluxMinimizationTest {
 		gibbs_eq = converter.getGibbsArray();
 		c_eq = converter.getConcentrationsArray();
 		
-		//test
+		//test and create an FluxMinimization object:
 		FluxMinimization fm = new FluxMinimization(sbml, c_eq, gibbs_eq, targetFluxes);
 		double[] flux = fm.getFluxVector();
 		for (int i = 0; i< fm.getFluxVector().length; i++) {

@@ -65,7 +65,7 @@ public class ConstraintsTest {
 		System.out.println("-> done concentrations");
 		c_eq = cu.getConcentrationsArray();
 		
-		System.out.print("gibbs array: [");
+		System.out.print("gibbs array: [ ");
 		for (int i = 0; i < gibbs_eq.length; i++) {
 			System.out.print(gibbs_eq[i] + " ");
 		}

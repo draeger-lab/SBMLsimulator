@@ -51,6 +51,8 @@ public class FluxBalanceAnalysisTest {
 		CSVDataConverter cu = new CSVDataConverter(sbml);
 		File file_g = new File(args[1]);
 		File file_c = new File(args[2]);
+		
+		// read gibbs and concentrations
 		cu.readGibbsFromFile(file_g);
 
 		while(cu.getGibbsArray() == null) {
@@ -68,9 +70,18 @@ public class FluxBalanceAnalysisTest {
 		System.out.println("-> done concentrations");
 		c_eq = cu.getConcentrationsArray();
 
+		//create FluxBalanceAnalysis object and solve it:
 		constraints =  new Constraints(sbml, gibbs_eq, c_eq);
 		FluxBalanceAnalysis fba = new FluxBalanceAnalysis(c_eq, constraints, sbml, targetFluxes);
 		fba.solve();
+		
+		//print flux solution:
+		double[] fluxsolution = fba.solution_fluxVector;
+		String solution = "[ ";
+		for (int i = 0; i < fluxsolution.length; i++) {
+			solution += fluxsolution + " ";
+		}
+		System.out.println("solutions for the fluxes: " + solution + "]");
 	}
 
 }
