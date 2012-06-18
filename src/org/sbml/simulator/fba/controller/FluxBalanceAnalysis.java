@@ -22,11 +22,14 @@ import ilog.concert.IloNumExpr;
 import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
 
+import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
+import org.simulator.math.odes.MultiTable;
 
 /**
  * Contains all components for flux balance analysis and solves the optimization problem
- * for the incoming target function and constraints with linear or quadratic programming.
+ * for the incoming target function and constraints with quadratic programming.
+ * It also contains a MultiTable for the visualization of the computed fluxes.
  * 
  * @author Meike Aichele
  * @version $Rev$
@@ -34,6 +37,7 @@ import org.sbml.jsbml.SBMLDocument;
  * @since 1.0
  */
 public class FluxBalanceAnalysis {
+	
 	/**
 	 * Can be a {@link FluxMinimization}-object 
 	 * or an other function for which the network has to be optimized
@@ -74,7 +78,16 @@ public class FluxBalanceAnalysis {
 	 * Contains the solutions of cplex for the fluxes.
 	 */
 	public double[] solution_fluxVector;
+	
+	/**
+	 * Contains the {@link# solution_fluxVector} in a {@link MultiTable} for visualization.
+	 */
+	public MultiTable fluxesForVisualization;
 
+	
+// CONSTRUCTORS:	
+	
+	
 	/**
 	 * Constructor that get's a {@link Constraints}-Object and a {@link SBMLDocument} 
 	 * and that set's the {@link# linearProgramming} true.
@@ -86,6 +99,7 @@ public class FluxBalanceAnalysis {
 		this(new FluxMinimization(doc, c_eq, constraints.getGibbsEnergies(), targetFluxes), constraints);
 	}
 
+	
 	/**
 	 * Constructor that get's {@link TargetFunction}, {@link Constraints} and a Boolean, which
 	 * contains the information for linearProgramming (true) or quadraticProgramming (false).
@@ -103,6 +117,10 @@ public class FluxBalanceAnalysis {
 		this.solution_fluxVector = new double[target.getFluxVector().length];
 	}
 
+	
+// METHODS FOR SOLVING FBA:
+	
+	
 	/**
 	 * Calls a method to solve the problem with linear programming if the boolean
 	 * {@link# linearProgramming} is set and true, else it calls a method for quadratic programming.
@@ -117,7 +135,8 @@ public class FluxBalanceAnalysis {
 
 
 	/**
-	 * Calls CPLEX to solve the problem with quadratic programming
+	 * Calls CPLEX to solve the problem with quadratic programming and sets in the end
+	 * the computed solutions for concentrations and fluxes.
 	 * @throws IloException 
 	 */
 	private double[] solveWithQuadraticProgramming() throws IloException {
@@ -205,10 +224,19 @@ public class FluxBalanceAnalysis {
 			solution_concentrations = cplex.getValues(c);
 		}
 		cplex.end();
+		
+		// create the MultiTable for visualization
+		fluxesForVisualization = createMultiTableForVisualizing();
 		return solution;
 
 	}
 
+	/**
+	 * Puts for {@link Reaction} j the upper bound on the given ubValue
+	 * @param ubValue
+	 * @param j (index of reaction)
+	 * @return true if ubValue was set successfully
+	 */
 	public boolean setUbOfReactionJ(double ubValue, int j) {
 		if (j < targetFunc.getFluxVector().length) {
 			ub[j] = ubValue;
@@ -220,7 +248,7 @@ public class FluxBalanceAnalysis {
 
 
 	/**
-	 * Puts for reaction j the lower bound on the given lbValue
+	 * Puts for {@link Reaction} j the lower bound on the given lbValue.
 	 * @param lbValue
 	 * @param j (index of reaction)
 	 * @return true if lbValue was set successfully
@@ -232,5 +260,24 @@ public class FluxBalanceAnalysis {
 		} else {
 			return false;
 		}
+	}
+	
+	/**
+	 * Creates a {@link MultiTable} that contains the computed fluxes for visualization.
+	 * @return MultiTable
+	 */
+	private MultiTable createMultiTableForVisualizing(){
+		double[] time = {0};
+		String[] idsOfReactions = new String[constraints.document.getModel().getReactionCount()];
+		for (int i = 0; i < constraints.document.getModel().getReactionCount(); i++){
+			idsOfReactions[i] = constraints.document.getModel().getReaction(i).getId();
+		}
+		double[][] fluxes = new double[solution_fluxVector.length][1];
+		for (int j = 0; j < solution_fluxVector.length; j++) {
+			fluxes[j][0] = solution_fluxVector[j];
+		}
+		MultiTable mt = new MultiTable(time, fluxes, idsOfReactions);
+		
+		return mt;
 	}
 }
