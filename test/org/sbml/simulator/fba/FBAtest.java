@@ -68,6 +68,7 @@ public class FBAtest {
 	 * @throws XMLStreamException
 	 * @throws IOException
 	 */
+	@SuppressWarnings("deprecation")
 	private static void conductFBA(File sbmlFile, int targetFluxIndices[], double targetFluxes[]) throws XMLStreamException, IOException {
 	  SBMLDocument a = (new SBMLReader()).readSBML(sbmlFile.getAbsolutePath());
 
@@ -212,7 +213,8 @@ public class FBAtest {
         
       }
       */
-      double alpha[] = new double[K.getColumnDimension()];
+      @SuppressWarnings("unused")
+	double alpha[] = new double[K.getColumnDimension()];
       Alpha = K.solve(new Matrix(target_fluxes));
       
       
@@ -223,7 +225,8 @@ public class FBAtest {
       Random rand = new Random();
       
             
-      double alpha[] = new double[K_trans.getRowDimension()];
+      @SuppressWarnings("unused")
+	double alpha[] = new double[K_trans.getRowDimension()];
       for (int i = 0; i <r;i++){
         target_fluxes[i][0] = rand.nextInt(5);
       }
@@ -265,6 +268,7 @@ public class FBAtest {
 	 * @return
 	 * @throws IOException
 	 */
+	@SuppressWarnings("deprecation")
 	private static double[] read_Gibbs_file(Model model,String string) throws IOException {
 		
 		List<Double> energies = new LinkedList<Double>();
@@ -294,6 +298,7 @@ public class FBAtest {
 	 * @throws IOException
 	 */
 
+	@SuppressWarnings("deprecation")
 	public static void Gibbs_to_file(Model model, String outputfile)
 			throws IOException {
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outputfile));
@@ -464,6 +469,7 @@ public class FBAtest {
 	 */
 
 	public static Matrix rowexchange(Matrix matrix, int s, int t) {
+		@SuppressWarnings("unused")
 		int num_rows = matrix.getRowDimension();
 		int num_cols = matrix.getColumnDimension();
 		double hold;
@@ -489,6 +495,7 @@ public class FBAtest {
 	public static Matrix colexchange(Matrix matrix, int s, int t) {
 
 		int num_rows = matrix.getRowDimension();
+		@SuppressWarnings("unused")
 		int num_cols = matrix.getColumnDimension();
 		double hold;
 
