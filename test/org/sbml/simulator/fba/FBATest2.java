@@ -30,7 +30,7 @@ public class FBATest2 {
     FluxBalanceAnalysis flux = new FluxBalanceAnalysis(a.getModel(),
         "Gibbs_energies_hepato.txt", "Conc.txt");
     flux.generate_stoichiometry();
-    Matrix stoich = flux.getStoich();
+//    Matrix stoich = flux.getStoich();
     int rec = flux.getNum_rec();
     int spec = flux.getNum_spec();
 
@@ -78,11 +78,11 @@ public class FBATest2 {
     Matrix V = S.svd().getV();
     System.out.println(S);
     System.out.println(V);
-    int r = S.rank();
+//    int r = S.rank();
     double RT = 2.14;
     Matrix K = new Matrix(6, 2);
-    double c[] = V.getColumn(4);
-    double d[] = V.getColumn(5);
+//    double c[] = V.getColumn(4);
+//    double d[] = V.getColumn(5);
     for (int i = 0; i < 2; i++) {
       for (int j = 0; j < 6; j++) {
         K.set(j, i, V.get(j, i + 4));
@@ -241,7 +241,8 @@ public class FBATest2 {
     
     lin.setMinProblem(true);
     QuadraticProgramSolver uu = (QuadraticProgramSolver) SolverFactory.newDefault();
-    double sol[] = uu.solve(lin);
+//    double sol[] = 
+    	uu.solve(lin);
     
     /*
      * try { //create a buffered reader that connects to the console, we use

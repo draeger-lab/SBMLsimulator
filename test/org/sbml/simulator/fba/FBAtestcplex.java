@@ -70,7 +70,7 @@ public class FBAtestcplex {
     //		System.out.println(2);
 		try {
 			double lambda1 = 100d;
-			int lambda2 = 10;
+//			int lambda2 = 10;
 			double lambda3 = 0.01d;
 
 			// generate Nullspace
@@ -217,7 +217,7 @@ public class FBAtestcplex {
 			}
 
 			IloNumVar[] x = cplex.numVarArray(ub.length, lb, ub);
-			double var = (lambda1 - lambda1 * 2 * c_eq[0]);
+//			double var = (lambda1 - lambda1 * 2 * c_eq[0]);
 
 			double[] objvals = new double[ub.length];
 			// conc
@@ -287,7 +287,7 @@ public class FBAtestcplex {
 				IloNumExpr rec_error = cplex.prod(0, x[t]);
 
 				for (int j = 0; j < S.getRowDimension(); j++) {
-					IloNumExpr temp = rec_error;
+//					IloNumExpr temp = rec_error;
 					rec_error = cplex.sum(cplex.prod(RT * S.get(j, i), x[j]),
 							rec_error);
 				}
