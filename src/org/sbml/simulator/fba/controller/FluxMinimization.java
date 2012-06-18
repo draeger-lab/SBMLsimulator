@@ -77,6 +77,11 @@ public class FluxMinimization implements TargetFunction {
 	private int[] counterArray;
 
 	/**
+	 * Contains the computed stoichiometric matrix N.
+	 */
+	private StoichiometricMatrix N;
+	
+	/**
 	 * Constructor, that gets a {@link StoichiometricMatrix} and computes 
 	 * the fluxVector an the errorArray itself.
 	 * 
@@ -89,6 +94,7 @@ public class FluxMinimization implements TargetFunction {
 	public FluxMinimization(SBMLDocument doc, StoichiometricMatrix N, double[] c_eq, double[] gibbs_eq, String[] targetFluxes) {
 		this.fluxVector = FluxMinimizationUtils.computeFluxVector(N, targetFluxes, doc);
 		this.c_eq = c_eq;
+		this.N = N;
 		Constraints c = new Constraints(doc, gibbs_eq, c_eq);
 		this.gibbs = c.getGibbsEnergies();
 		if (gibbs != null) {
@@ -306,6 +312,12 @@ public class FluxMinimization implements TargetFunction {
 	 */
 	public int[] getCounterArray() {
 		return counterArray;
+	}
+
+
+	@Override
+	public double[][] getStoichiometricMatrix() {
+		return N.getArray();
 	}
 
 }

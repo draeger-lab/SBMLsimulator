@@ -61,4 +61,9 @@ public interface TargetFunction {
 	 * like the flux vector are.
 	 */
 	public int[] getCounterArray();
+	
+	/**
+	 * @return the computed stoichiometric matrix N.
+	 */
+	public double[][] getStoichiometricMatrix();
 }
