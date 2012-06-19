@@ -41,8 +41,8 @@ public class EstimationInitOperator implements InterfaceInitialization {
 		InterfaceOptimizationProblem problem) {
 		double[] data = ((ESIndividualDoubleData)indy).getDoubleData();
 		for (int i = 0; i < data.length; i++) {
-      if(ranges[i].isGaussianInitialization()) {
-      	double stdDev = ranges[i].getGaussianStandardDeviation() * ranges[i].getInitialGaussianValue();
+      if(ranges[i].isGaussianInitialization() && (ranges[i].getInitialMinimum() <= ranges[i].getInitialGaussianValue()) && (ranges[i].getInitialMaximum() >= ranges[i].getInitialGaussianValue())) {
+      	double stdDev = (ranges[i].getGaussianStandardDeviation() / 100) * ranges[i].getInitialGaussianValue();
       	if(stdDev == 0) {
       		stdDev = ranges[i].getGaussianStandardDeviation();
       	}
