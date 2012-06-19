@@ -188,7 +188,7 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
     public void dynamicChangeOfReaction(String id, double value, boolean labels) {
         LinkedList<Edge> edgeList = graph.getId2edge()
                 .get(id);
-        if (reactionID2reactionNode.get(id) != null) {
+        if ((reactionID2reactionNode.get(id) != null) && (value != 0)) {
             ReactionNodeRealizer nr = (ReactionNodeRealizer) graph.getSimpleGraph().getRealizer(reactionID2reactionNode.get(id));
             // line width
             double absvalue = Math.abs(value);
@@ -271,7 +271,12 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
                 nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
             }
             graph.getSimpleGraph().updateViews();
-        } else {
+        } else if (value == 0) {
+            logger.finer(MessageFormat.format(
+                    "ReactionID: {0} value=0. Reverting id.",
+                    new Object[] { id }));
+            revertChanges(id);
+        } else if (reactionID2reactionNode.get(id) == null) {
             logger.finer(MessageFormat.format(
                     "No ReactionNodeRealizer for ReactionID: {0}",
                     new Object[] { id }));

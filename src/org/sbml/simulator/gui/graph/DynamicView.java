@@ -712,17 +712,9 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
                                 updateThem.getValueAt(0, i),
                                 controlPanel.getSelectionStateOfNodeLabels());
                     } else if (document.getModel().getReaction(id) != null) {
-                        if (timepoint == 0.0) {
-                            // there's no initial reaction data.
-                            graphManipulator.revertChanges(id);
-                        } else {
-                            graphManipulator
-                                    .dynamicChangeOfReaction(
-                                            id,
-                                            updateThem.getValueAt(0, i),
-                                            controlPanel
-                                                    .getSelectionStateOfReactionLabels());
-                        }
+                        graphManipulator.dynamicChangeOfReaction(id, updateThem
+                                .getValueAt(0, i), controlPanel
+                                .getSelectionStateOfReactionLabels());
                     }
                 } else {
                     graphManipulator.revertChanges(id);

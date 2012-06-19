@@ -150,7 +150,7 @@ public class ManipulatorOfNodeSizeAndColor extends AbstractGraphManipulator {
         RGBcolor3 = new int[] { r, g, b }; 
         
         /*
-         * Store min/max once to save computation time for absolute part
+         * Store min/max once to save computation time for absolute part of
          * concentration changes.
          */
         minMaxOfSelectedSpecies = core.getMinMaxOfIDs(selectedSpecies);
