@@ -61,7 +61,7 @@ public class DynamicControlPanel extends JPanel {
 	 * @version $Rev$
 	 */
 	public enum Buttons implements ActionCommand{
-		PLAY, PAUSE, STOP, TOVIDEO, GRAPHSHOT, NODESIZE, NODECOLOR;
+		PLAY, PAUSE, STOP, TOVIDEO, GRAPHSHOT;
 
 		/* (non-Javadoc)
 		 * @see de.zbit.gui.actioncommand.ActionCommand#getName()
@@ -86,7 +86,7 @@ public class DynamicControlPanel extends JPanel {
 	 * @version $Rev$
 	 */
 	public enum Items {
-	    FAST, NORMAL, SLOW, NODESIZE, NODECOLOR;
+	    FAST, NORMAL, SLOW;
 	    
 	    /**
 	     * Play speeds.

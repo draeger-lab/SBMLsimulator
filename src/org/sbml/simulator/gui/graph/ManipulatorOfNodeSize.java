@@ -42,11 +42,6 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
     private static final transient Logger logger = Logger.getLogger(ManipulatorOfNodeSize.class.getName());
     
     /**
-     * Slope of linear regression m, and yintercept c. 
-     */
-//    private double m = 1, c= 0;
-    
-    /**
      * If provided, colors of {@link LegendTableModel} are used as node colors.
      */
     private LegendTableModel legendTable = null;
@@ -69,74 +64,69 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
             maxNodeSize = DEFAULT_MAX_NODE_SIZE;
     
     /**
-     * Constructs a new nodesize-manipulator on the given graph. Minimum node
-     * size and maximum node size per default and reactions line widths per
-     * default.
-     * Node colors per default value.
-     * 
-     * @param graph
-     * @param document
-     * @param core
-     * @param minMaxOfSpecies
-     * @param minMaxOfReactions
+     * Concentration changes relativ or absolute? Per default false.
      */
-    public ManipulatorOfNodeSize(SBML2GraphML graph, SBMLDocument document,
-            DynamicCore core, String[] selectedSpecies,
-            String[] selectedReactions) {
-        super(graph, document, core, selectedReactions, DEFAULT_MIN_LINEWIDTH,
-                DEFAULT_MAX_LINEWIDTH);
-        minMaxOfSelectedSpecies = core.getMinMaxOfIDs(selectedSpecies);
-//        computeSpeciesAdjusting(minMaxOfSelectedSpecies[0], minMaxOfSelectedSpecies[1], minNodeSize, maxNodeSize);
-    }
+    private boolean relativeConcentrations = false;
     
     /**
      * Constructs a new nodesize-manipulator on the given graph. Minimum node
      * size and maximum node size as given. If minimum node size greater than
-     * maximum node size, default values will be used.
-     * Node colors uniform as user given.
+     * maximum node size, default values will be used. Reactions line widths as
+     * given. Node colors uniform as user given.
+     * Concentration changes as user given.
      * 
      * @param graph
      * @param document
      * @param core
-     * @param minMaxOfSpecies
-     * @param minMaxOfReactions
+     * @param selectedSpecies
+     * @param selectedReactions
      * @param minNodeSize
      * @param maxNodeSize
+     * @param relativeConcentrations
      * @param reactionsMinLinewidth
      * @param reactionsMaxLineWidth
      */
     public ManipulatorOfNodeSize(SBML2GraphML graph, SBMLDocument document,
             DynamicCore core, Color uniformNodeColor, String[] selectedSpecies,
             String[] selectedReactions, double minNodeSize, double maxNodeSize,
-            float reactionsMinLinewidth, float reactionsMaxLineWidth) {
-        // no use of this() to avoid computation of adjusting twice
-        super(graph, document, core, selectedReactions, reactionsMinLinewidth,
+            boolean relativeConcentrations, float reactionsMinLineWidth,
+            float reactionsMaxLineWidth) {
+        
+        // no use of this() because of other super constructor
+        super(graph, document, core, selectedReactions, reactionsMinLineWidth,
                 reactionsMaxLineWidth);
+        
         if (minNodeSize < maxNodeSize) {
             this.minNodeSize = minNodeSize;
             this.maxNodeSize = maxNodeSize;
         } // else ignore input and use default node sizes
         DEFAULT_NODE_COLOR = uniformNodeColor;
         REVERT_NODE_SIZE = DEFAULT_MIN_NODE_SIZE;
+        this.relativeConcentrations = relativeConcentrations;
+        /*
+         * Store min/max once to save computation time in case of absolute
+         * concentration changes.
+         */
         minMaxOfSelectedSpecies = core.getMinMaxOfIDs(selectedSpecies);
-//        computeSpeciesAdjusting(minMaxOfSelectedSpecies[0], minMaxOfSelectedSpecies[1],
-//                minNodeSize, maxNodeSize);
     }
     
     /**
      * Constructs a new nodesize-manipulator on the given graph. Minimum node
      * size and maximum node size as given. If minimum node size greater than
-     * maximum node size, default values will be used.
+     * maximum node size, default values will be used. Reactions line widths as
+     * given.
      * Nodecolors as in given {@link LegendTableModel}.
+     * Concentration changes as user given.
      * 
      * @param graph
      * @param document
      * @param core
      * @param legendTableModel
-     * @param minMaxOfSpecies
-     * @param minMaxOfReactions
+     * @param selectedSpecies
+     * @param selectedReactions
      * @param minNodeSize
      * @param maxNodeSize
+     * @param relativeConcentrations
      * @param reactionsMinLinewidth
      * @param reactionsMaxLineWidth
      */
@@ -144,32 +134,54 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
             DynamicCore core, LegendTableModel legendTableModel,
             String[] selectedSpecies, String[] selectedReactions,
             double minNodeSize, double maxNodeSize,
-            float reactionsMinLinewidth, float reactionsMaxLineWidth) {
-        // no use of this() to avoid computation of adjusting twice
+            boolean relativeConcentrations, float reactionsMinLinewidth,
+            float reactionsMaxLineWidth) {
+        
         super(graph, document, core, selectedReactions, reactionsMinLinewidth,
                 reactionsMaxLineWidth);
+        
         this.legendTable = legendTableModel;
         if (minNodeSize < maxNodeSize) {
             this.minNodeSize = minNodeSize;
             this.maxNodeSize = maxNodeSize;
         } // else ignore input and use default node sizes
+        this.relativeConcentrations = relativeConcentrations;
+        
+        /*
+         * Store min/max once to save computation time in case of absolute
+         * concentration changes.
+         */
         minMaxOfSelectedSpecies = core.getMinMaxOfIDs(selectedSpecies);
-//        computeSpeciesAdjusting(minMaxOfSelectedSpecies[0], minMaxOfSelectedSpecies[1],
-//                minNodeSize, maxNodeSize);
     }
     
     /**
-     * Computes adjusting values for given limits.
-     * @param lowerDataLimit
-     * @param upperDataLimit
-     * @param minNodeSize
-     * @param maxNodeSize
+     * Constructs a new nodesize-manipulator on the given graph. Minimum node
+     * size and maximum node size per default and reactions line widths per
+     * default.
+     * Node colors per default value.
+     * Concentration changes absolute per default.
+     * 
+     * @param graph
+     * @param document
+     * @param core
+     * @param selectedSpecies
+     * @param selectedReactions
      */
-//    private void computeSpeciesAdjusting(double lowerDataLimit, double upperDataLimit, double minNodeSize, double maxNodeSize){
-//        double[] linearRegression = computeBIAS(lowerDataLimit, upperDataLimit, minNodeSize, maxNodeSize);
-//        m = linearRegression[0];
-//        c = linearRegression[1];
-//    }
+    public ManipulatorOfNodeSize(SBML2GraphML graph, SBMLDocument document,
+            DynamicCore core, String[] selectedSpecies,
+            String[] selectedReactions) {
+        
+        super(graph, document, core, selectedReactions, DEFAULT_MIN_LINEWIDTH,
+                DEFAULT_MAX_LINEWIDTH);
+        
+        REVERT_NODE_SIZE = DEFAULT_MIN_NODE_SIZE;
+        
+        /*
+         * Store min/max once to save computation time in case of absolute
+         * concentration changes.
+         */
+        minMaxOfSelectedSpecies = core.getMinMaxOfIDs(selectedSpecies);
+    }
 
     /* (non-Javadoc)
      * @see org.sbml.simulator.gui.graph.GraphManipulator#dynamicChangeOfNode(java.lang.String, double, double, boolean)
@@ -177,11 +189,29 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
     @Override
     public void dynamicChangeOfNode(String id, double value, boolean labels) {
         if (id2speciesNode.get(id) != null) {
-            double size = adjustValue(minMaxOfSelectedSpecies[0],
-                    minMaxOfSelectedSpecies[1], minNodeSize, maxNodeSize, value);
+            double minValue, maxValue; // values to compute adjusting 
+            if (relativeConcentrations) {
+                /*
+                 * Realtive changes. Use species specific min/max values.
+                 */
+                minValue = id2minMaxData.get(id)[0];
+                maxValue = id2minMaxData.get(id)[1];
+            } else {
+                /*
+                 * Absolute changes. Use min/max values of all selected species.
+                 */
+                minValue = minMaxOfSelectedSpecies[0];
+                maxValue = minMaxOfSelectedSpecies[1];
+            }
+            
+            // compute adusting
+            double size = adjustValue(minValue, maxValue, minNodeSize,
+                    maxNodeSize, value);
             logger.finer(MessageFormat.format(
                     "Species {0}: value={1}, results in node size={2}",
                     new Object[] { id, value, size }));
+            
+            // visualize
             NodeRealizer nr = graph.getSimpleGraph()
                     .getRealizer(graph.getId2node().get(id));
             double ratio = nr.getHeight() / nr.getWidth(); //keep ratio in case of elliptic nodes
@@ -206,7 +236,9 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
                 // labels switched off, therefore remove them, if there are any
                 nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
             }
+            
+            // update view
+            graph.getSimpleGraph().updateViews();
         }
-        graph.getSimpleGraph().updateViews();
     }
 }
