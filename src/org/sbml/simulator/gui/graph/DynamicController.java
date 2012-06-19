@@ -237,19 +237,26 @@ public class DynamicController implements ChangeListener, ActionListener,
         if (core != null) {
             SBPreferences prefs = SBPreferences
                     .getPreferencesFor(GraphOptions.class);
+            
             // get current options
             float reactionsMinLineWidth = prefs
                     .getFloat(GraphOptions.MIN_LINE_WIDTH);
             float reactionsMaxLineWidth = prefs
                     .getFloat(GraphOptions.MAX_LINE_WIDTH);
+            boolean relativeConcentrations = prefs
+                    .getBoolean(GraphOptions.RELATIVE_CONCENTRATION_CHANGES);
+            
             logger.finer("#selected species: " + view.getSelectedSpecies().length);
             logger.finer("#selected reactions: " + view.getSelectedReactions().length);
+            
             if (controlPanel.getSelectedManipulator().equals(Manipulators.NODESIZE.getName())) {
+                
                 // get current options
                 double minNodeSize = prefs
                         .getDouble(GraphOptions.MIN_NODE_SIZE);
                 double maxNodeSize = prefs
                         .getDouble(GraphOptions.MAX_NODE_SIZE);
+                
                 if (prefs.getBoolean(GraphOptions.USE_UNIFORM_NODE_COLOR)) {
                     return new ManipulatorOfNodeSize(
                             view.getGraph(),
@@ -259,36 +266,19 @@ public class DynamicController implements ChangeListener, ActionListener,
                                     prefs.get(GraphOptions.UNIFORM_NODE_COLOR)),
                             view.getSelectedSpecies(), view
                                     .getSelectedReactions(), minNodeSize,
-                            maxNodeSize, reactionsMinLineWidth,
-                            reactionsMaxLineWidth);
-//                    return new ManipulatorOfNodeSize(
-//                            view.getGraph(),
-//                            view.getSBMLDocument(),
-//                            Option.parseOrCast(Color.class,
-//                                    prefs.get(GraphOptions.UNIFORM_NODE_COLOR)),
-//                            core.getMinMaxOfIDs(view.getSelectedSpecies()),
-//                            core.getMinMaxOfIDs(view.getSelectedReactions()),
-//                            minNodeSize, maxNodeSize, reactionsMinLineWidth,
-//                            reactionsMaxLineWidth);
+                            maxNodeSize, relativeConcentrations,
+                            reactionsMinLineWidth, reactionsMaxLineWidth);
                 } else {
-                    return new ManipulatorOfNodeSize(
-                            view.getGraph(),
-                            view.getSBMLDocument(),
-                            core,
-                            view.getLegendPanel().getLegendTableModel(),
-                            view.getSelectedSpecies(), view
-                                    .getSelectedReactions(), minNodeSize,
-                            maxNodeSize, reactionsMinLineWidth,
-                            reactionsMaxLineWidth);
-//                    return new ManipulatorOfNodeSize(view.getGraph(),
-//                            view.getSBMLDocument(), view.getLegendPanel()
-//                                    .getLegendTableModel(),
-//                            core.getMinMaxOfIDs(view.getSelectedSpecies()),
-//                            core.getMinMaxOfIDs(view.getSelectedReactions()),
-//                            minNodeSize, maxNodeSize, reactionsMinLineWidth,
-//                            reactionsMaxLineWidth);
+                    return new ManipulatorOfNodeSize(view.getGraph(),
+                            view.getSBMLDocument(), core, view.getLegendPanel()
+                                    .getLegendTableModel(),
+                            view.getSelectedSpecies(),
+                            view.getSelectedReactions(), minNodeSize,
+                            maxNodeSize, relativeConcentrations,
+                            reactionsMinLineWidth, reactionsMaxLineWidth);
                 }
             } else if (controlPanel.getSelectedManipulator().equals(Manipulators.NODECOLOR.getName())) {
+                
                 // get current options
                 Color color1 = Option.parseOrCast(Color.class,
                         prefs.get(GraphOptions.COLOR1));
@@ -297,27 +287,37 @@ public class DynamicController implements ChangeListener, ActionListener,
                 Color color3 = Option.parseOrCast(Color.class,
                         prefs.get(GraphOptions.COLOR3));
                 double nodeSize = prefs.getDouble(GraphOptions.COLOR_NODE_SIZE);
+                
                 return new ManipulatorOfNodeColor(view.getGraph(),
                         view.getSBMLDocument(), core,
                         view.getSelectedSpecies(), view.getSelectedReactions(),
-                        nodeSize, color1, color2, color3,
+                        relativeConcentrations, nodeSize, color1, color2,
+                        color3, reactionsMinLineWidth, reactionsMaxLineWidth);
+            } else if (controlPanel.getSelectedManipulator().equals(Manipulators.NODESIZE_AND_COLOR.getName())) {
+                
+                // get current options
+                Color color1 = Option.parseOrCast(Color.class,
+                        prefs.get(GraphOptions.COLOR1));
+                Color color2 = Option.parseOrCast(Color.class,
+                        prefs.get(GraphOptions.COLOR2));
+                Color color3 = Option.parseOrCast(Color.class,
+                        prefs.get(GraphOptions.COLOR3));
+                double minNodeSize = prefs
+                        .getDouble(GraphOptions.MIN_NODE_SIZE);
+                double maxNodeSize = prefs
+                        .getDouble(GraphOptions.MAX_NODE_SIZE);
+                
+                return new ManipulatorOfNodeSizeAndColor(view.getGraph(),
+                        view.getSBMLDocument(), core,
+                        view.getSelectedSpecies(), view.getSelectedReactions(),
+                        minNodeSize, maxNodeSize, color1, color2, color3,
                         reactionsMinLineWidth, reactionsMaxLineWidth);
-//                return new ManipulatorOfNodeColor(view.getGraph(),
-//                        view.getSBMLDocument(), core.getMinMaxOfIDs(view
-//                                .getSelectedSpecies()),
-//                        core.getMinMaxOfIDs(view.getSelectedReactions()),
-//                        nodeSize, color1, color2, color3,
-//                        reactionsMinLineWidth, reactionsMaxLineWidth);
             }
 
             // in any other case return nodesize manipulator per default.
             return new ManipulatorOfNodeSize(view.getGraph(),
                     view.getSBMLDocument(), core, view.getSelectedSpecies(),
                     view.getSelectedReactions());
-//            return new ManipulatorOfNodeSize(view.getGraph(),
-//                    view.getSBMLDocument(), core.getMinMaxOfIDs(view
-//                            .getSelectedSpecies()), core.getMinMaxOfIDs(view
-//                            .getSelectedReactions()));
         }
         return null; // do nothing if core isn't set yet.
     }
@@ -379,23 +379,21 @@ public class DynamicController implements ChangeListener, ActionListener,
     public void preferenceChange(PreferenceChangeEvent evt) {
         // immediately change graph visualization
         SBPreferences prefs = SBPreferences.getPreferencesFor(GraphOptions.class);
-        if (controlPanel.getSelectedManipulator().equals(Manipulators.NODESIZE.getName())) {
-            if (evt.getKey().equals("MAX_NODE_SIZE")
-                    || evt.getKey().equals("MIN_NODE_SIZE")
-                    || evt.getKey().equals("MIN_LINE_WIDTH")
-                    || evt.getKey().equals("MAX_LINE_WIDTH")
-                    || evt.getKey().equals("USE_UNIFORM_NODE_COLOR")
-                    || evt.getKey().equals("UNIFORM_NODE_COLOR")) {
-                view.setGraphManipulator(getSelectedGraphManipulator());
-            }
-        } else if (controlPanel.getSelectedManipulator().equals(Manipulators.NODECOLOR.getName())) {
-            if (evt.getKey().equals("COLOR1") || evt.getKey().equals("COLOR2")
-                    || evt.getKey().equals("COLOR3")
-                    || evt.getKey().equals("COLOR_NODE_SIZE")
-                    || evt.getKey().equals("MIN_LINE_WIDTH")
-                    || evt.getKey().equals("MAX_LINE_WIDTH")) {
-                view.setGraphManipulator(getSelectedGraphManipulator());
-            }
+        if (evt.getKey().equals("MAX_NODE_SIZE")
+                || evt.getKey().equals("MIN_NODE_SIZE")
+                || evt.getKey().equals("MIN_LINE_WIDTH")
+                || evt.getKey().equals("MAX_LINE_WIDTH")
+                || evt.getKey().equals("USE_UNIFORM_NODE_COLOR")
+                || evt.getKey().equals("UNIFORM_NODE_COLOR")
+                || evt.getKey().equals("RELATIVE_CONCENTRATION_CHANGES")
+                || evt.getKey().equals("COLOR1")
+                || evt.getKey().equals("COLOR2")
+                || evt.getKey().equals("COLOR3")
+                || evt.getKey().equals("COLOR_NODE_SIZE")) {
+            /*
+             * Options concerning visualization.
+             */
+            view.setGraphManipulator(getSelectedGraphManipulator());
         }
 
         if (evt.getKey().equals("SHOW_NODE_LABELS")) {

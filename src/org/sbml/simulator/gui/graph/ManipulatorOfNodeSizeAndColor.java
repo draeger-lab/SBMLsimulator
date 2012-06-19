@@ -24,23 +24,32 @@ import java.util.logging.Logger;
 import org.sbml.jsbml.SBMLDocument;
 
 import y.view.NodeRealizer;
+
 import de.zbit.graph.io.SBML2GraphML;
 import de.zbit.gui.ColorPalette;
 
 
 /**
  * This class is a {@link GraphManipulator}. It changes the color of the given
- * nodes and width of given reactions.
+ * nodes as well as their size and width of given reactions. Changes of color
+ * are relative to concentration changes, changes of node size are absolute to
+ * concentration changes.
  * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
-public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
+public class ManipulatorOfNodeSizeAndColor extends AbstractGraphManipulator {
     
     /**
      * A {@link Logger} for this class.
      */
-    private static final transient Logger logger = Logger.getLogger(ManipulatorOfNodeColor.class.getName());
+    private static final transient Logger logger = Logger.getLogger(ManipulatorOfNodeSizeAndColor.class.getName());
+    
+    /**
+     * Minimum and maximum Node Size with default initialization.
+     */
+    private double minNodeSize = DEFAULT_MIN_NODE_SIZE,
+            maxNodeSize = DEFAULT_MAX_NODE_SIZE;
     
     /**
      * Field for the first color (high concentration), second color (mid
@@ -55,20 +64,11 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
     private double[] minMaxOfSelectedSpecies;
     
     /**
-     * Node size per default 30.
-     */
-    private double nodeSize = 30;
-    
-    /**
-     * Concentration changes relativ or absolute? Per default false.
-     */
-    private boolean relativeConcentrations = false;
-    
-    /**
-     * Constructs node-color manipulator with default gradient camine red (high)
-     * -> white (mid) -> gold (low) and default node size and default reactions
-     * linewidths.
-     * Concentration changes absolute per default.
+     * Constructs a new node-size and node-color manipulator. Changes of
+     * node-size are computed absolute, changes of node-color are computed
+     * relative. Minimum node size and maximum node size per default and
+     * reactions line widths per default. Default gradient camine red (high) ->
+     * white (mid) -> gold (low).
      * 
      * @param graph
      * @param document
@@ -76,13 +76,14 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
      * @param selectedSpecies
      * @param selectedReactions
      */
-    public ManipulatorOfNodeColor(SBML2GraphML graph, SBMLDocument document, DynamicCore core,
-            String[] selectedSpecies,
+    public ManipulatorOfNodeSizeAndColor(SBML2GraphML graph, SBMLDocument document,
+            DynamicCore core, String[] selectedSpecies,
             String[] selectedReactions) {
         
-        super(graph, document, core, selectedReactions, DEFAULT_MIN_LINEWIDTH, DEFAULT_MAX_LINEWIDTH);
+        super(graph, document, core, selectedReactions, DEFAULT_MIN_LINEWIDTH,
+                DEFAULT_MAX_LINEWIDTH);
         
-        REVERT_NODE_SIZE = nodeSize;
+        REVERT_NODE_SIZE = DEFAULT_MIN_NODE_SIZE;
         
         // default colors
         RGBcolor1 = new int[] { ColorPalette.CAMINE_RED.getRed(),
@@ -92,43 +93,49 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
         RGBcolor3 = new int[]{ ColorPalette.GOLD.getRed(),
                 ColorPalette.GOLD.getGreen(),
                 ColorPalette.GOLD.getBlue() };
+        
         /*
-         * Store min/max once to save computation time in case of absolute
+         * Store min/max once to save computation time for absolute part
          * concentration changes.
          */
         minMaxOfSelectedSpecies = core.getMinMaxOfIDs(selectedSpecies);
     }
     
     /**
-     * Constructs node-color manipulator with the given RGB colors as color1
-     * (high) -> color2 (mid) -> color3 (low) and a constant node size.
-     * Reactions line widths as given. Concentration changes as user given.
+     * Constructs a new node-size and node-color manipulator. Changes of
+     * node-size are computed absolute, changes of node-color are computed
+     * relative. Minimum node size and maximum node size as given. If minimum
+     * node size greater than maximum node size, default values will be used.
+     * Color gradient as given by color1 (high) -> color2 (mid) -> color3 (low).
+     * Reactions line widths as given.
      * 
      * @param graph
      * @param document
      * @param core
      * @param selectedSpecies
      * @param selectedReactions
-     * @param relativeConcentrations
-     * @param nodeSize
+     * @param minNodeSize
+     * @param maxNodeSize
      * @param color1
      * @param color2
      * @param color3
-     * @param reactionsMinLineWidth
+     * @param reactionsMinLinewidth
      * @param reactionsMaxLineWidth
      */
-    public ManipulatorOfNodeColor(SBML2GraphML graph, SBMLDocument document,
-            DynamicCore core, String[] selectedSpecies,
-            String[] selectedReactions, boolean relativeConcentrations,
-            double nodeSize, Color color1, Color color2, Color color3,
+    public ManipulatorOfNodeSizeAndColor(SBML2GraphML graph,
+            SBMLDocument document, DynamicCore core, String[] selectedSpecies,
+            String[] selectedReactions, double minNodeSize, double maxNodeSize,
+            Color color1, Color color2, Color color3,
             float reactionsMinLineWidth, float reactionsMaxLineWidth) {
         
         // no use of this() because of other super constructor
         super(graph, document, core, selectedReactions, reactionsMinLineWidth, reactionsMaxLineWidth);
         
         // gather settings
-        this.nodeSize = nodeSize;
-        REVERT_NODE_SIZE = nodeSize;
+        if (minNodeSize < maxNodeSize) {
+            this.minNodeSize = minNodeSize;
+            this.maxNodeSize = maxNodeSize;
+        } // else ignore input and use default node sizes
         int r = color1.getRed();
         int g = color1.getGreen();
         int b = color1.getBlue();
@@ -141,54 +148,41 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
         g = color3.getGreen();
         b = color3.getBlue();
         RGBcolor3 = new int[] { r, g, b }; 
-        this.relativeConcentrations = relativeConcentrations;
         
         /*
-         * Store min/max once to save computation time in case of absolute
+         * Store min/max once to save computation time for absolute part
          * concentration changes.
          */
         minMaxOfSelectedSpecies = core.getMinMaxOfIDs(selectedSpecies);
     }
-    
+
     /* (non-Javadoc)
      * @see org.sbml.simulator.gui.graph.GraphManipulator#dynamicChangeOfNode(java.lang.String, double, boolean)
      */
     @Override
     public void dynamicChangeOfNode(String id, double value, boolean labels) {
         if (id2speciesNode.get(id) != null) {
-            NodeRealizer nr = graph.getSimpleGraph()
-                    .getRealizer(graph.getId2node().get(id));
             
-            // init visualization style
-            double ratio = nr.getHeight() / nr.getWidth(); //keep ratio in case of elliptic nodes
-            nr.setSize(nodeSize, nodeSize*ratio); //standard node size
+            // compute adusting of node size (absolute)
+            double size = adjustValue(minMaxOfSelectedSpecies[0],
+                    minMaxOfSelectedSpecies[1], minNodeSize, maxNodeSize, value);
             
-            double minValue, maxValue; // values to compute adjusting 
-            if (relativeConcentrations) {
-                /*
-                 * Realtive changes. Use species specific min/max values.
-                 */
-                minValue = id2minMaxData.get(id)[0];
-                maxValue = id2minMaxData.get(id)[1];
-            } else {
-                /*
-                 * Absolute changes. Use min/max values of all selected species.
-                 */
-                minValue = minMaxOfSelectedSpecies[0];
-                maxValue = minMaxOfSelectedSpecies[1];
-            }
-            
-            // compute adjusting
-            double percent = adjustValue(minValue, maxValue, 0, 1, value);
+            // compute adjusting of node color (relative)
+            double percent = adjustValue(id2minMaxData.get(id)[0],
+                    id2minMaxData.get(id)[1], 0, 1, value);
             int[] RGBinterpolated = linearColorInterpolationForThree(percent,
                     RGBcolor1, RGBcolor2, RGBcolor3);
             logger.finer(MessageFormat
-                    .format("Species {0}: value={1}, results in percent={2} and r={3}, g={4}, b={5}",
-                            new Object[] { id, value, percent,
+                    .format("Species {0}: value={1}, results in node size={2} and color percent={3} and r={4}, g={5}, b={6}",
+                            new Object[] { id, value, size, percent,
                                     RGBinterpolated[0], RGBinterpolated[1],
                                     RGBinterpolated[2] }));
             
             // visualize
+            NodeRealizer nr = graph.getSimpleGraph()
+                    .getRealizer(graph.getId2node().get(id));
+            double ratio = nr.getHeight() / nr.getWidth(); // keep ratio in case of elliptic nodes
+            nr.setSize(size, size*ratio);
             nr.setFillColor(new Color(RGBinterpolated[0], RGBinterpolated[1], RGBinterpolated[2]));
             
             /*
@@ -206,4 +200,5 @@ public class ManipulatorOfNodeColor extends AbstractGraphManipulator{
             graph.getSimpleGraph().updateViews();
         }
     }
+
 }

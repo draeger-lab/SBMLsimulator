@@ -34,6 +34,7 @@
   <entry key="SIMULATIONSPEED_SPINNER_TOOLTIP">Displays the current simulation speed as value. Changeable in Options/Network.</entry>
   <entry key="NODESIZE">Node size</entry>
   <entry key="NODECOLOR">Node color</entry>
+  <entry key="NODESIZE_AND_COLOR">Abs. size/rel. color</entry>
   <entry key="GROUP_VISUALIZATION">Visualization</entry> 
   <entry key="SEARCHBAR_TOOLTIP">Choose time point of visualization.</entry>
   
@@ -49,7 +50,7 @@
   
   <!-- Error Messages -->
   
-  <entry key="VIDEO_CODEC_NOT_FOUND">Couldn't guess video codec. Stated file ending/format correct?</entry>
+  <entry key="VIDEO_CODEC_NOT_FOUND">Couldn't guess video codec. Given file ending/format correct?</entry>
   <entry key="COULD_NOT_WRITE_SCREENSHOT">Couldn't write screenshot file.</entry>
   
   <!-- GraphOptions -->
@@ -79,10 +80,10 @@
   <entry key="MIN_LINE_WIDTH_TOOLTIP">Determines the minimum line width of dynamic reaction visualization.</entry> 
   <entry key="MAX_LINE_WIDTH">Maximum line width</entry>
   <entry key="MAX_LINE_WIDTH_TOOLTIP">Determines the maximum line width of dynamic reaction visualization.</entry>
-  <entry key="SHOW_NODE_LABELS">Node labels</entry>
-  <entry key="SHOW_NODE_LABELS_TOOLTIP">Enables/Disables node labels.</entry>
-  <entry key="SHOW_REACTION_LABELS">Reaction labels</entry>
-  <entry key="SHOW_REACTION_LABELS_TOOLTIP">Enables/Disables reaction labels.</entry>
+  <entry key="SHOW_NODE_LABELS">Concentrations</entry>
+  <entry key="SHOW_NODE_LABELS_TOOLTIP">Shows/hides concentrations of species.</entry>
+  <entry key="SHOW_REACTION_LABELS">Reaction rates</entry>
+  <entry key="SHOW_REACTION_LABELS_TOOLTIP">Shows/hides reaction rates.</entry>
   <entry key="GRAPH_LABELS">Labeling</entry>
   <entry key="GRAPH_LABELS_TOOLTIP">Enables/Disables labels.</entry>
   <entry key="COLOR_NODE_SIZE">Constant node size</entry>
@@ -105,10 +106,12 @@
   <entry key="GROUP_VIDEO_ENCODING">Video encoding</entry>
   <entry key="GROUP_VIDEO_ENCODING_TOOLTIP">These settings control video encoding.</entry>
   <entry key="VIDEO_FRAMERATE">Framerate</entry>
-  <entry key="VIDEO_FRAMERATE_TOOLTIP">The lower this setting, the faster the video play speed.</entry>
+  <entry key="VIDEO_FRAMERATE_TOOLTIP">The lower this setting, the faster and shorter is the resulting video.</entry>
   <entry key="VIDEO_IMAGE_STEPSIZE">Steps between two images</entry>
   <entry key="VIDEO_IMAGE_STEPSIZE_TOOLTIP">The less steps are chosen, the less images are taken to encode the video.</entry>    
   <entry key="VIDEO_RESOLUTION_MULTIPLIER">Resolution multiplier</entry>
   <entry key="VIDEO_RESOLUTION_MULTIPLIER_TOOLTIP">The higher this multiplier, the better the resolution but the higher the outcoming file size.</entry>
+  <entry key="RELATIVE_CONCENTRATION_CHANGES">Relative concentration change</entry>
+  <entry key="RELATIVE_CONCENTRATION_CHANGES_TOOLTIP">By enabling this option, concentration change will be relative. This means each species has its own min/max value with which the changes in visualization are computed, as far as this option is supported by the chosen visualization style.</entry>
   
 </properties>

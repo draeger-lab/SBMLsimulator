@@ -67,7 +67,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
      * @version $Rev$
      */
     public enum Manipulators {
-        NODESIZE, NODECOLOR;
+        NODESIZE, NODECOLOR, NODESIZE_AND_COLOR;
 
         /**
          * Returns a string array of all manipulators.
@@ -75,7 +75,8 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
          * @return
          */
         public static String[] getAllManipulators() {
-            return new String[] { NODESIZE.getName(), NODECOLOR.getName() };
+            return new String[] { NODESIZE.getName(), NODECOLOR.getName(),
+                    NODESIZE_AND_COLOR.getName() };
         }
         
         /**
@@ -83,18 +84,19 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
          * @param manipulatorName
          * @return
          */
-        public static Manipulators getManipulator(String manipulatorName){
-            if(manipulatorName.equals(bundle.getString("NODESIZE"))){
+        public static Manipulators getManipulator(String manipulatorName) {
+            if (manipulatorName.equals(bundle.getString("NODESIZE"))) {
                 return NODESIZE;
-            }else if(manipulatorName.equals(bundle.getString("NODECOLOR"))){
+            } else if (manipulatorName.equals(bundle.getString("NODECOLOR"))) {
                 return NODECOLOR;
+            } else if (manipulatorName.equals(bundle.getString("NODESIZE_AND_COLOR"))) {
+                return NODESIZE_AND_COLOR;
             }
             return null;
         }
 
         /**
          * Returns localized name of this Item.
-         * 
          * @return
          */
         public String getName() {
@@ -620,6 +622,9 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
          * necessary scaling).
          */
         Graph2D graph = graphPanel.getConverter().getSimpleGraph();
+        
+        //unselect objects
+        graph.unselectAll();
         
         //save current view
         Graph2DView originalViewPort = (Graph2DView) graph.getCurrentView();

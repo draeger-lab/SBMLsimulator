@@ -40,7 +40,7 @@ import de.zbit.graph.sbgn.ReactionNodeRealizer;
 
 /**
  * This class is an abstract graph manipulator, that provides some basic
- * functions. Each {@link GraphManipulator} should be derived from this class.
+ * functions and constants. Each {@link GraphManipulator} should be derived from this class.
  * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
@@ -58,24 +58,20 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
     protected SBML2GraphML graph;
     
     /**
-     * Default node size to revert changes of nodes.
+     * Default node size to revert changes of nodes. Can be changed by derived
+     * classes.
      */
     protected double REVERT_NODE_SIZE = 8;
     
     /**
-     * Default min/max node size used. Can be changed by derived classes.
+     * Default min/max node size for species.
      */
-    protected static double DEFAULT_MIN_NODE_SIZE = 8, DEFAULT_MAX_NODE_SIZE = 50;
+    public static final double DEFAULT_MIN_NODE_SIZE = 8, DEFAULT_MAX_NODE_SIZE = 50;
     
     /**
-     * Default min/max line width used. Can be changed by derived classes.
+     * Default min/max line width for Reactions.
      */
-    protected static float DEFAULT_MIN_LINEWIDTH = 1, DEFAULT_MAX_LINEWIDTH = 6;
-    
-    /**
-     * Parameters for default DynamicChangeOfReaction.
-     */
-//    private double m = 1, c = 0;
+    public static final float DEFAULT_MIN_LINEWIDTH = 1, DEFAULT_MAX_LINEWIDTH = 6;
     
     /**
      * Saves mapping from reactionIDs to related reaction nodes.
@@ -107,7 +103,7 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
      * Saves minimum and maximum value of selected Reactions to save computation
      * time.
      */
-    private double[] minMaxOfselectedReactions;
+    protected double[] minMaxOfselectedReactions;
     
     /**
      * Used linewidth for dynamic visualization of reactions.
@@ -151,30 +147,6 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
      * 
      * @param graph
      * @param document
-     * @param minMaxOfReactionsData
-     * @param reactionsMinLineWidth
-     * @param reactionsMaxLineWidth
-     */
-//    public AbstractGraphManipulator(SBML2GraphML graph, SBMLDocument document,
-//            double[] minMaxOfReactionsData, float reactionsMinLineWidth,
-//            float reactionsMaxLineWidth) {
-//        this(graph, document);
-//        /*
-//         * Take absolute higher limit as xMax and 0 as xLow for regression.
-//         * Eventually reactions will end up in equillibrium.
-//         */
-//        computeReactionAdjusting(minMaxOfReactionsData[0],
-//                minMaxOfReactionsData[1], reactionsMinLineWidth, reactionsMaxLineWidth);
-//    }
-    
-    /**
-     * Constructs an abstract graph manipulator on the given
-     * {@link SBML2GraphML} and {@link SBMLDocument}. Additionally this
-     * constructor provides a basic implementation of dynamicChangeofReaction
-     * method with the given parameters.
-     * 
-     * @param graph
-     * @param document
      * @param core
      * @param selectedReactions
      * @param reactionsMinLineWidth
@@ -188,9 +160,6 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
         minMaxOfselectedReactions = core.getMinMaxOfIDs(selectedReactions);
         this.minLineWidth = reactionsMinLineWidth;
         this.maxLineWidth = reactionsMaxLineWidth;
-//        computeReactionAdjusting(minMaxOfselectedReactions[0],
-//                minMaxOfselectedReactions[1], reactionsMinLineWidth,
-//                reactionsMaxLineWidth);
     }
     
     /**
@@ -211,45 +180,6 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
         return ((1 / (xUpperLimit - xLowerLimit)) * (value - xLowerLimit))
                 * (yUpperLimit - yLowerLimit) + yLowerLimit;
     }
-    
-    /**
-     * Linear regression for two given points (xLowerLimit, yLowerLimit) and
-     * (xUpperLimit, yUpperLimit).
-     * 
-     * @param xLowerLimit
-     * @param xUpperLimit
-     * @param yLowerLimit
-     * @param yUpperLimit
-     * @return first index of array represents the slope, second index the
-     *         yintercept.
-     */
-//    protected double[] computeBIAS(double xLowerLimit, double xUpperLimit, double yLowerLimit, double yUpperLimit){
-//        double slope = (yUpperLimit-yLowerLimit) / (xUpperLimit - xLowerLimit);
-//        double yintercept = yLowerLimit-slope*xLowerLimit;
-//        return new double[] { slope, yintercept };
-//    }
-    
-    /**
-     * Computes the adjusting values for given limits.
-     * @param lowerReactionLimit
-     * @param upperReactionLimit
-     * @param minLineWidth
-     * @param maxLineWidth
-     */
-//    private void computeReactionAdjusting(double lowerReactionLimit,
-//            double upperReactionLimit, float minLineWidth, float maxLineWidth) {
-//        /*
-//         * Take absolute higher limit as xMax and 0 as xLow for regression.
-//         * Eventually reactions will end up in equillibrium.
-//         */
-//        double xHigh = Math.abs(lowerReactionLimit) > Math
-//                .abs(upperReactionLimit) ? Math.abs(lowerReactionLimit) : Math
-//                .abs(upperReactionLimit);
-//        double[] linearRegression = computeBIAS(0, xHigh, minLineWidth,
-//                maxLineWidth);
-//        m = linearRegression[0];
-//        c = linearRegression[1];
-//    }
     
     /* (non-Javadoc)
      * @see org.sbml.simulator.gui.graph.GraphManipulator#dynamicChangeOfReaction(java.lang.String, double)
@@ -274,11 +204,6 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
             logger.finer(MessageFormat
                     .format("Reaction {0}: Abs. value={1}, computes to line width={2}",
                             new Object[] { id, absvalue, lineWidth }));
-            
-//            float lineWidth = (m != 1) ? (float) (absvalue * m + c) : 1;
-//            logger.finer(MessageFormat
-//                    .format("INDIRECT: Reaction {0}: Abs. value={1}, m={2}, c={3}, computes to line width={4}",
-//                            new Object[] { id, absvalue, m, c, lineWidth }));
             
             // ReactionNode line width
             nr.setLineWidth(lineWidth);
@@ -383,6 +308,64 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
         }
     }
     
+    /**
+     * Linear interpolation over two given colors.
+     * 
+     * @param percent [0,1]
+     * @param RGBcolor1 low concentration (percent -> 0)
+     * @param RGBcolor2 high concentration (percent -> 1)
+     * @return
+     */
+    protected int[] linearColorInterpolation(double percent, int[] RGBcolor1,
+            int[] RGBcolor2) {
+        
+        int[] outcolor = {0, 0, 0};
+        if (percent >= 0 && percent <= 1) {
+            for (int i = 0; i < outcolor.length; i++) {
+                outcolor[i] = (int) (RGBcolor1[i] * percent + RGBcolor2[i]
+                        * (1 - percent));
+            }
+            return outcolor;
+        } else if (percent > 1) {
+            //maybe round-off error
+            return RGBcolor1;
+        } else {
+            //maybe round-off error
+            return RGBcolor2;
+        }
+    }
+    
+    
+    /**
+     * Linear interpolation over three given colors. 
+     * 
+     * @param percent [0,1]
+     * @param RGBcolor1 low concentration (percent -> 0)
+     * @param RGBcolor2 mid concentration
+     * @param RGBcolor3 high concentration (percent -> 1)
+     * @return
+     */
+    protected int[] linearColorInterpolationForThree(double percent,
+            int[] RGBcolor1, int[] RGBcolor2, int[] RGBcolor3) {
+        
+        if (percent >= 0 && percent <= 0.5) {
+            // color interpolation between color2 (mid concentration) and color3
+            // (low concentration)
+            double resPercent = adjustValue(0, 0.5, 0, 1, percent);
+            return linearColorInterpolation(resPercent, RGBcolor2, RGBcolor3);
+        } else if (percent > 0.5 && percent <= 1.0){
+            //color interpolation between color1 (high concentration) and color2 (mid concentration)
+            double resPercent = adjustValue(0.5, 1, 0, 1, percent);
+            return linearColorInterpolation(resPercent, RGBcolor1, RGBcolor2);
+        } else if (percent > 1) {
+            // maybe round-off error
+            return RGBcolor1;
+        } else {
+            // maybe round-off error
+            return RGBcolor3;
+        }
+    }
+
     /* (non-Javadoc)
      * @see org.sbml.simulator.gui.graph.GraphManipulator#revertChanges(java.lang.String)
      */

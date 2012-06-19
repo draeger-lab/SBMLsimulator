@@ -32,6 +32,7 @@
   <entry key="SIMULATIONSPEED_SPINNER_TOOLTIP">Zeigt die aktuelle Simulationsgeschwindigkeit als Wert an. Kann in den Optionen unter Netzwerk geändert werden.</entry>
   <entry key="NODESIZE">Knotengröße</entry>
   <entry key="NODECOLOR">Knotenfarbe</entry>
+  <entry key="NODESIZE_AND_COLOR">Abs.Größe/rel.Farbe</entry>
   <entry key="GROUP_VISUALIZATION">Visualisierung</entry>
   <entry key="VISUALIZATION_TOOLTIP">Wählen Sie die Art der dynamischen Visualisierung und die zu visualisierenden Daten aus.</entry>
   <entry key="SEARCHBAR_TOOLTIP">Stellen Sie den Zeitpunkt der Visualisierung ein.</entry>
@@ -78,10 +79,10 @@
   <entry key="MIN_LINE_WIDTH_TOOLTIP">Definiert die minimale Linienbreite der dynamischen Visualisierung von Reaktionen.</entry>    
   <entry key="MAX_LINE_WIDTH">Maximale Linienbreite</entry>
   <entry key="MAX_LINE_WIDTH_TOOLTIP">Definiert die maximale Linienbreite der dynamischen Visualisierung von Reaktionen.</entry>
-  <entry key="SHOW_NODE_LABELS">Knotenbeschriftung</entry>
-  <entry key="SHOW_NODE_LABELS_TOOLTIP">Aktiviert/Deaktiviert die Knotenbeschriftung.</entry>
-  <entry key="SHOW_REACTION_LABELS">Reaktionenbeschriftung</entry>
-  <entry key="SHOW_REACTION_LABELS_TOOLTIP">Aktiviert/Deaktiviert die Reaktionenbeschriftung.</entry>  
+  <entry key="SHOW_NODE_LABELS">Konzentrationen</entry>
+  <entry key="SHOW_NODE_LABELS_TOOLTIP">Zeigt/verbirgt die Konzentrationen der Species.</entry>
+  <entry key="SHOW_REACTION_LABELS">Reaktionsgeschwindigkeiten</entry>
+  <entry key="SHOW_REACTION_LABELS_TOOLTIP">Zeigt/verbirgt die Reaktionsgeschwindigkeiten.</entry>  
   <entry key="GRAPH_LABELS">Beschriftung</entry>
   <entry key="GRAPH_LABELS_TOOLTIP">Aktiviert/Deaktiviert die Beschriftungen.</entry>
   <entry key="COLOR_NODE_SIZE">Konstante Knotengröße</entry>
@@ -104,11 +105,14 @@
   <entry key="GROUP_VIDEO_ENCODING">Videoerstellung</entry>
   <entry key="GROUP_VIDEO_ENCODING_TOOLTIP">Diese Optionen beeinflussen die Videoerstellung.</entry>
   <entry key="VIDEO_FRAMERATE">Framerate</entry>
-  <entry key="VIDEO_FRAMERATE_TOOLTIP">Je niedriger diese Einstellung, desto schneller wird das resultierende Video.</entry>
+  <entry key="VIDEO_FRAMERATE_TOOLTIP">Je niedriger diese Einstellung, desto schneller und kürzer wird das resultierende Video.</entry>
   <entry key="VIDEO_IMAGE_STEPSIZE">Bilderschrittweite</entry>
   <entry key="VIDEO_IMAGE_STEPSIZE_TOOLTIP">Hier können Sie einstellen, wie viele Bilder von der Simulation gemacht werden sollen. Je geringer die Bilderschrittweite, desto weniger Bilder werden gemacht.</entry>    
   <entry key="VIDEO_RESOLUTION_MULTIPLIER">Auflösungsmultiplikator</entry>
   <entry key="VIDEO_RESOLUTION_MULTIPLIER_TOOLTIP">Je größer der Multiplikator, desto besser ist die Videoauflösung, aber desto größer ist die Dateigröße.</entry>
+  <entry key="RELATIVE_CONCENTRATION_CHANGES">Relative Konzentrationsänderung</entry>
+  <entry key="RELATIVE_CONCENTRATION_CHANGES_TOOLTIP">Mit dieser Option können die Konzentrationsänderungen relativ zueinander visualisiert werden. Das bedeutet, dass für jede Species ein eigener min/max Wert zur Berechnung der visuellen Konzentrationsänderung benutzt wird, sofern die gewählte Art der Visualisierung diese Option unterstützt.</entry>
+  
 
   
 </properties>
