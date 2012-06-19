@@ -271,11 +271,23 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
                 nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
             }
             graph.getSimpleGraph().updateViews();
-        } else if (value == 0) {
+        } else if ((reactionID2reactionNode.get(id) != null) && (value == 0)) {
+            revertChanges(id);
+            
             logger.finer(MessageFormat.format(
                     "ReactionID: {0} value=0. Reverting id.",
                     new Object[] { id }));
-            revertChanges(id);
+            
+            /*
+             * If labels are enable show them anyway.
+             */
+            if (labels) {
+                ReactionNodeRealizer nr = (ReactionNodeRealizer) graph
+                        .getSimpleGraph().getRealizer(
+                                reactionID2reactionNode.get(id));
+                labelNode(nr, id, value);
+                graph.getSimpleGraph().updateViews();
+            }
         } else if (reactionID2reactionNode.get(id) == null) {
             logger.finer(MessageFormat.format(
                     "No ReactionNodeRealizer for ReactionID: {0}",
