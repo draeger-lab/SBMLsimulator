@@ -112,7 +112,6 @@
   <entry key="VIDEO_RESOLUTION_MULTIPLIER_TOOLTIP">Je größer der Multiplikator, desto besser ist die Videoauflösung, aber desto größer ist die Dateigröße.</entry>
   <entry key="RELATIVE_CONCENTRATION_CHANGES">Relative Konzentrationsänderung</entry>
   <entry key="RELATIVE_CONCENTRATION_CHANGES_TOOLTIP">Mit dieser Option können die Konzentrationsänderungen relativ zueinander visualisiert werden. Das bedeutet, dass für jede Species ein eigener min/max Wert zur Berechnung der visuellen Konzentrationsänderung benutzt wird, sofern die gewählte Art der Visualisierung diese Option unterstützt.</entry>
-  
-
-  
+  <entry key ="INTERPOLATE_EXP_DATA">Experimentelle Daten interpolieren</entry>
+  <entry key ="INTERPOLATE_EXP_DATA_TOOLTIP">Aktiviert/deaktiviert die Interpolation experimenteller Daten, wenn diese weniger als 100 Zeitpunkte besitzen.</entry>
 </properties>

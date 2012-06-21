@@ -113,5 +113,6 @@
   <entry key="VIDEO_RESOLUTION_MULTIPLIER_TOOLTIP">The higher this multiplier, the better the resolution but the higher the outcoming file size.</entry>
   <entry key="RELATIVE_CONCENTRATION_CHANGES">Relative concentration change</entry>
   <entry key="RELATIVE_CONCENTRATION_CHANGES_TOOLTIP">By enabling this option, concentration change will be relative. This means each species has its own min/max value with which the changes in visualization are computed, as far as this option is supported by the chosen visualization style.</entry>
-  
+  <entry key ="INTERPOLATE_EXP_DATA">Interpolate experimental data</entry>
+  <entry key ="INTERPOLATE_EXP_DATA_TOOLTIP">Enable/disable interpolation of experimental data, if there are less than 100 timepoints.</entry>
 </properties>
