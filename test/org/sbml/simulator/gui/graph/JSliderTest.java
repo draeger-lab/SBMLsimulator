@@ -18,6 +18,7 @@
 package org.sbml.simulator.gui.graph;
 
 import java.awt.FlowLayout;
+import java.awt.image.BufferedImage;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -30,7 +31,7 @@ import org.simulator.math.odes.MultiTable;
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
-public class JSliderTest extends JFrame implements DynamicGraph{
+public class JSliderTest extends JFrame implements IDynamicGraph{
 	private static final long serialVersionUID = -7669702948757945505L;
 	
 	JFrame window = new JFrame("SliderTest");
@@ -88,7 +89,7 @@ public class JSliderTest extends JFrame implements DynamicGraph{
 	}
 
 	/* (non-Javadoc)
-	 * @see org.sbml.simulator.gui.graph.DynamicGraph#updateGraph(double, org.simulator.math.odes.MultiTable)
+	 * @see org.sbml.simulator.gui.graph.IDynamicGraph#updateGraph(double, org.simulator.math.odes.MultiTable)
 	 */
 	@Override
 	public void updateGraph(double timePoint, MultiTable updateThem) {
@@ -100,5 +101,23 @@ public class JSliderTest extends JFrame implements DynamicGraph{
 		dataStrings.setText(dataString);
 		searchBar.setValue(core.getIndexOfTimepoint(timePoint));
 	}
+
+    /* (non-Javadoc)
+     * @see org.sbml.simulator.gui.graph.IDynamicGraph#donePlay()
+     */
+    @Override
+    public void donePlay() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see org.sbml.simulator.gui.graph.IDynamicGraph#takeGraphshot(int, int)
+     */
+    @Override
+    public BufferedImage takeGraphshot(int width, int height) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

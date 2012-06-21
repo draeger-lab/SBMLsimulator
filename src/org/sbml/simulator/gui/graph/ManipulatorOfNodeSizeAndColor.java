@@ -30,7 +30,7 @@ import de.zbit.gui.ColorPalette;
 
 
 /**
- * This class is a {@link GraphManipulator}. It changes the color of the given
+ * This class is a {@link IGraphManipulator}. It changes the color of the given
  * nodes as well as their size and width of given reactions. Changes of color
  * are relative to concentration changes, changes of node size are absolute to
  * concentration changes.
@@ -38,7 +38,7 @@ import de.zbit.gui.ColorPalette;
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
-public class ManipulatorOfNodeSizeAndColor extends AbstractGraphManipulator {
+public class ManipulatorOfNodeSizeAndColor extends AGraphManipulator {
     
     /**
      * A {@link Logger} for this class.
@@ -157,7 +157,7 @@ public class ManipulatorOfNodeSizeAndColor extends AbstractGraphManipulator {
     }
 
     /* (non-Javadoc)
-     * @see org.sbml.simulator.gui.graph.GraphManipulator#dynamicChangeOfNode(java.lang.String, double, boolean)
+     * @see org.sbml.simulator.gui.graph.IGraphManipulator#dynamicChangeOfNode(java.lang.String, double, boolean)
      */
     @Override
     public void dynamicChangeOfNode(String id, double value, boolean labels) {

@@ -51,18 +51,18 @@ import de.zbit.util.prefs.SBPreferences;
  * This class gathers all elements concerning the dynamic visualization and
  * ensures that every part is consistent with each other, i.e. search bar with
  * visualized values. (This is ensured by the implementation of
- * {@link DynamicGraph}. Every change of the slider goes through this class). It
+ * {@link IDynamicGraph}. Every change of the slider goes through this class). It
  * represents the view in MVC-Pattern and therefore listenes for change notifies
  * of associated {@link DynamicCore}.
  * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
-public class DynamicView extends JSplitPane implements DynamicGraph,
+public class DynamicView extends JSplitPane implements IDynamicGraph,
         PropertyChangeListener {
 
     /**
-     * Stores {@link GraphManipulator}s.
+     * Stores {@link IGraphManipulator}s.
      * 
      * @author Fabian Schwarzkopf
      * @version $Rev$
@@ -195,9 +195,9 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     private MultiTable currData;
 
     /**
-     * This field contains the current {@link GraphManipulator}.
+     * This field contains the current {@link IGraphManipulator}.
      */
-    private GraphManipulator graphManipulator;
+    private IGraphManipulator graphManipulator;
     
     /**
      * Internal variable (fixpoint for video).
@@ -367,7 +367,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     /*
      * (non-Javadoc)
      * 
-     * @see org.sbml.simulator.gui.graph.DynamicGraph#donePlay()
+     * @see org.sbml.simulator.gui.graph.IDynamicGraph#donePlay()
      */
     @Override
     public void donePlay() {
@@ -609,17 +609,17 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     }
 
     /**
-     * Sets the {@link GraphManipulator} for this {@link DynamicView}.
+     * Sets the {@link IGraphManipulator} for this {@link DynamicView}.
      * 
      * @param gm
      */
-    public void setGraphManipulator(GraphManipulator gm) {
+    public void setGraphManipulator(IGraphManipulator gm) {
         graphManipulator = gm;
         updateGraph();
     }
 
     /* (non-Javadoc)
-     * @see org.sbml.simulator.gui.graph.DynamicGraph#takeGraphshot()
+     * @see org.sbml.simulator.gui.graph.IDynamicGraph#takeGraphshot()
      */
     @Override
     public BufferedImage takeGraphshot(int width, int height) {
@@ -695,7 +695,7 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
     /*
      * (non-Javadoc)
      * 
-     * @see org.sbml.simulator.gui.graph.DynamicGraph#updateGraph(double,
+     * @see org.sbml.simulator.gui.graph.IDynamicGraph#updateGraph(double,
      * org.simulator.math.odes.MultiTable)
      */
     @Override

@@ -228,12 +228,12 @@ public class DynamicController implements ChangeListener, ActionListener,
     }
 
     /**
-     * Returns user selected {@link GraphManipulator} with selected options. If
+     * Returns user selected {@link IGraphManipulator} with selected options. If
      * there isn't yet a {@link DynamicCore} assigned, return is null.
      * 
      * @return
      */
-    public GraphManipulator getSelectedGraphManipulator() {
+    public IGraphManipulator getSelectedGraphManipulator() {
         if (core != null) {
             SBPreferences prefs = SBPreferences
                     .getPreferencesFor(GraphOptions.class);
