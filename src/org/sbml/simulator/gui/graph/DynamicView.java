@@ -45,6 +45,7 @@ import y.view.Graph2DView;
 import de.zbit.graph.gui.TranslatorSBMLgraphPanel;
 import de.zbit.graph.io.SBML2GraphML;
 import de.zbit.util.ResourceManager;
+import de.zbit.util.prefs.SBPreferences;
 
 /**
  * This class gathers all elements concerning the dynamic visualization and
@@ -523,7 +524,14 @@ public class DynamicView extends JSplitPane implements DynamicGraph,
             if (expData != null){
                 final MultiTable data;
                 final DynamicView thisView = this;
-                if (expData.getTimePoints().length < 100) {
+                if ((expData.getTimePoints().length < 100)
+                        && SBPreferences.getPreferencesFor(GraphOptions.class)
+                                .getBoolean(GraphOptions.INTERPOLATE_EXP_DATA)) {
+                    /*
+                     * Interpolate if there are less than 100 timepoints. CSV
+                     * files with less than 2 timepoints can't be read by main
+                     * program, thus there is no check for that.
+                     */
                     data = SplineCalculation.calculateSplineValues(expData, 100);
                 } else {
                     data = expData;

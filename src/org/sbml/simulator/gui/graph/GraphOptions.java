@@ -69,6 +69,12 @@ public interface GraphOptions extends KeyProvider{
      */
     public static final Option<Boolean> RELATIVE_CONCENTRATION_CHANGES = new Option<Boolean>(
         "RELATIVE_CONCENTRATION_CHANGES", Boolean.class, bundle, Boolean.FALSE);
+    
+    /**
+     * Enable/Disable interpolation of added experimental data.
+     */
+    public static final Option<Boolean> INTERPOLATE_EXP_DATA = new Option<Boolean>(
+        "INTERPOLATE_EXP_DATA", Boolean.class, bundle, Boolean.TRUE);
 
     /**
      * In case of dynamic node size change, it defines the minimum node size.
@@ -189,7 +195,7 @@ public interface GraphOptions extends KeyProvider{
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static final OptionGroup GROUP_VISUALIZATION = new OptionGroup(
-        "GROUP_VISUALIZATION", bundle, RELATIVE_CONCENTRATION_CHANGES, SHOW_NODE_LABELS, SHOW_REACTION_LABELS, VISUALIZATION_STYLE);
+        "GROUP_VISUALIZATION", bundle, INTERPOLATE_EXP_DATA, RELATIVE_CONCENTRATION_CHANGES, SHOW_NODE_LABELS, SHOW_REACTION_LABELS, VISUALIZATION_STYLE);
     
     /**
      * Settings in case of dynamic change of node size.
