@@ -39,7 +39,7 @@
   
   <!-- DynamicView -->
   
-  <entry key="SIMULATION_DATA">Simulierte Daten</entry> 
+  <entry key="SIMULATION_DATA">Berechnete Daten</entry> 
   <entry key="EXPERIMENTAL_DATA">Experimentelle Daten</entry> 
   <entry key="FLUXBILANCE_DATA">Flussbilanz</entry>
   
