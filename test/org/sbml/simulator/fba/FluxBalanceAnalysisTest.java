@@ -41,7 +41,9 @@ public class FluxBalanceAnalysisTest {
 	static Constraints constraints = null;
 	
 	/**
-	 * @param args
+	 * @param args[0] the SBMLDocument-File
+	 * args[1] the Gibbs-File
+	 * args[2] the concentration-File
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {

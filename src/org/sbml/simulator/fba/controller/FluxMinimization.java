@@ -69,7 +69,7 @@ public class FluxMinimization implements TargetFunction {
 	 * Vector that is made up of the transposed null space matrix K and
 	 * the corresponding gibbs energies.
 	 */
-	private double[] L;
+	private double[] L = null;
 
 	/**
 	 * counts the lengths of the components in the target array
@@ -80,32 +80,45 @@ public class FluxMinimization implements TargetFunction {
 	 * Contains the computed stoichiometric matrix N.
 	 */
 	private StoichiometricMatrix N;
-	
+
+	/**
+	 * Current {@link SBMLDocument}
+	 */
+	private SBMLDocument document;
+
 	/**
 	 * Constructor, that gets a {@link StoichiometricMatrix} and computes 
-	 * the fluxVector an the errorArray itself.
+	 * the fluxVector, the Gibbs energies, the concentrations and the errorArray itself.
 	 * 
 	 * @param doc
 	 * @param N
 	 * @param c_eq
 	 * @param gibbs_eq
-	 * @param targetFluxes
+	 * @param targetFluxes, important for computing the flux vector
 	 */
 	public FluxMinimization(SBMLDocument doc, StoichiometricMatrix N, double[] c_eq, double[] gibbs_eq, String[] targetFluxes) {
+		
+		// set the fields of this object
+		this.document = doc;
 		this.fluxVector = FluxMinimizationUtils.computeFluxVector(N, targetFluxes, doc);
-		this.c_eq = c_eq;
+		setC_eq(c_eq);
+		
 		this.N = N;
+		
+		// get the computed Gibbs energies for the incoming Gibbs energies in steady state
 		Constraints c = new Constraints(doc, gibbs_eq, c_eq);
 		this.gibbs = c.getGibbsEnergies();
 		if (gibbs != null) {
 			this.errorArray = FluxMinimizationUtils.computeError(gibbs.length);
 		}
+		
+		// compute the initial concentrations
 		this.concentrations = computeConcentrations(doc);
+		
+		// compute L or let it be null if the Gibbs energies couldn't be computed
 		if(gibbs != null && doc != null) {
 			this.L = computeL(doc);
-		} else {
-			this.L = null;
-		}
+		} 
 	}
 
 
@@ -122,7 +135,7 @@ public class FluxMinimization implements TargetFunction {
 	public FluxMinimization(SBMLDocument doc, double[] c_eq, double[] gibbs_eq, String[] targetFluxes) {
 		this(doc,FluxMinimizationUtils.SBMLDocToStoichMatrix(doc), c_eq, gibbs_eq, targetFluxes);
 	}
-	
+
 
 	/**
 	 * Computes the transposed kernel matrix of the reduced stoichiometric matrix N
@@ -193,25 +206,25 @@ public class FluxMinimization implements TargetFunction {
 		counterArray = new int[4];
 		fillCounterArray(fluxVector.length, errorArray.length, L.length);
 		int counter = 0;
-		
+
 		// fill it with the flux vector: ||J||
 		for (int i=0; i< this.fluxVector.length; i++) {
 			target[counter] = fluxVector[i];
 			counter++;
 		}
-		
+
 		// the weighted error: lambda3*||E||
 		for (int k = 0; k < this.errorArray.length; k++) {
 			target[counter] = lambda1 * errorArray[k];
 			counter++;
 		}
-		
+
 		// ||L||: lambda2*||L||
 		for (int h = 0; h < this.L.length; h++) {
 			target[counter] = lambda2 * L[h];
 			counter++;
 		}
-		
+
 		// the weighted gibbs energy: lambda4*||G||
 		for (int l = 0; l < this.gibbs.length; l++) {
 			target[counter] = lambda4 * gibbs[l];
@@ -246,10 +259,20 @@ public class FluxMinimization implements TargetFunction {
 	}
 
 	/**
-	 * @param c_eq the c_eq to set
+	 * If the incoming array is not null, then set it, 
+	 * else set the content to 1, so that the variables for this array are later
+	 * not weighted.
+	 * @param c_eq
 	 */
 	public void setC_eq(double[] c_eq) {
-		this.c_eq = c_eq;
+		if (c_eq != null) {
+			this.c_eq = c_eq;
+		} else {
+			this.c_eq = new double[document.getModel().getSpeciesCount()];
+			for (int i = 0; i < this.c_eq.length; i++) {
+				this.c_eq[i] = 1;
+			}
+		}
 	}
 
 	/*
