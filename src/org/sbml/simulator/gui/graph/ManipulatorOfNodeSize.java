@@ -28,13 +28,13 @@ import y.view.NodeRealizer;
 import de.zbit.graph.io.SBML2GraphML;
 
 /**
- * This class is a {@link GraphManipulator}. It changes the size of the given
+ * This class is a {@link IGraphManipulator}. It changes the size of the given
  * nodes and width of given reactions.
  * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
-public class ManipulatorOfNodeSize extends AbstractGraphManipulator{   
+public class ManipulatorOfNodeSize extends AGraphManipulator{   
     
     /**
      * A {@link Logger} for this class.
@@ -184,7 +184,7 @@ public class ManipulatorOfNodeSize extends AbstractGraphManipulator{
     }
 
     /* (non-Javadoc)
-     * @see org.sbml.simulator.gui.graph.GraphManipulator#dynamicChangeOfNode(java.lang.String, double, double, boolean)
+     * @see org.sbml.simulator.gui.graph.IGraphManipulator#dynamicChangeOfNode(java.lang.String, double, double, boolean)
      */
     @Override
     public void dynamicChangeOfNode(String id, double value, boolean labels) {

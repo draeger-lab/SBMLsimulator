@@ -40,17 +40,17 @@ import de.zbit.graph.sbgn.ReactionNodeRealizer;
 
 /**
  * This class is an abstract graph manipulator, that provides some basic
- * functions and constants. Each {@link GraphManipulator} should be derived from this class.
+ * functions and constants. Each {@link IGraphManipulator} should be derived from this class.
  * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
-public abstract class AbstractGraphManipulator implements GraphManipulator{
+public abstract class AGraphManipulator implements IGraphManipulator{
     
     /**
      * A {@link Logger} for this class.
      */
-    private static final transient Logger logger = Logger.getLogger(AbstractGraphManipulator.class.getName());
+    private static final transient Logger logger = Logger.getLogger(AGraphManipulator.class.getName());
     
     /**
      * Pointer to the graph.
@@ -117,7 +117,7 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
      * @param document
      * @param core
      */
-    public AbstractGraphManipulator(SBML2GraphML graph, SBMLDocument document, DynamicCore core){
+    public AGraphManipulator(SBML2GraphML graph, SBMLDocument document, DynamicCore core){
         this.graph = graph;
         reactionID2reactionNode = new HashMap<String, Node>();
         id2speciesNode = new HashMap<String, Node>();
@@ -152,7 +152,7 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
      * @param reactionsMinLineWidth
      * @param reactionsMaxLineWidth
      */
-    public AbstractGraphManipulator(SBML2GraphML graph, SBMLDocument document,
+    public AGraphManipulator(SBML2GraphML graph, SBMLDocument document,
             DynamicCore core, String[] selectedReactions,
             float reactionsMinLineWidth, float reactionsMaxLineWidth) {
         this(graph, document, core);
@@ -182,7 +182,7 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
     }
     
     /* (non-Javadoc)
-     * @see org.sbml.simulator.gui.graph.GraphManipulator#dynamicChangeOfReaction(java.lang.String, double)
+     * @see org.sbml.simulator.gui.graph.IGraphManipulator#dynamicChangeOfReaction(java.lang.String, double)
      */
     @Override
     public void dynamicChangeOfReaction(String id, double value, boolean labels) {
@@ -384,7 +384,7 @@ public abstract class AbstractGraphManipulator implements GraphManipulator{
     }
 
     /* (non-Javadoc)
-     * @see org.sbml.simulator.gui.graph.GraphManipulator#revertChanges(java.lang.String)
+     * @see org.sbml.simulator.gui.graph.IGraphManipulator#revertChanges(java.lang.String)
      */
     @Override
     public void revertChanges(String id) {

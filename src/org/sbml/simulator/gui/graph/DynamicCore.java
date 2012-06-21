@@ -251,7 +251,7 @@ public class DynamicCore {
 	/**
 	 * Listener, which will be notified, when the current timestep changes.
 	 */
-	private DynamicGraph observer;
+	private IDynamicGraph observer;
 	
 	/**
 	 * Determines the speed of the the play method.
@@ -266,7 +266,7 @@ public class DynamicCore {
 	 * @param observer
 	 * @param data
 	 */
-	public DynamicCore(DynamicGraph observer, MultiTable data){
+	public DynamicCore(IDynamicGraph observer, MultiTable data){
 	    this.observer = observer;
 		setData(data);
 	}
@@ -280,7 +280,7 @@ public class DynamicCore {
      * @param data
      * @param document
      */
-	public DynamicCore(DynamicGraph observer, MultiTable data, SBMLDocument document){
+	public DynamicCore(IDynamicGraph observer, MultiTable data, SBMLDocument document){
 	    this(observer, data);
 	    computeSpecificLimits(document);
 	}

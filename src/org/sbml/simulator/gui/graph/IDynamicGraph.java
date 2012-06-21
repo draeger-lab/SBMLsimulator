@@ -28,7 +28,7 @@ import org.simulator.math.odes.MultiTable;
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
-public interface DynamicGraph {
+public interface IDynamicGraph {
 
     /**
 	 * Method envoked by related {@link DynamicCore} when playthread is done.

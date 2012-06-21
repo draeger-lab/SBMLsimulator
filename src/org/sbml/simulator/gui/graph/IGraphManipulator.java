@@ -28,7 +28,7 @@ import de.zbit.graph.gui.TranslatorSBMLgraphPanel;
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
-public interface GraphManipulator {
+public interface IGraphManipulator {
 
     /**
      * Changes the visualization of a given node.
