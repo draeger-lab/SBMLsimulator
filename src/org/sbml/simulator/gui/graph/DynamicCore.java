@@ -52,11 +52,14 @@ public class DynamicCore {
             .getBundle("org.sbml.simulator.gui.graph.DynamicGraph");
     
     /**
-	 * Own thread to cycle through timepoints.
-	 * 
-	 * @author Fabian Schwarzkopf
-	 * @version $Rev$
-	 */
+     * A {@link SwingWorker} to cycle through all timepoints or video-encoding
+     * in background.
+     * This class is highly related to the {@link DynamicCore} and is therefore
+     * a private inner class.
+     * 
+     * @author Fabian Schwarzkopf
+     * @version $Rev$
+     */
 	private class PlayWorker extends SwingWorker<Void, Double>{
 	    
 	    /**
