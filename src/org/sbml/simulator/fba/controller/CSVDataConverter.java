@@ -41,7 +41,7 @@ public class CSVDataConverter {
 	 * Contains the information about the sort of the file:
 	 * true if it is a Gibbs-file, false if it's not.
 	 */
-	boolean isGibbsFile;
+	Boolean isGibbsFile;
 	
 	/**
 	 * Containing the corresponding {@link SBMLDocument}.
@@ -65,6 +65,11 @@ public class CSVDataConverter {
 	private CSVDataReader reader;
 
 	/**
+	 * 
+	 */
+	private Boolean isConcentrationFile;
+
+	/**
 	 * Constructor
 	 * @param doc
 	 */
@@ -80,7 +85,9 @@ public class CSVDataConverter {
 	 * @throws Exception 
 	 */
 	public double[] readConcentrationsFromFile (File files) throws Exception {
-		readFromFile(files, false);
+		this.isConcentrationFile = true;
+		this.isGibbsFile = null;
+		readFromFile(files);
 		return concentrationsArray;
 	}
 
@@ -93,7 +100,9 @@ public class CSVDataConverter {
 	 * @throws Exception 
 	 */
 	public double[] readGibbsFromFile(File files) throws Exception {
-		readFromFile(files, true);
+		this.isGibbsFile = true;
+		this.isConcentrationFile = null;
+		readFromFile(files);
 		return gibbsArray;
 	}
 
@@ -104,9 +113,8 @@ public class CSVDataConverter {
 	 * @param gibbs
 	 * @throws Exception 
 	 */
-	private void readFromFile(File files, Boolean isGibbs) throws Exception {
-		this.isGibbsFile = isGibbs;
-		reader = new CSVDataReader(files,null);
+	private void readFromFile(File file) throws Exception {
+		reader = new CSVDataReader(file,null);
 		reader.addPropertyChangeListener(EventHandler.create(PropertyChangeListener.class, this, "writeDataInArray", "newValue"));
 		reader.cancel(true);
 	}
@@ -128,7 +136,7 @@ public class CSVDataConverter {
 				keys[i] = data[i][0];
 			}
 			
-			if (isGibbsFile) {
+			if (isGibbsFile != null && isGibbsFile) {
 				gibbsArray = new double[values.length];
 				for(int i = 0; i< values.length; i++) {
 					gibbsArray[i] = Double.parseDouble(values[i]);
@@ -137,10 +145,11 @@ public class CSVDataConverter {
 					fileMatchToDocument++;
 					}
 				}
-			} else {
+			} else if(isConcentrationFile!= null && isConcentrationFile){
 				concentrationsArray = new double[values.length];
 				for(int i = 0; i< values.length; i++) {
 					concentrationsArray[i] = Double.parseDouble(values[i]);
+					System.out.println("key " + (i+1) + ": " + keys[i]);
 					if (document.getModel().getSpecies(keys[i]) != null) {
 						document.getModel().getSpecies(keys[i]).putUserObject(KEY_CONCENTRATIONS, concentrationsArray[i]);
 					fileMatchToDocument++;

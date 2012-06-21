@@ -48,27 +48,33 @@ public class FluxMinimizationTest {
 		sbml = (new SBMLReader()).readSBML(args[0]);
 		File file_g = new File(args[1]);
 		File file_c = new File(args[2]);
-		CSVDataConverter converter = new CSVDataConverter(sbml);
-		converter.readGibbsFromFile(file_g);
-		converter.readConcentrationsFromFile(file_c);
-		while(converter.getGibbsArray() == null) {
+		CSVDataConverter converter1 = new CSVDataConverter(sbml);
+		CSVDataConverter converter2 = new CSVDataConverter(sbml);
+		converter1.readGibbsFromFile(file_g);
+		converter2.readConcentrationsFromFile(file_c);
+		System.out.println(converter1.getReader().getState());
+		while(converter1.getGibbsArray() == null) {
 			//wait
 		}
-		while(converter.getConcentrationsArray() == null) {
+		System.out.println(converter1.getReader().getState());
+		while(converter2.getConcentrationsArray() == null) {
 			//wait
 		}
 		System.out.println("done reading");
 
 		// set gibbs and concentrations
-		gibbs_eq = converter.getGibbsArray();
-		c_eq = converter.getConcentrationsArray();
+		gibbs_eq = converter1.getGibbsArray();
+		c_eq = converter2.getConcentrationsArray();
 		
 		//test and create an FluxMinimization object:
 		FluxMinimization fm = new FluxMinimization(sbml, c_eq, gibbs_eq, targetFluxes);
 		double[] flux = fm.getFluxVector();
+		System.out.println("The computed flux vector: ");
+		System.out.print("[ ");
 		for (int i = 0; i< fm.getFluxVector().length; i++) {
-			System.out.println(flux[i]);
+			System.out.print(flux[i] + " ");
 		}
+		System.out.print("]");
 		
 	}
 

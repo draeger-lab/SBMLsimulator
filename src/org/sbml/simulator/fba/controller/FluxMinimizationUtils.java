@@ -112,12 +112,12 @@ public class FluxMinimizationUtils {
 				if (reac.hasProduct(metabolit)) {
 					// the stoichiometry of products is positive in the stoichiometricMatrix
 					if (reac.getProductForSpecies(metabolit.getId()).isSetStoichiometry()) {
-						sMatrix.set(i, j, reac.getProductForSpecies(metabolit.getId()).getStoichiometry());
+						sMatrix.set(j, i, reac.getProductForSpecies(metabolit.getId()).getStoichiometry());
 					}
 				} else if (reac.hasReactant(metabolit)) {
 					// the stoichiometry of reactants is negative in the stoichiometricMatrix
 					if (reac.getReactantForSpecies(metabolit.getId()).isSetStoichiometry()) {
-						sMatrix.set(i, j, - reac.getReactantForSpecies(metabolit.getId()).getStoichiometry());
+						sMatrix.set(j, i, - reac.getReactantForSpecies(metabolit.getId()).getStoichiometry());
 					}
 				}
 			}
