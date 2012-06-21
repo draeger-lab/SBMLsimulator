@@ -105,8 +105,8 @@
   <entry key="DATA_NOT_AVAILABLE">Chosen data set for visualization is not available by now.</entry>
   <entry key="GROUP_VIDEO_ENCODING">Video encoding</entry>
   <entry key="GROUP_VIDEO_ENCODING_TOOLTIP">These settings control video encoding.</entry>
-  <entry key="VIDEO_FRAMERATE">Framerate</entry>
-  <entry key="VIDEO_FRAMERATE_TOOLTIP">The lower this setting, the faster and shorter is the resulting video.</entry>
+  <entry key="VIDEO_TIMESTAMP">Time-stamp</entry>
+  <entry key="VIDEO_TIMESTAMP_TOOLTIP">The lower this setting, the faster and shorter is the resulting video.</entry>
   <entry key="VIDEO_IMAGE_STEPSIZE">Steps between two images</entry>
   <entry key="VIDEO_IMAGE_STEPSIZE_TOOLTIP">The less steps are chosen, the less images are taken to encode the video.</entry>    
   <entry key="VIDEO_RESOLUTION_MULTIPLIER">Resolution multiplier</entry>

@@ -156,14 +156,14 @@ public class DynamicController implements ChangeListener, ActionListener,
                         height = (height % 2) == 1 ? height-1 : height;
                         logger.fine("Video out resolution = " + width + "x" + height);
                         
-                        int framerate = (int) prefs
-                                .getDouble(GraphOptions.VIDEO_FRAMERATE);
+                        int timestamp = (int) prefs
+                                .getDouble(GraphOptions.VIDEO_TIMESTAMP);
                         int captureStepSize = (int) prefs
                                 .getDouble(GraphOptions.VIDEO_IMAGE_STEPSIZE);
                         
                         //catch errors due to videoencoding
                         try {
-                            core.generateVideo(width, height, framerate,
+                            core.generateVideo(width, height, timestamp,
                                     captureStepSize,
                                     destinationFile.getAbsolutePath());
                         } catch (UnsupportedOperationException uoe) {
