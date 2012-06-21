@@ -100,12 +100,12 @@
   <entry key="VISUALIZATION_STYLE">Visualisierungsart</entry>
   <entry key="VISUALIZATION_STYLE_TOOLTIP">Wählen Sie die Art der Visualisierung.</entry>    
   <entry key="VISUALIZATION_DATA">Visualisierte Daten</entry>
-  <entry key="VISUALIZATION_DATA_TOOLTIP">Wählen Sie die zu visualisierende Daten aus.</entry>
+  <entry key="VISUALIZATION_DATA_TOOLTIP">Wählen Sie die zu visualisierenden Daten aus.</entry>
   <entry key="DATA_NOT_AVAILABLE">Der zur Visualisierung ausgewählte Datensatz steht momentan nicht zur Verfügung.</entry>
   <entry key="GROUP_VIDEO_ENCODING">Videoerstellung</entry>
   <entry key="GROUP_VIDEO_ENCODING_TOOLTIP">Diese Optionen beeinflussen die Videoerstellung.</entry>
-  <entry key="VIDEO_FRAMERATE">Framerate</entry>
-  <entry key="VIDEO_FRAMERATE_TOOLTIP">Je niedriger diese Einstellung, desto schneller und kürzer wird das resultierende Video.</entry>
+  <entry key="VIDEO_TIMESTAMP">Zeitstempel</entry>
+  <entry key="VIDEO_TIMESTAMP_TOOLTIP">Je niedriger diese Einstellung, desto schneller und kürzer wird das resultierende Video.</entry>
   <entry key="VIDEO_IMAGE_STEPSIZE">Bilderschrittweite</entry>
   <entry key="VIDEO_IMAGE_STEPSIZE_TOOLTIP">Hier können Sie einstellen, wie viele Bilder von der Simulation gemacht werden sollen. Je geringer die Bilderschrittweite, desto weniger Bilder werden gemacht.</entry>    
   <entry key="VIDEO_RESOLUTION_MULTIPLIER">Auflösungsmultiplikator</entry>

@@ -172,8 +172,8 @@ public interface GraphOptions extends KeyProvider{
     /**
      * Sets framerate.
      */
-    public static final Option<Double> VIDEO_FRAMERATE = new Option<Double>(
-            "VIDEO_FRAMERATE", Double.class, bundle, new Range<Double>(
+    public static final Option<Double> VIDEO_TIMESTAMP = new Option<Double>(
+            "VIDEO_TIMESTAMP", Double.class, bundle, new Range<Double>(
                     Double.class, "{[1, 1E2]}"), Double.valueOf(25d));
     
     /**
@@ -230,6 +230,6 @@ public interface GraphOptions extends KeyProvider{
      */
     @SuppressWarnings("unchecked")
     public static final OptionGroup<Double> GROUP_VIDEO_ENCODING = new OptionGroup<Double>(
-        "GROUP_VIDEO_ENCODING", bundle, VIDEO_RESOLUTION_MULTIPLIER, VIDEO_FRAMERATE, VIDEO_IMAGE_STEPSIZE);
+        "GROUP_VIDEO_ENCODING", bundle, VIDEO_RESOLUTION_MULTIPLIER, VIDEO_TIMESTAMP, VIDEO_IMAGE_STEPSIZE);
     
 }
