@@ -367,6 +367,15 @@ public class DynamicCore {
             playWorker.execute();
         }
 	}
+    
+    /**
+     * Returns data for the current timepoint.
+     * @return
+     */
+    public MultiTable getCurrData() {
+        double[] currTimePoints = {currTimepoint};
+        return data.filter(currTimePoints);
+    }
 	
 	/**
 	 * Get the current timepoint of the core.

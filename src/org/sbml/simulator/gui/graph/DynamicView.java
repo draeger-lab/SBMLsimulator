@@ -185,16 +185,6 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
     private HashMap<String, Boolean> reactionsSelectionStates = new HashMap<String, Boolean>();
 
     /**
-     * Saves the currently displayed time.
-     */
-    private double currTime;
-
-    /**
-     * Saves the currently displayed data.
-     */
-    private MultiTable currData;
-
-    /**
      * This field contains the current {@link IGraphManipulator}.
      */
     private IGraphManipulator graphManipulator;
@@ -267,9 +257,6 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
             }
             
             //init view
-            currData = null;
-            currTime = 0;
-
             /*
              * Default selections. Selections are saved implicit in hashmaps due
              * to TableModelListener
@@ -684,11 +671,12 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
 
     /**
      * Updates the displayed graph with respect to the user chosen settings.
-     * (i.e. turning on/off labels).
+     * (e.g. turning on/off labels).
      */
     public void updateGraph() {
-        if ((visualizedCore != null) && (currData != null)) {
-            updateGraph(currTime, currData);
+        if (visualizedCore != null) {
+            updateGraph(visualizedCore.getCurrTimepoint(),
+                    visualizedCore.getCurrData());
         }
     }
     
@@ -700,9 +688,6 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
      */
     @Override
     public void updateGraph(double timepoint, MultiTable updateThem) {
-        // save currently displayed properties
-        currTime = timepoint;
-        currData = updateThem;
         // update JSlider (in case of "play")
         controlPanel.setSearchbarValue(timepoint);
 
