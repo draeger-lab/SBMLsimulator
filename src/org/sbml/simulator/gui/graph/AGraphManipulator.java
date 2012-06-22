@@ -161,12 +161,14 @@ public abstract class AGraphManipulator implements IGraphManipulator{
         this.minLineWidth = reactionsMinLineWidth;
         this.maxLineWidth = reactionsMaxLineWidth;
     }
-    
+
     /**
      * Maps the given value which has to be within [xLowerLimit, xUpperLimit] to
      * codomain [yLowerLimit, yUpperLimit]. This is done implicit by a linear
      * regression through the points (xLowerLimit, yLowerLimit) and
-     * (xUpperLimit, yUpperLimit).
+     * (xUpperLimit, yUpperLimit). If xUpperLimit < xLowerLimit or xUpperLimit
+     * equal to xLowerLimit (e.g. only one timepoint given) than a point in the
+     * middle of yLowerLimit and yUpperLimit will be returned.
      * 
      * @param xLowerLimit
      * @param xUpperLimit
@@ -177,6 +179,13 @@ public abstract class AGraphManipulator implements IGraphManipulator{
      */
     protected double adjustValue(double xLowerLimit, double xUpperLimit,
             double yLowerLimit, double yUpperLimit, double value) {
+        if ((xUpperLimit == xLowerLimit) || (xUpperLimit < xLowerLimit)) {
+            /*
+             * No proper limits given, return value inbetween codomain.
+             */
+            return (yLowerLimit+yUpperLimit) / 2.0;
+        }
+        
         return ((1 / (xUpperLimit - xLowerLimit)) * (value - xLowerLimit))
                 * (yUpperLimit - yLowerLimit) + yLowerLimit;
     }
