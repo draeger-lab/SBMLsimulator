@@ -309,14 +309,6 @@ public class DynamicCore {
                     if (tmpValue > maxData) {
                         maxData = tmpValue;
                     }
-                    
-                    /*
-                     * avoid min=max in case of only 1 timepoint given (e.g.
-                     * flux balance)
-                     */
-                    if (data.getRowCount() == 1) {
-                        minData = 0;
-                    }
                 }
                 // min/max saved for this specie
                 id2MinMaxData.put(data.getColumnIdentifier(i), new double[] {
@@ -330,14 +322,6 @@ public class DynamicCore {
                     } 
                     if (tmpValue > maxData) {
                         maxData = tmpValue;
-                    }
-                    
-                    /*
-                     * avoid min=max in case of only 1 timepoint given (e.g.
-                     * flux balance)
-                     */
-                    if (data.getRowCount() == 1) {
-                        minData = 0;
                     }
                 }
                 // min/max saved for this reaction
