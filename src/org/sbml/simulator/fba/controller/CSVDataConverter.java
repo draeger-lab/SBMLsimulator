@@ -137,28 +137,47 @@ public class CSVDataConverter {
 			}
 			
 			if (isGibbsFile != null && isGibbsFile) {
-				gibbsArray = new double[values.length];
+				initializeGibbsArray();
 				for(int i = 0; i< values.length; i++) {
-					gibbsArray[i] = Double.parseDouble(values[i]);
 					if (document.getModel().getReaction(keys[i]) != null) {
 						document.getModel().getReaction(keys[i]).putUserObject(KEY_GIBBS, gibbsArray[i]);
+						int index = document.getModel().getListOfReactions().getIndex(document.getModel().getReaction(keys[i]));
+						gibbsArray[index] = Double.parseDouble(values[i]);
 					fileMatchToDocument++;
 					}
 				}
 			} else if(isConcentrationFile!= null && isConcentrationFile){
-				concentrationsArray = new double[values.length];
+				initializeConcentrationArray();
 				for(int i = 0; i< values.length; i++) {
-					concentrationsArray[i] = Double.parseDouble(values[i]);
-					System.out.println("key " + (i+1) + ": " + keys[i]);
 					if (document.getModel().getSpecies(keys[i]) != null) {
 						document.getModel().getSpecies(keys[i]).putUserObject(KEY_CONCENTRATIONS, concentrationsArray[i]);
-					fileMatchToDocument++;
+						int index = document.getModel().getListOfSpecies().getIndex(document.getModel().getSpecies(keys[i]));
+						concentrationsArray[index] = Double.parseDouble(values[i]);
+						fileMatchToDocument++;
 					}
 				}
 			}
 			if (fileMatchToDocument == 0) {
 				throw new Exception("given file does not match with opend SBMLDocument");				
 			}
+		}
+	}
+
+	private void initializeConcentrationArray() {
+		concentrationsArray = new double[document.getModel().getSpeciesCount()];
+		for (int i = 0; i < concentrationsArray.length; i++) {
+			concentrationsArray[i] = Double.NaN;
+		}
+	}
+
+	/**
+	 * Initializes the Gibbs-array, so that every cell is filled with NaN and when there is
+	 * read a file with Gibbs energies, the content will be overwritten.
+	 */
+	private void initializeGibbsArray() {
+		gibbsArray = new double[document.getModel().getReactionCount()];
+		for (int i = 0; i < gibbsArray.length; i++) {
+			gibbsArray[i] = Double.NaN;
 		}
 	}
 

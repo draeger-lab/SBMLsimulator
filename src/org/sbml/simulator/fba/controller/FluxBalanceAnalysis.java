@@ -171,10 +171,9 @@ public class FluxBalanceAnalysis {
 		// now put the variables together  
 		IloNumExpr cplex_target = cplex.sum(lin, cplex.prod(TargetFunction.lambda1, sum));
 
-
 		// only for FluxMinimization has the target function be minimized
 		if (targetFunc instanceof FluxMinimization) {
-			cplex.addMinimize(cplex_target);
+			//cplex.addMinimize(cplex_target);
 		} else {
 			cplex.addMaximize(cplex_target);
 		}
@@ -203,11 +202,12 @@ public class FluxBalanceAnalysis {
 		// constraint N * J = 0
 		double[][] N = targetFunc.getStoichiometricMatrix();
 		IloNumExpr sumOfNJ = null;
-		for (int i = 0; i < constraints.document.getModel().getReactionCount() ; i++) {
+		for (int i = 0; i < flux.length ; i++) {
 			for (int j = 0; j < N[0].length; j++) {
-				IloNumExpr temp = sumOfNJ;
+				IloNumExpr temp = sumOfNJ; 
 				sumOfNJ = cplex.sum(cplex.prod(N[i][j], cplex.prod(flux[i], x[i])), temp);
 			}
+			//TODO: nullpointer exception
 			cplex.addEq(sumOfNJ, 0);
 		}
 
@@ -215,7 +215,8 @@ public class FluxBalanceAnalysis {
 
 		// now solve the problem and get the solution array for the variables x
 		double[] solution = null;
-		if (cplex.solve()) {
+		if (cplex.solve()) { 
+			//TODO: "CPLEX Error: object is unknown to IloCplex" eliminate
 			// get the from cplex computed values for the variables x and c
 			solution = cplex.getValues(x);
 			for (int i = 0; i < counter[1]; i++) {
