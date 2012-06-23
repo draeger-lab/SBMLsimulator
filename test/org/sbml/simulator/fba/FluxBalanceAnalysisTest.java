@@ -50,27 +50,27 @@ public class FluxBalanceAnalysisTest {
 		sbml = (new SBMLReader()).readSBML(args[0]);
 
 		//ConstraintsUtils:
-		CSVDataConverter cu = new CSVDataConverter(sbml);
+		CSVDataConverter cu1 = new CSVDataConverter(sbml);
+		CSVDataConverter cu2 = new CSVDataConverter(sbml);
 		File file_g = new File(args[1]);
 		File file_c = new File(args[2]);
 		
 		// read gibbs and concentrations
-		cu.readGibbsFromFile(file_g);
+		cu1.readGibbsFromFile(file_g);
 
-		while(cu.getGibbsArray() == null) {
+		while(cu1.getGibbsArray() == null) {
 			//wait
 		}
 		System.out.println("-> done gibbs");
-		gibbs_eq = cu.getGibbsArray();
-
-		System.out.println(cu.getReader().getState());
-		cu.readConcentrationsFromFile(file_c);
-		System.out.println(cu.getReader().getState());
-		while(cu.getConcentrationsArray() == null) {
+		gibbs_eq = cu1.getGibbsArray();
+		
+		cu2.readConcentrationsFromFile(file_c);
+		System.out.println(cu2.getReader().getState());
+		while(cu2.getConcentrationsArray() == null) {
 			//wait
 		}
 		System.out.println("-> done concentrations");
-		c_eq = cu.getConcentrationsArray();
+		c_eq = cu2.getConcentrationsArray();
 
 		//create FluxBalanceAnalysis object and solve it:
 		constraints =  new Constraints(sbml, gibbs_eq, c_eq);

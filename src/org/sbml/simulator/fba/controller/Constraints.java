@@ -99,8 +99,8 @@ public class Constraints {
 			for (int i=0; i< steadyStateGibbs.length; i++) {
 				double sum = 0;
 				// compute sum( N[j][i] * c_eq[j] )
-				for (int j=0; j< equilibriumConcentrations.length; j++) {
-					sum += N.get(j, i) * equilibriumConcentrations[j];
+				for (int j=0; j< N.getColumnDimension(); j++) {
+					sum += N.get(i, j) * equilibriumConcentrations[j];
 				}
 				// delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * ln(sum( N[j][i] * c_eq[j] ))
 				gibbsEnergies[i] = steadyStateGibbs[i] + R*T*Math.log(sum);
