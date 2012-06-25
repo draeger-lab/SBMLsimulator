@@ -114,11 +114,13 @@ public class FluxMinimizationUtils {
 					if (reac.getProductForSpecies(metabolit.getId()).isSetStoichiometry()) {
 						sMatrix.set(j, i, reac.getProductForSpecies(metabolit.getId()).getStoichiometry());
 					}
+					else sMatrix.set(j, i, 1);
 				} else if (reac.hasReactant(metabolit)) {
 					// the stoichiometry of reactants is negative in the stoichiometricMatrix
 					if (reac.getReactantForSpecies(metabolit.getId()).isSetStoichiometry()) {
 						sMatrix.set(j, i, - reac.getReactantForSpecies(metabolit.getId()).getStoichiometry());
 					}
+					else sMatrix.set(j, i, - 1);
 				}
 			}
 		}
