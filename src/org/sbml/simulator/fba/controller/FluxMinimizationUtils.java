@@ -46,11 +46,11 @@ public class FluxMinimizationUtils {
 	 */
 	public static double[] computeFluxVector(StoichiometricMatrix N, String[] targetFluxes, SBMLDocument doc) {
 		StabilityMatrix steadyStateMatrix = N.getSteadyStateFluxes();
-		double[] fluxVector = new double[steadyStateMatrix.getColumnDimension()];
+		double[] fluxVector = new double[N.getColumnDimension()];
 		// fill the fluxVector
-		for (int column=0; column < N.getSteadyStateFluxes().getColumnDimension(); column++) {
+		for (int column=0; column < N.getColumnDimension(); column++) {
 			if (targetFluxes == null || isNoTargetFlux(column, targetFluxes, doc)) {
-				fluxVector[column] = computeManhattenNorm(steadyStateMatrix.getColumn(column));
+				fluxVector[column] = computeManhattenNorm(N.getColumn(column));
 			}
 		}
 		return fluxVector;
@@ -134,8 +134,9 @@ public class FluxMinimizationUtils {
 	 * @return a new SBMLDocument without transport reactions
 	 */
 	public static SBMLDocument eliminateTransports(SBMLDocument doc) {
-		SBMLDocument newDoc = doc;
+		SBMLDocument newDoc = doc.clone();
 		for (int i = 0; i < doc.getModel().getReactionCount(); i++) {
+//			System.out.println(i + " : " + doc.getModel().getReaction(i).getName());
 			if (SBO.isChildOf(doc.getModel().getReaction(i).getSBOTerm(), SBO.getTransport())) {
 				// reaction i is a transport reaction: remove it
 				newDoc.getModel().removeReaction(i);
