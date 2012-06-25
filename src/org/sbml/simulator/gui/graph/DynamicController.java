@@ -188,7 +188,7 @@ public class DynamicController implements ChangeListener, ActionListener,
                 	File destinationFile = GUITools.saveFileDialog(view,
                 		guiPrefs.get(GUIOptions.SAVE_DIR), false, false,
                 		JFileChooser.FILES_ONLY, SBFileFilter.createPNGFileFilter());
-                    
+                	
                     if (destinationFile != null) {
                         //add extenion if missing
                         if (!destinationFile.getName().toLowerCase().endsWith(".png")) {
@@ -379,6 +379,8 @@ public class DynamicController implements ChangeListener, ActionListener,
     public void preferenceChange(PreferenceChangeEvent evt) {
         // immediately change graph visualization
         SBPreferences prefs = SBPreferences.getPreferencesFor(GraphOptions.class);
+        
+        //Options concerning visualization.
         if (evt.getKey().equals("MAX_NODE_SIZE")
                 || evt.getKey().equals("MIN_NODE_SIZE")
                 || evt.getKey().equals("MIN_LINE_WIDTH")
@@ -390,9 +392,30 @@ public class DynamicController implements ChangeListener, ActionListener,
                 || evt.getKey().equals("COLOR2")
                 || evt.getKey().equals("COLOR3")
                 || evt.getKey().equals("COLOR_NODE_SIZE")) {
-            /*
-             * Options concerning visualization.
-             */
+            
+            //ensure correct user inputs
+            if (prefs.getDouble(GraphOptions.MAX_NODE_SIZE) <= prefs
+                    .getDouble(GraphOptions.MIN_NODE_SIZE)) {
+                //node sizes wrong
+                GUITools.showErrorMessage(view,
+                        bundle.getString("EXC_MIN_MAX_NODE_SIZE"));
+                prefs.put(GraphOptions.MIN_NODE_SIZE,
+                        prefs.getDefault(GraphOptions.MIN_NODE_SIZE));
+                prefs.put(GraphOptions.MAX_NODE_SIZE,
+                        prefs.getDefault(GraphOptions.MAX_NODE_SIZE));
+            } else if (prefs.getDouble(GraphOptions.MAX_LINE_WIDTH) <= prefs
+                    .getDouble(GraphOptions.MIN_LINE_WIDTH)) {
+                // line widths wrong
+                GUITools.showErrorMessage(view,
+                        bundle.getString("EXC_MIN_MAX_LINE_WIDTH"));
+                prefs.put(GraphOptions.MIN_LINE_WIDTH,
+                        prefs.getDefault(GraphOptions.MIN_LINE_WIDTH));
+                prefs.put(GraphOptions.MAX_LINE_WIDTH,
+                        prefs.getDefault(GraphOptions.MAX_LINE_WIDTH));
+            }
+            
+            //TODO redraw options panel after "accept"
+            
             view.setGraphManipulator(getSelectedGraphManipulator());
         }
 

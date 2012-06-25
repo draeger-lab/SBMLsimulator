@@ -95,6 +95,7 @@ public interface GraphOptions extends KeyProvider{
      */
     public static final Option<Boolean> USE_UNIFORM_NODE_COLOR = new Option<Boolean>(
         "USE_UNIFORM_NODE_COLOR", Boolean.class, bundle, Boolean.FALSE);
+    //TODO add dependency for uniform node color (only active if this option is true)
     
     /**
      * Color for uniform node color.
