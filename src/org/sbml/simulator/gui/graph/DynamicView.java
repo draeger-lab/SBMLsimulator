@@ -62,7 +62,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
         PropertyChangeListener {
 
     /**
-     * Stores {@link IGraphManipulator}s.
+     * Stores all available {@link IGraphManipulator}s.
      * 
      * @author Fabian Schwarzkopf
      * @version $Rev$

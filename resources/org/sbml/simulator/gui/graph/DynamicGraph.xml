@@ -52,6 +52,8 @@
   
   <entry key="VIDEO_CODEC_NOT_FOUND">Couldn't guess video codec. Given file ending/format correct?</entry>
   <entry key="COULD_NOT_WRITE_SCREENSHOT">Couldn't write screenshot file.</entry>
+  <entry key="EXC_MIN_MAX_NODE_SIZE">Maximum node size has to be greater than minimum node size. Changing to default values.</entry>
+  <entry key="EXC_MIN_MAX_LINE_WIDTH">Maximum line width has to be greater than minimum line width. Changing to default values.</entry>
   
   <!-- GraphOptions -->
 

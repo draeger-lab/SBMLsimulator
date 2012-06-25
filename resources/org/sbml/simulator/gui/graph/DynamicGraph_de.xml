@@ -50,7 +50,9 @@
   <!-- Error Messages -->
   
   <entry key="VIDEO_CODEC_NOT_FOUND">Videocodec wurde nicht erkannt. Möglicherweise existiert dieser Videocodec auf Ihrem System nicht, oder die angegeben Dateiendung ist falsch.</entry>
-  <entry key="COULD_NOT_WRITE_SCREENSHOT">Bilddatei konnte nicht produziert werden.</entry>  
+  <entry key="COULD_NOT_WRITE_SCREENSHOT">Bilddatei konnte nicht produziert werden.</entry>
+  <entry key="EXC_MIN_MAX_NODE_SIZE">Maximale Knotengröße muss größer sein als minimale Knotengröße. Standardwerte werden benutzt.</entry>
+  <entry key="EXC_MIN_MAX_LINE_WIDTH">Maximale Liniendicke muss größer sein als minimale Liniendicke. Standardwerte werden benutzt.</entry>  
   
   <!-- GraphOptions -->
 
