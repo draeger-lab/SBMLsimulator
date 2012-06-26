@@ -312,6 +312,25 @@ public class DynamicController implements ChangeListener, ActionListener,
                         view.getSelectedSpecies(), view.getSelectedReactions(),
                         minNodeSize, maxNodeSize, color1, color2, color3,
                         reactionsMinLineWidth, reactionsMaxLineWidth);
+            } else if (controlPanel.getSelectedManipulator().equals(Manipulators.NODECOLOR_AND_SIZE.getName())) {
+                
+                // get current options
+                Color color1 = Option.parseOrCast(Color.class,
+                        prefs.get(GraphOptions.COLOR1));
+                Color color2 = Option.parseOrCast(Color.class,
+                        prefs.get(GraphOptions.COLOR2));
+                Color color3 = Option.parseOrCast(Color.class,
+                        prefs.get(GraphOptions.COLOR3));
+                double minNodeSize = prefs
+                        .getDouble(GraphOptions.MIN_NODE_SIZE);
+                double maxNodeSize = prefs
+                        .getDouble(GraphOptions.MAX_NODE_SIZE);
+                
+                return new ManipulatorOfNodeColorAndSize(view.getGraph(),
+                        view.getSBMLDocument(), core,
+                        view.getSelectedSpecies(), view.getSelectedReactions(),
+                        minNodeSize, maxNodeSize, color1, color2, color3,
+                        reactionsMinLineWidth, reactionsMaxLineWidth);
             }
 
             // in any other case return nodesize manipulator per default.
