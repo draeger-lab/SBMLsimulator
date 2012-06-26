@@ -34,7 +34,8 @@
   <entry key="SIMULATIONSPEED_SPINNER_TOOLTIP">Displays the current simulation speed as value. Changeable in Options/Network.</entry>
   <entry key="NODESIZE">Node size</entry>
   <entry key="NODECOLOR">Node color</entry>
-  <entry key="NODESIZE_AND_COLOR">Abs. size/rel. color</entry>
+  <entry key="NODESIZE_AND_COLOR">Abs.size/rel.color</entry>
+  <entry key="NODECOLOR_AND_SIZE">Rel.size/abs.color</entry>
   <entry key="GROUP_VISUALIZATION">Visualization</entry> 
   <entry key="SEARCHBAR_TOOLTIP">Choose time point of visualization.</entry>
   

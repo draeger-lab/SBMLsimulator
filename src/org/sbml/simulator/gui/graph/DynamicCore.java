@@ -348,11 +348,11 @@ public class DynamicCore {
      * 
      * @param width
      * @param height
-     * @param framerate
+     * @param timestamp
      * @param captureEveryXstep
      * @param destinationFile
      */
-    public void generateVideo(int width, int height, int framerate,
+    public void generateVideo(int width, int height, int timestamp,
             int captureEveryXstep, String destinationFile) {
 	    //start off by zero time
 	    currTimepoint = data.getTimePoint(0);
@@ -361,7 +361,7 @@ public class DynamicCore {
         
         if(playWorker == null){
             //generate video
-            playWorker = new PlayWorker(true, width, height, framerate,
+            playWorker = new PlayWorker(true, width, height, timestamp,
                     captureEveryXstep,
                     destinationFile);
             playWorker.execute();

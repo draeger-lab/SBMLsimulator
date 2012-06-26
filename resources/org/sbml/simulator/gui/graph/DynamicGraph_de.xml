@@ -33,6 +33,7 @@
   <entry key="NODESIZE">Knotengröße</entry>
   <entry key="NODECOLOR">Knotenfarbe</entry>
   <entry key="NODESIZE_AND_COLOR">Abs.Größe/rel.Farbe</entry>
+  <entry key="NODECOLOR_AND_SIZE">Rel.Größe/abs.Farbe</entry>
   <entry key="GROUP_VISUALIZATION">Visualisierung</entry>
   <entry key="VISUALIZATION_TOOLTIP">Wählen Sie die Art der dynamischen Visualisierung und die zu visualisierenden Daten aus.</entry>
   <entry key="SEARCHBAR_TOOLTIP">Stellen Sie den Zeitpunkt der Visualisierung ein.</entry>

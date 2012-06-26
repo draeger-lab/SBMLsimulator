@@ -68,7 +68,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
      * @version $Rev$
      */
     public enum Manipulators {
-        NODESIZE, NODECOLOR, NODESIZE_AND_COLOR;
+        NODESIZE, NODECOLOR, NODESIZE_AND_COLOR, NODECOLOR_AND_SIZE;
 
         /**
          * Returns a string array of all manipulators.
@@ -77,7 +77,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
          */
         public static String[] getAllManipulators() {
             return new String[] { NODESIZE.getName(), NODECOLOR.getName(),
-                    NODESIZE_AND_COLOR.getName() };
+                    NODESIZE_AND_COLOR.getName(), NODECOLOR_AND_SIZE.getName() };
         }
         
         /**
@@ -92,6 +92,8 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
                 return NODECOLOR;
             } else if (manipulatorName.equals(bundle.getString("NODESIZE_AND_COLOR"))) {
                 return NODESIZE_AND_COLOR;
+            } else if (manipulatorName.equals(bundle.getString("NODECOLOR_AND_SIZE"))) {
+                return NODECOLOR_AND_SIZE;
             }
             return null;
         }
