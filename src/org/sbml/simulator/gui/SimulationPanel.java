@@ -61,6 +61,9 @@ import org.sbml.simulator.math.QualityMeasure;
 import org.simulator.math.odes.DESSolver;
 import org.simulator.math.odes.MultiTable;
 
+import y.view.Graph2D;
+
+import de.zbit.graph.io.Graph2Dwriter;
 import de.zbit.gui.BaseFrameTab;
 import de.zbit.gui.GUIOptions;
 import de.zbit.gui.GUITools;
@@ -177,6 +180,11 @@ public class SimulationPanel extends JPanel implements
 	 * 
 	 */
   private SimulationVisualizationPanel visualizationPanel;
+
+  /**
+   * 
+   */
+	private DynamicView dynamicGraphView;
   
   /**
    * @param model
@@ -396,7 +404,7 @@ public class SimulationPanel extends JPanel implements
         dataTableView = new MultipleTableView<MultiTable>();
         dataTableView.addTableModelListener(visualizationPanel);
         
-        DynamicView dynamicGraphView = new DynamicView(getModel().getSBMLDocument());
+        dynamicGraphView = new DynamicView(getModel().getSBMLDocument());
         simulationManager.addPropertyChangeListener(dynamicGraphView); //get simulation data when finished
         foot.addPreferenceChangeListener(dynamicGraphView.getDynamicController()); //get changed options
         this.addPropertyChangeListener(dynamicGraphView); //get experimental data
@@ -657,12 +665,33 @@ public class SimulationPanel extends JPanel implements
 				return saveTable(dataTableView.getSelectedTable(), bundle.getString("NO_EXPERIMENTAL_DATA_LOADED"));
 			case TAB_IN_SILICO_DATA_INDEX:
 				return saveTable(getSimulationResultsTable(), bundle.getString("NO_SIMULATION_PERFORMED"));
+			case TAB_GRAPH_VIEW_INDEX:
+				return saveGraph(saveDir);
 			default:
 				return null;
 		}
 	}
 
   /**
+	 * @param saveDir
+	 * @return
+	 */
+	private File saveGraph(String saveDir) {
+		File f = GUITools.saveFileDialog(this, saveDir, false, false,
+			JFileChooser.FILES_ONLY, SBFileFilter.createJPEGFileFilter());
+		if (f != null) {
+			try {
+				Graph2D graph = dynamicGraphView.getGraph().getSimpleGraph();
+				new Graph2Dwriter(Graph2Dwriter.writeableFileExtensions.jpeg).writeToFile(graph,f.toString());
+				return f;
+			} catch (Exception exc) {
+				GUITools.showErrorMessage(this, exc);
+			}
+		}
+		return null;
+	}
+
+	/**
    * @param enabled
    */
   public void setAllEnabled(boolean enabled) {
