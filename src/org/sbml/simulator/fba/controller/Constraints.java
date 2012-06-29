@@ -82,7 +82,7 @@ public class Constraints {
 	 */
 	public Constraints (SBMLDocument doc, double[] gibbs_eq, double[] c_eq) {
 		this.document = doc;
-		equilibriumConcentrations = gibbs_eq;
+		equilibriumGibbsEnergies = gibbs_eq;
 		equilibriumConcentrations = c_eq;
 		computeGibbsEnergies(gibbs_eq);
 	}
@@ -98,9 +98,11 @@ public class Constraints {
 			gibbsEnergies = new double[steadyStateGibbs.length];
 			for (int i=0; i< steadyStateGibbs.length; i++) {
 				double sum = 0;
-				// compute sum( N[j][i] * c_eq[j] )
+				// compute sum( N[i][j] * c_eq[j] )
 				for (int j=0; j< N.getColumnDimension(); j++) {
-					sum += N.get(i, j) * equilibriumConcentrations[j];
+					if (!((Double)equilibriumConcentrations[j]).isNaN()) {
+						sum += N.get(i, j) * equilibriumConcentrations[j];
+					}
 				}
 				// delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * ln(sum( N[j][i] * c_eq[j] ))
 				gibbsEnergies[i] = steadyStateGibbs[i] + R*T*Math.log(sum);
@@ -152,11 +154,13 @@ public class Constraints {
 	 * @return
 	 */
 	public double computeR_max(double[] fluxVector) {
-		double r_max = 0;
+		double r_max = Double.MIN_NORMAL;
 		if (gibbsEnergies != null) {
 			if (fluxVector.length <= gibbsEnergies.length) {
 				for(int i = 0; i < fluxVector.length; i++) {
-					r_max = Math.max(r_max,(fluxVector[i]/gibbsEnergies[i]));
+					if (!Double.isNaN(gibbsEnergies[i])) {
+						r_max = Math.max(r_max,(fluxVector[i]/gibbsEnergies[i]));
+					}
 				}
 			} else {
 				for (int i = 0; i < gibbsEnergies.length; i++) {

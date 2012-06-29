@@ -37,7 +37,7 @@ import org.simulator.math.odes.MultiTable;
  * @since 1.0
  */
 public class FluxBalanceAnalysis {
-	
+
 	/**
 	 * Can be a {@link FluxMinimization}-object 
 	 * or an other function for which the network has to be optimized
@@ -78,16 +78,16 @@ public class FluxBalanceAnalysis {
 	 * Contains the solutions of cplex for the fluxes.
 	 */
 	public double[] solution_fluxVector;
-	
+
 	/**
 	 * Contains the {@link# solution_fluxVector} in a {@link MultiTable} for visualization.
 	 */
 	public MultiTable fluxesForVisualization;
 
-	
-// CONSTRUCTORS:	
-	
-	
+
+	// CONSTRUCTORS:	
+
+
 	/**
 	 * Constructor that get's a {@link Constraints}-Object and a {@link SBMLDocument} 
 	 * and that set's the {@link# linearProgramming} true.
@@ -99,7 +99,7 @@ public class FluxBalanceAnalysis {
 		this(new FluxMinimization(doc, c_eq, constraints.getGibbsEnergies(), targetFluxes), constraints);
 	}
 
-	
+
 	/**
 	 * Constructor that get's {@link TargetFunction}, {@link Constraints} and a Boolean, which
 	 * contains the information for linearProgramming (true) or quadraticProgramming (false).
@@ -112,15 +112,16 @@ public class FluxBalanceAnalysis {
 		this.targetFunc = target;
 		this.constraints = constraints;
 		int length = targetFunc.computeTargetFunctionForQuadraticProgramming().length;
-		lb = new double[length];
-		ub = new double[length];
+		lb = new double[length + targetFunc.getConcentrations().length];
+		ub = new double[length + targetFunc.getConcentrations().length];
 		this.solution_fluxVector = new double[target.getFluxVector().length];
+		this.solution_concentrations = new double[targetFunc.getConcentrations().length];
 	}
 
-	
-// METHODS FOR SOLVING FBA:
-	
-	
+
+	// METHODS FOR SOLVING FBA:
+
+
 	/**
 	 * Calls a method to solve the problem with linear programming if the boolean
 	 * {@link# linearProgramming} is set and true, else it calls a method for quadratic programming.
@@ -147,33 +148,48 @@ public class FluxBalanceAnalysis {
 		// create upper bounds (ub) and lower bounds (lb) for the variables x
 		int[] counter = targetFunc.getCounterArray();
 		// counter[1] contains the length of the flux vector
-		for (int i = counter[1]; i< target.length; i++) {
+		for (int i = 0; i< counter[3]; i++) {
 			lb[i]= 0.0; 
 			ub[i] = Double.MAX_VALUE;
 		}
+		for (int g = counter[3]; g < target.length; g++) {
+			lb[g] = Double.MIN_VALUE;
+			ub[g] = Double.MAX_VALUE;
+		}
+		for(int j = target.length; j < (concentrations.length + target.length); j++) {
+			lb[j] = Math.pow(10, -10);
+			ub[j] = Math.pow(10, -1);
+		}
 		// create variables with upper bounds and lower bounds
-		IloNumVar[] x = cplex.numVarArray(target.length, lb, ub);
+		IloNumVar[] x = cplex.numVarArray(target.length + concentrations.length, lb, ub);
 
 		//compute the target function for cplex with the scalar product (lin)
-		IloNumExpr lin = cplex.scalProd(target, x);
-
+		IloNumExpr lin = cplex.prod(0, x[0]);
+		for (int i = 0; i < target.length; i++) {
+			IloNumExpr temp = lin;
+			lin = cplex.sum(temp, cplex.prod(target[i], x[i]));
+		}
 
 		//lambda1*sum((c_i - c_eq)^2)
 		double[] c_eq = constraints.getEquilibriumConcentrations();
-		IloNumVar[] c = cplex.numVarArray(concentrations.length, lb, ub);
-		IloNumExpr sum = null;
-		for (int i = 0; i< c.length; i++) {
-			IloNumExpr temp = sum;
-			IloNumExpr c_i = cplex.prod(c[i], concentrations[i]);
-			sum = cplex.sum(temp, cplex.prod(cplex.sum(c_i, (-1 * c_eq[i])), cplex.sum(c_i, (-1 * c_eq[i]))));
-		}
 
+		// an expression that is desired null because IloNumExpr sum = null gives back an exception of cplex
+		IloNumExpr sum = cplex.prod(0, x[0]);
+		for (int i = 0; i< concentrations.length; i++) {
+			IloNumExpr temp = sum;
+			IloNumExpr c_i = cplex.prod(x[i + target.length], concentrations[i]);
+			if(!Double.isNaN(concentrations[i])) {
+				// here the sum (c_i - c_eq)^2 is performed by cplex. To make it simpler for cplex, the binomial formula is used
+				// where cplex.square(x) = x^2
+				sum = cplex.sum(temp, cplex.square(c_i), cplex.sum(cplex.prod(c_i, ((-2) * c_eq[i])), cplex.square(cplex.constant(c_eq[i]))));
+			}
+		}
 		// now put the variables together  
-		IloNumExpr cplex_target = cplex.sum(lin, cplex.prod(TargetFunction.lambda1, sum));
+		IloNumExpr cplex_target = cplex.sum(cplex.prod(TargetFunction.lambda1, sum),lin);
 
 		// only for FluxMinimization has the target function be minimized
 		if (targetFunc instanceof FluxMinimization) {
-			//cplex.addMinimize(cplex_target);
+			cplex.addMinimize(cplex_target);
 		} else {
 			cplex.addMaximize(cplex_target);
 		}
@@ -181,53 +197,58 @@ public class FluxBalanceAnalysis {
 
 		//CONSTRAINTS
 
-		double[] flux = targetFunc.getFluxVector();
-		double[] gibbs = constraints.getGibbsEnergies();
-		double r_max = constraints.computeR_max(flux);
-		for (int i = 0; i< counter[1]; i++) {
-			//jg is the expression for J_i * G_i
-			//and jr_maxg the expression for |J_i| - r_max * |G_i|
-			for (int k = 0; k < counter[counter.length-1]; k++) {
-				// constraint |J_i| - r_max * |G_i| < 0
-				IloNumExpr j_i = cplex.abs(cplex.prod(flux[i], x[i]));
-				IloNumExpr g_i = cplex.abs(cplex.prod(gibbs[i], x[k]));
-				IloNumExpr jr_maxg = cplex.sum(j_i, (cplex.prod(-1, cplex.prod(r_max, g_i))));
-				cplex.addLe(jr_maxg, 0);
-
-				// constraint J_i * G_i < 0
-				IloNumExpr jg = cplex.prod(cplex.prod(flux[i], x[i]),cplex.prod(gibbs[i],x[k]));
-				cplex.addLe(jg, 0);
-			}
-		}
-		// constraint N * J = 0
-		double[][] N = targetFunc.getStoichiometricMatrix();
-		IloNumExpr sumOfNJ = null;
-		for (int i = 0; i < flux.length ; i++) {
-			for (int j = 0; j < N[0].length; j++) {
-				IloNumExpr temp = sumOfNJ; 
-				sumOfNJ = cplex.sum(cplex.prod(N[i][j], cplex.prod(flux[i], x[i])), temp);
-			}
-			//TODO: nullpointer exception
-			cplex.addEq(sumOfNJ, 0);
-		}
-
+//		double[] flux = targetFunc.getFluxVector();
+//		double[] gibbs = constraints.getGibbsEnergies();
+//		double r_max = constraints.computeR_max(flux);
+//		for (int i = 0; i< counter[1]; i++) {
+//			//jg is the expression for J_i * G_i
+//			//and jr_maxg the expression for |J_i| - r_max * |G_i|
+//			for (int k = counter[3]; k < x.length; k++) {
+//				// constraint |J_i| - r_max * |G_i| < 0
+//				IloNumExpr j_i = cplex.abs(cplex.prod(flux[i], x[i]));
+//				IloNumExpr g_i = cplex.abs(cplex.prod(gibbs[i], x[k]));
+//				IloNumExpr jr_maxg = cplex.sum(j_i, (cplex.prod(-1, cplex.prod(r_max, g_i))));
+//				cplex.addLe(jr_maxg, 0);
+//
+//				// constraint J_i * G_i < 0
+//				IloNumExpr jg = cplex.prod(cplex.prod(flux[i], x[i]),cplex.prod(gibbs[i],x[k]));
+//				cplex.addLe(jg, 0);
+//			}
+//		}
+//		// constraint N * J = 0
+//		double[][] N = targetFunc.getStoichiometricMatrix();
+//		IloNumExpr sumOfNJ = cplex.prod(0, x[0]);
+//		for (int i = 0; i < flux.length ; i++) {
+//			for (int j = 0; j < N[0].length; j++) {
+//				IloNumExpr temp = sumOfNJ; 
+//				sumOfNJ = cplex.sum(cplex.prod(N[i][j], cplex.prod(flux[i], x[i])), temp);
+//			}
+//			cplex.addEq(sumOfNJ, 0);
+//		}
+		
+		// constraint that minimal 3 fluxes can be 0
+		//TODO
+		cplex.addEq(x[6], 1);
 
 
 		// now solve the problem and get the solution array for the variables x
 		double[] solution = null;
+		System.out.println(cplex.isPrimalFeasible());
 		if (cplex.solve()) { 
-			//TODO: "CPLEX Error: object is unknown to IloCplex" eliminate
 			// get the from cplex computed values for the variables x and c
 			solution = cplex.getValues(x);
+			System.out.println(cplex.getObjValue());
 			for (int i = 0; i < counter[1]; i++) {
 				solution_fluxVector[i] = solution[i];
 			}
-			solution_concentrations = cplex.getValues(c);
+			for (int j = 0; j < concentrations.length; j++) {
+			solution_concentrations[j] = solution[j + target.length];
+			}
 		}
 		cplex.end();
-		
+
 		// create the MultiTable for visualization
-		fluxesForVisualization = createMultiTableForVisualizing();
+		//fluxesForVisualization = createMultiTableForVisualizing();
 		return solution;
 
 	}
@@ -264,6 +285,36 @@ public class FluxBalanceAnalysis {
 	}
 	
 	/**
+	 * Puts for {@link Species} j the lower bound on the given lbValue.
+	 * @param lbValue
+	 * @param j
+	 * @return true if lbValue was set successfully
+	 */
+	public boolean setLbofConcentrationJ(double lbValue, int j) {
+		if (j < concentrations.length) {
+			lb[j + target.length] = lbValue;
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Puts for {@link Species} j the upper bound on the given ubValue.
+	 * @param ubValue
+	 * @param j
+	 * @return true if ubValue was set successfully
+	 */
+	public boolean setUbofConcentrationJ(double ubValue, int j) {
+		if (j < concentrations.length) {
+			ub[j + target.length] = ubValue;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
 	 * Creates a {@link MultiTable} that contains the computed fluxes for visualization.
 	 * @return MultiTable
 	 */
@@ -278,7 +329,7 @@ public class FluxBalanceAnalysis {
 			fluxes[j][0] = solution_fluxVector[j];
 		}
 		MultiTable mt = new MultiTable(time, fluxes, idsOfReactions);
-		
+
 		return mt;
 	}
 }

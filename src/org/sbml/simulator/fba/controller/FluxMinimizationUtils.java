@@ -46,11 +46,11 @@ public class FluxMinimizationUtils {
 	 */
 	public static double[] computeFluxVector(StoichiometricMatrix N, String[] targetFluxes, SBMLDocument doc) {
 		StabilityMatrix steadyStateMatrix = N.getSteadyStateFluxes();
-		double[] fluxVector = new double[N.getColumnDimension()];
+		double[] fluxVector = new double[N.getRowDimension()];
 		// fill the fluxVector
-		for (int column=0; column < N.getColumnDimension(); column++) {
-			if (targetFluxes == null || isNoTargetFlux(column, targetFluxes, doc)) {
-				fluxVector[column] = computeManhattenNorm(N.getColumn(column));
+		for (int row = 0; row < N.getRowDimension(); row++) {
+			if (targetFluxes == null || isNoTargetFlux(row, targetFluxes, doc)) {
+				fluxVector[row] = computeManhattenNorm(steadyStateMatrix.getRow(row));
 			}
 		}
 		return fluxVector;
@@ -100,27 +100,27 @@ public class FluxMinimizationUtils {
 		SBMLDocument doc = eliminateTransports(document);
 		// build a new StoichiometricMatrix with the number of metabolites as the dimension of rows
 		// and the number of reactions as the dimension of columns
-		int metaboliteCount = doc.getModel().getSpeciesCount();
+		int speciesCount = doc.getModel().getSpeciesCount();
 		int reactionCount = doc.getModel().getReactionCount();
-		StoichiometricMatrix sMatrix = new StoichiometricMatrix (metaboliteCount, reactionCount);
+		StoichiometricMatrix sMatrix = new StoichiometricMatrix (reactionCount, speciesCount);
 
 		//fill the matrix with the stoichiometry of each reaction
 		for (int i = 0; i < reactionCount; i++) {
-			for (int j = 0; j < metaboliteCount; j++) {
+			for (int j = 0; j < speciesCount; j++) {
 				Reaction reac = doc.getModel().getReaction(i);
-				Species metabolit = doc.getModel().getSpecies(j);
-				if (reac.hasProduct(metabolit)) {
+				Species species = doc.getModel().getSpecies(j);
+				if (reac.hasProduct(species)) {
 					// the stoichiometry of products is positive in the stoichiometricMatrix
-					if (reac.getProductForSpecies(metabolit.getId()).isSetStoichiometry()) {
-						sMatrix.set(j, i, reac.getProductForSpecies(metabolit.getId()).getStoichiometry());
+					if (reac.getProductForSpecies(species.getId()).isSetStoichiometry()) {
+						sMatrix.set(i, j, reac.getProductForSpecies(species.getId()).getStoichiometry());
 					}
-					else sMatrix.set(j, i, 1);
-				} else if (reac.hasReactant(metabolit)) {
+					else sMatrix.set(i, j, 1);
+				} else if (reac.hasReactant(species)) {
 					// the stoichiometry of reactants is negative in the stoichiometricMatrix
-					if (reac.getReactantForSpecies(metabolit.getId()).isSetStoichiometry()) {
-						sMatrix.set(j, i, - reac.getReactantForSpecies(metabolit.getId()).getStoichiometry());
+					if (reac.getReactantForSpecies(species.getId()).isSetStoichiometry()) {
+						sMatrix.set(i, j, - reac.getReactantForSpecies(species.getId()).getStoichiometry());
 					}
-					else sMatrix.set(j, i, - 1);
+					else sMatrix.set(i, j, - 1);
 				}
 			}
 		}

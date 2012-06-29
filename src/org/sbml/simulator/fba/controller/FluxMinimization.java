@@ -106,18 +106,18 @@ public class FluxMinimization implements TargetFunction {
 		this.N = N;
 		
 		// get the computed Gibbs energies for the incoming Gibbs energies in steady state
-		Constraints c = new Constraints(doc, gibbs_eq, c_eq);
+		Constraints c = new Constraints(document, gibbs_eq, c_eq);
 		this.gibbs = c.getGibbsEnergies();
 		if (gibbs != null) {
 			this.errorArray = FluxMinimizationUtils.computeError(gibbs.length);
 		}
 		
 		// compute the initial concentrations
-		this.concentrations = computeConcentrations(doc);
+		this.concentrations = computeConcentrations(document);
 		
 		// compute L or let it be null if the Gibbs energies couldn't be computed
-		if(gibbs != null && doc != null) {
-			this.L = computeL(doc);
+		if(gibbs != null && document != null) {
+			this.L = computeL(document);
 		} 
 	}
 
