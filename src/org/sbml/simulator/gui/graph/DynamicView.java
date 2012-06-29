@@ -218,7 +218,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
         graphWithLegend = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, legend,
                 graphPanel);
         graphWithLegend.setDividerLocation(330);
-        controlPanel = new DynamicControlPanel(this, controller);
+        controlPanel = new DynamicControlPanel(controller);
         
         /*
          * initial capacity will get bigger, if there are more datasets added

@@ -240,15 +240,6 @@ public class DynamicControlPanel extends JPanel {
 	}
 	
 	/**
-	 * Constructs a new control panel with all dependancies.
-	 * @param view
-	 * @param controller
-	 */
-	public DynamicControlPanel(DynamicView view, DynamicController controller) {
-        this(controller);
-    }
-	
-	/**
 	 * Helper to layout components.
 	 * @param gbl
 	 * @param c
