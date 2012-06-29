@@ -33,9 +33,9 @@ import org.sbml.jsbml.SBMLDocument;
  */
 public class CSVDataConverter {
 
-	private static final String KEY_CONCENTRATIONS = "concentration";
+	public static final String KEY_CONCENTRATIONS = "concentration";
 
-	private static final String KEY_GIBBS = "gibbs";
+	public static final String KEY_GIBBS = "gibbs";
 
 	/**
 	 * Contains the information about the sort of the file:
@@ -74,7 +74,7 @@ public class CSVDataConverter {
 	 * @param doc
 	 */
 	public CSVDataConverter(SBMLDocument doc) {
-		this.document = doc;
+		this.document = FluxMinimizationUtils.eliminateTransports(doc);
 	}
 	
 	/**
@@ -171,13 +171,13 @@ public class CSVDataConverter {
 	}
 
 	/**
-	 * Initializes the Gibbs-array, so that every cell is filled with NaN and when there is
+	 * Initializes the Gibbs-array, so that every cell is filled with 0 and when there is
 	 * read a file with Gibbs energies, the content will be overwritten.
 	 */
 	private void initializeGibbsArray() {
 		gibbsArray = new double[document.getModel().getReactionCount()];
 		for (int i = 0; i < gibbsArray.length; i++) {
-			gibbsArray[i] = Double.NaN;
+			gibbsArray[i] = 0;
 		}
 	}
 
