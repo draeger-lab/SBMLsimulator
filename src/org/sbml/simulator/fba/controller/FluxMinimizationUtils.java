@@ -17,6 +17,9 @@
  */
 package org.sbml.simulator.fba.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBO;
@@ -63,8 +66,9 @@ public class FluxMinimizationUtils {
 	 * @param targetFluxes
 	 * @param doc
 	 * @return
+	 * @throws Exception 
 	 */
-	public static double[] computeFluxVector(String[] targetFluxes, SBMLDocument doc) {
+	public static double[] computeFluxVector(String[] targetFluxes, SBMLDocument doc) throws Exception {
 		return computeFluxVector(SBMLDocToStoichMatrix(doc), targetFluxes, doc);
 	}
 
@@ -95,8 +99,9 @@ public class FluxMinimizationUtils {
 	 * Gets a {@link SBMLDocument} and gives back the corresponding {@link StoichiometricMatrix}.
 	 * @param doc
 	 * @return {@link StoichiometricMatrix}
+	 * @throws Exception 
 	 */
-	public static StoichiometricMatrix SBMLDocToStoichMatrix(SBMLDocument document){
+	public static StoichiometricMatrix SBMLDocToStoichMatrix(SBMLDocument document) throws Exception{
 		SBMLDocument doc = eliminateTransports(document);
 		// build a new StoichiometricMatrix with the number of metabolites as the dimension of rows
 		// and the number of reactions as the dimension of columns
@@ -104,6 +109,9 @@ public class FluxMinimizationUtils {
 		int reactionCount = doc.getModel().getReactionCount();
 		StoichiometricMatrix sMatrix = new StoichiometricMatrix (reactionCount, speciesCount);
 
+		if (doc.getLevel() > 3) {
+			throw new Exception("Stoichiometric matrix is only available for SBML versions < 3.0");
+		}
 		//fill the matrix with the stoichiometry of each reaction
 		for (int i = 0; i < reactionCount; i++) {
 			for (int j = 0; j < speciesCount; j++) {
@@ -128,6 +136,10 @@ public class FluxMinimizationUtils {
 		return sMatrix;
 	}
 
+	
+	public static List<String> eliminatedReactions = new ArrayList<String>();
+	
+	
 	/**
 	 * Eliminates the transport-reactions and gives back the new {@link SBMLDocument}.
 	 * @param doc
@@ -136,10 +148,11 @@ public class FluxMinimizationUtils {
 	public static SBMLDocument eliminateTransports(SBMLDocument doc) {
 		SBMLDocument newDoc = doc.clone();
 		for (int i = 0; i < doc.getModel().getReactionCount(); i++) {
-//			System.out.println(i + " : " + doc.getModel().getReaction(i).getName());
+			String id = doc.getModel().getReaction(i).getId();
 			if (SBO.isChildOf(doc.getModel().getReaction(i).getSBOTerm(), SBO.getTransport())) {
 				// reaction i is a transport reaction: remove it
-				newDoc.getModel().removeReaction(i);
+				newDoc.getModel().removeReaction(id);
+				eliminatedReactions.add(id);
 			}
 		}
 		return newDoc;

@@ -20,8 +20,11 @@ package org.sbml.simulator.fba.controller;
 import java.beans.EventHandler;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.IOException;
 
 import org.sbml.jsbml.SBMLDocument;
+
+import de.zbit.io.csv.CSVWriter;
 
 /**
  * Class for reading the concentrations and Gibbs energies in steady state from a file.
@@ -42,17 +45,17 @@ public class CSVDataConverter {
 	 * true if it is a Gibbs-file, false if it's not.
 	 */
 	Boolean isGibbsFile;
-	
+
 	/**
 	 * Containing the corresponding {@link SBMLDocument}.
 	 */
 	private SBMLDocument document;
-	
+
 	/**
 	 * Containing the read Gibbs energies.
 	 */
 	private double[] gibbsArray;
-	
+
 	/**
 	 * Containing the read concentrations.
 	 */
@@ -65,7 +68,7 @@ public class CSVDataConverter {
 	private CSVDataReader reader;
 
 	/**
-	 * 
+	 * Containing the information if it is a concentration file that should be read.
 	 */
 	private Boolean isConcentrationFile;
 
@@ -76,7 +79,7 @@ public class CSVDataConverter {
 	public CSVDataConverter(SBMLDocument doc) {
 		this.document = FluxMinimizationUtils.eliminateTransports(doc);
 	}
-	
+
 	/**
 	 * Method to read equilibrium concentrations from a file.
 	 * 
@@ -120,14 +123,16 @@ public class CSVDataConverter {
 	}
 
 	/**
-	 * Writes the incoming data from the csv-file in {@link# solutionArray}.
+	 * Writes the incoming data from the csv-file in an array. When it was a gibbs data file
+	 * the data will be written in the {@link# gibbsArray} else it was a concentration data file
+	 * and the data will be written in the {@link# concentrationsArray}.
 	 * @param obj
 	 * @throws Exception 
 	 */
 	public void writeDataInArray(Object obj) throws Exception {
 		if (obj instanceof String[][]) {
-            String[][] data = (String[][]) obj;
-            String[] values = new String[data.length];
+			String[][] data = (String[][]) obj;
+			String[] values = new String[data.length];
 			String[] keys = new String[data.length];
 			int fileMatchToDocument = 0;
 			// values are in the second column and keys in the first column
@@ -135,22 +140,24 @@ public class CSVDataConverter {
 				values[i] = data[i][1];
 				keys[i] = data[i][0];
 			}
-			
+
 			if (isGibbsFile != null && isGibbsFile) {
 				initializeGibbsArray();
 				for(int i = 0; i< values.length; i++) {
-					if (document.getModel().getReaction(keys[i]) != null) {
-						document.getModel().getReaction(keys[i]).putUserObject(KEY_GIBBS, gibbsArray[i]);
-						int index = document.getModel().getListOfReactions().getIndex(document.getModel().getReaction(keys[i]));
-						gibbsArray[index] = Double.parseDouble(values[i]);
-					fileMatchToDocument++;
+					if (document.getModel().containsReaction(keys[i])) {
+						if (!FluxMinimizationUtils.eliminatedReactions.contains(keys[i])) {
+							document.getModel().getReaction(keys[i]).putUserObject(KEY_GIBBS, Double.parseDouble(values[i]));
+							int index = document.getModel().getListOfReactions().getIndex(document.getModel().getReaction(keys[i]));
+							gibbsArray[index] = Double.parseDouble(values[i]);
+							fileMatchToDocument++;
+						}
 					}
 				}
 			} else if(isConcentrationFile!= null && isConcentrationFile){
 				initializeConcentrationArray();
 				for(int i = 0; i< values.length; i++) {
-					if (document.getModel().getSpecies(keys[i]) != null) {
-						document.getModel().getSpecies(keys[i]).putUserObject(KEY_CONCENTRATIONS, concentrationsArray[i]);
+					if (document.getModel().containsSpecies(keys[i])) {
+						document.getModel().getSpecies(keys[i]).putUserObject(KEY_CONCENTRATIONS, values[i]);
 						int index = document.getModel().getListOfSpecies().getIndex(document.getModel().getSpecies(keys[i]));
 						concentrationsArray[index] = Double.parseDouble(values[i]);
 						fileMatchToDocument++;
@@ -163,6 +170,10 @@ public class CSVDataConverter {
 		}
 	}
 
+	/**
+	 * Initializes the Concentration-array, so that every cell is filled with NaN and when there is
+	 * read a file with concentrations, the content will be overwritten.
+	 */
 	private void initializeConcentrationArray() {
 		concentrationsArray = new double[document.getModel().getSpeciesCount()];
 		for (int i = 0; i < concentrationsArray.length; i++) {
@@ -171,13 +182,13 @@ public class CSVDataConverter {
 	}
 
 	/**
-	 * Initializes the Gibbs-array, so that every cell is filled with 0 and when there is
+	 * Initializes the Gibbs-array, so that every cell is filled with NaN and when there is
 	 * read a file with Gibbs energies, the content will be overwritten.
 	 */
 	private void initializeGibbsArray() {
 		gibbsArray = new double[document.getModel().getReactionCount()];
 		for (int i = 0; i < gibbsArray.length; i++) {
-			gibbsArray[i] = 0;
+			gibbsArray[i] = Double.NaN;
 		}
 	}
 
@@ -194,7 +205,7 @@ public class CSVDataConverter {
 	public double[] getConcentrationsArray() {
 		return concentrationsArray;
 	}
-	
+
 
 	/**
 	 * 
@@ -202,5 +213,46 @@ public class CSVDataConverter {
 	 */
 	public CSVDataReader getReader(){
 		return reader;
+	}
+
+	/**
+	 * Writes the computed values of the flux balance analysis in the given csv-File, which has 2 columns and for every reaction/ species a line.
+	 * The first line contains the heading "Reaction_id" or "Species_id" (first column) and "steady_state_value" (second column).
+	 * @param computed_solution
+	 * @param file
+	 * @throws IOException
+	 */
+	public void writeComputedValuesInCSV(double[] computed_solution, File file) throws IOException {
+		CSVWriter writer = new CSVWriter();
+		String[][] data = null;
+		Boolean isFluxSolution = null;
+		Boolean isConcSolution = null;
+		if (computed_solution.length == document.getModel().getReactionCount()) {
+			data = new String[document.getModel().getReactionCount()+1][2];
+			data[0][0] = "Reaction_id";
+			isFluxSolution = true;
+		} else if (computed_solution.length == document.getModel().getSpeciesCount()) {
+			data = new String[document.getModel().getSpeciesCount()+1][2];
+			data[0][0] = "Species_id";
+			isConcSolution = true;
+		}
+		if (isConcSolution == null && isFluxSolution == null) {
+			// then the array has the wrong length
+			throw new IllegalArgumentException("Solution is neither corressponding to the reactions in this model nor to " +
+			"the species.");
+		}
+		data[0][1] = "steady_state_value";
+		for (int i = 1; i < document.getModel().getReactionCount(); i++) {
+			if (isFluxSolution) {
+				// write the reactions ids
+				data[i][0] = document.getModel().getReaction(i).getId();
+			} else if (isConcSolution) {
+				// write the species ids
+				data[i][0] = document.getModel().getSpecies(i).getId();
+			}
+			// write the solution
+			data[i][1] = Double.toString(computed_solution[i]);
+		}
+		writer.write(data, file);
 	}
 }
