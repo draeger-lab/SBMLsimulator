@@ -136,7 +136,7 @@ public class DynamicCore {
 			super.done();
 			if (encoder != null) {
 			    encoder.close();
-			    logger.fine("Videoencoding successful");
+			    logger.info(bundle.getString("VIDEOENCODING_DONE"));
 			}
 			
 			/*
