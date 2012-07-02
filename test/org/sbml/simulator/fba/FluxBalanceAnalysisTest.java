@@ -78,12 +78,20 @@ public class FluxBalanceAnalysisTest {
 		fba.solve();
 		
 		//print flux solution:
-		double[] fluxsolution = fba.solution_fluxVector;
-		String solution = "[ ";
-		for (int i = 0; i < fluxsolution.length; i++) {
-			solution += fluxsolution + " ";
+//		double[] fluxsolution = fba.solution_fluxVector;
+//		System.out.println("solutions for the fluxes: ");
+//		for (int i = 0; i < fluxsolution.length; i++) {
+//			System.out.println(sbml.getModel().getReaction(i).getId() + "   " + fluxsolution[i]);
+//		}
+		
+		System.out.println("-----------------");
+		//print conc solution:
+		double[] concsolution = fba.solution_concentrations;
+		System.out.println("solutions for the concs: ");
+		for (int i = 0; i < concsolution.length; i++) {
+			System.out.println(sbml.getModel().getSpecies(i).getId() + "   " + concsolution[i]);
 		}
-		System.out.println("solutions for the fluxes: " + solution + "]");
+		
 	}
 
 }
