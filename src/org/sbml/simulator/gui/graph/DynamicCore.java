@@ -25,6 +25,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import javax.swing.ProgressMonitor;
 import javax.swing.SwingWorker;
 
 import org.sbml.jsbml.SBMLDocument;
@@ -110,7 +111,7 @@ public class DynamicCore {
             this.height = height;
             frame = 0;
             image = 1;
-            totalimages = data.getRowCount()-1/captureEveryXStep;
+            totalimages = (data.getRowCount()-1) / captureEveryXStep;
             encoder = ToolFactory.makeWriter(destinationFile);
             logger.fine("Added " + width +"x" + height + " videostream");
             encoder.addVideoStream(0, 0, width, height);
@@ -366,6 +367,26 @@ public class DynamicCore {
                     destinationFile);
             playWorker.execute();
         }
+        //TODO progress bar while encoding
+//        Thread pm = new Thread(new Runnable() {
+//            
+//            @Override
+//            public void run() {
+//                ProgressMonitor pm = new ProgressMonitor(null, "m", "n", 0, 100);
+//                pm.setMillisToDecideToPopup(0);
+//                pm.setMillisToPopup(0);
+//                for (int i = 0; i <= 100; i++) {
+//                    pm.setProgress(i);
+//                    // Als Ersatz für eine rechen-
+//                    // intensive Operation
+//                    try {
+//                        Thread.sleep(100);
+//                    } catch (Exception ex) {
+//                    }
+//                }
+//            }
+//        });
+//        pm.start();
 	}
     
     /**
