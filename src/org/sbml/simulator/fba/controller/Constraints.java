@@ -68,8 +68,9 @@ public class Constraints {
 	 * in a Gibbs energy file.
 	 * 
 	 * @param doc
+	 * @throws Exception 
 	 */
-	public Constraints (SBMLDocument doc) {
+	public Constraints (SBMLDocument doc) throws Exception {
 		this(doc, null, null);
 	}
 
@@ -79,8 +80,9 @@ public class Constraints {
 	 * @param doc
 	 * @param gibbs_eq
 	 * @param c_eq
+	 * @throws Exception 
 	 */
-	public Constraints (SBMLDocument doc, double[] gibbs_eq, double[] c_eq) {
+	public Constraints (SBMLDocument doc, double[] gibbs_eq, double[] c_eq) throws Exception {
 		this.document = doc;
 		equilibriumGibbsEnergies = gibbs_eq;
 		equilibriumConcentrations = c_eq;
@@ -90,8 +92,9 @@ public class Constraints {
 	/**
 	 * Computes the Gibbs energies with the formula delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * ln(sum( N[j][i] * c_eq[j] ))
 	 * @param steadyStateGibbs
+	 * @throws Exception 
 	 */
-	private double[] computeGibbsEnergies(double[] steadyStateGibbs) {
+	private double[] computeGibbsEnergies(double[] steadyStateGibbs) throws Exception {
 
 		if (steadyStateGibbs != null && this.document != null && equilibriumConcentrations != null) {
 			StoichiometricMatrix N = FluxMinimizationUtils.SBMLDocToStoichMatrix(document);
@@ -114,8 +117,9 @@ public class Constraints {
 
 	/**
 	 * @param gibbsEnergies the gibbsEnergies to set
+	 * @throws Exception 
 	 */
-	public void setEquilibriumGibbsEnergies(double[] gibbsEnergies) {
+	public void setEquilibriumGibbsEnergies(double[] gibbsEnergies) throws Exception {
 		this.equilibriumGibbsEnergies = gibbsEnergies;
 		computeGibbsEnergies(gibbsEnergies);
 	}

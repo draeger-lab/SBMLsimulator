@@ -21,6 +21,7 @@ import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
 import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
+import ilog.cplex.IloCplex.IntParam;
 
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
@@ -94,8 +95,9 @@ public class FluxBalanceAnalysis {
 	 * 
 	 * @param constraints
 	 * @param doc
+	 * @throws Exception 
 	 */
-	public FluxBalanceAnalysis(double[] c_eq, Constraints constraints, SBMLDocument doc, String[] targetFluxes) {
+	public FluxBalanceAnalysis(double[] c_eq, Constraints constraints, SBMLDocument doc, String[] targetFluxes) throws Exception {
 		this(new FluxMinimization(doc, c_eq, constraints.getGibbsEnergies(), targetFluxes), constraints);
 	}
 
@@ -164,7 +166,7 @@ public class FluxBalanceAnalysis {
 		IloNumVar[] x = cplex.numVarArray(target.length + concentrations.length, lb, ub);
 
 		//compute the target function for cplex with the scalar product (lin)
-		IloNumExpr lin = cplex.prod(0, x[0]);
+		IloNumExpr lin = cplex.numExpr();
 		for (int i = 0; i < target.length; i++) {
 			IloNumExpr temp = lin;
 			lin = cplex.sum(temp, cplex.prod(target[i], x[i]));
@@ -173,8 +175,8 @@ public class FluxBalanceAnalysis {
 		//lambda1*sum((c_i - c_eq)^2)
 		double[] c_eq = constraints.getEquilibriumConcentrations();
 
-		// an expression that is desired null because IloNumExpr sum = null gives back an exception of cplex
-		IloNumExpr sum = cplex.prod(0, x[0]);
+		// a new expression, because IloNumExpr sum = null gives back an exception of cplex
+		IloNumExpr sum = cplex.numExpr();
 		for (int i = 0; i< concentrations.length; i++) {
 			IloNumExpr temp = sum;
 			IloNumExpr c_i = cplex.prod(x[i + target.length], concentrations[i]);
@@ -187,7 +189,7 @@ public class FluxBalanceAnalysis {
 		// now put the variables together  
 		IloNumExpr cplex_target = cplex.sum(cplex.prod(TargetFunction.lambda1, sum),lin);
 
-		// only for FluxMinimization has the target function be minimized
+		// only for FluxMinimization the target function has to be minimized
 		if (targetFunc instanceof FluxMinimization) {
 			cplex.addMinimize(cplex_target);
 		} else {
@@ -197,54 +199,65 @@ public class FluxBalanceAnalysis {
 
 		//CONSTRAINTS
 
-//		double[] flux = targetFunc.getFluxVector();
-//		double[] gibbs = constraints.getGibbsEnergies();
-//		double r_max = constraints.computeR_max(flux);
-//		for (int i = 0; i< counter[1]; i++) {
-//			//jg is the expression for J_i * G_i
-//			//and jr_maxg the expression for |J_i| - r_max * |G_i|
-//			for (int k = counter[3]; k < x.length; k++) {
-//				// constraint |J_i| - r_max * |G_i| < 0
-//				IloNumExpr j_i = cplex.abs(cplex.prod(flux[i], x[i]));
-//				IloNumExpr g_i = cplex.abs(cplex.prod(gibbs[i], x[k]));
-//				IloNumExpr jr_maxg = cplex.sum(j_i, (cplex.prod(-1, cplex.prod(r_max, g_i))));
-//				cplex.addLe(jr_maxg, 0);
-//
-//				// constraint J_i * G_i < 0
-//				IloNumExpr jg = cplex.prod(cplex.prod(flux[i], x[i]),cplex.prod(gibbs[i],x[k]));
-//				cplex.addLe(jg, 0);
-//			}
-//		}
-//		// constraint N * J = 0
-//		double[][] N = targetFunc.getStoichiometricMatrix();
-//		IloNumExpr sumOfNJ = cplex.prod(0, x[0]);
-//		for (int i = 0; i < flux.length ; i++) {
-//			for (int j = 0; j < N[0].length; j++) {
-//				IloNumExpr temp = sumOfNJ; 
-//				sumOfNJ = cplex.sum(cplex.prod(N[i][j], cplex.prod(flux[i], x[i])), temp);
-//			}
-//			cplex.addEq(sumOfNJ, 0);
-//		}
-		
-		// constraint that minimal 3 fluxes can be 0
-		//TODO
-		cplex.addEq(x[6], 1);
+		double[] flux = targetFunc.getFluxVector();
+		double[] gibbs = constraints.getGibbsEnergies();
+		double r_max = constraints.computeR_max(flux);
+		for (int i = 0; i< counter[1]; i++) {
+			//jg is the expression for J_i * G_i
+			//and jr_maxg the expression for |J_i| - r_max * |G_i|
+			for (int k = counter[3]; k < x.length; k++) {
+				// constraint |J_i| - r_max * |G_i| < 0
+				IloNumExpr j_i = cplex.abs(cplex.prod(flux[i], x[i]));
+				IloNumExpr g_i = cplex.abs(cplex.prod(gibbs[i], x[k]));
+				IloNumExpr jr_maxg = cplex.sum(j_i, (cplex.prod(-1, cplex.prod(r_max, g_i))));
+				//				cplex.addLe(jr_maxg, 0);
 
-
-		// now solve the problem and get the solution array for the variables x
-		double[] solution = null;
-		System.out.println(cplex.isPrimalFeasible());
-		if (cplex.solve()) { 
-			// get the from cplex computed values for the variables x and c
-			solution = cplex.getValues(x);
-			System.out.println(cplex.getObjValue());
-			for (int i = 0; i < counter[1]; i++) {
-				solution_fluxVector[i] = solution[i];
-			}
-			for (int j = 0; j < concentrations.length; j++) {
-			solution_concentrations[j] = solution[j + target.length];
+				// constraint J_i * G_i < 0
+				IloNumExpr jg = cplex.prod(cplex.prod(flux[i], x[i]),cplex.prod(gibbs[i],x[k]));
+				cplex.addLe(jg, 0);
 			}
 		}
+		// constraint N * J = 0
+		double[][] N = targetFunc.getStoichiometricMatrix();
+		IloNumExpr sumOfNJ = cplex.numExpr();
+		for (int i = 0; i < flux.length ; i++) {
+			for (int j = 0; j < N[0].length; j++) {
+				IloNumExpr temp = sumOfNJ; 
+				sumOfNJ = cplex.sum(cplex.prod(N[i][j], cplex.prod(flux[i], x[i])), temp);
+			}
+			cplex.addEq(sumOfNJ, 0);
+		}
+
+		// constraint that minimal 1 flux has to be > 0
+		IloNumExpr fluxExpr = cplex.numExpr() ;
+		for (int i = 0; i < flux.length ; i++) {
+			IloNumExpr temp = fluxExpr;
+			fluxExpr = cplex.sum(cplex.prod(flux[i], x[i]),temp);
+		}
+		cplex.addGe(fluxExpr, 0.0001);
+
+
+		// now solve the problem and get the solution array for the variables x,
+		// cplex.setOut(null) stops the logger massages of cplex
+		double[] solution = null;
+		//		cplex.setOut(null);
+		//set the iteration limit: without doing this, cplex iterates 2100000000 times...
+		cplex.setParam(IloCplex.IntParam.BarItLim, 2);
+
+		cplex.solve(); 
+		// get the from cplex computed values for the variables x
+		solution = cplex.getValues(x);
+		System.out.println(cplex.getObjValue());
+		for (int i = 0; i < counter[1]; i++) {
+			// the first counter[1]-values are corressponding to the fluxes
+			solution_fluxVector[i] = flux[i] * solution[i];
+		}
+		for (int j = 0; j < concentrations.length; j++) {
+			// the last values in x are corresponding to the concentrations
+			solution_concentrations[j] = concentrations[j] * solution[j + target.length];
+		}
+
+
 		cplex.end();
 
 		// create the MultiTable for visualization
@@ -283,7 +296,7 @@ public class FluxBalanceAnalysis {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Puts for {@link Species} j the lower bound on the given lbValue.
 	 * @param lbValue
@@ -298,7 +311,7 @@ public class FluxBalanceAnalysis {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Puts for {@link Species} j the upper bound on the given ubValue.
 	 * @param ubValue
