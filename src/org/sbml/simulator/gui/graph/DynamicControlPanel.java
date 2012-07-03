@@ -358,7 +358,7 @@ public class DynamicControlPanel extends JPanel {
 		reactionLabelsCB.addActionListener(controller);
 		
 		timelbl = new JLabel(MessageFormat.format("{0}: {1}", new Object[]{bundle.getString("TIMEPOINT"), "N/A"}));
-		status = new JLabel("bla");
+		status = new JLabel();
 		
 		//init buttons
 		play = GUITools.createButton(playIcon, controller, Buttons.PLAY, Buttons.PLAY.getToolTip());
