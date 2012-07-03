@@ -17,7 +17,6 @@
  */
 package org.sbml.simulator.gui.graph;
 
-import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -38,10 +37,6 @@ import org.sbml.simulator.gui.table.LegendTableModel;
 import org.sbml.simulator.math.SplineCalculation;
 import org.simulator.math.odes.MultiTable;
 
-import y.io.JPGIOHandler;
-import y.io.ViewPortConfigurator;
-import y.view.Graph2D;
-import y.view.Graph2DView;
 import de.zbit.graph.gui.TranslatorSBMLgraphPanel;
 import de.zbit.graph.io.SBML2GraphML;
 import de.zbit.util.ResourceManager;
@@ -190,16 +185,11 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
      * This field contains the current {@link IGraphManipulator}.
      */
     private IGraphManipulator graphManipulator;
-    
+
     /**
-     * Internal variable (fixpoint for video).
+     * {@link ImageGenerator} to handle image generating.
      */
-    private Point viewPoint;
-    
-    /**
-     * Internal variable (fixpoint for video).
-     */
-    private double zoomLevel;
+    private ImageGenerator imgGenerator;
     
     /**
      * Constructs all necessary elements.
@@ -320,7 +310,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
         };
         computationOfLimits.execute();
     }
-
+    
     /**
      * This function determines the fixpoints to generate videos. It ensures
      * that graph elements will stay on their location even if the graphsize
@@ -329,45 +319,19 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
      * @param width
      *            of the video stream
      */
-    public void determineFixPoints(int width){
-        SBPreferences prefs = SBPreferences.getPreferencesFor(GraphOptions.class);
-        
-        Graph2D graph = graphPanel.getConverter().getSimpleGraph();
-
-        //save current view
-        Graph2DView originalViewPort = (Graph2DView) graph.getCurrentView();
-        
-        //create dedicated view
-        JPGIOHandler ioh = new JPGIOHandler();
-        Graph2DView imageView = ioh.createDefaultGraph2DView(graph);
-        
-        //configure imageView such that whole graph is contained
-        ViewPortConfigurator vpc = new ViewPortConfigurator();
-        vpc.setGraph2D(imageView.getGraph2D());
-        if (prefs.getBoolean(GraphOptions.VIDEO_DISPLAY_WINDOW)) {
-            //use whole graph
-            vpc.setGraph2D(imageView.getGraph2D());
-            vpc.setClipType(ViewPortConfigurator.CLIP_GRAPH);
-            //scale it to achieve high resolution
-            vpc.setSizeType(ViewPortConfigurator.SIZE_USE_CUSTOM_WIDTH);
-            vpc.setCustomWidth(width);
+    
+    /**
+     * TODO
+     * @param width
+     * @return
+     */
+    public boolean determineFixPoints(int width){
+        if (imgGenerator != null) {
+            imgGenerator.determineFixPoints(width);
+            return true;
         } else {
-            //use original view
-            vpc.setGraph2DView(originalViewPort);
-            vpc.setClipType(ViewPortConfigurator.CLIP_VIEW);
-            //scale it anyway for high resultion
-            vpc.setSizeType(ViewPortConfigurator.SIZE_USE_CUSTOM_WIDTH);
-            vpc.setCustomWidth(width);
+            return false;
         }
-        vpc.configure(imageView);
-        
-        //save initial viewpoint
-        viewPoint = imageView.getViewPoint();
-        //save initial zoomlevel
-        zoomLevel = imageView.getZoom();
-        
-        logger.fine("Fixpoints set. Viewpoint: " + viewPoint + "; Zoomlevel: "
-                + zoomLevel);
     }
 
     /*
@@ -408,7 +372,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
     public LegendPanel getLegendPanel() {
         return legend;
     }
-    
+
     /**
      * Returns {@link SBMLDocument} of this {@link DynamicView}.
      * 
@@ -417,46 +381,21 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
     public SBMLDocument getSBMLDocument() {
         return document;
     }
-
+    
     /**
      * Returns an array {width, height} of the graph size independent of current
      * view. Returned width and height represent the raw resolution of this graph. 
      * @return {width, height}
      */
-    public int[] getScreenshotResolution(){
-        SBPreferences prefs = SBPreferences.getPreferencesFor(GraphOptions.class);
-        
-        Graph2D graph = graphPanel.getConverter().getSimpleGraph();
-
-        //save current view
-        Graph2DView originalViewPort = (Graph2DView) graph.getCurrentView();
-        
-        //create dedicated view
-        JPGIOHandler ioh = new JPGIOHandler();
-        Graph2DView imageView = ioh.createDefaultGraph2DView(graph);
-
-        //configure view
-        ViewPortConfigurator vpc = new ViewPortConfigurator();
-        if (prefs.getBoolean(GraphOptions.VIDEO_DISPLAY_WINDOW)) {
-            //configure imageView such that whole graph is contained
-            vpc.setGraph2D(imageView.getGraph2D());
-            vpc.setClipType(ViewPortConfigurator.CLIP_GRAPH);
-            vpc.setSizeType(ViewPortConfigurator.SIZE_USE_ORIGINAL);
-        } else {
-            //use original view
-            vpc.setGraph2DView(originalViewPort);
-            vpc.setClipType(ViewPortConfigurator.CLIP_VIEW);
-            //do not scale it, because this method returns the real resolution
-            vpc.setSizeType(ViewPortConfigurator.SIZE_USE_ORIGINAL);
-        }
-        vpc.configure(imageView);
-        
-        int width = imageView.getWidth();
-        int height = imageView.getHeight();
-        
-        return new int[]{width, height};
-    }
     
+    /**
+     * TODO
+     * @return
+     */
+    public int[] getScreenshotResolution(){
+        return imgGenerator != null ? imgGenerator.getScreenshotResolution() : null; 
+    }
+
     /**
      * Returns selected reactions.
      * 
@@ -471,7 +410,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
         }
         return selectedReactions.toArray(new String[selectedReactions.size()]);
     }
-
+    
     /**
      * Returns selected species.
      * 
@@ -486,7 +425,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
         }
         return selectedSpecies.toArray(new String[selectedSpecies.size()]);
     }
-    
+
     /*
      * (non-Javadoc)
      * 
@@ -590,7 +529,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
             }
         }
     }
-
+    
     /**
      * Saves selection state of id, whether specie or reaction, in corresponding
      * hashmap. Method should be invoked on changes in {@link LegendTableModel}.
@@ -605,7 +544,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
             reactionsSelectionStates.put(id, bool);
         }
     }
-    
+
     /**
      * updates all selection states of IDs saved in corresponding hashmap
      * (reactions & species)
@@ -628,7 +567,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
             }
         }
     }
-
+    
     /**
      * Sets the {@link IGraphManipulator} for this {@link DynamicView}.
      * 
@@ -639,78 +578,20 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
         updateGraph();
     }
 
+    /**
+     * Sets the current {@link ImageGenerator}.
+     * @param imggen
+     */
+    public void setImgGenerator(ImageGenerator imggen) {
+        this.imgGenerator = imggen;
+    }
+
     /* (non-Javadoc)
      * @see org.sbml.simulator.gui.graph.IDynamicGraph#takeGraphshot()
      */
     @Override
     public BufferedImage takeGraphshot(int width, int height) {
-        SBPreferences prefs = SBPreferences.getPreferencesFor(GraphOptions.class);
-        /*
-         * Take screenshot in dedicated view to ensure that nothing is cut off
-         * and to change screenshotresolution independent of actual view (this
-         * allows higher screenshot resolutions without users noticing the
-         * necessary scaling).
-         */
-        Graph2D graph = graphPanel.getConverter().getSimpleGraph();
-        
-        //unselect objects
-        graph.unselectAll();
-        
-        //save current view
-        Graph2DView originalViewPort = (Graph2DView) graph.getCurrentView();
-        
-        //create dedicated view for graphshot
-        JPGIOHandler ioh = new JPGIOHandler();
-        Graph2DView imageView = ioh.createDefaultGraph2DView(graph);
-        
-        //use original render settings
-        imageView.setGraph2DRenderer(originalViewPort.getGraph2DRenderer());
-        imageView.setRenderingHints(originalViewPort.getRenderingHints());
-        
-        //set dedicated view
-        graph.setCurrentView(imageView);
-        
-        //settings for dedicated view
-        ViewPortConfigurator vpc = new ViewPortConfigurator();
-        if (prefs.getBoolean(GraphOptions.VIDEO_DISPLAY_WINDOW)) {
-            vpc.setGraph2D(imageView.getGraph2D());
-            //do not cut off anything not in view
-            vpc.setClipType(ViewPortConfigurator.CLIP_GRAPH);
-            //scale image to video size
-            vpc.setSizeType(ViewPortConfigurator.SIZE_USE_CUSTOM_WIDTH);
-            vpc.setCustomWidth(width);
-        } else {
-            //use current display window
-            vpc.setGraph2DView(originalViewPort);
-            vpc.setClipType(ViewPortConfigurator.CLIP_VIEW);
-            //scale it anyway to ensure high resolution
-            vpc.setSizeType(ViewPortConfigurator.SIZE_USE_CUSTOM_WIDTH);
-            vpc.setCustomWidth(width);
-        }
-        //configure dedicated view with settings
-        vpc.configure(imageView);
-        
-        /*
-         * fix zoomlevel and viewpoint to prevent pixel jumping during video
-         * generating. Make sure to call determineFixePoints(int width) before calling
-         * this function.
-         */
-        if (zoomLevel != 0 && viewPoint != null) {
-            imageView.setZoom(zoomLevel);
-            imageView.setViewPoint(viewPoint.x, viewPoint.y);
-        } else {
-            logger.fine("No Fixpoints available. There might be some pixel jumping in videos.");
-        }
-        
-        //take screenshot
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
-        imageView.paintVisibleContent(image.createGraphics());
-        
-        //restore original view
-        graph.removeView(graph.getCurrentView());
-        graph.setCurrentView(originalViewPort);
-        
-        return image;
+        return imgGenerator != null ? imgGenerator.takeGraphshot(width, height) : null;
     }
 
     /**

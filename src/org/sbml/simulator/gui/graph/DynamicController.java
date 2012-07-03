@@ -131,7 +131,12 @@ public class DynamicController implements ChangeListener, ActionListener,
                      * Graphsize as base for video resolution ensures that the
                      * black margin in video is at minimum.
                      */
-
+                    
+                    //assign image generator
+                    view.setImgGenerator(new ImageGenerator(view.getGraph()
+                            .getSimpleGraph(), prefs
+                            .getBoolean(GraphOptions.VIDEO_DISPLAY_WINDOW)));
+                    
                     // determine raw graph size
                     int[] size = view.getScreenshotResolution();
                     int width = size[0];
@@ -222,10 +227,15 @@ public class DynamicController implements ChangeListener, ActionListener,
                 } else if (e.getActionCommand().equals("GRAPHSHOT")) {
                 	SBPreferences guiPrefs = SBPreferences
                 			.getPreferencesFor(GUIOptions.class);
-
+                	
                     int resolutionMultiplier = (int) prefs
                             .getDouble(GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
-
+                    
+                    //assign image generator
+                    view.setImgGenerator(new ImageGenerator(view.getGraph()
+                            .getSimpleGraph(), prefs
+                            .getBoolean(GraphOptions.VIDEO_DISPLAY_WINDOW)));
+                    
                     // determine raw graph size
                     int[] size = view.getScreenshotResolution();
                     int width = size[0] * resolutionMultiplier;
