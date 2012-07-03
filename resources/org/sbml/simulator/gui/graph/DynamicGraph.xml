@@ -112,8 +112,8 @@
   <entry key="VISUALIZATION_DATA">Data for visualization</entry>
   <entry key="VISUALIZATION_DATA_TOOLTIP">Choose the data to visualize.</entry>  
   <entry key="DATA_NOT_AVAILABLE">Chosen data set for visualization is not available by now.</entry>
-  <entry key="GROUP_VIDEO_ENCODING">Video encoding</entry>
-  <entry key="GROUP_VIDEO_ENCODING_TOOLTIP">These settings control video encoding.</entry>
+  <entry key="GROUP_VIDEO_ENCODING">Video encoding / Screenshot settings</entry>
+  <entry key="GROUP_VIDEO_ENCODING_TOOLTIP">These settings control video encoding and screenshot settings.</entry>
   <entry key="VIDEO_TIMESTAMP">Time-stamp</entry>
   <entry key="VIDEO_TIMESTAMP_TOOLTIP">The lower this setting, the faster and shorter is the resulting video.</entry>
   <entry key="VIDEO_IMAGE_STEPSIZE">Steps between two images</entry>
@@ -126,5 +126,7 @@
   <entry key="INTERPOLATE_EXP_DATA_TOOLTIP">Enable/disable interpolation of experimental data, if there are less than 100 timepoints.</entry>
   <entry key="VIDEO_FORCE_RESOLUTION_MULTIPLIER">Force resolution multiplier</entry>
   <entry key="VIDEO_FORCE_RESOLUTION_MULTIPLIER_TOOLTIP">By enabling this option you can force to use the resolution multiplier even if the video output resolution would be big enough.</entry>
+  <entry key="VIDEO_DISPLAY_WINDOW">Picture whole graph</entry>
+  <entry key="VIDEO_DISPLAY_WINDOW_TOOLTIP">Choose if the whole graph should be pictured in videos and screenshots or just the current display window.</entry>
   
 </properties>
