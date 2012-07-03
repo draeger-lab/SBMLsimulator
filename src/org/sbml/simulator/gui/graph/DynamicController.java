@@ -131,14 +131,11 @@ public class DynamicController implements ChangeListener, ActionListener,
                      * Graphsize as base for video resolution ensures that the
                      * black margin in video is at minimum.
                      */
-                    
-                    //assign image generator
-                    view.setImgGenerator(new ImageGenerator(view.getGraph()
-                            .getSimpleGraph(), prefs
-                            .getBoolean(GraphOptions.VIDEO_DISPLAY_WINDOW)));
-                    
+                    ImageGenerator imggen = new ImageGenerator(view.getGraph().getSimpleGraph(), prefs
+                            .getBoolean(GraphOptions.VIDEO_DISPLAY_WINDOW));
+
                     // determine raw graph size
-                    int[] size = view.getScreenshotResolution();
+                    int[] size  = imggen.getScreenshotResolution();
                     int width = size[0];
                     int height = size[1];
 
@@ -157,9 +154,11 @@ public class DynamicController implements ChangeListener, ActionListener,
                         width *= resolutionMultiplier;
                         height *= resolutionMultiplier;
                     }
-
-                    // determine fixpoints to prevent pixeljumping in videos
-                    view.determineFixPoints(width);
+                    //determine fixpoint to prevent pixel jumping
+                    imggen.determineFixPoints(width); 
+                    
+                    //assign image generator
+                    view.setImgGenerator(imggen);
 
                     // even resolution
                     width = (width % 2) == 1 ? width - 1 : width;
@@ -172,7 +171,7 @@ public class DynamicController implements ChangeListener, ActionListener,
                     int captureStepSize = (int) prefs
                             .getDouble(GraphOptions.VIDEO_IMAGE_STEPSIZE);
 
-                    //Warning if computation could take very long
+                    //warning if computation could take very long
                     int numScreenshots = (core.getTimepoints().length-1) / captureStepSize;
                     if (width > 2500 || height > 2500 || numScreenshots > 150) {
                         GUITools.showMessage(
@@ -231,13 +230,15 @@ public class DynamicController implements ChangeListener, ActionListener,
                     int resolutionMultiplier = (int) prefs
                             .getDouble(GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
                     
+                    
+                    ImageGenerator imggen = new ImageGenerator(view.getGraph().getSimpleGraph(), prefs
+                            .getBoolean(GraphOptions.VIDEO_DISPLAY_WINDOW));
+                    
                     //assign image generator
-                    view.setImgGenerator(new ImageGenerator(view.getGraph()
-                            .getSimpleGraph(), prefs
-                            .getBoolean(GraphOptions.VIDEO_DISPLAY_WINDOW)));
+                    view.setImgGenerator(imggen);
                     
                     // determine raw graph size
-                    int[] size = view.getScreenshotResolution();
+                    int[] size  = imggen.getScreenshotResolution();
                     int width = size[0] * resolutionMultiplier;
                     int height = size[1] * resolutionMultiplier;
 

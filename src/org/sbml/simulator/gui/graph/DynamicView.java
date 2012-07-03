@@ -310,33 +310,9 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
         };
         computationOfLimits.execute();
     }
-    
-    /**
-     * This function determines the fixpoints to generate videos. It ensures
-     * that graph elements will stay on their location even if the graphsize
-     * changes during visualization (e. g. nodes getting bigger/smaller).
-     * 
-     * @param width
-     *            of the video stream
-     */
-    
-    /**
-     * TODO
-     * @param width
-     * @return
-     */
-    public boolean determineFixPoints(int width){
-        if (imgGenerator != null) {
-            imgGenerator.determineFixPoints(width);
-            return true;
-        } else {
-            return false;
-        }
-    }
 
     /*
      * (non-Javadoc)
-     * 
      * @see org.sbml.simulator.gui.graph.IDynamicGraph#donePlay()
      */
     @Override
@@ -381,20 +357,6 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
     public SBMLDocument getSBMLDocument() {
         return document;
     }
-    
-    /**
-     * Returns an array {width, height} of the graph size independent of current
-     * view. Returned width and height represent the raw resolution of this graph. 
-     * @return {width, height}
-     */
-    
-    /**
-     * TODO
-     * @return
-     */
-    public int[] getScreenshotResolution(){
-        return imgGenerator != null ? imgGenerator.getScreenshotResolution() : null; 
-    }
 
     /**
      * Returns selected reactions.
@@ -428,7 +390,6 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
 
     /*
      * (non-Javadoc)
-     * 
      * @see java.beans.PropertyChangeListener#propertyChange(java.beans.
      * PropertyChangeEvent)
      */

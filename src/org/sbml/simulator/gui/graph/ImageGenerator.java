@@ -62,8 +62,12 @@ public class ImageGenerator {
     private double zoomLevel;
     
     /**
-     * Constructs a new {@link ImageGenerator} on the given graph.
+     * Constructs a new {@link ImageGenerator} on the given graph. Depending on
+     * the given boolean, either the whole graph will be pictured or just the
+     * current view.
+     * 
      * @param graph
+     * @param wholeGraph
      */
     public ImageGenerator(Graph2D graph, boolean wholeGraph) {
         this.graph = graph;
@@ -76,8 +80,7 @@ public class ImageGenerator {
      * ensures that graph elements will stay on their location even if the
      * graphsize changes during visualization (e. g. nodes getting
      * bigger/smaller).
-     * @param width
-     * @param wholeGraph
+     * @param width of the output resolution
      */
     public void determineFixPoints(int width) {
         //save current view
@@ -117,10 +120,9 @@ public class ImageGenerator {
     }
 
     /**
-     * Returns either an array {width, height} of the whole graph independent of current
-     * view or the resolution of the current view. Returned width and height represent the raw resolution of this graph.
-     * @param wholeGraph
-     * @return
+     * Returned width and height represent the unscaled graph as a whole or the
+     * width and height of the current display window.
+     * @return {width, height}
      */
     public int[] getScreenshotResolution(){
         //save current view
@@ -153,13 +155,18 @@ public class ImageGenerator {
     }
 
     /**
-     * This method returns an image of the given size. To achieve higher
-     * resolutions than the actual graphsize, the graph gets scaled to the given
-     * size in an dedicated view to take the screenshot. Depending on the given
-     * boolean, the whole graph is pictured or just the current view.
+     * This method returns an {@link BufferedImage} of the given size. To
+     * achieve higher resolutions than the actual graphsize, the graph gets
+     * scaled to the given size in a dedicated view to take the screenshot.<br>
+     * In order to generate videos as sequence of images, fixpoints should
+     * initially be determined first with determineFixpoints(). Then each
+     * picture will be taken from the same point of view and zoomlevel. This
+     * means there will be no elements changing their position due to changing
+     * their size while a dynamic simulation. Espacially important if the whole
+     * graph is pictured, because than the bounding box will vary if the
+     * elements change their size.
      * @param width
      * @param height
-     * @param wholeGraph
      * @return
      */
     public BufferedImage takeGraphshot(int width, int height) {
