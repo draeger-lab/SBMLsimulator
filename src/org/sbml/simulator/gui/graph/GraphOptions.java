@@ -198,6 +198,13 @@ public interface GraphOptions extends KeyProvider{
         "VIDEO_FORCE_RESOLUTION_MULTIPLIER", Boolean.class, bundle, Boolean.FALSE);
     
     /**
+     * Option to use the current whole graph to generate videos and images
+     * or the current view graph.
+     */
+    public static final Option<Boolean> VIDEO_DISPLAY_WINDOW = new Option<Boolean>(
+            "VIDEO_DISPLAY_WINDOW", Boolean.class, bundle, Boolean.TRUE);
+    
+    /**
      * Options for visualization.
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -237,6 +244,6 @@ public interface GraphOptions extends KeyProvider{
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static final OptionGroup GROUP_VIDEO_ENCODING = new OptionGroup(
-        "GROUP_VIDEO_ENCODING", bundle, VIDEO_RESOLUTION_MULTIPLIER, VIDEO_FORCE_RESOLUTION_MULTIPLIER, VIDEO_TIMESTAMP, VIDEO_IMAGE_STEPSIZE);
+        "GROUP_VIDEO_ENCODING", bundle, VIDEO_DISPLAY_WINDOW, VIDEO_FORCE_RESOLUTION_MULTIPLIER, VIDEO_RESOLUTION_MULTIPLIER, VIDEO_TIMESTAMP, VIDEO_IMAGE_STEPSIZE);
     
 }

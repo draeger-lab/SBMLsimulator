@@ -324,14 +324,19 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
     /**
      * This function determines the fixpoints to generate videos. It ensures
      * that graph elements will stay on their location even if the graphsize
-     * changes during visualization (i. e. nodes getting bigger/smaller).
+     * changes during visualization (e. g. nodes getting bigger/smaller).
      * 
      * @param width
      *            of the video stream
      */
     public void determineFixPoints(int width){
+        SBPreferences prefs = SBPreferences.getPreferencesFor(GraphOptions.class);
+        
         Graph2D graph = graphPanel.getConverter().getSimpleGraph();
 
+        //save current view
+        Graph2DView originalViewPort = (Graph2DView) graph.getCurrentView();
+        
         //create dedicated view
         JPGIOHandler ioh = new JPGIOHandler();
         Graph2DView imageView = ioh.createDefaultGraph2DView(graph);
@@ -339,9 +344,21 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
         //configure imageView such that whole graph is contained
         ViewPortConfigurator vpc = new ViewPortConfigurator();
         vpc.setGraph2D(imageView.getGraph2D());
-        vpc.setClipType(ViewPortConfigurator.CLIP_GRAPH);
-        vpc.setSizeType(ViewPortConfigurator.SIZE_USE_CUSTOM_WIDTH);
-        vpc.setCustomWidth(width);
+        if (prefs.getBoolean(GraphOptions.VIDEO_DISPLAY_WINDOW)) {
+            //use whole graph
+            vpc.setGraph2D(imageView.getGraph2D());
+            vpc.setClipType(ViewPortConfigurator.CLIP_GRAPH);
+            //scale it to achieve high resolution
+            vpc.setSizeType(ViewPortConfigurator.SIZE_USE_CUSTOM_WIDTH);
+            vpc.setCustomWidth(width);
+        } else {
+            //use original view
+            vpc.setGraph2DView(originalViewPort);
+            vpc.setClipType(ViewPortConfigurator.CLIP_VIEW);
+            //scale it anyway for high resultion
+            vpc.setSizeType(ViewPortConfigurator.SIZE_USE_CUSTOM_WIDTH);
+            vpc.setCustomWidth(width);
+        }
         vpc.configure(imageView);
         
         //save initial viewpoint
@@ -407,17 +424,31 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
      * @return {width, height}
      */
     public int[] getScreenshotResolution(){
+        SBPreferences prefs = SBPreferences.getPreferencesFor(GraphOptions.class);
+        
         Graph2D graph = graphPanel.getConverter().getSimpleGraph();
 
+        //save current view
+        Graph2DView originalViewPort = (Graph2DView) graph.getCurrentView();
+        
         //create dedicated view
         JPGIOHandler ioh = new JPGIOHandler();
         Graph2DView imageView = ioh.createDefaultGraph2DView(graph);
-        
-        //configure imageView such that whole graph is contained
+
+        //configure view
         ViewPortConfigurator vpc = new ViewPortConfigurator();
-        vpc.setGraph2D(imageView.getGraph2D());
-        vpc.setClipType(ViewPortConfigurator.CLIP_GRAPH);
-        vpc.setSizeType(ViewPortConfigurator.SIZE_USE_ORIGINAL);
+        if (prefs.getBoolean(GraphOptions.VIDEO_DISPLAY_WINDOW)) {
+            //configure imageView such that whole graph is contained
+            vpc.setGraph2D(imageView.getGraph2D());
+            vpc.setClipType(ViewPortConfigurator.CLIP_GRAPH);
+            vpc.setSizeType(ViewPortConfigurator.SIZE_USE_ORIGINAL);
+        } else {
+            //use original view
+            vpc.setGraph2DView(originalViewPort);
+            vpc.setClipType(ViewPortConfigurator.CLIP_VIEW);
+            //do not scale it, because this method returns the real resolution
+            vpc.setSizeType(ViewPortConfigurator.SIZE_USE_ORIGINAL);
+        }
         vpc.configure(imageView);
         
         int width = imageView.getWidth();
@@ -613,6 +644,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
      */
     @Override
     public BufferedImage takeGraphshot(int width, int height) {
+        SBPreferences prefs = SBPreferences.getPreferencesFor(GraphOptions.class);
         /*
          * Take screenshot in dedicated view to ensure that nothing is cut off
          * and to change screenshotresolution independent of actual view (this
@@ -640,12 +672,21 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
         
         //settings for dedicated view
         ViewPortConfigurator vpc = new ViewPortConfigurator();
-        vpc.setGraph2D(imageView.getGraph2D());
-        //do not cut off anything not in view
-        vpc.setClipType(ViewPortConfigurator.CLIP_GRAPH);
-        //scale image to video size
-        vpc.setSizeType(ViewPortConfigurator.SIZE_USE_CUSTOM_WIDTH);
-        vpc.setCustomWidth(width);
+        if (prefs.getBoolean(GraphOptions.VIDEO_DISPLAY_WINDOW)) {
+            vpc.setGraph2D(imageView.getGraph2D());
+            //do not cut off anything not in view
+            vpc.setClipType(ViewPortConfigurator.CLIP_GRAPH);
+            //scale image to video size
+            vpc.setSizeType(ViewPortConfigurator.SIZE_USE_CUSTOM_WIDTH);
+            vpc.setCustomWidth(width);
+        } else {
+            //use current display window
+            vpc.setGraph2DView(originalViewPort);
+            vpc.setClipType(ViewPortConfigurator.CLIP_VIEW);
+            //scale it anyway to ensure high resolution
+            vpc.setSizeType(ViewPortConfigurator.SIZE_USE_CUSTOM_WIDTH);
+            vpc.setCustomWidth(width);
+        }
         //configure dedicated view with settings
         vpc.configure(imageView);
         
