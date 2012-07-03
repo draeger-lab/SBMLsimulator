@@ -22,7 +22,9 @@
   <entry key="GRAPHSHOT">Bild</entry>
   <entry key="GRAPHSHOT_TOOLTIP">Speichert das aktuelle Netzwerk als Bilddatei. Die Auflösung kann über den Auflösungsmultiplikator in den Optionen angepasst werden.</entry>   
   <entry key="NODELABELS">Knotenbeschriftung</entry>
+  <entry key="NODELABELS_TOOLTIP">Blendet die Konzentrationen ein/aus.</entry>
   <entry key="REACTIONLABELS">Reaktionenbeschriftung</entry>
+  <entry key="REACTIONLABELS_TOOLTIP">Blendet die Reaktionsgeschwindigkeiten ein/aus.</entry>
   <entry key="FAST">Schnell</entry>
   <entry key="NORMAL">Normal</entry>
   <entry key="SLOW">Langsam</entry>
@@ -37,6 +39,8 @@
   <entry key="GROUP_VISUALIZATION">Visualisierung</entry>
   <entry key="VISUALIZATION_TOOLTIP">Wählen Sie die Art der dynamischen Visualisierung und die zu visualisierenden Daten aus.</entry>
   <entry key="SEARCHBAR_TOOLTIP">Stellen Sie den Zeitpunkt der Visualisierung ein.</entry>
+  <entry key="GENERATE_VIDEO">Erzeuge Video mit {0}x{1} Pixel.</entry>
+  <entry key="SCREENSHOT_DONE">Bild erfolgreich gespeichert.</entry>
   
   <!-- DynamicView -->
   
@@ -55,6 +59,8 @@
   <entry key="COULD_NOT_WRITE_SCREENSHOT">Bilddatei konnte nicht produziert werden.</entry>
   <entry key="EXC_MIN_MAX_NODE_SIZE">Maximale Knotengröße muss größer sein als minimale Knotengröße. Standardwerte werden benutzt.</entry>
   <entry key="EXC_MIN_MAX_LINE_WIDTH">Maximale Liniendicke muss größer sein als minimale Liniendicke. Standardwerte werden benutzt.</entry>  
+  <entry key="VIDEO_LONG_COMPUTATION_TIME">Achtung! Mit den gewählten Einstellungen ({0}x{1} Pixel und {2} Bilder) könnte die Videoerzeugung einige Zeit in Anspruch nehmen und den Prozessor stark auslasten.</entry>
+  <entry key="INFO_COMP">Information</entry>
   
   <!-- GraphOptions -->
 
@@ -113,9 +119,12 @@
   <entry key="VIDEO_IMAGE_STEPSIZE">Bilderschrittweite</entry>
   <entry key="VIDEO_IMAGE_STEPSIZE_TOOLTIP">Hier können Sie einstellen, wie viele Bilder von der Simulation gemacht werden sollen. Je geringer die Bilderschrittweite, desto weniger Bilder werden gemacht.</entry>    
   <entry key="VIDEO_RESOLUTION_MULTIPLIER">Auflösungsmultiplikator</entry>
-  <entry key="VIDEO_RESOLUTION_MULTIPLIER_TOOLTIP">Je größer der Multiplikator, desto besser ist die Videoauflösung, aber desto größer ist die Dateigröße.</entry>
+  <entry key="VIDEO_RESOLUTION_MULTIPLIER_TOOLTIP">Je größer der Multiplikator, desto besser ist die Videoauflösung, aber desto größer ist die Dateigröße und die Berechnungszeit. Der Multiplikator wird nur genutzt, wenn die Ausgabeauflösung zu gering wäre um scharfe Videos zu generieren.</entry>
   <entry key="RELATIVE_CONCENTRATION_CHANGES">Relative Konzentrationsänderung</entry>
   <entry key="RELATIVE_CONCENTRATION_CHANGES_TOOLTIP">Mit dieser Option können die Konzentrationsänderungen relativ zueinander visualisiert werden. Das bedeutet, dass für jede Species ein eigener min/max Wert zur Berechnung der visuellen Konzentrationsänderung benutzt wird, sofern die gewählte Art der Visualisierung diese Option unterstützt.</entry>
-  <entry key ="INTERPOLATE_EXP_DATA">Experimentelle Daten interpolieren</entry>
-  <entry key ="INTERPOLATE_EXP_DATA_TOOLTIP">Aktiviert/deaktiviert die Interpolation experimenteller Daten, wenn diese weniger als 100 Zeitpunkte besitzen.</entry>
+  <entry key="INTERPOLATE_EXP_DATA">Experimentelle Daten interpolieren</entry>
+  <entry key="INTERPOLATE_EXP_DATA_TOOLTIP">Aktiviert/deaktiviert die Interpolation experimenteller Daten, wenn diese weniger als 100 Zeitpunkte besitzen.</entry>
+  <entry key="VIDEO_FORCE_RESOLUTION_MULTIPLIER">Erzwinge Auflösungsmultiplikator</entry>
+  <entry key="VIDEO_FORCE_RESOLUTION_MULTIPLIER_TOOLTIP">Mit dieser Option kann der Auflösungsmultiplikator erzwungen werden auch wenn die Video-Ausgabeauflösung groß genug wäre.</entry>
+  
 </properties>

@@ -216,6 +216,7 @@ public class DynamicControlPanel extends JPanel {
 	 */
 	private JLabel timelbl;
 	private JSlider searchBar;
+	private JLabel status;
 	private JButton play;
 	private JButton pause;
 	private JButton stop;
@@ -356,8 +357,10 @@ public class DynamicControlPanel extends JPanel {
 		reactionLabelsCB = GUITools.createJCheckBox(GraphOptions.SHOW_REACTION_LABELS, prefs, controller);
 		reactionLabelsCB.addActionListener(controller);
 		
-		//init buttons
 		timelbl = new JLabel(MessageFormat.format("{0}: {1}", new Object[]{bundle.getString("TIMEPOINT"), "N/A"}));
+		status = new JLabel("bla");
+		
+		//init buttons
 		play = GUITools.createButton(playIcon, controller, Buttons.PLAY, Buttons.PLAY.getToolTip());
 		pause = GUITools.createButton(pauseIcon, controller, Buttons.PAUSE, Buttons.PAUSE.getToolTip());
 		stop = GUITools.createButton(stopIcon, controller, Buttons.STOP, Buttons.STOP.getToolTip());
@@ -406,7 +409,7 @@ public class DynamicControlPanel extends JPanel {
 		addComponent(gbl, simVelolbl,       0, 2, 3, 1, GridBagConstraints.WEST,	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, simVeloCombo,	    3, 2, 1, 1, GridBagConstraints.CENTER,  GridBagConstraints.NONE,	    0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, simVeloSpin,	    4, 2, 1, 1, GridBagConstraints.WEST, 	GridBagConstraints.NONE, 		0, 0, new Insets(2,2,2,2));
-		addComponent(gbl, new JLabel(),     5, 2, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.HORIZONTAL,  1, 0, new Insets(2,2,2,2));
+		addComponent(gbl, status,           5, 2, 1, 1, GridBagConstraints.CENTER,  GridBagConstraints.HORIZONTAL,  1, 0, new Insets(2,2,2,2));
 		addComponent(gbl, reactionLabelsCB, 6, 2, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, nodeLabelsCB,     6, 1, 1, 1, GridBagConstraints.WEST,    GridBagConstraints.NONE,        0, 0, new Insets(2,2,2,2));
 		addComponent(gbl, manipulatorsPane, 7, 0, 3, 3, GridBagConstraints.CENTER,  GridBagConstraints.BOTH,        0, 0, new Insets(2,2,2,2));
@@ -533,6 +536,14 @@ public class DynamicControlPanel extends JPanel {
 	public void setSimVeloCombo(Items item) {
 	    simVeloCombo.setSelectedItem(item.getName());
 	    simVeloSpin.setValue(item.getSpeed(item));
+	}
+	
+    /**
+     * Displays a given string on the {@link DynamicControlPanel}.
+     * @param label
+     */
+	public void setStatusString(String label) {
+	    status.setText(label);
 	}
 	
 	/**

@@ -95,7 +95,6 @@ public interface GraphOptions extends KeyProvider{
      */
     public static final Option<Boolean> USE_UNIFORM_NODE_COLOR = new Option<Boolean>(
         "USE_UNIFORM_NODE_COLOR", Boolean.class, bundle, Boolean.FALSE);
-    //TODO add dependency for uniform node color (only active if this option is true)
     
     /**
      * Color for uniform node color.
@@ -192,6 +191,13 @@ public interface GraphOptions extends KeyProvider{
                     Double.class, "{[1, 1E2]}"), Double.valueOf(3d));
     
     /**
+     * Option to force resolution multiplier, even if the output resolution is
+     * greater than some threshold.
+     */
+    public static final Option<Boolean> VIDEO_FORCE_RESOLUTION_MULTIPLIER = new Option<Boolean>(
+        "VIDEO_FORCE_RESOLUTION_MULTIPLIER", Boolean.class, bundle, Boolean.FALSE);
+    
+    /**
      * Options for visualization.
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -229,8 +235,8 @@ public interface GraphOptions extends KeyProvider{
     /**
      * Settings for video encoding.
      */
-    @SuppressWarnings("unchecked")
-    public static final OptionGroup<Double> GROUP_VIDEO_ENCODING = new OptionGroup<Double>(
-        "GROUP_VIDEO_ENCODING", bundle, VIDEO_RESOLUTION_MULTIPLIER, VIDEO_TIMESTAMP, VIDEO_IMAGE_STEPSIZE);
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static final OptionGroup GROUP_VIDEO_ENCODING = new OptionGroup(
+        "GROUP_VIDEO_ENCODING", bundle, VIDEO_RESOLUTION_MULTIPLIER, VIDEO_FORCE_RESOLUTION_MULTIPLIER, VIDEO_TIMESTAMP, VIDEO_IMAGE_STEPSIZE);
     
 }
