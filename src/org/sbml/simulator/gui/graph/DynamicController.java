@@ -24,6 +24,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
@@ -123,49 +124,81 @@ public class DynamicController implements ChangeListener, ActionListener,
                     core.stopPlay();
                     controlPanel.setStopStatus();
                 } else if (e.getActionCommand().equals("TOVIDEO")) {
+                    /*
+                     * Resolution has to be even and can't be user chosen,
+                     * otherwise video image will get stretched. Therefore just
+                     * a resolution multiplier to get higher resolutions. Using
+                     * Graphsize as base for video resolution ensures that the
+                     * black margin in video is at minimum.
+                     */
+
+                    // determine raw graph size
+                    int[] size = view.getScreenshotResolution();
+                    int width = size[0];
+                    int height = size[1];
+
+                    // determine output resolution
+                    if (prefs
+                            .getBoolean(GraphOptions.VIDEO_FORCE_RESOLUTION_MULTIPLIER)
+                            || width < 1000 || height < 1000) {
+                        int resolutionMultiplier = (int) prefs
+                                .getDouble(GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
+                        /*
+                         * if resolution is too small or if resolution
+                         * multiplier is forced by the user than scale it
+                         * otherwise use normal resolution to save computation
+                         * time
+                         */
+                        width *= resolutionMultiplier;
+                        height *= resolutionMultiplier;
+                    }
+
+                    // determine fixpoints to prevent pixeljumping in videos
+                    view.determineFixPoints(width);
+
+                    // even resolution
+                    width = (width % 2) == 1 ? width - 1 : width;
+                    height = (height % 2) == 1 ? height - 1 : height;
+                    logger.fine("Video out resolution = " + width + "x"
+                            + height);
+
+                    int timestamp = (int) prefs
+                            .getDouble(GraphOptions.VIDEO_TIMESTAMP);
+                    int captureStepSize = (int) prefs
+                            .getDouble(GraphOptions.VIDEO_IMAGE_STEPSIZE);
+
+                    //Warning if computation could take very long
+                    int numScreenshots = (core.getTimepoints().length-1) / captureStepSize;
+                    if (width > 2500 || height > 2500 || numScreenshots > 150) {
+                        GUITools.showMessage(
+                                MessageFormat.format(
+                                        bundle.getString("VIDEO_LONG_COMPUTATION_TIME"),
+                                        new Object[] { width, height,
+                                                numScreenshots }), bundle
+                                        .getString("INFO_COMP"));
+                    }
+                    
                     File destinationFile = GUITools.saveFileDialog(view,
                             System.getProperty("user.home"), true, false,
                             JFileChooser.FILES_ONLY);
                     
                     if (destinationFile != null) {
                         controlPanel.setVideoStatus();
-                        //ensure dividers don't get moved
+                        controlPanel.setStatusString("["
+                                + MessageFormat.format(
+                                        bundle.getString("GENERATE_VIDEO"),
+                                        new Object[] { width, height }) + "]");
+                        // ensure dividers don't get moved
                         view.setEnabled(false);
-                        
-                        /*
-                         * Resolution has to be even and can't be user chosen,
-                         * otherwise video image will get stretched. Therefore
-                         * just a resolution multiplier to get higher
-                         * resolutions. Using Graphsize as base for video
-                         * resolution ensures that the black margin in video
-                         * is at minimum.
-                         */
-                        int resolutionMultiplier = (int) prefs
-                                .getDouble(GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
-                        
-                        //determine raw graph size
-                        int[] size = view.getScreenshotResolution();
-                        int width = size[0] * resolutionMultiplier;
-                        int height = size[1] * resolutionMultiplier;
-                        
-                        //determine fixpoints to prevent pixeljumping in videos
-                        view.determineFixPoints(width);
-                        
-                        //even resolution
-                        width = (width % 2) == 1 ? width-1 : width;
-                        height = (height % 2) == 1 ? height-1 : height;
-                        logger.fine("Video out resolution = " + width + "x" + height);
-                        
-                        int timestamp = (int) prefs
-                                .getDouble(GraphOptions.VIDEO_TIMESTAMP);
-                        int captureStepSize = (int) prefs
-                                .getDouble(GraphOptions.VIDEO_IMAGE_STEPSIZE);
-                        
-                        //catch errors due to videoencoding
+
+                        // catch errors due to videoencoding
                         try {
                             core.generateVideo(width, height, timestamp,
                                     captureStepSize,
                                     destinationFile.getAbsolutePath());
+                            
+                            // view gets automatically enabled if its
+                            // successful.
                         } catch (UnsupportedOperationException uoe) {
                             GUITools.showErrorMessage(
                                     view,
@@ -173,6 +206,8 @@ public class DynamicController implements ChangeListener, ActionListener,
                                             + "\n >> "
                                             + destinationFile.getName());
                             controlPanel.setStopStatus();
+                            view.setEnabled(true);
+                            controlPanel.setStatusString(null);
                         } catch (IllegalArgumentException iae) {
                             GUITools.showErrorMessage(
                                     view,
@@ -180,43 +215,54 @@ public class DynamicController implements ChangeListener, ActionListener,
                                             + "\n >> "
                                             + destinationFile.getName());
                             controlPanel.setStopStatus();
+                            view.setEnabled(true);
+                            controlPanel.setStatusString(null);
                         }
                     }
                 } else if (e.getActionCommand().equals("GRAPHSHOT")) {
                 	SBPreferences guiPrefs = SBPreferences
                 			.getPreferencesFor(GUIOptions.class);
-                	File destinationFile = GUITools.saveFileDialog(view,
-                		guiPrefs.get(GUIOptions.SAVE_DIR), false, false,
-                		JFileChooser.FILES_ONLY, SBFileFilter.createPNGFileFilter());
-                	
+
+                    int resolutionMultiplier = (int) prefs
+                            .getDouble(GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
+
+                    // determine raw graph size
+                    int[] size = view.getScreenshotResolution();
+                    int width = size[0] * resolutionMultiplier;
+                    int height = size[1] * resolutionMultiplier;
+
+                    File destinationFile = GUITools.saveFileDialog(view,
+                            guiPrefs.get(GUIOptions.SAVE_DIR), false, false,
+                            JFileChooser.FILES_ONLY,
+                            SBFileFilter.createPNGFileFilter());
+
                     if (destinationFile != null) {
-                        //add extenion if missing
-                        if (!destinationFile.getName().toLowerCase().endsWith(".png")) {
-                            destinationFile = new File(destinationFile.getAbsolutePath() + ".png");
+
+                        // add extenion if missing
+                        if (!destinationFile.getName().toLowerCase()
+                                .endsWith(".png")) {
+                            destinationFile = new File(
+                                    destinationFile.getAbsolutePath() + ".png");
                         }
                         
-                        int resolutionMultiplier = (int) prefs
-                                .getDouble(GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
-                        
-                        //determine raw graphsize
-                        int[] size = view.getScreenshotResolution();
-                        int width = size[0] * resolutionMultiplier;
-                        int height = size[1] * resolutionMultiplier;
-                        
                         try {
-                        	if (!destinationFile.getName().toLowerCase().endsWith(".png")) {
-                        		destinationFile = new File(destinationFile.getAbsolutePath() + ".png");
-                        	}
-                        	ImageIO.write(view.takeGraphshot(width, height),
-                        		"png", destinationFile);
-                        	guiPrefs.put(GUIOptions.SAVE_DIR, destinationFile.getParent());
-                        	guiPrefs.flush();
-                        	logger.fine("Writing screenshot successful.");
+                            if (!destinationFile.getName().toLowerCase()
+                                    .endsWith(".png")) {
+                                destinationFile = new File(
+                                        destinationFile.getAbsolutePath()
+                                                + ".png");
+                            }
+                            ImageIO.write(view.takeGraphshot(width, height),
+                                    "png", destinationFile);
+                            guiPrefs.put(GUIOptions.SAVE_DIR,
+                                    destinationFile.getParent());
+                            guiPrefs.flush();
+                            logger.info(bundle.getString("SCREENSHOT_DONE"));
                         } catch (IOException ioe) {
                             logger.warning(bundle
                                     .getString("COULD_NOT_WRITE_SCREENSHOT"));
                         } catch (BackingStoreException exc) {
-													logger.warning(exc.getLocalizedMessage());
+                            logger.warning(exc.getLocalizedMessage());
                         }
                     }
                 }

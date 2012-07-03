@@ -112,7 +112,9 @@ public class DynamicCore {
             image = 1;
             totalimages = (data.getRowCount()-1) / captureEveryXStep;
             encoder = ToolFactory.makeWriter(destinationFile);
-            logger.fine("Added " + width +"x" + height + " videostream");
+            logger.info(MessageFormat.format(
+                    bundle.getString("GENERATE_VIDEO"), new Object[] { width,
+                            height }));
             encoder.addVideoStream(0, 0, width, height);
         }
 	    

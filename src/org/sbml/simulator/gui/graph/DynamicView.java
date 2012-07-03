@@ -362,6 +362,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
     public void donePlay() {
         controlPanel.setStopStatus();
         setEnabled(true); //ensure that view is enabled
+        controlPanel.setStatusString(null); //no displayed status
     }
 
     /**
