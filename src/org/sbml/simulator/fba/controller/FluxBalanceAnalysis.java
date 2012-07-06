@@ -21,7 +21,6 @@ import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
 import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
-import ilog.cplex.IloCplex.IntParam;
 
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
@@ -100,6 +99,15 @@ public class FluxBalanceAnalysis {
 	public FluxBalanceAnalysis(double[] c_eq, Constraints constraints, SBMLDocument doc, String[] targetFluxes) throws Exception {
 		this(new FluxMinimization(doc, c_eq, constraints.getGibbsEnergies(), targetFluxes), constraints);
 	}
+	
+	/**
+	 * 
+	 * @param doc
+	 * @throws Exception
+	 */
+	public FluxBalanceAnalysis(SBMLDocument doc) throws Exception {
+		this(new FluxMinimization(doc, FluxMinimizationUtils.SBMLDocToStoichMatrix(doc), null, null, null), new Constraints(doc));
+	}
 
 
 	/**
@@ -151,11 +159,11 @@ public class FluxBalanceAnalysis {
 		int[] counter = targetFunc.getCounterArray();
 		// counter[1] contains the length of the flux vector
 		for (int i = 0; i< counter[3]; i++) {
-			lb[i]= 0.0; 
+			lb[i]= Double.NEGATIVE_INFINITY; 
 			ub[i] = Double.MAX_VALUE;
 		}
 		for (int g = counter[3]; g < target.length; g++) {
-			lb[g] = Double.MIN_VALUE;
+			lb[g] = Double.NEGATIVE_INFINITY;
 			ub[g] = Double.MAX_VALUE;
 		}
 		for(int j = target.length; j < (concentrations.length + target.length); j++) {
@@ -184,6 +192,8 @@ public class FluxBalanceAnalysis {
 				// here the sum (c_i - c_eq)^2 is performed by cplex. To make it simpler for cplex, the binomial formula is used
 				// where cplex.square(x) = x^2
 				sum = cplex.sum(temp, cplex.square(c_i), cplex.sum(cplex.prod(c_i, ((-2) * c_eq[i])), cplex.square(cplex.constant(c_eq[i]))));
+			} else {
+				sum = cplex.sum(temp, cplex.square(x[i + target.length]),cplex.sum(cplex.prod(x[i + target.length], ((-2) * c_eq[i])), cplex.square(cplex.constant(c_eq[i]))));
 			}
 		}
 		// now put the variables together  
@@ -191,11 +201,29 @@ public class FluxBalanceAnalysis {
 
 		// only for FluxMinimization the target function has to be minimized
 		if (targetFunc instanceof FluxMinimization) {
-			cplex.addMinimize(cplex_target);
+			cplex.addMinimize(lin);
 		} else {
 			cplex.addMaximize(cplex_target);
 		}
 
+//		for (int i = 0; i < x.length; i++) {
+//			if (i < counter[1]) {
+//				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
+//				System.out.println("  flux");
+//			} else if (i < counter[2]) {
+//				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
+//				System.out.println("  E");
+//			} else if (i < counter[3]) {
+//				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
+//				System.out.println("  L");
+//			} else if (i < target.length) {
+//				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
+//				System.out.println("  gibbs");
+//			} else {
+//				System.out.print(i + ": " + concentrations[i-target.length] + "    x: "+ x[i]);
+//				System.out.println("  conc");
+//			}
+//		}
 
 		//CONSTRAINTS
 
@@ -205,44 +233,45 @@ public class FluxBalanceAnalysis {
 		for (int i = 0; i< counter[1]; i++) {
 			//jg is the expression for J_i * G_i
 			//and jr_maxg the expression for |J_i| - r_max * |G_i|
-			for (int k = counter[3]; k < x.length; k++) {
-				// constraint |J_i| - r_max * |G_i| < 0
-				IloNumExpr j_i = cplex.abs(cplex.prod(flux[i], x[i]));
-				IloNumExpr g_i = cplex.abs(cplex.prod(gibbs[i], x[k]));
-				IloNumExpr jr_maxg = cplex.sum(j_i, (cplex.prod(-1, cplex.prod(r_max, g_i))));
-				//				cplex.addLe(jr_maxg, 0);
-
-				// constraint J_i * G_i < 0
-				IloNumExpr jg = cplex.prod(cplex.prod(flux[i], x[i]),cplex.prod(gibbs[i],x[k]));
-				cplex.addLe(jg, 0);
+			int k = i + counter[3];
+			// constraint |J_i| - r_max * |G_i| < 0
+			//			System.out.println("fluss_i: " + flux[i] + ", gibbs_i: "+ gibbs[i]);
+			IloNumExpr j_i = cplex.prod(cplex.abs(cplex.constant(flux[i])), x[i]);
+			IloNumExpr g_i = cplex.prod(cplex.abs(cplex.constant(gibbs[i])), x[k]);
+			IloNumExpr r_maxg = cplex.numExpr();
+			if (!Double.isNaN(gibbs[i]) && !Double.isInfinite(gibbs[i])) {
+				r_maxg = cplex.prod(r_max, g_i);
+			} else {
+				r_maxg = cplex.prod(r_max, x[k]);
 			}
-		}
-		// constraint N * J = 0
-		double[][] N = targetFunc.getStoichiometricMatrix();
-		IloNumExpr sumOfNJ = cplex.numExpr();
-		for (int i = 0; i < flux.length ; i++) {
-			for (int j = 0; j < N[0].length; j++) {
-				IloNumExpr temp = sumOfNJ; 
-				sumOfNJ = cplex.sum(cplex.prod(N[i][j], cplex.prod(flux[i], x[i])), temp);
+			//			System.out.println(", r_maxg: " + r_maxg + ", j_i:" + j_i);
+//			cplex.addGe(r_maxg, j_i);
+
+			// constraint J_i * G_i < 0
+			IloNumExpr jg = cplex.numExpr();
+			if (!Double.isNaN(gibbs[i]) && !Double.isInfinite(gibbs[i])) {
+				jg = cplex.prod(cplex.prod(flux[i], x[i]),cplex.prod(gibbs[i],x[k]));
+			} else {
+				jg = cplex.prod(cplex.prod(flux[i], x[i]),x[k]);
 			}
-			cplex.addEq(sumOfNJ, 0);
+//			cplex.addLe(jg, -Double.MIN_VALUE);
 		}
 
-		// constraint that minimal 1 flux has to be > 0
-		IloNumExpr fluxExpr = cplex.numExpr() ;
-		for (int i = 0; i < flux.length ; i++) {
-			IloNumExpr temp = fluxExpr;
-			fluxExpr = cplex.sum(cplex.prod(flux[i], x[i]),temp);
-		}
-		cplex.addGe(fluxExpr, 0.0001);
-
+//		for (int i = 0; i < concentrations.length; i++) {
+//			if (Double.isNaN(concentrations[i])) {
+//				cplex.addRange(Math.pow(10, -10), x[i+target.length], Math.pow(10, -1));
+//			} else {
+//				cplex.addRange(Math.pow(10, -10), cplex.prod(concentrations[i], x[i+target.length]), Math.pow(10, -1));
+//			}
+//		}
 
 		// now solve the problem and get the solution array for the variables x,
 		// cplex.setOut(null) stops the logger massages of cplex
 		double[] solution = null;
 		//		cplex.setOut(null);
+
 		//set the iteration limit: without doing this, cplex iterates 2100000000 times...
-		cplex.setParam(IloCplex.IntParam.BarItLim, 2);
+		cplex.setParam(IloCplex.IntParam.BarItLim, 50);
 
 		cplex.solve(); 
 		// get the from cplex computed values for the variables x
@@ -344,5 +373,18 @@ public class FluxBalanceAnalysis {
 		MultiTable mt = new MultiTable(time, fluxes, idsOfReactions);
 
 		return mt;
+	}
+
+
+	public void showIfTheFluxesAddToNull(SBMLDocument doc){
+		for (int s = 0; s < doc.getModel().getSpeciesCount(); s++) {
+			double sum = 0;
+			for(int i = 0; i < solution_fluxVector.length; i++) {
+				if(doc.getModel().getReaction(i).hasProduct(doc.getModel().getSpecies(s)) || doc.getModel().getReaction(i).hasReactant(doc.getModel().getSpecies(s))) {
+					sum += solution_fluxVector[i];
+				}
+			}
+			System.out.print(sum + "  ");
+		}
 	}
 }

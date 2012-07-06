@@ -27,6 +27,8 @@ import org.sbml.jsbml.Species;
 import org.sbml.simulator.stability.math.StabilityMatrix;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
+import eva2.tools.math.Jama.Matrix;
+
 /**
  * Contains methods to compute the flux vector for FBA and a method to get the {@link StoichiometricMatrix} of an incoming {@link SBMLDocument}.
  * It also contains a method to compute the Error array for FluxMinimization.
@@ -48,14 +50,16 @@ public class FluxMinimizationUtils {
 	 * @return double[] flux vector
 	 */
 	public static double[] computeFluxVector(StoichiometricMatrix N, String[] targetFluxes, SBMLDocument doc) {
-		StabilityMatrix steadyStateMatrix = N.getSteadyStateFluxes();
-		double[] fluxVector = new double[N.getRowDimension()];
+//		StabilityMatrix steadyStateMatrix = N.getSteadyStateFluxes();
+		int i = N.getReducedMatrix().svd().getV().getRowDimension() - (N.getColumnDimension() - N.rank());
+		double[] fluxVector = new double[N.getColumnDimension()];
 		// fill the fluxVector
-		for (int row = 0; row < N.getRowDimension(); row++) {
-			if (targetFluxes == null || isNoTargetFlux(row, targetFluxes, doc)) {
-				fluxVector[row] = computeManhattenNorm(steadyStateMatrix.getRow(row));
-			}
-		}
+//		for (int row = 0; row < N.getColumnDimension(); row++) {
+//			if (targetFluxes == null || isNoTargetFlux(row, targetFluxes, doc)) {
+//				fluxVector[row] = computeManhattenNorm(steadyStateMatrix.getRow(row));
+//			}
+//		}
+		fluxVector  = N.getReducedMatrix().svd().getV().getArray()[i];
 		return fluxVector;
 	}
 	
@@ -107,7 +111,7 @@ public class FluxMinimizationUtils {
 		// and the number of reactions as the dimension of columns
 		int speciesCount = doc.getModel().getSpeciesCount();
 		int reactionCount = doc.getModel().getReactionCount();
-		StoichiometricMatrix sMatrix = new StoichiometricMatrix (reactionCount, speciesCount);
+		StoichiometricMatrix sMatrix = new StoichiometricMatrix (speciesCount,reactionCount);
 
 		if (doc.getLevel() > 3) {
 			throw new Exception("Stoichiometric matrix is only available for SBML versions < 3.0");
@@ -120,15 +124,15 @@ public class FluxMinimizationUtils {
 				if (reac.hasProduct(species)) {
 					// the stoichiometry of products is positive in the stoichiometricMatrix
 					if (reac.getProductForSpecies(species.getId()).isSetStoichiometry()) {
-						sMatrix.set(i, j, reac.getProductForSpecies(species.getId()).getStoichiometry());
+						sMatrix.set(j, i, reac.getProductForSpecies(species.getId()).getStoichiometry());
 					}
-					else sMatrix.set(i, j, 1);
+					else sMatrix.set(j, i, 1);
 				} else if (reac.hasReactant(species)) {
 					// the stoichiometry of reactants is negative in the stoichiometricMatrix
 					if (reac.getReactantForSpecies(species.getId()).isSetStoichiometry()) {
-						sMatrix.set(i, j, - reac.getReactantForSpecies(species.getId()).getStoichiometry());
+						sMatrix.set(j, i, - reac.getReactantForSpecies(species.getId()).getStoichiometry());
 					}
-					else sMatrix.set(i, j, - 1);
+					else sMatrix.set(j, i, - 1);
 				}
 			}
 		}
@@ -183,7 +187,7 @@ public class FluxMinimizationUtils {
 		double[] error = new double[length];
 		// fill the error-vector with ones, so that it only consists of the variables
 		for (int i = 0; i < error.length; i++) {
-			error[i] = 1;
+			error[i] = 1.0;
 		}
 		return error;
 	}

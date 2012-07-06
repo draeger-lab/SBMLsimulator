@@ -69,7 +69,7 @@ public class FluxMinimization implements TargetFunction {
 	 * Vector that is made up of the transposed null space matrix K and
 	 * the corresponding gibbs energies.
 	 */
-	private double[] L = null;
+	private double[] L = {};
 
 	/**
 	 * counts the lengths of the components in the target array
@@ -98,27 +98,27 @@ public class FluxMinimization implements TargetFunction {
 	 * @throws Exception 
 	 */
 	public FluxMinimization(SBMLDocument doc, StoichiometricMatrix N, double[] c_eq, double[] gibbs_eq, String[] targetFluxes) throws Exception {
-		
+
 		// set the fields of this object
 		this.document = doc;
 		this.fluxVector = FluxMinimizationUtils.computeFluxVector(N, targetFluxes, doc);
 		setC_eq(c_eq);
-		
+
 		this.N = N;
-		
+
 		// get the computed Gibbs energies for the incoming Gibbs energies in steady state
 		Constraints c = new Constraints(document, gibbs_eq, c_eq);
 		this.gibbs = c.getGibbsEnergies();
 		if (gibbs != null) {
 			this.errorArray = FluxMinimizationUtils.computeError(gibbs.length);
 		}
-		
+
 		// compute the initial concentrations
 		this.concentrations = computeConcentrations(document);
-		
+
 		// compute L or let it be null if the Gibbs energies couldn't be computed
 		if(gibbs != null && document != null) {
-			this.L = computeL(document);
+//			this.L = computeL(document);
 		} 
 	}
 
@@ -184,7 +184,9 @@ public class FluxMinimization implements TargetFunction {
 					concentrations[i] = currentSpecies.getInitialConcentration();
 				} else if (currentSpecies.isSetInitialAmount()){
 					// divide through the volume of the compartment
-					concentrations[i] = currentSpecies.getInitialAmount() / currentSpecies.getCompartmentInstance().getSize();
+					if (currentSpecies.getCompartmentInstance().isSetSize()){
+						concentrations[i] = currentSpecies.getInitialAmount() / currentSpecies.getCompartmentInstance().getSize();
+					}
 				}
 			}
 		}
@@ -202,8 +204,8 @@ public class FluxMinimization implements TargetFunction {
 
 		// create the target vector 
 		double[] target = new double[fluxVector.length + 
-		                             concentrations.length + 
-		                             errorArray.length + L.length +
+		                             errorArray.length + 
+		                             L.length +
 		                             gibbs.length];
 		// this is a pointer, which counts in the target vector the actually position
 		counterArray = new int[4];
@@ -212,25 +214,25 @@ public class FluxMinimization implements TargetFunction {
 
 		// fill it with the flux vector: ||J||
 		for (int i=0; i< this.fluxVector.length; i++) {
-			target[counter] = fluxVector[i];
+			target[counter] = Math.abs(fluxVector[i]);
 			counter++;
 		}
 
 		// the weighted error: lambda3*||E||
 		for (int k = 0; k < this.errorArray.length; k++) {
-			target[counter] = lambda1 * errorArray[k];
+			target[counter] = lambda1 * Math.abs(errorArray[k]);
 			counter++;
 		}
 
 		// ||L||: lambda2*||L||
 		for (int h = 0; h < this.L.length; h++) {
-			target[counter] = lambda2 * L[h];
+			target[counter] = lambda2 * Math.abs(L[h]);
 			counter++;
 		}
 
 		// the weighted gibbs energy: lambda4*||G||
 		for (int l = 0; l < this.gibbs.length; l++) {
-			target[counter] = lambda4 * gibbs[l];
+			target[counter] = lambda4 * Math.abs(gibbs[l]);
 			counter++;
 		}
 
