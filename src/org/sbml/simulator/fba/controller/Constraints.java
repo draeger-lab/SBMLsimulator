@@ -103,9 +103,9 @@ public class Constraints {
 				double sum = 0;
 				// compute sum( N[i][j] * c_eq[j] )
 				for (int j=0; j< N.getColumnDimension(); j++) {
-					if (!((Double)equilibriumConcentrations[j]).isNaN()) {
-						sum += N.get(i, j) * equilibriumConcentrations[j];
-					}
+					if (!Double.isNaN(equilibriumConcentrations[j])) {
+						sum += N.get(j, i) * equilibriumConcentrations[j];
+					} 
 				}
 				// delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * ln(sum( N[j][i] * c_eq[j] ))
 				gibbsEnergies[i] = steadyStateGibbs[i] + R*T*Math.log(sum);

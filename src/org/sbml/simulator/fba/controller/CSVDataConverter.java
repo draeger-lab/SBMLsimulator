@@ -177,7 +177,7 @@ public class CSVDataConverter {
 	private void initializeConcentrationArray() {
 		concentrationsArray = new double[document.getModel().getSpeciesCount()];
 		for (int i = 0; i < concentrationsArray.length; i++) {
-			concentrationsArray[i] = Double.NaN;
+			concentrationsArray[i] = Math.pow(10, -11);
 		}
 	}
 
