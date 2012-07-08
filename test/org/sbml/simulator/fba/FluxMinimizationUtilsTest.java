@@ -53,25 +53,32 @@ public class FluxMinimizationUtilsTest {
 		StoichiometricMatrix testMatrix;
 		try {
 			testMatrix = FluxMinimizationUtils.SBMLDocToStoichMatrix(sbml);
-			for(int i = 0 ; i < testMatrix.getColumnDimension(); i++) {
-				for (int j = 0 ; j < testMatrix.getRowDimension(); j++) {
-					System.out.print(testMatrix.get(j, i) + " ");
+			for (int i = 0; i < sbml.getModel().getReactionCount(); i++) {
+				System.out.print(sbml.getModel().getReaction(i).getId()+" ");
+			}
+			System.out.println();
+			for(int i = 0 ; i < testMatrix.getRowDimension(); i++) {
+				System.out.print(sbml.getModel().getSpecies(i).getId() + ": ");
+				for (int j = 0 ; j < testMatrix.getColumnDimension(); j++) {
+						System.out.print(testMatrix.get(i, j) + " ");
 				}
 				System.out.println();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 
 		// test the method to compute the flux vector:
 		System.out.println();
 		System.out.println("Flux vector:");
 		double[] fluxvector;
+		System.out.println(FluxMinimizationUtils.eliminatedReactions.toString());
 		try {
 			fluxvector = FluxMinimizationUtils.computeFluxVector(null, sbml);
 			for (int i= 0; i < fluxvector.length; i++) {
-				System.out.print(fluxvector[i] + " ");
+				System.out.print(FluxMinimizationUtils.eliminateTransports(sbml).getModel().getReaction(i).getId() + "  ");
+				System.out.println(fluxvector[i] + " ");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -80,9 +87,9 @@ public class FluxMinimizationUtilsTest {
 		// test the method to eliminate transport reactions:
 		System.out.println();
 		System.out.println();
-		System.out.println("Test eliminating transport reactions");
+		System.out.println("Test eliminating transport reactions in the given document: ");
 		SBMLDocument new_Doc = FluxMinimizationUtils.eliminateTransports(sbml);
-		System.out.println(new_Doc.equals(sbml));
+		System.out.println(!new_Doc.equals(sbml));
 
 	}
 

@@ -102,13 +102,17 @@ public class Constraints {
 			for (int i=0; i< steadyStateGibbs.length; i++) {
 				double sum = 0;
 				// compute sum( N[i][j] * c_eq[j] )
-				for (int j=0; j< N.getColumnDimension(); j++) {
+				for (int j=0; j< N.getRowDimension(); j++) {
 					if (!Double.isNaN(equilibriumConcentrations[j])) {
-						sum += N.get(j, i) * equilibriumConcentrations[j];
+						sum += N.get(j, i) * Math.log(equilibriumConcentrations[j]);
 					} 
 				}
 				// delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * ln(sum( N[j][i] * c_eq[j] ))
-				gibbsEnergies[i] = steadyStateGibbs[i] + R*T*Math.log(sum);
+				if (!Double.isNaN(steadyStateGibbs[i])) {
+					gibbsEnergies[i] = steadyStateGibbs[i] + R*T*sum;
+				} else {
+					gibbsEnergies[i] = R*T*sum;
+				}
 			}
 		}
 		// return the computed Gibbs energies
@@ -162,13 +166,16 @@ public class Constraints {
 		if (gibbsEnergies != null) {
 			if (fluxVector.length <= gibbsEnergies.length) {
 				for(int i = 0; i < fluxVector.length; i++) {
-					if (!Double.isNaN(gibbsEnergies[i])) {
+					// if you divide by NaN, r_max will be NaN and if you divide by zero, you get r_max = infinity
+					if (!Double.isNaN(gibbsEnergies[i]) && gibbsEnergies[i] != 0) {
 						r_max = Math.max(r_max,(fluxVector[i]/gibbsEnergies[i]));
 					}
 				}
 			} else {
 				for (int i = 0; i < gibbsEnergies.length; i++) {
-					r_max = Math.max(r_max,(fluxVector[i]/gibbsEnergies[i]));
+					if (!Double.isNaN(gibbsEnergies[i]) && gibbsEnergies[i] != 0) {
+						r_max = Math.max(r_max,(fluxVector[i]/gibbsEnergies[i]));
+					}
 				}
 			}
 		}

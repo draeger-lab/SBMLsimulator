@@ -51,7 +51,7 @@ public class FluxMinimizationUtils {
 	 */
 	public static double[] computeFluxVector(StoichiometricMatrix N, String[] targetFluxes, SBMLDocument doc) {
 //		StabilityMatrix steadyStateMatrix = N.getSteadyStateFluxes();
-		int i = N.getReducedMatrix().svd().getV().getRowDimension() - (N.getColumnDimension() - N.rank());
+		int i = N.svd().getV().getRowDimension() - (N.getColumnDimension() - N.rank());
 		double[] fluxVector = new double[N.getColumnDimension()];
 		// fill the fluxVector
 //		for (int row = 0; row < N.getColumnDimension(); row++) {
@@ -117,22 +117,22 @@ public class FluxMinimizationUtils {
 			throw new Exception("Stoichiometric matrix is only available for SBML versions < 3.0");
 		}
 		//fill the matrix with the stoichiometry of each reaction
-		for (int i = 0; i < reactionCount; i++) {
-			for (int j = 0; j < speciesCount; j++) {
-				Reaction reac = doc.getModel().getReaction(i);
-				Species species = doc.getModel().getSpecies(j);
+		for (int j = 0; j < reactionCount; j++) { //j is the column (reaction)
+			for (int i = 0; i < speciesCount; i++) { // i is the row (species)
+				Reaction reac = doc.getModel().getReaction(j);
+				Species species = doc.getModel().getSpecies(i);
 				if (reac.hasProduct(species)) {
 					// the stoichiometry of products is positive in the stoichiometricMatrix
 					if (reac.getProductForSpecies(species.getId()).isSetStoichiometry()) {
-						sMatrix.set(j, i, reac.getProductForSpecies(species.getId()).getStoichiometry());
+						sMatrix.set(i, j, reac.getProductForSpecies(species.getId()).getStoichiometry());
 					}
-					else sMatrix.set(j, i, 1);
+					else sMatrix.set(i, j, 1);
 				} else if (reac.hasReactant(species)) {
 					// the stoichiometry of reactants is negative in the stoichiometricMatrix
 					if (reac.getReactantForSpecies(species.getId()).isSetStoichiometry()) {
-						sMatrix.set(j, i, - reac.getReactantForSpecies(species.getId()).getStoichiometry());
+						sMatrix.set(i, j, - reac.getReactantForSpecies(species.getId()).getStoichiometry());
 					}
-					else sMatrix.set(j, i, - 1);
+					else sMatrix.set(i, j, - 1);
 				}
 			}
 		}
