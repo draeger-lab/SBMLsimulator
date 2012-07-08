@@ -17,6 +17,9 @@
  */
 package org.sbml.simulator.fba.controller;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
 import ilog.concert.IloNumVar;
@@ -84,6 +87,8 @@ public class FluxBalanceAnalysis {
 	 */
 	public MultiTable fluxesForVisualization;
 
+	private static final transient Logger logger = Logger.getLogger(FluxBalanceAnalysis.class);
+
 
 	// CONSTRUCTORS:	
 
@@ -99,7 +104,7 @@ public class FluxBalanceAnalysis {
 	public FluxBalanceAnalysis(double[] c_eq, Constraints constraints, SBMLDocument doc, String[] targetFluxes) throws Exception {
 		this(new FluxMinimization(doc, c_eq, constraints.getGibbsEnergies(), targetFluxes), constraints);
 	}
-	
+
 	/**
 	 * 
 	 * @param doc
@@ -157,33 +162,32 @@ public class FluxBalanceAnalysis {
 		// TARGET
 		// create upper bounds (ub) and lower bounds (lb) for the variables x
 		int[] counter = targetFunc.getCounterArray();
-		// counter[1] contains the length of the flux vector
+		// counter[3] contains the index of the gibbs vector
 		for (int i = 0; i< counter[3]; i++) {
 			lb[i]= Double.NEGATIVE_INFINITY; 
 			ub[i] = Double.MAX_VALUE;
 		}
 		for (int g = counter[3]; g < target.length; g++) {
-			lb[g] = Double.NEGATIVE_INFINITY;
-			ub[g] = Double.MAX_VALUE;
+			lb[g] = -100000;
+			ub[g] = 100000;
 		}
 		for(int j = target.length; j < (concentrations.length + target.length); j++) {
 			lb[j] = Math.pow(10, -10);
 			ub[j] = Math.pow(10, -1);
 		}
 		// create variables with upper bounds and lower bounds
-		IloNumVar[] x = cplex.numVarArray(target.length + concentrations.length, lb, ub);
+		IloNumVar[] x = cplex.numVarArray((target.length + concentrations.length), lb, ub);
 
 		//compute the target function for cplex with the scalar product (lin)
-		IloNumExpr lin = cplex.numExpr();
-		for (int i = 0; i < target.length; i++) {
+		IloNumExpr lin = cplex.prod(target[0], x[0]);
+		for (int i = 1; i < target.length; i++) {
 			IloNumExpr temp = lin;
 			lin = cplex.sum(temp, cplex.prod(target[i], x[i]));
 		}
 
+
 		//lambda1*sum((c_i - c_eq)^2)
 		double[] c_eq = constraints.getEquilibriumConcentrations();
-
-		// a new expression, because IloNumExpr sum = null gives back an exception of cplex
 		IloNumExpr sum = cplex.numExpr();
 		for (int i = 0; i< concentrations.length; i++) {
 			IloNumExpr temp = sum;
@@ -202,28 +206,29 @@ public class FluxBalanceAnalysis {
 		// only for FluxMinimization the target function has to be minimized
 		if (targetFunc instanceof FluxMinimization) {
 			cplex.addMinimize(lin);
+			System.out.println(lin);
 		} else {
 			cplex.addMaximize(cplex_target);
 		}
 
-//		for (int i = 0; i < x.length; i++) {
-//			if (i < counter[1]) {
-//				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
-//				System.out.println("  flux");
-//			} else if (i < counter[2]) {
-//				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
-//				System.out.println("  E");
-//			} else if (i < counter[3]) {
-//				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
-//				System.out.println("  L");
-//			} else if (i < target.length) {
-//				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
-//				System.out.println("  gibbs");
-//			} else {
-//				System.out.print(i + ": " + concentrations[i-target.length] + "    x: "+ x[i]);
-//				System.out.println("  conc");
-//			}
-//		}
+		//		for (int i = 0; i < x.length; i++) {
+		//			if (i < counter[1]) {
+		//				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
+		//				System.out.println("  flux");
+		//			} else if (i < counter[2]) {
+		//				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
+		//				System.out.println("  E");
+		//			} else if (i < counter[3]) {
+		//				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
+		//				System.out.println("  L");
+		//			} else if (i < target.length) {
+		//				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
+		//				System.out.println("  gibbs");
+		//			} else {
+		//				System.out.print(i + ": " + concentrations[i-target.length] + "    x: "+ x[i]);
+		//				System.out.println("  conc");
+		//			}
+		//		}
 
 		//CONSTRAINTS
 
@@ -245,7 +250,8 @@ public class FluxBalanceAnalysis {
 				r_maxg = cplex.prod(r_max, x[k]);
 			}
 			//			System.out.println(", r_maxg: " + r_maxg + ", j_i:" + j_i);
-//			cplex.addGe(r_maxg, j_i);
+			cplex.addLe(cplex.diff(j_i, r_maxg), 0);
+			logger.log(Level.DEBUG, String.format("constraint |J_i| - r_max * |G_i| < 0:  "+ cplex.diff(j_i, r_maxg)+ " < " + 0 ));
 
 			// constraint J_i * G_i < 0
 			IloNumExpr jg = cplex.numExpr();
@@ -254,16 +260,19 @@ public class FluxBalanceAnalysis {
 			} else {
 				jg = cplex.prod(cplex.prod(flux[i], x[i]),x[k]);
 			}
-//			cplex.addLe(jg, -Double.MIN_VALUE);
+			cplex.addLe(jg, 0);
+			logger.log(Level.DEBUG, String.format("constraint J_i * G_i: " + jg + " <= " + 0));
 		}
 
-//		for (int i = 0; i < concentrations.length; i++) {
-//			if (Double.isNaN(concentrations[i])) {
-//				cplex.addRange(Math.pow(10, -10), x[i+target.length], Math.pow(10, -1));
-//			} else {
-//				cplex.addRange(Math.pow(10, -10), cplex.prod(concentrations[i], x[i+target.length]), Math.pow(10, -1));
-//			}
-//		}
+		for (int i = 0; i < concentrations.length; i++) {
+			if (Double.isNaN(concentrations[i])) {
+				cplex.addRange(Math.pow(10, -10), x[i+target.length], Math.pow(10, -1));
+				logger.log(Level.DEBUG, String.format(Math.pow(10, -10) + " <= " + x[i+target.length] + " <= " + Math.pow(10, -1)));
+			} else {
+				cplex.addRange(Math.pow(10, -10), cplex.prod(concentrations[i], x[i+target.length]), Math.pow(10, -1));
+				logger.log(Level.DEBUG, String.format(Math.pow(10, -10) + " <= " + cplex.prod(concentrations[i], x[i+target.length]) + " <= " + Math.pow(10, -1)));
+			}
+		}
 
 		// now solve the problem and get the solution array for the variables x,
 		// cplex.setOut(null) stops the logger massages of cplex
@@ -273,20 +282,22 @@ public class FluxBalanceAnalysis {
 		//set the iteration limit: without doing this, cplex iterates 2100000000 times...
 		cplex.setParam(IloCplex.IntParam.BarItLim, 50);
 
-		cplex.solve(); 
+		cplex.solve();
 		// get the from cplex computed values for the variables x
 		solution = cplex.getValues(x);
-		System.out.println(cplex.getObjValue());
 		for (int i = 0; i < counter[1]; i++) {
 			// the first counter[1]-values are corressponding to the fluxes
 			solution_fluxVector[i] = flux[i] * solution[i];
 		}
 		for (int j = 0; j < concentrations.length; j++) {
 			// the last values in x are corresponding to the concentrations
-			solution_concentrations[j] = concentrations[j] * solution[j + target.length];
+			if (!Double.isNaN(concentrations[j])) {
+				//correct the computed solutions by multiply them with the computed variable-value
+				solution_concentrations[j] = concentrations[j] * solution[j + target.length];
+			} else {
+				solution_concentrations[j] = solution[j + target.length];
+			}
 		}
-
-
 		cplex.end();
 
 		// create the MultiTable for visualization

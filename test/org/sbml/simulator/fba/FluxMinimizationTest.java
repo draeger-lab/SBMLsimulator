@@ -23,6 +23,7 @@ import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
 import org.sbml.simulator.fba.controller.CSVDataConverter;
 import org.sbml.simulator.fba.controller.FluxMinimization;
+import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 
 /**
  * @author Meike Aichele
@@ -67,12 +68,21 @@ public class FluxMinimizationTest {
 		c_eq = converter2.getConcentrationsArray();
 		
 		//test and create an FluxMinimization object:
-		FluxMinimization fm = new FluxMinimization(sbml, c_eq, gibbs_eq, targetFluxes);
+		FluxMinimization fm = new FluxMinimization(FluxMinimizationUtils.eliminateTransports(sbml), c_eq, gibbs_eq, targetFluxes);
 		double[] flux = fm.getFluxVector();
 		System.out.println("The computed flux vector: ");
 		System.out.print("[ ");
 		for (int i = 0; i< fm.getFluxVector().length; i++) {
 			System.out.print(flux[i] + " ");
+		}
+		System.out.print("]");
+		System.out.println();
+		
+		double[] conc = fm.getConcentrations();
+		System.out.println("The computed concentrations: ");
+		System.out.print("[ ");
+		for (int i = 0; i< conc.length; i++) {
+			System.out.print(conc[i] + " ");
 		}
 		System.out.print("]");
 		

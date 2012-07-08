@@ -171,9 +171,10 @@ public class FluxMinimization implements TargetFunction {
 		for (int i = 0; i < model.getSpeciesCount(); i++) {
 			currentSpecies = model.getSpecies(i);
 			if (currentSpecies.hasOnlySubstanceUnits()) {
+				// Species is in Mole
 				if (currentSpecies.isSetInitialConcentration()){
 					// multiply with the volume of the compartment
-					concentrations[i] = currentSpecies.getInitialConcentration()* document.getModel().getCompartment(currentSpecies.getCompartment()).getSize();
+					concentrations[i] = currentSpecies.getInitialConcentration()* currentSpecies.getCompartmentInstance().getSize();
 				} else if (currentSpecies.isSetInitialAmount()){
 					// do nothing
 					concentrations[i] = currentSpecies.getInitialAmount();
@@ -214,7 +215,7 @@ public class FluxMinimization implements TargetFunction {
 
 		// fill it with the flux vector: ||J||
 		for (int i=0; i< this.fluxVector.length; i++) {
-			target[counter] = Math.abs(fluxVector[i]);
+			target[i] = Math.abs(fluxVector[i]);
 			counter++;
 		}
 
@@ -232,7 +233,11 @@ public class FluxMinimization implements TargetFunction {
 
 		// the weighted gibbs energy: lambda4*||G||
 		for (int l = 0; l < this.gibbs.length; l++) {
-			target[counter] = lambda4 * Math.abs(gibbs[l]);
+			if (!Double.isNaN(gibbs[l]) && !Double.isInfinite(gibbs[l])) {
+				target[counter] = lambda4 * Math.abs(gibbs[l]);
+			} else {
+				target[counter] = lambda4;
+			}
 			counter++;
 		}
 

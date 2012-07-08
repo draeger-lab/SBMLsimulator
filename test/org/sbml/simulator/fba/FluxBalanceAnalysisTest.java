@@ -24,6 +24,7 @@ import org.sbml.jsbml.SBMLReader;
 import org.sbml.simulator.fba.controller.CSVDataConverter;
 import org.sbml.simulator.fba.controller.Constraints;
 import org.sbml.simulator.fba.controller.FluxBalanceAnalysis;
+import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 
 /**
  * @author Meike Aichele
@@ -78,11 +79,11 @@ public class FluxBalanceAnalysisTest {
 		fba.solve();
 		
 		//print flux solution:
-//		double[] fluxsolution = fba.solution_fluxVector;
-//		System.out.println("solutions for the fluxes: ");
-//		for (int i = 0; i < fluxsolution.length; i++) {
-//			System.out.println(sbml.getModel().getReaction(i).getId() + "   " + fluxsolution[i]);
-//		}
+		double[] fluxsolution = fba.solution_fluxVector;
+		System.out.println("solutions for the fluxes: ");
+		for (int i = 0; i < fluxsolution.length; i++) {
+			System.out.println(sbml.getModel().getReaction(i).getId() + "   " + fluxsolution[i]);
+		}
 		
 		System.out.println("-----------------");
 		//print conc solution:

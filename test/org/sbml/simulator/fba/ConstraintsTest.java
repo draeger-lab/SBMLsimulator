@@ -44,28 +44,26 @@ public class ConstraintsTest {
 	public static void main(String[] args) throws Exception {
 		sbml = (new SBMLReader()).readSBML(args[0]);
 		
-		//ConstraintsUtils:
-		CSVDataConverter cu = new CSVDataConverter(sbml);
+		sbml = (new SBMLReader()).readSBML(args[0]);
 		File file_g = new File(args[1]);
 		File file_c = new File(args[2]);
-		cu.readGibbsFromFile(file_g);
-		
-		while(cu.getGibbsArray() == null) {
+		CSVDataConverter converter1 = new CSVDataConverter(sbml);
+		CSVDataConverter converter2 = new CSVDataConverter(sbml);
+		converter1.readGibbsFromFile(file_g);
+		converter2.readConcentrationsFromFile(file_c);
+		System.out.println(converter1.getReader().getState());
+		while(converter1.getGibbsArray() == null) {
 			//wait
 		}
-		System.out.println("-> done gibbs");
-		gibbs_eq = cu.getGibbsArray();
-		
-		System.out.println(cu.getReader().getState());
-		cu.readConcentrationsFromFile(file_c);
-		System.out.println(cu.getReader().getState());
-		while(cu.getConcentrationsArray() == null) {
+		gibbs_eq = converter1.getGibbsArray();
+		System.out.println(converter1.getReader().getState());
+		while(converter2.getConcentrationsArray() == null) {
 			//wait
 		}
-		System.out.println("-> done concentrations");
-		c_eq = cu.getConcentrationsArray();
+		c_eq = converter2.getConcentrationsArray();
+		System.out.println("done reading");
 		
-		System.out.print("gibbs array: [ ");
+		System.out.print("read gibbs array: [ ");
 		for (int i = 0; i < gibbs_eq.length; i++) {
 			System.out.print(gibbs_eq[i] + " ");
 		}
@@ -81,6 +79,11 @@ public class ConstraintsTest {
 		double[] fluxVector = FluxMinimizationUtils.computeFluxVector(null, sbml);
 		double r_max = con.computeR_max(fluxVector);
 		System.out.println("r_max = " + r_max);
+		
+		System.out.println("the computed Gibbs energies:");
+		for (int i = 0; i < con.getGibbsEnergies().length; i++) {
+			System.out.print(con.getGibbsEnergies()[i] + "  ");
+		}
 	}
 
 }

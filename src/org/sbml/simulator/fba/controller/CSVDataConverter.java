@@ -171,7 +171,8 @@ public class CSVDataConverter {
 	}
 
 	/**
-	 * Initializes the Concentration-array, so that every cell is filled with NaN and when there is
+	 * Initializes the Concentration-array, so that every cell is filled with 10^(-11),
+	 * because that is the normal minimal amount in nature, and when there is
 	 * read a file with concentrations, the content will be overwritten.
 	 */
 	private void initializeConcentrationArray() {
