@@ -91,7 +91,7 @@ public class Constraints {
 
 	/**
 	 * Computes the Gibbs energies with the formula delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * ln(sum( N[j][i] * c_eq[j] ))
-	 * @param steadyStateGibbs
+	 * @param steadyStateGibbs in kJ/mol
 	 * @throws Exception 
 	 */
 	private double[] computeGibbsEnergies(double[] steadyStateGibbs) throws Exception {
@@ -107,12 +107,17 @@ public class Constraints {
 						sum += N.get(j, i) * Math.log(equilibriumConcentrations[j]);
 					} 
 				}
-				// delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * ln(sum( N[j][i] * c_eq[j] ))
-				if (!Double.isNaN(steadyStateGibbs[i])) {
-					gibbsEnergies[i] = steadyStateGibbs[i] + R*T*sum;
-				} else {
-					gibbsEnergies[i] = R*T*sum;
-				}
+				// delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum( N[j][i] * ln(c_eq[j]) )
+//				if (!Double.isNaN(steadyStateGibbs[i])) {
+				// the steadyStateGibbs are in kJ/mol thats why the value has to be multiplied with 1000
+					gibbsEnergies[i] = (steadyStateGibbs[i]*1000) + R*T*sum;
+//				} else {
+//					if (sum != 0) {
+//						gibbsEnergies[i] = R*T*sum;
+//					} else {
+//						gibbsEnergies[i] = Double.NaN;
+//					}
+//				}
 			}
 		}
 		// return the computed Gibbs energies
@@ -131,7 +136,7 @@ public class Constraints {
 	/**
 	 * @return the gibbsEnergies
 	 */
-	public double[] getEquilibriumGibbsEnergiesGibbsEnergies() {
+	public double[] getEquilibriumGibbsEnergies() {
 		return equilibriumGibbsEnergies;
 	}
 

@@ -97,7 +97,7 @@ public class FluxMinimization implements TargetFunction {
 	 * @param targetFluxes, important for computing the flux vector
 	 * @throws Exception 
 	 */
-	public FluxMinimization(SBMLDocument doc, StoichiometricMatrix N, double[] c_eq, double[] gibbs_eq, String[] targetFluxes) throws Exception {
+	public FluxMinimization(Constraints con, SBMLDocument doc, StoichiometricMatrix N, double[] c_eq, double[] gibbs_eq, String[] targetFluxes) throws Exception {
 
 		// set the fields of this object
 		this.document = doc;
@@ -107,8 +107,7 @@ public class FluxMinimization implements TargetFunction {
 		this.N = N;
 
 		// get the computed Gibbs energies for the incoming Gibbs energies in steady state
-		Constraints c = new Constraints(document, gibbs_eq, c_eq);
-		this.gibbs = c.getGibbsEnergies();
+		this.gibbs = con.getGibbsEnergies();
 		if (gibbs != null) {
 			this.errorArray = FluxMinimizationUtils.computeError(gibbs.length);
 		}
@@ -135,7 +134,7 @@ public class FluxMinimization implements TargetFunction {
 	 * @throws Exception 
 	 */
 	public FluxMinimization(SBMLDocument doc, double[] c_eq, double[] gibbs_eq, String[] targetFluxes) throws Exception {
-		this(doc,FluxMinimizationUtils.SBMLDocToStoichMatrix(doc), c_eq, gibbs_eq, targetFluxes);
+		this(new Constraints(doc, gibbs_eq, c_eq),doc,FluxMinimizationUtils.SBMLDocToStoichMatrix(doc), c_eq, gibbs_eq, targetFluxes);
 	}
 
 
@@ -147,11 +146,13 @@ public class FluxMinimization implements TargetFunction {
 	 * @throws Exception 
 	 */
 	private double[] computeL(SBMLDocument doc) throws Exception {
-		Matrix K_int_t = ConservationRelations.calculateConsRelations(FluxMinimizationUtils.SBMLDocToStoichMatrix(doc)).transpose();
+		Matrix K_int_t = ConservationRelations.calculateConsRelations(FluxMinimizationUtils.SBMLDocToStoichMatrix(doc));
 		double[] erg = new double[gibbs.length];
 		for (int i = 0; i< gibbs.length; i++) {
-			for (int j = 0; j < K_int_t.getColumnDimension(); j++) {
-				erg[i] += K_int_t.get(i, j)*gibbs[i];
+			System.out.println("K_int_t.getRowDimension(): " + K_int_t.getRowDimension());
+			for (int j = 0; j < K_int_t.getRowDimension(); j++) {
+				System.out.println(" K_int_t.get(j, i): "+ K_int_t.get(j, i));
+				erg[i] += K_int_t.get(j, i)*gibbs[i];
 			}
 		}
 		return erg;
@@ -171,7 +172,6 @@ public class FluxMinimization implements TargetFunction {
 		for (int i = 0; i < model.getSpeciesCount(); i++) {
 			currentSpecies = model.getSpecies(i);
 			if (currentSpecies.hasOnlySubstanceUnits()) {
-				// Species is in Mole
 				if (currentSpecies.isSetInitialConcentration()){
 					// multiply with the volume of the compartment
 					concentrations[i] = currentSpecies.getInitialConcentration()* currentSpecies.getCompartmentInstance().getSize();
@@ -208,6 +208,7 @@ public class FluxMinimization implements TargetFunction {
 		                             errorArray.length + 
 		                             L.length +
 		                             gibbs.length];
+		
 		// this is a pointer, which counts in the target vector the actually position
 		counterArray = new int[4];
 		fillCounterArray(fluxVector.length, errorArray.length, L.length);
@@ -219,15 +220,18 @@ public class FluxMinimization implements TargetFunction {
 			counter++;
 		}
 
+		// concentrations left out because they are quadratic and must be computed in 
+		// FluxBalanceAnalysis
+		
 		// the weighted error: lambda3*||E||
 		for (int k = 0; k < this.errorArray.length; k++) {
-			target[counter] = lambda1 * Math.abs(errorArray[k]);
+			target[counter] = lambda2 * Math.abs(errorArray[k]);
 			counter++;
 		}
 
 		// ||L||: lambda2*||L||
 		for (int h = 0; h < this.L.length; h++) {
-			target[counter] = lambda2 * Math.abs(L[h]);
+			target[counter] = lambda3 * Math.abs(L[h]);
 			counter++;
 		}
 
@@ -240,9 +244,6 @@ public class FluxMinimization implements TargetFunction {
 			}
 			counter++;
 		}
-
-		// concentrations left out because they are quadratic and must be computed in 
-		// FluxBalanceAnalysis
 		return target;
 	}
 
