@@ -162,7 +162,7 @@ public class ImageGenerator {
      * initially be determined first with determineFixpoints(). Then each
      * picture will be taken from the same point of view and zoomlevel. This
      * means there will be no elements changing their position due to changing
-     * their size while a dynamic simulation. Espacially important if the whole
+     * their size while a dynamic simulation. Especially important if the whole
      * graph is pictured, because than the bounding box will vary if the
      * elements change their size.
      * @param width
