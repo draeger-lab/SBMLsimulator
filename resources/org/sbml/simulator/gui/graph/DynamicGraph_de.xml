@@ -98,11 +98,11 @@
   <entry key="COLOR_NODE_SIZE">Konstante Knotengröße</entry>
   <entry key="COLOR_NODE_SIZE_TOOLTIP">Wählen Sie die (konstante) Knotengröße, bei der dynamischen Änderung der Knotenfarbe.</entry>
   <entry key="SIM_SPEED_FAST">Schnelle Abspielgeschwindigkeit</entry>
-  <entry key="SIM_SPEED_FAST_TOOLTIP">Modifiziert die schnelle Abspielgeschwindigkeit ein.</entry>
+  <entry key="SIM_SPEED_FAST_TOOLTIP">Modifiziert die schnelle Abspielgeschwindigkeit.</entry>
   <entry key="SIM_SPEED_NORMAL">Normale Abspielgeschwindigkeit</entry>
-  <entry key="SIM_SPEED_NORMAL_TOOLTIP">Modifiziert die normale Abspielgeschwindigkeit ein.</entry>  
+  <entry key="SIM_SPEED_NORMAL_TOOLTIP">Modifiziert die normale Abspielgeschwindigkeit.</entry>  
   <entry key="SIM_SPEED_SLOW">Langsame Abspielgeschwindigkeit</entry>
-  <entry key="SIM_SPEED_SLOW_TOOLTIP">Modifiziert die langsame Abspielgeschwindigkeit ein.</entry>
+  <entry key="SIM_SPEED_SLOW_TOOLTIP">Modifiziert die langsame Abspielgeschwindigkeit.</entry>
   <entry key="SIM_SPEED_CHOOSER">Abspielgeschwindigkeit</entry>
   <entry key="SIM_SPEED_CHOOSER_TOOLTIP">Stellen Sie die Abspielgeschwindigkeit ein.</entry>
   <entry key="GROUP_SIM_SPEED">Abspielgeschwindigkeit</entry>
