@@ -17,6 +17,8 @@
  */
 package org.sbml.simulator.gui.graph;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.util.logging.Logger;
@@ -226,8 +228,12 @@ public class ImageGenerator {
             logger.fine("No Fixpoints available. There might be some pixel jumping in videos.");
         }
         
-        //take screenshot
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+        //if BufferedImage is too large, overlap will be white
+        Graphics2D paintArea = image.createGraphics();
+        paintArea.setColor(Color.WHITE);
+        paintArea.fillRect(0, 0, width, height);
+        //paint screenshot
         imageView.paintVisibleContent(image.createGraphics());
         
         //restore original view
