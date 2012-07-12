@@ -18,7 +18,7 @@
   <entry key="STOP">Stop</entry>
   <entry key="STOP_TOOLTIP">Stop the dynamic visualization.</entry>
   <entry key="TOVIDEO">Video</entry>
-  <entry key="TOVIDEO_TOOLTIP">Save the dynamic visualization as a video. Resolution can be adjusted with resolution multiplier in options.</entry>
+  <entry key="TOVIDEO_TOOLTIP">Save the dynamic visualization as a video. Resolution can be adjusted with resolution multiplier in options and the resulting speed of the video itself will be approximately the same as the chosen simulation speed.</entry>
   <entry key="GRAPHSHOT">Image</entry>
   <entry key="GRAPHSHOT_TOOLTIP">Take a screenshot of the whole graph. Resolution can be adjusted with resolution multiplier in options.</entry>  
   <entry key="NODELABELS">Nodelabels</entry>
@@ -116,8 +116,8 @@
   <entry key="GROUP_VIDEO_ENCODING_TOOLTIP">These settings control video encoding and screenshot settings.</entry>
   <entry key="VIDEO_TIMESTAMP">Time-stamp</entry>
   <entry key="VIDEO_TIMESTAMP_TOOLTIP">The lower this setting, the faster and shorter is the resulting video.</entry>
-  <entry key="VIDEO_IMAGE_STEPSIZE">Steps between two images</entry>
-  <entry key="VIDEO_IMAGE_STEPSIZE_TOOLTIP">The less steps are chosen, the less images are taken to encode the video.</entry>    
+  <entry key="VIDEO_IMAGE_STEPSIZE">Skipped timepoints</entry>
+  <entry key="VIDEO_IMAGE_STEPSIZE_TOOLTIP">Choose how many timepoints are skipped to produce the video. The less timepoints are skipped, the smoother the output video will get.</entry>    
   <entry key="VIDEO_RESOLUTION_MULTIPLIER">Resolution multiplier</entry>
   <entry key="VIDEO_RESOLUTION_MULTIPLIER_TOOLTIP">The higher this multiplier, the better the resolution but the higher the outcoming file size and compution time. It is only used if the output resolution would be too small to generate a sharp video.</entry>
   <entry key="RELATIVE_CONCENTRATION_CHANGES">Relative concentration change</entry>

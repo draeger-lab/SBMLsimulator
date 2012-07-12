@@ -169,12 +169,12 @@ public interface GraphOptions extends KeyProvider{
     "SIM_SPEED_CHOOSER", String.class, bundle, new Range<String>(String.class,
       Items.getAllSpeedItems()), Items.NORMAL.getName());
     
-    /**
-     * Sets framerate.
-     */
-    public static final Option<Double> VIDEO_TIMESTAMP = new Option<Double>(
-            "VIDEO_TIMESTAMP", Double.class, bundle, new Range<Double>(
-                    Double.class, "{[1, 1E2]}"), Double.valueOf(25d));
+//    /**
+//     * Sets framerate.
+//     */
+//    public static final Option<Double> VIDEO_TIMESTAMP = new Option<Double>(
+//            "VIDEO_TIMESTAMP", Double.class, bundle, new Range<Double>(
+//                    Double.class, "{[1, 1E2]}"), Double.valueOf(25d));
     
     /**
      * Sets step size for image taking.
@@ -244,6 +244,6 @@ public interface GraphOptions extends KeyProvider{
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static final OptionGroup GROUP_VIDEO_ENCODING = new OptionGroup(
-        "GROUP_VIDEO_ENCODING", bundle, VIDEO_DISPLAY_WINDOW, VIDEO_FORCE_RESOLUTION_MULTIPLIER, VIDEO_RESOLUTION_MULTIPLIER, VIDEO_TIMESTAMP, VIDEO_IMAGE_STEPSIZE);
+        "GROUP_VIDEO_ENCODING", bundle, VIDEO_DISPLAY_WINDOW, VIDEO_FORCE_RESOLUTION_MULTIPLIER, VIDEO_RESOLUTION_MULTIPLIER, VIDEO_IMAGE_STEPSIZE);
     
 }
