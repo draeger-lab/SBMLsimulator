@@ -150,6 +150,8 @@ public class FluxMinimizationUtils {
 		for (int i = 0; i < doc.getModel().getReactionCount(); i++) {
 			Reaction currentReac = doc.getModel().getReaction(i);
 			if (currentReac.isReversible()) {
+				reversibleReactions.add(currentReac.getId());
+				reversibleReactions.add(currentReac.getId() + "_rev");
 				Reaction createdReac = currentReac.clone();
 				createdReac.setId(currentReac.getId() + "_rev");
 				createdReac.setMetaId(currentReac.getMetaId() + "_rev");
@@ -179,6 +181,7 @@ public class FluxMinimizationUtils {
 
 
 	public static List<String> eliminatedReactions = new ArrayList<String>();
+	public static List<String> reversibleReactions = new ArrayList<String>();
 
 
 	/**

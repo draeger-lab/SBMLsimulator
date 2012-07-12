@@ -95,10 +95,14 @@ public class Constraints {
 	 * @throws Exception 
 	 */
 	private double[] computeGibbsEnergies(double[] steadyStateGibbs) throws Exception {
-
 		if (steadyStateGibbs != null && this.document != null && equilibriumConcentrations != null) {
+			
+			// initialize
 			StoichiometricMatrix N = FluxMinimizationUtils.SBMLDocToStoichMatrix(document);
+			SBMLDocument doc = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(document);
 			gibbsEnergies = new double[steadyStateGibbs.length];
+			
+			// compute delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum(N[j][i] * ln(c_eq[j]))
 			for (int i=0; i< steadyStateGibbs.length; i++) {
 				double sum = 0;
 				// compute sum( N[i][j] * c_eq[j] )
@@ -107,25 +111,19 @@ public class Constraints {
 						sum += N.get(j, i) * Math.log(equilibriumConcentrations[j]);
 					} 
 				}
-				if (document.getModel().getReaction(i)!= null && 
-						document.getModel().getReaction(i).getUserObject(CSVDataConverter.KEY_GIBBS) != null &&
-						document.getModel().getReaction(i).getUserObject(CSVDataConverter.KEY_GIBBS).equals("isReverse")){
-					gibbsEnergies[i] = (-1)*((steadyStateGibbs[i]*1000) + R*T*sum);
-					//TODO: geht hier nicht rein, obwohl userobject richtig gesetzt wird
+				// delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum( N[j][i] * ln(c_eq[j]) )
+				// look if there is a reversible reaction and set the reverse reaction gibbs energie
+				if (FluxMinimizationUtils.reversibleReactions.contains(doc.getModel().getReaction(i).getId())) {
+					if (doc.getModel().containsReaction(doc.getModel().getReaction(i).getId() + "_rev")) {	
+						gibbsEnergies[i] = (steadyStateGibbs[i]*1000) + R*T*sum;
+						int index_of_rev_reac = doc.getModel().getListOfReactions().getIndex(doc.getModel().getReaction(doc.getModel().getReaction(i).getId() + "_rev"));
+						// set the gibbs energie of the reverse reaction to the negtive 
+						gibbsEnergies[index_of_rev_reac] = gibbsEnergies[i] * (-1);
+					}
 				} else {
+					// it's no reversible reaction
 					gibbsEnergies[i] = (steadyStateGibbs[i]*1000) + R*T*sum;
 				}
-				// delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum( N[j][i] * ln(c_eq[j]) )
-				//				if (!Double.isNaN(steadyStateGibbs[i])) {
-				// the steadyStateGibbs are in kJ/mol thats why the value has to be multiplied with 1000
-				//				gibbsEnergies[i] = (steadyStateGibbs[i]*1000) + R*T*sum;
-				//				} else {
-				//					if (sum != 0) {
-				//						gibbsEnergies[i] = R*T*sum;
-				//					} else {
-				//						gibbsEnergies[i] = Double.NaN;
-				//					}
-				//				}
 			}
 		}
 		// return the computed Gibbs energies
@@ -163,6 +161,8 @@ public class Constraints {
 	}
 
 	/**
+	 * computed Gibbs energies by 
+	 * delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum( N[j][i] * ln(c_eq[j]) )
 	 * @return the computed gibbsEnergies
 	 */
 	public double[] getGibbsEnergies() {
@@ -172,7 +172,7 @@ public class Constraints {
 	/**
 	 * Computes the maximum of J_i / G_i for every reaction i in the model
 	 * @param fluxVector
-	 * @return
+	 * @return r_max
 	 */
 	public double computeR_max(double[] fluxVector) {
 		double r_max = Double.MIN_NORMAL;
