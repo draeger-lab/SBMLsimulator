@@ -24,7 +24,6 @@ import org.sbml.jsbml.SBMLReader;
 import org.sbml.simulator.fba.controller.CSVDataConverter;
 import org.sbml.simulator.fba.controller.Constraints;
 import org.sbml.simulator.fba.controller.FluxBalanceAnalysis;
-import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 
 /**
  * @author Meike Aichele

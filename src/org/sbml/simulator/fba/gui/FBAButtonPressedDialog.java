@@ -1,6 +1,6 @@
 /*
  * $Id:  FBAButtonPressedDialog.java 19:44:04 Meike Aichele$
- * $URL: FBAButtonPressedDialog.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.

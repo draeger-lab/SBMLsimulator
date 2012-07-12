@@ -66,10 +66,10 @@ public class FluxMinimizationTest {
 		// set gibbs and concentrations
 		gibbs_eq = converter1.getGibbsArray();
 		c_eq = converter2.getConcentrationsArray();
-		
 		//test and create an FluxMinimization object:
-		FluxMinimization fm = new FluxMinimization(FluxMinimizationUtils.eliminateTransports(sbml), c_eq, gibbs_eq, targetFluxes);
+		FluxMinimization fm = new FluxMinimization(sbml, c_eq, gibbs_eq, targetFluxes);
 		double[] flux = fm.getFluxVector();
+		
 		System.out.println("The computed flux vector: ");
 		System.out.print("[ ");
 		for (int i = 0; i< fm.getFluxVector().length; i++) {
