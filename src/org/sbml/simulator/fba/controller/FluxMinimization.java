@@ -20,7 +20,6 @@ package org.sbml.simulator.fba.controller;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.Species;
-import org.sbml.simulator.stability.math.ConservationRelations;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
 import eva2.tools.math.Jama.Matrix;
@@ -202,6 +201,7 @@ public class FluxMinimization implements TargetFunction {
 	public double[] computeTargetFunctionForQuadraticProgramming() {
 		// the function to minimize is: ||J|| + lambda1*sum((c_i - c_eq)^2) + lambda2*||L|| + lambda3*||E|| + lambda4*||G||
 
+		//TODO: Nullpointer if errorArray etc is null
 		// create the target vector 
 		double[] target = new double[fluxVector.length + 
 		                             errorArray.length + 

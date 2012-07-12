@@ -808,6 +808,8 @@ PropertyChangeListener {
 		if (simPanel.getTabbedPane().getTabCount() < 6) {
 			FBAButtonPressedDialog dialog = new FBAButtonPressedDialog(SwingUtilities.getWindowAncestor(simPanel), ModalityType.DOCUMENT_MODAL);
 		    dialog.setLocationRelativeTo(simPanel);
+		    FBAPanel fbaPanel = new FBAPanel(simPanel.getModel().getSBMLDocument());
+		    simPanel.getTabbedPane().add(bundle.getString("TAB_FBA"), fbaPanel);
 			dialog.setVisible(true);
 		} else {
 			FBAPanel fbaPanel = ((FBAPanel) simPanel.getTabbedPane().getTabComponentAt(6));
