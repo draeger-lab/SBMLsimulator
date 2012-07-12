@@ -18,6 +18,7 @@
 package org.sbml.simulator.fba.gui;
 
 import javax.swing.JPanel;
+import javax.swing.JTable;
 
 /**
  * this class visualizes the table/chart in which the computed data
@@ -35,7 +36,12 @@ public class ChartPanel extends JPanel{
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	public ChartPanel() {
+	public ChartPanel(String[][] rowDataFluxes, String[][] rowDataConc, String[] columnNamesFluxes, String[] columnNamesConc) {
+		super();
+		JTable tableFluxes = new JTable(rowDataFluxes, columnNamesFluxes);
+		JTable tableConc = new JTable(rowDataConc, columnNamesConc);
+		this.add(tableFluxes);
+		this.add(tableConc);
 		// TODO Auto-generated constructor stub
 	}
 }

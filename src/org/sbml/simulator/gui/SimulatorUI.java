@@ -21,6 +21,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.Dialog.ModalityType;
+import java.awt.Window;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
@@ -43,13 +45,16 @@ import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import org.sbml.jsbml.Compartment;
@@ -61,6 +66,7 @@ import org.sbml.optimization.EvA2GUIStarter;
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.SBMLsimulator;
+import org.sbml.simulator.fba.gui.FBAButtonPressedDialog;
 import org.sbml.simulator.fba.gui.FBAPanel;
 import org.sbml.simulator.io.CSVReadingTask;
 import org.sbml.simulator.io.SimulatorIOOptions;
@@ -75,6 +81,7 @@ import de.zbit.gui.GUIOptions;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.SerialWorker;
 import de.zbit.gui.actioncommand.ActionCommand;
+import de.zbit.gui.wizard.Wizard;
 import de.zbit.io.csv.CSVOptions;
 import de.zbit.io.filefilter.SBFileFilter;
 import de.zbit.sbml.gui.SBMLReadingTask;
@@ -799,7 +806,12 @@ PropertyChangeListener {
 	 */
 	public void startFBA() {
 		if (simPanel.getTabbedPane().getTabCount() < 6) {
-			simPanel.getTabbedPane().add(bundle.getString("TAB_FBA"), new FBAPanel(simPanel.getModel().getSBMLDocument()));
+			FBAButtonPressedDialog dialog = new FBAButtonPressedDialog(SwingUtilities.getWindowAncestor(simPanel), ModalityType.DOCUMENT_MODAL);
+		    dialog.setLocationRelativeTo(simPanel);
+			dialog.setVisible(true);
+		} else {
+			FBAPanel fbaPanel = ((FBAPanel) simPanel.getTabbedPane().getTabComponentAt(6));
+			fbaPanel.addConcentrations(null);
 		}
 	}
 

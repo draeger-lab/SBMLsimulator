@@ -17,9 +17,12 @@
  */
 package org.sbml.simulator.fba.gui;
 
+import java.io.File;
+
 import javax.swing.JPanel;
 
 import org.sbml.jsbml.SBMLDocument;
+import org.sbml.simulator.fba.controller.FluxBalanceAnalysis;
 
 /**
  * @author Meike Aichele
@@ -39,20 +42,37 @@ public class FBAPanel extends JPanel{
 	private ChartPanel chart;
 	private SettingPanel settings;
 	private VODPanel vod;
-	private SBMLDocument document;
+	private FluxBalanceAnalysis fba;
 	private static final long serialVersionUID = 1L;
 	
-	public FBAPanel (SBMLDocument document) {
-		this.chart = new ChartPanel();
+	public FBAPanel (SBMLDocument document, File resultfile) {
+		try {
+			fba = new FluxBalanceAnalysis(document);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		String[] columnNamesForChartFluxes = {"reactions","flux value"};
+		String[] columnNamesForChartConc = {"species", "concentration value"};
+//		this.chart = new ChartPanel(columnNamesForChartConc, columnNamesForChartFluxes);
 		this.settings = new SettingPanel();
 		this.vod = new VODPanel();
-		this.document = document;
 		init();
 		// TODO: call FluxBalanceAnalysis
 	}
 
+	public FBAPanel(SBMLDocument sbmlDocument) {
+		// TODO Auto-generated constructor stub
+	}
+	
+	public boolean addConcentrations(File conc_file) {
+		if (fba != null && conc_file != null) {
+			//TODO set concentrations
+		}
+		return true;
+	}
+
 	private void init() {
-		this.chart.setVisible(true);
+//		this.chart.setVisible(true);
 		this.settings.setVisible(true);
 		this.vod.setVisible(true);
 	}
