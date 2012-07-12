@@ -18,7 +18,7 @@
   <entry key="STOP">Stop</entry>
   <entry key="STOP_TOOLTIP">Stoppt die dynamische Visualisierung.</entry>
   <entry key="TOVIDEO">Video</entry>
-  <entry key="TOVIDEO_TOOLTIP">Speichert die dynamische Visualisierung als Video. Die Auflösung kann über den Auflösungsmultiplikator in den Optionen angepasst werden.</entry>
+  <entry key="TOVIDEO_TOOLTIP">Speichert die dynamische Visualisierung als Video. Die Auflösung kann über den Auflösungsmultiplikator in den Optionen angepasst werden und die Videogeschwindigkeit ist annähernd dieselbe, wie die eingestellte Simulationsgeschwindigkeit.</entry>
   <entry key="GRAPHSHOT">Bild</entry>
   <entry key="GRAPHSHOT_TOOLTIP">Speichert das aktuelle Netzwerk als Bilddatei. Die Auflösung kann über den Auflösungsmultiplikator in den Optionen angepasst werden.</entry>   
   <entry key="NODELABELS">Knotenbeschriftung</entry>
@@ -117,7 +117,7 @@
   <entry key="VIDEO_TIMESTAMP">Zeitstempel</entry>
   <entry key="VIDEO_TIMESTAMP_TOOLTIP">Je niedriger diese Einstellung, desto schneller und kürzer wird das resultierende Video.</entry>
   <entry key="VIDEO_IMAGE_STEPSIZE">Bilderschrittweite</entry>
-  <entry key="VIDEO_IMAGE_STEPSIZE_TOOLTIP">Hier können Sie einstellen, wie viele Bilder von der Simulation gemacht werden sollen. Je geringer die Bilderschrittweite, desto weniger Bilder werden gemacht.</entry>    
+  <entry key="VIDEO_IMAGE_STEPSIZE_TOOLTIP">Hier können Sie einstellen, nach wie vielen Zeitschritten ein Bild für das Video gemacht werden soll. Je geringer die Bilderschrittweite, desto mehr Bilder werden generiert und desto glatter sind die Übergänge im Video.</entry>    
   <entry key="VIDEO_RESOLUTION_MULTIPLIER">Auflösungsmultiplikator</entry>
   <entry key="VIDEO_RESOLUTION_MULTIPLIER_TOOLTIP">Je größer der Multiplikator, desto besser ist die Videoauflösung, aber desto größer ist die Dateigröße und die Berechnungszeit. Der Multiplikator wird nur genutzt, wenn die Ausgabeauflösung zu gering wäre um scharfe Videos zu generieren.</entry>
   <entry key="RELATIVE_CONCENTRATION_CHANGES">Relative Konzentrationsänderung</entry>
@@ -125,7 +125,7 @@
   <entry key="INTERPOLATE_EXP_DATA">Experimentelle Daten interpolieren</entry>
   <entry key="INTERPOLATE_EXP_DATA_TOOLTIP">Aktiviert/deaktiviert die Interpolation experimenteller Daten, wenn diese weniger als 100 Zeitpunkte besitzen.</entry>
   <entry key="VIDEO_FORCE_RESOLUTION_MULTIPLIER">Erzwinge Auflösungsmultiplikator</entry>
-  <entry key="VIDEO_FORCE_RESOLUTION_MULTIPLIER_TOOLTIP">Mit dieser Option kann der Auflösungsmultiplikator erzwungen werden auch wenn die Video-Ausgabeauflösung groß genug wäre.</entry>
+  <entry key="VIDEO_FORCE_RESOLUTION_MULTIPLIER_TOOLTIP">Mit dieser Option kann der Auflösungsmultiplikator erzwungen werden auch wenn die Videoauflösung groß genug wäre.</entry>
   <entry key="VIDEO_DISPLAY_WINDOW">Komplettes Netzwerk abbilden</entry>
   <entry key="VIDEO_DISPLAY_WINDOW_TOOLTIP">Wählen Sie, ob das komplette Netzwerk auf Bildern und Videos dargestellt werden soll oder nur die aktuelle Ansicht.</entry>
   

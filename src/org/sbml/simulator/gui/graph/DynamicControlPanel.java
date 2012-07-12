@@ -152,7 +152,7 @@ public class DynamicControlPanel extends JPanel {
          * @param item
          * @return
          */
-        public int getSpeed(Items item) {
+        public static int getSpeed(Items item) {
             if (item == FAST) {
                 return FAST_SPEED;
             } else if (item == NORMAL) {
@@ -315,10 +315,10 @@ public class DynamicControlPanel extends JPanel {
 	 */
 	public int getSimulationSpeed() {
 	    try {
-	        return ((Integer) simVeloSpin.getValue()).intValue();
-	    } catch(Exception e) {
+	        return Items.getSpeed(Items.getItem(simVeloCombo.getSelectedItem().toString()));
+	    } catch (Exception e) {
 	        logger.warning(bundle.getString("FALSE_INPUT"));
-	        return 200; //playspeed per default
+	        return 25; //playspeed per default
 	    }
 	}
 	
@@ -535,7 +535,7 @@ public class DynamicControlPanel extends JPanel {
 	 */
 	public void setSimVeloCombo(Items item) {
 	    simVeloCombo.setSelectedItem(item.getName());
-	    simVeloSpin.setValue(item.getSpeed(item));
+	    simVeloSpin.setValue(Items.getSpeed(item));
 	}
 	
     /**

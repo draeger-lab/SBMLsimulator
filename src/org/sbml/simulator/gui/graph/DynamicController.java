@@ -141,19 +141,25 @@ public class DynamicController implements ChangeListener, ActionListener,
 
                     // determine output resolution
                     if (prefs
-                            .getBoolean(GraphOptions.VIDEO_FORCE_RESOLUTION_MULTIPLIER)
-                            || width < 1000 || height < 1000) {
+                            .getBoolean(GraphOptions.VIDEO_FORCE_RESOLUTION_MULTIPLIER)) {
                         int resolutionMultiplier = (int) prefs
                                 .getDouble(GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
                         /*
-                         * if resolution is too small or if resolution
-                         * multiplier is forced by the user than scale it
-                         * otherwise use normal resolution to save computation
-                         * time
+                         * if resolution multiplier is forced by the user than
+                         * scale it
                          */
                         width *= resolutionMultiplier;
                         height *= resolutionMultiplier;
+                    } else if (width < 1000 || height < 1000) {
+                        /*
+                         * if resolution is too small than scale it anyway
+                         */
+                        while (width < 1000 || height < 1000) {
+                            width *= 2;
+                            height *= 2;
+                        }
                     }
+                    
                     //determine fixpoint to prevent pixel jumping
                     imggen.determineFixPoints(width); 
                     
@@ -166,11 +172,26 @@ public class DynamicController implements ChangeListener, ActionListener,
                     logger.fine("Video out resolution = " + width + "x"
                             + height);
 
-                    int timestamp = (int) prefs
-                            .getDouble(GraphOptions.VIDEO_TIMESTAMP);
+//                    int timestamp = (int) prefs
+//                            .getDouble(GraphOptions.VIDEO_TIMESTAMP);
+                    
                     int captureStepSize = (int) prefs
                             .getDouble(GraphOptions.VIDEO_IMAGE_STEPSIZE);
-
+                    
+                    /*
+                     * Determine the time (in miliseconds) which each frame will
+                     * be visible in the video by the actual playspeed in the
+                     * simulator. Because of the time it takes to draw one
+                     * timestep (~3ms or something), the actual time of each
+                     * frame has to be longer than the actual playspeed, such
+                     * that the output video length and therefore the speed of
+                     * the video itself is as close as the experienced speed in
+                     * the simulator. Depending on the chosen numbers of images
+                     * which will be skipped between each frame, the frametime
+                     * need to be multiplied by this.
+                     */
+                    int timestamp = (controlPanel.getSimulationSpeed() + 3) * captureStepSize;
+                    
                     //warning if computation could take very long
                     int numScreenshots = (core.getTimepoints().length-1) / captureStepSize;
                     if (width > 2500 || height > 2500 || numScreenshots > 150) {

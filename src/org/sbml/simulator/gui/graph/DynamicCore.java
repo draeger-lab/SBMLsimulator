@@ -85,7 +85,7 @@ public class DynamicCore {
 	    /**
 	     * Some control elements for video encoding.
 	     */
-	    private int width, height, frame, image, totalimages;
+	    private int width, height, frameTime, image, totalimages;
 	    
 	    /**
 	     * Construct {@link PlayWorker} without video encoding.
@@ -108,7 +108,7 @@ public class DynamicCore {
             this.timestamp = timestamp;
             this.width = width;
             this.height = height;
-            frame = 0;
+            frameTime = 0;
             image = 1;
             totalimages = (data.getRowCount()-1) / captureEveryXStep;
             encoder = ToolFactory.makeWriter(destinationFile);
@@ -123,6 +123,7 @@ public class DynamicCore {
 		 */
 		@Override
 		protected Void doInBackground() throws Exception {
+		    //cycle through timepoints
 			for(int i = getIndexOfTimepoint(currTimepoint)+1; i < timePoints.length; i++){
 				publish(timePoints[i]);
 				Thread.sleep(playspeed);
@@ -182,15 +183,15 @@ public class DynamicCore {
                     }
                     
                     if (generateVideo) {
-                        frame += timestamp; //timestamp for video encoding
                         if (getIndexOfTimepoint(timePoint) % captureStepSize == 0) {
                             // take picture now
                             logger.info(MessageFormat.format(
                                     bundle.getString("PROCESSING_IMAGE"),
                                     new Object[] { image, totalimages }));
                             encoder.encodeVideo(0, observer.takeGraphshot(width, height),
-                                    frame, TimeUnit.MILLISECONDS);
+                                    frameTime, TimeUnit.MILLISECONDS);
                             image++;
+                            frameTime += timestamp; //timestamp for video encoding
                         }
                     }
                 }
@@ -260,9 +261,10 @@ public class DynamicCore {
 	
 	/**
 	 * Determines the speed of the the play method.
-	 * By default 700.
+	 * This is the time in miliseconds between each timepoint.
+	 * By default 25.
 	 */
-	private int playspeed = 700;
+	private int playspeed = 25;
 	
 	/**
 	 * Constructs the core with an observer and simulation data.
@@ -489,7 +491,6 @@ public class DynamicCore {
 	 */
 	public void play(){
 		if(playWorker == null){
-		    
 		    //start from the beginning, if currently the last timepoint is set.
 		    if (currTimepoint == timePoints[timePoints.length - 1]) {
 		        setCurrTimepoint(0);
