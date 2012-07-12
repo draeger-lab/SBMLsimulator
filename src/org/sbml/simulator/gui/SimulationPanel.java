@@ -107,6 +107,11 @@ public class SimulationPanel extends JPanel implements
   /**
    * 
    */
+  private static final int TAB_FBA_INDEX = 5;
+  
+  /**
+   * 
+   */
   private static final int TAB_EXPERIMENT_INDEX = 2;
   
   /**
@@ -774,6 +779,20 @@ public class SimulationPanel extends JPanel implements
 		if (visualizationPanel != null) {
 			visualizationPanel.print();
 		}
+	}
+
+	/**
+	 * @return the tabbedPane
+	 */
+	public JTabbedPane getTabbedPane() {
+		return tabbedPane;
+	}
+
+	/**
+	 * @param tabbedPane the tabbedPane to set
+	 */
+	public void setTabbedPane(JTabbedPane tabbedPane) {
+		this.tabbedPane = tabbedPane;
 	}
   
 }

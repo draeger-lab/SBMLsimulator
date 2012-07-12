@@ -24,10 +24,9 @@ import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBO;
 import org.sbml.jsbml.Species;
+import org.sbml.jsbml.SpeciesReference;
 import org.sbml.simulator.stability.math.StabilityMatrix;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
-
-import eva2.tools.math.Jama.Matrix;
 
 /**
  * Contains methods to compute the flux vector for FBA and a method to get the {@link StoichiometricMatrix} of an incoming {@link SBMLDocument}.
@@ -50,19 +49,19 @@ public class FluxMinimizationUtils {
 	 * @return double[] flux vector
 	 */
 	public static double[] computeFluxVector(StoichiometricMatrix N, String[] targetFluxes, SBMLDocument doc) {
-//		StabilityMatrix steadyStateMatrix = N.getSteadyStateFluxes();
-		int i = N.svd().getV().getRowDimension() - (N.getColumnDimension() - N.rank());
-		double[] fluxVector = new double[N.getColumnDimension()];
+		StabilityMatrix steadyStateMatrix = N.getSteadyStateFluxes();
+		double[] fluxVector = new double[steadyStateMatrix.getRowDimension()];
 		// fill the fluxVector
-//		for (int row = 0; row < N.getColumnDimension(); row++) {
-//			if (targetFluxes == null || isNoTargetFlux(row, targetFluxes, doc)) {
-//				fluxVector[row] = computeManhattenNorm(steadyStateMatrix.getRow(row));
-//			}
-//		}
-		fluxVector  = N.getReducedMatrix().svd().getV().getArray()[i];
+		for (int row = 0; row < N.getColumnDimension(); row++) {
+			if (targetFluxes == null || isNoTargetFlux(row, targetFluxes, doc)) {
+				fluxVector[row] =steadyStateMatrix.get(row,0);
+			} else {
+				fluxVector[row] = 0;
+			}
+		}
 		return fluxVector;
 	}
-	
+
 	/**
 	 * Gets a {@link StoichiometricMatrix} and gives back the corresponding flux-vector in Manhattan-Norm, without the given 
 	 * target fluxes.
@@ -89,11 +88,11 @@ public class FluxMinimizationUtils {
 	 */
 	private static boolean isNoTargetFlux(int column, String[] targetFluxes, SBMLDocument doc) {
 		Reaction r = doc.getModel().getReaction(column);
-			for (int i = 0; i < targetFluxes.length; i++) {
-				if (r.getId().equals(targetFluxes[i])) {
-					return false;
-				}
+		for (int i = 0; i < targetFluxes.length; i++) {
+			if (r.getId().equals(targetFluxes[i])) {
+				return false;
 			}
+		}
 		return true;
 	}
 
@@ -106,7 +105,8 @@ public class FluxMinimizationUtils {
 	 * @throws Exception 
 	 */
 	public static StoichiometricMatrix SBMLDocToStoichMatrix(SBMLDocument document) throws Exception{
-		SBMLDocument doc = eliminateTransports(document);
+		SBMLDocument doc = eliminateTransportsAndSplitReversibleReactions(document);
+
 		// build a new StoichiometricMatrix with the number of metabolites as the dimension of rows
 		// and the number of reactions as the dimension of columns
 		int speciesCount = doc.getModel().getSpeciesCount();
@@ -140,10 +140,47 @@ public class FluxMinimizationUtils {
 		return sMatrix;
 	}
 
-	
+
+	public static SBMLDocument eliminateTransportsAndSplitReversibleReactions(
+			SBMLDocument document) {
+		// first eliminate the transports
+		SBMLDocument doc = eliminateTransports(document);
+		SBMLDocument revReacDoc = doc.clone();
+		//split the reversible reactions
+		for (int i = 0; i < doc.getModel().getReactionCount(); i++) {
+			Reaction currentReac = doc.getModel().getReaction(i);
+			if (currentReac.isReversible()) {
+				Reaction createdReac = currentReac.clone();
+				createdReac.setId(currentReac.getId() + "_rev");
+				createdReac.setMetaId(currentReac.getMetaId() + "_rev");
+				createdReac.setName(currentReac.getName() + "_rev");
+				createdReac.getListOfProducts().clear();
+				createdReac.getListOfReactants().clear();
+				for (int j = 0; j < currentReac.getListOfReactants().size(); j++) {
+					SpeciesReference sr = currentReac.getReactant(j).clone();
+					sr.setMetaId(currentReac.getReactant(j).getMetaId() + "_rev");
+					sr.setParentSBML(currentReac.getProduct(0).getParent());
+					createdReac.addProduct(sr);
+				}
+				for (int k = 0; k < currentReac.getListOfProducts().size(); k++) {
+					SpeciesReference sr = currentReac.getProduct(k).clone();
+					sr.setMetaId(currentReac.getProduct(k).getMetaId() + "_rev");
+					sr.setParentSBML(currentReac.getReactant(0).getParent());
+					createdReac.addReactant(sr);
+				}
+				createdReac.setReversible(false);
+				revReacDoc.getModel().addReaction(createdReac);
+				revReacDoc.getModel().getReaction(i).setReversible(false);
+			}
+		}
+		// return the new document
+		return revReacDoc;
+	}
+
+
 	public static List<String> eliminatedReactions = new ArrayList<String>();
-	
-	
+
+
 	/**
 	 * Eliminates the transport-reactions and gives back the new {@link SBMLDocument}.
 	 * @param doc

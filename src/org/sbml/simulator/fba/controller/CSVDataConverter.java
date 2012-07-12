@@ -77,7 +77,7 @@ public class CSVDataConverter {
 	 * @param doc
 	 */
 	public CSVDataConverter(SBMLDocument doc) {
-		this.document = FluxMinimizationUtils.eliminateTransports(doc);
+		this.document = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(doc);
 	}
 
 	/**
@@ -150,6 +150,11 @@ public class CSVDataConverter {
 							int index = document.getModel().getListOfReactions().getIndex(document.getModel().getReaction(keys[i]));
 							gibbsArray[index] = Double.parseDouble(values[i]);
 							fileMatchToDocument++;
+							if (document.getModel().containsReaction(keys[i] + "_rev")){
+								document.getModel().getReaction(keys[i] + "_rev").putUserObject(KEY_GIBBS, "isReverse");
+								int index2 = document.getModel().getListOfReactions().getIndex(document.getModel().getReaction(keys[i] + "_rev"));
+								gibbsArray[index2] = Double.parseDouble(values[i]);
+							}
 						}
 					}
 				}

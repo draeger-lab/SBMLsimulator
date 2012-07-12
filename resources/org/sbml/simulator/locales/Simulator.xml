@@ -227,6 +227,7 @@
   <entry key="NULL_MODEL">Model is null.</entry>
   <entry key="INTEGRATION_TOOLBOX">Integration tool box</entry>
   <entry key="TAB_SIMULATION">Simulation</entry>
+  <entry key="TAB_FBA">FBA</entry>
   <entry key="TAB_IN_SILICO_DATA">Computed data</entry>
   <entry key="TAB_EXPERIMENTAL_DATA">Experimental data</entry>
   <entry key="TAB_MODEL_VIEW">Model</entry>

@@ -47,7 +47,14 @@ public class FBAPanel extends JPanel{
 		this.settings = new SettingPanel();
 		this.vod = new VODPanel();
 		this.document = document;
+		init();
 		// TODO: call FluxBalanceAnalysis
+	}
+
+	private void init() {
+		this.chart.setVisible(true);
+		this.settings.setVisible(true);
+		this.vod.setVisible(true);
 	}
 
 	/**
