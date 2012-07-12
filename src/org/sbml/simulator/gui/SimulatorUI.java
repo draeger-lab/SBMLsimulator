@@ -61,6 +61,7 @@ import org.sbml.optimization.EvA2GUIStarter;
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.SBMLsimulator;
+import org.sbml.simulator.fba.gui.FBAPanel;
 import org.sbml.simulator.io.CSVReadingTask;
 import org.sbml.simulator.io.SimulatorIOOptions;
 import org.sbml.simulator.math.SplineCalculation;
@@ -99,8 +100,8 @@ import eva2.tools.BasicResourceLoader;
  * @since 1.0
  */
 public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
-		PropertyChangeListener {
-  
+PropertyChangeListener {
+
 	/**
 	 * Commands that can be understood by this dialog.
 	 * 
@@ -130,7 +131,11 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		/**
 		 * Prints the current graph.
 		 */
-		PRINT;
+		PRINT,
+		/**
+		 * Start a new flux balance analysis
+		 */
+		START_FBA;
 
 		/* (non-Javadoc)
 		 * @see de.zbit.gui.ActionCommand#getName()
@@ -152,19 +157,19 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 				return bundle.getString(elem);
 			}
 			return StringUtil
-					.firstLetterUpperCase(toString().replace('_', ' '));
+			.firstLetterUpperCase(toString().replace('_', ' '));
 		}
 	}
-	
-	/**
-   * The resource bundle to be used to display texts to a user.
-   */
-  private static final transient ResourceBundle bundle = ResourceManager
-      .getBundle("org.sbml.simulator.locales.Simulator");
 
 	/**
-   * A {@link Logger} for this class.
-   */
+	 * The resource bundle to be used to display texts to a user.
+	 */
+	private static final transient ResourceBundle bundle = ResourceManager
+	.getBundle("org.sbml.simulator.locales.Simulator");
+
+	/**
+	 * A {@link Logger} for this class.
+	 */
 	private static final Logger logger = Logger.getLogger(SimulatorUI.class.getName());
 
 	/**
@@ -198,7 +203,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	public SimulatorUI() {
 		this((AppConf) null);
 	}
-	
+
 	/**
 	 * 
 	 * @param appConf
@@ -208,14 +213,14 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		int[] resolutions = new int[] {16, 32, 48, 128, 256};
 		List<Image> icons = new LinkedList<Image>();
 		for (int res: resolutions) {
-		  Object icon = UIManager.get("SBMLsimulator_" + res);
-		  if ((icon != null) && (icon instanceof ImageIcon)) {
-		    icons.add(((ImageIcon) icon).getImage());
-		  }
+			Object icon = UIManager.get("SBMLsimulator_" + res);
+			if ((icon != null) && (icon instanceof ImageIcon)) {
+				icons.add(((ImageIcon) icon).getImage());
+			}
 		}
 		setIconImages(icons);
 		GUITools.setEnabled(false, getJMenuBar(), toolBar,
-			Command.SIMULATION_START, Command.SIMULATION_STOP);
+				Command.SIMULATION_START, Command.SIMULATION_STOP, Command.START_FBA);
 		SBProperties props = appConf.getCmdArgs();
 		if (props.containsKey(SimulatorIOOptions.SBML_INPUT_FILE)) {
 			ArrayList<File> listOfFilesToBeOpened = new ArrayList<File>(2);
@@ -239,8 +244,8 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 			}
 		}
 	}
-	
-	
+
+
 
 	/**
 	 * 
@@ -251,13 +256,13 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		if (simPanel != null) {
 			simPanel.addExperimentalData(title, data);
 			if (simPanel.getExperimentalData().size() == 1) {
-				GUITools.setEnabled(true, getJMenuBar(), getJToolBar(), Command.OPTIMIZATION, Command.PRINT);
+				GUITools.setEnabled(true, getJMenuBar(), getJToolBar(), Command.OPTIMIZATION, Command.PRINT, Command.START_FBA);
 			}
 		} else {
 			// reject data files
 			JOptionPane.showMessageDialog(this,
-				bundle.getString("CANNOT_OPEN_DATA_WIHTOUT_MODEL"),
-				bundle.getString("UNABLE_TO_OPEN_DATA"), JOptionPane.WARNING_MESSAGE);
+					bundle.getString("CANNOT_OPEN_DATA_WIHTOUT_MODEL"),
+					bundle.getString("UNABLE_TO_OPEN_DATA"), JOptionPane.WARNING_MESSAGE);
 		}
 	}
 
@@ -271,12 +276,12 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		ImageIcon icon = new ImageIcon(SimulatorUI.class.getResource("img/PRINT_16.png"));
 		UIManager.put("PRINT_16", icon);
 		JMenuItem print = GUITools.createJMenuItem(
-			EventHandler.create(ActionListener.class, this, "print"), Command.PRINT,
-			icon, KeyStroke.getKeyStroke('P', ctr_down));
+				EventHandler.create(ActionListener.class, this, "print"), Command.PRINT,
+				icon, KeyStroke.getKeyStroke('P', ctr_down));
 		print.setEnabled(false);
 		return new JMenuItem[] {print};
 	}
-	
+
 	/**
 	 * Print the current plot.
 	 */
@@ -293,27 +298,33 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	protected JMenuItem[] additionalEditMenuItems() {
 		ImageIcon icon = new ImageIcon(SimulatorUI.class.getResource("img/PLAY_16.png"));
 		// new ImageIcon(SimulatorUI.class.getResource("img/CAMERA_16.png"))
+		UIManager.put("FBA", icon);
+		JMenuItem startFBA = GUITools.createJMenuItem(
+				EventHandler.create(ActionListener.class, this, "startFBA"),
+				Command.START_FBA, new ImageIcon(SimulatorUI.class.getResource("img/FBA_16.png")), 'F');
+
+
 		UIManager.put("PLAY_16", icon);
 		JMenuItem startSimulation = GUITools.createJMenuItem(
 				EventHandler.create(ActionListener.class, this, "simulate"),
 				Command.SIMULATION_START, icon, 'S');
-		
+
 		icon = new ImageIcon(SimulatorUI.class.getResource("img/STOP_16.png"));
 		UIManager.put("STOP_16", icon);
 		JMenuItem stopSimulation = GUITools.createJMenuItem(
-			EventHandler.create(ActionListener.class, this, "stopSimulation"),
-			Command.SIMULATION_STOP, icon, false);
-		
+				EventHandler.create(ActionListener.class, this, "stopSimulation"),
+				Command.SIMULATION_STOP, icon, false);
+
 		JMenuItem optimization = GUITools.createJMenuItem(
 				EventHandler.create(ActionListener.class, this, "optimize"),
 				Command.OPTIMIZATION, UIManager.getIcon("ICON_EVA2"), 'O');
 		optimization.setEnabled(false);
 		JCheckBoxMenuItem item = GUITools.createJCheckBoxMenuItem(
-			Command.SHOW_OPTIONS, simPanel != null ? simPanel.isShowSettingsPanel()
-					: true, simPanel != null, this);
-		return new JMenuItem[] { startSimulation, stopSimulation, optimization, item };
+				Command.SHOW_OPTIONS, simPanel != null ? simPanel.isShowSettingsPanel()
+						: true, simPanel != null, this);
+		return new JMenuItem[] { startFBA, startSimulation, stopSimulation, optimization, item };
 	}
-	
+
 	/**
 	 * Cancels a running simulation.
 	 * 
@@ -322,7 +333,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	public boolean stopSimulation() {
 		if (simPanel != null) {
 			GUITools.setEnabled(false, getJMenuBar(), getJToolBar(), Command.SIMULATION_STOP);
-			GUITools.setEnabled(true, getJMenuBar(), getJToolBar(), Command.SIMULATION_START);
+			GUITools.setEnabled(true, getJMenuBar(), getJToolBar(), Command.SIMULATION_START, Command.START_FBA);
 			return simPanel.stopSimulation();
 		}
 		return false;
@@ -348,7 +359,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 				message = bundle.getString("CLOSE_MODEL_BEFORE_OPENING_NEXT") + ' ' + message;
 			}
 			if (GUITools.showQuestionMessage(this, message,
-				bundle.getString("CLOSING_MODEL"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+					bundle.getString("CLOSING_MODEL"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 				removePreferenceChangeListener(simPanel.getSimulationToolPanel());
 				if (GUITools.contains(getContentPane(), simPanel)) {
 					getContentPane().remove(simPanel);
@@ -357,12 +368,12 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 				setTitle(getApplicationName());
 				if (onlyClosing) {
 					GUITools.swapAccelerator(getJMenuBar(), BaseAction.FILE_OPEN,
-						Command.OPEN_DATA);
+							Command.OPEN_DATA);
 				}
 				GUITools.setEnabled(false, getJMenuBar(), toolBar,
-					BaseAction.FILE_CLOSE, BaseAction.FILE_SAVE_AS,
-					Command.SIMULATION_START, Command.SHOW_OPTIONS, Command.OPEN_DATA,
-					Command.OPTIMIZATION, Command.PRINT);
+						BaseAction.FILE_CLOSE, BaseAction.FILE_SAVE_AS,
+						Command.SIMULATION_START, Command.SHOW_OPTIONS, Command.OPEN_DATA,
+						Command.OPTIMIZATION, Command.PRINT, Command.START_FBA);
 				GUITools.setEnabled(true, getJMenuBar(), toolBar, BaseAction.FILE_OPEN);
 				repaint();
 				return true;
@@ -379,7 +390,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		JMenu fileMenu = super.createFileMenu(loadDefaultFileMenuEntries);
 		JMenuItem openFile = (JMenuItem) GUITools.find(fileMenu, BaseAction.FILE_OPEN);
 		JMenuItem openData = GUITools.createJMenuItem(EventHandler.create(ActionListener.class, this,
-				"openFileAndLogHistory"), Command.OPEN_DATA);
+		"openFileAndLogHistory"), Command.OPEN_DATA);
 		openData.setEnabled(false);
 		fileMenu.remove(openFile);
 		JMenu openMenu = GUITools.createJMenu(bundle.getString("OPEN"), bundle.getString("OPEN_TOOLTIP"), openFile, openData);
@@ -441,7 +452,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	public URL getURLLicense() {
 		return getClass().getResource(bundle.getString("LICENSE_HTML"));
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrame#getURLOnlineHelp()
 	 */
@@ -467,7 +478,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	 * @param file
 	 */
 	public File[] open(File... files) {
-    return openFileAndLogHistory(files);
+		return openFileAndLogHistory(files);
 	}
 
 	/* (non-Javadoc)
@@ -476,7 +487,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	protected File[] openFile(File... files) {
 		File[] modelFiles = null;
 		File[] dataFiles = null;
-		
+
 		/*
 		 * Investigate the given files or let the user open a model and some data:
 		 */
@@ -491,8 +502,8 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 				}
 				if (vp.getB().size() > 0) {
 					GUITools.showListMessage(this,
-						bundle.getString("COULD_NOT_OPEN_FILES"),
-						bundle.getString("UNSUPPORTED_FILE_TYPES"), vp.getB());
+							bundle.getString("COULD_NOT_OPEN_FILES"),
+							bundle.getString("UNSUPPORTED_FILE_TYPES"), vp.getB());
 				}
 			}
 		} else {
@@ -502,21 +513,21 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 			if (simPanel == null) { 
 				// Open a model
 				modelFiles = GUITools.openFileDialog(this,
-					prefs.get(GUIOptions.OPEN_DIR).toString(), false, false,
-					JFileChooser.FILES_ONLY, SBFileFilter.createSBMLFileFilterList());
+						prefs.get(GUIOptions.OPEN_DIR).toString(), false, false,
+						JFileChooser.FILES_ONLY, SBFileFilter.createSBMLFileFilterList());
 			} else { 
 				// Open (experimental) data files
 				dataFiles = GUITools.openFileDialog(this,
-					prefs.get(GUIOptions.OPEN_DIR), true, false, JFileChooser.FILES_ONLY,
-					SBFileFilter.createCSVFileFilter());
+						prefs.get(GUIOptions.OPEN_DIR), true, false, JFileChooser.FILES_ONLY,
+						SBFileFilter.createCSVFileFilter());
 			}
 		}
-		
+
 		/*
 		 * Update the graphical user interface given some files (model and maybe data).
 		 */
 		SerialWorker worker = new SerialWorker();
-		
+
 		// First the model(s):
 		if ((modelFiles != null) && (modelFiles.length > 0)) {
 			try {
@@ -526,7 +537,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 			} catch (Exception exc) {
 				GUITools.showErrorMessage(this, exc);
 			}
-			
+
 			if (modelFiles.length > 1) {
 				GUITools.showListMessage(this, bundle
 						.getString("CAN_ONLY_OPEN_ONE_MODEL_AT_A_TIME"), bundle
@@ -534,19 +545,19 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 						.subList(1, modelFiles.length));
 			}
 		} 
-		
+
 		if ((dataFiles != null) && (dataFiles.length > 0)) {
 			// Second: the data
 			CSVReadingTask task2 = new CSVReadingTask(this, dataFiles);
 			task2.addPropertyChangeListener(EventHandler.create(PropertyChangeListener.class, this, "addExperimentalData", "newValue"));
 			worker.add(task2);
 		}
-		
+
 		worker.execute();
 
 		// setStatusBarToMemoryUsage();
 		validate();
-		
+
 		return modelFiles;
 	}
 
@@ -577,8 +588,8 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		if (baseDir == null) {
 			GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.OPTIMIZATION);
 			JOptionPane.showMessageDialog(this,
-				StringUtil.toHTMLToolTip(bundle.getString("CANNOT_LAUNCH_EVA2")),
-				bundle.getString("ERROR_MESSAGE"), JOptionPane.ERROR_MESSAGE);
+					StringUtil.toHTMLToolTip(bundle.getString("CANNOT_LAUNCH_EVA2")),
+					bundle.getString("ERROR_MESSAGE"), JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		setSimulationAndOptimizationEnabled(false);
@@ -587,20 +598,20 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		final Model model = doc2.getModel();
 		final QuantitySelectionPanel panel = new QuantitySelectionPanel(model);
 		if (JOptionPane.showConfirmDialog(this, panel,
-			bundle.getString("SELECT_QUANTITIES_FOR_OPTIMIZATION"), JOptionPane.OK_CANCEL_OPTION,
-			JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
+				bundle.getString("SELECT_QUANTITIES_FOR_OPTIMIZATION"), JOptionPane.OK_CANCEL_OPTION,
+				JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
 			try {
 				String[] selectedQuantityIds = panel.getSelectedQuantityIds();
 				simPanel.notifyQuantitiesSelected(selectedQuantityIds);
 				final WindowListener wl = EventHandler.create(WindowListener.class,
-					this, "optimizationFinished", "source", "windowClosed");
+						this, "optimizationFinished", "source", "windowClosed");
 				final SimulatorUI ui = this;
 				MultiTable reference = simPanel.getExperimentalData(0);
 				for (int col = 0; col < reference.getColumnCount(); col++) {
 					String id = reference.getColumnIdentifier(col);
 					if (Arrays.binarySearch(selectedQuantityIds, id) < 0) {
 						double value = ((Double) reference.getValueAt(0, col))
-								.doubleValue();
+						.doubleValue();
 						if (!Double.isNaN(value)) {
 							Species sp = model.getSpecies(id);
 							if (sp != null) {
@@ -629,8 +640,8 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 				if (prefs.getBoolean(EstimationOptions.FIT_TO_SPLINES)) {
 					for (int i = experimentalData.size() - 1; i >= 0; i--) {
 						experimentalData.set(i, SplineCalculation.calculateSplineValues(
-							experimentalData.get(i),
-							prefs.getInt(EstimationOptions.NUMBER_OF_SPLINE_SAMPLES)));
+								experimentalData.get(i),
+								prefs.getInt(EstimationOptions.NUMBER_OF_SPLINE_SAMPLES)));
 					}
 				}
 				new Thread(new Runnable() {
@@ -641,19 +652,19 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 						// TODO: implement org.sbml.optimization.OptimizationWorker to do this job
 						try {
 							SBPreferences prefs = SBPreferences
-									.getPreferencesFor(EstimationOptions.class);
+							.getPreferencesFor(EstimationOptions.class);
 							simPanel.refreshStepSize();
 							DESSolver solver = simPanel.getSolver();
 							if (solver instanceof AdaptiveStepsizeIntegrator) {
-					    	AdaptiveStepsizeIntegrator integrator = (AdaptiveStepsizeIntegrator) solver;
-					    	integrator.setAbsTol(simPanel.getSimulationManager().getSimulationConfiguration().getAbsTol());
-					    	integrator.setRelTol(simPanel.getSimulationManager().getSimulationConfiguration().getRelTol());
-					    }
+								AdaptiveStepsizeIntegrator integrator = (AdaptiveStepsizeIntegrator) solver;
+								integrator.setAbsTol(simPanel.getSimulationManager().getSimulationConfiguration().getAbsTol());
+								integrator.setRelTol(simPanel.getSimulationManager().getSimulationConfiguration().getRelTol());
+							}
 							EstimationProblem estimationProblem = new EstimationProblem(
-								solver, simPanel.getDistance(), model,
-								experimentalData, prefs
-										.getBoolean(EstimationOptions.EST_MULTI_SHOOT), panel
-										.getSelectedQuantityRanges());
+									solver, simPanel.getDistance(), model,
+									experimentalData, prefs
+									.getBoolean(EstimationOptions.EST_MULTI_SHOOT), panel
+									.getSelectedQuantityRanges());
 							simPanel.getSimulationManager().setEstimationProblem(estimationProblem);
 							EvA2GUIStarter.init(estimationProblem, ui, simPanel, wl);
 						} catch (Throwable exc) {
@@ -670,7 +681,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 			setSimulationAndOptimizationEnabled(true);
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
 	 */
@@ -688,7 +699,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 			statusBar.showProgress().finished();
 			statusBar.hideProgress();
 			GUITools.setEnabled(true, getJMenuBar(), getJToolBar(),
-					BaseAction.FILE_SAVE_AS, Command.SIMULATION_START, Command.PRINT);
+					BaseAction.FILE_SAVE_AS, Command.SIMULATION_START, Command.PRINT, Command.START_FBA);
 		}
 	}
 
@@ -700,10 +711,10 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 			return simPanel.saveToFile(); 
 		}
 		GUITools.showMessage(bundle.getString("NOTHING_TO_SAVE"),
-			bundle.getString("INFORMATION"));
+				bundle.getString("INFORMATION"));
 		return null;
 	}
-	
+
 	/**
 	 * 
 	 * @param obj must be an instance of {@link SBMLDocument}.
@@ -714,31 +725,31 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 				logger.fine("Cannot set the SBMLDocument to a null value.");
 			} else {
 				logger.fine(String.format(
-				  "The given object of type %s is ignored because it cannot be cast to SBMLDocument.",
-					obj.getClass().getName()));
+						"The given object of type %s is ignored because it cannot be cast to SBMLDocument.",
+						obj.getClass().getName()));
 			}
 		} else {
 			SBMLDocument doc = (SBMLDocument) obj;
 			if ((doc != null) && (doc.isSetModel())) {
-				
+
 				if ((simPanel != null) && !closeFile(false)) {
 					return;
 				}
-				
+
 				Model model = doc.getModel();
 				simPanel = new SimulationPanel(model);
 				getContentPane().add(simPanel, BorderLayout.CENTER);
 				addPreferenceChangeListener(simPanel);
-				
+
 				GUITools.swapAccelerator(getJMenuBar(), BaseAction.FILE_OPEN ,Command.OPEN_DATA);
 				GUITools.setEnabled(false, getJMenuBar(), BaseAction.FILE_OPEN);
 				GUITools.setEnabled(true, getJMenuBar(), toolBar,
-					BaseAction.FILE_SAVE_AS, Command.SIMULATION_START,
-					Command.SHOW_OPTIONS, Command.OPEN_DATA);
+						BaseAction.FILE_SAVE_AS, Command.SIMULATION_START,
+						Command.SHOW_OPTIONS, Command.OPEN_DATA, Command.START_FBA);
 				//			setTitle(String.format("%s - %s", getApplicationName(),
 				//				modelFiles[0].getAbsolutePath()));
 				validate();
-				
+
 			} else {
 				// TODO
 				//			JOptionPane.showMessageDialog(this, StringUtil.toHTML(
@@ -763,24 +774,33 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	 */
 	private void setSimulationAndOptimizationEnabled(boolean enabled) {
 		GUITools.setEnabled(enabled, getJMenuBar(), toolBar,
-			Command.SIMULATION_START, BaseAction.FILE_CLOSE, Command.OPTIMIZATION,
-			BaseAction.EDIT_PREFERENCES);
+				Command.SIMULATION_START, BaseAction.FILE_CLOSE, Command.OPTIMIZATION, Command.START_FBA,
+				BaseAction.EDIT_PREFERENCES);
 		simPanel.setAllEnabled(enabled);
 	}
-	
+
 	/**
 	 * 
 	 */
 	public void simulate() {
-    try {
-      logger.info(bundle.getString("LAUNCHING_SIMULATION"));
-      GUITools.setEnabled(false, getJMenuBar(), getJToolBar(), Command.SIMULATION_START);
-      GUITools.setEnabled(true, getJMenuBar(), getJToolBar(), Command.SIMULATION_STOP);
-      simPanel.addPropertyChangedListener(this);
-      simPanel.simulate();
-    } catch (Exception exc) {
-      GUITools.showErrorMessage(this, exc);
-    }
+		try {
+			logger.info(bundle.getString("LAUNCHING_SIMULATION"));
+			GUITools.setEnabled(false, getJMenuBar(), getJToolBar(), Command.SIMULATION_START, Command.START_FBA);
+			GUITools.setEnabled(true, getJMenuBar(), getJToolBar(), Command.SIMULATION_STOP);
+			simPanel.addPropertyChangedListener(this);
+			simPanel.simulate();
+		} catch (Exception exc) {
+			GUITools.showErrorMessage(this, exc);
+		}
 	}
-	
+
+	/**
+	 * Visualize the FluxBalanceAnalysis-Panel
+	 */
+	public void startFBA() {
+		if (simPanel.getTabbedPane().getTabCount() < 6) {
+			simPanel.getTabbedPane().add(bundle.getString("TAB_FBA"), new FBAPanel(simPanel.getModel().getSBMLDocument()));
+		}
+	}
+
 }

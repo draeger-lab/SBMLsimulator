@@ -107,17 +107,25 @@ public class Constraints {
 						sum += N.get(j, i) * Math.log(equilibriumConcentrations[j]);
 					} 
 				}
-				// delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum( N[j][i] * ln(c_eq[j]) )
-//				if (!Double.isNaN(steadyStateGibbs[i])) {
-				// the steadyStateGibbs are in kJ/mol thats why the value has to be multiplied with 1000
+				if (document.getModel().getReaction(i)!= null && 
+						document.getModel().getReaction(i).getUserObject(CSVDataConverter.KEY_GIBBS) != null &&
+						document.getModel().getReaction(i).getUserObject(CSVDataConverter.KEY_GIBBS).equals("isReverse")){
+					gibbsEnergies[i] = (-1)*((steadyStateGibbs[i]*1000) + R*T*sum);
+					//TODO: geht hier nicht rein, obwohl userobject richtig gesetzt wird
+				} else {
 					gibbsEnergies[i] = (steadyStateGibbs[i]*1000) + R*T*sum;
-//				} else {
-//					if (sum != 0) {
-//						gibbsEnergies[i] = R*T*sum;
-//					} else {
-//						gibbsEnergies[i] = Double.NaN;
-//					}
-//				}
+				}
+				// delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum( N[j][i] * ln(c_eq[j]) )
+				//				if (!Double.isNaN(steadyStateGibbs[i])) {
+				// the steadyStateGibbs are in kJ/mol thats why the value has to be multiplied with 1000
+				//				gibbsEnergies[i] = (steadyStateGibbs[i]*1000) + R*T*sum;
+				//				} else {
+				//					if (sum != 0) {
+				//						gibbsEnergies[i] = R*T*sum;
+				//					} else {
+				//						gibbsEnergies[i] = Double.NaN;
+				//					}
+				//				}
 			}
 		}
 		// return the computed Gibbs energies

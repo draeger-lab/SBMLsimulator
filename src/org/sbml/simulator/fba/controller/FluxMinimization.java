@@ -117,7 +117,7 @@ public class FluxMinimization implements TargetFunction {
 
 		// compute L or let it be null if the Gibbs energies couldn't be computed
 		if(gibbs != null && document != null) {
-//			this.L = computeL(document);
+			this.L = computeL(document);
 		} 
 	}
 
@@ -146,12 +146,11 @@ public class FluxMinimization implements TargetFunction {
 	 * @throws Exception 
 	 */
 	private double[] computeL(SBMLDocument doc) throws Exception {
-		Matrix K_int_t = ConservationRelations.calculateConsRelations(FluxMinimizationUtils.SBMLDocToStoichMatrix(doc));
+		Matrix K_int_t = FluxMinimizationUtils.SBMLDocToStoichMatrix(doc).getConservationRelations();
+
 		double[] erg = new double[gibbs.length];
 		for (int i = 0; i< gibbs.length; i++) {
-			System.out.println("K_int_t.getRowDimension(): " + K_int_t.getRowDimension());
 			for (int j = 0; j < K_int_t.getRowDimension(); j++) {
-				System.out.println(" K_int_t.get(j, i): "+ K_int_t.get(j, i));
 				erg[i] += K_int_t.get(j, i)*gibbs[i];
 			}
 		}
@@ -208,7 +207,7 @@ public class FluxMinimization implements TargetFunction {
 		                             errorArray.length + 
 		                             L.length +
 		                             gibbs.length];
-		
+
 		// this is a pointer, which counts in the target vector the actually position
 		counterArray = new int[4];
 		fillCounterArray(fluxVector.length, errorArray.length, L.length);
@@ -222,7 +221,7 @@ public class FluxMinimization implements TargetFunction {
 
 		// concentrations left out because they are quadratic and must be computed in 
 		// FluxBalanceAnalysis
-		
+
 		// the weighted error: lambda3*||E||
 		for (int k = 0; k < this.errorArray.length; k++) {
 			target[counter] = lambda2 * Math.abs(errorArray[k]);
@@ -231,7 +230,11 @@ public class FluxMinimization implements TargetFunction {
 
 		// ||L||: lambda2*||L||
 		for (int h = 0; h < this.L.length; h++) {
+			if (!Double.isNaN(L[h])) {
 			target[counter] = lambda3 * Math.abs(L[h]);
+			} else {
+				target[counter] = lambda3;
+			}
 			counter++;
 		}
 

@@ -192,12 +192,14 @@ public class FluxBalanceAnalysis {
 		for (int i = 0; i< concentrations.length; i++) {
 			IloNumExpr temp = sum;
 			IloNumExpr c_i = cplex.prod(x[i + target.length], concentrations[i]);
-			if(!Double.isNaN(concentrations[i])) {
+			if(!Double.isNaN(concentrations[i]) && !Double.isNaN(c_eq[i])) {
 				// here the sum (c_i - c_eq)^2 is performed by cplex. To make it simpler for cplex, the binomial formula is used
 				// where cplex.square(x) = x^2
 				sum = cplex.sum(temp, cplex.square(c_i), cplex.sum(cplex.prod(c_i, ((-2) * c_eq[i])), cplex.square(cplex.constant(c_eq[i]))));
-			} else {
+			} else if(!Double.isNaN(c_eq[i])){
 				sum = cplex.sum(temp, cplex.square(x[i + target.length]),cplex.sum(cplex.prod(x[i + target.length], ((-2) * c_eq[i])), cplex.square(cplex.constant(c_eq[i]))));
+			} else {
+				sum = cplex.sum(temp ,cplex.square(x[i + target.length]));
 			}
 		}
 		// now put the variables together  
@@ -211,24 +213,24 @@ public class FluxBalanceAnalysis {
 			cplex.addMaximize(cplex_target);
 		}
 
-				for (int i = 0; i < x.length; i++) {
-					if (i < counter[1]) {
-						System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
-						System.out.println("  flux");
-					} else if (i < counter[2]) {
-						System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
-						System.out.println("  E");
-					} else if (i < counter[3]) {
-						System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
-						System.out.println("  L");
-					} else if (i < target.length) {
-						System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
-						System.out.println("  gibbs");
-					} else {
-						System.out.print(i + ": " + concentrations[i-target.length] + "    x: "+ x[i]);
-						System.out.println("  conc");
-					}
-				}
+		for (int i = 0; i < x.length; i++) {
+			if (i < counter[1]) {
+				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
+				System.out.println("  flux");
+			} else if (i < counter[2]) {
+				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
+				System.out.println("  E");
+			} else if (i < counter[3]) {
+				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
+				System.out.println("  L");
+			} else if (i < target.length) {
+				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
+				System.out.println("  gibbs");
+			} else {
+				System.out.print(i + ": " + concentrations[i-target.length] + "    x: "+ x[i]);
+				System.out.println("  conc");
+			}
+		}
 
 		//CONSTRAINTS
 
