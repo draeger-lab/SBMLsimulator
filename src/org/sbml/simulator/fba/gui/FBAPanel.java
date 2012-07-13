@@ -17,12 +17,29 @@
  */
 package org.sbml.simulator.fba.gui;
 
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
+import javax.swing.JToolBar;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.simulator.fba.controller.FluxBalanceAnalysis;
+import org.sbml.simulator.gui.InteractiveScanPanel;
+import org.sbml.simulator.gui.LegendPanel;
+import org.sbml.simulator.gui.QuantitySelectionPanel;
+import org.sbml.simulator.gui.SimulationPanel;
+import org.sbml.simulator.gui.SimulationToolPanel;
+import org.sbml.simulator.gui.SimulationVisualizationPanel;
+
+import de.zbit.gui.layout.LayoutHelper;
 
 /**
  * @author Meike Aichele
@@ -30,7 +47,7 @@ import org.sbml.simulator.fba.controller.FluxBalanceAnalysis;
  * @date 07.05.2012
  * @since 1.0
  */
-public class FBAPanel extends JPanel{
+public class FBAPanel extends JPanel implements ActionListener, TableModelListener{
 
 	/**
 	 * the FBAPanel consists of 3 components:
@@ -40,28 +57,37 @@ public class FBAPanel extends JPanel{
 	 * - a VODPanel, which visualizes the results of fba in a diagram.
 	 */
 	private ChartPanel chart;
-	private SettingPanel settings;
+	private FBASettingPanel settings;
 	private VODPanel vod;
+	private SBMLDocument currentDoc;
 	private FluxBalanceAnalysis fba;
+	private SimulationPanel simPanel;
 	private static final long serialVersionUID = 1L;
 	
 	public FBAPanel (SBMLDocument document, File resultfile) {
-		try {
-			fba = new FluxBalanceAnalysis(document);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		String[] columnNamesForChartFluxes = {"reactions","flux value"};
-		String[] columnNamesForChartConc = {"species", "concentration value"};
+		super(new BorderLayout());
+//		try {
+//			fba = new FluxBalanceAnalysis(document);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		String[] columnNamesForChartFluxes = {"reactions","flux value"};
+//		String[] columnNamesForChartConc = {"species", "concentration value"};
 //		this.chart = new ChartPanel(columnNamesForChartConc, columnNamesForChartFluxes);
-		this.settings = new SettingPanel();
+		this.chart = new ChartPanel();
+		this.settings = new FBASettingPanel();
 		this.vod = new VODPanel();
 		init();
 		// TODO: call FluxBalanceAnalysis
 	}
 
 	public FBAPanel(SBMLDocument sbmlDocument) {
-		// TODO Auto-generated constructor stub
+		super(new BorderLayout());
+		currentDoc = sbmlDocument;
+		this.chart = new ChartPanel();
+		this.settings = new FBASettingPanel(this);
+		this.vod = new VODPanel();
+		setVisible(true);
 	}
 	
 	public boolean addConcentrations(File conc_file) {
@@ -70,11 +96,31 @@ public class FBAPanel extends JPanel{
 		}
 		return true;
 	}
+	
+	public boolean addGibbsValues(File gibbs_file) {
+		return true;
+	}
 
 	private void init() {
-//		this.chart.setVisible(true);
-		this.settings.setVisible(true);
-		this.vod.setVisible(true);
+		JSplitPane jsp = new JSplitPane();
+		vod.setBorder(BorderFactory.createLoweredBevelBorder());
+		
+		// legend panel
+		LegendPanel legendPanel = new LegendPanel(currentDoc.getModel(), true);
+	    legendPanel.addTableModelListener(this);
+	    legendPanel.setBorder(BorderFactory.createLoweredBevelBorder());
+	    
+	    // split left components
+	    JSplitPane topDown = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true,
+	      legendPanel, settings);
+	    topDown.setDividerLocation(topDown.getDividerLocation() + 100);
+	    
+	    // split all
+	    jsp.setLeftComponent(topDown);
+	    jsp.setRightComponent(vod);
+	    jsp.setDividerLocation(topDown.getDividerLocation() + 200);
+	    
+		add(jsp);
 	}
 
 	/**
@@ -94,14 +140,14 @@ public class FBAPanel extends JPanel{
 	/**
 	 * @param settings the settings to set
 	 */
-	public void setSettingPanel(SettingPanel settings) {
+	public void setFBASettingPanel(FBASettingPanel settings) {
 		this.settings = settings;
 	}
 
 	/**
 	 * @return the settings
 	 */
-	public SettingPanel getSettingPanel() {
+	public FBASettingPanel getFBASettingPanel() {
 		return settings;
 	}
 
@@ -117,6 +163,47 @@ public class FBAPanel extends JPanel{
 	 */
 	public VODPanel getVODPanel() {
 		return vod;
+	}
+
+	/**
+	 * @return the fba
+	 */
+	public FluxBalanceAnalysis getFba() {
+		return fba;
+	}
+
+	/**
+	 * @param simPanel
+	 */
+	public void setSimulatorPanel(SimulationPanel simPanel) {
+		this.simPanel = simPanel;
+		init();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void tableChanged(TableModelEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * @return the currentDoc
+	 */
+	public SBMLDocument getCurrentDoc() {
+		return currentDoc;
+	}
+
+	/**
+	 * @param currentDoc the currentDoc to set
+	 */
+	public void setCurrentDoc(SBMLDocument currentDoc) {
+		this.currentDoc = currentDoc;
 	}
 
 }

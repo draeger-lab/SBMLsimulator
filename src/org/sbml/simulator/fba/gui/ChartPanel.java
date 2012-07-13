@@ -44,4 +44,8 @@ public class ChartPanel extends JPanel{
 		this.add(tableConc);
 		// TODO Auto-generated constructor stub
 	}
+	
+	public ChartPanel() {
+		// TODO Auto-generated constructor stub
+	}
 }
