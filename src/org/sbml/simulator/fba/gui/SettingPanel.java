@@ -17,6 +17,9 @@
  */
 package org.sbml.simulator.fba.gui;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.JPanel;
 
 /**
@@ -28,7 +31,7 @@ import javax.swing.JPanel;
  * @date 07.05.2012
  * @since 1.0
  */
-public class SettingPanel extends JPanel{
+public class SettingPanel extends JPanel implements ActionListener{
 
 	/**
 	 * 
@@ -67,5 +70,11 @@ public class SettingPanel extends JPanel{
 	 */
 	public VODSettingPanel getVodSettingPanel() {
 		return vodSettings;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 }

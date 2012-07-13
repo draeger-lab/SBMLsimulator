@@ -17,6 +17,13 @@
  */
 package org.sbml.simulator.fba.gui;
 
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 /**
@@ -29,16 +36,86 @@ import javax.swing.JPanel;
  * @since 1.0
  */
 
-public class VODPanel extends JPanel{
+public class VODPanel extends JPanel implements ActionListener{
 
 	/**
-	 * 
+	 * default serial version
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	public VODPanel() {
-		// TODO Auto-generated constructor stub
-	}
+	private double[] fluxes;
+	private double[] concentrations;
+	private double[] gibbs_values;
 	
+	public VODPanel() {
+		JPanel plot = new JPanel(new BorderLayout());
+		JLabel label = new JLabel("here will be the panel to visualize the computed values of flux balance analysis");
+		plot.setSize(200, 200);
+		plot.add(label, BorderLayout.CENTER);
+		
+		JPanel changePlotPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		JButton switchButton = new JButton("Change to dynamic View");
+		switchButton.addActionListener(this);
+		changePlotPanel.add(switchButton, BorderLayout.EAST);
+		
+		add(plot, BorderLayout.CENTER);
+		add(changePlotPanel, BorderLayout.SOUTH);
+		setVisible(true);
+	}
 
+	
+	
+	/**
+	 * @return the fluxes
+	 */
+	public double[] getFluxes() {
+		return fluxes;
+	}
+
+	/**
+	 * @param fluxes the fluxes to set
+	 */
+	public void setFluxes(double[] fluxes) {
+		this.fluxes = fluxes;
+	}
+
+	/**
+	 * @return the concentrations
+	 */
+	public double[] getConcentrations() {
+		return concentrations;
+	}
+
+	/**
+	 * @param concentrations the concentrations to set
+	 */
+	public void setConcentrations(double[] concentrations) {
+		this.concentrations = concentrations;
+	}
+
+	/**
+	 * @return the gibbs_values
+	 */
+	public double[] getGibbs_values() {
+		return gibbs_values;
+	}
+
+	/**
+	 * @param gibbs_values the gibbs_values to set
+	 */
+	public void setGibbs_values(double[] gibbs_values) {
+		this.gibbs_values = gibbs_values;
+	}
+
+
+
+
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	
 }
