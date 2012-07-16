@@ -141,23 +141,15 @@ public class DynamicController implements ChangeListener, ActionListener,
 
                     // determine output resolution
                     if (prefs
-                            .getBoolean(GraphOptions.VIDEO_FORCE_RESOLUTION_MULTIPLIER)) {
+                            .getBoolean(GraphOptions.VIDEO_FORCE_RESOLUTION_MULTIPLIER) || width < 1000 || height < 1000) {
                         int resolutionMultiplier = (int) prefs
                                 .getDouble(GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
                         /*
-                         * if resolution multiplier is forced by the user than
-                         * scale it
+                         * if resolution multiplier is forced by the user or if
+                         * resolution is too small than scale it
                          */
                         width *= resolutionMultiplier;
                         height *= resolutionMultiplier;
-                    } else if (width < 1000 || height < 1000) {
-                        /*
-                         * if resolution is too small than scale it anyway
-                         */
-                        while (width < 1000 || height < 1000) {
-                            width *= 2;
-                            height *= 2;
-                        }
                     }
                     
                     //determine fixpoint to prevent pixel jumping
@@ -500,7 +492,9 @@ public class DynamicController implements ChangeListener, ActionListener,
                         prefs.getDefault(GraphOptions.MIN_NODE_SIZE));
                 prefs.put(GraphOptions.MAX_NODE_SIZE,
                         prefs.getDefault(GraphOptions.MAX_NODE_SIZE));
-            } else if (prefs.getDouble(GraphOptions.MAX_LINE_WIDTH) <= prefs
+            }
+            
+            if (prefs.getDouble(GraphOptions.MAX_LINE_WIDTH) <= prefs
                     .getDouble(GraphOptions.MIN_LINE_WIDTH)) {
                 // line widths wrong
                 GUITools.showErrorMessage(view,
@@ -512,6 +506,11 @@ public class DynamicController implements ChangeListener, ActionListener,
             }
             
             //TODO redraw options panel after "accept"
+//            try {
+//                prefs.flush();
+//            } catch (BackingStoreException e) {
+//                e.printStackTrace();
+//            }
             
             view.setGraphManipulator(getSelectedGraphManipulator());
         }

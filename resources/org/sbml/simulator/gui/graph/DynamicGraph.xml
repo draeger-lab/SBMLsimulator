@@ -98,11 +98,11 @@
   <entry key="COLOR_NODE_SIZE">Constant node size</entry>
   <entry key="COLOR_NODE_SIZE_TOOLTIP">Determines the constant node size in case of dynamic change of node color.</entry>
   <entry key="SIM_SPEED_FAST">Fast play speed</entry>
-  <entry key="SIM_SPEED_FAST_TOOLTIP">Sets setting for fast play speed.</entry>
+  <entry key="SIM_SPEED_FAST_TOOLTIP">Chose time in miliseconds for how long the current timepoint will be shown.</entry>
   <entry key="SIM_SPEED_NORMAL">Normal play speed</entry>
-  <entry key="SIM_SPEED_NORMAL_TOOLTIP">Sets setting for normal play speed.</entry>  
+  <entry key="SIM_SPEED_NORMAL_TOOLTIP">Chose time in miliseconds for how long the current timepoint will be shown.</entry>  
   <entry key="SIM_SPEED_SLOW">Slow play speed</entry>
-  <entry key="SIM_SPEED_SLOW_TOOLTIP">Sets setting for slow play speed.</entry>
+  <entry key="SIM_SPEED_SLOW_TOOLTIP">Chose time in miliseconds for how long the current timepoint will be shown.</entry>
   <entry key="SIM_SPEED_CHOOSER">Choose play speed</entry>
   <entry key="SIM_SPEED_CHOOSER_TOOLTIP">This options determines the play speed.</entry>  
   <entry key="GROUP_SIM_SPEED">Play speed</entry>
