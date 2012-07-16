@@ -25,6 +25,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import javax.swing.ProgressMonitor;
 import javax.swing.SwingWorker;
 
 import org.sbml.jsbml.SBMLDocument;
@@ -364,6 +365,19 @@ public class DynamicCore {
         playspeed = 1; //as fast as possible
         
         if(playWorker == null){
+            
+            //TODO progressmonitor
+//            Thread progressBar = new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    ProgressMonitor pm = new ProgressMonitor(null, "msg", "note", 0, 100);
+//                    pm.setMillisToDecideToPopup(0);
+//                    pm.setMillisToPopup(0);
+//                    pm.setProgress(50);
+//                }
+//            });
+//            progressBar.start();
+            
             //generate video
             playWorker = new PlayWorker(true, width, height, timestamp,
                     captureEveryXstep,
