@@ -134,7 +134,7 @@ public class FBAButtonPressedDialog extends JDialog implements ActionListener{
 		 * fields and buttons for the concentrations file
 		 */
 		JPanel panelConcFile = new JPanel(new BorderLayout());
-		panelConcFile.setBorder(BorderFactory.createTitledBorder("Conzentrations file:"));
+		panelConcFile.setBorder(BorderFactory.createTitledBorder("Concentrations file:"));
 		textFieldConcentrationsFile = new JTextField();
 		buttonConcentrationsFile = new JButton("...");
 		buttonConcentrationsFile.addActionListener(this);
