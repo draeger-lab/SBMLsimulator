@@ -55,6 +55,10 @@ public class FluxMinimizationUtils {
 		for (int row = 0; row < N.getColumnDimension(); row++) {
 			if (targetFluxes == null || isNoTargetFlux(row, targetFluxes, doc)) {
 				fluxVector[row] =steadyStateMatrix.get(row,0);
+				if (Math.abs(fluxVector[row]) < Math.pow(10, -15)) {
+					//then the value is similar to 0 and the flux is 0
+					fluxVector[row] = 0;
+				}
 			} else {
 				fluxVector[row] = 0;
 			}
@@ -141,6 +145,14 @@ public class FluxMinimizationUtils {
 	}
 
 
+	/**
+	 * Gets a {@link SBMLDocument} and searches the reversible reactions. Than it creates
+	 * a new SBMLDocument without the transport reactions and the reversible reactions split in two
+	 * irreversible reaction to both sides.
+	 * @param document
+	 * @return {@link SBMLDocument}
+	 */
+	@SuppressWarnings("deprecation")
 	public static SBMLDocument eliminateTransportsAndSplitReversibleReactions(
 			SBMLDocument document) {
 		// first eliminate the transports
@@ -161,13 +173,13 @@ public class FluxMinimizationUtils {
 				for (int j = 0; j < currentReac.getListOfReactants().size(); j++) {
 					SpeciesReference sr = currentReac.getReactant(j).clone();
 					sr.setMetaId(currentReac.getReactant(j).getMetaId() + "_rev");
-					sr.setParentSBML(currentReac.getProduct(0).getParent());
+					sr.setThisAsParentSBMLObject(currentReac.getProduct(0).getParent());
 					createdReac.addProduct(sr);
 				}
 				for (int k = 0; k < currentReac.getListOfProducts().size(); k++) {
 					SpeciesReference sr = currentReac.getProduct(k).clone();
 					sr.setMetaId(currentReac.getProduct(k).getMetaId() + "_rev");
-					sr.setParentSBML(currentReac.getReactant(0).getParent());
+					sr.setThisAsParentSBMLObject(currentReac.getReactant(0).getParent());
 					createdReac.addReactant(sr);
 				}
 				createdReac.setReversible(false);
