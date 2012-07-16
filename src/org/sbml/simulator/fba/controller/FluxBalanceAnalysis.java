@@ -208,7 +208,6 @@ public class FluxBalanceAnalysis {
 		// only for FluxMinimization the target function has to be minimized
 		if (targetFunc instanceof FluxMinimization) {
 			cplex.addMinimize(lin);
-			System.out.println(lin);
 		} else {
 			cplex.addMaximize(cplex_target);
 		}
@@ -242,7 +241,6 @@ public class FluxBalanceAnalysis {
 			//and jr_maxg the expression for |J_i| - r_max * |G_i|
 			int k = i + counter[3];
 			// constraint |J_i| - r_max * |G_i| < 0
-			//			System.out.println("fluss_i: " + flux[i] + ", gibbs_i: "+ gibbs[i]);
 			IloNumExpr j_i = cplex.prod(cplex.abs(cplex.constant(flux[i])), x[i]);
 			IloNumExpr g_i = cplex.prod(cplex.abs(cplex.constant(gibbs[i])), x[k]);
 			IloNumExpr r_maxg = cplex.numExpr();
@@ -251,7 +249,6 @@ public class FluxBalanceAnalysis {
 			} else {
 				r_maxg = cplex.prod(r_max, x[k]);
 			}
-			//			System.out.println(", r_maxg: " + r_maxg + ", j_i:" + j_i);
 			cplex.addLe(cplex.diff(j_i, r_maxg), 0);
 			logger.log(Level.DEBUG, String.format("constraint |J_i| - r_max * |G_i| < 0:  "+ cplex.diff(j_i, r_maxg)+ " < " + 0 ));
 

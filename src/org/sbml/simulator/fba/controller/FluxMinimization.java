@@ -109,6 +109,8 @@ public class FluxMinimization implements TargetFunction {
 		this.gibbs = con.getGibbsEnergies();
 		if (gibbs != null) {
 			this.errorArray = FluxMinimizationUtils.computeError(gibbs.length);
+		} else {
+			this.errorArray = new double[0];
 		}
 
 		// compute the initial concentrations
@@ -117,7 +119,9 @@ public class FluxMinimization implements TargetFunction {
 		// compute L or let it be null if the Gibbs energies couldn't be computed
 		if(gibbs != null && document != null) {
 			this.L = computeL(document);
-		} 
+		} else {
+			L = new double[0];
+		}
 	}
 
 
@@ -183,7 +187,7 @@ public class FluxMinimization implements TargetFunction {
 					concentrations[i] = currentSpecies.getInitialConcentration();
 				} else if (currentSpecies.isSetInitialAmount()){
 					// divide through the volume of the compartment
-					if (currentSpecies.getCompartmentInstance().isSetSize()){
+					if (currentSpecies.getCompartmentInstance().isSetSize() && currentSpecies.getCompartmentInstance().getSize() != 0){
 						concentrations[i] = currentSpecies.getInitialAmount() / currentSpecies.getCompartmentInstance().getSize();
 					}
 				}
@@ -201,7 +205,6 @@ public class FluxMinimization implements TargetFunction {
 	public double[] computeTargetFunctionForQuadraticProgramming() {
 		// the function to minimize is: ||J|| + lambda1*sum((c_i - c_eq)^2) + lambda2*||L|| + lambda3*||E|| + lambda4*||G||
 
-		//TODO: Nullpointer if errorArray etc is null
 		// create the target vector 
 		double[] target = new double[fluxVector.length + 
 		                             errorArray.length + 
@@ -210,7 +213,9 @@ public class FluxMinimization implements TargetFunction {
 
 		// this is a pointer, which counts in the target vector the actually position
 		counterArray = new int[4];
-		fillCounterArray(fluxVector.length, errorArray.length, L.length);
+		fillCounterArray(fluxVector.length,
+				errorArray.length, 
+				L.length);
 		int counter = 0;
 
 		// fill it with the flux vector: ||J||
@@ -231,7 +236,7 @@ public class FluxMinimization implements TargetFunction {
 		// ||L||: lambda2*||L||
 		for (int h = 0; h < this.L.length; h++) {
 			if (!Double.isNaN(L[h])) {
-			target[counter] = lambda3 * Math.abs(L[h]);
+				target[counter] = lambda3 * Math.abs(L[h]);
 			} else {
 				target[counter] = lambda3;
 			}
@@ -352,6 +357,10 @@ public class FluxMinimization implements TargetFunction {
 	}
 
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.fba.controller.TargetFunction#getStoichiometricMatrix()
+	 */
 	@Override
 	public double[][] getStoichiometricMatrix() {
 		return N.getArray();
