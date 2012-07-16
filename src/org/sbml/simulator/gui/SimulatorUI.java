@@ -807,14 +807,18 @@ PropertyChangeListener {
 	public void startFBA() {
 		if (simPanel.getTabbedPane().getTabCount() < 6) {
 			FBAButtonPressedDialog dialog = new FBAButtonPressedDialog(SwingUtilities.getWindowAncestor(simPanel), ModalityType.DOCUMENT_MODAL);
-		    dialog.setLocationRelativeTo(simPanel);
-		    FBAPanel fbaPanel = new FBAPanel(simPanel.getModel().getSBMLDocument());
-		    fbaPanel.setSimulatorPanel(simPanel);
-		    simPanel.getTabbedPane().add(bundle.getString("TAB_FBA"), fbaPanel);
+			dialog.setLocationRelativeTo(simPanel);
+			FBAPanel fbaPanel = new FBAPanel(simPanel.getModel().getSBMLDocument());
+			fbaPanel.setSimulatorPanel(simPanel);
 			dialog.setVisible(true);
+			
+			if(dialog.hasFiles()) {
+				Component current = simPanel.getTabbedPane().add(bundle.getString("TAB_FBA"), fbaPanel);
+				simPanel.getTabbedPane().setSelectedComponent(current);
+			}
 		} else {
-			FBAPanel fbaPanel = ((FBAPanel) simPanel.getTabbedPane().getTabComponentAt(6));
-			fbaPanel.addConcentrations(null);
+			FBAPanel fbaPanel = ((FBAPanel) simPanel.getTabbedPane().getTabComponentAt(simPanel.getTabbedPane().getTabCount()-1));
+			//TODO
 		}
 	}
 

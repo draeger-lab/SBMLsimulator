@@ -95,6 +95,7 @@ public class FBAButtonPressedDialog extends JDialog implements ActionListener{
 	private boolean hasFiles;
 
 
+
 	/**
 	 * Creates a new dialog to load the files for flux balance analysis.
 	 * @param windowAncestor

@@ -18,16 +18,19 @@
 package org.sbml.simulator.fba.gui;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.LinkedList;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 
 import org.sbml.jsbml.Reaction;
@@ -46,7 +49,7 @@ import de.zbit.gui.layout.LayoutHelper;
  * @date 07.05.2012
  * @since 1.0
  */
-public class FBASettingPanel extends JPanel implements ActionListener{
+public class FBASettingPanel extends JPanel implements ActionListener, ChangeListener{
 
 	/**
 	 * 
@@ -57,7 +60,7 @@ public class FBASettingPanel extends JPanel implements ActionListener{
 	/**
 	 * Backup of the original values
 	 */
-	private double originalValues[];
+	private double originalValues[][];
 
 	/**
 	 * button to reset the changes
@@ -104,7 +107,6 @@ public class FBASettingPanel extends JPanel implements ActionListener{
 		super(new BorderLayout());
 		tab = new JTabbedPane();
 		init();
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -119,6 +121,9 @@ public class FBASettingPanel extends JPanel implements ActionListener{
 		init();
 	}
 
+	/**
+	 * initialize the whole panel with the different tabs
+	 */
 	private void init() {
 		initTabs(document);
 		
@@ -128,25 +133,23 @@ public class FBASettingPanel extends JPanel implements ActionListener{
 	    foot.add(buttonReset);
 	    
 	    tab.setSize(500, 800);
-	    add(tab, BorderLayout.CENTER);
+	    JScrollPane sp = new JScrollPane(tab);
+	    add(sp, BorderLayout.CENTER);
 	    add(foot, BorderLayout.SOUTH);
 		
 		this.setVisible(true);
 	}
 
+	/**
+	 * initialize the tabs
+	 * @param document2
+	 */
 	private void initTabs(SBMLDocument document2) {
 		if (document2 != null) {
 			// create the panel for the concentrations of species
 			JPanel speciesPanel = new JPanel();
-			LayoutHelper lh = new LayoutHelper(speciesPanel);
 			initSpecificTab(speciesPanel, document2.getModel().getListOfSpecies().toArray());
 			tab.add("Concentrations", speciesPanel);
-			
-			// create the panel for general properties
-			JPanel propertiesPanel = new JPanel();
-			initPropertyTab(propertiesPanel);
-			propertiesPanel.setVisible(true);
-			tab.add("Properties", propertiesPanel);
 			
 			// create the panel for the flux values
 			JPanel fluxPanel = new JPanel();
@@ -161,14 +164,37 @@ public class FBASettingPanel extends JPanel implements ActionListener{
 				e.printStackTrace();
 			}
 			tab.add("Fluxes", fluxPanel);
+			
+			// create the panel for general properties
+			JPanel propertiesPanel = new JPanel();
+			initPropertyTab(propertiesPanel);
+			propertiesPanel.setVisible(true);
+			tab.add("Properties", propertiesPanel);
 		}
 	}
 
+	/**
+	 * initialize the components of the properties tab
+	 * @param propertiesPanel
+	 */
 	private void initPropertyTab(JPanel propertiesPanel) {
-		// TODO Auto-generated method stub
-		
+		JPanel panel = new JPanel();
+		LayoutHelper lh = new LayoutHelper(panel);
+		String[] cbmodel = {"Fluss Minimierung", "Biomasse Maximierung"};
+		JComboBox cb = new JComboBox(cbmodel);
+		cb.setName("Zielfunktion");
+		cb.setSelectedIndex(0);
+		cb.getComponent(1).setEnabled(false);
+		lh.add(new JLabel("Zielfunktion: "));
+		lh.add(cb);
+		propertiesPanel.add(panel);
 	}
 
+	/**
+	 * initialize the components of the fluxes-/species-tab
+	 * @param panel
+	 * @param objects
+	 */
 	private void initSpecificTab(JPanel panel,
 			Object[] objects) {
 		if (objects != null){
@@ -181,15 +207,22 @@ public class FBASettingPanel extends JPanel implements ActionListener{
 					JPanel row_i = new JPanel(new BorderLayout());
 					concUpperBounds[i] = new JSpinner();
 					concUpperBounds[i].setValue(0.1);
+					concUpperBounds[i].addChangeListener(this);
 					concLowerBounds[i] = new JSpinner();
 					concLowerBounds[i].setValue(0);
+					concLowerBounds[i].addChangeListener(this);
 					Species currentSpec = (Species) objects[i];
 					JLabel specLabel = new JLabel(currentSpec.isSetName() ? currentSpec.getName() : currentSpec.getId());
 					
 					//add Components
-					row_i.add(specLabel);
-					row_i.add(concLowerBounds[i]);
-					row_i.add(concUpperBounds[i]);
+					LayoutHelper lh = new LayoutHelper(row_i);
+					lh.add(specLabel);
+					JPanel bounds = new JPanel();
+					LayoutHelper lh2 = new LayoutHelper(bounds);
+					lh2.add(concLowerBounds[i], 2, i, 1, 1, 0, 0);
+					lh2.add(concUpperBounds[i], 4, i, 1, 1, 0, 0);
+					lh.add(bounds);
+					panel.add(row_i);
 				}
 			} else if (objects[0] instanceof Reaction) {
 				fluxUpperBounds = new JSpinner[objects.length];
@@ -200,17 +233,22 @@ public class FBASettingPanel extends JPanel implements ActionListener{
 					JPanel row_i = new JPanel(new BorderLayout());
 					fluxUpperBounds[i] = new JSpinner();
 					fluxUpperBounds[i].setValue(10000);
+					fluxUpperBounds[i].addChangeListener(this);
 					fluxLowerBounds[i] = new JSpinner();
 					fluxLowerBounds[i].setValue(-10000);
+					fluxUpperBounds[i].addChangeListener(this);
 					Reaction currentReac = (Reaction) objects[i];
 					JLabel reacLabel = new JLabel(currentReac.isSetName() ? currentReac.getName() : currentReac.getId());
 					
 					//add Components
-					row_i.add(reacLabel, new FlowLayout(FlowLayout.LEFT));
+					LayoutHelper lh = new LayoutHelper(row_i);
+					lh.add(reacLabel);
 					JPanel bounds = new JPanel();
-					bounds.add(fluxLowerBounds[i]);
-					bounds.add(fluxUpperBounds[i]);
-					row_i.add(bounds, new FlowLayout(FlowLayout.CENTER));
+					LayoutHelper lh2 = new LayoutHelper(bounds);
+					lh2.add(fluxLowerBounds[i], 2, i, 1, 1, 0, 0);
+					lh2.add(fluxUpperBounds[i], 4, i, 1, 1, 0, 0);
+					lh.add(bounds);
+					panel.add(row_i);
 				}
 			}
 		}
@@ -224,6 +262,16 @@ public class FBASettingPanel extends JPanel implements ActionListener{
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
+	 */
+	@Override
+	public void stateChanged(ChangeEvent arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
