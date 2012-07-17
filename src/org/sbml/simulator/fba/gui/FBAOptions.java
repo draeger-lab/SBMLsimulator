@@ -1,6 +1,6 @@
 /*
  * $Id:  FBAProperties.java 15:29:01 Meike Aichele$
- * $URL: FBAProperties.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -63,37 +63,37 @@ public interface FBAOptions extends KeyProvider {
 
 
 	/**
-	 * 
+	 * Choose a target function
 	 */
 	public static final Option<String> DEFAULT_TARGET_FUNCTION = new Option<String>(
 			"DEFAULT_TARGET_FUNCTION", String.class, bundle, new Range<String>(String.class, Manipulators.getAllManipulators()), "Flux Minimization");
 	
 	/**
-	 * 
+	 * Change lambda1 to weight the concentrations in the target function
 	 */
 	public static final Option<Double> LAMBDA1 = new Option<Double>(
 			"LAMBDA1", Double.class, bundle, Double.valueOf(TargetFunction.lambda1));
 		
 	/**
-	 * 
+	 * Change lambda2 to weight the errors in the target function
 	 */
 	public static final Option<Double> LAMBDA2 = new Option<Double>(
 			"LAMBDA2", Double.class, bundle, Double.valueOf(TargetFunction.lambda2));
 		
 	/**
-	 * 
+	 * Change lambda3 to weight the L-Matrix in the target function
 	 */
 	public static final Option<Double> LAMBDA3 = new Option<Double>(
 			"LAMBDA3", Double.class, bundle, Double.valueOf(TargetFunction.lambda3));
 	
 	/**
-	 * 
+	 * Change lambda4 to weight the Gibbs energies in the target function
 	 */
 	public static final Option<Double> LAMBDA4 = new Option<Double>(
 			"LAMBDA4", Double.class, bundle, Double.valueOf(TargetFunction.lambda4));
 		
 	/**
-	 * 
+	 * Group of lambdas
 	 */
 	@SuppressWarnings("unchecked")
 	public static final OptionGroup<Double> SET_LAMBDAS = new OptionGroup<Double>(
@@ -101,34 +101,34 @@ public interface FBAOptions extends KeyProvider {
 			LAMBDA2, LAMBDA3, LAMBDA4);
 		
 	/**
-	 * 
+	 * Set the iterations for the CPLEX algorithm
 	 */
 	public static final Option<Integer> SET_INTERATIONS = new Option<Integer>(
 			"SET_INTERATIONS", Integer.class, bundle, new Range<Integer>(
                     Integer.class, "{(1, 100000]}"), Integer.valueOf(600));
 	
 	/**
-	 * 
+	 * Choose to activate the constraint J*G < 0
 	 */
 	public static final Option<Boolean> ACTIVATE_CONSTRAINT_JG_LESS_THAN_0 = new Option<Boolean>(
 			"ACTIVATE_CONSTRAINT_JG_LESS_THAN_0", Boolean.class, bundle, Boolean.FALSE);
 	
 	
 	/**
-	 * 
+	 * Choose to activate the constraint |J|-r_max*|G| < 0
 	 */
 	public static final Option<Boolean> ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0 = new Option<Boolean>(
 			"ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0", Boolean.class, bundle, Boolean.FALSE);
 	
 	/**
-	 * 
+	 * Choose to activate the constraint J>0
 	 */
 	public static final Option<Boolean> ACTIVATE_CONSTRAINT_J_GREATER_THAN_0 = new Option<Boolean>(
 			"ACTIVATE_CONSTRAINT_J_GREATER_THAN_0", Boolean.class, bundle, Boolean.FALSE);
 	
 	
 	/**
-	 * 
+	 * Group to active some constraints
 	 */
 	@SuppressWarnings("unchecked")
 	public static final OptionGroup<Boolean> SET_CONSTRAINTS = new OptionGroup<Boolean>(
