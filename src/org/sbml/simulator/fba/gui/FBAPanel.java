@@ -23,23 +23,17 @@ import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.BorderFactory;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
-import javax.swing.JToolBar;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
 import org.sbml.jsbml.SBMLDocument;
+import org.sbml.simulator.fba.controller.Constraints;
 import org.sbml.simulator.fba.controller.FluxBalanceAnalysis;
-import org.sbml.simulator.gui.InteractiveScanPanel;
 import org.sbml.simulator.gui.LegendPanel;
-import org.sbml.simulator.gui.QuantitySelectionPanel;
 import org.sbml.simulator.gui.SimulationPanel;
-import org.sbml.simulator.gui.SimulationToolPanel;
-import org.sbml.simulator.gui.SimulationVisualizationPanel;
 
-import de.zbit.gui.layout.LayoutHelper;
 
 /**
  * @author Meike Aichele
@@ -48,6 +42,7 @@ import de.zbit.gui.layout.LayoutHelper;
  * @since 1.0
  */
 public class FBAPanel extends JPanel implements ActionListener, TableModelListener{
+
 
 	/**
 	 * the FBAPanel consists of 3 components:
@@ -62,18 +57,18 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	private SBMLDocument currentDoc;
 	private FluxBalanceAnalysis fba;
 	private SimulationPanel simPanel;
+	private File gibbsFile;
+	private File concFile;
 	private static final long serialVersionUID = 1L;
-	
-	public FBAPanel (SBMLDocument document, File resultfile) {
+
+	public FBAPanel (SBMLDocument document, File ... files) {
 		super(new BorderLayout());
-//		try {
-//			fba = new FluxBalanceAnalysis(document);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		String[] columnNamesForChartFluxes = {"reactions","flux value"};
-//		String[] columnNamesForChartConc = {"species", "concentration value"};
-//		this.chart = new ChartPanel(columnNamesForChartConc, columnNamesForChartFluxes);
+		try {
+			fba = new FluxBalanceAnalysis(document);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		this.chart = new ChartPanel();
 		this.settings = new FBASettingPanel();
 		this.vod = new VODPanel();
@@ -89,37 +84,27 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 		this.vod = new VODPanel();
 		setVisible(true);
 	}
-	
-	public boolean addConcentrations(File conc_file) {
-		if (fba != null && conc_file != null) {
-			//TODO set concentrations
-		}
-		return true;
-	}
-	
-	public boolean addGibbsValues(File gibbs_file) {
-		return true;
-	}
+
 
 	private void init() {
 		JSplitPane jsp = new JSplitPane();
 		vod.setBorder(BorderFactory.createLoweredBevelBorder());
-		
+
 		// legend panel
 		LegendPanel legendPanel = new LegendPanel(currentDoc.getModel(), true);
-	    legendPanel.addTableModelListener(this);
-	    legendPanel.setBorder(BorderFactory.createLoweredBevelBorder());
-	    
-	    // split left components
-	    JSplitPane topDown = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true,
-	      legendPanel, settings);
-	    topDown.setDividerLocation(topDown.getDividerLocation() + 100);
-	    
-	    // split all
-	    jsp.setLeftComponent(topDown);
-	    jsp.setRightComponent(vod);
-	    jsp.setDividerLocation(topDown.getDividerLocation() + 200);
-	    
+		legendPanel.addTableModelListener(this);
+		legendPanel.setBorder(BorderFactory.createLoweredBevelBorder());
+
+		// split left components
+		JSplitPane topDown = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true,
+				legendPanel, settings);
+		topDown.setDividerLocation(topDown.getDividerLocation() + 100);
+
+		// split all
+		jsp.setLeftComponent(topDown);
+		jsp.setRightComponent(vod);
+		jsp.setDividerLocation(topDown.getDividerLocation() + 200);
+
 		add(jsp);
 	}
 
@@ -183,13 +168,13 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void tableChanged(TableModelEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	/**
@@ -204,6 +189,34 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	 */
 	public void setCurrentDoc(SBMLDocument currentDoc) {
 		this.currentDoc = currentDoc;
+	}
+
+	/**
+	 * @param gibbsFile the gibbsFile to set
+	 */
+	public void setGibbsFile(File gibbsFile) {
+		this.gibbsFile = gibbsFile;
+	}
+
+	/**
+	 * @return the gibbsFile
+	 */
+	public File getGibbsFile() {
+		return gibbsFile;
+	}
+
+	/**
+	 * @param concFile the concFile to set
+	 */
+	public void setConcFile(File concFile) {
+		this.concFile = concFile;
+	}
+
+	/**
+	 * @return the concFile
+	 */
+	public File getConcFile() {
+		return concFile;
 	}
 
 }
