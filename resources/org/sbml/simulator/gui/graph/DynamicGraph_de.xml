@@ -114,8 +114,6 @@
   <entry key="DATA_NOT_AVAILABLE">Der zur Visualisierung ausgewählte Datensatz steht momentan nicht zur Verfügung.</entry>
   <entry key="GROUP_VIDEO_ENCODING">Video- und Bilderstellung</entry>
   <entry key="GROUP_VIDEO_ENCODING_TOOLTIP">Diese Optionen beeinflussen die Video- und Bilderstellung.</entry>
-  <entry key="VIDEO_TIMESTAMP">Zeitstempel</entry>
-  <entry key="VIDEO_TIMESTAMP_TOOLTIP">Je niedriger diese Einstellung, desto schneller und kürzer wird das resultierende Video.</entry>
   <entry key="VIDEO_IMAGE_STEPSIZE">Bilderschrittweite</entry>
   <entry key="VIDEO_IMAGE_STEPSIZE_TOOLTIP">Hier können Sie einstellen, nach wie vielen Zeitschritten ein Bild für das Video gemacht werden soll. Je geringer die Bilderschrittweite, desto mehr Bilder werden generiert und desto glatter sind die Übergänge im Video.</entry>    
   <entry key="VIDEO_RESOLUTION_MULTIPLIER">Auflösungsmultiplikator</entry>

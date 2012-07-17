@@ -163,9 +163,6 @@ public class DynamicController implements ChangeListener, ActionListener,
                     height = (height % 2) == 1 ? height - 1 : height;
                     logger.fine("Video out resolution = " + width + "x"
                             + height);
-
-//                    int timestamp = (int) prefs
-//                            .getDouble(GraphOptions.VIDEO_TIMESTAMP);
                     
                     int captureStepSize = (int) prefs
                             .getDouble(GraphOptions.VIDEO_IMAGE_STEPSIZE);
@@ -210,7 +207,7 @@ public class DynamicController implements ChangeListener, ActionListener,
 
                         // catch errors due to videoencoding
                         try {
-                            core.generateVideo(width, height, timestamp,
+                            core.generateVideo(view, width, height, timestamp,
                                     captureStepSize,
                                     destinationFile.getAbsolutePath());
                             
@@ -505,12 +502,11 @@ public class DynamicController implements ChangeListener, ActionListener,
                         prefs.getDefault(GraphOptions.MAX_LINE_WIDTH));
             }
             
-            //TODO redraw options panel after "accept"
-//            try {
-//                prefs.flush();
-//            } catch (BackingStoreException e) {
-//                e.printStackTrace();
-//            }
+            try {
+                prefs.flush();
+            } catch (BackingStoreException e) {
+                e.printStackTrace();
+            }
             
             view.setGraphManipulator(getSelectedGraphManipulator());
         }
