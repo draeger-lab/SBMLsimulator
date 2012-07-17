@@ -23,7 +23,7 @@ package org.sbml.simulator.fba.controller;
  * @date 07.05.2012
  * @since 1.0
  */
-public interface TargetFunction {
+public abstract class TargetFunction {
 	
 	public static double lambda1 = 10;
 	public static double lambda2 = 10;
@@ -34,36 +34,37 @@ public interface TargetFunction {
 	 * This method gives an array back, which contains the target function for quadratic programming 
 	 * @return double[]
 	 */
-	public double[] computeTargetFunctionForQuadraticProgramming();
+	public abstract double[] computeTargetFunctionForQuadraticProgramming();
 
 	/**
 	 * @return true, if the target function belongs to a minimization problem
 	 */
-	public boolean isMinProblem();
+	public abstract boolean isMinProblem();
 	
 	/**
 	 * @return the computed flux vector
 	 */
-	public double[] getFluxVector();
+	public abstract double[] getFluxVector();
 	
 	/**
 	 * @return the computed Gibbs energies
 	 */
-	public double[] getGibbs();
+	public abstract double[] getGibbs();
 
 	/**
 	 * @return the computed concentrations
 	 */
-	public double[] getConcentrations();
+	public abstract double[] getConcentrations();
 	
 	/**
 	 * @return the counter array to see where in the target array the different components 
 	 * like the flux vector are.
 	 */
-	public int[] getCounterArray();
+	public abstract int[] getCounterArray();
 	
 	/**
 	 * @return the computed stoichiometric matrix N.
 	 */
-	public double[][] getStoichiometricMatrix();
+	public abstract double[][] getStoichiometricMatrix();
+
 }

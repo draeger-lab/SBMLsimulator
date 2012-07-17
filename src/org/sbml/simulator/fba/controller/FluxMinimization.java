@@ -35,7 +35,7 @@ import eva2.tools.math.Jama.Matrix;
  * @date 07.05.2012
  * @since 1.0
  */
-public class FluxMinimization implements TargetFunction {
+public class FluxMinimization extends TargetFunction {
 
 	/**
 	 * To compute a flux minimization, we need an error-value-array 
@@ -313,7 +313,6 @@ public class FluxMinimization implements TargetFunction {
 	 * (non-Javadoc)
 	 * @see org.sbml.simulator.fba.controller.TargetFunction#isMinProblem()
 	 */
-	@Override
 	public boolean isMinProblem() {
 		return true;
 	}
@@ -338,7 +337,6 @@ public class FluxMinimization implements TargetFunction {
 	 * (non-Javadoc)
 	 * @see org.sbml.simulator.fba.controller.TargetFunction#getFluxVector()
 	 */
-	@Override
 	public double[] getFluxVector() {
 		return this.fluxVector;
 	}
@@ -361,7 +359,6 @@ public class FluxMinimization implements TargetFunction {
 	 * (non-Javadoc)
 	 * @see org.sbml.simulator.fba.controller.TargetFunction#getStoichiometricMatrix()
 	 */
-	@Override
 	public double[][] getStoichiometricMatrix() {
 		return N.getArray();
 	}
