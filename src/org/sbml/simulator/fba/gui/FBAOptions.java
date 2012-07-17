@@ -17,11 +17,12 @@
  */
 package org.sbml.simulator.fba.gui;
 
+import java.io.File;
 import java.util.ResourceBundle;
 
-import org.sbml.simulator.fba.controller.FluxBalanceAnalysis;
 import org.sbml.simulator.fba.controller.TargetFunction;
 
+import de.zbit.io.filefilter.SBFileFilter;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.Option;
@@ -103,8 +104,8 @@ public interface FBAOptions extends KeyProvider {
 	/**
 	 * Set the iterations for the CPLEX algorithm
 	 */
-	public static final Option<Integer> SET_INTERATIONS = new Option<Integer>(
-			"SET_INTERATIONS", Integer.class, bundle, new Range<Integer>(
+	public static final Option<Integer> SET_ITERATIONS = new Option<Integer>(
+			"SET_ITERATIONS", Integer.class, bundle, new Range<Integer>(
                     Integer.class, "{(1, 100000]}"), Integer.valueOf(600));
 	
 	/**
@@ -133,5 +134,38 @@ public interface FBAOptions extends KeyProvider {
 	@SuppressWarnings("unchecked")
 	public static final OptionGroup<Boolean> SET_CONSTRAINTS = new OptionGroup<Boolean>(
 			"SET_CONSTRAINTS", bundle, ACTIVATE_CONSTRAINT_JG_LESS_THAN_0, ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0, ACTIVATE_CONSTRAINT_J_GREATER_THAN_0);
+
+	/**
+	 * Group to set the target function and the iterations
+	 */
+	@SuppressWarnings("unchecked")
+	public static final OptionGroup<?> SET_TARGET_AND_ITERATIONS = new OptionGroup<Object>(
+			"SET_TARGET_AND_ITERATIONS", bundle, DEFAULT_TARGET_FUNCTION, SET_ITERATIONS);
+
+
+	/**
+	 * load a Gibbs file
+	 */
+	public static final Option<File> LOAD_GIBBS_FILE = new Option<File>(
+			"LOAD_GIBBS_FILE", File.class, bundle, new Range<File>(File.class,
+					SBFileFilter.createCSVFileFilter()), new File(
+					System.getProperty("user.dir")));
+	
+	/**
+	 * Load a concentration file
+	 */
+	public static final Option<File> LOAD_CONCENTRATION_FILE = new Option<File>(
+			"LOAD_CONCENTRATION_FILE", File.class, bundle, new Range<File>(File.class,
+					SBFileFilter.createCSVFileFilter()), new File(
+					System.getProperty("user.dir")));
+	
+	
+	/**
+	 * Group to load files
+	 */
+	@SuppressWarnings("unchecked")
+	public static final OptionGroup<File> FILES = new OptionGroup<File>(
+			"FILES", bundle, LOAD_GIBBS_FILE, LOAD_CONCENTRATION_FILE);
+
 	
 }
