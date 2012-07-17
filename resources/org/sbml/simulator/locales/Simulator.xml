@@ -86,6 +86,19 @@
   <entry key="INTEGRATION_STRATEGY">Integration strategy</entry>
   <entry key="INTEGRATION_STRATEGY_TOOLTIP">Select whether or not to apply a multiple shooting strategy.</entry>
   
+  <!-- FBAOptions -->
+  <entry key="ACTIVATE_CONSTRAINT_JG_LESS_THAN_0">Set the constraint J*G less than 0  on</entry>
+  <entry key="ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0">Set the constraint |J| - r_max*|G| less than 0 on</entry>
+  <entry key="ACTIVATE_CONSTRAINT_J_GREATER_THAN_0">Set the constraint J greater than 0 on</entry>
+  <entry key="DEFAULT_TARGET_FUNCTION">The default target function is always flux minimization</entry>
+  <entry key="LAMBDA1">A double value required to weight the concentrations</entry>
+  <entry key="LAMBDA2">A double value required to weight the errors</entry>
+  <entry key="LAMBDA3">A double value required to weight the L-matrix</entry>
+  <entry key="LAMBDA4">A double value required to weight the computed Gibbs energies</entry>
+  <entry key="SET_CONSTRAINTS">Constraints</entry>
+  <entry key="SET_LAMBDAS">Lambdas</entry>
+  <entry key="SET_INTERATIONS">Requires a number of iterations for the CPLEX algorithm</entry>
+  
   <!-- EstimationProblem -->
   
   <entry key="KIND_OF_SHOOTING">Using {0} shooting!</entry>
