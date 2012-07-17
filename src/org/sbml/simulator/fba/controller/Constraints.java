@@ -102,11 +102,11 @@ public class Constraints {
 			SBMLDocument doc = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(document);
 			gibbsEnergies = new double[steadyStateGibbs.length];
 			
-			// compute delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum(N[j][i] * ln(c_eq[j]))
-			for (int i=0; i< steadyStateGibbs.length; i++) {
+			// compute delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum(N[j][i] * ln(c_eq[j])) 
+			for (int i=0; i< document.getModel().getReactionCount(); i++) {
 				double sum = 0;
 				// compute sum( N[i][j] * c_eq[j] )
-				for (int j=0; j< N.getRowDimension(); j++) {
+				for (int j=0; j< document.getModel().getSpeciesCount(); j++) {
 					if (!Double.isNaN(equilibriumConcentrations[j])) {
 						sum += N.get(j, i) * Math.log(equilibriumConcentrations[j]);
 					} 
@@ -115,14 +115,14 @@ public class Constraints {
 				// look if there is a reversible reaction and set the reverse reaction gibbs energie
 				if (FluxMinimizationUtils.reversibleReactions.contains(doc.getModel().getReaction(i).getId())) {
 					if (doc.getModel().containsReaction(doc.getModel().getReaction(i).getId() + "_rev")) {	
-						gibbsEnergies[i] = (steadyStateGibbs[i]*1000) + R*T*sum;
+						gibbsEnergies[i] = (steadyStateGibbs[i]) + ((R*T*sum)/1000);
 						int index_of_rev_reac = doc.getModel().getListOfReactions().getIndex(doc.getModel().getReaction(doc.getModel().getReaction(i).getId() + "_rev"));
 						// set the gibbs energie of the reverse reaction to the negtive 
 						gibbsEnergies[index_of_rev_reac] = gibbsEnergies[i] * (-1);
 					}
 				} else {
 					// it's no reversible reaction
-					gibbsEnergies[i] = (steadyStateGibbs[i]*1000) + R*T*sum;
+					gibbsEnergies[i] = (steadyStateGibbs[i]) + ((R*T*sum)/1000);
 				}
 			}
 		}

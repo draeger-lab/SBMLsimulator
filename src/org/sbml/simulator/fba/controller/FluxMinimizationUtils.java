@@ -54,10 +54,10 @@ public class FluxMinimizationUtils {
 		// fill the fluxVector
 		for (int row = 0; row < N.getColumnDimension(); row++) {
 			if (targetFluxes == null || isNoTargetFlux(row, targetFluxes, doc)) {
-				fluxVector[row] =steadyStateMatrix.get(row,0);
+				fluxVector[row] =steadyStateMatrix.get(row,steadyStateMatrix.getColumnDimension()-1);
 				if (Math.abs(fluxVector[row]) < Math.pow(10, -15)) {
 					//then the value is similar to 0 and the flux is 0
-					fluxVector[row] = 0;
+//					fluxVector[row] = 0;
 				}
 			} else {
 				fluxVector[row] = 0;
@@ -159,8 +159,9 @@ public class FluxMinimizationUtils {
 		SBMLDocument doc = eliminateTransports(document);
 		SBMLDocument revReacDoc = doc.clone();
 		//split the reversible reactions
+		int metaid = 0;
 		for (int i = 0; i < doc.getModel().getReactionCount(); i++) {
-			Reaction currentReac = doc.getModel().getReaction(i);
+			Reaction currentReac = revReacDoc.getModel().getReaction(doc.getModel().getReaction(i).getId());
 			if (currentReac.isReversible()) {
 				reversibleReactions.add(currentReac.getId());
 				reversibleReactions.add(currentReac.getId() + "_rev");
@@ -170,21 +171,22 @@ public class FluxMinimizationUtils {
 				createdReac.setName(currentReac.getName() + "_rev");
 				createdReac.getListOfProducts().clear();
 				createdReac.getListOfReactants().clear();
-				for (int j = 0; j < currentReac.getListOfReactants().size(); j++) {
+				for (int j = 0; j < currentReac.getReactantCount(); j++) {
 					SpeciesReference sr = currentReac.getReactant(j).clone();
-					sr.setMetaId(currentReac.getReactant(j).getMetaId() + "_rev");
-					sr.setThisAsParentSBMLObject(currentReac.getProduct(0).getParent());
+					sr.setMetaId(metaid + "_rev");
+					metaid++;
 					createdReac.addProduct(sr);
 				}
-				for (int k = 0; k < currentReac.getListOfProducts().size(); k++) {
+
+				for (int k = 0; k < currentReac.getProductCount(); k++) {
 					SpeciesReference sr = currentReac.getProduct(k).clone();
-					sr.setMetaId(currentReac.getProduct(k).getMetaId() + "_rev");
-					sr.setThisAsParentSBMLObject(currentReac.getReactant(0).getParent());
+					sr.setMetaId(metaid + "_rev");
+					metaid++;
 					createdReac.addReactant(sr);
 				}
 				createdReac.setReversible(false);
 				revReacDoc.getModel().addReaction(createdReac);
-				revReacDoc.getModel().getReaction(i).setReversible(false);
+				currentReac.setReversible(false);
 			}
 		}
 		// return the new document

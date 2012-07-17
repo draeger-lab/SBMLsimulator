@@ -89,6 +89,11 @@ public class FluxBalanceAnalysis {
 
 	private static final transient Logger logger = Logger.getLogger(FluxBalanceAnalysis.class);
 
+	private boolean constraintJG = true;
+
+	private boolean constraintJr_maxG = true;
+
+	private int cplexIterations = 500;
 
 	// CONSTRUCTORS:	
 
@@ -163,11 +168,11 @@ public class FluxBalanceAnalysis {
 		// create upper bounds (ub) and lower bounds (lb) for the variables x
 		int[] counter = targetFunc.getCounterArray();
 		// counter[3] contains the index of the gibbs vector
-		for (int i = 0; i< counter[3]; i++) {
-			lb[i]= Double.NEGATIVE_INFINITY; 
-			ub[i] = Double.MAX_VALUE;
+		for (int i = 0; i< counter[1]; i++) {
+			lb[i]= -100000; 
+			ub[i] = 100000;
 		}
-		for (int g = counter[3]; g < target.length; g++) {
+		for (int g = counter[2]; g < target.length; g++) {
 			lb[g] = -100000;
 			ub[g] = 100000;
 		}
@@ -207,32 +212,34 @@ public class FluxBalanceAnalysis {
 
 		// only for FluxMinimization the target function has to be minimized
 		if (targetFunc instanceof FluxMinimization) {
-			cplex.addMinimize(lin);
+			cplex.addMinimize(cplex_target);
 		} else {
 			cplex.addMaximize(cplex_target);
 		}
 
-		for (int i = 0; i < x.length; i++) {
-			if (i < counter[1]) {
-				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
-				System.out.println("  flux");
-			} else if (i < counter[2]) {
-				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
-				System.out.println("  E");
-			} else if (i < counter[3]) {
-				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
-				System.out.println("  L");
-			} else if (i < target.length) {
-				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
-				System.out.println("  gibbs");
-			} else {
-				System.out.print(i + ": " + concentrations[i-target.length] + "    x: "+ x[i]);
-				System.out.println("  conc");
-			}
-		}
+//		
+//		for (int i = 0; i < x.length; i++) {
+//			if (i < counter[1]) {
+//				System.out.print(FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(constraints.document).getModel().getReaction(i).getId() + ": " + target[i] + "    x: "+ x[i]);
+//				System.out.println("  flux");
+//			} else if (i < counter[2]) {
+//				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
+//				System.out.println("  E");
+//			} else if (i < counter[3]) {
+//				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
+//				System.out.println("  L");
+//			} else if (i < target.length) {
+//				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
+//				System.out.println("  gibbs");
+//			} else {
+//				System.out.print(i + ": " + concentrations[i-target.length] + "    x: "+ x[i]);
+//				System.out.println("  conc");
+//			}
+//		}
 
 		//CONSTRAINTS
 
+		SBMLDocument sbml = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(constraints.document);
 		double[] flux = targetFunc.getFluxVector();
 		double[] gibbs = constraints.getGibbsEnergies();
 		double r_max = constraints.computeR_max(flux);
@@ -245,31 +252,28 @@ public class FluxBalanceAnalysis {
 			IloNumExpr g_i = cplex.prod(cplex.abs(cplex.constant(gibbs[i])), x[k]);
 			IloNumExpr r_maxg = cplex.numExpr();
 			if (!Double.isNaN(gibbs[i]) && !Double.isInfinite(gibbs[i])) {
-				r_maxg = cplex.prod(r_max, g_i);
+				r_maxg = cplex.prod(r_max, cplex.abs(cplex.constant(gibbs[i])));
+				
 			} else {
 				r_maxg = cplex.prod(r_max, x[k]);
 			}
-			cplex.addLe(cplex.diff(j_i, r_maxg), 0);
-			logger.log(Level.DEBUG, String.format("constraint |J_i| - r_max * |G_i| < 0:  "+ cplex.diff(j_i, r_maxg)+ " < " + 0 ));
-
+			if (isConstraintJr_maxG()) {
+				cplex.addLe(cplex.diff(j_i, r_maxg), -Double.MIN_VALUE);
+				logger.log(Level.DEBUG, String.format("constraint |J_i| - r_max * |G_i| < 0:  "+ cplex.diff(j_i, r_maxg)+ " < " + 0 ));
+			}
+			
+			cplex.addGe(cplex.prod(cplex.constant(flux[i]), x[i]), 0);
 			// constraint J_i * G_i < 0
 			IloNumExpr jg = cplex.numExpr();
 			if (!Double.isNaN(gibbs[i]) && !Double.isInfinite(gibbs[i])) {
-				jg = cplex.prod(cplex.prod(flux[i], x[i]),cplex.prod(gibbs[i],x[k]));
+				jg = cplex.prod(cplex.prod(flux[i], x[i]),gibbs[i]);
 			} else {
 				jg = cplex.prod(cplex.prod(flux[i], x[i]),x[k]);
 			}
-			cplex.addLe(jg, 0);
-			logger.log(Level.DEBUG, String.format("constraint J_i * G_i: " + jg + " <= " + 0));
-		}
-
-		for (int i = 0; i < concentrations.length; i++) {
-			if (Double.isNaN(concentrations[i])) {
-				cplex.addRange(Math.pow(10, -10), x[i+target.length], Math.pow(10, -1));
-				logger.log(Level.DEBUG, String.format(Math.pow(10, -10) + " <= " + x[i+target.length] + " <= " + Math.pow(10, -1)));
-			} else {
-				cplex.addRange(Math.pow(10, -10), cplex.prod(concentrations[i], x[i+target.length]), Math.pow(10, -1));
-				logger.log(Level.DEBUG, String.format(Math.pow(10, -10) + " <= " + cplex.prod(concentrations[i], x[i+target.length]) + " <= " + Math.pow(10, -1)));
+			if (isConstraintJG()) {
+				cplex.addLe(jg, -Double.MIN_VALUE);
+				System.out.println(sbml.getModel().getReaction(i) + ": " + jg + " < " + 0);
+				logger.log(Level.DEBUG, String.format("constraint J_i * G_i: " + jg + " <= " + 0));
 			}
 		}
 
@@ -279,7 +283,7 @@ public class FluxBalanceAnalysis {
 		//		cplex.setOut(null);
 
 		//set the iteration limit: without doing this, cplex iterates 2100000000 times...
-		cplex.setParam(IloCplex.IntParam.BarItLim, 50);
+		cplex.setParam(IloCplex.IntParam.BarItLim, cplexIterations );
 
 		cplex.solve();
 		// get the from cplex computed values for the variables x
@@ -396,5 +400,79 @@ public class FluxBalanceAnalysis {
 			}
 			System.out.print(sum + "  ");
 		}
+	}
+
+	/**
+	 * Sets lambda1
+	 * @param lambda
+	 */
+	public void setLambda1(double lambda) {
+		TargetFunction.lambda1 = lambda;
+	}
+
+	/**
+	 * Sets lambda2
+	 * @param lambda
+	 */
+	public void setLambda2(double lambda) {
+		TargetFunction.lambda2 = lambda;
+	}
+
+	/**
+	 * Sets lamda3
+	 * @param lambda
+	 */
+	public void setLambda3(double lambda) {
+		TargetFunction.lambda3 = lambda;
+	}
+
+	/**
+	 * Sets lambda4 
+	 * @param lambda
+	 */
+	public void setLambda4(double lambda) {
+		TargetFunction.lambda4 = lambda;
+	}
+
+	/**
+	 * @param constraintJG the constraintJG to set
+	 */
+	public void setConstraintJG(boolean constraintJG) {
+		this.constraintJG = constraintJG;
+	}
+
+	/**
+	 * @return the constraintJG
+	 */
+	public boolean isConstraintJG() {
+		return constraintJG;
+	}
+
+	/**
+	 * @param constraintJr_maxG the constraintJr_maxG to set
+	 */
+	public void setConstraintJr_maxG(boolean constraintJr_maxG) {
+		this.constraintJr_maxG = constraintJr_maxG;
+	}
+
+	/**
+	 * @return the constraintJr_maxG
+	 */
+	public boolean isConstraintJr_maxG() {
+		return constraintJr_maxG;
+	}
+
+	/**
+	 * @return the cplexIterations
+	 */
+	public int getCplexIterations() {
+		return cplexIterations;
+	}
+
+	/**
+	 * @param cplexIterations the cplexIterations to set
+	 */
+	public void setCplexIterations(int cplexIterations) {
+		this.cplexIterations = cplexIterations;
 	}
 }
