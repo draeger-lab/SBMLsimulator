@@ -260,7 +260,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
 
             // activate controlpanel
             controlPanel.setCore(visualizedCore);
-
+            
             // get user chosen graphmanipulator
             graphManipulator = controller.getSelectedGraphManipulator();
             //show core's current timepoint
@@ -396,9 +396,9 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
     @Override
     public void propertyChange(PropertyChangeEvent e) {
         if (e.getPropertyName().equals("done")) {
+            //simulation done
             final MultiTable data = (MultiTable) e.getNewValue();
             final DynamicView thisView = this;
-            // simulation done
             if (data != null) {
                 /*
                  * Computation of limits in own swingworker because of O(n^2).
@@ -439,7 +439,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
                 };
                 computationOfLimits.execute();
             }
-        } else if (e.getPropertyName().equals("measurements")){
+        } else if (e.getPropertyName().equals("measurements")) {
             //experimental data added
             MultiTable expData = (MultiTable) e.getNewValue();
             if (expData != null){
@@ -488,6 +488,15 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
                 };
                 computationOfLimits.execute();
             }
+        } else if (e.getPropertyName().equals("video_progress")) {
+            /*
+             * progression of video generation.
+             * Fire "progress" property such that the progressBar is updated
+             */
+            this.firePropertyChange("progress", null, e.getNewValue());
+        } else if (e.getPropertyName().equals("video_done")) {
+            //fire "done" property such that the progressBar is updated
+            this.firePropertyChange("done", null, null);
         }
     }
     

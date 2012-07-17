@@ -413,6 +413,7 @@ public class SimulationPanel extends JPanel implements
         simulationManager.addPropertyChangeListener(dynamicGraphView); //get simulation data when finished
         foot.addPreferenceChangeListener(dynamicGraphView.getDynamicController()); //get changed options
         this.addPropertyChangeListener(dynamicGraphView); //get experimental data
+        dynamicGraphView.addPropertyChangeListener(this); //use of progressBar
 //        TranslatorSBMLgraphPanel graphView = new TranslatorSBMLgraphPanel(getModel().getSBMLDocument(), false);
         
         tabbedPane = new JTabbedPane();

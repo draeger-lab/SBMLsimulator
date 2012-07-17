@@ -114,8 +114,6 @@
   <entry key="DATA_NOT_AVAILABLE">Chosen data set for visualization is not available by now.</entry>
   <entry key="GROUP_VIDEO_ENCODING">Video encoding / Screenshot settings</entry>
   <entry key="GROUP_VIDEO_ENCODING_TOOLTIP">These settings control video encoding and screenshot settings.</entry>
-  <entry key="VIDEO_TIMESTAMP">Time-stamp</entry>
-  <entry key="VIDEO_TIMESTAMP_TOOLTIP">The lower this setting, the faster and shorter is the resulting video.</entry>
   <entry key="VIDEO_IMAGE_STEPSIZE">Skipped timepoints</entry>
   <entry key="VIDEO_IMAGE_STEPSIZE_TOOLTIP">Choose how many timepoints are skipped to produce the video. The less timepoints are skipped, the smoother the output video will get.</entry>    
   <entry key="VIDEO_RESOLUTION_MULTIPLIER">Resolution multiplier</entry>
