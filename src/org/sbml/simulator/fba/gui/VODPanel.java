@@ -18,13 +18,21 @@
 package org.sbml.simulator.fba.gui;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import java.awt.Color;
+import java.awt.GradientPaint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.category.SlidingCategoryDataset;
+
 
 /**
  * This class represents a panel for the Visualization Of Datasets (VOD)
@@ -35,36 +43,78 @@ import javax.swing.JPanel;
  * @date 07.05.2012
  * @since 1.0
  */
-
 public class VODPanel extends JPanel implements ActionListener{
 
 	/**
 	 * default serial version
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	private double[] fluxes;
 	private double[] concentrations;
-	private double[] gibbs_values;
 	
+	private JPanel plot;
+
+
+	/**
+	 * Default constructor
+	 */
 	public VODPanel() {
-		JPanel plot = new JPanel(new BorderLayout());
-		JLabel label = new JLabel("here will be the panel to visualize the computed values of flux balance analysis");
-		plot.setSize(200, 200);
-		plot.add(label, BorderLayout.CENTER);
-		
-		JPanel changePlotPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		JButton switchButton = new JButton("Change to dynamic View");
-		switchButton.addActionListener(this);
-		changePlotPanel.add(switchButton, BorderLayout.EAST);
-		
-		add(plot, BorderLayout.CENTER);
-		add(changePlotPanel, BorderLayout.SOUTH);
+		plot = new JPanel(new BorderLayout());
+//		plot.setSize(100, 100);
+	}
+
+	/**
+	 * Sets the bar-plot 
+	 */
+	public void init() {
+		DefaultCategoryDataset underlying = new DefaultCategoryDataset();
+		for (int i = 0; i < fluxes.length; i++) {
+			underlying.setValue(fluxes[i], "", Integer.toString(i));
+		}
+		SlidingCategoryDataset scd = new SlidingCategoryDataset(underlying, 0, fluxes.length-1);
+
+		JFreeChart jfreechart = createChart(scd);
+		org.jfree.chart.ChartPanel chartpanel = new org.jfree.chart.ChartPanel(jfreechart);
+
+		plot.add(chartpanel, BorderLayout.CENTER);
+		this.add(plot, BorderLayout.CENTER);
+//		JPanel changePlotPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		//		JButton switchButton = new JButton("Change to dynamic View");
+		//		switchButton.addActionListener(this);
+		//		changePlotPanel.add(switchButton, BorderLayout.EAST);
+		//		
+//		add(changePlotPanel, BorderLayout.SOUTH);
 		setVisible(true);
 	}
 
-	
-	
+	/**
+	 * Sets the conditions of the plot (name, axes, etc.)
+	 * @param dataset
+	 * @return
+	 */
+	private static JFreeChart createChart(SlidingCategoryDataset dataset) {
+		JFreeChart jfreechart = ChartFactory.createBarChart("Steady-State Fluxes", "Reaction", "Value", dataset, false);
+		CategoryPlot cplot = (CategoryPlot) jfreechart.getPlot();
+
+		CategoryAxis domainAxis = cplot.getDomainAxis();
+		domainAxis.setMaximumCategoryLabelWidthRatio(0.8f);
+		domainAxis.setLowerMargin(0.02);
+		domainAxis.setUpperMargin(0.02);
+
+		// disable bar outlines...
+		BarRenderer renderer = (BarRenderer) cplot.getRenderer();
+		renderer.setDrawBarOutline(false);
+
+		// set up gradient paints for series...
+		GradientPaint gp0 = new GradientPaint(0.0f, 0.0f, Color.blue,
+				0.0f, 0.0f, new Color(0, 0, 64));
+		renderer.setSeriesPaint(0, gp0);
+
+		return jfreechart;
+	}
+
+
 	/**
 	 * @return the fluxes
 	 */
@@ -93,29 +143,12 @@ public class VODPanel extends JPanel implements ActionListener{
 		this.concentrations = concentrations;
 	}
 
-	/**
-	 * @return the gibbs_values
-	 */
-	public double[] getGibbs_values() {
-		return gibbs_values;
-	}
-
-	/**
-	 * @param gibbs_values the gibbs_values to set
-	 */
-	public void setGibbs_values(double[] gibbs_values) {
-		this.gibbs_values = gibbs_values;
-	}
-
-
-
-
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
-	
+
 }

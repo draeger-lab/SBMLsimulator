@@ -23,19 +23,30 @@ import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.BorderFactory;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
 import org.sbml.jsbml.SBMLDocument;
+import org.sbml.simulator.fba.controller.CSVDataConverter;
 import org.sbml.simulator.fba.controller.Constraints;
 import org.sbml.simulator.fba.controller.FluxBalanceAnalysis;
 import org.sbml.simulator.gui.LegendPanel;
 import org.sbml.simulator.gui.SimulationPanel;
 
+import de.zbit.util.prefs.SBPreferences;
+
 
 /**
+ * the FBAPanel consists of 3 components:
+ * - a ChartPanel, which shows the computed data of fba in a table
+ * - a SettingPanel, which shows the setting that can be made to change the result of fba
+ *   and its visualization (the VODPanel)
+ * - a VODPanel, which visualizes the results of fba in a diagram.
+ *
  * @author Meike Aichele
  * @version $Rev$
  * @date 07.05.2012
@@ -43,15 +54,8 @@ import org.sbml.simulator.gui.SimulationPanel;
  */
 public class FBAPanel extends JPanel implements ActionListener, TableModelListener{
 
-
-	/**
-	 * the FBAPanel consists of 3 components:
-	 * - a ChartPanel, which shows the computed data of fba in a table
-	 * - a SettingPanel, which shows the setting that can be made to change the result of fba
-	 *   and its visualization (the VODPanel)
-	 * - a VODPanel, which visualizes the results of fba in a diagram.
-	 */
-	private ChartPanel chart;
+	private ChartPanel chartConc;
+	private ChartPanel chartFlux;
 	private FBASettingPanel settings;
 	private VODPanel vod;
 	private SBMLDocument currentDoc;
@@ -59,33 +63,37 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	private SimulationPanel simPanel;
 	private File gibbsFile;
 	private File concFile;
+	private String[] targetFluxes = null;
 	private static final long serialVersionUID = 1L;
 
-	public FBAPanel (SBMLDocument document, File ... files) {
-		super(new BorderLayout());
-		try {
-			fba = new FluxBalanceAnalysis(document);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	private boolean JG_less_than_0;
+	private boolean J_rmax_G_less_than_0;
+	private boolean J_greater_0;
+	private int iterations;
+	private double lambda1;
+	private double lambda2;
+	private double lambda3;
+	private double lambda4;
 
-		this.chart = new ChartPanel();
-		this.settings = new FBASettingPanel();
-		this.vod = new VODPanel();
-		init();
-		// TODO: call FluxBalanceAnalysis
-	}
-
-	public FBAPanel(SBMLDocument sbmlDocument) {
+	/**
+	 * Constructor that sets all the different panels
+	 * @param document
+	 */
+	public FBAPanel (SBMLDocument document) {
 		super(new BorderLayout());
-		currentDoc = sbmlDocument;
-		this.chart = new ChartPanel();
+		currentDoc = document;
+		this.chartConc = new ChartPanel(document);
+		this.chartFlux = new ChartPanel(document);
 		this.settings = new FBASettingPanel(this);
 		this.vod = new VODPanel();
+		init();
 		setVisible(true);
 	}
 
 
+	/**
+	 * initialoze the whole fba frame
+	 */
 	private void init() {
 		JSplitPane jsp = new JSplitPane();
 		vod.setBorder(BorderFactory.createLoweredBevelBorder());
@@ -100,26 +108,17 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 				legendPanel, settings);
 		topDown.setDividerLocation(topDown.getDividerLocation() + 100);
 
+		JTabbedPane tabs = new JTabbedPane();
+		tabs.add("Visualization",vod);
+		tabs.add("Table Concentrations", chartConc);
+		tabs.add("Table Fluxes", chartFlux);
+		
 		// split all
 		jsp.setLeftComponent(topDown);
-		jsp.setRightComponent(vod);
+		jsp.setRightComponent(tabs);
 		jsp.setDividerLocation(topDown.getDividerLocation() + 200);
 
 		add(jsp);
-	}
-
-	/**
-	 * @param chart the chart to set
-	 */
-	public void setChartPanel(ChartPanel chart) {
-		this.chart = chart;
-	}
-
-	/**
-	 * @return the chart
-	 */
-	public ChartPanel getChartPanel() {
-		return chart;
 	}
 
 	/**
@@ -196,6 +195,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	 */
 	public void setGibbsFile(File gibbsFile) {
 		this.gibbsFile = gibbsFile;
+		startFBA();
 	}
 
 	/**
@@ -217,6 +217,84 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	 */
 	public File getConcFile() {
 		return concFile;
+	}
+
+
+	/**
+	 * start the flux balance analysis
+	 */
+	public void startFBA() {
+		checkPreferences();
+		try {
+			CSVDataConverter csvConverterGibbs = new CSVDataConverter(currentDoc);
+			CSVDataConverter csvConverterConc = new CSVDataConverter(currentDoc);
+			if (concFile != null) {
+				csvConverterConc.readConcentrationsFromFile(concFile);
+				while(csvConverterConc.getConcentrationsArray() == null) {
+					//wait while reading
+				}
+			} 
+			if (gibbsFile != null) {
+				csvConverterGibbs.readGibbsFromFile(gibbsFile);
+				while(csvConverterGibbs.getGibbsArray() == null) {
+					//wait while reading
+				}
+			}
+			Constraints c = new Constraints(currentDoc, csvConverterGibbs.getGibbsArray(), csvConverterConc.getConcentrationsArray());
+			fba = new FluxBalanceAnalysis(c, currentDoc, targetFluxes);
+
+			//set constraints and iterations
+			fba.setConstraintJG(JG_less_than_0);
+			fba.setConstraintJr_maxG(J_rmax_G_less_than_0);
+			fba.setCplexIterations(iterations);
+			fba.setConstraintJ0(J_greater_0);
+			
+			//set lambdas
+			fba.setLambda1(lambda1);
+			fba.setLambda2(lambda2);
+			fba.setLambda3(lambda3);
+			fba.setLambda4(lambda4);
+
+			//solve
+			fba.solve();
+		} catch (Exception e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(this,
+					e,
+					"Running FBA failed",
+					JOptionPane.ERROR_MESSAGE);
+		}
+		vod.setFluxes(fba.solution_fluxVector);
+		vod.setConcentrations(fba.solution_concentrations);
+		vod.init();
+		chartFlux.setFluxes(fba.solution_fluxVector);
+		chartConc.setConcentrations(fba.solution_concentrations);
+		chartFlux.init();
+		chartConc.init();
+	}
+
+
+	/**
+	 * check if the options were changed
+	 */
+	private void checkPreferences() {
+		SBPreferences sbPrefs = SBPreferences.getPreferencesFor(FBAOptions.class);
+		if (sbPrefs.getFile(FBAOptions.LOAD_CONCENTRATION_FILE) != null) {
+			concFile = sbPrefs.getFile(FBAOptions.LOAD_CONCENTRATION_FILE);
+		}
+		if (sbPrefs.getFile(FBAOptions.LOAD_GIBBS_FILE)!= null) {
+			gibbsFile = sbPrefs.getFile(FBAOptions.LOAD_GIBBS_FILE);
+		}
+		JG_less_than_0 = sbPrefs.getBoolean(FBAOptions.ACTIVATE_CONSTRAINT_JG_LESS_THAN_0);
+		J_rmax_G_less_than_0 = sbPrefs.getBoolean(FBAOptions.ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0);
+		J_greater_0 = sbPrefs.getBoolean(FBAOptions.ACTIVATE_CONSTRAINT_J_GREATER_THAN_0);
+		iterations = sbPrefs.getInt(FBAOptions.SET_ITERATIONS);
+		
+		//check lambdas
+		lambda1 = sbPrefs.getDouble(FBAOptions.LAMBDA1);
+		lambda2 = sbPrefs.getDouble(FBAOptions.LAMBDA2);
+		lambda3 = sbPrefs.getDouble(FBAOptions.LAMBDA3);
+		lambda4 = sbPrefs.getDouble(FBAOptions.LAMBDA4);
 	}
 
 }
