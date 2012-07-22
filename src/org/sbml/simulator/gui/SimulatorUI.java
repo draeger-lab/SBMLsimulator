@@ -809,18 +809,31 @@ PropertyChangeListener {
 			FBAButtonPressedDialog dialog = new FBAButtonPressedDialog(SwingUtilities.getWindowAncestor(simPanel), ModalityType.DOCUMENT_MODAL);
 			dialog.setLocationRelativeTo(simPanel);
 			dialog.setVisible(true);
-			FBAPanel fbaPanel = new FBAPanel(simPanel.getModel().getSBMLDocument());
-			fbaPanel.setSimulatorPanel(simPanel);
 			
 			if(dialog.hasFiles()) {
-				fbaPanel.setGibbsFile(dialog.getEnergieFile());
+				FBAPanel fbaPanel = new FBAPanel(simPanel.getModel().getSBMLDocument());
+				fbaPanel.setSimulatorPanel(simPanel);
 				fbaPanel.setConcFile(dialog.getConcentrationFile());
+				fbaPanel.setGibbsFile(dialog.getEnergieFile());
 				Component current = simPanel.getTabbedPane().add(bundle.getString("TAB_FBA"), fbaPanel);
 				simPanel.getTabbedPane().setSelectedComponent(current);
+			} else {
+				FBAPanel fbaPanel = new FBAPanel(simPanel.getModel().getSBMLDocument());
+				fbaPanel.setSimulatorPanel(simPanel);
+				Component current = simPanel.getTabbedPane().add(bundle.getString("TAB_FBA"), fbaPanel);
+				simPanel.getTabbedPane().setSelectedComponent(current);
+				startFBA();
 			}
 		} else {
-			FBAPanel fbaPanel = ((FBAPanel) simPanel.getTabbedPane().getTabComponentAt(simPanel.getTabbedPane().getTabCount()-1));
-			//TODO
+			if(simPanel.getTabbedPane().getSelectedIndex() == 5) {
+				FBAPanel fbaPanel = (FBAPanel) simPanel.getTabbedPane().getSelectedComponent();
+				fbaPanel.startFBA();
+			} else {
+				simPanel.getTabbedPane().setSelectedIndex(5);
+				FBAPanel fbaPanel = (FBAPanel) simPanel.getTabbedPane().getSelectedComponent();
+				fbaPanel.startFBA();
+			}
+			
 		}
 	}
 

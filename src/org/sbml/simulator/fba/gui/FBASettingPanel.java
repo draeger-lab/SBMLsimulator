@@ -164,30 +164,7 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 				e.printStackTrace();
 			}
 			tab.add("Fluxes", fluxPanel);
-			
-			// create the panel for general properties
-			JPanel propertiesPanel = new JPanel();
-			initPropertyTab(propertiesPanel);
-			propertiesPanel.setVisible(true);
-			tab.add("Properties", propertiesPanel);
 		}
-	}
-
-	/**
-	 * initialize the components of the properties tab
-	 * @param propertiesPanel
-	 */
-	private void initPropertyTab(JPanel propertiesPanel) {
-		JPanel panel = new JPanel();
-		LayoutHelper lh = new LayoutHelper(panel);
-		String[] cbmodel = {"Fluss Minimierung", "Biomasse Maximierung"};
-		JComboBox cb = new JComboBox(cbmodel);
-		cb.setName("Zielfunktion");
-		cb.setSelectedIndex(0);
-		cb.getComponent(1).setEnabled(false);
-		lh.add(new JLabel("Zielfunktion: "));
-		lh.add(cb);
-		propertiesPanel.add(panel);
 	}
 
 	/**

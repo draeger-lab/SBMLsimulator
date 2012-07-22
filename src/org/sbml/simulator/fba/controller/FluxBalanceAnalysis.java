@@ -93,7 +93,9 @@ public class FluxBalanceAnalysis {
 
 	private boolean constraintJr_maxG = true;
 
-	private int cplexIterations = 500;
+	private boolean constraintJ0 = true;
+
+	private int cplexIterations = 600;
 
 	// CONSTRUCTORS:	
 
@@ -106,8 +108,8 @@ public class FluxBalanceAnalysis {
 	 * @param doc
 	 * @throws Exception 
 	 */
-	public FluxBalanceAnalysis(double[] c_eq, Constraints constraints, SBMLDocument doc, String[] targetFluxes) throws Exception {
-		this(new FluxMinimization(doc, c_eq, constraints.getEquilibriumGibbsEnergies(), targetFluxes), constraints);
+	public FluxBalanceAnalysis(Constraints constraints, SBMLDocument doc, String[] targetFluxes) throws Exception {
+		this(new FluxMinimization(doc, constraints.getEquilibriumConcentrations(), constraints.getEquilibriumGibbsEnergies(), targetFluxes), constraints);
 	}
 
 	/**
@@ -131,7 +133,9 @@ public class FluxBalanceAnalysis {
 		super();
 		this.targetFunc = target;
 		this.constraints = constraints;
-		int length = targetFunc.computeTargetFunctionForQuadraticProgramming().length;
+		SBMLDocument doc = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(constraints.document);
+		int length = doc.getModel().getReactionCount()*4;
+		//		int length = targetFunc.computeTargetFunctionForQuadraticProgramming().length;
 		lb = new double[length + targetFunc.getConcentrations().length];
 		ub = new double[length + targetFunc.getConcentrations().length];
 		this.solution_fluxVector = new double[target.getFluxVector().length];
@@ -217,25 +221,25 @@ public class FluxBalanceAnalysis {
 			cplex.addMaximize(cplex_target);
 		}
 
-//		
-//		for (int i = 0; i < x.length; i++) {
-//			if (i < counter[1]) {
-//				System.out.print(FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(constraints.document).getModel().getReaction(i).getId() + ": " + target[i] + "    x: "+ x[i]);
-//				System.out.println("  flux");
-//			} else if (i < counter[2]) {
-//				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
-//				System.out.println("  E");
-//			} else if (i < counter[3]) {
-//				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
-//				System.out.println("  L");
-//			} else if (i < target.length) {
-//				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
-//				System.out.println("  gibbs");
-//			} else {
-//				System.out.print(i + ": " + concentrations[i-target.length] + "    x: "+ x[i]);
-//				System.out.println("  conc");
-//			}
-//		}
+		//		
+		//		for (int i = 0; i < x.length; i++) {
+		//			if (i < counter[1]) {
+		//				System.out.print(FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(constraints.document).getModel().getReaction(i).getId() + ": " + target[i] + "    x: "+ x[i]);
+		//				System.out.println("  flux");
+		//			} else if (i < counter[2]) {
+		//				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
+		//				System.out.println("  E");
+		//			} else if (i < counter[3]) {
+		//				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
+		//				System.out.println("  L");
+		//			} else if (i < target.length) {
+		//				System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
+		//				System.out.println("  gibbs");
+		//			} else {
+		//				System.out.print(i + ": " + concentrations[i-target.length] + "    x: "+ x[i]);
+		//				System.out.println("  conc");
+		//			}
+		//		}
 
 		//CONSTRAINTS
 
@@ -253,7 +257,7 @@ public class FluxBalanceAnalysis {
 			IloNumExpr r_maxg = cplex.numExpr();
 			if (!Double.isNaN(gibbs[i]) && !Double.isInfinite(gibbs[i])) {
 				r_maxg = cplex.prod(r_max, cplex.abs(cplex.constant(gibbs[i])));
-				
+
 			} else {
 				r_maxg = cplex.prod(r_max, x[k]);
 			}
@@ -261,8 +265,9 @@ public class FluxBalanceAnalysis {
 				cplex.addLe(cplex.diff(j_i, r_maxg), -Double.MIN_VALUE);
 				logger.log(Level.DEBUG, String.format("constraint |J_i| - r_max * |G_i| < 0:  "+ cplex.diff(j_i, r_maxg)+ " < " + 0 ));
 			}
-			
-			cplex.addGe(cplex.prod(cplex.constant(flux[i]), x[i]), 0);
+			if (constraintJ0) {
+				cplex.addGe(cplex.prod(cplex.constant(flux[i]), x[i]), 0);
+			}
 			// constraint J_i * G_i < 0
 			IloNumExpr jg = cplex.numExpr();
 			if (!Double.isNaN(gibbs[i]) && !Double.isInfinite(gibbs[i])) {
@@ -474,5 +479,19 @@ public class FluxBalanceAnalysis {
 	 */
 	public void setCplexIterations(int cplexIterations) {
 		this.cplexIterations = cplexIterations;
+	}
+
+	/**
+	 * @return the constraintJ0
+	 */
+	public boolean isConstraintJ0() {
+		return constraintJ0;
+	}
+
+	/**
+	 * @param constraintJ0 the constraintJ0 to set
+	 */
+	public void setConstraintJ0(boolean constraintJ0) {
+		this.constraintJ0 = constraintJ0;
 	}
 }
