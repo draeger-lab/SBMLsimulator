@@ -23,7 +23,6 @@ import java.awt.event.ActionListener;
 import java.util.LinkedList;
 
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -55,12 +54,21 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+
+	/**
+	 * The corresponding FluxBalanceAnalysis-object
+	 */
 	private FluxBalanceAnalysis fba;
 
 	/**
 	 * Backup of the original values
 	 */
-	private double originalValues[][];
+	private double originalConcValues[][];
+
+	/**
+	 * Backup of the original values
+	 */
+	private double originalFluxValues[][];
 
 	/**
 	 * button to reset the changes
@@ -71,7 +79,7 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 	 * containing the tabs fluxes, species and general properties.
 	 */
 	private JTabbedPane tab;
-	
+
 	/**
 	 * contains the current {@link SBMLDocument}.
 	 */
@@ -81,24 +89,24 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 	 * array of JSpinners for concentrations upper bounds
 	 */
 	private JSpinner[] concUpperBounds;
-	
+
 	/**
 	 * array of JSpinners for concentrations lower bounds
 	 */
 	private JSpinner[] concLowerBounds;
-	
+
 	/**
 	 * array of JSpinners for fluxes upper bounds
 	 */
 	private JSpinner[] fluxUpperBounds;
-	
+
 	/**
 	 * array of JSpinners for fluxes lower bounds
 	 */
 	private JSpinner[] fluxLowerBounds;
-	
-	
-	
+
+
+
 
 	/**
 	 * default constructor
@@ -126,17 +134,17 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 	 */
 	private void init() {
 		initTabs(document);
-		
+
 		JPanel foot = new JPanel();
-	    buttonReset = GUITools.createJButton(this, Command.RESET);
-	    buttonReset.setEnabled(false);
-	    foot.add(buttonReset);
-	    
-	    tab.setSize(500, 800);
-	    JScrollPane sp = new JScrollPane(tab);
-	    add(sp, BorderLayout.CENTER);
-	    add(foot, BorderLayout.SOUTH);
-		
+		buttonReset = GUITools.createJButton(this, Command.RESET);
+		buttonReset.setEnabled(false);
+		foot.add(buttonReset);
+
+		tab.setSize(500, 800);
+		JScrollPane sp = new JScrollPane(tab);
+		add(sp, BorderLayout.CENTER);
+		add(foot, BorderLayout.SOUTH);
+
 		this.setVisible(true);
 	}
 
@@ -150,7 +158,7 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 			JPanel speciesPanel = new JPanel();
 			initSpecificTab(speciesPanel, document2.getModel().getListOfSpecies().toArray());
 			tab.add("Concentrations", speciesPanel);
-			
+
 			// create the panel for the flux values
 			JPanel fluxPanel = new JPanel();
 			try {
@@ -172,14 +180,14 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 	 * @param panel
 	 * @param objects
 	 */
-	private void initSpecificTab(JPanel panel,
-			Object[] objects) {
+	private void initSpecificTab(JPanel panel, Object[] objects) {
 		if (objects != null){
 			if(objects[0] instanceof Species) {
 				concUpperBounds = new JSpinner[objects.length];
 				concLowerBounds = new JSpinner[objects.length];
+				originalConcValues = new double[objects.length][2];
 				for(int i = 0; i < objects.length; i++) {
-					
+
 					//create components of this row 
 					JPanel row_i = new JPanel(new BorderLayout());
 					concUpperBounds[i] = new JSpinner();
@@ -188,9 +196,13 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 					concLowerBounds[i] = new JSpinner();
 					concLowerBounds[i].setValue(0);
 					concLowerBounds[i].addChangeListener(this);
+
+					originalConcValues[i][0] = (Double) concLowerBounds[i].getValue();
+					originalConcValues[i][1] = (Double) concUpperBounds[i].getValue();
+
 					Species currentSpec = (Species) objects[i];
 					JLabel specLabel = new JLabel(currentSpec.isSetName() ? currentSpec.getName() : currentSpec.getId());
-					
+
 					//add Components
 					LayoutHelper lh = new LayoutHelper(row_i);
 					lh.add(specLabel);
@@ -204,8 +216,9 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 			} else if (objects[0] instanceof Reaction) {
 				fluxUpperBounds = new JSpinner[objects.length];
 				fluxLowerBounds = new JSpinner[objects.length];
+				originalFluxValues = new double[objects.length][2];
 				for(int i = 0; i < objects.length; i++) {
-					
+
 					//create components of this row 
 					JPanel row_i = new JPanel(new BorderLayout());
 					fluxUpperBounds[i] = new JSpinner();
@@ -214,9 +227,13 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 					fluxLowerBounds[i] = new JSpinner();
 					fluxLowerBounds[i].setValue(-10000);
 					fluxUpperBounds[i].addChangeListener(this);
+
+					originalFluxValues[i][0] = (Double) fluxLowerBounds[i].getValue();
+					originalFluxValues[i][1] = (Double) fluxUpperBounds[i].getValue();
+
 					Reaction currentReac = (Reaction) objects[i];
 					JLabel reacLabel = new JLabel(currentReac.isSetName() ? currentReac.getName() : currentReac.getId());
-					
+
 					//add Components
 					LayoutHelper lh = new LayoutHelper(row_i);
 					lh.add(reacLabel);
@@ -237,8 +254,24 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-
+		Object source = e.getSource();
+		if (source.equals(buttonReset) && tab.getSelectedIndex() == 1) {
+			// its the flux tab
+			for (int i = 0; i < fluxLowerBounds.length; i++) {
+				fluxLowerBounds[i].setValue(originalFluxValues[i][0]);
+				fluxUpperBounds[i].setValue(originalFluxValues[i][1]);
+				fba.setLbOfReactionJ(originalFluxValues[i][0], i);
+				fba.setUbOfReactionJ(originalFluxValues[i][1], i);
+			}
+		} else if (source.equals(buttonReset) && tab.getSelectedIndex() == 0) {
+			// its the conc tab
+			for (int j = 0; j < concLowerBounds.length; j++) {
+				concLowerBounds[j].setValue(originalConcValues[j][0]);
+				concUpperBounds[j].setValue(originalConcValues[j][1]);
+				fba.setLbofConcentrationJ(originalConcValues[j][0], j);
+				fba.setUbofConcentrationJ(originalConcValues[j][1], j);
+			}
+		}
 	}
 
 	/*
@@ -246,9 +279,26 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
 	 */
 	@Override
-	public void stateChanged(ChangeEvent arg0) {
-		// TODO Auto-generated method stub
-		
+	public void stateChanged(ChangeEvent evt) {
+		JSpinner source = (JSpinner) evt.getSource();
+		for (int i = 0; i < fluxLowerBounds.length; i++) {
+			if (source.equals(fluxLowerBounds[i])){
+				// the source is a lb source of fluxes
+				fba.setLbOfReactionJ((Double) source.getValue(), i);
+			} else if (source.equals(fluxUpperBounds[i])) {
+				// the source is a ub source of fluxes
+				fba.setUbOfReactionJ((Double) source.getValue(), i);
+			}
+		}
+		for (int s = 0; s < concLowerBounds.length; s++) {
+			if (source.equals(concLowerBounds[s])) {
+				// the source is a lb source of concentrations
+				fba.setLbofConcentrationJ((Double) source.getValue(), s);
+			} else if (source.equals(concUpperBounds[s])) {
+				// the source is a ub source of concentrations
+				fba.setUbofConcentrationJ((Double) source.getValue(), s);
+			}
+		}
 	}
 
 }

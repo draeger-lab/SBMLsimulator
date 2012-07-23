@@ -253,7 +253,6 @@ public class FluxBalanceAnalysis {
 			int k = i + counter[3];
 			// constraint |J_i| - r_max * |G_i| < 0
 			IloNumExpr j_i = cplex.prod(cplex.abs(cplex.constant(flux[i])), x[i]);
-			IloNumExpr g_i = cplex.prod(cplex.abs(cplex.constant(gibbs[i])), x[k]);
 			IloNumExpr r_maxg = cplex.numExpr();
 			if (!Double.isNaN(gibbs[i]) && !Double.isInfinite(gibbs[i])) {
 				r_maxg = cplex.prod(r_max, cplex.abs(cplex.constant(gibbs[i])));

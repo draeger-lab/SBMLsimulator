@@ -152,7 +152,6 @@ public class FluxMinimizationUtils {
 	 * @param document
 	 * @return {@link SBMLDocument}
 	 */
-	@SuppressWarnings("deprecation")
 	public static SBMLDocument eliminateTransportsAndSplitReversibleReactions(
 			SBMLDocument document) {
 		// first eliminate the transports
