@@ -106,6 +106,10 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 	private JSpinner[] fluxLowerBounds;
 
 
+	/**
+	 * parent FBAPanel
+	 */
+	private FBAPanel parent;
 
 
 	/**
@@ -123,6 +127,7 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 	 */
 	public FBASettingPanel(FBAPanel parent) {
 		super(new BorderLayout());
+		this.parent = parent;
 		fba = parent.getFba();
 		tab = new JTabbedPane();
 		document = parent.getCurrentDoc();
@@ -194,7 +199,7 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 					concUpperBounds[i].setValue(0.1);
 					concUpperBounds[i].addChangeListener(this);
 					concLowerBounds[i] = new JSpinner();
-					concLowerBounds[i].setValue(0);
+					concLowerBounds[i].setValue(0.0);
 					concLowerBounds[i].addChangeListener(this);
 
 					originalConcValues[i][0] = (Double) concLowerBounds[i].getValue();
@@ -222,10 +227,10 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 					//create components of this row 
 					JPanel row_i = new JPanel(new BorderLayout());
 					fluxUpperBounds[i] = new JSpinner();
-					fluxUpperBounds[i].setValue(10000);
+					fluxUpperBounds[i].setValue(10000.0);
 					fluxUpperBounds[i].addChangeListener(this);
 					fluxLowerBounds[i] = new JSpinner();
-					fluxLowerBounds[i].setValue(-10000);
+					fluxLowerBounds[i].setValue(-10000.0);
 					fluxUpperBounds[i].addChangeListener(this);
 
 					originalFluxValues[i][0] = (Double) fluxLowerBounds[i].getValue();
@@ -284,21 +289,47 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 		for (int i = 0; i < fluxLowerBounds.length; i++) {
 			if (source.equals(fluxLowerBounds[i])){
 				// the source is a lb source of fluxes
-				fba.setLbOfReactionJ((Double) source.getValue(), i);
+				if (source.getValue() instanceof Integer) {
+					fba.setLbOfReactionJ((Integer) source.getValue(), i);
+				} else if (source.getValue() instanceof Double) {
+					fba.setLbOfReactionJ((Double) source.getValue(), i);
+				}
 			} else if (source.equals(fluxUpperBounds[i])) {
 				// the source is a ub source of fluxes
-				fba.setUbOfReactionJ((Double) source.getValue(), i);
+				if (source.getValue() instanceof Integer) {
+					fba.setUbOfReactionJ((Integer) source.getValue(), i);
+				} else if (source.getValue() instanceof Double) {
+					fba.setUbOfReactionJ((Double) source.getValue(), i);
+				}
 			}
 		}
 		for (int s = 0; s < concLowerBounds.length; s++) {
 			if (source.equals(concLowerBounds[s])) {
 				// the source is a lb source of concentrations
-				fba.setLbofConcentrationJ((Double) source.getValue(), s);
+				if (source.getValue() instanceof Integer) {
+					fba.setLbofConcentrationJ((Integer) source.getValue(), s);
+				} else if (source.getValue() instanceof Double) {
+					fba.setLbofConcentrationJ((Double) source.getValue(), s);
+				}
 			} else if (source.equals(concUpperBounds[s])) {
 				// the source is a ub source of concentrations
-				fba.setUbofConcentrationJ((Double) source.getValue(), s);
+				if (source.getValue() instanceof Integer) {
+					fba.setUbofConcentrationJ((Integer) source.getValue(), s);
+				} else if (source.getValue() instanceof Double) {
+					fba.setUbofConcentrationJ((Double) source.getValue(), s);
+				}
 			}
 		}
+		parent.getVODPanel().init();
+		buttonReset.setEnabled(true);
+	}
+
+	/**
+	 * sets the fba object
+	 * @param fba2
+	 */
+	public void setFBA(FluxBalanceAnalysis fba2) {
+		this.fba = fba2;
 	}
 
 }
