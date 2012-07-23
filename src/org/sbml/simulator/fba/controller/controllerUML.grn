@@ -2,50 +2,43 @@
    <greenVersion="30500"/>
    <type>
       <name="=SBMLsimulator/src<org.sbml.simulator.fba.controller{FluxBalanceAnalysis.java[FluxBalanceAnalysis"/>
-      <height="-1"/>
-      <width="-1"/>
-      <x="257"/>
-      <y="14"/>
+      <height="271"/>
+      <width="316"/>
+      <x="29"/>
+      <y="76"/>
    </type>
    <type>
       <name="=SBMLsimulator/src<org.sbml.simulator.fba.controller{FluxMinimization.java[FluxMinimization"/>
-      <height="-1"/>
-      <width="-1"/>
-      <x="356"/>
-      <y="280"/>
+      <height="282"/>
+      <width="459"/>
+      <x="520"/>
+      <y="311"/>
    </type>
    <type>
       <name="=SBMLsimulator/src<org.sbml.simulator.fba.controller{Constraints.java[Constraints"/>
-      <height="-1"/>
-      <width="-1"/>
-      <x="764"/>
-      <y="181"/>
-   </type>
-   <type>
-      <name="=SBMLsimulator/src<org.sbml.simulator.fba.controller{Errorobject.java[Errorobject"/>
-      <height="-1"/>
-      <width="-1"/>
-      <x="385"/>
-      <y="508"/>
+      <height="153"/>
+      <width="279"/>
+      <x="487"/>
+      <y="33"/>
    </type>
    <type>
       <name="=SBMLsimulator/src<org.sbml.simulator.fba.controller{TargetFunction.java[TargetFunction"/>
       <height="-1"/>
       <width="-1"/>
-      <x="66"/>
-      <y="180"/>
-   </type>
-   <type>
-      <name="=SBMLsimulator/src<org.sbml.simulator.fba.controller{FluxVector.java[FluxVector"/>
-      <height="-1"/>
-      <width="-1"/>
-      <x="88"/>
-      <y="479"/>
+      <x="31"/>
+      <y="412"/>
    </type>
    <relationship>
       <class="edu.buffalo.cse.green.relationship.association.AssociationPart"/>
-      <sourceType="=SBMLsimulator/src<org.sbml.simulator.fba.controller{FluxMinimization.java[FluxMinimization"/>
-      <targetType="=SBMLsimulator/src<org.sbml.simulator.fba.controller{Errorobject.java[Errorobject"/>
+      <sourceType="=SBMLsimulator/src<org.sbml.simulator.fba.controller{FluxBalanceAnalysis.java[FluxBalanceAnalysis"/>
+      <targetType="=SBMLsimulator/src<org.sbml.simulator.fba.controller{Constraints.java[Constraints"/>
+      <bendpoints>
+      </bendpoints>
+   </relationship>
+   <relationship>
+      <class="edu.buffalo.cse.green.relationship.dependency.DependencyIPart"/>
+      <sourceType="=SBMLsimulator/src<org.sbml.simulator.fba.controller{FluxBalanceAnalysis.java[FluxBalanceAnalysis"/>
+      <targetType="=SBMLsimulator/src<org.sbml.simulator.fba.controller{FluxMinimization.java[FluxMinimization"/>
       <bendpoints>
       </bendpoints>
    </relationship>
@@ -64,16 +57,16 @@
       </bendpoints>
    </relationship>
    <relationship>
-      <class="edu.buffalo.cse.green.relationship.association.AssociationPart"/>
-      <sourceType="=SBMLsimulator/src<org.sbml.simulator.fba.controller{FluxBalanceAnalysis.java[FluxBalanceAnalysis"/>
+      <class="edu.buffalo.cse.green.relationship.dependency.DependencyIPart"/>
+      <sourceType="=SBMLsimulator/src<org.sbml.simulator.fba.controller{FluxMinimization.java[FluxMinimization"/>
       <targetType="=SBMLsimulator/src<org.sbml.simulator.fba.controller{Constraints.java[Constraints"/>
       <bendpoints>
       </bendpoints>
    </relationship>
    <relationship>
-      <class="edu.buffalo.cse.green.relationship.association.AssociationPart"/>
-      <sourceType="=SBMLsimulator/src<org.sbml.simulator.fba.controller{FluxMinimization.java[FluxMinimization"/>
-      <targetType="=SBMLsimulator/src<org.sbml.simulator.fba.controller{FluxVector.java[FluxVector"/>
+      <class="edu.buffalo.cse.green.relationship.dependency.DependencyIPart"/>
+      <sourceType="=SBMLsimulator/src<org.sbml.simulator.fba.controller{FluxBalanceAnalysis.java[FluxBalanceAnalysis"/>
+      <targetType="=SBMLsimulator/src<org.sbml.simulator.fba.controller{Constraints.java[Constraints"/>
       <bendpoints>
       </bendpoints>
    </relationship>
