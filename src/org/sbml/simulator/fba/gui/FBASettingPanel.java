@@ -113,7 +113,7 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 
 
 	/**
-	 * default constructor
+	 * Default constructor
 	 */
 	public FBASettingPanel() {
 		super(new BorderLayout());
@@ -122,7 +122,7 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 	}
 
 	/**
-	 * constructor that gets the corresponding {@link FBAPanel}
+	 * Constructor that gets the corresponding {@link FBAPanel}
 	 * @param parent
 	 */
 	public FBASettingPanel(FBAPanel parent) {
@@ -135,7 +135,7 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 	}
 
 	/**
-	 * initialize the whole panel with the different tabs
+	 * Initialize the whole panel with the different tabs
 	 */
 	private void init() {
 		initTabs(document);
@@ -154,7 +154,7 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 	}
 
 	/**
-	 * initialize the tabs
+	 * Initialize the tabs
 	 * @param document2
 	 */
 	private void initTabs(SBMLDocument document2) {
@@ -195,13 +195,17 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 
 					//create components of this row 
 					JPanel row_i = new JPanel(new BorderLayout());
+					// upper bounds
 					concUpperBounds[i] = new JSpinner();
 					concUpperBounds[i].setValue(0.1);
 					concUpperBounds[i].addChangeListener(this);
+					
+					// lower bounds
 					concLowerBounds[i] = new JSpinner();
 					concLowerBounds[i].setValue(0.0);
 					concLowerBounds[i].addChangeListener(this);
 
+					// original values
 					originalConcValues[i][0] = (Double) concLowerBounds[i].getValue();
 					originalConcValues[i][1] = (Double) concUpperBounds[i].getValue();
 
@@ -226,13 +230,18 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 
 					//create components of this row 
 					JPanel row_i = new JPanel(new BorderLayout());
+					
+					//upper bounds
 					fluxUpperBounds[i] = new JSpinner();
 					fluxUpperBounds[i].setValue(10000.0);
 					fluxUpperBounds[i].addChangeListener(this);
+					
+					//lower bounds
 					fluxLowerBounds[i] = new JSpinner();
 					fluxLowerBounds[i].setValue(-10000.0);
-					fluxUpperBounds[i].addChangeListener(this);
+					fluxLowerBounds[i].addChangeListener(this);
 
+					//original values
 					originalFluxValues[i][0] = (Double) fluxLowerBounds[i].getValue();
 					originalFluxValues[i][1] = (Double) fluxUpperBounds[i].getValue();
 

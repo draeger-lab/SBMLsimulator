@@ -20,6 +20,7 @@ package org.sbml.simulator.fba.gui;
 import java.io.File;
 import java.util.ResourceBundle;
 
+import org.sbml.simulator.fba.controller.FluxBalanceAnalysis;
 import org.sbml.simulator.fba.controller.TargetFunction;
 
 import de.zbit.io.filefilter.SBFileFilter;
@@ -38,6 +39,7 @@ import de.zbit.util.prefs.Range;
 public interface FBAOptions extends KeyProvider {
 
 	/**
+	 * Contains the choice for the target function in {@link FluxBalanceAnalysis}
 	 * 
 	 * @author Meike Aichele
 	 * @version $Rev$

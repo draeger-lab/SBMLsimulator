@@ -23,6 +23,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 
 import org.sbml.jsbml.SBMLDocument;
+import org.sbml.simulator.fba.controller.FluxBalanceAnalysis;
 import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 
 
@@ -38,17 +39,43 @@ import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 public class ChartPanel extends JPanel{
 
 	/**
-	 * 
+	 * Default serial version number
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * 2D-Array that contains the data of the computed fluxes in {@link FluxBalanceAnalysis}
+	 */
 	private String[][] dataFluxes;
+	
+	/**
+	 * 2D-Array that contains the data of the computed concentrations in {@link FluxBalanceAnalysis}
+	 */
 	private String[][] dataConc;
+	
+	/**
+	 * The table that shows the computed values of fluxes
+	 */
 	private JTable tableFluxes;
+	
+	/**
+	 * Table that shows the computed values of concentrations
+	 */
 	private JTable tableConc;
 
+	/**
+	 * The current {@link SBMLDocument}
+	 */
 	private SBMLDocument doc;
 
+	
+	/**
+	 * Constructor that creates the tables of the incoming data-arrays
+	 * @param rowDataFluxes
+	 * @param rowDataConc
+	 * @param columnNamesFluxes
+	 * @param columnNamesConc
+	 */
 	public ChartPanel(String[][] rowDataFluxes, String[][] rowDataConc, String[] columnNamesFluxes, String[] columnNamesConc) {
 		super();
 		JTabbedPane tabs = new JTabbedPane();
@@ -59,11 +86,19 @@ public class ChartPanel extends JPanel{
 		this.add(tabs);
 	}
 
+	/**
+	 * Constructor that gets only the {@link SBMLDocument}
+	 * @param document
+	 */
 	public ChartPanel(SBMLDocument document) {
 		super();
 		doc = document;
 	}
 
+	/**
+	 * Sets the concentrations and creates the table of this content
+	 * @param solution_concentrations
+	 */
 	public void setConcentrations(double[] solution_concentrations) {
 		SBMLDocument doc_new = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(doc);
 		if (solution_concentrations != null) {
@@ -80,6 +115,9 @@ public class ChartPanel extends JPanel{
 		}
 	}
 
+	/**
+	 * Initializes the whole panel
+	 */
 	public void init() {
 		if (dataFluxes != null) {
 			String[] columns = {"Id", "Value"};
@@ -106,13 +144,17 @@ public class ChartPanel extends JPanel{
 		this.add(panel);
 	}
 
+	/**
+	 * Sets the fluxes and creates the table of fluxes, if the incoming array is not null.
+	 * @param solution_fluxVector
+	 */
 	public void setFluxes(double[] solution_fluxVector) {
 		SBMLDocument doc_new = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(doc);
 		String[] reactionIds = new String[doc_new.getModel().getReactionCount()];
 		for (int i = 0; i < reactionIds.length; i++) {
 			reactionIds[i] = doc_new.getModel().getReaction(i).getId();
 		}
-		
+		// if there is a solution
 		if (solution_fluxVector != null) {
 			dataFluxes = new String[solution_fluxVector.length][2];
 			for (int i = 0; i < solution_fluxVector.length; i++) {
