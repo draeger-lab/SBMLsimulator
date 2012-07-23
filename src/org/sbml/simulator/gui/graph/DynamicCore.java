@@ -97,19 +97,20 @@ public class DynamicCore {
          */
         public PlayWorker(boolean generateVideo, int width, int height,
                 int timestamp, int captureEveryXStep, String destinationFile) {
-            this.generateVideo = generateVideo;
-            captureStepSize = captureEveryXStep;
-            this.timestamp = timestamp;
-            this.width = width;
-            this.height = height;
-            frameTime = 0;
-            image = 1;
-            totalimages = (data.getRowCount() - 1) / captureEveryXStep;
-            encoder = ToolFactory.makeWriter(destinationFile);
-            logger.info(MessageFormat.format(
-                    bundle.getString("GENERATE_VIDEO"), new Object[] { width,
-                            height }));
-            encoder.addVideoStream(0, 0, width, height);
+        	this();
+        	this.generateVideo = generateVideo;
+        	captureStepSize = captureEveryXStep;
+        	this.timestamp = timestamp;
+        	this.width = width;
+        	this.height = height;
+        	frameTime = 0;
+        	image = 1;
+        	totalimages = (data.getRowCount() - 1) / captureEveryXStep;
+        	encoder = ToolFactory.makeWriter(destinationFile);
+        	logger.info(MessageFormat.format(
+        		bundle.getString("GENERATE_VIDEO"), new Object[] { width,
+        			height }));
+        	encoder.addVideoStream(0, 0, width, height);
         }
 
         /*
@@ -121,18 +122,33 @@ public class DynamicCore {
         protected Void doInBackground() throws Exception {
             // cycle through timepoints
             for (int i = getIndexOfTimepoint(currTimepoint) + 1; i < timePoints.length; i++) {
-//                publish(timePoints[i]);
-                /*
-                 * Allow redrawing of GUI to update elements e.g. progressBar
-                 */
-                final int final_i = i;
-                SwingUtilities.invokeAndWait(new Runnable() {
-                    @Override
-                    public void run() {
-                        publish(timePoints[final_i]);
-                    }
-                });
-                Thread.sleep(playspeed);
+            	if (generateVideo) {
+            		if (i % captureStepSize == 0) {
+            			/*
+            			 * take and process image
+            			 */
+            			logger.info(MessageFormat.format(
+            				bundle.getString("PROCESSING_IMAGE"),
+            				new Object[] { image, totalimages }));
+            			encoder.encodeVideo(0,
+            				observer.takeGraphshot(width, height),
+            				frameTime, TimeUnit.MILLISECONDS);
+            			/*
+            			 * fire property change to support things like
+            			 * progressBars. the fired new property is a number
+            			 * inbetween 0 and 100 representing the processed
+            			 * percentage.
+            			 */
+            			int perc = (int) ((image/(double)totalimages) * 100);
+            			this.firePropertyChange("video_progress", null, perc);
+            			image++;
+            			frameTime += timestamp; // timestamp for video encoding
+            		}
+            	}
+            	publish(timePoints[i]);
+            	if (!generateVideo) {
+            		Thread.sleep(playspeed);
+            	}
             }
             return null;
         }
@@ -176,50 +192,30 @@ public class DynamicCore {
              * timepoint like stopPlay() is intented.
              */
             if (!isCancelled()) {
-                for (Double timePoint : chunks) {
-                    operationsDone = false;
-                    setCurrTimepoint(timePoint);
-
-                    /*
-                     * Wait till graph drawing is finished in case of large
-                     * data. (Observer has to invoke operationsDone() after
-                     * finished graph drawing).
-                     */
-                    while (!operationsDone) {
-                        try {
-                            logger.fine("Waiting for graph drawing to be completed.");
-                            Thread.sleep(AWAITING_GRAPH_DRAWING);
-                        } catch (InterruptedException e) {
-                            logger.fine("Could not wait for graph drawing to be completed.");
-                            e.printStackTrace();
-                        }
-                    }
-
-                    if (generateVideo) {
-                        if (getIndexOfTimepoint(timePoint) % captureStepSize == 0) {
-                            /*
-                             * take and process image
-                             */
-                            logger.info(MessageFormat.format(
-                                    bundle.getString("PROCESSING_IMAGE"),
-                                    new Object[] { image, totalimages }));
-                            encoder.encodeVideo(0,
-                                    observer.takeGraphshot(width, height),
-                                    frameTime, TimeUnit.MILLISECONDS);
-                            /*
-                             * fire property change to support things like
-                             * progressBars. the fired new property is a number
-                             * inbetween 0 and 100 representing the processed
-                             * percentage.
-                             */
-                            int perc = (int) ((image/(double)totalimages)*100);
-                            this.firePropertyChange("video_progress", null,
-                                    perc);
-                            image++;
-                            frameTime += timestamp; // timestamp for video encoding
-                        }
-                    }
-                }
+            	if (generateVideo) {
+            		Double last = chunks.get(chunks.size() - 1);
+            		chunks.clear();
+            		chunks.add(last);
+            	}
+            	for (Double timePoint : chunks) {
+            		operationsDone = false;
+            		setCurrTimepoint(timePoint);
+            		
+            		/*
+            		 * Wait till graph drawing is finished in case of large
+            		 * data. (Observer has to invoke operationsDone() after
+            		 * finished graph drawing).
+            		 */
+            		while (!operationsDone) {
+            			try {
+            				logger.fine("Waiting for graph drawing to be completed.");
+            				Thread.sleep(AWAITING_GRAPH_DRAWING);
+            			} catch (InterruptedException e) {
+            				logger.fine("Could not wait for graph drawing to be completed.");
+            				e.printStackTrace();
+            			}
+            		}
+            	}
             }
         }
     }
