@@ -25,6 +25,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import org.sbml.jsbml.SBMLDocument;
@@ -120,7 +121,17 @@ public class DynamicCore {
         protected Void doInBackground() throws Exception {
             // cycle through timepoints
             for (int i = getIndexOfTimepoint(currTimepoint) + 1; i < timePoints.length; i++) {
-                publish(timePoints[i]);
+//                publish(timePoints[i]);
+                /*
+                 * Allow redrawing of GUI to update elements e.g. progressBar
+                 */
+                final int final_i = i;
+                SwingUtilities.invokeAndWait(new Runnable() {
+                    @Override
+                    public void run() {
+                        publish(timePoints[final_i]);
+                    }
+                });
                 Thread.sleep(playspeed);
             }
             return null;
