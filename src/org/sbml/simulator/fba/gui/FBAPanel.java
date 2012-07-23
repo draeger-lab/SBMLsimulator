@@ -60,7 +60,6 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	private VODPanel vod;
 	private SBMLDocument currentDoc;
 	private FluxBalanceAnalysis fba;
-	private SimulationPanel simPanel;
 	private File gibbsFile;
 	private File concFile;
 	private String[] targetFluxes = null;
@@ -160,7 +159,6 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	 * @param simPanel
 	 */
 	public void setSimulatorPanel(SimulationPanel simPanel) {
-		this.simPanel = simPanel;
 		init();
 	}
 
