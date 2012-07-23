@@ -118,7 +118,7 @@ public class FBAButtonPressedDialog extends JDialog implements ActionListener{
 
 		JPanel container = new JPanel(new GridLayout(3, 1));
 
-		/**
+		/*
 		 * fields and buttons for the gibbs file
 		 */
 		JPanel panelEnergieFile = new JPanel(new BorderLayout());
@@ -130,7 +130,7 @@ public class FBAButtonPressedDialog extends JDialog implements ActionListener{
 		panelEnergieFile.add(buttonEnergieDatei, BorderLayout.EAST);
 		container.add(panelEnergieFile);
 
-		/**
+		/*
 		 * fields and buttons for the concentrations file
 		 */
 		JPanel panelConcFile = new JPanel(new BorderLayout());
@@ -142,7 +142,7 @@ public class FBAButtonPressedDialog extends JDialog implements ActionListener{
 		panelConcFile.add(buttonConcentrationsFile, BorderLayout.EAST);
 		container.add(panelConcFile);
 
-		/**
+		/*
 		 * ok and cancel buttons
 		 */
 		JPanel panelButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT));

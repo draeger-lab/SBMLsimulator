@@ -50,9 +50,19 @@ public class VODPanel extends JPanel implements ActionListener{
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Contains the computed values for the fluxes
+	 */
 	private double[] fluxes;
+	
+	/**
+	 * Contains the computed values for the concentrations
+	 */
 	private double[] concentrations;
 	
+	/**
+	 * Contains the plot
+	 */
 	private JPanel plot;
 
 
@@ -142,10 +152,13 @@ public class VODPanel extends JPanel implements ActionListener{
 		this.concentrations = concentrations;
 	}
 
-
+	/*
+	 * (non-Javadoc)
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
+		// TODO: make button pressed answer
 
 	}
 

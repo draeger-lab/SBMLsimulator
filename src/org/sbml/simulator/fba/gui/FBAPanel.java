@@ -54,24 +54,94 @@ import de.zbit.util.prefs.SBPreferences;
  */
 public class FBAPanel extends JPanel implements ActionListener, TableModelListener{
 
+	/**
+	 * The tab with the chart of concentrations
+	 */
 	private ChartPanel chartConc;
+	
+	/**
+	 * The tab with the chart of fluxes
+	 */
 	private ChartPanel chartFlux;
+	
+	/**
+	 * The setting panel wich contains the upper and lower bounds of fluxes and concentrations
+	 */
 	private FBASettingPanel settings;
+	
+	/**
+	 * Contains the visualization of data
+	 */
 	private VODPanel vod;
+	
+	/**
+	 * The current opened {@link SBMLDocument}
+	 */
 	private SBMLDocument currentDoc;
+	
+	/**
+	 * The current computed {@link FluxBalanceAnalysis}
+	 */
 	private FluxBalanceAnalysis fba;
+	
+	/**
+	 * the Gibbs energy file
+	 */
 	private File gibbsFile;
+	
+	/**
+	 * The concentration file
+	 */
 	private File concFile;
+	
+	/**
+	 * The target fluxes
+	 */
 	private String[] targetFluxes = null;
+	
+	/**
+	 * serial version number
+	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Constraint J*G < 0 is on, when this variable is set true
+	 */
 	private boolean JG_less_than_0;
+	
+	/**
+	 * Constraint |J| - r_max*|G| < 0 is on, when this variable is set true
+	 */
 	private boolean J_rmax_G_less_than_0;
+	
+	/**
+	 * Constraint J > 0 is on, when this variable is set true
+	 */
 	private boolean J_greater_0;
+	
+	/**
+	 * Number of iterations for CPLEX
+	 */
 	private int iterations;
+	
+	/**
+	 * weighted factor lambda1 to weight the concentrations
+	 */
 	private double lambda1;
+	
+	/**
+	 * weighted factor lambda2 to weight the errors
+	 */
 	private double lambda2;
+	
+	/**
+	 * weighted factor lambda3 to weight the L-Matrix
+	 */
 	private double lambda3;
+	
+	/**
+	 * weighted factor lambda4 to weight the Gibbs energies
+	 */
 	private double lambda4;
 
 	/**
@@ -91,7 +161,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 
 
 	/**
-	 * initialoze the whole fba frame
+	 * Initialize the whole FBA frame
 	 */
 	private void init() {
 		JSplitPane jsp = new JSplitPane();
@@ -111,7 +181,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 		tabs.add("Visualization", vod);
 		tabs.add("Table Concentrations", chartConc);
 		tabs.add("Table Fluxes", chartFlux);
-		
+
 		// split all
 		jsp.setLeftComponent(topDown);
 		jsp.setRightComponent(tabs);
@@ -162,12 +232,20 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 		init();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see javax.swing.event.TableModelListener#tableChanged(javax.swing.event.TableModelEvent)
+	 */
 	@Override
 	public void tableChanged(TableModelEvent arg0) {
 		// TODO Auto-generated method stub
@@ -246,7 +324,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 			fba.setConstraintJr_maxG(J_rmax_G_less_than_0);
 			fba.setCplexIterations(iterations);
 			fba.setConstraintJ0(J_greater_0);
-			
+
 			//set lambdas
 			fba.setLambda1(lambda1);
 			fba.setLambda2(lambda2);
@@ -265,11 +343,15 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 		vod.setFluxes(fba.solution_fluxVector);
 		vod.setConcentrations(fba.solution_concentrations);
 		vod.init();
+		vod.updateUI();
 		chartFlux.setFluxes(fba.solution_fluxVector);
 		chartConc.setConcentrations(fba.solution_concentrations);
 		chartFlux.init();
+		chartFlux.updateUI();
 		chartConc.init();
+		chartConc.repaint();
 		settings.setFBA(fba);
+		this.repaint();
 	}
 
 
@@ -288,7 +370,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 		J_rmax_G_less_than_0 = sbPrefs.getBoolean(FBAOptions.ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0);
 		J_greater_0 = sbPrefs.getBoolean(FBAOptions.ACTIVATE_CONSTRAINT_J_GREATER_THAN_0);
 		iterations = sbPrefs.getInt(FBAOptions.SET_ITERATIONS);
-		
+
 		//check lambdas
 		lambda1 = sbPrefs.getDouble(FBAOptions.LAMBDA1);
 		lambda2 = sbPrefs.getDouble(FBAOptions.LAMBDA2);
