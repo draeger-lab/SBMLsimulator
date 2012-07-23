@@ -75,7 +75,7 @@ public class FluxBalanceAnalysisTest {
 
 		//create FluxBalanceAnalysis object and solve it:
 		constraints =  new Constraints(sbml, gibbs_eq, c_eq);
-		FluxBalanceAnalysis fba = new FluxBalanceAnalysis(c_eq, constraints, sbml, targetFluxes);
+		FluxBalanceAnalysis fba = new FluxBalanceAnalysis(constraints, sbml, targetFluxes);
 //		fba.setLambda1(0);
 //		fba.setLambda2(0);
 //		fba.setLambda3(0);
