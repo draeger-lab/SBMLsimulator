@@ -108,7 +108,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 		topDown.setDividerLocation(topDown.getDividerLocation() + 100);
 
 		JTabbedPane tabs = new JTabbedPane();
-		tabs.add("Visualization",vod);
+		tabs.add("Visualization", vod);
 		tabs.add("Table Concentrations", chartConc);
 		tabs.add("Table Fluxes", chartFlux);
 		
@@ -269,6 +269,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 		chartConc.setConcentrations(fba.solution_concentrations);
 		chartFlux.init();
 		chartConc.init();
+		settings.setFBA(fba);
 	}
 
 

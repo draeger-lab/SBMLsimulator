@@ -61,7 +61,6 @@ public class VODPanel extends JPanel implements ActionListener{
 	 */
 	public VODPanel() {
 		plot = new JPanel(new BorderLayout());
-//		plot.setSize(100, 100);
 	}
 
 	/**
