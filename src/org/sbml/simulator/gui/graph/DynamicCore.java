@@ -186,16 +186,24 @@ public class DynamicCore {
 
                     if (generateVideo) {
                         if (getIndexOfTimepoint(timePoint) % captureStepSize == 0) {
-                            // take picture now
+                            /*
+                             * take and process image
+                             */
                             logger.info(MessageFormat.format(
                                     bundle.getString("PROCESSING_IMAGE"),
                                     new Object[] { image, totalimages }));
                             encoder.encodeVideo(0,
                                     observer.takeGraphshot(width, height),
                                     frameTime, TimeUnit.MILLISECONDS);
-                            //update progressBar
-                            this.firePropertyChange("video_progress",
-                                    image - 1, image);
+                            /*
+                             * fire property change to support things like
+                             * progressBars. the fired new property is a number
+                             * inbetween 0 and 100 representing the processed
+                             * percentage.
+                             */
+                            int perc = (int) ((image/(double)totalimages)*100);
+                            this.firePropertyChange("video_progress", null,
+                                    perc);
                             image++;
                             frameTime += timestamp; // timestamp for video encoding
                         }
