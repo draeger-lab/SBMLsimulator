@@ -321,7 +321,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 
 			//set constraints and iterations
 			fba.setConstraintJG(JG_less_than_0);
-			fba.setConstraintJr_maxG(J_rmax_G_less_than_0);
+			fba.setConstraintJ_rmaxG(J_rmax_G_less_than_0);
 			fba.setCplexIterations(iterations);
 			fba.setConstraintJ0(J_greater_0);
 

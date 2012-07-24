@@ -282,8 +282,8 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 			for (int j = 0; j < concLowerBounds.length; j++) {
 				concLowerBounds[j].setValue(originalConcValues[j][0]);
 				concUpperBounds[j].setValue(originalConcValues[j][1]);
-				fba.setLbofConcentrationJ(originalConcValues[j][0], j);
-				fba.setUbofConcentrationJ(originalConcValues[j][1], j);
+				fba.setLbOfConcentrationJ(originalConcValues[j][0], j);
+				fba.setUbOfConcentrationJ(originalConcValues[j][1], j);
 			}
 		}
 	}
@@ -316,16 +316,16 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 			if (source.equals(concLowerBounds[s])) {
 				// the source is a lb source of concentrations
 				if (source.getValue() instanceof Integer) {
-					fba.setLbofConcentrationJ((Integer) source.getValue(), s);
+					fba.setLbOfConcentrationJ((Integer) source.getValue(), s);
 				} else if (source.getValue() instanceof Double) {
-					fba.setLbofConcentrationJ((Double) source.getValue(), s);
+					fba.setLbOfConcentrationJ((Double) source.getValue(), s);
 				}
 			} else if (source.equals(concUpperBounds[s])) {
 				// the source is a ub source of concentrations
 				if (source.getValue() instanceof Integer) {
-					fba.setUbofConcentrationJ((Integer) source.getValue(), s);
+					fba.setUbOfConcentrationJ((Integer) source.getValue(), s);
 				} else if (source.getValue() instanceof Double) {
-					fba.setUbofConcentrationJ((Double) source.getValue(), s);
+					fba.setUbOfConcentrationJ((Double) source.getValue(), s);
 				}
 			}
 		}

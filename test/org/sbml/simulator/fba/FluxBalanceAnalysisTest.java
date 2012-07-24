@@ -18,6 +18,7 @@
 package org.sbml.simulator.fba;
 
 import java.io.File;
+import java.util.logging.Logger;
 
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
@@ -34,7 +35,8 @@ import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
  */
 public class FluxBalanceAnalysisTest {
 
-
+	private static final transient Logger logger = Logger.getLogger(FluxBalanceAnalysisTest.class.getName());
+	
 	static double[] c_eq = null;
 	static double[] gibbs_eq = null;
 	static String[] targetFluxes = null;
@@ -49,27 +51,34 @@ public class FluxBalanceAnalysisTest {
 	 */
 	public static void main(String[] args) throws Exception {
 		sbml = (new SBMLReader()).readSBML(args[0]);
-
+		
+		logger.info("document read");
 		//ConstraintsUtils:
 		CSVDataConverter cu1 = new CSVDataConverter(sbml);
 		CSVDataConverter cu2 = new CSVDataConverter(sbml);
-		File file_g = new File(args[1]);
-		File file_c = new File(args[2]);
+		File gibbsFile = new File(args[1]);
+		File concFile = new File(args[2]);
 		
+		logger.info("will read gibbs");
 		// read gibbs and concentrations
-		cu1.readGibbsFromFile(file_g);
-
+		cu1.readGibbsFromFile(gibbsFile);
 		while(cu1.getGibbsArray() == null) {
 			//wait
+			System.out.print(".");
+//			logger.info("cu1.getGibbsArray() == null");
 		}
+		System.out.println();
 		System.out.println("-> done gibbs");
 		gibbs_eq = cu1.getGibbsArray();
 		
-		cu2.readConcentrationsFromFile(file_c);
+		cu2.readConcentrationsFromFile(concFile);
 		System.out.println(cu2.getReader().getState());
 		while(cu2.getConcentrationsArray() == null) {
 			//wait
+			System.out.print(".");
+//			logger.info("cu2.getConcentrationsArray() == null");
 		}
+		System.out.println();
 		System.out.println("-> done concentrations");
 		c_eq = cu2.getConcentrationsArray();
 
@@ -81,25 +90,25 @@ public class FluxBalanceAnalysisTest {
 //		fba.setLambda3(0);
 //		fba.setLambda4(0);
 		fba.setConstraintJG(true);
-		fba.setConstraintJr_maxG(true);
+		fba.setConstraintJ_rmaxG(true);
 		fba.setCplexIterations(4000);
 		fba.solve();
 		
 		//print flux solution:
-		double[] fluxsolution = fba.solution_fluxVector;
+		double[] fluxSolution = fba.solution_fluxVector;
 		System.out.println("solutions for the fluxes: ");
 		SBMLDocument doc = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(sbml);
-		for (int i = 0; i < fluxsolution.length; i++) {
-			System.out.println(doc.getModel().getReaction(i).getId() + "   " + fluxsolution[i]);
+		for (int i = 0; i < fluxSolution.length; i++) {
+			System.out.println(doc.getModel().getReaction(i).getId() + "   " + fluxSolution[i]);
 		}
 		
-		System.out.println("-----------------");
-		//print conc solution:
-		double[] concsolution = fba.solution_concentrations;
-		System.out.println("solutions for the concs: ");
-		for (int i = 0; i < concsolution.length; i++) {
-			System.out.println(sbml.getModel().getSpecies(i).getId() + "   " + concsolution[i]);
-		}
+//		System.out.println("-----------------");
+//		//print conc solution:
+//		double[] concSolution = fba.solution_concentrations;
+//		System.out.println("solutions for the concs: ");
+//		for (int i = 0; i < concSolution.length; i++) {
+//			System.out.println(sbml.getModel().getSpecies(i).getId() + "   " + concSolution[i]);
+//		}
 		
 	}
 

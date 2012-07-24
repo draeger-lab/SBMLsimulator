@@ -98,14 +98,14 @@ public class CSVDataConverter {
 	/**
 	 * Reads out the Gibbs energies from a given file and writes it in the array gibbsEnergies
 	 *
-	 * @param files
+	 * @param file
 	 * @return
 	 * @throws Exception 
 	 */
-	public double[] readGibbsFromFile(File files) throws Exception {
+	public double[] readGibbsFromFile(File file) throws Exception {
 		this.isGibbsFile = true;
 		this.isConcentrationFile = null;
-		readFromFile(files);
+		readFromFile(file);
 		return gibbsArray;
 	}
 

@@ -91,7 +91,7 @@ public class FluxBalanceAnalysis {
 
 	private boolean constraintJG = true;
 
-	private boolean constraintJr_maxG = true;
+	private boolean constraintJ_rmaxG = true;
 
 	private boolean constraintJ0 = true;
 
@@ -253,16 +253,16 @@ public class FluxBalanceAnalysis {
 			int k = i + counter[3];
 			// constraint |J_i| - r_max * |G_i| < 0
 			IloNumExpr j_i = cplex.prod(cplex.abs(cplex.constant(flux[i])), x[i]);
-			IloNumExpr r_maxg = cplex.numExpr();
+			IloNumExpr rmaxG = cplex.numExpr();
 			if (!Double.isNaN(gibbs[i]) && !Double.isInfinite(gibbs[i])) {
-				r_maxg = cplex.prod(r_max, cplex.abs(cplex.constant(gibbs[i])));
+				rmaxG = cplex.prod(r_max, cplex.abs(cplex.constant(gibbs[i])));
 
 			} else {
-				r_maxg = cplex.prod(r_max, x[k]);
+				rmaxG = cplex.prod(r_max, x[k]);
 			}
-			if (isConstraintJr_maxG()) {
-				cplex.addLe(cplex.diff(j_i, r_maxg), -Double.MIN_VALUE);
-				logger.log(Level.DEBUG, String.format("constraint |J_i| - r_max * |G_i| < 0:  "+ cplex.diff(j_i, r_maxg)+ " < " + 0 ));
+			if (isConstraintJ_rmaxG()) {
+				cplex.addLe(cplex.diff(j_i, rmaxG), -Double.MIN_VALUE);
+				logger.log(Level.DEBUG, String.format("constraint |J_i| - r_max * |G_i| < 0:  "+ cplex.diff(j_i, rmaxG)+ " < " + 0 ));
 			}
 			if (constraintJ0) {
 				cplex.addGe(cplex.prod(cplex.constant(flux[i]), x[i]), 0);
@@ -350,7 +350,7 @@ public class FluxBalanceAnalysis {
 	 * @param j
 	 * @return true if lbValue was set successfully
 	 */
-	public boolean setLbofConcentrationJ(double lbValue, int j) {
+	public boolean setLbOfConcentrationJ(double lbValue, int j) {
 		if (j < concentrations.length) {
 			lb[j + target.length] = lbValue;
 			return true;
@@ -365,7 +365,7 @@ public class FluxBalanceAnalysis {
 	 * @param j
 	 * @return true if ubValue was set successfully
 	 */
-	public boolean setUbofConcentrationJ(double ubValue, int j) {
+	public boolean setUbOfConcentrationJ(double ubValue, int j) {
 		if (j < concentrations.length) {
 			ub[j + target.length] = ubValue;
 			return true;
@@ -453,17 +453,17 @@ public class FluxBalanceAnalysis {
 	}
 
 	/**
-	 * @param constraintJr_maxG the constraintJr_maxG to set
+	 * @param constraintJ_rmaxG the constraintJr_maxG to set
 	 */
-	public void setConstraintJr_maxG(boolean constraintJr_maxG) {
-		this.constraintJr_maxG = constraintJr_maxG;
+	public void setConstraintJ_rmaxG(boolean constraintJ_rmaxG) {
+		this.constraintJ_rmaxG = constraintJ_rmaxG;
 	}
 
 	/**
 	 * @return the constraintJr_maxG
 	 */
-	public boolean isConstraintJr_maxG() {
-		return constraintJr_maxG;
+	public boolean isConstraintJ_rmaxG() {
+		return constraintJ_rmaxG;
 	}
 
 	/**
