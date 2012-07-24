@@ -204,6 +204,7 @@ public class DynamicController implements ChangeListener, ActionListener,
                                         new Object[] { width, height }) + "]");
                         // ensure dividers don't get moved
                         view.setEnabled(false);
+                        view.setEnableLegend(false);
 
                         // catch errors due to videoencoding
                         try {
@@ -221,6 +222,7 @@ public class DynamicController implements ChangeListener, ActionListener,
                                             + destinationFile.getName());
                             controlPanel.setStopStatus();
                             view.setEnabled(true);
+                            view.setEnableLegend(true);
                             controlPanel.setStatusString(null);
                         } catch (IllegalArgumentException iae) {
                             GUITools.showErrorMessage(
@@ -230,6 +232,7 @@ public class DynamicController implements ChangeListener, ActionListener,
                                             + destinationFile.getName());
                             controlPanel.setStopStatus();
                             view.setEnabled(true);
+                            view.setEnableLegend(true);
                             controlPanel.setStatusString(null);
                         }
                     }

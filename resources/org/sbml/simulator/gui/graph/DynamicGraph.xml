@@ -16,7 +16,7 @@
   <entry key="PAUSE">Pause</entry>
   <entry key="PAUSE_TOOLTIP">Pause the dynamic visualization.</entry>
   <entry key="STOP">Stop</entry>
-  <entry key="STOP_TOOLTIP">Stop the dynamic visualization.</entry>
+  <entry key="STOP_TOOLTIP">Stop the dynamic visualization or abort video generating.</entry>
   <entry key="TOVIDEO">Video</entry>
   <entry key="TOVIDEO_TOOLTIP">Save the dynamic visualization as a video. Resolution can be adjusted with resolution multiplier in options and the resulting speed of the video itself will be approximately the same as the chosen simulation speed.</entry>
   <entry key="GRAPHSHOT">Image</entry>
@@ -61,6 +61,7 @@
   <entry key="EXC_MIN_MAX_LINE_WIDTH">Maximum line width has to be greater than minimum line width. Changing to default values.</entry>
   <entry key="VIDEO_LONG_COMPUTATION_TIME">Attention! Video generation could take some time and high processor workload with the chosen settings ({0}x{1} and {2} pictures).</entry>
   <entry key="INFO_COMP">Information</entry>
+  <entry key="VIDEOENCODING_ERROR">Error or abort while video encoding. In case of error try again.</entry>
   
   <!-- GraphOptions -->
 

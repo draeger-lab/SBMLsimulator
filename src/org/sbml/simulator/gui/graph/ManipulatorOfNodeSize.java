@@ -218,9 +218,9 @@ public class ManipulatorOfNodeSize extends AGraphManipulator{
             nr.setSize(size, size*ratio);
             //use standard color if no legendTableModel is provided
             Color color = null;
-            if(legendTable != null){
+            if (legendTable != null) {
                 color = legendTable.getColorFor(id);
-            }else if (color == null){
+            } else if (color == null){
                 //ensure that color is never null in case of wrong LegendTableModel
                 color = DEFAULT_NODE_COLOR;
             }

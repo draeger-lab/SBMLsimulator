@@ -310,7 +310,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
         };
         computationOfLimits.execute();
     }
-
+    
     /*
      * (non-Javadoc)
      * @see org.sbml.simulator.gui.graph.IDynamicGraph#donePlay()
@@ -319,6 +319,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
     public void donePlay() {
         controlPanel.setStopStatus();
         setEnabled(true); //ensure that view is enabled
+        setEnableLegend(true);
         controlPanel.setStatusString(null); //no displayed status
     }
 
@@ -372,7 +373,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
         }
         return selectedReactions.toArray(new String[selectedReactions.size()]);
     }
-    
+
     /**
      * Returns selected species.
      * 
@@ -387,7 +388,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
         }
         return selectedSpecies.toArray(new String[selectedSpecies.size()]);
     }
-
+    
     /*
      * (non-Javadoc)
      * @see java.beans.PropertyChangeListener#propertyChange(java.beans.
@@ -499,7 +500,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
             this.firePropertyChange("done", null, null);
         }
     }
-    
+
     /**
      * Saves selection state of id, whether specie or reaction, in corresponding
      * hashmap. Method should be invoked on changes in {@link LegendTableModel}.
@@ -514,7 +515,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
             reactionsSelectionStates.put(id, bool);
         }
     }
-
+    
     /**
      * updates all selection states of IDs saved in corresponding hashmap
      * (reactions & species)
@@ -536,6 +537,14 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
                 reactionsSelectionStates.put(id, false);
             }
         }
+    }
+
+    /**
+     * Enable/disable legendpanel e.g. in case of video generating
+     * @param b
+     */
+    public void setEnableLegend(boolean b) {
+        legend.setEnabled(b);
     }
     
     /**

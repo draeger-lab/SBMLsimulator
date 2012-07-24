@@ -25,7 +25,6 @@ import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import org.sbml.jsbml.SBMLDocument;
@@ -34,6 +33,7 @@ import org.simulator.math.odes.MultiTable;
 import com.xuggle.mediatool.IMediaWriter;
 import com.xuggle.mediatool.ToolFactory;
 
+import de.zbit.gui.GUITools;
 import de.zbit.util.ResourceManager;
 
 /**
@@ -79,6 +79,13 @@ public class DynamicCore {
          * Some control elements for video encoding.
          */
         private int width, height, frameTime, image, totalimages;
+        
+        /**
+         * Switch to wait for graph update to be completed in order to
+         * synchronize graphupdating and picture taking.
+         * (Graphupdate -> picture -> Graphupdate -> picture -> ...)
+         */
+        private volatile boolean awaitUpdate;
 
         /**
          * Construct {@link PlayWorker} without video encoding.
@@ -122,32 +129,47 @@ public class DynamicCore {
         protected Void doInBackground() throws Exception {
             // cycle through timepoints
             for (int i = getIndexOfTimepoint(currTimepoint) + 1; i < timePoints.length; i++) {
+                //turn on synchronization
             	if (generateVideo) {
-            		if (i % captureStepSize == 0) {
-            			/*
-            			 * take and process image
-            			 */
-            			logger.info(MessageFormat.format(
-            				bundle.getString("PROCESSING_IMAGE"),
-            				new Object[] { image, totalimages }));
-            			encoder.encodeVideo(0,
-            				observer.takeGraphshot(width, height),
-            				frameTime, TimeUnit.MILLISECONDS);
-            			/*
-            			 * fire property change to support things like
-            			 * progressBars. the fired new property is a number
-            			 * inbetween 0 and 100 representing the processed
-            			 * percentage.
-            			 */
-            			int perc = (int) ((image/(double)totalimages) * 100);
-            			this.firePropertyChange("video_progress", null, perc);
-            			image++;
-            			frameTime += timestamp; // timestamp for video encoding
-            		}
+            	    awaitUpdate = true;
             	}
+            	
+            	//process timepoint in EDT
             	publish(timePoints[i]);
+            	
             	if (!generateVideo) {
+            	    //wait in case of playing
             		Thread.sleep(playspeed);
+            	} else {
+            	    //video generating
+                    
+                    if (i % captureStepSize == 0) {
+                        
+                        //await graph update of this particular timepoint
+                        while (awaitUpdate) {
+                            Thread.sleep(10);
+                        }
+                        
+                        /*
+                         * take and process image
+                         */
+                        logger.info(MessageFormat.format(
+                            bundle.getString("PROCESSING_IMAGE"),
+                            new Object[] { image, totalimages }));
+                        encoder.encodeVideo(0,
+                            observer.takeGraphshot(width, height),
+                            frameTime, TimeUnit.MILLISECONDS);
+                        /*
+                         * fire property change to support things like
+                         * progressBars. the fired new property is a number
+                         * inbetween 0 and 100 representing the processed
+                         * percentage.
+                         */
+                        int perc = (int) ((image/(double)totalimages) * 100);
+                        this.firePropertyChange("video_progress", null, perc);
+                        image++;
+                        frameTime += timestamp; // timestamp for video encoding
+                    }
             	}
             }
             return null;
@@ -163,7 +185,11 @@ public class DynamicCore {
             super.done();
             if (encoder != null) {
                 encoder.close();
-                logger.info(bundle.getString("VIDEOENCODING_DONE"));
+                if (image >= totalimages) {
+                    logger.info(bundle.getString("VIDEOENCODING_DONE"));
+                } else {
+                    GUITools.showErrorMessage(null, bundle.getString("VIDEOENCODING_ERROR"));
+                }
                 //update progressBar
                 firePropertyChange("video_done", null, null);
             }
@@ -192,11 +218,6 @@ public class DynamicCore {
              * timepoint like stopPlay() is intented.
              */
             if (!isCancelled()) {
-            	if (generateVideo) {
-            		Double last = chunks.get(chunks.size() - 1);
-            		chunks.clear();
-            		chunks.add(last);
-            	}
             	for (Double timePoint : chunks) {
             		operationsDone = false;
             		setCurrTimepoint(timePoint);
@@ -215,6 +236,13 @@ public class DynamicCore {
             				e.printStackTrace();
             			}
             		}
+            	}
+            	
+            	/*
+            	 * notify waiting thread about graph update.
+            	 */
+            	if (generateVideo) {
+            	    awaitUpdate = false;
             	}
             }
         }
