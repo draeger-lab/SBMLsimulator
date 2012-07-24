@@ -80,7 +80,7 @@ public class FluxBalanceAnalysis {
 	/**
 	 * Contains the solutions of cplex for the fluxes.
 	 */
-	public double[] solution_fluxVector;
+	public double[] solutionFluxVector;
 
 	/**
 	 * Contains the {@link# solution_fluxVector} in a {@link MultiTable} for visualization.
@@ -133,12 +133,12 @@ public class FluxBalanceAnalysis {
 		super();
 		this.targetFunc = target;
 		this.constraints = constraints;
-		SBMLDocument doc = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(constraints.document);
+		SBMLDocument doc = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(constraints.originalDocument);
 		int length = doc.getModel().getReactionCount()*4;
 		//		int length = targetFunc.computeTargetFunctionForQuadraticProgramming().length;
 		lb = new double[length + targetFunc.getConcentrations().length];
 		ub = new double[length + targetFunc.getConcentrations().length];
-		this.solution_fluxVector = new double[target.getFluxVector().length];
+		this.solutionFluxVector = new double[target.getFluxVector().length];
 		this.solution_concentrations = new double[targetFunc.getConcentrations().length];
 	}
 
@@ -243,7 +243,7 @@ public class FluxBalanceAnalysis {
 
 		//CONSTRAINTS
 
-		SBMLDocument sbml = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(constraints.document);
+		SBMLDocument sbml = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(constraints.originalDocument);
 		double[] flux = targetFunc.getFluxVector();
 		double[] gibbs = constraints.getGibbsEnergies();
 		double r_max = constraints.computeR_max(flux);
@@ -294,7 +294,7 @@ public class FluxBalanceAnalysis {
 		solution = cplex.getValues(x);
 		for (int i = 0; i < counter[1]; i++) {
 			// the first counter[1]-values are corressponding to the fluxes
-			solution_fluxVector[i] = flux[i] * solution[i];
+			solutionFluxVector[i] = flux[i] * solution[i];
 		}
 		for (int j = 0; j < concentrations.length; j++) {
 			// the last values in x are corresponding to the concentrations
@@ -380,13 +380,13 @@ public class FluxBalanceAnalysis {
 	 */
 	private MultiTable createMultiTableForVisualizing(){
 		double[] time = {0};
-		String[] idsOfReactions = new String[constraints.document.getModel().getReactionCount()];
-		for (int i = 0; i < constraints.document.getModel().getReactionCount(); i++){
-			idsOfReactions[i] = constraints.document.getModel().getReaction(i).getId();
+		String[] idsOfReactions = new String[constraints.originalDocument.getModel().getReactionCount()];
+		for (int i = 0; i < constraints.originalDocument.getModel().getReactionCount(); i++){
+			idsOfReactions[i] = constraints.originalDocument.getModel().getReaction(i).getId();
 		}
-		double[][] fluxes = new double[solution_fluxVector.length][1];
-		for (int j = 0; j < solution_fluxVector.length; j++) {
-			fluxes[j][0] = solution_fluxVector[j];
+		double[][] fluxes = new double[solutionFluxVector.length][1];
+		for (int j = 0; j < solutionFluxVector.length; j++) {
+			fluxes[j][0] = solutionFluxVector[j];
 		}
 		MultiTable mt = new MultiTable(time, fluxes, idsOfReactions);
 
@@ -397,9 +397,9 @@ public class FluxBalanceAnalysis {
 	public void showIfTheFluxesAddToNull(SBMLDocument doc){
 		for (int s = 0; s < doc.getModel().getSpeciesCount(); s++) {
 			double sum = 0;
-			for(int i = 0; i < solution_fluxVector.length; i++) {
+			for(int i = 0; i < solutionFluxVector.length; i++) {
 				if(doc.getModel().getReaction(i).hasProduct(doc.getModel().getSpecies(s)) || doc.getModel().getReaction(i).hasReactant(doc.getModel().getSpecies(s))) {
-					sum += solution_fluxVector[i];
+					sum += solutionFluxVector[i];
 				}
 			}
 			System.out.print(sum + "  ");

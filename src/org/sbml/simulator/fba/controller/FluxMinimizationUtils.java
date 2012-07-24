@@ -39,6 +39,8 @@ import org.sbml.simulator.stability.math.StoichiometricMatrix;
  */
 public class FluxMinimizationUtils {
 
+	protected static final String endingForBackwardReaction = "_rev";
+	
 	/**
 	 * Gets a {@link StoichiometricMatrix} and gives back the corresponding flux-vector in Manhattan-Norm, without the given 
 	 * target fluxes.
@@ -109,34 +111,41 @@ public class FluxMinimizationUtils {
 	 * @throws Exception 
 	 */
 	public static StoichiometricMatrix SBMLDocToStoichMatrix(SBMLDocument document) throws Exception{
-		SBMLDocument doc = eliminateTransportsAndSplitReversibleReactions(document);
+		SBMLDocument modifiedDocument = eliminateTransportsAndSplitReversibleReactions(document);
 
-		// build a new StoichiometricMatrix with the number of metabolites as the dimension of rows
+		// build a new StoichiometricMatrix with the number of species as the dimension of rows
 		// and the number of reactions as the dimension of columns
-		int speciesCount = doc.getModel().getSpeciesCount();
-		int reactionCount = doc.getModel().getReactionCount();
+		int speciesCount = modifiedDocument.getModel().getSpeciesCount();
+		int reactionCount = modifiedDocument.getModel().getReactionCount();
 		StoichiometricMatrix sMatrix = new StoichiometricMatrix (speciesCount,reactionCount);
 
-		if (doc.getLevel() > 3) {
-			throw new Exception("Stoichiometric matrix is only available for SBML versions < 3.0");
-		}
 		//fill the matrix with the stoichiometry of each reaction
 		for (int j = 0; j < reactionCount; j++) { //j is the column (reaction)
 			for (int i = 0; i < speciesCount; i++) { // i is the row (species)
-				Reaction reac = doc.getModel().getReaction(j);
-				Species species = doc.getModel().getSpecies(i);
+				Reaction reac = modifiedDocument.getModel().getReaction(j);
+				Species species = modifiedDocument.getModel().getSpecies(i);
 				if (reac.hasProduct(species)) {
 					// the stoichiometry of products is positive in the stoichiometricMatrix
 					if (reac.getProductForSpecies(species.getId()).isSetStoichiometry()) {
 						sMatrix.set(i, j, reac.getProductForSpecies(species.getId()).getStoichiometry());
 					}
-					else sMatrix.set(i, j, 1);
+					else if (!reac.getProductForSpecies(species.getId()).isSetStoichiometry() && (modifiedDocument.getLevel() < 3)) {
+						sMatrix.set(i, j, 1);
+					}
+					else if (!reac.getProductForSpecies(species.getId()).isSetStoichiometry() && (modifiedDocument.getLevel() >= 3)) {
+						throw new Exception("Stoichiometry of species: " + reac.getProductForSpecies(species.getId()) + " is unknown. Can't create the full stoichiometric matrix of the model.");
+					}
 				} else if (reac.hasReactant(species)) {
 					// the stoichiometry of reactants is negative in the stoichiometricMatrix
 					if (reac.getReactantForSpecies(species.getId()).isSetStoichiometry()) {
 						sMatrix.set(i, j, - reac.getReactantForSpecies(species.getId()).getStoichiometry());
 					}
-					else sMatrix.set(i, j, - 1);
+					else if (!reac.getReactantForSpecies(species.getId()).isSetStoichiometry() && (modifiedDocument.getLevel() < 3)) {
+						sMatrix.set(i, j, - 1);
+					}
+					else if (!reac.getReactantForSpecies(species.getId()).isSetStoichiometry() && (modifiedDocument.getLevel() >= 3)) {
+						throw new Exception("Stoichiometry of species: " + reac.getReactantForSpecies(species.getId()) + " is unknown. Can't create the full stoichiometric matrix of the model.");
+					}
 				}
 			}
 		}
@@ -160,34 +169,36 @@ public class FluxMinimizationUtils {
 		//split the reversible reactions
 		int metaid = 0;
 		for (int i = 0; i < doc.getModel().getReactionCount(); i++) {
-			Reaction currentReac = revReacDoc.getModel().getReaction(doc.getModel().getReaction(i).getId());
-			if (currentReac.isReversible()) {
-				reversibleReactions.add(currentReac.getId());
-				reversibleReactions.add(currentReac.getId() + "_rev");
-				Reaction createdReac = currentReac.clone();
-				createdReac.setId(currentReac.getId() + "_rev");
-				createdReac.setMetaId(currentReac.getMetaId() + "_rev");
-				createdReac.setName(currentReac.getName() + "_rev");
-				createdReac.getListOfProducts().clear();
-				createdReac.getListOfReactants().clear();
-				for (int j = 0; j < currentReac.getReactantCount(); j++) {
-					SpeciesReference sr = currentReac.getReactant(j).clone();
-					sr.setMetaId(metaid + "_rev");
+			Reaction reversibleReac = revReacDoc.getModel().getReaction(doc.getModel().getReaction(i).getId());
+			if (reversibleReac.isReversible()) {
+				reversibleReactions.add(reversibleReac.getId());
+				reversibleReactions.add(reversibleReac.getId() + endingForBackwardReaction);
+				Reaction backwardReac = reversibleReac.clone();
+				backwardReac.setId(reversibleReac.getId() + endingForBackwardReaction);
+				backwardReac.setMetaId(reversibleReac.getMetaId() + endingForBackwardReaction);
+				backwardReac.setName(reversibleReac.getName() + endingForBackwardReaction);
+				backwardReac.getListOfProducts().clear();
+				backwardReac.getListOfReactants().clear();
+				for (int j = 0; j < reversibleReac.getReactantCount(); j++) {
+					SpeciesReference sr = reversibleReac.getReactant(j).clone();
+					sr.setMetaId(metaid + endingForBackwardReaction);
 					metaid++;
-					createdReac.addProduct(sr);
+					backwardReac.addProduct(sr);
 				}
 
-				for (int k = 0; k < currentReac.getProductCount(); k++) {
-					SpeciesReference sr = currentReac.getProduct(k).clone();
-					sr.setMetaId(metaid + "_rev");
+				for (int k = 0; k < reversibleReac.getProductCount(); k++) {
+					SpeciesReference sr = reversibleReac.getProduct(k).clone();
+					sr.setMetaId(metaid + endingForBackwardReaction);
 					metaid++;
-					createdReac.addReactant(sr);
+					backwardReac.addReactant(sr);
 				}
-				createdReac.setReversible(false);
-				revReacDoc.getModel().addReaction(createdReac);
-				currentReac.setReversible(false);
+				backwardReac.setReversible(false);
+				revReacDoc.getModel().addReaction(backwardReac);
+				reversibleReac.setReversible(false);
 			}
 		}
+		//TODO checked
+		
 		// return the new document
 		return revReacDoc;
 	}

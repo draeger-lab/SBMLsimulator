@@ -45,7 +45,7 @@ public class Constraints {
 	/**
 	 * Contains the opened {@link SBMLDocument}
 	 */
-	public SBMLDocument document;
+	public SBMLDocument originalDocument;
 
 	/**
 	 * Contains the concentrations in equilibrium / steady state
@@ -83,7 +83,7 @@ public class Constraints {
 	 * @throws Exception 
 	 */
 	public Constraints (SBMLDocument doc, double[] gibbs_eq, double[] c_eq) throws Exception {
-		this.document = doc;
+		this.originalDocument = doc;
 		equilibriumGibbsEnergies = gibbs_eq;
 		equilibriumConcentrations = c_eq;
 		computeGibbsEnergies(gibbs_eq);
@@ -95,34 +95,37 @@ public class Constraints {
 	 * @throws Exception 
 	 */
 	private double[] computeGibbsEnergies(double[] steadyStateGibbs) throws Exception {
-		if (steadyStateGibbs != null && this.document != null && equilibriumConcentrations != null) {
+		if (steadyStateGibbs != null && this.originalDocument != null && equilibriumConcentrations != null) {
 			
 			// initialize
-			StoichiometricMatrix N = FluxMinimizationUtils.SBMLDocToStoichMatrix(document);
-			SBMLDocument doc = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(document);
+			StoichiometricMatrix N = FluxMinimizationUtils.SBMLDocToStoichMatrix(originalDocument);
+			SBMLDocument modifiedDocument = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(originalDocument);
 			gibbsEnergies = new double[steadyStateGibbs.length];
+			System.out.println("steadyStateGibbs: " + steadyStateGibbs.length);
+			System.out.println("j = " + originalDocument.getModel().getReactionCount() + "\n i = " + originalDocument.getModel().getSpeciesCount());
 			
-			// compute delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum(N[j][i] * ln(c_eq[j])) 
-			for (int i=0; i< document.getModel().getReactionCount(); i++) {
+			// compute delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum(N[i][j] * ln(S[i])) 
+			for (int j = 0; j < originalDocument.getModel().getReactionCount(); j++) {
 				double sum = 0;
-				// compute sum( N[i][j] * c_eq[j] )
-				for (int j=0; j< document.getModel().getSpeciesCount(); j++) {
-					if (!Double.isNaN(equilibriumConcentrations[j])) {
-						sum += N.get(j, i) * Math.log(equilibriumConcentrations[j]);
+				// compute sum( N[i][j] * ln(S_eq[i]) ) equals to the sum( N[i][j] * c_eq[i] ) 
+				for (int i = 0; i < originalDocument.getModel().getSpeciesCount(); i++) {
+					if (!Double.isNaN(equilibriumConcentrations[i])) {
+						System.out.println("--> i: " + i + " j: " + j + " N[i,j]: " + N.get(i, j) + " c_eq: " + equilibriumConcentrations[i]);
+						sum += N.get(i, j) * Math.log(equilibriumConcentrations[i]);
 					} 
 				}
-				// delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum( N[j][i] * ln(c_eq[j]) )
-				// look if there is a reversible reaction and set the reverse reaction gibbs energie
-				if (FluxMinimizationUtils.reversibleReactions.contains(doc.getModel().getReaction(i).getId())) {
-					if (doc.getModel().containsReaction(doc.getModel().getReaction(i).getId() + "_rev")) {	
-						gibbsEnergies[i] = (steadyStateGibbs[i]) + ((R*T*sum)/1000);
-						int index_of_rev_reac = doc.getModel().getListOfReactions().getIndex(doc.getModel().getReaction(doc.getModel().getReaction(i).getId() + "_rev"));
+				// delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum( N[i][j] * ln(c_eq[i]) )
+				// look if there is a reversible reaction and set the reverse reaction Gibbs energy
+				if (FluxMinimizationUtils.reversibleReactions.contains(modifiedDocument.getModel().getReaction(j).getId())) {
+					if (modifiedDocument.getModel().containsReaction(modifiedDocument.getModel().getReaction(j).getId() + FluxMinimizationUtils.endingForBackwardReaction)) {	
+						gibbsEnergies[j] = (steadyStateGibbs[j]) + ((R*T*sum)/1000);
+						int index_of_rev_reac = modifiedDocument.getModel().getListOfReactions().getIndex(modifiedDocument.getModel().getReaction(modifiedDocument.getModel().getReaction(j).getId() + "_rev"));
 						// set the gibbs energie of the reverse reaction to the negtive 
-						gibbsEnergies[index_of_rev_reac] = gibbsEnergies[i] * (-1);
+						gibbsEnergies[index_of_rev_reac] = gibbsEnergies[j] * (-1);
 					}
 				} else {
 					// it's no reversible reaction
-					gibbsEnergies[i] = (steadyStateGibbs[i]) + ((R*T*sum)/1000);
+					gibbsEnergies[j] = (steadyStateGibbs[j]) + ((R*T*sum)/1000);
 				}
 			}
 		}

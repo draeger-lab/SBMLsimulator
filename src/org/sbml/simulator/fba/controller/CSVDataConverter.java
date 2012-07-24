@@ -49,7 +49,7 @@ public class CSVDataConverter {
 	/**
 	 * Containing the corresponding {@link SBMLDocument}.
 	 */
-	private SBMLDocument document;
+	private SBMLDocument modifiedDocument;
 
 	/**
 	 * Containing the read Gibbs energies.
@@ -77,7 +77,7 @@ public class CSVDataConverter {
 	 * @param doc
 	 */
 	public CSVDataConverter(SBMLDocument doc) {
-		this.document = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(doc);
+		this.modifiedDocument = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(doc);
 	}
 
 	/**
@@ -113,7 +113,6 @@ public class CSVDataConverter {
 	 * Reads out the Gibbs energies or concentrations from a given file and writes it in an array, that the method returns.
 	 * 
 	 * @param files
-	 * @param gibbs
 	 * @throws Exception 
 	 */
 	private void readFromFile(File file) throws Exception {
@@ -139,21 +138,22 @@ public class CSVDataConverter {
 			for(int i = 0; i < data.length; i++) {
 				values[i] = data[i][1];
 				keys[i] = data[i][0];
+				System.out.println(keys[i] + "..." + values[i]);
 			}
 
 			if (isGibbsFile != null && isGibbsFile) {
 				initializeGibbsArray();
 				for(int i = 0; i< values.length; i++) {
-					if (document.getModel().containsReaction(keys[i])) {
+					if (modifiedDocument.getModel().containsReaction(keys[i])) {
 						if (!FluxMinimizationUtils.eliminatedReactions.contains(keys[i])) {
-							document.getModel().getReaction(keys[i]).putUserObject(KEY_GIBBS, Double.parseDouble(values[i]));
-							int index = document.getModel().getListOfReactions().getIndex(document.getModel().getReaction(keys[i]));
+							modifiedDocument.getModel().getReaction(keys[i]).putUserObject(KEY_GIBBS, Double.parseDouble(values[i]));
+							int index = modifiedDocument.getModel().getListOfReactions().getIndex(modifiedDocument.getModel().getReaction(keys[i]));
 							gibbsArray[index] = Double.parseDouble(values[i]);
 							fileMatchToDocument++;
-							if (document.getModel().containsReaction(keys[i] + "_rev")){
-								document.getModel().getReaction(keys[i] + "_rev").putUserObject(KEY_GIBBS, "isReverse");
-								int index2 = document.getModel().getListOfReactions().getIndex(document.getModel().getReaction(keys[i] + "_rev"));
-								gibbsArray[index2] = Double.parseDouble(values[i]);
+							if (modifiedDocument.getModel().containsReaction(keys[i] + FluxMinimizationUtils.endingForBackwardReaction)){
+								modifiedDocument.getModel().getReaction(keys[i] + FluxMinimizationUtils.endingForBackwardReaction).putUserObject(KEY_GIBBS, "isReverse");
+								int index2 = modifiedDocument.getModel().getListOfReactions().getIndex(modifiedDocument.getModel().getReaction(keys[i] + FluxMinimizationUtils.endingForBackwardReaction));
+								gibbsArray[index2] = Double.parseDouble(values[i]); // TODO check
 							}
 						}
 					}
@@ -161,9 +161,9 @@ public class CSVDataConverter {
 			} else if(isConcentrationFile!= null && isConcentrationFile){
 				initializeConcentrationArray();
 				for(int i = 0; i< values.length; i++) {
-					if (document.getModel().containsSpecies(keys[i])) {
-						document.getModel().getSpecies(keys[i]).putUserObject(KEY_CONCENTRATIONS, values[i]);
-						int index = document.getModel().getListOfSpecies().getIndex(document.getModel().getSpecies(keys[i]));
+					if (modifiedDocument.getModel().containsSpecies(keys[i])) {
+						modifiedDocument.getModel().getSpecies(keys[i]).putUserObject(KEY_CONCENTRATIONS, values[i]);
+						int index = modifiedDocument.getModel().getListOfSpecies().getIndex(modifiedDocument.getModel().getSpecies(keys[i]));
 						concentrationsArray[index] = Double.parseDouble(values[i]);
 						fileMatchToDocument++;
 					}
@@ -181,7 +181,7 @@ public class CSVDataConverter {
 	 * read a file with concentrations, the content will be overwritten.
 	 */
 	private void initializeConcentrationArray() {
-		concentrationsArray = new double[document.getModel().getSpeciesCount()];
+		concentrationsArray = new double[modifiedDocument.getModel().getSpeciesCount()];
 		for (int i = 0; i < concentrationsArray.length; i++) {
 			concentrationsArray[i] = Math.pow(10, -11);
 		}
@@ -192,7 +192,7 @@ public class CSVDataConverter {
 	 * read a file with Gibbs energies, the content will be overwritten.
 	 */
 	private void initializeGibbsArray() {
-		gibbsArray = new double[document.getModel().getReactionCount()];
+		gibbsArray = new double[modifiedDocument.getModel().getReactionCount()];
 		for (int i = 0; i < gibbsArray.length; i++) {
 			gibbsArray[i] = Double.NaN;
 		}
@@ -233,12 +233,12 @@ public class CSVDataConverter {
 		String[][] data = null;
 		Boolean isFluxSolution = null;
 		Boolean isConcSolution = null;
-		if (computed_solution.length == document.getModel().getReactionCount()) {
-			data = new String[document.getModel().getReactionCount()+1][2];
+		if (computed_solution.length == modifiedDocument.getModel().getReactionCount()) {
+			data = new String[modifiedDocument.getModel().getReactionCount()+1][2];
 			data[0][0] = "Reaction_id";
 			isFluxSolution = true;
-		} else if (computed_solution.length == document.getModel().getSpeciesCount()) {
-			data = new String[document.getModel().getSpeciesCount()+1][2];
+		} else if (computed_solution.length == modifiedDocument.getModel().getSpeciesCount()) {
+			data = new String[modifiedDocument.getModel().getSpeciesCount()+1][2];
 			data[0][0] = "Species_id";
 			isConcSolution = true;
 		}
@@ -248,13 +248,13 @@ public class CSVDataConverter {
 			"the species.");
 		}
 		data[0][1] = "steady_state_value";
-		for (int i = 1; i < document.getModel().getReactionCount(); i++) {
+		for (int i = 1; i < modifiedDocument.getModel().getReactionCount(); i++) {
 			if (isFluxSolution) {
 				// write the reactions ids
-				data[i][0] = document.getModel().getReaction(i).getId();
+				data[i][0] = modifiedDocument.getModel().getReaction(i).getId();
 			} else if (isConcSolution) {
 				// write the species ids
-				data[i][0] = document.getModel().getSpecies(i).getId();
+				data[i][0] = modifiedDocument.getModel().getSpecies(i).getId();
 			}
 			// write the solution
 			data[i][1] = Double.toString(computed_solution[i]);
