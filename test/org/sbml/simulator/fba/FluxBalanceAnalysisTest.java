@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
+import org.sbml.jsbml.SBMLWriter;
 import org.sbml.simulator.fba.controller.CSVDataConverter;
 import org.sbml.simulator.fba.controller.Constraints;
 import org.sbml.simulator.fba.controller.FluxBalanceAnalysis;
@@ -37,10 +38,10 @@ public class FluxBalanceAnalysisTest {
 
 	private static final transient Logger logger = Logger.getLogger(FluxBalanceAnalysisTest.class.getName());
 	
-	static double[] c_eq = null;
-	static double[] gibbs_eq = null;
+	static double[] equilibriumsConcentrations = null;
+	static double[] equilibriumsGibbsEnergies = null;
 	static String[] targetFluxes = null;
-	static SBMLDocument sbml = null;
+	static SBMLDocument originalSBMLDoc = null;
 	static Constraints constraints = null;
 	
 	/**
@@ -50,12 +51,19 @@ public class FluxBalanceAnalysisTest {
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
-		sbml = (new SBMLReader()).readSBML(args[0]);
+		originalSBMLDoc = (new SBMLReader()).readSBML(args[0]);
+		
+		// TODO debugging
+		System.out.println("original - reactionCount: " + originalSBMLDoc.getModel().getReactionCount());
+		System.out.println("original - speciesCount: " + originalSBMLDoc.getModel().getSpeciesCount());
 		
 		logger.info("document read");
 		//ConstraintsUtils:
-		CSVDataConverter cu1 = new CSVDataConverter(sbml);
-		CSVDataConverter cu2 = new CSVDataConverter(sbml);
+		CSVDataConverter cu1 = new CSVDataConverter(originalSBMLDoc);
+		CSVDataConverter cu2 = new CSVDataConverter(originalSBMLDoc);
+		
+		
+		
 		File gibbsFile = new File(args[1]);
 		File concFile = new File(args[2]);
 		
@@ -67,24 +75,29 @@ public class FluxBalanceAnalysisTest {
 			System.out.print(".");
 //			logger.info("cu1.getGibbsArray() == null");
 		}
+		equilibriumsGibbsEnergies = cu1.getGibbsArray();
 		System.out.println();
 		System.out.println("-> done gibbs");
-		gibbs_eq = cu1.getGibbsArray();
+		
 		
 		cu2.readConcentrationsFromFile(concFile);
-		System.out.println(cu2.getReader().getState());
+//		System.out.println(cu2.getReader().getState());
 		while(cu2.getConcentrationsArray() == null) {
 			//wait
 			System.out.print(".");
 //			logger.info("cu2.getConcentrationsArray() == null");
 		}
+		equilibriumsConcentrations = cu2.getConcentrationsArray();
 		System.out.println();
 		System.out.println("-> done concentrations");
-		c_eq = cu2.getConcentrationsArray();
 
+		// TODO debugging
+		System.out.println("length gibbs: " + equilibriumsGibbsEnergies.length);
+		System.out.println("length conc: " + equilibriumsConcentrations.length);
+		
 		//create FluxBalanceAnalysis object and solve it:
-		constraints =  new Constraints(sbml, gibbs_eq, c_eq);
-		FluxBalanceAnalysis fba = new FluxBalanceAnalysis(constraints, sbml, targetFluxes);
+		constraints =  new Constraints(originalSBMLDoc, equilibriumsGibbsEnergies, equilibriumsConcentrations);
+		FluxBalanceAnalysis fba = new FluxBalanceAnalysis(constraints, originalSBMLDoc, targetFluxes);
 //		fba.setLambda1(0);
 //		fba.setLambda2(0);
 //		fba.setLambda3(0);
@@ -95,9 +108,9 @@ public class FluxBalanceAnalysisTest {
 		fba.solve();
 		
 		//print flux solution:
-		double[] fluxSolution = fba.solution_fluxVector;
+		double[] fluxSolution = fba.solutionFluxVector;
 		System.out.println("solutions for the fluxes: ");
-		SBMLDocument doc = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(sbml);
+		SBMLDocument doc = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(originalSBMLDoc);
 		for (int i = 0; i < fluxSolution.length; i++) {
 			System.out.println(doc.getModel().getReaction(i).getId() + "   " + fluxSolution[i]);
 		}
