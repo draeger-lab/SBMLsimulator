@@ -560,7 +560,7 @@ public class DynamicControlPanel extends JPanel {
      * Enables {@link DynamicControlPanel} elements accordant to video status.
      */
     public void setVideoStatus(){
-        Component[] elements = { play, pause, stop, video, graphShot,
+        Component[] elements = { play, pause, video, graphShot,
                 searchBar, simVeloCombo, nodeLabelsCB, reactionLabelsCB,
                 manipulatorsCombo, dataCombo };
         GUITools.setEnabledForAll(false, elements);
