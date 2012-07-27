@@ -317,7 +317,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 				}
 			}
 			Constraints c = new Constraints(currentDoc, csvConverterGibbs.getGibbsArray(), csvConverterConc.getConcentrationsArray());
-			fba = new FluxBalanceAnalysis(c, currentDoc, targetFluxes);
+			fba = new FluxBalanceAnalysis(currentDoc, c, targetFluxes);
 
 			//set constraints and iterations
 			fba.setConstraintJG(JG_less_than_0);

@@ -52,17 +52,17 @@ public class FluxMinimization extends TargetFunction {
 	/**
 	 * An array of the concentrations in the model.
 	 */
-	private double[] concentrations;
+	private double[] initialConcentrations;
 
 	/**
 	 * Contains the concentrations in the model in steady-state.
 	 */
-	private double[] c_eq;
+	private double[] equilibriumsConcentrations;
 
 	/**
 	 * Contains the computed gibbs energies in the model.
 	 */
-	private double[] gibbs;
+	private double[] equilibriumsGibbsEnergies;
 
 	/**
 	 * Vector that is made up of the transposed null space matrix K and
@@ -83,42 +83,43 @@ public class FluxMinimization extends TargetFunction {
 	/**
 	 * Current {@link SBMLDocument}
 	 */
-	private SBMLDocument document;
+	private SBMLDocument oriDocument;
 
 	/**
 	 * Constructor, that gets a {@link StoichiometricMatrix} and computes 
 	 * the fluxVector, the Gibbs energies, the concentrations and the errorArray itself.
-	 * 
-	 * @param doc
-	 * @param N
-	 * @param c_eq
-	 * @param gibbs_eq
+	 *
+	 * @param originalDocument
+	 * @param constraints
+	 * @param N (stoichiometric matrix)
 	 * @param targetFluxes, important for computing the flux vector
 	 * @throws Exception 
 	 */
-	public FluxMinimization(Constraints con, SBMLDocument doc, StoichiometricMatrix N, double[] c_eq, double[] gibbs_eq, String[] targetFluxes) throws Exception {
+	public FluxMinimization(SBMLDocument originalDocument, Constraints constraints, StoichiometricMatrix N, String[] targetFluxes) throws Exception {
 
 		// set the fields of this object
-		this.document = doc;
-		this.fluxVector = FluxMinimizationUtils.computeFluxVector(N, targetFluxes, doc);
-		setC_eq(c_eq);
+		this.oriDocument = originalDocument;
+		this.fluxVector = FluxMinimizationUtils.computeFluxVector(N, targetFluxes, originalDocument);
+		setC_eq(constraints.getEquilibriumConcentrations());
 
 		this.N = N;
 
 		// get the computed Gibbs energies for the incoming Gibbs energies in steady state
-		this.gibbs = con.getGibbsEnergies();
-		if (gibbs != null) {
-			this.errorArray = FluxMinimizationUtils.computeError(gibbs.length);
+		this.equilibriumsGibbsEnergies = constraints.getGibbsEnergies();
+		
+		// get the error array
+		if (equilibriumsGibbsEnergies != null) {
+			this.errorArray = FluxMinimizationUtils.computeError(equilibriumsGibbsEnergies.length);
 		} else {
 			this.errorArray = new double[0];
 		}
 
 		// compute the initial concentrations
-		this.concentrations = computeConcentrations(document);
+		this.initialConcentrations = extractConcentrations(oriDocument);
 
 		// compute L or let it be null if the Gibbs energies couldn't be computed
-		if(gibbs != null && document != null) {
-			this.L = computeL(document);
+		if(equilibriumsGibbsEnergies != null && oriDocument != null) {
+			this.L = computeL(oriDocument);
 		} else {
 			L = new double[0];
 		}
@@ -137,63 +138,81 @@ public class FluxMinimization extends TargetFunction {
 	 * @throws Exception 
 	 */
 	public FluxMinimization(SBMLDocument doc, double[] c_eq, double[] gibbs_eq, String[] targetFluxes) throws Exception {
-		this(new Constraints(doc, gibbs_eq, c_eq),doc,FluxMinimizationUtils.SBMLDocToStoichMatrix(doc), c_eq, gibbs_eq, targetFluxes);
+		this(doc,new Constraints(doc, gibbs_eq, c_eq),FluxMinimizationUtils.SBMLDocToStoichMatrix(doc), targetFluxes);
 	}
 
+	/**
+	 * 
+	 * @param doc
+	 * @param constraints
+	 * @param targetFluxes
+	 * @throws Exception
+	 */
+	public FluxMinimization(SBMLDocument doc, Constraints constraints, String[] targetFluxes) throws Exception {
+		this(doc, constraints, FluxMinimizationUtils.SBMLDocToStoichMatrix(doc), targetFluxes);
+	}
 
 	/**
 	 * Computes the transposed kernel matrix of the reduced stoichiometric matrix N
 	 * multiplied with the reaction Gibbs energy values for the internal reactions of the system.
-	 * @param doc
+	 * 
+	 * @param originalDocument
 	 * @return L = (K_int^T) * (Delta_r(gibbs))_int
 	 * @throws Exception 
 	 */
-	private double[] computeL(SBMLDocument doc) throws Exception {
-		Matrix K_int_t = FluxMinimizationUtils.SBMLDocToStoichMatrix(doc).getConservationRelations();
+	private double[] computeL(SBMLDocument originalDocument) throws Exception {
+		Matrix transposedK_int = FluxMinimizationUtils.SBMLDocToStoichMatrix(originalDocument).getConservationRelations();
 
-		double[] erg = new double[gibbs.length];
-		for (int i = 0; i< gibbs.length; i++) {
-			for (int j = 0; j < K_int_t.getRowDimension(); j++) {
-				erg[i] += K_int_t.get(j, i)*gibbs[i];
+		double[] vectorL = new double[equilibriumsGibbsEnergies.length];
+		for (int i = 0; i< equilibriumsGibbsEnergies.length; i++) {
+			for (int j = 0; j < transposedK_int.getColumnDimension(); j++) {
+				vectorL[i] += transposedK_int.get(i,j)*equilibriumsGibbsEnergies[i];
 			}
 		}
-		return erg;
+		return vectorL;
 	}
 
 
 	/**
 	 * Fills the concentrations-array with the initial concentrations/amounts of
 	 * the {@link Species} in this {@link Model}.
+	 * 
 	 * @param document
 	 * @return concentrations-array
 	 */
-	private double[] computeConcentrations(SBMLDocument document) {
+	private double[] extractConcentrations(SBMLDocument document) {
 		Model model = document.getModel();
-		concentrations = new double[model.getSpeciesCount()];
+		initialConcentrations = new double[model.getSpeciesCount()];
 		Species currentSpecies;
 		for (int i = 0; i < model.getSpeciesCount(); i++) {
 			currentSpecies = model.getSpecies(i);
 			if (currentSpecies.hasOnlySubstanceUnits()) {
 				if (currentSpecies.isSetInitialConcentration()){
 					// multiply with the volume of the compartment
-					concentrations[i] = currentSpecies.getInitialConcentration()* currentSpecies.getCompartmentInstance().getSize();
+					initialConcentrations[i] = currentSpecies.getInitialConcentration()* currentSpecies.getCompartmentInstance().getSize();
 				} else if (currentSpecies.isSetInitialAmount()){
 					// do nothing
-					concentrations[i] = currentSpecies.getInitialAmount();
+					initialConcentrations[i] = currentSpecies.getInitialAmount();
+				}
+				else {
+					// TODO no initialConcentration and no initialAmount isSet --> unknown
 				}
 			} else {
 				if (currentSpecies.isSetInitialConcentration()){
 					// do nothing
-					concentrations[i] = currentSpecies.getInitialConcentration();
+					initialConcentrations[i] = currentSpecies.getInitialConcentration();
 				} else if (currentSpecies.isSetInitialAmount()){
 					// divide through the volume of the compartment
 					if (currentSpecies.getCompartmentInstance().isSetSize() && currentSpecies.getCompartmentInstance().getSize() != 0){
-						concentrations[i] = currentSpecies.getInitialAmount() / currentSpecies.getCompartmentInstance().getSize();
+						initialConcentrations[i] = currentSpecies.getInitialAmount() / currentSpecies.getCompartmentInstance().getSize();
 					}
+				}
+				else {
+					// TODO no initialConcentration and no initialAmount isSet --> unknown
 				}
 			}
 		}
-		return concentrations;
+		return initialConcentrations;
 	}
 
 
@@ -203,13 +222,15 @@ public class FluxMinimization extends TargetFunction {
 	 */
 	@Override
 	public double[] computeTargetFunctionForQuadraticProgramming() {
-		// the function to minimize is: ||J|| + lambda1*sum((c_i - c_eq)^2) + lambda2*||L|| + lambda3*||E|| + lambda4*||G||
+		// the function to minimize is: ||J|| + lambda1*sum((c_i - c_eq)^2) + lambda2*||L|| + lambda3*||E|| + lambda4*||deltaG||
 
+		// TODO
+		
 		// create the target vector 
-		double[] target = new double[fluxVector.length + 
-		                             errorArray.length + 
-		                             L.length +
-		                             gibbs.length];
+		double[] target = new double[fluxVector.length + 				// ||J||
+		                             L.length +							// ||L||
+		                             errorArray.length + 				// ||E||
+		                             equilibriumsGibbsEnergies.length];	// ||deltaG||
 
 		// this is a pointer, which counts in the target vector the actually position
 		counterArray = new int[4];
@@ -218,7 +239,7 @@ public class FluxMinimization extends TargetFunction {
 				L.length);
 		int counter = 0;
 
-		// fill it with the flux vector: ||J||
+		// fill the target with the flux vector: ||J|| 
 		for (int i=0; i< this.fluxVector.length; i++) {
 			target[i] = Math.abs(fluxVector[i]);
 			counter++;
@@ -227,6 +248,7 @@ public class FluxMinimization extends TargetFunction {
 		// concentrations left out because they are quadratic and must be computed in 
 		// FluxBalanceAnalysis
 
+		// TODO lambda 2 and 3 are swapped
 		// the weighted error: lambda3*||E||
 		for (int k = 0; k < this.errorArray.length; k++) {
 			target[counter] = lambda2 * Math.abs(errorArray[k]);
@@ -244,9 +266,9 @@ public class FluxMinimization extends TargetFunction {
 		}
 
 		// the weighted gibbs energy: lambda4*||G||
-		for (int l = 0; l < this.gibbs.length; l++) {
-			if (!Double.isNaN(gibbs[l]) && !Double.isInfinite(gibbs[l])) {
-				target[counter] = lambda4 * Math.abs(gibbs[l]);
+		for (int l = 0; l < this.equilibriumsGibbsEnergies.length; l++) {
+			if (!Double.isNaN(equilibriumsGibbsEnergies[l]) && !Double.isInfinite(equilibriumsGibbsEnergies[l])) {
+				target[counter] = lambda4 * Math.abs(equilibriumsGibbsEnergies[l]);
 			} else {
 				target[counter] = lambda4;
 			}
@@ -260,21 +282,21 @@ public class FluxMinimization extends TargetFunction {
 	 * @see org.sbml.simulator.fba.controller.TargetFunction#getConcentrations()
 	 */
 	public double[] getConcentrations() {
-		return concentrations;
+		return initialConcentrations;
 	}
 
 	/**
 	 * @param concentrations the concentrations to set
 	 */
 	public void setConcentrations(double[] concentrations) {
-		this.concentrations = concentrations;
+		this.initialConcentrations = concentrations;
 	}
 
 	/**
-	 * @return the c_eq
+	 * @return the equilibriumsConcentrations
 	 */
 	public double[] getC_eq() {
-		return c_eq;
+		return equilibriumsConcentrations;
 	}
 
 	/**
@@ -285,11 +307,11 @@ public class FluxMinimization extends TargetFunction {
 	 */
 	public void setC_eq(double[] c_eq) {
 		if (c_eq != null) {
-			this.c_eq = c_eq;
+			this.equilibriumsConcentrations = c_eq;
 		} else {
-			this.c_eq = new double[document.getModel().getSpeciesCount()];
-			for (int i = 0; i < this.c_eq.length; i++) {
-				this.c_eq[i] = 1;
+			this.equilibriumsConcentrations = new double[oriDocument.getModel().getSpeciesCount()];
+			for (int i = 0; i < this.equilibriumsConcentrations.length; i++) {
+				this.equilibriumsConcentrations[i] = 1;
 			}
 		}
 	}
@@ -299,14 +321,14 @@ public class FluxMinimization extends TargetFunction {
 	 * @see org.sbml.simulator.fba.controller.TargetFunction#getGibbs()
 	 */
 	public double[] getGibbs() {
-		return gibbs;
+		return equilibriumsGibbsEnergies;
 	}
 
 	/**
 	 * @param gibbs the gibbs to set
 	 */
 	public void setGibbs(double[] gibbs) {
-		this.gibbs = gibbs;
+		this.equilibriumsGibbsEnergies = gibbs;
 	}
 
 	/*
@@ -328,7 +350,7 @@ public class FluxMinimization extends TargetFunction {
 	private void fillCounterArray(int length1, int length2, int length3) {
 		counterArray[0] = 0;
 		counterArray[1] = length1;
-		counterArray[2] = length1 + length2;
+		counterArray[2] = counterArray[1] + length2;
 		counterArray[3] = counterArray[2] + length3;
 	}
 

@@ -138,7 +138,6 @@ public class CSVDataConverter {
 			for(int i = 0; i < data.length; i++) {
 				values[i] = data[i][1];
 				keys[i] = data[i][0];
-				System.out.println(keys[i] + "..." + values[i]);
 			}
 
 			if (isGibbsFile != null && isGibbsFile) {
@@ -153,7 +152,7 @@ public class CSVDataConverter {
 							if (modifiedDocument.getModel().containsReaction(keys[i] + FluxMinimizationUtils.endingForBackwardReaction)){
 								modifiedDocument.getModel().getReaction(keys[i] + FluxMinimizationUtils.endingForBackwardReaction).putUserObject(KEY_GIBBS, "isReverse");
 								int index2 = modifiedDocument.getModel().getListOfReactions().getIndex(modifiedDocument.getModel().getReaction(keys[i] + FluxMinimizationUtils.endingForBackwardReaction));
-								gibbsArray[index2] = Double.parseDouble(values[i]); // TODO check
+								gibbsArray[index2] = -Double.parseDouble(values[i]); // TODO check
 							}
 						}
 					}

@@ -45,7 +45,7 @@ public class FluxBalanceAnalysis {
 	 * Can be a {@link FluxMinimization}-object 
 	 * or an other function for which the network has to be optimized
 	 */
-	public TargetFunction targetFunc;
+	public TargetFunction targetFunction;
 
 	/**
 	 * Contains e.g. Gibbs-energies
@@ -101,24 +101,24 @@ public class FluxBalanceAnalysis {
 
 
 	/**
-	 * Constructor that get's a {@link Constraints}-Object and a {@link SBMLDocument} 
-	 * and that set's the {@link# linearProgramming} true.
-	 * 
+	 * Constructor that gets a {@link Constraints}-Object and a {@link SBMLDocument} 
+	 * and that sets the {@link# linearProgramming} true.
+	 * @param originalDocument
 	 * @param constraints
-	 * @param doc
+	 * 
 	 * @throws Exception 
 	 */
-	public FluxBalanceAnalysis(Constraints constraints, SBMLDocument doc, String[] targetFluxes) throws Exception {
-		this(new FluxMinimization(doc, constraints.getEquilibriumConcentrations(), constraints.getEquilibriumGibbsEnergies(), targetFluxes), constraints);
+	public FluxBalanceAnalysis(SBMLDocument originalDocument, Constraints constraints, String[] targetFluxes) throws Exception {
+		this(new FluxMinimization(originalDocument, constraints, targetFluxes), constraints);
 	}
 
 	/**
 	 * 
-	 * @param doc
+	 * @param originalDocument
 	 * @throws Exception
 	 */
-	public FluxBalanceAnalysis(SBMLDocument doc) throws Exception {
-		this(new FluxMinimization(new Constraints(doc),doc, FluxMinimizationUtils.SBMLDocToStoichMatrix(doc), null, null, null), new Constraints(doc));
+	public FluxBalanceAnalysis(SBMLDocument originalDocument) throws Exception {
+		this(new FluxMinimization(originalDocument, new Constraints(originalDocument), FluxMinimizationUtils.SBMLDocToStoichMatrix(originalDocument), null), new Constraints(originalDocument));
 	}
 
 
@@ -130,16 +130,21 @@ public class FluxBalanceAnalysis {
 	 * @param constraints
 	 */
 	public FluxBalanceAnalysis(TargetFunction target, Constraints constraints) {
+		// TODO change java Doc of the method 
 		super();
-		this.targetFunc = target;
+		this.targetFunction = target;
 		this.constraints = constraints;
-		SBMLDocument doc = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(constraints.originalDocument);
-		int length = doc.getModel().getReactionCount()*4;
+		SBMLDocument modifiedDocument = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(constraints.originalDocument);
+		int length = modifiedDocument.getModel().getReactionCount()*4;
 		//		int length = targetFunc.computeTargetFunctionForQuadraticProgramming().length;
-		lb = new double[length + targetFunc.getConcentrations().length];
-		ub = new double[length + targetFunc.getConcentrations().length];
+		lb = new double[length + targetFunction.getConcentrations().length];
+		ub = new double[length + targetFunction.getConcentrations().length];
+		// TODO sysout entfernen
+		System.out.println("lb: " + lb.length + " ub: " + ub.length);
+		
+		
 		this.solutionFluxVector = new double[target.getFluxVector().length];
-		this.solution_concentrations = new double[targetFunc.getConcentrations().length];
+		this.solution_concentrations = new double[targetFunction.getConcentrations().length];
 	}
 
 
@@ -153,8 +158,8 @@ public class FluxBalanceAnalysis {
 	 * @throws IloException 
 	 */
 	public double[] solve() throws IloException {
-		target = targetFunc.computeTargetFunctionForQuadraticProgramming();
-		concentrations = targetFunc.getConcentrations();
+		target = targetFunction.computeTargetFunctionForQuadraticProgramming();
+		concentrations = targetFunction.getConcentrations();
 		return solveWithQuadraticProgramming();
 	}
 
@@ -170,7 +175,7 @@ public class FluxBalanceAnalysis {
 
 		// TARGET
 		// create upper bounds (ub) and lower bounds (lb) for the variables x
-		int[] counter = targetFunc.getCounterArray();
+		int[] counter = targetFunction.getCounterArray();
 		// counter[3] contains the index of the gibbs vector
 		for (int i = 0; i< counter[1]; i++) {
 			lb[i]= -100000; 
@@ -215,7 +220,7 @@ public class FluxBalanceAnalysis {
 		IloNumExpr cplex_target = cplex.sum(cplex.prod(TargetFunction.lambda1, sum),lin);
 
 		// only for FluxMinimization the target function has to be minimized
-		if (targetFunc instanceof FluxMinimization) {
+		if (targetFunction instanceof FluxMinimization) {
 			cplex.addMinimize(cplex_target);
 		} else {
 			cplex.addMaximize(cplex_target);
@@ -243,41 +248,48 @@ public class FluxBalanceAnalysis {
 
 		//CONSTRAINTS
 
-		SBMLDocument sbml = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(constraints.originalDocument);
-		double[] flux = targetFunc.getFluxVector();
-		double[] gibbs = constraints.getGibbsEnergies();
-		double r_max = constraints.computeR_max(flux);
-		for (int i = 0; i< counter[1]; i++) {
-			//jg is the expression for J_i * G_i
-			//and jr_maxg the expression for |J_i| - r_max * |G_i|
-			int k = i + counter[3];
-			// constraint |J_i| - r_max * |G_i| < 0
-			IloNumExpr j_i = cplex.prod(cplex.abs(cplex.constant(flux[i])), x[i]);
-			IloNumExpr rmaxG = cplex.numExpr();
-			if (!Double.isNaN(gibbs[i]) && !Double.isInfinite(gibbs[i])) {
-				rmaxG = cplex.prod(r_max, cplex.abs(cplex.constant(gibbs[i])));
-
-			} else {
-				rmaxG = cplex.prod(r_max, x[k]);
-			}
+		SBMLDocument modifiedDocument = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(constraints.originalDocument);
+		double[] steadyStateFluxes = targetFunction.getFluxVector();
+		double[] compGibbs = constraints.getGibbsEnergies();
+		double[] r_max = constraints.computeR_max(steadyStateFluxes);
+		
+		for (int j = 0; j< counter[1]; j++) {
+			//jg is the expression for J_j * G_j
+			//and j_rmaxG the expression for |J_j| - r_max * |G_j|
+			int k = j + counter[3];
+			
+			IloNumExpr j_j = cplex.prod(cplex.abs(cplex.constant(steadyStateFluxes[j])), x[j]);
+			
+			// constraint |J_j| - r_max * |G_j| < 0
 			if (isConstraintJ_rmaxG()) {
-				cplex.addLe(cplex.diff(j_i, rmaxG), -Double.MIN_VALUE);
-				logger.log(Level.DEBUG, String.format("constraint |J_i| - r_max * |G_i| < 0:  "+ cplex.diff(j_i, rmaxG)+ " < " + 0 ));
+				IloNumExpr rmaxG = cplex.numExpr();
+				if (!Double.isNaN(compGibbs[j]) && !Double.isInfinite(compGibbs[j])) {
+					rmaxG = cplex.prod(r_max[j], cplex.abs(cplex.constant(compGibbs[j])));
+				} else {
+					rmaxG = cplex.prod(r_max[j], x[k]);
+				}
+				
+				cplex.addLe(cplex.diff(j_j, rmaxG), -Double.MIN_VALUE);
+				logger.log(Level.DEBUG, String.format("constraint |J_j| - r_max * |G_j| < 0:  "+ cplex.diff(j_j, rmaxG)+ " < " + 0 ));
 			}
-			if (constraintJ0) {
-				cplex.addGe(cplex.prod(cplex.constant(flux[i]), x[i]), 0);
+			
+			// constraint J_j >= 0
+			if (isConstraintJ0()) {
+				cplex.addGe(cplex.prod(cplex.constant(steadyStateFluxes[j]), x[j]), 0);
 			}
-			// constraint J_i * G_i < 0
-			IloNumExpr jg = cplex.numExpr();
-			if (!Double.isNaN(gibbs[i]) && !Double.isInfinite(gibbs[i])) {
-				jg = cplex.prod(cplex.prod(flux[i], x[i]),gibbs[i]);
-			} else {
-				jg = cplex.prod(cplex.prod(flux[i], x[i]),x[k]);
-			}
+			
+			// constraint J_j * G_j < 0
 			if (isConstraintJG()) {
+				IloNumExpr jg = cplex.numExpr();
+				if (!Double.isNaN(compGibbs[j]) && !Double.isInfinite(compGibbs[j])) {
+					jg = cplex.prod(cplex.prod(steadyStateFluxes[j], x[j]),compGibbs[j]);
+				} else {
+					jg = cplex.prod(cplex.prod(steadyStateFluxes[j], x[j]),x[k]);
+				}
+				
 				cplex.addLe(jg, -Double.MIN_VALUE);
-				System.out.println(sbml.getModel().getReaction(i) + ": " + jg + " < " + 0);
-				logger.log(Level.DEBUG, String.format("constraint J_i * G_i: " + jg + " <= " + 0));
+				System.out.println(modifiedDocument.getModel().getReaction(j) + ": " + jg + " < " + 0);
+				logger.log(Level.DEBUG, String.format("constraint J_j * G_j: " + jg + " < " + 0));
 			}
 		}
 
@@ -294,7 +306,7 @@ public class FluxBalanceAnalysis {
 		solution = cplex.getValues(x);
 		for (int i = 0; i < counter[1]; i++) {
 			// the first counter[1]-values are corressponding to the fluxes
-			solutionFluxVector[i] = flux[i] * solution[i];
+			solutionFluxVector[i] = steadyStateFluxes[i] * solution[i];
 		}
 		for (int j = 0; j < concentrations.length; j++) {
 			// the last values in x are corresponding to the concentrations
@@ -320,7 +332,7 @@ public class FluxBalanceAnalysis {
 	 * @return true if ubValue was set successfully
 	 */
 	public boolean setUbOfReactionJ(double ubValue, int j) {
-		if (j < targetFunc.getFluxVector().length) {
+		if (j < targetFunction.getFluxVector().length) {
 			ub[j] = ubValue;
 			return true;
 		} else {
@@ -336,7 +348,7 @@ public class FluxBalanceAnalysis {
 	 * @return true if lbValue was set successfully
 	 */
 	public boolean setLbOfReactionJ(double lbValue, int j) {
-		if (j < targetFunc.getFluxVector().length) {
+		if (j < targetFunction.getFluxVector().length) {
 			lb[j] = lbValue;
 			return true;
 		} else {
@@ -407,7 +419,7 @@ public class FluxBalanceAnalysis {
 	}
 
 	/**
-	 * Sets lambda1
+	 * Sets {@link TargetFunction.lambda1}
 	 * @param lambda
 	 */
 	public void setLambda1(double lambda) {
@@ -415,7 +427,7 @@ public class FluxBalanceAnalysis {
 	}
 
 	/**
-	 * Sets lambda2
+	 * Sets {@link TargetFunction.lambda2}
 	 * @param lambda
 	 */
 	public void setLambda2(double lambda) {
@@ -423,7 +435,7 @@ public class FluxBalanceAnalysis {
 	}
 
 	/**
-	 * Sets lamda3
+	 * Sets {@link TargetFunction.lambda3}
 	 * @param lambda
 	 */
 	public void setLambda3(double lambda) {
@@ -431,7 +443,7 @@ public class FluxBalanceAnalysis {
 	}
 
 	/**
-	 * Sets lambda4 
+	 * Sets {@link TargetFunction.lambda4} 
 	 * @param lambda
 	 */
 	public void setLambda4(double lambda) {
@@ -439,13 +451,15 @@ public class FluxBalanceAnalysis {
 	}
 
 	/**
-	 * @param constraintJG the constraintJG to set
+	 * constraint J_j * G_j < 0
+	 * @param constraintJG
 	 */
 	public void setConstraintJG(boolean constraintJG) {
 		this.constraintJG = constraintJG;
 	}
 
 	/**
+	 * constraint J_j * G_j < 0
 	 * @return the constraintJG
 	 */
 	public boolean isConstraintJG() {
@@ -453,19 +467,21 @@ public class FluxBalanceAnalysis {
 	}
 
 	/**
-	 * @param constraintJ_rmaxG the constraintJr_maxG to set
+	 * constraint |J_j| - r_max * |G_j| < 0
+	 * @param constraintJ_rmaxG
 	 */
 	public void setConstraintJ_rmaxG(boolean constraintJ_rmaxG) {
 		this.constraintJ_rmaxG = constraintJ_rmaxG;
 	}
 
 	/**
+	 * constraint |J_j| - r_max * |G_j| < 0
 	 * @return the constraintJr_maxG
 	 */
 	public boolean isConstraintJ_rmaxG() {
 		return constraintJ_rmaxG;
 	}
-
+	
 	/**
 	 * @return the cplexIterations
 	 */
@@ -481,6 +497,7 @@ public class FluxBalanceAnalysis {
 	}
 
 	/**
+	 * constraint J_j >= 0
 	 * @return the constraintJ0
 	 */
 	public boolean isConstraintJ0() {
@@ -488,7 +505,8 @@ public class FluxBalanceAnalysis {
 	}
 
 	/**
-	 * @param constraintJ0 the constraintJ0 to set
+	 * constraint J_j >= 0
+	 * @param constraintJ0
 	 */
 	public void setConstraintJ0(boolean constraintJ0) {
 		this.constraintJ0 = constraintJ0;
