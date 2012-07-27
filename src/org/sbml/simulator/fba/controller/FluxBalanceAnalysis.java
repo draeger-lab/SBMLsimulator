@@ -123,26 +123,44 @@ public class FluxBalanceAnalysis {
 
 
 	/**
-	 * Constructor that get's {@link TargetFunction}, {@link Constraints} and a Boolean, which
-	 * contains the information for linearProgramming (true) or quadraticProgramming (false).
+	 * Constructor that get's {@link TargetFunction} and  {@link Constraints} and initializes the arrays for 
+	 * solution of FBA.
 	 * 
 	 * @param target
 	 * @param constraints
 	 */
 	public FluxBalanceAnalysis(TargetFunction target, Constraints constraints) {
-		// TODO change java Doc of the method 
 		super();
 		this.targetFunction = target;
 		this.constraints = constraints;
 		SBMLDocument modifiedDocument = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(constraints.originalDocument);
-		int length = modifiedDocument.getModel().getReactionCount()*4;
-		//		int length = targetFunc.computeTargetFunctionForQuadraticProgramming().length;
-		lb = new double[length + targetFunction.getConcentrations().length];
-		ub = new double[length + targetFunction.getConcentrations().length];
+		int target_array_length = modifiedDocument.getModel().getReactionCount()*4;
+		
+		lb = new double[target_array_length + targetFunction.getConcentrations().length];
+		ub = new double[target_array_length + targetFunction.getConcentrations().length];
 		// TODO sysout entfernen
 		System.out.println("lb: " + lb.length + " ub: " + ub.length);
 		
 		
+		// initialize default upper bounds (ub) and lower bounds (lb) for the variables in cplex-call
+		int[] counter = targetFunction.getCounterArray();
+		// counter[1] contains the length of flux vector
+		for (int i = 0; i< counter[1]; i++) {
+			lb[i]= -100000; 
+			ub[i] = 100000;
+		}
+		for (int g = counter[1]; g < target_array_length; g++) {
+			lb[g] = -100000;
+			ub[g] = 100000;
+		}
+		// bounds for concentrations
+		for(int j = target_array_length; j < (concentrations.length + target_array_length); j++) {
+			lb[j] = Math.pow(10, -10);
+			ub[j] = Math.pow(10, -1);
+		}
+		
+		
+		// init solution arrays
 		this.solutionFluxVector = new double[target.getFluxVector().length];
 		this.solution_concentrations = new double[targetFunction.getConcentrations().length];
 	}
@@ -176,19 +194,7 @@ public class FluxBalanceAnalysis {
 		// TARGET
 		// create upper bounds (ub) and lower bounds (lb) for the variables x
 		int[] counter = targetFunction.getCounterArray();
-		// counter[3] contains the index of the gibbs vector
-		for (int i = 0; i< counter[1]; i++) {
-			lb[i]= -100000; 
-			ub[i] = 100000;
-		}
-		for (int g = counter[2]; g < target.length; g++) {
-			lb[g] = -100000;
-			ub[g] = 100000;
-		}
-		for(int j = target.length; j < (concentrations.length + target.length); j++) {
-			lb[j] = Math.pow(10, -10);
-			ub[j] = Math.pow(10, -1);
-		}
+		
 		// create variables with upper bounds and lower bounds
 		IloNumVar[] x = cplex.numVarArray((target.length + concentrations.length), lb, ub);
 

@@ -135,7 +135,8 @@ public class Constraints {
 			StoichiometricMatrix N = FluxMinimizationUtils.SBMLDocToStoichMatrix(originalDocument);
 			SBMLDocument modifiedDocument = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(originalDocument);
 			computedGibbsEnergies = new double[equilibriumsGibbs.length];
-			Model oriModel = originalDocument.getModel();
+			//TODO where do we need oriModel?
+			Model oriModel = originalDocument.getModel(); 
 			Model modModel = modifiedDocument.getModel();
 			
 			// compute delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum(N[i][j] * ln(S[i])) 
