@@ -72,8 +72,7 @@ public class FluxBalanceAnalysisTest {
 //			logger.info("cu1.getGibbsArray() == null");
 		}
 		equilibriumsGibbsEnergies = cu1.getGibbsArray();
-		System.out.println();
-		System.out.println("-> done gibbs");
+
 		
 		
 		cu2.readConcentrationsFromFile(concFile);
@@ -83,8 +82,7 @@ public class FluxBalanceAnalysisTest {
 //			logger.info("cu2.getConcentrationsArray() == null");
 		}
 		equilibriumsConcentrations = cu2.getConcentrationsArray();
-		System.out.println();
-		System.out.println("-> done concentrations");
+
 
 		//create FluxBalanceAnalysis object and solve it:
 		constraints =  new Constraints(originalSBMLDoc, equilibriumsGibbsEnergies, equilibriumsConcentrations, true);

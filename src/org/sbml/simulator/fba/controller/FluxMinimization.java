@@ -162,11 +162,12 @@ public class FluxMinimization extends TargetFunction {
 	 */
 	private double[] computeL(SBMLDocument originalDocument) throws Exception {
 		Matrix transposedK_int = FluxMinimizationUtils.SBMLDocToStoichMatrix(originalDocument).getConservationRelations();
-
+		// TODO sysout
+		System.out.println("K_int_row_dimension: " + transposedK_int.getRowDimension() + "    K_int_column_dimension: " + transposedK_int.getColumnDimension());
 		double[] vectorL = new double[equilibriumsGibbsEnergies.length];
 		for (int i = 0; i< equilibriumsGibbsEnergies.length; i++) {
-			for (int j = 0; j < transposedK_int.getColumnDimension(); j++) {
-				vectorL[i] += transposedK_int.get(i,j)*equilibriumsGibbsEnergies[i];
+			for (int j = 0; j < transposedK_int.getRowDimension(); j++) {
+				vectorL[i] += transposedK_int.get(j,i) * equilibriumsGibbsEnergies[i];
 			}
 		}
 		return vectorL;
@@ -245,23 +246,26 @@ public class FluxMinimization extends TargetFunction {
 			counter++;
 		}
 
-		// concentrations left out because they are quadratic and must be computed in 
-		// FluxBalanceAnalysis
+		/*
+		 *  concentrations left out because they are quadratic and must be computed in 
+		 *  FluxBalanceAnalysis
+		 *  
+		 */
 
-		// TODO lambda 2 and 3 are swapped
-		// the weighted error: lambda3*||E||
-		for (int k = 0; k < this.errorArray.length; k++) {
-			target[counter] = lambda2 * Math.abs(errorArray[k]);
-			counter++;
-		}
 
 		// ||L||: lambda2*||L||
 		for (int h = 0; h < this.L.length; h++) {
 			if (!Double.isNaN(L[h])) {
-				target[counter] = lambda3 * Math.abs(L[h]);
+				target[counter] = lambda2 * Math.abs(L[h]);
 			} else {
-				target[counter] = lambda3;
+				target[counter] = lambda2;
 			}
+			counter++;
+		}
+		
+		// the weighted error: lambda3*||E||
+		for (int k = 0; k < this.errorArray.length; k++) {
+			target[counter] = lambda3 * Math.abs(errorArray[k]);
 			counter++;
 		}
 
