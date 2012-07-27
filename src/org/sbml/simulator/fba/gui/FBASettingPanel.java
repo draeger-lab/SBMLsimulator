@@ -111,6 +111,11 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 	 */
 	private FBAPanel parent;
 
+	/**
+	 * User changed the bounds of fluxes or concentrations
+	 */
+	private boolean boundsAreChanged;
+
 
 	/**
 	 * Default constructor
@@ -199,7 +204,7 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 					concUpperBounds[i] = new JSpinner();
 					concUpperBounds[i].setValue(0.1);
 					concUpperBounds[i].addChangeListener(this);
-					
+
 					// lower bounds
 					concLowerBounds[i] = new JSpinner();
 					concLowerBounds[i].setValue(0.0);
@@ -230,12 +235,12 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 
 					//create components of this row 
 					JPanel row_i = new JPanel(new BorderLayout());
-					
+
 					//upper bounds
 					fluxUpperBounds[i] = new JSpinner();
 					fluxUpperBounds[i].setValue(10000.0);
 					fluxUpperBounds[i].addChangeListener(this);
-					
+
 					//lower bounds
 					fluxLowerBounds[i] = new JSpinner();
 					fluxLowerBounds[i].setValue(-10000.0);
@@ -329,8 +334,8 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 				}
 			}
 		}
-		parent.getVODPanel().init();
 		buttonReset.setEnabled(true);
+		boundsAreChanged = true;
 	}
 
 	/**
@@ -339,6 +344,131 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 	 */
 	public void setFBA(FluxBalanceAnalysis fba2) {
 		this.fba = fba2;
+	}
+
+	/**
+	 * @return the concUpperBounds
+	 */
+	public JSpinner[] getConcUpperBounds() {
+		return concUpperBounds;
+	}
+
+	/**
+	 * @param concUpperBounds the concUpperBounds to set
+	 */
+	public void setConcUpperBounds(JSpinner[] concUpperBounds) {
+		this.concUpperBounds = concUpperBounds;
+	}
+
+	/**
+	 * @return the concLowerBounds
+	 */
+	public JSpinner[] getConcLowerBounds() {
+		return concLowerBounds;
+	}
+
+	/**
+	 * @param concLowerBounds the concLowerBounds to set
+	 */
+	public void setConcLowerBounds(JSpinner[] concLowerBounds) {
+		this.concLowerBounds = concLowerBounds;
+	}
+
+	/**
+	 * @return the fluxUpperBounds
+	 */
+	public JSpinner[] getFluxUpperBounds() {
+		return fluxUpperBounds;
+	}
+
+	/**
+	 * @param fluxUpperBounds the fluxUpperBounds to set
+	 */
+	public void setFluxUpperBounds(JSpinner[] fluxUpperBounds) {
+		this.fluxUpperBounds = fluxUpperBounds;
+	}
+
+	/**
+	 * @return the fluxLowerBounds
+	 */
+	public JSpinner[] getFluxLowerBounds() {
+		return fluxLowerBounds;
+	}
+
+	/**
+	 * @param fluxLowerBounds the fluxLowerBounds to set
+	 */
+	public void setFluxLowerBounds(JSpinner[] fluxLowerBounds) {
+		this.fluxLowerBounds = fluxLowerBounds;
+	}
+
+	/**
+	 * @return the fluxLowerBoundValues
+	 */
+	public double[] getFluxLowerBoundValues() {
+		double[] flb = new double[fluxLowerBounds.length];
+		for (int i = 0; i < flb.length; i++) {
+			if (fluxLowerBounds[i].getValue() instanceof Double) {
+				flb[i] = (Double) fluxLowerBounds[i].getValue();
+			} else if (fluxLowerBounds[i].getValue() instanceof Integer) {
+				flb[i] = (Integer) fluxLowerBounds[i].getValue();
+			}
+		}
+		return flb;
+	}
+
+	/**
+	 * @return the fluxUpperBoundValues
+	 */
+	public double[] getFluxUpperBoundValues() {
+		double[] fub = new double[fluxUpperBounds.length];
+		for (int i = 0; i < fub.length; i++) {
+			if (fluxUpperBounds[i].getValue() instanceof Double) {
+				fub[i] = (Double) fluxUpperBounds[i].getValue();
+			} else if (fluxUpperBounds[i].getValue() instanceof Integer) {
+				fub[i] = (Integer) fluxUpperBounds[i].getValue();
+			}
+		}
+		return fub;
+	}
+
+
+	/**
+	 * @return the concLowerBoundValues
+	 */
+	public double[] getConcLowerBoundValues() {
+		double[] clb = new double[concLowerBounds.length];
+		for (int i = 0; i < clb.length; i++) {
+			if (concLowerBounds[i].getValue() instanceof Double) {
+				clb[i] = (Double) concLowerBounds[i].getValue();
+			} else if (concLowerBounds[i].getValue() instanceof Integer) {
+				clb[i] = (Integer) concLowerBounds[i].getValue();
+			}
+		}
+		return clb;
+	}
+
+	/**
+	 * @return the concUpperBoundValues
+	 */
+	public double[] getConcUpperBoundValues() {
+		double[] cub = new double[concUpperBounds.length];
+		for (int i = 0; i < cub.length; i++) {
+			if (concUpperBounds[i].getValue() instanceof Double) {
+				cub[i] = (Double) concUpperBounds[i].getValue();
+			} else if (concUpperBounds[i].getValue() instanceof Integer) {
+				cub[i] = (Integer) concUpperBounds[i].getValue();
+			}
+		}
+		return cub;
+	}
+
+
+	/**
+	 * @return the boundsAreChanged
+	 */
+	public boolean isBoundsAreChanged() {
+		return boundsAreChanged;
 	}
 
 }

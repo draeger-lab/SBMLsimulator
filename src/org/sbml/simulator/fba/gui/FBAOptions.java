@@ -150,7 +150,7 @@ public interface FBAOptions extends KeyProvider {
 	 */
 	public static final Option<File> LOAD_GIBBS_FILE = new Option<File>(
 			"LOAD_GIBBS_FILE", File.class, bundle, new Range<File>(File.class,
-					SBFileFilter.createTextFileFilter()), new File(
+					SBFileFilter.createCSVFileFilter()), new File(
 					System.getProperty("user.dir")));
 	
 	/**
@@ -158,7 +158,7 @@ public interface FBAOptions extends KeyProvider {
 	 */
 	public static final Option<File> LOAD_CONCENTRATION_FILE = new Option<File>(
 			"LOAD_CONCENTRATION_FILE", File.class, bundle, new Range<File>(File.class,
-					SBFileFilter.createTextFileFilter()), new File(
+					SBFileFilter.createCSVFileFilter()), new File(
 					System.getProperty("user.dir")));
 	
 	
