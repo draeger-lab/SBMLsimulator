@@ -72,19 +72,21 @@ public class ConstraintsTest {
 		
 		
 		//Constraints:
-		Constraints con = new Constraints(sbml);
-		con.setEquilibriumConcentrations(c_eq);
-		con.setEquilibriumGibbsEnergies(gibbs_eq);
+		Constraints constraints = new Constraints(sbml);
+		constraints.setEquilibriumConcentrations(c_eq);
+		constraints.setEquilibriumGibbsEnergies(gibbs_eq);
 		
 		//testing if computing r_max works
 		double[] fluxVector = FluxMinimizationUtils.computeFluxVector(null, sbml);
-		double r_max = con.computeR_max(fluxVector);
-		System.out.println("r_max = " + r_max);
+		double r_max[] = constraints.computeR_max(fluxVector);
+		for ( int i = 0; i < r_max.length; i++) {
+			System.out.println(r_max[i]);
+		}
 		
 		System.out.println("the computed Gibbs energies:");
-		for (int i = 0; i < con.getGibbsEnergies().length; i++) {
+		for (int i = 0; i < constraints.getGibbsEnergies().length; i++) {
 			System.out.print(FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(sbml).getModel().getReaction(i).getId() + "  ");
-			System.out.print(con.getGibbsEnergies()[i]);
+			System.out.print(constraints.getGibbsEnergies()[i]);
 			System.out.println();
 		}
 	}
