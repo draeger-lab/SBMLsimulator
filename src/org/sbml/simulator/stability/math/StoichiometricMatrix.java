@@ -192,7 +192,7 @@ public class StoichiometricMatrix extends StabilityMatrix {
 			logger.fine("Wrong dimensions");
 		}
 
-		// check if matrix has to be augmented befor performing the LU
+		// check if matrix has to be augmented before performing the LU
 		// decomposition
 		if (this.getRowDimension() >= this.getColumnDimension()) {
 			stoich = this;
