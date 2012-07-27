@@ -25,9 +25,32 @@ package org.sbml.simulator.fba.controller;
  */
 public abstract class TargetFunction {
 	
+	/**
+	 * weighting factor for the optimization problem, 
+	 * default value according to Ziller et al. (2009): 
+	 * lambda1*sum((c_i - c_eq)^2)
+	 */
 	public static double lambda1 = 10;
+	
+	/**
+	 * weighting factor for the optimization problem,
+	 * default value according to Ziller et al. (2009)
+	 * lambda2*||L||
+	 */
 	public static double lambda2 = 10;
+	
+	/**
+	 * weighting factor for the optimization problem,
+	 * default value according to Ziller et al. (2009)
+	 * lambda3*||E||
+	 */
 	public static double lambda3 = 0.01;
+	
+	/**
+	 * weighting factor for the optimization problem,
+	 * default value according to Ziller et al. (2009)
+	 * lambda4*||deltaG||
+	 */
 	public static double lambda4 = 1.0;
 	
 	/**

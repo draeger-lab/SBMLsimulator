@@ -39,6 +39,9 @@ import org.sbml.simulator.stability.math.StoichiometricMatrix;
  */
 public class FluxMinimizationUtils {
 
+	/**
+	 * contains the suffix for integrated backward reactions of reversible reactions.
+	 */
 	protected static final String endingForBackwardReaction = "_rev";
 	
 	/**
@@ -53,16 +56,19 @@ public class FluxMinimizationUtils {
 	public static double[] computeFluxVector(StoichiometricMatrix N, String[] targetFluxes, SBMLDocument doc) {
 		StabilityMatrix steadyStateMatrix = N.getSteadyStateFluxes();
 		double[] fluxVector = new double[steadyStateMatrix.getRowDimension()];
+
 		// fill the fluxVector
 		for (int row = 0; row < N.getColumnDimension(); row++) {
-			if (targetFluxes == null || isNoTargetFlux(row, targetFluxes, doc)) {
-				fluxVector[row] =steadyStateMatrix.get(row,steadyStateMatrix.getColumnDimension()-1);
-				if (Math.abs(fluxVector[row]) < Math.pow(10, -15)) {
-					//then the value is similar to 0 and the flux is 0
-//					fluxVector[row] = 0;
+			if (steadyStateMatrix.getColumnDimension() > 0) {
+				if (((targetFluxes == null) || isNoTargetFlux(row, targetFluxes, doc))) {
+					fluxVector[row] = steadyStateMatrix.get(row, steadyStateMatrix.getColumnDimension() - 1);
+					if (Math.abs(fluxVector[row]) < Math.pow(10, -15)) {
+						//then the value is similar to 0 and the flux is 0
+						fluxVector[row] = 0d;
+					}
+				} else {
+					// TODO use the targetflux ...
 				}
-			} else {
-				fluxVector[row] = 0;
 			}
 		}
 		return fluxVector;
@@ -126,24 +132,18 @@ public class FluxMinimizationUtils {
 				Species species = modifiedDocument.getModel().getSpecies(i);
 				if (reac.hasProduct(species)) {
 					// the stoichiometry of products is positive in the stoichiometricMatrix
-					if (reac.getProductForSpecies(species.getId()).isSetStoichiometry()) {
+					if (reac.getProductForSpecies(species.getId()).getStoichiometry() != Double.NaN) {
 						sMatrix.set(i, j, reac.getProductForSpecies(species.getId()).getStoichiometry());
 					}
-					else if (!reac.getProductForSpecies(species.getId()).isSetStoichiometry() && (modifiedDocument.getLevel() < 3)) {
-						sMatrix.set(i, j, 1);
-					}
-					else if (!reac.getProductForSpecies(species.getId()).isSetStoichiometry() && (modifiedDocument.getLevel() >= 3)) {
+					else {
 						throw new Exception("Stoichiometry of species: " + reac.getProductForSpecies(species.getId()) + " is unknown. Can't create the full stoichiometric matrix of the model.");
 					}
 				} else if (reac.hasReactant(species)) {
 					// the stoichiometry of reactants is negative in the stoichiometricMatrix
-					if (reac.getReactantForSpecies(species.getId()).isSetStoichiometry()) {
+					if (reac.getReactantForSpecies(species.getId()).getStoichiometry() != Double.NaN) {
 						sMatrix.set(i, j, - reac.getReactantForSpecies(species.getId()).getStoichiometry());
 					}
-					else if (!reac.getReactantForSpecies(species.getId()).isSetStoichiometry() && (modifiedDocument.getLevel() < 3)) {
-						sMatrix.set(i, j, - 1);
-					}
-					else if (!reac.getReactantForSpecies(species.getId()).isSetStoichiometry() && (modifiedDocument.getLevel() >= 3)) {
+					else {
 						throw new Exception("Stoichiometry of species: " + reac.getReactantForSpecies(species.getId()) + " is unknown. Can't create the full stoichiometric matrix of the model.");
 					}
 				}
@@ -197,8 +197,6 @@ public class FluxMinimizationUtils {
 				reversibleReac.setReversible(false);
 			}
 		}
-		//TODO checked
-		
 		// return the new document
 		return revReacDoc;
 	}
