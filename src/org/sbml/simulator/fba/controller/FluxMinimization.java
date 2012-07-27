@@ -106,7 +106,7 @@ public class FluxMinimization extends TargetFunction {
 
 		// get the computed Gibbs energies for the incoming Gibbs energies in steady state
 		this.equilibriumsGibbsEnergies = constraints.getGibbsEnergies();
-		
+
 		// get the error array
 		if (equilibriumsGibbsEnergies != null) {
 			this.errorArray = FluxMinimizationUtils.computeError(equilibriumsGibbsEnergies.length);
@@ -122,6 +122,13 @@ public class FluxMinimization extends TargetFunction {
 			this.L = computeL(oriDocument);
 		} else {
 			L = new double[0];
+		}
+
+		counterArray = new int[4];
+		if (fluxVector != null && errorArray != null && L != null) {
+			fillCounterArray(fluxVector.length,
+					errorArray.length, 
+					L.length);
 		}
 	}
 
@@ -226,7 +233,7 @@ public class FluxMinimization extends TargetFunction {
 		// the function to minimize is: ||J|| + lambda1*sum((c_i - c_eq)^2) + lambda2*||L|| + lambda3*||E|| + lambda4*||deltaG||
 
 		// TODO
-		
+
 		// create the target vector 
 		double[] target = new double[fluxVector.length + 				// ||J||
 		                             L.length +							// ||L||
@@ -234,10 +241,7 @@ public class FluxMinimization extends TargetFunction {
 		                             equilibriumsGibbsEnergies.length];	// ||deltaG||
 
 		// this is a pointer, which counts in the target vector the actually position
-		counterArray = new int[4];
-		fillCounterArray(fluxVector.length,
-				errorArray.length, 
-				L.length);
+
 		int counter = 0;
 
 		// fill the target with the flux vector: ||J|| 
@@ -262,7 +266,7 @@ public class FluxMinimization extends TargetFunction {
 			}
 			counter++;
 		}
-		
+
 		// the weighted error: lambda3*||E||
 		for (int k = 0; k < this.errorArray.length; k++) {
 			target[counter] = lambda3 * Math.abs(errorArray[k]);

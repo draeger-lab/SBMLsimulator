@@ -141,6 +141,8 @@ public class FluxBalanceAnalysis {
 		// TODO sysout entfernen
 		System.out.println("lb: " + lb.length + " ub: " + ub.length);
 		
+		// initialize the concentrations
+		concentrations = targetFunction.getConcentrations();
 		
 		// initialize default upper bounds (ub) and lower bounds (lb) for the variables in cplex-call
 		int[] counter = targetFunction.getCounterArray();
@@ -177,7 +179,6 @@ public class FluxBalanceAnalysis {
 	 */
 	public double[] solve() throws IloException {
 		target = targetFunction.computeTargetFunctionForQuadraticProgramming();
-		concentrations = targetFunction.getConcentrations();
 		return solveWithQuadraticProgramming();
 	}
 
