@@ -21,6 +21,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
 
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.simulator.fba.controller.FluxBalanceAnalysis;
@@ -162,5 +164,19 @@ public class ChartPanel extends JPanel{
 				dataFluxes[i][1] = Double.toString(solution_fluxVector[i]);
 			}
 		}
+	}
+
+	/**
+	 * @return the tableFluxes
+	 */
+	public JTable getTableFluxes() {
+		return tableFluxes;
+	}
+
+	/**
+	 * @return the tableConc
+	 */
+	public JTable getTableConc() {
+		return tableConc;
 	}
 }

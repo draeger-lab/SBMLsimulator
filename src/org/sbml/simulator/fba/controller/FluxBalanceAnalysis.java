@@ -126,15 +126,16 @@ public class FluxBalanceAnalysis {
 	 * Constructor that get's {@link TargetFunction} and  {@link Constraints} and initializes the arrays for 
 	 * solution of FBA.
 	 * 
-	 * @param target
+	 * @param targetfunc
 	 * @param constraints
 	 */
-	public FluxBalanceAnalysis(TargetFunction target, Constraints constraints) {
+	public FluxBalanceAnalysis(TargetFunction targetfunc, Constraints constraints) {
 		super();
-		this.targetFunction = target;
+		this.targetFunction = targetfunc;
 		this.constraints = constraints;
 		SBMLDocument modifiedDocument = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(constraints.originalDocument);
 		int target_array_length = modifiedDocument.getModel().getReactionCount()*4;
+		this.target = new double[target_array_length];
 		
 		lb = new double[target_array_length + targetFunction.getConcentrations().length];
 		ub = new double[target_array_length + targetFunction.getConcentrations().length];
@@ -163,7 +164,7 @@ public class FluxBalanceAnalysis {
 		
 		
 		// init solution arrays
-		this.solutionFluxVector = new double[target.getFluxVector().length];
+		this.solutionFluxVector = new double[targetfunc.getFluxVector().length];
 		this.solution_concentrations = new double[targetFunction.getConcentrations().length];
 	}
 
@@ -517,5 +518,45 @@ public class FluxBalanceAnalysis {
 	 */
 	public void setConstraintJ0(boolean constraintJ0) {
 		this.constraintJ0 = constraintJ0;
+	}
+
+	/**
+	 * Method to set the whole lower bounds for concentrations.
+	 * @param concLowerBound
+	 */
+	public void setLbOfConcentrations(double[] concLowerBound) {
+		for (int j = 0; j < concLowerBound.length; j++) {
+			lb[j + target.length] = concLowerBound[j];
+		}
+	}
+
+	/**
+	 * Method to set the whole lower bounds of fluxes.
+	 * @param fluxLowerBound
+	 */
+	public void setLbOfReactions(double[] fluxLowerBound) {
+		for (int j = 0; j < fluxLowerBound.length; j++) {
+			lb[j] = fluxLowerBound[j];
+		}
+	}
+
+	/**
+	 * Method to set the whole upper bounds of concentrations.
+	 * @param concUpperBound
+	 */
+	public void setUbOfConcentrations(double[] concUpperBound) {
+		for (int j = 0; j < concUpperBound.length; j++) {
+			ub[j + target.length] = concUpperBound[j];
+		}
+	}
+
+	/**
+	 * Method to set the whole upper bounds of fluxes.
+	 * @param fluxUpperBound
+	 */
+	public void setUbOfReactions(double[] fluxUpperBound) {
+		for (int j = 0; j < fluxUpperBound.length; j++) {
+			ub[j] = fluxUpperBound[j];
+		}
 	}
 }

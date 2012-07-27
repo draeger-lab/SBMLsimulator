@@ -58,47 +58,47 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	 * The tab with the chart of concentrations
 	 */
 	private ChartPanel chartConc;
-	
+
 	/**
 	 * The tab with the chart of fluxes
 	 */
 	private ChartPanel chartFlux;
-	
+
 	/**
 	 * The setting panel wich contains the upper and lower bounds of fluxes and concentrations
 	 */
 	private FBASettingPanel settings;
-	
+
 	/**
 	 * Contains the visualization of data
 	 */
 	private VODPanel vod;
-	
+
 	/**
 	 * The current opened {@link SBMLDocument}
 	 */
 	private SBMLDocument currentDoc;
-	
+
 	/**
 	 * The current computed {@link FluxBalanceAnalysis}
 	 */
 	private FluxBalanceAnalysis fba;
-	
+
 	/**
 	 * the Gibbs energy file
 	 */
 	private File gibbsFile;
-	
+
 	/**
 	 * The concentration file
 	 */
 	private File concFile;
-	
+
 	/**
 	 * The target fluxes
 	 */
 	private String[] targetFluxes = null;
-	
+
 	/**
 	 * serial version number
 	 */
@@ -108,41 +108,51 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	 * Constraint J*G < 0 is on, when this variable is set true
 	 */
 	private boolean JG_less_than_0;
-	
+
 	/**
 	 * Constraint |J| - r_max*|G| < 0 is on, when this variable is set true
 	 */
 	private boolean J_rmax_G_less_than_0;
-	
+
 	/**
 	 * Constraint J > 0 is on, when this variable is set true
 	 */
 	private boolean J_greater_0;
-	
+
 	/**
 	 * Number of iterations for CPLEX
 	 */
 	private int iterations;
-	
+
 	/**
 	 * weighted factor lambda1 to weight the concentrations
 	 */
 	private double lambda1;
-	
+
 	/**
 	 * weighted factor lambda2 to weight the errors
 	 */
 	private double lambda2;
-	
+
 	/**
 	 * weighted factor lambda3 to weight the L-Matrix
 	 */
 	private double lambda3;
-	
+
 	/**
 	 * weighted factor lambda4 to weight the Gibbs energies
 	 */
 	private double lambda4;
+
+	private double[] FluxLowerBound;
+
+	private double[] FluxUpperBound;
+
+	private double[] ConcLowerBound;
+
+	private double[] ConcUpperBound;
+
+	private boolean theFirstCall = true;
 
 	/**
 	 * Constructor that sets all the different panels
@@ -249,7 +259,6 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	@Override
 	public void tableChanged(TableModelEvent arg0) {
 		// TODO Auto-generated method stub
-
 	}
 
 	/**
@@ -331,6 +340,14 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 			fba.setLambda3(lambda3);
 			fba.setLambda4(lambda4);
 
+			//set bounds
+			if (isSetBounds() && settings.isBoundsAreChanged()) {
+				fba.setLbOfConcentrations(ConcLowerBound);
+				fba.setLbOfReactions(FluxLowerBound);
+				fba.setUbOfConcentrations(ConcUpperBound);
+				fba.setUbOfReactions(FluxUpperBound);
+			}
+
 			//solve
 			fba.solve();
 		} catch (Exception e) {
@@ -340,18 +357,62 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 					"Running FBA failed",
 					JOptionPane.ERROR_MESSAGE);
 		}
-		vod.setFluxes(fba.solutionFluxVector);
-		vod.setConcentrations(fba.solution_concentrations);
-		vod.init();
-		vod.updateUI();
-		chartFlux.setFluxes(fba.solutionFluxVector);
-		chartConc.setConcentrations(fba.solution_concentrations);
-		chartFlux.init();
-		chartFlux.updateUI();
-		chartConc.init();
-		chartConc.repaint();
-		settings.setFBA(fba);
-		this.repaint();
+
+		if (theFirstCall) {
+			vod.setFluxes(fba.solutionFluxVector);
+			vod.setConcentrations(fba.solution_concentrations);
+			vod.init();
+			chartFlux.setFluxes(fba.solutionFluxVector);
+			 //TODO syso
+			for (int i = 0; i < fba.solutionFluxVector.length; i++) {
+				System.out.print( " " + fba.solutionFluxVector[i]);
+			}
+			chartConc.setConcentrations(fba.solution_concentrations);
+			chartFlux.init();
+			chartConc.init();
+			settings.setFBA(fba);
+			this.repaint();
+		} else {
+			vod.setFluxes(fba.solutionFluxVector);
+			vod.setConcentrations(fba.solution_concentrations);
+			vod.updateUI();
+			//TODO syso
+			for (int i = 0; i < fba.solutionFluxVector.length; i++) {
+				System.out.print( " " + fba.solutionFluxVector[i]);
+			}
+			chartFlux.setFluxes(fba.solutionFluxVector);
+			chartConc.setConcentrations(fba.solution_concentrations);
+			chartFlux.getTableFluxes().revalidate();
+			chartFlux.getTableFluxes().repaint();
+			chartFlux.getTableFluxes().updateUI();
+			chartFlux.init();
+			chartConc.getTableConc().repaint();
+			settings.setFBA(fba);
+			this.repaint();
+		}
+	}
+
+	/**
+	 * @return the first call boolean
+	 */
+	public boolean isTheFirstCall() {
+		return theFirstCall;
+	}
+
+	/**
+	 * @param firstCall set the boolean that contains true if
+	 * this is the first call
+	 */
+	public void setTheFirstCall(boolean firstCall) {
+		theFirstCall = firstCall;
+	}
+
+
+	/**
+	 * @return true if all bounds are set, else false.
+	 */
+	private boolean isSetBounds() {
+		return FluxLowerBound != null && FluxUpperBound!= null && ConcLowerBound != null && ConcUpperBound != null;
 	}
 
 
@@ -376,6 +437,13 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 		lambda2 = sbPrefs.getDouble(FBAOptions.LAMBDA2);
 		lambda3 = sbPrefs.getDouble(FBAOptions.LAMBDA3);
 		lambda4 = sbPrefs.getDouble(FBAOptions.LAMBDA4);
+
+		//check upper and lower bounds
+		FluxLowerBound = settings.getFluxLowerBoundValues();
+		FluxUpperBound = settings.getFluxUpperBoundValues();
+		ConcLowerBound = settings.getConcLowerBoundValues();
+		ConcUpperBound = settings.getConcUpperBoundValues();
+
 	}
 
 }
