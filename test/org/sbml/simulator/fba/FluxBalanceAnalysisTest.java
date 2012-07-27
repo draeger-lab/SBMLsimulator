@@ -53,10 +53,6 @@ public class FluxBalanceAnalysisTest {
 	public static void main(String[] args) throws Exception {
 		originalSBMLDoc = (new SBMLReader()).readSBML(args[0]);
 		
-		// TODO debugging
-		System.out.println("original - reactionCount: " + originalSBMLDoc.getModel().getReactionCount());
-		System.out.println("original - speciesCount: " + originalSBMLDoc.getModel().getSpeciesCount());
-		
 		logger.info("document read");
 		//ConstraintsUtils:
 		CSVDataConverter cu1 = new CSVDataConverter(originalSBMLDoc);
@@ -81,7 +77,6 @@ public class FluxBalanceAnalysisTest {
 		
 		
 		cu2.readConcentrationsFromFile(concFile);
-//		System.out.println(cu2.getReader().getState());
 		while(cu2.getConcentrationsArray() == null) {
 			//wait
 			System.out.print(".");
@@ -91,13 +86,9 @@ public class FluxBalanceAnalysisTest {
 		System.out.println();
 		System.out.println("-> done concentrations");
 
-		// TODO debugging
-		System.out.println("length gibbs: " + equilibriumsGibbsEnergies.length);
-		System.out.println("length conc: " + equilibriumsConcentrations.length);
-		
 		//create FluxBalanceAnalysis object and solve it:
-		constraints =  new Constraints(originalSBMLDoc, equilibriumsGibbsEnergies, equilibriumsConcentrations);
-		FluxBalanceAnalysis fba = new FluxBalanceAnalysis(constraints, originalSBMLDoc, targetFluxes);
+		constraints =  new Constraints(originalSBMLDoc, equilibriumsGibbsEnergies, equilibriumsConcentrations, true);
+		FluxBalanceAnalysis fba = new FluxBalanceAnalysis(originalSBMLDoc, constraints, targetFluxes);
 //		fba.setLambda1(0);
 //		fba.setLambda2(0);
 //		fba.setLambda3(0);
