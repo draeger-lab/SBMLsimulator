@@ -51,7 +51,8 @@
   <!-- DynamicCore -->
   
   <entry key="PROCESSING_IMAGE">Bearbeite Bild {0} von {1}</entry>
-  <entry key="VIDEOENCODING_DONE">Encodierung erfolgreich beendet.</entry>
+  <entry key="VIDEOENCODING_DONE">Videoerzeugung erfolgreich beendet.</entry>
+  <entry key="VIDEOENCODING_CANCELED">Videoerzeugung abgebrochen.</entry>
   
   <!-- Error Messages -->
   

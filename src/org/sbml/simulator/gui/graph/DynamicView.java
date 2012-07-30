@@ -39,6 +39,7 @@ import org.simulator.math.odes.MultiTable;
 
 import de.zbit.graph.gui.TranslatorSBMLgraphPanel;
 import de.zbit.graph.io.SBML2GraphML;
+import de.zbit.gui.GUITools;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.SBPreferences;
 
@@ -544,7 +545,8 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
      * @param b
      */
     public void setEnableLegend(boolean b) {
-        legend.setEnabled(b);
+//        legend.setEnabled(b);
+        GUITools.setEnabledForAll(b, legend.getComponents());
     }
     
     /**

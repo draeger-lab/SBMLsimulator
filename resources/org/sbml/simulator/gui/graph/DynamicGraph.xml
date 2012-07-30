@@ -51,7 +51,8 @@
   <!-- DynamicCore -->
   
   <entry key="PROCESSING_IMAGE">Processing image {0} of {1}</entry>
-  <entry key="VIDEOENCODING_DONE">Videoencoding successful</entry>
+  <entry key="VIDEOENCODING_DONE">Videoencoding successful.</entry>
+  <entry key="VIDEOENCODING_CANCELED">Videoencoding canceled.</entry>
   
   <!-- Error Messages -->
   

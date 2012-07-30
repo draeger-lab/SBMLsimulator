@@ -150,25 +150,30 @@ public class DynamicCore {
                             Thread.sleep(10);
                         }
                         
-                        /*
-                         * take and process image
-                         */
-                        logger.info(MessageFormat.format(
-                            bundle.getString("PROCESSING_IMAGE"),
-                            new Object[] { image, totalimages }));
-                        encoder.encodeVideo(0,
-                            observer.takeGraphshot(width, height),
-                            frameTime, TimeUnit.MILLISECONDS);
-                        /*
-                         * fire property change to support things like
-                         * progressBars. the fired new property is a number
-                         * inbetween 0 and 100 representing the processed
-                         * percentage.
-                         */
-                        int perc = (int) ((image/(double)totalimages) * 100);
-                        this.firePropertyChange("video_progress", null, perc);
-                        image++;
-                        frameTime += timestamp; // timestamp for video encoding
+                        if (!isCancelled()) {
+                            /*
+                             * ensures that this thread is not encoding an image
+                             * while the encoder gets closed by EDT.
+                             */
+                            
+                            //take and process image
+                            logger.info(MessageFormat.format(
+                                bundle.getString("PROCESSING_IMAGE"),
+                                new Object[] { image, totalimages }));
+                            encoder.encodeVideo(0,
+                                observer.takeGraphshot(width, height),
+                                frameTime, TimeUnit.MILLISECONDS);
+                            /*
+                             * fire property change to support things like
+                             * progressBars. the fired new property is a number
+                             * inbetween 0 and 100 representing the processed
+                             * percentage.
+                             */
+                            int perc = (int) ((image/(double)totalimages) * 100);
+                            this.firePropertyChange("video_progress", null, perc);
+                            image++;
+                            frameTime += timestamp; // timestamp for video encoding
+                        }
                     }
             	}
             }
@@ -184,9 +189,12 @@ public class DynamicCore {
         protected void done() {
             super.done();
             if (encoder != null) {
+                encoder.flush();
                 encoder.close();
                 if (image >= totalimages) {
                     logger.info(bundle.getString("VIDEOENCODING_DONE"));
+                } else if (isCancelled()) {
+                    logger.info(bundle.getString("VIDEOENCODING_CANCELED"));
                 } else {
                     GUITools.showErrorMessage(null, bundle.getString("VIDEOENCODING_ERROR"));
                 }
@@ -198,11 +206,6 @@ public class DynamicCore {
              * Notify observer.
              */
             observer.donePlay();
-
-            /*
-             * Ensure that only one playWorker is active
-             */
-            playWorker = null;
         }
 
         /*
