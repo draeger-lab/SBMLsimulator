@@ -170,7 +170,7 @@ public class FluxMinimization extends TargetFunction {
 	private double[] computeL(SBMLDocument originalDocument) throws Exception {
 		Matrix transposedK_int = FluxMinimizationUtils.SBMLDocToStoichMatrix(originalDocument).getConservationRelations();
 		// TODO sysout
-		System.out.println("K_int_row_dimension: " + transposedK_int.getRowDimension() + "    K_int_column_dimension: " + transposedK_int.getColumnDimension());
+		System.out.println("K_int_row_dimension: " + transposedK_int.getRowDimension() + "    K_int_column_dimension: " + transposedK_int.getColumnDimension() + "   computedGibbsEnergies.length: " + computedGibbsEnergies.length);
 		double[] vectorL = new double[computedGibbsEnergies.length];
 		for (int i = 0; i< computedGibbsEnergies.length; i++) {
 			for (int j = 0; j < transposedK_int.getRowDimension(); j++) {
