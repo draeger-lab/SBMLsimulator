@@ -170,7 +170,7 @@ public class FluxMinimizationUtils {
 		int metaid = 0;
 		for (int i = 0; i < doc.getModel().getReactionCount(); i++) {
 			Reaction reversibleReac = revReacDoc.getModel().getReaction(doc.getModel().getReaction(i).getId());
-			if (reversibleReac.isReversible()) {
+			if (reversibleReac.isSetReversible() && reversibleReac.isReversible()) {
 				reversibleReactions.add(reversibleReac.getId());
 				reversibleReactions.add(reversibleReac.getId() + endingForBackwardReaction);
 				Reaction backwardReac = reversibleReac.clone();
