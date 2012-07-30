@@ -371,7 +371,7 @@ public class FluxBalanceAnalysis {
 	 * @param i (index of species)
 	 * @return true if lbValue was set successfully
 	 */
-	public boolean setLbOfConcentrationJ(double lbValue, int i) {
+	public boolean setLbOfConcentrationI(double lbValue, int i) {
 		if (i < concentrations.length) {
 			lb[i + target.length] = lbValue;
 			return true;
@@ -386,7 +386,7 @@ public class FluxBalanceAnalysis {
 	 * @param i (index of species)
 	 * @return true if ubValue was set successfully
 	 */
-	public boolean setUbOfConcentrationJ(double ubValue, int i) {
+	public boolean setUbOfConcentrationI(double ubValue, int i) {
 		if (i < concentrations.length) {
 			ub[i + target.length] = ubValue;
 			return true;
@@ -428,7 +428,7 @@ public class FluxBalanceAnalysis {
 	}
 
 	/**
-	 * Sets {@link TargetFunction.lambda1}
+	 * Sets {@link TargetFunction#lambda1}
 	 * @param lambda1
 	 */
 	public void setLambda1(double lambda1) {
@@ -436,7 +436,7 @@ public class FluxBalanceAnalysis {
 	}
 
 	/**
-	 * Sets {@link TargetFunction.lambda2}
+	 * Sets {@link TargetFunction#lambda2}
 	 * @param lambda2
 	 */
 	public void setLambda2(double lambda2) {
@@ -444,7 +444,7 @@ public class FluxBalanceAnalysis {
 	}
 
 	/**
-	 * Sets {@link TargetFunction.lambda3}
+	 * Sets {@link TargetFunction#lambda3}
 	 * @param lambda3
 	 */
 	public void setLambda3(double lambda3) {
@@ -452,7 +452,7 @@ public class FluxBalanceAnalysis {
 	}
 
 	/**
-	 * Sets {@link TargetFunction.lambda4} 
+	 * Sets {@link TargetFunction#lambda4} 
 	 * @param lambda4
 	 */
 	public void setLambda4(double lambda4) {
