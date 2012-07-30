@@ -62,7 +62,7 @@ public class FluxMinimization extends TargetFunction {
 	/**
 	 * Contains the computed gibbs energies in the model.
 	 */
-	private double[] equilibriumsGibbsEnergies;
+	private double[] computedGibbsEnergies;
 
 	/**
 	 * Vector that is made up of the transposed null space matrix K and
@@ -105,11 +105,11 @@ public class FluxMinimization extends TargetFunction {
 		this.N = N;
 
 		// get the computed Gibbs energies for the incoming Gibbs energies in steady state
-		this.equilibriumsGibbsEnergies = constraints.getGibbsEnergies();
+		this.computedGibbsEnergies = constraints.getGibbsEnergies();
 
 		// get the error array
-		if (equilibriumsGibbsEnergies != null) {
-			this.errorArray = FluxMinimizationUtils.computeError(equilibriumsGibbsEnergies.length);
+		if (computedGibbsEnergies != null) {
+			this.errorArray = FluxMinimizationUtils.computeError(computedGibbsEnergies.length);
 		} else {
 			this.errorArray = new double[0];
 		}
@@ -118,7 +118,7 @@ public class FluxMinimization extends TargetFunction {
 		this.initialConcentrations = extractConcentrations(oriDocument);
 
 		// compute L or let it be null if the Gibbs energies couldn't be computed
-		if(equilibriumsGibbsEnergies != null && oriDocument != null) {
+		if(computedGibbsEnergies != null && oriDocument != null) {
 			this.L = computeL(oriDocument);
 		} else {
 			L = new double[0];
@@ -171,10 +171,10 @@ public class FluxMinimization extends TargetFunction {
 		Matrix transposedK_int = FluxMinimizationUtils.SBMLDocToStoichMatrix(originalDocument).getConservationRelations();
 		// TODO sysout
 		System.out.println("K_int_row_dimension: " + transposedK_int.getRowDimension() + "    K_int_column_dimension: " + transposedK_int.getColumnDimension());
-		double[] vectorL = new double[equilibriumsGibbsEnergies.length];
-		for (int i = 0; i< equilibriumsGibbsEnergies.length; i++) {
+		double[] vectorL = new double[computedGibbsEnergies.length];
+		for (int i = 0; i< computedGibbsEnergies.length; i++) {
 			for (int j = 0; j < transposedK_int.getRowDimension(); j++) {
-				vectorL[i] += transposedK_int.get(j,i) * equilibriumsGibbsEnergies[i];
+				vectorL[i] += transposedK_int.get(j,i) * computedGibbsEnergies[i];
 			}
 		}
 		return vectorL;
@@ -238,7 +238,7 @@ public class FluxMinimization extends TargetFunction {
 		double[] target = new double[fluxVector.length + 				// ||J||
 		                             L.length +							// ||L||
 		                             errorArray.length + 				// ||E||
-		                             equilibriumsGibbsEnergies.length];	// ||deltaG||
+		                             computedGibbsEnergies.length];	// ||deltaG||
 
 		// this is a pointer, which counts in the target vector the actually position
 
@@ -274,9 +274,9 @@ public class FluxMinimization extends TargetFunction {
 		}
 
 		// the weighted gibbs energy: lambda4*||G||
-		for (int l = 0; l < this.equilibriumsGibbsEnergies.length; l++) {
-			if (!Double.isNaN(equilibriumsGibbsEnergies[l]) && !Double.isInfinite(equilibriumsGibbsEnergies[l])) {
-				target[counter] = lambda4 * Math.abs(equilibriumsGibbsEnergies[l]);
+		for (int l = 0; l < this.computedGibbsEnergies.length; l++) {
+			if (!Double.isNaN(computedGibbsEnergies[l]) && !Double.isInfinite(computedGibbsEnergies[l])) {
+				target[counter] = lambda4 * Math.abs(computedGibbsEnergies[l]);
 			} else {
 				target[counter] = lambda4;
 			}
@@ -329,14 +329,14 @@ public class FluxMinimization extends TargetFunction {
 	 * @see org.sbml.simulator.fba.controller.TargetFunction#getGibbs()
 	 */
 	public double[] getGibbs() {
-		return equilibriumsGibbsEnergies;
+		return computedGibbsEnergies;
 	}
 
 	/**
 	 * @param gibbs the gibbs to set
 	 */
 	public void setGibbs(double[] gibbs) {
-		this.equilibriumsGibbsEnergies = gibbs;
+		this.computedGibbsEnergies = gibbs;
 	}
 
 	/*
