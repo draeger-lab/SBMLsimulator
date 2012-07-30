@@ -75,7 +75,7 @@ public class FluxBalanceAnalysis {
 	/**
 	 * Contains the solutions of cplex for the concentrations.
 	 */
-	public double[] solution_concentrations;
+	public double[] solutionConcentrations;
 
 	/**
 	 * Contains the solutions of cplex for the fluxes.
@@ -165,7 +165,7 @@ public class FluxBalanceAnalysis {
 		
 		// init solution arrays
 		this.solutionFluxVector = new double[targetfunc.getFluxVector().length];
-		this.solution_concentrations = new double[targetFunction.getConcentrations().length];
+		this.solutionConcentrations = new double[targetFunction.getConcentrations().length];
 	}
 
 
@@ -296,6 +296,7 @@ public class FluxBalanceAnalysis {
 				}
 				
 				cplex.addLe(jg, -Double.MIN_VALUE);
+				// TODO sysout
 				System.out.println(modifiedDocument.getModel().getReaction(j) + ": " + jg + " < " + 0);
 				logger.log(Level.DEBUG, String.format("constraint J_j * G_j: " + jg + " < " + 0));
 			}
@@ -313,16 +314,16 @@ public class FluxBalanceAnalysis {
 		// get the from cplex computed values for the variables x
 		solution = cplex.getValues(x);
 		for (int i = 0; i < counter[1]; i++) {
-			// the first counter[1]-values are corressponding to the fluxes
+			// the first counter[1]-values are corresponding to the fluxes
 			solutionFluxVector[i] = steadyStateFluxes[i] * solution[i];
 		}
 		for (int j = 0; j < concentrations.length; j++) {
 			// the last values in x are corresponding to the concentrations
 			if (!Double.isNaN(concentrations[j])) {
 				//correct the computed solutions by multiply them with the computed variable-value
-				solution_concentrations[j] = concentrations[j] * solution[j + target.length];
+				solutionConcentrations[j] = concentrations[j] * solution[j + target.length];
 			} else {
-				solution_concentrations[j] = solution[j + target.length];
+				solutionConcentrations[j] = solution[j + target.length];
 			}
 		}
 		cplex.end();
@@ -365,14 +366,14 @@ public class FluxBalanceAnalysis {
 	}
 
 	/**
-	 * Puts for {@link Species} j the lower bound on the given lbValue.
+	 * Puts for {@link Species} i the lower bound on the given lbValue.
 	 * @param lbValue
-	 * @param j
+	 * @param i (index of species)
 	 * @return true if lbValue was set successfully
 	 */
-	public boolean setLbOfConcentrationJ(double lbValue, int j) {
-		if (j < concentrations.length) {
-			lb[j + target.length] = lbValue;
+	public boolean setLbOfConcentrationJ(double lbValue, int i) {
+		if (i < concentrations.length) {
+			lb[i + target.length] = lbValue;
 			return true;
 		} else {
 			return false;
@@ -380,14 +381,14 @@ public class FluxBalanceAnalysis {
 	}
 
 	/**
-	 * Puts for {@link Species} j the upper bound on the given ubValue.
+	 * Puts for {@link Species} i the upper bound on the given ubValue.
 	 * @param ubValue
-	 * @param j
+	 * @param i (index of species)
 	 * @return true if ubValue was set successfully
 	 */
-	public boolean setUbOfConcentrationJ(double ubValue, int j) {
-		if (j < concentrations.length) {
-			ub[j + target.length] = ubValue;
+	public boolean setUbOfConcentrationJ(double ubValue, int i) {
+		if (i < concentrations.length) {
+			ub[i + target.length] = ubValue;
 			return true;
 		} else {
 			return false;
@@ -428,34 +429,34 @@ public class FluxBalanceAnalysis {
 
 	/**
 	 * Sets {@link TargetFunction.lambda1}
-	 * @param lambda
+	 * @param lambda1
 	 */
-	public void setLambda1(double lambda) {
-		TargetFunction.lambda1 = lambda;
+	public void setLambda1(double lambda1) {
+		TargetFunction.lambda1 = lambda1;
 	}
 
 	/**
 	 * Sets {@link TargetFunction.lambda2}
-	 * @param lambda
+	 * @param lambda2
 	 */
-	public void setLambda2(double lambda) {
-		TargetFunction.lambda2 = lambda;
+	public void setLambda2(double lambda2) {
+		TargetFunction.lambda2 = lambda2;
 	}
 
 	/**
 	 * Sets {@link TargetFunction.lambda3}
-	 * @param lambda
+	 * @param lambda3
 	 */
-	public void setLambda3(double lambda) {
-		TargetFunction.lambda3 = lambda;
+	public void setLambda3(double lambda3) {
+		TargetFunction.lambda3 = lambda3;
 	}
 
 	/**
 	 * Sets {@link TargetFunction.lambda4} 
-	 * @param lambda
+	 * @param lambda4
 	 */
-	public void setLambda4(double lambda) {
-		TargetFunction.lambda4 = lambda;
+	public void setLambda4(double lambda4) {
+		TargetFunction.lambda4 = lambda4;
 	}
 
 	/**
@@ -491,6 +492,22 @@ public class FluxBalanceAnalysis {
 	}
 	
 	/**
+	 * constraint J_j >= 0
+	 * @param constraintJ0
+	 */
+	public void setConstraintJ0(boolean constraintJ0) {
+		this.constraintJ0 = constraintJ0;
+	}
+
+	/**
+	 * constraint J_j >= 0
+	 * @return the constraintJ0
+	 */
+	public boolean isConstraintJ0() {
+		return constraintJ0;
+	}
+
+	/**
 	 * @return the cplexIterations
 	 */
 	public int getCplexIterations() {
@@ -505,22 +522,6 @@ public class FluxBalanceAnalysis {
 	}
 
 	/**
-	 * constraint J_j >= 0
-	 * @return the constraintJ0
-	 */
-	public boolean isConstraintJ0() {
-		return constraintJ0;
-	}
-
-	/**
-	 * constraint J_j >= 0
-	 * @param constraintJ0
-	 */
-	public void setConstraintJ0(boolean constraintJ0) {
-		this.constraintJ0 = constraintJ0;
-	}
-
-	/**
 	 * Method to set the whole lower bounds for concentrations.
 	 * @param concLowerBound
 	 */
@@ -531,22 +532,22 @@ public class FluxBalanceAnalysis {
 	}
 
 	/**
-	 * Method to set the whole lower bounds of fluxes.
-	 * @param fluxLowerBound
-	 */
-	public void setLbOfReactions(double[] fluxLowerBound) {
-		for (int j = 0; j < fluxLowerBound.length; j++) {
-			lb[j] = fluxLowerBound[j];
-		}
-	}
-
-	/**
 	 * Method to set the whole upper bounds of concentrations.
 	 * @param concUpperBound
 	 */
 	public void setUbOfConcentrations(double[] concUpperBound) {
 		for (int j = 0; j < concUpperBound.length; j++) {
 			ub[j + target.length] = concUpperBound[j];
+		}
+	}
+
+	/**
+	 * Method to set the whole lower bounds of fluxes.
+	 * @param fluxLowerBound
+	 */
+	public void setLbOfReactions(double[] fluxLowerBound) {
+		for (int j = 0; j < fluxLowerBound.length; j++) {
+			lb[j] = fluxLowerBound[j];
 		}
 	}
 
