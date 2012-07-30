@@ -149,19 +149,25 @@ public class FluxBalanceAnalysis {
 		int[] counter = targetFunction.getCounterArray();
 		// counter[1] contains the length of flux vector
 		for (int i = 0; i< counter[1]; i++) {
-			lb[i]= -100000; 
+			lb[i]= 0; 
 			ub[i] = 100000;
 		}
-		for (int g = counter[1]; g < target_array_length; g++) {
-			lb[g] = -100000;
-			ub[g] = 100000;
+		// everything between counter[1] and the length of the target-array is: L-vector, Errorarray and computedGibbsArray
+		for (int lAndE = counter[1]; lAndE < counter[3]; lAndE++) {
+			lb[lAndE] = -100000;
+			ub[lAndE] = 100000;
 		}
+		// counter[3] is the index of the gibbs values
+		for (int gibbsBounds = counter[3]; gibbsBounds < target_array_length; gibbsBounds++) {
+			lb[gibbsBounds] = -100000;
+			ub[gibbsBounds] = 0;
+		}
+		
 		// bounds for concentrations
 		for(int j = target_array_length; j < (concentrations.length + target_array_length); j++) {
 			lb[j] = Math.pow(10, -10);
 			ub[j] = Math.pow(10, -1);
 		}
-		
 		
 		// init solution arrays
 		this.solutionFluxVector = new double[targetfunc.getFluxVector().length];
@@ -560,4 +566,37 @@ public class FluxBalanceAnalysis {
 			ub[j] = fluxUpperBound[j];
 		}
 	}
+
+	/**
+	 * @param i index of the {@link Reaction}
+	 * @return the upper bound of the corresponding variable to this reaction
+	 */
+	public Object getUbOfReactionJ(int i) {
+		return ub[i];
+	}
+
+	/**
+	 * @param i index of the {@link Reaction}
+	 * @return the lower bound of the corresponding variable to this reaction
+	 */
+	public Object getLbOfReactionJ(int i) {
+		return lb[i];
+	}
+
+	/**
+	 * @param i index of the {@link Species}
+	 * @return the lower bound of the corresponding variable to this species
+	 */
+	public Object getLbOfConcentrationI(int i) {
+		return lb[i + target.length];
+	}
+
+	/**
+	 * @param i index of the {@link Species}
+	 * @return the upper bound of the corresponding variable to this species
+	 */
+	public Object getUbOfConcentrationI(int i) {
+		return ub[i + target.length];
+	}
+
 }
