@@ -360,28 +360,28 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 
 		if (theFirstCall) {
 			vod.setFluxes(fba.solutionFluxVector);
-			vod.setConcentrations(fba.solution_concentrations);
+			vod.setConcentrations(fba.solutionConcentrations);
 			vod.init();
 			chartFlux.setFluxes(fba.solutionFluxVector);
 			 //TODO syso
 			for (int i = 0; i < fba.solutionFluxVector.length; i++) {
 				System.out.print( " " + fba.solutionFluxVector[i]);
 			}
-			chartConc.setConcentrations(fba.solution_concentrations);
+			chartConc.setConcentrations(fba.solutionConcentrations);
 			chartFlux.init();
 			chartConc.init();
 			settings.setFBA(fba);
 			this.repaint();
 		} else {
 			vod.setFluxes(fba.solutionFluxVector);
-			vod.setConcentrations(fba.solution_concentrations);
+			vod.setConcentrations(fba.solutionConcentrations);
 			vod.updateUI();
 			//TODO syso
 			for (int i = 0; i < fba.solutionFluxVector.length; i++) {
 				System.out.print( " " + fba.solutionFluxVector[i]);
 			}
 			chartFlux.setFluxes(fba.solutionFluxVector);
-			chartConc.setConcentrations(fba.solution_concentrations);
+			chartConc.setConcentrations(fba.solutionConcentrations);
 			chartFlux.getTableFluxes().revalidate();
 			chartFlux.getTableFluxes().repaint();
 			chartFlux.getTableFluxes().updateUI();
