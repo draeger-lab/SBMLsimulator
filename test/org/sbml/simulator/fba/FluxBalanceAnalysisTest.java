@@ -18,11 +18,17 @@
 package org.sbml.simulator.fba;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
+import org.sbml.jsbml.ListOf;
+import org.sbml.jsbml.Model;
+import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
-import org.sbml.jsbml.SBMLWriter;
+import org.sbml.jsbml.Species;
+import org.sbml.jsbml.SpeciesReference;
 import org.sbml.simulator.fba.controller.CSVDataConverter;
 import org.sbml.simulator.fba.controller.Constraints;
 import org.sbml.simulator.fba.controller.FluxBalanceAnalysis;
@@ -100,9 +106,47 @@ public class FluxBalanceAnalysisTest {
 		double[] fluxSolution = fba.solutionFluxVector;
 		System.out.println("solutions for the fluxes: ");
 		SBMLDocument doc = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(originalSBMLDoc);
+		Model model = doc.getModel();
 		for (int i = 0; i < fluxSolution.length; i++) {
-			System.out.println(doc.getModel().getReaction(i).getId() + "   " + fluxSolution[i]);
+			System.out.println(model.getReaction(i).getId() + "   " + fluxSolution[i]);
 		}
+		
+		Map<Species, Double> fluxSum = new HashMap<Species, Double>();
+		// TODO is sum of all in- and outgoing fluxes are 0?
+		for (int i = 0; i< model.getSpeciesCount(); i++ ) {
+			fluxSum.put(model.getSpecies(i), 0.0);
+		}
+		for (int j = 0; j < model.getReactionCount(); j++) {
+			Reaction r = model.getReaction(j);
+			ListOf<SpeciesReference> substrateList = r.getListOfReactants();
+			for (SpeciesReference sr : substrateList) {
+				double helper = fluxSum.get(sr.getSpeciesInstance());
+				helper += (-1 * sr.getStoichiometry() * fluxSolution[j]);
+//				System.out.println(
+//						sr.getSpeciesInstance() + ": -" 
+//						+ sr.getStoichiometry() + " * " 
+//						+ fluxSolution[j] + " = " 
+//						+ (-1 * sr.getStoichiometry() * fluxSolution[j]));
+				fluxSum.put(sr.getSpeciesInstance(), helper);
+			}
+			ListOf<SpeciesReference> productList = r.getListOfProducts();
+			for (SpeciesReference sr : productList) {
+				double helper = fluxSum.get(sr.getSpeciesInstance());
+				helper += (sr.getStoichiometry() * fluxSolution[j]);
+//				System.out.println(
+//						sr.getSpeciesInstance() + ": +" 
+//						+ sr.getStoichiometry() + " * " 
+//						+ fluxSolution[j] + " = " 
+//						+ (sr.getStoichiometry() * fluxSolution[j]));
+				fluxSum.put(sr.getSpeciesInstance(), helper);
+			}
+		}
+		System.out.println("\n#####################################");
+		System.out.println("sum of the in- and outgoing fluxes (incl. stoichiometry):");
+		for (int i = 0; i< model.getSpeciesCount(); i++ ) {
+			System.out.println(model.getSpecies(i) + " : " + fluxSum.get(model.getSpecies(i)));
+		}
+		
 		
 //		System.out.println("-----------------");
 //		//print conc solution:
