@@ -61,7 +61,7 @@ public class FluxMinimizationUtils {
 		for (int row = 0; row < N.getColumnDimension(); row++) {
 			if (steadyStateMatrix.getColumnDimension() > 0) {
 				if (((targetFluxes == null) || isNoTargetFlux(row, targetFluxes, doc))) {
-					fluxVector[row] = steadyStateMatrix.get(row, steadyStateMatrix.getColumnDimension() - 1);
+					fluxVector[row] = steadyStateMatrix.get(row, 0);
 					if (Math.abs(fluxVector[row]) < Math.pow(10, -15)) {
 						//then the value is similar to 0 and the flux is 0
 						fluxVector[row] = 0d;
