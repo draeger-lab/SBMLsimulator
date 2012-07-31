@@ -294,6 +294,8 @@ public class FluxBalanceAnalysis {
 				cplex.addGe(cplex.prod(cplex.constant(steadyStateFluxes[j]), x[j]), 0);
 			}
 			
+			
+			
 			// constraint J_j * G_j < 0
 			if (isConstraintJG()) {
 				IloNumExpr jg = cplex.numExpr();
