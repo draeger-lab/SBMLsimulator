@@ -126,9 +126,9 @@ public class FluxMinimization extends TargetFunction {
 
 		counterArray = new int[4];
 		if (fluxVector != null && errorArray != null && L != null) {
-			fillCounterArray(fluxVector.length,
-					errorArray.length, 
-					L.length);
+			fillCounterArray(fluxVector.length,		// J
+					errorArray.length, 				// E
+					L.length);						// L
 		}
 	}
 
