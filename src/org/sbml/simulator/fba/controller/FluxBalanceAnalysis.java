@@ -149,7 +149,7 @@ public class FluxBalanceAnalysis {
 		int[] counter = targetFunction.getCounterArray();
 		// counter[1] contains the length of flux vector
 		for (int i = 0; i< counter[1]; i++) {
-			lb[i]= 0; 
+			lb[i]= Double.MIN_VALUE; 
 			ub[i] = 100000;
 		}
 		// everything between counter[1] and the length of the target-array is: L-vector, Errorarray and computedGibbsArray
@@ -160,7 +160,7 @@ public class FluxBalanceAnalysis {
 		// counter[3] is the index of the gibbs values
 		for (int gibbsBounds = counter[3]; gibbsBounds < target_array_length; gibbsBounds++) {
 			lb[gibbsBounds] = -100000;
-			ub[gibbsBounds] = 0;
+			ub[gibbsBounds] = -Double.MIN_VALUE;
 		}
 		
 		// bounds for concentrations
@@ -425,6 +425,10 @@ public class FluxBalanceAnalysis {
 	}
 
 
+	/**
+	 * Method to show if the fluxes add to null.
+	 * @param doc
+	 */
 	public void showIfTheFluxesAddToNull(SBMLDocument doc){
 		for (int s = 0; s < doc.getModel().getSpeciesCount(); s++) {
 			double sum = 0;

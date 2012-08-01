@@ -30,7 +30,6 @@ import org.sbml.simulator.stability.math.ConservationRelations;
 import org.sbml.simulator.stability.math.StabilityMatrix;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
-import eva2.tools.math.Jama.Matrix;
 
 /**
  * Contains methods to compute the flux vector for FBA and a method to get the {@link StoichiometricMatrix} of an incoming {@link SBMLDocument}.
@@ -58,23 +57,13 @@ public class FluxMinimizationUtils {
 	 * @return double[] flux vector
 	 */
 	public static double[] computeFluxVector(StoichiometricMatrix N, String[] targetFluxes, SBMLDocument doc) {
-//		double[][] array = {{1,-1,0,0,-1,0}, {0,1,-1,0,0,0},{0,0,1,-1,0,1},{0,0,0,0,1,-1}};
-//		double[][] array = {{-1,0,-1,0,1,0}{}{}{}{}{}{}{}};
-//		N = new StoichiometricMatrix(array, 4, 6);
-//		N.getArray();
-//		Matrix matrix = new Matrix(N.getArray());
-//		System.out.println("-->" + matrix.rank());
-//		System.out.println();
-//		System.out.println(N.rank());
-//		Matrix matrix = new Matrix(N.getArray());
-//		int rank = matrix.rank();
-//		StabilityMatrix reducedMatrix = N.getReducedMatrix();
-		StoichiometricMatrix NwithoutZeroRows = new StoichiometricMatrix(eliminateZeroRows(N).getArray(), eliminateZeroRows(N).getRowDimension(), eliminateZeroRows(N).getColumnDimension());
-//		NwithoutZeroRows.rank();
+		StoichiometricMatrix eliminateZeroRows = eliminateZeroRows(N);
+		StoichiometricMatrix NwithoutZeroRows = new StoichiometricMatrix(eliminateZeroRows.getArray(), eliminateZeroRows.getRowDimension(), eliminateZeroRows.getColumnDimension());
 		StabilityMatrix steadyStateMatrix = ConservationRelations.calculateConsRelations(new StoichiometricMatrix(NwithoutZeroRows.transpose().getArray(),NwithoutZeroRows.getColumnDimension(),NwithoutZeroRows.getRowDimension()));
 		double[] fluxVector = new double[steadyStateMatrix.getColumnDimension()];
 
 		//TODO
+		System.out.println();
 		System.out.println("N.getColumnDimension() " + N.getColumnDimension() + "   N.getRowDimension() " + N.getRowDimension() + ", steadyStateMatrix.getColumnDimension() " + steadyStateMatrix.getColumnDimension() + "   steadyStateMatrix.getRowDimension() " +  steadyStateMatrix.getRowDimension());
 		
 		System.out.println("_------_");
@@ -84,7 +73,8 @@ public class FluxMinimizationUtils {
 		for (int column = 0; column < steadyStateMatrix.getColumnDimension(); column++) {
 			if (steadyStateMatrix.getRowDimension() > 0) {
 				if (((targetFluxes == null) || isNoTargetFlux(column, targetFluxes, doc))) {
-					fluxVector[column] = steadyStateMatrix.get(1,column);
+					//TODO: save all possible fluxes and pick that one, that gets the best fba-solution. 
+					fluxVector[column] = steadyStateMatrix.get(0,column);
 					if (Math.abs(fluxVector[column]) < Math.pow(10, -15)) {
 						//then the value is similar to 0 and the flux is 0
 						fluxVector[column] = 0d;
@@ -98,22 +88,28 @@ public class FluxMinimizationUtils {
 	}
 
 	/**
-	 * 
-	 * @param N
-	 * @return
+	 * Method to eliminate the rows in the {@link StoichiometricMatrix} that contains only zeros.
+	 * @param {@link StoichiometricMatrix} N
+	 * @return {@link StoichiometricMatrix} without the zero-rows.
 	 */
 	private static StoichiometricMatrix eliminateZeroRows(StoichiometricMatrix N) {
+		// initialize the new StoichiometricMatrix (without the zero-rows)
 		StoichiometricMatrix S;
 		
+		// list which contains the indices of the remaining rows
 		List<Integer> remainingList = new LinkedList<Integer>();
+		
 		for (int row = 0; row <N.getRowDimension(); row++){
+			//flagZeros is true if this row contains only zeros
 			boolean flagZeros = true;
+			int i = 0;
 			for (int col = 0; col <N.getColumnDimension(); col++) {
 				if (N.get(row, col) != 0.0) {
 					flagZeros = false;
+					i++;
 				}
 			}
-			if (!flagZeros) {
+			if (!flagZeros && i > 1) {
 				remainingList.add(row);
 			}
 			

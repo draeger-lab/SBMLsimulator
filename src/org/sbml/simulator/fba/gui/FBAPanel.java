@@ -349,7 +349,15 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 			}
 
 			//solve
+			try{
 			fba.solve();
+			} catch (ilog.cplex.CpxException cplexExc){
+				cplexExc.printStackTrace();
+				JOptionPane.showMessageDialog(this,
+						new String("Only the null vector solution found."),
+						"available solutions",
+						JOptionPane.ERROR_MESSAGE);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(this,
@@ -385,7 +393,6 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 			chartFlux.getTableFluxes().revalidate();
 			chartFlux.getTableFluxes().repaint();
 			chartFlux.getTableFluxes().updateUI();
-			chartFlux.init();
 			chartConc.getTableConc().repaint();
 			settings.setFBA(fba);
 			this.repaint();
