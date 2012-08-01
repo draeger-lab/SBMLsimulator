@@ -240,26 +240,26 @@ public class FluxBalanceAnalysis {
 			cplex.addMaximize(cplex_target);
 		}
 
-			// TODO debugging	
-				for (int i = 0; i < x.length; i++) {
-					if (i < counter[1]) {
-						System.out.print(FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(constraints.originalDocument).getModel().getReaction(i).getId() + ": " + target[i] + "    x: "+ x[i]);
-						System.out.println("  flux");
-					} else if (i < counter[2]) {
-						System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
-						System.out.println("  E");
-					} else if (i < counter[3]) {
-						System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
-						System.out.println("  L");
-					} else if (i < target.length) {
-						System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
-						System.out.println("  gibbs");
-					} else {
-						System.out.print(i + ": " + concentrations[i-target.length] + "    x: "+ x[i]);
-						System.out.println("  conc");
-					}
-				}
-				System.out.println();
+//			// TODO debugging	
+//				for (int i = 0; i < x.length; i++) {
+//					if (i < counter[1]) {
+//						System.out.print(FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(constraints.originalDocument).getModel().getReaction(i).getId() + ": " + target[i] + "    x: "+ x[i]);
+//						System.out.println("  flux");
+//					} else if (i < counter[2]) {
+//						System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
+//						System.out.println("  E");
+//					} else if (i < counter[3]) {
+//						System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
+//						System.out.println("  L");
+//					} else if (i < target.length) {
+//						System.out.print(i + ": " + target[i] + "    x: "+ x[i]);
+//						System.out.println("  gibbs");
+//					} else {
+//						System.out.print(i + ": " + concentrations[i-target.length] + "    x: "+ x[i]);
+//						System.out.println("  conc");
+//					}
+//				}
+//				System.out.println();
 				
 
 		//CONSTRAINTS
@@ -274,7 +274,7 @@ public class FluxBalanceAnalysis {
 			//and j_rmaxG the expression for |J_j| - r_max * |G_j|
 			int k = j + counter[3];
 			
-			IloNumExpr j_j = cplex.prod(cplex.abs(cplex.constant(steadyStateFluxes[j])), x[j]);
+			IloNumExpr j_j = cplex.abs(cplex.prod(Math.abs(steadyStateFluxes[j]), x[j]));
 			
 			// constraint |J_j| - r_max * |G_j| < 0
 			if (isConstraintJ_rmaxG()) {
@@ -291,7 +291,7 @@ public class FluxBalanceAnalysis {
 			
 			// constraint J_j >= 0
 			if (isConstraintJ0()) {
-				cplex.addGe(cplex.prod(cplex.constant(steadyStateFluxes[j]), x[j]), 0);
+				cplex.addGe(cplex.prod(steadyStateFluxes[j], x[j]), 0);
 			}
 			
 			
