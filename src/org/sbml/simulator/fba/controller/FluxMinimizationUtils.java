@@ -54,17 +54,23 @@ public class FluxMinimizationUtils {
 	 * @return double[] flux vector
 	 */
 	public static double[] computeFluxVector(StoichiometricMatrix N, String[] targetFluxes, SBMLDocument doc) {
-		StabilityMatrix steadyStateMatrix = N.getSteadyStateFluxes();
-		double[] fluxVector = new double[steadyStateMatrix.getRowDimension()];
+		StabilityMatrix steadyStateMatrix = new StoichiometricMatrix(N.transpose().getArray(),N.getColumnDimension(),N.getRowDimension()).getConservationRelations();
+		double[] fluxVector = new double[steadyStateMatrix.getColumnDimension()];
 
+		//TODO
+		System.out.println("N.getColumnDimension() " + N.getColumnDimension() + "   N.getRowDimension() " + N.getRowDimension() + ", steadyStateMatrix.getColumnDimension() " + steadyStateMatrix.getColumnDimension() + "   steadyStateMatrix.getRowDimension() " +  steadyStateMatrix.getRowDimension());
+		
+		System.out.println("_------_");
+		System.out.println(steadyStateMatrix.toString());
+		
 		// fill the fluxVector
-		for (int row = 0; row < N.getColumnDimension(); row++) {
-			if (steadyStateMatrix.getColumnDimension() > 0) {
-				if (((targetFluxes == null) || isNoTargetFlux(row, targetFluxes, doc))) {
-					fluxVector[row] = steadyStateMatrix.get(row, 0);
-					if (Math.abs(fluxVector[row]) < Math.pow(10, -15)) {
+		for (int column = 0; column < steadyStateMatrix.getColumnDimension(); column++) {
+			if (steadyStateMatrix.getRowDimension() > 0) {
+				if (((targetFluxes == null) || isNoTargetFlux(column, targetFluxes, doc))) {
+					fluxVector[column] = steadyStateMatrix.get(1,column);
+					if (Math.abs(fluxVector[column]) < Math.pow(10, -15)) {
 						//then the value is similar to 0 and the flux is 0
-						fluxVector[row] = 0d;
+						fluxVector[column] = 0d;
 					}
 				} else {
 					// TODO use the targetflux ...
