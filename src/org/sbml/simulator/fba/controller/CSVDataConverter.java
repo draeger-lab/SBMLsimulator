@@ -44,7 +44,7 @@ public class CSVDataConverter {
 	 * Contains the information about the sort of the file:
 	 * true if it is a Gibbs-file, false if it's not.
 	 */
-	Boolean isGibbsFile;
+	private Boolean isGibbsFile;
 
 	/**
 	 * Containing the corresponding {@link SBMLDocument}.
@@ -74,23 +74,23 @@ public class CSVDataConverter {
 
 	/**
 	 * Constructor
-	 * @param doc
+	 * @param originalDoc
 	 */
-	public CSVDataConverter(SBMLDocument doc) {
-		this.modifiedDocument = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(doc);
+	public CSVDataConverter(SBMLDocument originalDoc) {
+		this.modifiedDocument = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(originalDoc);
 	}
 
 	/**
 	 * Method to read equilibrium concentrations from a file.
 	 * 
-	 * @param files
-	 * @return
+	 * @param file
+	 * @return concentrationsArray
 	 * @throws Exception 
 	 */
-	public double[] readConcentrationsFromFile (File files) throws Exception {
+	public double[] readConcentrationsFromFile (File file) throws Exception {
 		this.isConcentrationFile = true;
 		this.isGibbsFile = null;
-		readFromFile(files);
+		readFromFile(file);
 		return concentrationsArray;
 	}
 
@@ -99,7 +99,7 @@ public class CSVDataConverter {
 	 * Reads out the Gibbs energies from a given file and writes it in the array gibbsEnergies
 	 *
 	 * @param file
-	 * @return
+	 * @return gibbsArray
 	 * @throws Exception 
 	 */
 	public double[] readGibbsFromFile(File file) throws Exception {
@@ -112,7 +112,7 @@ public class CSVDataConverter {
 	/**
 	 * Reads out the Gibbs energies or concentrations from a given file and writes it in an array, that the method returns.
 	 * 
-	 * @param files
+	 * @param file
 	 * @throws Exception 
 	 */
 	private void readFromFile(File file) throws Exception {
@@ -122,7 +122,7 @@ public class CSVDataConverter {
 	}
 
 	/**
-	 * Writes the incoming data from the csv-file in an array. When it was a gibbs data file
+	 * Writes the incoming data from the CSV-file in an array. When it was a Gibbs data file
 	 * the data will be written in the {@link# gibbsArray} else it was a concentration data file
 	 * and the data will be written in the {@link# concentrationsArray}.
 	 * @param obj
@@ -220,6 +220,8 @@ public class CSVDataConverter {
 		return reader;
 	}
 
+	
+	//TODO: call this method in the gui --> create a button for that
 	/**
 	 * Writes the computed values of the flux balance analysis in the given csv-File, which has 2 columns and for every reaction/ species a line.
 	 * The first line contains the heading "Reaction_id" or "Species_id" (first column) and "steady_state_value" (second column).
