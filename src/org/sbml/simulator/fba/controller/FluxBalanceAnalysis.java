@@ -55,12 +55,12 @@ public class FluxBalanceAnalysis {
 	/**
 	 * lower bound for cplex variables
 	 */
-	public double[] lb;
+	private double[] lb;
 
 	/**
 	 * upper bounds for cplex variables
 	 */
-	public double[] ub;
+	private double[] ub;
 
 	/**
 	 * Contains the target array for cplex.
@@ -139,8 +139,6 @@ public class FluxBalanceAnalysis {
 		
 		lb = new double[target_array_length + targetFunction.getConcentrations().length];
 		ub = new double[target_array_length + targetFunction.getConcentrations().length];
-		// TODO sysout entfernen
-		System.out.println("lb: " + lb.length + " ub: " + ub.length);
 		
 		// initialize the concentrations
 		concentrations = targetFunction.getConcentrations();
