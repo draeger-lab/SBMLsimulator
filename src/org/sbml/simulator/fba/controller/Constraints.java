@@ -119,7 +119,7 @@ public class Constraints {
 	private double[] getEquillibriumGibbsEnergiesfromkKiloJoule(double[] gibbs_eq) {
 		double[] adaptedGibbsEnergies = new double[gibbs_eq.length];
 		for (int i = 0; i < gibbs_eq.length; i++) {
-			adaptedGibbsEnergies[i] = gibbs_eq[i] / 1000;
+			adaptedGibbsEnergies[i] = gibbs_eq[i] * 1000;
 		}
 		return adaptedGibbsEnergies;
 	}

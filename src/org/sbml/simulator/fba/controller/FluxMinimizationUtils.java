@@ -56,6 +56,12 @@ public class FluxMinimizationUtils {
 	 * List contains the reversible reactions.
 	 */
 	public static List<String> reversibleReactions = new ArrayList<String>();
+
+	private static SBMLDocument systemBoundaryDocument;
+
+	private static SBMLDocument modDoc;
+
+	private static StoichiometricMatrix N_int_sys;
 	
 	
 	
@@ -63,20 +69,22 @@ public class FluxMinimizationUtils {
 	 * Gets a {@link StoichiometricMatrix} and gives back the corresponding flux-vector in Manhattan-Norm, without the given 
 	 * target fluxes.
 	 * 
-	 * @param N
+	 * @param N_int
 	 * @param targetFluxes 
 	 * @param doc 
 	 * @return double[] flux vector
 	 */
-	public static double[] computeFluxVector(StoichiometricMatrix N, String[] targetFluxes, SBMLDocument doc) {
-		StoichiometricMatrix eliminateZeroRows = eliminateZeroRows(N);
+	public static double[] computeFluxVector(StoichiometricMatrix N_int, String[] targetFluxes, SBMLDocument doc) {
+		StoichiometricMatrix eliminateZeroRows = eliminateZeroRows(N_int);
 		StoichiometricMatrix NwithoutZeroRows = new StoichiometricMatrix(eliminateZeroRows.getArray(), eliminateZeroRows.getRowDimension(), eliminateZeroRows.getColumnDimension());
-		StabilityMatrix steadyStateMatrix = ConservationRelations.calculateConsRelations(new StoichiometricMatrix(NwithoutZeroRows.transpose().getArray(),NwithoutZeroRows.getColumnDimension(),NwithoutZeroRows.getRowDimension()));
+		NwithoutZeroRows.getReducedMatrix();
+//		StabilityMatrix steadyStateMatrix = ConservationRelations.calculateConsRelations(new StoichiometricMatrix(NwithoutZeroRows.transpose().getArray(),NwithoutZeroRows.getColumnDimension(),NwithoutZeroRows.getRowDimension()));
+		StabilityMatrix steadyStateMatrix = (new StoichiometricMatrix(NwithoutZeroRows.transpose().getArray(),NwithoutZeroRows.getColumnDimension(),NwithoutZeroRows.getRowDimension())).getConservationRelations();
 		double[] fluxVector = new double[steadyStateMatrix.getColumnDimension()];
 
 		//TODO
 		System.out.println();
-		System.out.println("N.getColumnDimension() " + N.getColumnDimension() + "   N.getRowDimension() " + N.getRowDimension() + ", steadyStateMatrix.getColumnDimension() " + steadyStateMatrix.getColumnDimension() + "   steadyStateMatrix.getRowDimension() " +  steadyStateMatrix.getRowDimension());
+		System.out.println("N.getColumnDimension() " + N_int.getColumnDimension() + "   N.getRowDimension() " + N_int.getRowDimension() + ", steadyStateMatrix.getColumnDimension() " + steadyStateMatrix.getColumnDimension() + "   steadyStateMatrix.getRowDimension() " +  steadyStateMatrix.getRowDimension());
 		
 		System.out.println("_------_");
 		System.out.println(steadyStateMatrix.toString());
@@ -121,7 +129,8 @@ public class FluxMinimizationUtils {
 					i++;
 				}
 			}
-			if (!flagZeros && i > 1) {
+//			if (!flagZeros && i > 1) {
+			if (!flagZeros) {
 				remainingList.add(row);
 			}
 			
@@ -168,7 +177,7 @@ public class FluxMinimizationUtils {
 		return true;
 	}
 
-
+	
 
 	/**
 	 * Gets the original {@link SBMLDocument} and gives back the corresponding {@link StoichiometricMatrix}.
@@ -176,20 +185,20 @@ public class FluxMinimizationUtils {
 	 * @return {@link StoichiometricMatrix}
 	 * @throws Exception 
 	 */
-	public static StoichiometricMatrix SBMLDocToStoichMatrix(SBMLDocument originalDocument) throws Exception{
-		SBMLDocument modifiedDocument = eliminateTransportsAndSplitReversibleReactions(originalDocument);
+	public static StoichiometricMatrix SBMLDocToStoichMatrix(SBMLDocument doc) throws Exception{
+		doc = eliminateTransportsAndSplitReversibleReactions(doc);
 
 		// build a new StoichiometricMatrix with the number of species as the dimension of rows
 		// and the number of reactions as the dimension of columns
-		int speciesCount = modifiedDocument.getModel().getSpeciesCount();
-		int reactionCount = modifiedDocument.getModel().getReactionCount();
+		int speciesCount = doc.getModel().getSpeciesCount();
+		int reactionCount = doc.getModel().getReactionCount();
 		StoichiometricMatrix sMatrix = new StoichiometricMatrix (speciesCount,reactionCount);
 
 		//fill the matrix with the stoichiometry of each reaction
 		for (int j = 0; j < reactionCount; j++) { //j is the column (reaction)
 			for (int i = 0; i < speciesCount; i++) { // i is the row (species)
-				Reaction reac = modifiedDocument.getModel().getReaction(j);
-				Species species = modifiedDocument.getModel().getSpecies(i);
+				Reaction reac = doc.getModel().getReaction(j);
+				Species species = doc.getModel().getSpecies(i);
 				if (reac.hasProduct(species)) {
 					// the stoichiometry of products is positive in the stoichiometricMatrix
 					if (reac.getProductForSpecies(species.getId()).getStoichiometry() != Double.NaN) {
@@ -209,7 +218,12 @@ public class FluxMinimizationUtils {
 				}
 			}
 		}
-
+		
+		for (int i = 0; i< sMatrix.getRowDimension(); i++) {
+			double[] d = sMatrix.getRow(i);
+			if (d.equals(sMatrix.getRowShallow(i)))
+			System.out.println(d);
+		}
 		return sMatrix;
 	}
 
@@ -309,4 +323,68 @@ public class FluxMinimizationUtils {
 		}
 		return error;
 	}
+	
+	
+	/**
+	 * 
+	 * @param originalDoc
+	 * @return SBMLDocument with added system boundaries
+	 * @throws Exception
+	 */
+	public static SBMLDocument expandDocument(SBMLDocument originalDoc) throws Exception {
+		SBMLDocument modifiedDocument = eliminateTransportsAndSplitReversibleReactions(originalDoc);
+		StoichiometricMatrix N_int = SBMLDocToStoichMatrix(modifiedDocument);
+		systemBoundaryDocument = addSystemBoundaries(N_int, modifiedDocument);
+		N_int_sys = SBMLDocToStoichMatrix(systemBoundaryDocument);
+		return systemBoundaryDocument;
+	}
+	
+	/**
+	 * @return StoichiometricMatrix with added system boundaries
+	 */
+	public static StoichiometricMatrix expandStoichiometricMatrix() {
+		return N_int_sys;
+	}
+
+	/**
+	 * 
+	 * @param n_int
+	 * @param modDoc
+	 * @return
+	 */
+	private static SBMLDocument addSystemBoundaries(StoichiometricMatrix n_int,
+			SBMLDocument modDoc) {
+		SBMLDocument doc = modDoc.clone();
+		for (int row = 0; row < n_int.getRowDimension(); row++) {
+			if (sumOfRow(n_int.getRow(row)) > 0.0) {
+				//TODO: species and reactions adden, stoich = -1
+				// doc = blablaMethod(indexOSpecies, doc, stoichiometry)
+			} else if (sumOfRow(n_int.getRow(row)) < 0.0) {
+				//TODO: species and reactions adden, stoich = +1
+			}
+		}
+		return doc;
+	}
+
+	/**
+	 * 
+	 * @param row
+	 * @return
+	 */
+	private static double sumOfRow(double[] row) {
+		double sum = 0;
+		for(int column = 0; column < row.length; column++) {
+			sum += row[column];
+		}
+		return sum;
+	}
+	
+	private static SBMLDocument blablaMethod(int indexOfSpecies, SBMLDocument doc, double stoichiometry) {
+		SBMLDocument mod = doc.clone();
+		// TODO do the computation
+		return mod;
+	}
+	
+	
+	
 }
