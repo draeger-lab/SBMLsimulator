@@ -151,6 +151,8 @@ public class FluxBalanceAnalysis {
 		for (int i = 0; i< counter[1]; i++) {
 			lb[i]= Double.MIN_VALUE; 
 			ub[i] = 100000;
+//			lb[i] = 1.0;
+//			ub[i] = 1.0;
 		}
 		// everything between counter[1] and the length of the target-array is: L-vector, Errorarray and computedGibbsArray
 		for (int lAndE = counter[1]; lAndE < counter[3]; lAndE++) {
@@ -161,6 +163,9 @@ public class FluxBalanceAnalysis {
 		for (int gibbsBounds = counter[3]; gibbsBounds < target_array_length; gibbsBounds++) {
 			lb[gibbsBounds] = -100000;
 			ub[gibbsBounds] = -Double.MIN_VALUE;
+//			lb[gibbsBounds] = -1;
+//			ub[gibbsBounds] = -1;
+
 		}
 		
 		// bounds for concentrations
@@ -268,7 +273,7 @@ public class FluxBalanceAnalysis {
 		double[] steadyStateFluxes = targetFunction.getFluxVector();
 		double[] compGibbs = constraints.getComputedGibbsEnergies();
 		double[] r_max = constraints.computeR_max(steadyStateFluxes);
-		
+		System.out.println("1: " + isConstraintJ_rmaxG() + " 2: " + isConstraintJ0() + " 3: " + isConstraintJG());
 		for (int j = 0; j< counter[1]; j++) {
 			//jg is the expression for J_j * G_j
 			//and j_rmaxG the expression for |J_j| - r_max * |G_j|
