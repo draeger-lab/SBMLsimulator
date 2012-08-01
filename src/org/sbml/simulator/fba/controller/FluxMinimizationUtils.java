@@ -18,6 +18,7 @@
 package org.sbml.simulator.fba.controller;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.sbml.jsbml.Reaction;
@@ -28,6 +29,8 @@ import org.sbml.jsbml.SpeciesReference;
 import org.sbml.simulator.stability.math.ConservationRelations;
 import org.sbml.simulator.stability.math.StabilityMatrix;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
+
+import eva2.tools.math.Jama.Matrix;
 
 /**
  * Contains methods to compute the flux vector for FBA and a method to get the {@link StoichiometricMatrix} of an incoming {@link SBMLDocument}.
@@ -55,7 +58,20 @@ public class FluxMinimizationUtils {
 	 * @return double[] flux vector
 	 */
 	public static double[] computeFluxVector(StoichiometricMatrix N, String[] targetFluxes, SBMLDocument doc) {
-		StabilityMatrix steadyStateMatrix = ConservationRelations.calculateConsRelations(new StoichiometricMatrix(N.transpose().getArray(),N.getColumnDimension(),N.getRowDimension()));
+//		double[][] array = {{1,-1,0,0,-1,0}, {0,1,-1,0,0,0},{0,0,1,-1,0,1},{0,0,0,0,1,-1}};
+//		double[][] array = {{-1,0,-1,0,1,0}{}{}{}{}{}{}{}};
+//		N = new StoichiometricMatrix(array, 4, 6);
+//		N.getArray();
+//		Matrix matrix = new Matrix(N.getArray());
+//		System.out.println("-->" + matrix.rank());
+//		System.out.println();
+//		System.out.println(N.rank());
+//		Matrix matrix = new Matrix(N.getArray());
+//		int rank = matrix.rank();
+//		StabilityMatrix reducedMatrix = N.getReducedMatrix();
+		StoichiometricMatrix NwithoutZeroRows = new StoichiometricMatrix(eliminateZeroRows(N).getArray(), eliminateZeroRows(N).getRowDimension(), eliminateZeroRows(N).getColumnDimension());
+//		NwithoutZeroRows.rank();
+		StabilityMatrix steadyStateMatrix = ConservationRelations.calculateConsRelations(new StoichiometricMatrix(NwithoutZeroRows.transpose().getArray(),NwithoutZeroRows.getColumnDimension(),NwithoutZeroRows.getRowDimension()));
 		double[] fluxVector = new double[steadyStateMatrix.getColumnDimension()];
 
 		//TODO
@@ -79,6 +95,35 @@ public class FluxMinimizationUtils {
 			}
 		}
 		return fluxVector;
+	}
+
+	/**
+	 * 
+	 * @param N
+	 * @return
+	 */
+	private static StoichiometricMatrix eliminateZeroRows(StoichiometricMatrix N) {
+		StoichiometricMatrix S;
+		
+		List<Integer> remainingList = new LinkedList<Integer>();
+		for (int row = 0; row <N.getRowDimension(); row++){
+			boolean flagZeros = true;
+			for (int col = 0; col <N.getColumnDimension(); col++) {
+				if (N.get(row, col) != 0.0) {
+					flagZeros = false;
+				}
+			}
+			if (!flagZeros) {
+				remainingList.add(row);
+			}
+			
+		}
+		
+		S = new StoichiometricMatrix(remainingList.size(), N.getColumnDimension());
+		for (int j = 0; j < S.getRowDimension(); j++) {
+			S.setRow(j, N.getRow(remainingList.get(j)));
+		}
+		return S;
 	}
 
 	/**
@@ -118,13 +163,13 @@ public class FluxMinimizationUtils {
 
 
 	/**
-	 * Gets a {@link SBMLDocument} and gives back the corresponding {@link StoichiometricMatrix}.
+	 * Gets the original {@link SBMLDocument} and gives back the corresponding {@link StoichiometricMatrix}.
 	 * @param doc
 	 * @return {@link StoichiometricMatrix}
 	 * @throws Exception 
 	 */
-	public static StoichiometricMatrix SBMLDocToStoichMatrix(SBMLDocument document) throws Exception{
-		SBMLDocument modifiedDocument = eliminateTransportsAndSplitReversibleReactions(document);
+	public static StoichiometricMatrix SBMLDocToStoichMatrix(SBMLDocument originalDocument) throws Exception{
+		SBMLDocument modifiedDocument = eliminateTransportsAndSplitReversibleReactions(originalDocument);
 
 		// build a new StoichiometricMatrix with the number of species as the dimension of rows
 		// and the number of reactions as the dimension of columns
