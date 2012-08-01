@@ -25,6 +25,7 @@ import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBO;
 import org.sbml.jsbml.Species;
 import org.sbml.jsbml.SpeciesReference;
+import org.sbml.simulator.stability.math.ConservationRelations;
 import org.sbml.simulator.stability.math.StabilityMatrix;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
@@ -54,7 +55,7 @@ public class FluxMinimizationUtils {
 	 * @return double[] flux vector
 	 */
 	public static double[] computeFluxVector(StoichiometricMatrix N, String[] targetFluxes, SBMLDocument doc) {
-		StabilityMatrix steadyStateMatrix = new StoichiometricMatrix(N.transpose().getArray(),N.getColumnDimension(),N.getRowDimension()).getConservationRelations();
+		StabilityMatrix steadyStateMatrix = ConservationRelations.calculateConsRelations(new StoichiometricMatrix(N.transpose().getArray(),N.getColumnDimension(),N.getRowDimension()));
 		double[] fluxVector = new double[steadyStateMatrix.getColumnDimension()];
 
 		//TODO
