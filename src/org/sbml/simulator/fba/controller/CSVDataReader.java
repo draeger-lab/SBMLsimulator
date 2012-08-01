@@ -28,7 +28,7 @@ import de.zbit.gui.csv.ExpectedColumn;
 import de.zbit.io.csv.CSVReader;
 
 /**
- * Reads the csv files in background.
+ * Reads the CSV-files in background.
  * 
  * @author Meike Aichele
  * @version $Rev$
@@ -37,10 +37,27 @@ import de.zbit.io.csv.CSVReader;
  */
 public class CSVDataReader extends SwingWorker<String[][], Void>{
 
+	/**
+	 * The read data in a 2D-String-Array.
+	 */
 	private String[][] stringData;
+	
+	/**
+	 * boolean doRead
+	 */
 	private boolean doRead = true;
+	
+	/**
+	 * The corresponding CSVImporterV2
+	 */
 	private CSVImporterV2 converter;
 
+	/**
+	 * Constructor that calls the read-method.
+	 * @param file
+	 * @param parent
+	 * @throws Exception
+	 */
 	public CSVDataReader(File file, Component parent) throws Exception {
 		converter = new CSVImporterV2(file.getAbsolutePath(), new ArrayList<ExpectedColumn>(2));
 		if(parent != null) {

@@ -63,6 +63,7 @@ public class Constraints {
 	 */
 	private double R = 8.3144621;
 
+	
 	/**
 	 * Constructor, that gets a {@link SBMLDocument} and creates a new
 	 * array of Gibbs energies, that stays empty if the user doesn't check
@@ -78,25 +79,26 @@ public class Constraints {
 
 	/**
 	 * Constructor that computes the GibbsEnergies from the incoming gibbs_eq
-	 * @param doc
+	 * @param originalDoc
 	 * @param gibbs_eq
 	 * @param c_eq
 	 * @throws Exception 
 	 */
-	public Constraints (SBMLDocument doc, double[] gibbs_eq, double[] c_eq) throws Exception {
-		this(doc, gibbs_eq, c_eq, false);
+	public Constraints (SBMLDocument originalDoc, double[] gibbs_eq, double[] c_eq) throws Exception {
+		this(originalDoc, gibbs_eq, c_eq, false);
 	}
 	
 	/**
+	 * Constructor that computes the GibbsEnergies from the incoming gibbs_eq and c_eq.
 	 * 
-	 * @param doc
+	 * @param originalDoc
 	 * @param gibbs_eq
 	 * @param c_eq
 	 * @param kiloJoule (true, if gibbsEnergies are given in [kJ/mol])
 	 * @throws Exception
 	 */
-	public Constraints (SBMLDocument doc, double[] gibbs_eq, double[] c_eq, boolean kiloJoule) throws Exception {
-		originalDocument = doc;
+	public Constraints (SBMLDocument originalDoc, double[] gibbs_eq, double[] c_eq, boolean kiloJoule) throws Exception {
+		originalDocument = originalDoc;
 		equilibriumConcentrations = c_eq;
 			
 		if (kiloJoule) {
@@ -109,7 +111,7 @@ public class Constraints {
 	}
 
 	/**
-	 * converts Gibbs values given in [kJ/mol] to [J/mol]
+	 * Converts Gibbs values given in [kJ/mol] to [J/mol].
 	 * 
 	 * @param gibbs_eq
 	 * @return adapted Gibbs energies
@@ -124,7 +126,7 @@ public class Constraints {
 
 
 	/**
-	 * Computes the Gibbs energies with the formula delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * ln(sum( N[j][i] * c_eq[j] ))
+	 * Computes the Gibbs energies with the formula delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * ln(sum( N[j][i] * c_eq[j] )).
 	 * @param equilibriumsGibbs in kJ/mol
 	 * @throws Exception 
 	 */
@@ -186,11 +188,11 @@ public class Constraints {
 	}
 
 	/**
-	 * computed Gibbs energies by 
+	 * Computed Gibbs energies by 
 	 * delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum( N[i][j] * ln(S[i]) )
 	 * @return the computed gibbsEnergies
 	 */
-	public double[] getGibbsEnergies() {
+	public double[] getComputedGibbsEnergies() {
 		return computedGibbsEnergies;
 	}
 

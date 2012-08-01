@@ -105,7 +105,7 @@ public class FluxMinimization extends TargetFunction {
 		this.N = N_int;
 
 		// get the computed Gibbs energies for the incoming Gibbs energies in steady state
-		this.computedGibbsEnergies = constraints.getGibbsEnergies();
+		this.computedGibbsEnergies = constraints.getComputedGibbsEnergies();
 
 		// get the error array
 		if (computedGibbsEnergies != null) {
@@ -168,12 +168,13 @@ public class FluxMinimization extends TargetFunction {
 	 * @throws Exception 
 	 */
 	private double[] computeL(SBMLDocument originalDocument) throws Exception {
+		// get the kernel (K_int) of this StoichiometricMatrix and transpose it
 		Matrix transposedK_int = FluxMinimizationUtils.SBMLDocToStoichMatrix(originalDocument).getConservationRelations();
-		// TODO sysout
-		System.out.println("K_int_row_dimension: " + transposedK_int.getRowDimension() + "    K_int_column_dimension: " + transposedK_int.getColumnDimension() + "   computedGibbsEnergies.length: " + computedGibbsEnergies.length);
+		
 		double[] vectorL = new double[computedGibbsEnergies.length];
 		for (int i = 0; i< computedGibbsEnergies.length; i++) {
 			for (int j = 0; j < transposedK_int.getRowDimension(); j++) {
+				// compute L = (K_int^T) * (Delta_r(gibbs))_int
 				vectorL[i] += transposedK_int.get(j,i) * computedGibbsEnergies[i];
 			}
 		}
@@ -231,8 +232,6 @@ public class FluxMinimization extends TargetFunction {
 	@Override
 	public double[] computeTargetFunctionForQuadraticProgramming() {
 		// the function to minimize is: ||J|| + lambda1*sum((c_i - c_eq)^2) + lambda2*||L|| + lambda3*||E|| + lambda4*||deltaG||
-
-		// TODO
 
 		// create the target vector 
 		double[] target = new double[fluxVector.length + 				// ||J||

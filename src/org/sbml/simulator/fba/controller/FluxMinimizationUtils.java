@@ -48,6 +48,18 @@ public class FluxMinimizationUtils {
 	protected static final String endingForBackwardReaction = "_rev";
 	
 	/**
+	 * List contains the eliminated reactions (the transport reactions).
+	 */
+	public static List<String> eliminatedReactions = new ArrayList<String>();
+	
+	/**
+	 * List contains the reversible reactions.
+	 */
+	public static List<String> reversibleReactions = new ArrayList<String>();
+	
+	
+	
+	/**
 	 * Gets a {@link StoichiometricMatrix} and gives back the corresponding flux-vector in Manhattan-Norm, without the given 
 	 * target fluxes.
 	 * 
@@ -248,10 +260,6 @@ public class FluxMinimizationUtils {
 		// return the new document
 		return revReacDoc;
 	}
-
-
-	public static List<String> eliminatedReactions = new ArrayList<String>();
-	public static List<String> reversibleReactions = new ArrayList<String>();
 
 
 	/**

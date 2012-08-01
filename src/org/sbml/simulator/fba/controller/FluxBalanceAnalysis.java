@@ -266,7 +266,7 @@ public class FluxBalanceAnalysis {
 
 		SBMLDocument modifiedDocument = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(constraints.originalDocument);
 		double[] steadyStateFluxes = targetFunction.getFluxVector();
-		double[] compGibbs = constraints.getGibbsEnergies();
+		double[] compGibbs = constraints.getComputedGibbsEnergies();
 		double[] r_max = constraints.computeR_max(steadyStateFluxes);
 		
 		for (int j = 0; j< counter[1]; j++) {
