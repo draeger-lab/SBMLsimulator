@@ -26,7 +26,6 @@ import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBO;
 import org.sbml.jsbml.Species;
 import org.sbml.jsbml.SpeciesReference;
-import org.sbml.simulator.stability.math.ConservationRelations;
 import org.sbml.simulator.stability.math.StabilityMatrix;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
@@ -57,10 +56,14 @@ public class FluxMinimizationUtils {
 	 */
 	public static List<String> reversibleReactions = new ArrayList<String>();
 
+	/**
+	 * 
+	 */
 	private static SBMLDocument systemBoundaryDocument;
 
-	private static SBMLDocument modDoc;
-
+	/**
+	 * 
+	 */
 	private static StoichiometricMatrix N_int_sys;
 	
 	
@@ -357,10 +360,15 @@ public class FluxMinimizationUtils {
 		SBMLDocument doc = modDoc.clone();
 		for (int row = 0; row < n_int.getRowDimension(); row++) {
 			if (sumOfRow(n_int.getRow(row)) > 0.0) {
-				//TODO: species and reactions adden, stoich = -1
-				// doc = blablaMethod(indexOSpecies, doc, stoichiometry)
+				//species and reactions adden, stoich = -1
+				int indexOfSpecies = row;
+				double stoichiometry = -1;
+				doc = addNewSpeciesAndReactionEntriesToDoc(indexOfSpecies, doc, stoichiometry);
 			} else if (sumOfRow(n_int.getRow(row)) < 0.0) {
-				//TODO: species and reactions adden, stoich = +1
+				//species and reactions adden, stoich = +1
+				int indexOfSpecies = row;
+				double stoichiometry = 1;
+				doc = addNewSpeciesAndReactionEntriesToDoc(indexOfSpecies, doc, stoichiometry);
 			}
 		}
 		return doc;
@@ -379,12 +387,37 @@ public class FluxMinimizationUtils {
 		return sum;
 	}
 	
-	private static SBMLDocument blablaMethod(int indexOfSpecies, SBMLDocument doc, double stoichiometry) {
+	
+	/**
+	 * 
+	 * @param indexOfSpecies
+	 * @param doc
+	 * @param stoichiometry
+	 * @return
+	 */
+	private static SBMLDocument addNewSpeciesAndReactionEntriesToDoc(int indexOfSpecies, SBMLDocument doc, double stoichiometry) {
 		SBMLDocument mod = doc.clone();
-		// TODO do the computation
+		// get species
+		Species systemBoundarySpec = mod.getModel().getSpecies(indexOfSpecies);
+		String sbs_id = systemBoundarySpec.getId();
+		
+		// new reaction
+		String sbr_id = "deg_r_" + indexOfSpecies;
+		Reaction systemBoundaryReaction = new Reaction(sbr_id);
+		systemBoundaryReaction.setMetaId(sbr_id);
+		
+		SpeciesReference specRef =  new SpeciesReference(systemBoundarySpec);
+		specRef.setMetaId("meta_" + sbs_id);
+		specRef.setStoichiometry(stoichiometry);
+		if (Math.signum(stoichiometry) == -1) {
+			systemBoundaryReaction.addReactant(specRef);
+		} else {
+			systemBoundaryReaction.addProduct(specRef);
+		}
+		systemBoundaryReaction.setReversible(false);
+		mod.getModel().addReaction(systemBoundaryReaction);
+		
 		return mod;
 	}
-	
-	
 	
 }
