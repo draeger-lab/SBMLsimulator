@@ -74,7 +74,7 @@ public class FluxBalanceAnalysisTest {
 		cu1.readGibbsFromFile(gibbsFile);
 		while(cu1.getGibbsArray() == null) {
 			//wait
-			System.out.print(".");
+			System.out.print("");
 //			logger.info("cu1.getGibbsArray() == null");
 		}
 		equilibriumsGibbsEnergies = cu1.getGibbsArray();
@@ -84,7 +84,7 @@ public class FluxBalanceAnalysisTest {
 		cu2.readConcentrationsFromFile(concFile);
 		while(cu2.getConcentrationsArray() == null) {
 			//wait
-			System.out.print(".");
+			System.out.print("");
 //			logger.info("cu2.getConcentrationsArray() == null");
 		}
 		equilibriumsConcentrations = cu2.getConcentrationsArray();
@@ -97,27 +97,29 @@ public class FluxBalanceAnalysisTest {
 //		fba.setLambda2(0);
 //		fba.setLambda3(0);
 //		fba.setLambda4(0);
-		fba.setConstraintJG(true);
-		fba.setConstraintJ_rmaxG(true);
+		fba.setConstraintJG(false);
+		fba.setConstraintJ_rmaxG(false);
+		fba.setConstraintJ0(false);
 		fba.setCplexIterations(4000);
 		fba.solve();
 		
 		//print flux solution:
 		double[] fluxSolution = fba.solutionFluxVector;
 		System.out.println("solutions for the fluxes: ");
-		SBMLDocument doc = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(originalSBMLDoc);
-		Model model = doc.getModel();
+		SBMLDocument modifiedDocument = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(originalSBMLDoc);
+		Model modModel = modifiedDocument.getModel();
 		for (int i = 0; i < fluxSolution.length; i++) {
-			System.out.println(model.getReaction(i).getId() + "   " + fluxSolution[i]);
+			System.out.println(modModel.getReaction(i).getId() + "   " + fluxSolution[i]);
 		}
 		
-		Map<Species, Double> fluxSum = new HashMap<Species, Double>();
+		System.out.println("#####################################");
 		// TODO is sum of all in- and outgoing fluxes are 0?
-		for (int i = 0; i< model.getSpeciesCount(); i++ ) {
-			fluxSum.put(model.getSpecies(i), 0.0);
+		Map<Species, Double> fluxSum = new HashMap<Species, Double>();
+		for (int i = 0; i< modModel.getSpeciesCount(); i++ ) {
+			fluxSum.put(modModel.getSpecies(i), 0.0);
 		}
-		for (int j = 0; j < model.getReactionCount(); j++) {
-			Reaction r = model.getReaction(j);
+		for (int j = 0; j < modModel.getReactionCount(); j++) {
+			Reaction r = modModel.getReaction(j);
 			ListOf<SpeciesReference> substrateList = r.getListOfReactants();
 			for (SpeciesReference sr : substrateList) {
 				double helper = fluxSum.get(sr.getSpeciesInstance());
@@ -143,18 +145,18 @@ public class FluxBalanceAnalysisTest {
 		}
 		System.out.println("\n#####################################");
 		System.out.println("sum of the in- and outgoing fluxes (incl. stoichiometry):");
-		for (int i = 0; i< model.getSpeciesCount(); i++ ) {
-			System.out.println(model.getSpecies(i) + " : " + fluxSum.get(model.getSpecies(i)));
+		for (int i = 0; i< modModel.getSpeciesCount(); i++ ) {
+			System.out.println(modModel.getSpecies(i) + " : " + fluxSum.get(modModel.getSpecies(i)));
 		}
 		
 		
-//		System.out.println("-----------------");
-//		//print conc solution:
-//		double[] concSolution = fba.solution_concentrations;
-//		System.out.println("solutions for the concs: ");
-//		for (int i = 0; i < concSolution.length; i++) {
-//			System.out.println(sbml.getModel().getSpecies(i).getId() + "   " + concSolution[i]);
-//		}
+		System.out.println("-----------------");
+		//print conc solution:
+		double[] concSolution = fba.solutionConcentrations;
+		System.out.println("solutions for the concs: ");
+		for (int i = 0; i < concSolution.length; i++) {
+			System.out.println(originalSBMLDoc.getModel().getSpecies(i).getId() + "   " + concSolution[i]);
+		}
 		
 	}
 
