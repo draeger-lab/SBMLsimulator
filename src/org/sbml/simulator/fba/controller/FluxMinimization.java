@@ -91,18 +91,18 @@ public class FluxMinimization extends TargetFunction {
 	 *
 	 * @param originalDocument
 	 * @param constraints
-	 * @param N (stoichiometric matrix)
+	 * @param N_int (stoichiometric matrix)
 	 * @param targetFluxes, important for computing the flux vector
 	 * @throws Exception 
 	 */
-	public FluxMinimization(SBMLDocument originalDocument, Constraints constraints, StoichiometricMatrix N, String[] targetFluxes) throws Exception {
+	public FluxMinimization(SBMLDocument originalDocument, Constraints constraints, StoichiometricMatrix N_int, String[] targetFluxes) throws Exception {
 
 		// set the fields of this object
 		this.oriDocument = originalDocument;
-		this.fluxVector = FluxMinimizationUtils.computeFluxVector(N, targetFluxes, originalDocument);
+		this.fluxVector = FluxMinimizationUtils.computeFluxVector(N_int, targetFluxes, originalDocument);
 		setC_eq(constraints.getEquilibriumConcentrations());
 
-		this.N = N;
+		this.N = N_int;
 
 		// get the computed Gibbs energies for the incoming Gibbs energies in steady state
 		this.computedGibbsEnergies = constraints.getGibbsEnergies();
