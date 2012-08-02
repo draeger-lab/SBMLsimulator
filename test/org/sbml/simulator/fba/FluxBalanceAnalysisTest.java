@@ -46,6 +46,7 @@ public class FluxBalanceAnalysisTest {
 	
 	static double[] equilibriumsConcentrations = null;
 	static double[] equilibriumsGibbsEnergies = null;
+	static double[] systemBoundaries = {Double.NaN,Double.NaN,Double.NaN,Double.NaN,Double.NaN,Double.NaN,1,-1};
 	static String[] targetFluxes = null;
 	static SBMLDocument originalSBMLDoc = null;
 	static Constraints constraints = null;
@@ -61,8 +62,8 @@ public class FluxBalanceAnalysisTest {
 		
 		logger.info("document read");
 		//ConstraintsUtils:
-		CSVDataConverter cu1 = new CSVDataConverter(originalSBMLDoc);
-		CSVDataConverter cu2 = new CSVDataConverter(originalSBMLDoc);
+		CSVDataConverter cu1 = new CSVDataConverter(originalSBMLDoc, systemBoundaries);
+		CSVDataConverter cu2 = new CSVDataConverter(originalSBMLDoc, systemBoundaries);
 		
 		
 		
@@ -70,7 +71,7 @@ public class FluxBalanceAnalysisTest {
 		File concFile = new File(args[2]);
 		
 		logger.info("will read gibbs");
-		// read gibbs and concentrations
+		// read gibbs energies
 		cu1.readGibbsFromFile(gibbsFile);
 		while(cu1.getGibbsArray() == null) {
 			//wait
@@ -78,9 +79,8 @@ public class FluxBalanceAnalysisTest {
 //			logger.info("cu1.getGibbsArray() == null");
 		}
 		equilibriumsGibbsEnergies = cu1.getGibbsArray();
-
 		
-		
+		// read concentrations
 		cu2.readConcentrationsFromFile(concFile);
 		while(cu2.getConcentrationsArray() == null) {
 			//wait
@@ -88,10 +88,24 @@ public class FluxBalanceAnalysisTest {
 //			logger.info("cu2.getConcentrationsArray() == null");
 		}
 		equilibriumsConcentrations = cu2.getConcentrationsArray();
-
+		
+		// TODO read system boundaries
+		/*
+		 * initialize a system boundary array covering all species with value Double.NaN
+		 * NaN stands for case if species is not at the system boundary
+		 * fill with following:
+		 * -1  if -HC00083_i : case if species can only consumed 
+		 * +1  if +HC00083_i : case if species can only be produced
+		 *  0  if =HC00083_i : case if species can be consumed or produced
+		 * 
+		 * put it in the field "systemBoundaries" of this class
+		 * 
+		 */
+		
+		
 
 		//create FluxBalanceAnalysis object and solve it:
-		constraints =  new Constraints(originalSBMLDoc, equilibriumsGibbsEnergies, equilibriumsConcentrations, true);
+		constraints =  new Constraints(originalSBMLDoc, equilibriumsGibbsEnergies, equilibriumsConcentrations, systemBoundaries, true);
 		FluxBalanceAnalysis fba = new FluxBalanceAnalysis(originalSBMLDoc, constraints, targetFluxes);
 //		fba.setLambda1(0);
 //		fba.setLambda2(0);
@@ -103,17 +117,17 @@ public class FluxBalanceAnalysisTest {
 		fba.setCplexIterations(4000);
 		fba.solve();
 		
+		System.out.println();
 		//print flux solution:
 		double[] fluxSolution = fba.solutionFluxVector;
-		System.out.println("solutions for the fluxes: ");
-		SBMLDocument modifiedDocument = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(originalSBMLDoc);
+		System.out.println("--------solution for the fluxes:--------");
+		SBMLDocument modifiedDocument = FluxMinimizationUtils.getExpandedDocument(originalSBMLDoc, systemBoundaries);
 		Model modModel = modifiedDocument.getModel();
 		for (int i = 0; i < fluxSolution.length; i++) {
 			System.out.println(modModel.getReaction(i).getId() + "   " + fluxSolution[i]);
 		}
 		
-		System.out.println("#####################################");
-		// TODO is sum of all in- and outgoing fluxes are 0?
+		// print sum of all in- and outgoing fluxes are 0?
 		Map<Species, Double> fluxSum = new HashMap<Species, Double>();
 		for (int i = 0; i< modModel.getSpeciesCount(); i++ ) {
 			fluxSum.put(modModel.getSpecies(i), 0.0);
@@ -143,19 +157,27 @@ public class FluxBalanceAnalysisTest {
 				fluxSum.put(sr.getSpeciesInstance(), helper);
 			}
 		}
-		System.out.println("\n#####################################");
-		System.out.println("sum of the in- and outgoing fluxes (incl. stoichiometry):");
+		System.out.println();
+		System.out.println("--------sum of the in- and outgoing fluxes (incl. stoichiometry)--------");
 		for (int i = 0; i< modModel.getSpeciesCount(); i++ ) {
 			System.out.println(modModel.getSpecies(i) + " : " + fluxSum.get(modModel.getSpecies(i)));
 		}
 		
-		
-		System.out.println("-----------------");
+		System.out.println();
 		//print conc solution:
 		double[] concSolution = fba.solutionConcentrations;
-		System.out.println("solutions for the concs: ");
+		System.out.println("--------solution for the concentrations:--------");
 		for (int i = 0; i < concSolution.length; i++) {
 			System.out.println(originalSBMLDoc.getModel().getSpecies(i).getId() + "   " + concSolution[i]);
+		}
+		
+		System.out.println();
+		System.out.println("--------species at the system boundaries----------");
+		double[] sb = constraints.getSystemBoundaries();
+		for (int i = 0; i < sb.length; i++){
+			if (!Double.isNaN(sb[i])) {
+				System.out.println(originalSBMLDoc.getModel().getSpecies(i));
+			}
 		}
 		
 	}

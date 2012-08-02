@@ -75,9 +75,20 @@ public class CSVDataConverter {
 	/**
 	 * Constructor
 	 * @param originalDoc
+	 * @throws Exception 
 	 */
-	public CSVDataConverter(SBMLDocument originalDoc) {
-		this.modifiedDocument = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(originalDoc);
+	public CSVDataConverter(SBMLDocument originalDoc) throws Exception {
+		this.modifiedDocument = FluxMinimizationUtils.getExpandedDocument(originalDoc);
+	}
+	
+	/**
+	 * 
+	 * @param originalDoc
+	 * @param systemBoundaries
+	 * @throws Exception
+	 */
+	public CSVDataConverter(SBMLDocument originalDoc, double[] systemBoundaries) throws Exception {
+		this.modifiedDocument = FluxMinimizationUtils.getExpandedDocument(originalDoc, systemBoundaries);
 	}
 
 	/**
