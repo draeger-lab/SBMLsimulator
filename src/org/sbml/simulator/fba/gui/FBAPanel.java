@@ -277,8 +277,9 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 
 	/**
 	 * @param gibbsFile the gibbsFile to set
+	 * @throws Exception 
 	 */
-	public void setGibbsFile(File gibbsFile) {
+	public void setGibbsFile(File gibbsFile) throws Exception {
 		this.gibbsFile = gibbsFile;
 		startFBA();
 	}
@@ -307,8 +308,9 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 
 	/**
 	 * start the flux balance analysis
+	 * @throws Exception 
 	 */
-	public void startFBA() {
+	public void startFBA() throws Exception {
 		checkPreferences();
 		try {
 			CSVDataConverter csvConverterGibbs = new CSVDataConverter(currentDoc);
@@ -325,7 +327,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 					//wait while reading
 				}
 			}
-			Constraints c = new Constraints(currentDoc, csvConverterGibbs.getGibbsArray(), csvConverterConc.getConcentrationsArray());
+			Constraints c = new Constraints(currentDoc, csvConverterGibbs.getGibbsArray(), csvConverterConc.getConcentrationsArray(), null);
 			fba = new FluxBalanceAnalysis(currentDoc, c, targetFluxes);
 
 			//set constraints and iterations

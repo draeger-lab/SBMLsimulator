@@ -100,9 +100,10 @@ public class ChartPanel extends JPanel{
 	/**
 	 * Sets the concentrations and creates the table of this content
 	 * @param solution_concentrations
+	 * @throws Exception 
 	 */
-	public void setConcentrations(double[] solution_concentrations) {
-		SBMLDocument doc_new = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(doc);
+	public void setConcentrations(double[] solution_concentrations) throws Exception {
+		SBMLDocument doc_new = FluxMinimizationUtils.getExpandedDocument(doc);
 		if (solution_concentrations != null) {
 			String[] speciesId = new String[doc_new.getModel().getSpeciesCount()];
 			for (int i = 0; i < doc_new.getModel().getSpeciesCount(); i++) {
@@ -149,9 +150,10 @@ public class ChartPanel extends JPanel{
 	/**
 	 * Sets the fluxes and creates the table of fluxes, if the incoming array is not null.
 	 * @param solution_fluxVector
+	 * @throws Exception 
 	 */
-	public void setFluxes(double[] solution_fluxVector) {
-		SBMLDocument doc_new = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(doc);
+	public void setFluxes(double[] solution_fluxVector) throws Exception {
+		SBMLDocument doc_new = FluxMinimizationUtils.getExpandedDocument(doc);
 		String[] reactionIds = new String[doc_new.getModel().getReactionCount()];
 		for (int i = 0; i < reactionIds.length; i++) {
 			reactionIds[i] = doc_new.getModel().getReaction(i).getId();

@@ -118,7 +118,7 @@ public class FluxBalanceAnalysis {
 	 * @throws Exception
 	 */
 	public FluxBalanceAnalysis(SBMLDocument originalDocument) throws Exception {
-		this(new FluxMinimization(originalDocument, new Constraints(originalDocument), FluxMinimizationUtils.SBMLDocToStoichMatrix(originalDocument), null), new Constraints(originalDocument));
+		this(new FluxMinimization(originalDocument, new Constraints(originalDocument), FluxMinimizationUtils.getExpandedStoichiometricMatrix(originalDocument), null), new Constraints(originalDocument));
 	}
 
 
@@ -128,13 +128,15 @@ public class FluxBalanceAnalysis {
 	 * 
 	 * @param targetfunc
 	 * @param constraints
+	 * @throws Exception 
 	 */
-	public FluxBalanceAnalysis(TargetFunction targetfunc, Constraints constraints) {
+	public FluxBalanceAnalysis(TargetFunction targetfunc, Constraints constraints) throws Exception {
 		super();
 		this.targetFunction = targetfunc;
 		this.constraints = constraints;
-		SBMLDocument modifiedDocument = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(constraints.originalDocument);
-		int target_array_length = modifiedDocument.getModel().getReactionCount()*4;
+		SBMLDocument modDoc = FluxMinimizationUtils.getExpandedDocument(constraints.originalDocument);
+		int[] counter = targetFunction.getCounterArray();
+		int target_array_length = modDoc.getModel().getReactionCount()*4;
 		this.target = new double[target_array_length];
 		
 		lb = new double[target_array_length + targetFunction.getConcentrations().length];
@@ -144,13 +146,12 @@ public class FluxBalanceAnalysis {
 		concentrations = targetFunction.getConcentrations();
 		
 		// initialize default upper bounds (ub) and lower bounds (lb) for the variables in cplex-call
-		int[] counter = targetFunction.getCounterArray();
 		// counter[1] contains the length of flux vector
 		for (int i = 0; i< counter[1]; i++) {
-			lb[i]= Double.MIN_VALUE; 
-			ub[i] = 100000;
-//			lb[i] = 1.0;
-//			ub[i] = 1.0;
+//			lb[i]= Double.MIN_VALUE; 
+//			ub[i] = 100000;
+			lb[i] = 1.0;
+			ub[i] = 1.0;
 		}
 		// everything between counter[1] and the length of the target-array is: L-vector, Errorarray and computedGibbsArray
 		for (int lAndE = counter[1]; lAndE < counter[3]; lAndE++) {
@@ -187,7 +188,7 @@ public class FluxBalanceAnalysis {
 	 * @return double[]
 	 * @throws IloException 
 	 */
-	public double[] solve() throws IloException {
+	public double[] solve() throws Exception {
 		target = targetFunction.computeTargetFunctionForQuadraticProgramming();
 		return solveWithQuadraticProgramming();
 	}
@@ -196,9 +197,9 @@ public class FluxBalanceAnalysis {
 	/**
 	 * Calls CPLEX to solve the problem with quadratic programming and sets in the end
 	 * the computed solutions for concentrations and fluxes.
-	 * @throws IloException 
+	 * @throws Exception 
 	 */
-	private double[] solveWithQuadraticProgramming() throws IloException {
+	private double[] solveWithQuadraticProgramming() throws Exception {
 		// create the cplex solver
 		IloCplex cplex = new IloCplex();
 
@@ -267,7 +268,9 @@ public class FluxBalanceAnalysis {
 
 		//CONSTRAINTS
 
-		SBMLDocument modifiedDocument = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(constraints.originalDocument);
+		SBMLDocument modifiedDocument = FluxMinimizationUtils.getExpandedDocument(constraints.originalDocument, constraints.getSystemBoundaries());
+		
+		// TODO do this for all steady state fluxes...
 		double[] steadyStateFluxes = targetFunction.getFluxVector();
 		double[] compGibbs = constraints.getComputedGibbsEnergies();
 		double[] r_max = constraints.computeR_max(steadyStateFluxes);

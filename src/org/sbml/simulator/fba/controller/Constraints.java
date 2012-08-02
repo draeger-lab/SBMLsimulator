@@ -34,6 +34,11 @@ import org.sbml.simulator.stability.math.StoichiometricMatrix;
 public class Constraints {
 
 	/**
+	 * Contains the opened {@link SBMLDocument}
+	 */
+	public SBMLDocument originalDocument;
+
+	/**
 	 * Contains the Gibbs energies in steady state
 	 */
 	private double[] equilibriumGibbsEnergies;
@@ -42,11 +47,6 @@ public class Constraints {
 	 * Contains the computed Gibbs energies
 	 */
 	private double[] computedGibbsEnergies;
-
-	/**
-	 * Contains the opened {@link SBMLDocument}
-	 */
-	public SBMLDocument originalDocument;
 
 	/**
 	 * Contains the concentrations in equilibrium / steady state
@@ -62,6 +62,15 @@ public class Constraints {
 	 * The ideal gas constant R in J/(mol * K)
 	 */
 	private double R = 8.3144621;
+	
+	/**
+	 * contains the species specific information whether the species belongs to the system boundary or not.
+	 * NaN if species is not at the system boundary
+	 * -1  if -HC00083_i : case if species can only be consumed 
+	 * +1  if +HC00083_i : case if species can only be produced
+	 *  0  if =HC00083_i : case if species can be consumed or produced
+	 */
+	private double[] systemBoundaries;
 
 	
 	/**
@@ -73,7 +82,7 @@ public class Constraints {
 	 * @throws Exception 
 	 */
 	public Constraints (SBMLDocument doc) throws Exception {
-		this(doc, null, null);
+		this(doc, null, null, null);
 	}
 
 
@@ -82,10 +91,11 @@ public class Constraints {
 	 * @param originalDoc
 	 * @param gibbs_eq
 	 * @param c_eq
+	 * @param systemBoundaries
 	 * @throws Exception 
 	 */
-	public Constraints (SBMLDocument originalDoc, double[] gibbs_eq, double[] c_eq) throws Exception {
-		this(originalDoc, gibbs_eq, c_eq, false);
+	public Constraints (SBMLDocument originalDoc, double[] gibbs_eq, double[] c_eq, double[] systemBoundaries) throws Exception {
+		this(originalDoc, gibbs_eq, c_eq, systemBoundaries, false);
 	}
 	
 	/**
@@ -94,12 +104,14 @@ public class Constraints {
 	 * @param originalDoc
 	 * @param gibbs_eq
 	 * @param c_eq
+	 * @param systemBoundaries
 	 * @param kiloJoule (true, if gibbsEnergies are given in [kJ/mol])
 	 * @throws Exception
 	 */
-	public Constraints (SBMLDocument originalDoc, double[] gibbs_eq, double[] c_eq, boolean kiloJoule) throws Exception {
+	public Constraints (SBMLDocument originalDoc, double[] gibbs_eq, double[] c_eq, double[] systemBoundaries, boolean kiloJoule) throws Exception {
 		originalDocument = originalDoc;
 		equilibriumConcentrations = c_eq;
+		this.systemBoundaries = systemBoundaries;
 			
 		if (kiloJoule) {
 			equilibriumGibbsEnergies = getEquillibriumGibbsEnergiesfromkKiloJoule(gibbs_eq);
@@ -134,8 +146,8 @@ public class Constraints {
 		if ((equilibriumsGibbs != null) && (this.originalDocument != null) && (equilibriumConcentrations != null)) {
 			
 			// initialize
-			StoichiometricMatrix N = FluxMinimizationUtils.SBMLDocToStoichMatrix(originalDocument);
-			SBMLDocument modifiedDocument = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(originalDocument);
+			StoichiometricMatrix N = FluxMinimizationUtils.getExpandedStoichiometricMatrix(originalDocument);
+			SBMLDocument modifiedDocument = FluxMinimizationUtils.getExpandedDocument(originalDocument, systemBoundaries);
 			computedGibbsEnergies = new double[equilibriumsGibbs.length];
 			Model modModel = modifiedDocument.getModel();
 			
@@ -153,6 +165,11 @@ public class Constraints {
 				computedGibbsEnergies[j] = (equilibriumsGibbs[j]) + (R*T*sum);
 			}
 		}
+		
+		for (int i = (computedGibbsEnergies.length - systemBoundaries.length); i < computedGibbsEnergies.length; i++) {
+			computedGibbsEnergies[i] = 0.0; // for system boundary added reactions
+		}
+		
 		// return the computed Gibbs energies
 		return computedGibbsEnergies;
 	}
@@ -196,6 +213,22 @@ public class Constraints {
 		return computedGibbsEnergies;
 	}
 
+	/**
+	 * 
+	 * @param systemBoundaries
+	 */
+	public void setSystemBoundaries(double[] systemBoundaries) {
+		this.systemBoundaries = systemBoundaries;
+	}
+	
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public double[] getSystemBoundaries() {
+		return systemBoundaries;
+	}
 	
 	/**
 	 * Computes the maximum of J_j / G_j for every reaction j in the model

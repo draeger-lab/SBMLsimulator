@@ -85,7 +85,7 @@ public class ConstraintsTest {
 		
 		System.out.println("the computed Gibbs energies:");
 		for (int i = 0; i < constraints.getComputedGibbsEnergies().length; i++) {
-			System.out.print(FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(sbml).getModel().getReaction(i).getId() + "  ");
+			System.out.print(FluxMinimizationUtils.getExpandedDocument(sbml).getModel().getReaction(i).getId() + "  ");
 			System.out.print(constraints.getComputedGibbsEnergies()[i]);
 			System.out.println();
 		}

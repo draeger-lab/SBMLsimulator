@@ -796,8 +796,9 @@ PropertyChangeListener {
 
 	/**
 	 * Visualize the FluxBalanceAnalysis-Panel
+	 * @throws Exception 
 	 */
-	public void startFBA() {
+	public void startFBA() throws Exception {
 		if (simPanel.getTabbedPane().getTabCount() < 6) {
 			FBAPanel fbaPanel = new FBAPanel(simPanel.getModel().getSBMLDocument());
 			fbaPanel.setTheFirstCall(true);

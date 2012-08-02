@@ -145,7 +145,7 @@ public class FluxMinimization extends TargetFunction {
 	 * @throws Exception 
 	 */
 	public FluxMinimization(SBMLDocument doc, double[] c_eq, double[] gibbs_eq, String[] targetFluxes) throws Exception {
-		this(doc,new Constraints(doc, gibbs_eq, c_eq),FluxMinimizationUtils.SBMLDocToStoichMatrix(doc), targetFluxes);
+		this(doc,new Constraints(doc, gibbs_eq, c_eq, null),FluxMinimizationUtils.getExpandedStoichiometricMatrix(doc), targetFluxes);
 	}
 
 	/**
@@ -156,7 +156,7 @@ public class FluxMinimization extends TargetFunction {
 	 * @throws Exception
 	 */
 	public FluxMinimization(SBMLDocument doc, Constraints constraints, String[] targetFluxes) throws Exception {
-		this(doc, constraints, FluxMinimizationUtils.SBMLDocToStoichMatrix(doc), targetFluxes);
+		this(doc, constraints, FluxMinimizationUtils.getExpandedStoichiometricMatrix(doc), targetFluxes);
 	}
 
 	/**
@@ -169,10 +169,12 @@ public class FluxMinimization extends TargetFunction {
 	 */
 	private double[] computeL(SBMLDocument originalDocument) throws Exception {
 		// get the kernel (K_int) of this StoichiometricMatrix and transpose it
-		Matrix transposedK_int = FluxMinimizationUtils.SBMLDocToStoichMatrix(originalDocument).getConservationRelations();
-		
+		StoichiometricMatrix N_int_sys = FluxMinimizationUtils.getExpandedStoichiometricMatrix(originalDocument);
+		Matrix transposedK_int = new StoichiometricMatrix(N_int_sys.transpose().getArray(), N_int_sys.getColumnDimension(), N_int_sys.getRowDimension()).getConservationRelations();
 		double[] vectorL = new double[computedGibbsEnergies.length];
-		for (int i = 0; i< computedGibbsEnergies.length; i++) {
+//		int k = 0;
+		for (int i = 0; i < vectorL.length; i++) {
+//			k = FluxMinimizationUtils.remainingList.get(i); // k-th element of the computed Gibbs energies
 			for (int j = 0; j < transposedK_int.getRowDimension(); j++) {
 				// compute L = (K_int^T) * (Delta_r(gibbs))_int
 				vectorL[i] += transposedK_int.get(j,i) * computedGibbsEnergies[i];
