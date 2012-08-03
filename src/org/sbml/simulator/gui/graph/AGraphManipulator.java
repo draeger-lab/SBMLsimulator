@@ -186,8 +186,8 @@ public abstract class AGraphManipulator implements IGraphManipulator{
             return (yLowerLimit+yUpperLimit) / 2.0;
         }
         
-        return ((1 / (xUpperLimit - xLowerLimit)) * (value - xLowerLimit))
-                * (yUpperLimit - yLowerLimit) + yLowerLimit;
+        return ((yUpperLimit - yLowerLimit) / (xUpperLimit - xLowerLimit))
+                * (value - xLowerLimit) + yLowerLimit;
     }
     
     /* (non-Javadoc)
