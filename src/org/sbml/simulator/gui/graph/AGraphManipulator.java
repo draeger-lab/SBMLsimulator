@@ -163,31 +163,28 @@ public abstract class AGraphManipulator implements IGraphManipulator{
     }
 
     /**
-     * Maps the given value which has to be within [xLowerLimit, xUpperLimit] to
-     * codomain [yLowerLimit, yUpperLimit]. This is done implicit by a linear
-     * regression through the points (xLowerLimit, yLowerLimit) and
-     * (xUpperLimit, yUpperLimit). If xUpperLimit < xLowerLimit or xUpperLimit
-     * equal to xLowerLimit (e.g. only one timepoint given) than a point in the
-     * middle of yLowerLimit and yUpperLimit will be returned.
+     * Maps the given value which has to be within [x1, x2] to codomain [y1,
+     * y2]. This is done implicit by a linear regression through the points (x1,
+     * y1) and (x2, y2). If x2 <= x1 (e.g. only one timepoint given) than a
+     * point in the middle of y1 and y2 will be returned.
      * 
-     * @param xLowerLimit
-     * @param xUpperLimit
-     * @param yLowerLimit
-     * @param yUpperLimit
-     * @param value
+     * @param x1
+     * @param x2
+     * @param y1
+     * @param y2
+     * @param v
      * @return
      */
-    protected double adjustValue(double xLowerLimit, double xUpperLimit,
-            double yLowerLimit, double yUpperLimit, double value) {
-        if ((xUpperLimit == xLowerLimit) || (xUpperLimit < xLowerLimit)) {
+    protected double adjustValue(double x1, double x2, double y1, double y2,
+            double v) {
+        if (x2 <= x1) {
             /*
              * No proper limits given, return value inbetween codomain.
              */
-            return (yLowerLimit+yUpperLimit) / 2.0;
+            return (y1+y2) / 2.0;
         }
         
-        return ((yUpperLimit - yLowerLimit) / (xUpperLimit - xLowerLimit))
-                * (value - xLowerLimit) + yLowerLimit;
+        return ((y2 - y1) / (x2 - x1)) * (v - x1) + y1;
     }
     
     /* (non-Javadoc)
