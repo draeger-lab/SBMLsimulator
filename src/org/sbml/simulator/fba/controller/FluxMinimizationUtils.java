@@ -79,9 +79,19 @@ public class FluxMinimizationUtils {
 	private static StoichiometricMatrix N_int_sys;
 	
 	/**
-	 * list which contains the indices of the remaining rows
+	 * contains the indices of the remaining rows, which are not only zeros
 	 */
-	public static List<Integer> remainingList = new LinkedList<Integer>();; 
+	public static List<Integer> remainingList = new LinkedList<Integer>();
+
+	/**
+	 * contains the system boundaries array
+	 */
+	private static double[] systemBoundaries; 
+			
+	/**
+	 * contains the steadyStateMatrix
+	 */
+	private static StabilityMatrix steadyStateMatrix; 
 	
 	/**
 	 * Gets a {@link StoichiometricMatrix} and gives back the corresponding flux-vector in Manhattan-Norm, without the given 
@@ -96,16 +106,13 @@ public class FluxMinimizationUtils {
 		StoichiometricMatrix eliminateZeroRows = eliminateZeroRows(N_int_sys);
 		StoichiometricMatrix NwithoutZeroRows = new StoichiometricMatrix(eliminateZeroRows.getArray(), eliminateZeroRows.getRowDimension(), eliminateZeroRows.getColumnDimension());
 		NwithoutZeroRows.getReducedMatrix();
-		StabilityMatrix steadyStateMatrix = ConservationRelations.calculateConsRelations(new StoichiometricMatrix(NwithoutZeroRows.transpose().getArray(),NwithoutZeroRows.getColumnDimension(),NwithoutZeroRows.getRowDimension()));
+		steadyStateMatrix = ConservationRelations.calculateConsRelations(new StoichiometricMatrix(NwithoutZeroRows.transpose().getArray(),NwithoutZeroRows.getColumnDimension(),NwithoutZeroRows.getRowDimension()));
 //		StabilityMatrix steadyStateMatrix = (new StoichiometricMatrix(NwithoutZeroRows.transpose().getArray(),NwithoutZeroRows.getColumnDimension(),NwithoutZeroRows.getRowDimension())).getConservationRelations();
 		double[] fluxVector = new double[steadyStateMatrix.getColumnDimension()];
 
 		//TODO sysouts entfernen
 		System.out.println();
 		System.out.println("N.getColumnDimension() " + N_int_sys.getColumnDimension() + "   N.getRowDimension() " + N_int_sys.getRowDimension() + ", steadyStateMatrix.getColumnDimension() " + steadyStateMatrix.getColumnDimension() + "   steadyStateMatrix.getRowDimension() " +  steadyStateMatrix.getRowDimension());
-		
-		System.out.println("--------steady state matrix--------");
-		System.out.println(steadyStateMatrix.toString());
 		
 		// fill the fluxVector
 		for (int column = 0; column < steadyStateMatrix.getColumnDimension(); column++) {
@@ -398,6 +405,35 @@ public class FluxMinimizationUtils {
 	
 	/**
 	 * 
+	 * @return the steady state matrix
+	 */
+	public static StabilityMatrix getSteadyStateMatrix() {
+		return steadyStateMatrix;
+	}
+	
+	/**
+	 * 
+	 * @return the system boundaries
+	 */
+	public static double[] getSystemBoundaries() {
+		return systemBoundaries;
+	}
+	
+	/**
+	 * 
+	 * @param doc
+	 * @return the system boundaries created from the stoichiometric matrix
+	 * @throws Exception 
+	 */
+	public static double[] getSystemBoundaries(SBMLDocument doc) throws Exception {
+		if (systemBoundaries == null) {
+			expandDocument(doc);
+		}
+		return systemBoundaries;
+	}
+	
+	/**
+	 * 
 	 * @param originalDocument
 	 * @throws Exception
 	 */
@@ -434,6 +470,7 @@ public class FluxMinimizationUtils {
 		for (int row = 0; row < n_int.getRowDimension(); row++) {
 			systemBoundaries[row] = -(sumOfRowOrCol(n_int.getRow(row)));
 		}
+		FluxMinimizationUtils.systemBoundaries = systemBoundaries;
 		doc = addNewReactionEntriesToDoc(systemBoundaries, doc);
 		return doc;
 	}

@@ -41,15 +41,24 @@ public class CSVDataConverter {
 	public static final String KEY_GIBBS = "gibbs";
 
 	/**
-	 * Contains the information about the sort of the file:
-	 * true if it is a Gibbs-file, false if it's not.
+	 * Containing the corresponding {@link SBMLDocument}.
+	 */
+	private SBMLDocument modifiedDocument;
+
+	/**
+	 * true if a gibbs file is given
 	 */
 	private Boolean isGibbsFile;
 
 	/**
-	 * Containing the corresponding {@link SBMLDocument}.
+	 * true if a concentration file is given
 	 */
-	private SBMLDocument modifiedDocument;
+	private Boolean isConcentrationFile;
+	
+	/**
+	 * true if a system boundaries file is given
+	 */
+	private Boolean isSystemBoundariesFile;
 
 	/**
 	 * Containing the read Gibbs energies.
@@ -61,6 +70,10 @@ public class CSVDataConverter {
 	 */
 	private double[] concentrationsArray;
 
+	/**
+	 * Containing the species indices of species at the system boundaries
+	 */
+	private double[] systemBoundariesArray;
 
 	/**
 	 * Containing the reader to read the csv files
@@ -68,27 +81,48 @@ public class CSVDataConverter {
 	private CSVDataReader reader;
 
 	/**
-	 * Containing the information if it is a concentration file that should be read.
-	 */
-	private Boolean isConcentrationFile;
-
-	/**
-	 * Constructor
+	 * Call this constructor if no system boundaries file is given, 
+	 * for the automated creation of the system boundaries.
 	 * @param originalDoc
 	 * @throws Exception 
 	 */
 	public CSVDataConverter(SBMLDocument originalDoc) throws Exception {
 		this.modifiedDocument = FluxMinimizationUtils.getExpandedDocument(originalDoc);
+		this.systemBoundariesArray = FluxMinimizationUtils.getSystemBoundaries(originalDoc);
 	}
 	
 	/**
-	 * 
+	 * Call this constructor for the creation of a the systems boundaries array.
+	 * @param originalDoc
+	 * @param systemBoundariesFile
+	 */
+	public CSVDataConverter(SBMLDocument originalDoc, boolean systemBoundariesFile) {
+		this.modifiedDocument = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(originalDoc);
+	}
+	
+	/**
+	 * Call this constructor for the creation of the gibbs and the concentration array.
 	 * @param originalDoc
 	 * @param systemBoundaries
 	 * @throws Exception
 	 */
 	public CSVDataConverter(SBMLDocument originalDoc, double[] systemBoundaries) throws Exception {
 		this.modifiedDocument = FluxMinimizationUtils.getExpandedDocument(originalDoc, systemBoundaries);
+	}
+
+	/**
+	 * Reads out the Gibbs energies from a given file and writes it in the array gibbsEnergies
+	 *
+	 * @param file
+	 * @return gibbsArray
+	 * @throws Exception 
+	 */
+	public double[] readGibbsFromFile(File file) throws Exception {
+		this.isGibbsFile = true;
+		this.isConcentrationFile = null;
+		this.isSystemBoundariesFile = null;
+		readFromFile(file);
+		return gibbsArray;
 	}
 
 	/**
@@ -101,23 +135,23 @@ public class CSVDataConverter {
 	public double[] readConcentrationsFromFile (File file) throws Exception {
 		this.isConcentrationFile = true;
 		this.isGibbsFile = null;
+		this.isSystemBoundariesFile = null;
 		readFromFile(file);
 		return concentrationsArray;
 	}
 
-
 	/**
-	 * Reads out the Gibbs energies from a given file and writes it in the array gibbsEnergies
-	 *
+	 * 
 	 * @param file
-	 * @return gibbsArray
-	 * @throws Exception 
+	 * @return
+	 * @throws Exception
 	 */
-	public double[] readGibbsFromFile(File file) throws Exception {
-		this.isGibbsFile = true;
+	public double[] readSystemBoundariesFromFile(File file) throws Exception {
+		this.isSystemBoundariesFile = true;
+		this.isGibbsFile = null;
 		this.isConcentrationFile = null;
 		readFromFile(file);
-		return gibbsArray;
+		return systemBoundariesArray;
 	}
 
 	/**
@@ -151,9 +185,9 @@ public class CSVDataConverter {
 				keys[i] = data[i][0];
 			}
 
-			if (isGibbsFile != null && isGibbsFile) {
+			if (isGibbsFile != null && isGibbsFile) {// TODO check if doubled
 				initializeGibbsArray();
-				for(int i = 0; i< values.length; i++) {
+				for(int i = 0; i < values.length; i++) {
 					if (modifiedDocument.getModel().containsReaction(keys[i])) {
 						if (!FluxMinimizationUtils.eliminatedReactions.contains(keys[i])) {
 							modifiedDocument.getModel().getReaction(keys[i]).putUserObject(KEY_GIBBS, Double.parseDouble(values[i]));
@@ -163,14 +197,14 @@ public class CSVDataConverter {
 							if (modifiedDocument.getModel().containsReaction(keys[i] + FluxMinimizationUtils.endingForBackwardReaction)){
 								modifiedDocument.getModel().getReaction(keys[i] + FluxMinimizationUtils.endingForBackwardReaction).putUserObject(KEY_GIBBS, "isReverse");
 								int index2 = modifiedDocument.getModel().getListOfReactions().getIndex(modifiedDocument.getModel().getReaction(keys[i] + FluxMinimizationUtils.endingForBackwardReaction));
-								gibbsArray[index2] = -Double.parseDouble(values[i]); // TODO check
+								gibbsArray[index2] = -Double.parseDouble(values[i]);
 							}
 						}
 					}
 				}
-			} else if(isConcentrationFile!= null && isConcentrationFile){
+			} else if(isConcentrationFile != null && isConcentrationFile){// TODO check if doubled
 				initializeConcentrationArray();
-				for(int i = 0; i< values.length; i++) {
+				for(int i = 0; i < values.length; i++) {
 					if (modifiedDocument.getModel().containsSpecies(keys[i])) {
 						modifiedDocument.getModel().getSpecies(keys[i]).putUserObject(KEY_CONCENTRATIONS, values[i]);
 						int index = modifiedDocument.getModel().getListOfSpecies().getIndex(modifiedDocument.getModel().getSpecies(keys[i]));
@@ -178,13 +212,45 @@ public class CSVDataConverter {
 						fileMatchToDocument++;
 					}
 				}
+			} else if (isSystemBoundariesFile != null && isSystemBoundariesFile) { // TODO check if doubled
+				initializeSystemBoundariesArray();
+				for (int i = 0; i < values.length; i++) {
+					if (modifiedDocument.getModel().containsSpecies(keys[i])) {
+						int index = modifiedDocument.getModel().getListOfSpecies().getIndex(modifiedDocument.getModel().getSpecies(keys[i]));
+						// TODO sysout entfernen
+						System.out.println(i + ": " + keys[i] + " ... " + values[i]);
+						if (values[i].equals("-")){
+							systemBoundariesArray[index] = -1;
+						}
+						else if (values[i].equals("+")) {
+							systemBoundariesArray[index] = +1;
+						}
+						else if (values[i].equals("=")) {
+							systemBoundariesArray[index] = 0;
+						}
+						fileMatchToDocument++;
+					}
+					// TODO
+				}
+				
 			}
 			if (fileMatchToDocument == 0) {
-				throw new Exception("given file does not match with opend SBMLDocument");				
+				throw new Exception("given file does not match with opened SBMLDocument");				
 			}
 		}
 	}
 
+	/**
+	 * Initializes the Gibbs-array, so that every cell is filled with NaN and when there is
+	 * read a file with Gibbs energies, the content will be overwritten.
+	 */
+	private void initializeGibbsArray() {
+		gibbsArray = new double[modifiedDocument.getModel().getReactionCount()];
+		for (int i = 0; i < gibbsArray.length; i++) {
+			gibbsArray[i] = Double.NaN;
+		}
+	}
+	
 	/**
 	 * Initializes the Concentration-array, so that every cell is filled with 10^(-11),
 	 * because that is the normal minimal amount in nature, and when there is
@@ -197,14 +263,10 @@ public class CSVDataConverter {
 		}
 	}
 
-	/**
-	 * Initializes the Gibbs-array, so that every cell is filled with NaN and when there is
-	 * read a file with Gibbs energies, the content will be overwritten.
-	 */
-	private void initializeGibbsArray() {
-		gibbsArray = new double[modifiedDocument.getModel().getReactionCount()];
-		for (int i = 0; i < gibbsArray.length; i++) {
-			gibbsArray[i] = Double.NaN;
+	private void initializeSystemBoundariesArray() {
+		systemBoundariesArray = new double[modifiedDocument.getModel().getSpeciesCount()];
+		for (int i =0; i < systemBoundariesArray.length; i++) {
+			systemBoundariesArray[i] = Double.NaN;
 		}
 	}
 
@@ -222,6 +284,13 @@ public class CSVDataConverter {
 		return concentrationsArray;
 	}
 
+	/**
+	 * 
+	 * @return the systemBoundariesArray
+	 */
+	public double[] getSystemBoundariesArray() {
+		return systemBoundariesArray;
+	}
 
 	/**
 	 * 

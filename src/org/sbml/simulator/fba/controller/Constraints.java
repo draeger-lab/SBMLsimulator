@@ -166,8 +166,10 @@ public class Constraints {
 			}
 		}
 		
-		for (int i = (computedGibbsEnergies.length - systemBoundaries.length); i < computedGibbsEnergies.length; i++) {
-			computedGibbsEnergies[i] = 0.0; // for system boundary added reactions
+		for (int i = 0; i < computedGibbsEnergies.length; i++) {
+			if (!Double.isNaN(systemBoundaries[i])) {
+				computedGibbsEnergies[i] = 0.0; // for system boundary added reactions
+			}
 		}
 		
 		// return the computed Gibbs energies
