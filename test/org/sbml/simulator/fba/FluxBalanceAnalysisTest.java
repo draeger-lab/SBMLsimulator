@@ -46,7 +46,7 @@ public class FluxBalanceAnalysisTest {
 	
 	static double[] equilibriumsConcentrations = null;
 	static double[] equilibriumsGibbsEnergies = null;
-	static double[] systemBoundaries = {Double.NaN,Double.NaN,Double.NaN,Double.NaN,Double.NaN,Double.NaN,1,-1};
+	static double[] systemBoundaries = null; // TODO {Double.NaN,Double.NaN,Double.NaN,Double.NaN,Double.NaN,Double.NaN,1,-1};
 	static String[] targetFluxes = null;
 	static SBMLDocument originalSBMLDoc = null;
 	static Constraints constraints = null;
@@ -59,37 +59,8 @@ public class FluxBalanceAnalysisTest {
 	 */
 	public static void main(String[] args) throws Exception {
 		originalSBMLDoc = (new SBMLReader()).readSBML(args[0]);
-		
-		logger.info("document read");
-		//ConstraintsUtils:
-		CSVDataConverter cu1 = new CSVDataConverter(originalSBMLDoc, systemBoundaries);
-		CSVDataConverter cu2 = new CSVDataConverter(originalSBMLDoc, systemBoundaries);
-		
-		
-		
-		File gibbsFile = new File(args[1]);
-		File concFile = new File(args[2]);
-		
-		logger.info("will read gibbs");
-		// read gibbs energies
-		cu1.readGibbsFromFile(gibbsFile);
-		while(cu1.getGibbsArray() == null) {
-			//wait
-			System.out.print("");
-//			logger.info("cu1.getGibbsArray() == null");
-		}
-		equilibriumsGibbsEnergies = cu1.getGibbsArray();
-		
-		// read concentrations
-		cu2.readConcentrationsFromFile(concFile);
-		while(cu2.getConcentrationsArray() == null) {
-			//wait
-			System.out.print("");
-//			logger.info("cu2.getConcentrationsArray() == null");
-		}
-		equilibriumsConcentrations = cu2.getConcentrationsArray();
-		
-		// TODO read system boundaries
+		logger.info("document read: " + args[0]);
+
 		/*
 		 * initialize a system boundary array covering all species with value Double.NaN
 		 * NaN stands for case if species is not at the system boundary
@@ -101,6 +72,54 @@ public class FluxBalanceAnalysisTest {
 		 * put it in the field "systemBoundaries" of this class
 		 * 
 		 */
+		// TODO read system boundaries:
+		CSVDataConverter cu0;
+
+		File systemBoundariesFile = null;		
+		if (args.length >= 4) {
+			systemBoundariesFile = new File(args[3]);
+			cu0 = new CSVDataConverter(originalSBMLDoc,true);
+			cu0.readSystemBoundariesFromFile(systemBoundariesFile);
+			System.out.println("sysbound file vorhanden");
+		}
+		else {
+			cu0 = new CSVDataConverter(originalSBMLDoc);
+			System.out.println("sysbound file nicht vorhanden");
+		}
+		
+		while (cu0.getSystemBoundariesArray() == null){
+			//wait
+			System.out.print(".");
+		}
+		systemBoundaries = cu0.getSystemBoundariesArray();
+		logger.info("system boundaries are read: " + systemBoundariesFile);
+		System.out.println("SB");
+		
+		CSVDataConverter cu1 = new CSVDataConverter(originalSBMLDoc, systemBoundaries);
+		CSVDataConverter cu2 = new CSVDataConverter(originalSBMLDoc, systemBoundaries);
+		File gibbsFile = new File(args[1]);
+		File concFile = new File(args[2]);
+		
+		// read gibbs energies
+		cu1.readGibbsFromFile(gibbsFile);
+		while(cu1.getGibbsArray() == null) {
+			//wait
+			System.out.print(".");
+//			logger.info("cu1.getGibbsArray() == null");
+		}
+		equilibriumsGibbsEnergies = cu1.getGibbsArray();
+		logger.info("gibbs are read: " + gibbsFile.getName());
+		
+		
+		// read concentrations
+		cu2.readConcentrationsFromFile(concFile);
+		while(cu2.getConcentrationsArray() == null) {
+			//wait
+			System.out.print(".");
+//			logger.info("cu2.getConcentrationsArray() == null");
+		}
+		equilibriumsConcentrations = cu2.getConcentrationsArray();
+		logger.info("concentrations are read: " + concFile.getName());
 		
 		
 
@@ -116,6 +135,10 @@ public class FluxBalanceAnalysisTest {
 		fba.setConstraintJ0(false);
 		fba.setCplexIterations(4000);
 		fba.solve();
+		
+		System.out.println();
+		System.out.println("--------steady state matrix--------");
+		System.out.println(FluxMinimizationUtils.getSteadyStateMatrix().toString());
 		
 		System.out.println();
 		//print flux solution:
