@@ -685,7 +685,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	/* (non-Javadoc)
 	 * @see de.zbit.gui.BaseFrame#saveFile()
 	 */
-	public File saveFile() {
+	public File saveFileAs() {
 		if (simPanel != null) { 
 			return simPanel.saveToFile(); 
 		}
