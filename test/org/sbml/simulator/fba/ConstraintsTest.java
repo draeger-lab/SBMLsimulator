@@ -40,10 +40,10 @@ public class ConstraintsTest {
 	static double[] gibbs_eq = null;
 	static String[] targetFluxes = null;
 	static SBMLDocument sbml = null;
-	
+
 	public static void main(String[] args) throws Exception {
 		sbml = (new SBMLReader()).readSBML(args[0]);
-		
+
 		sbml = (new SBMLReader()).readSBML(args[0]);
 		File file_g = new File(args[1]);
 		File file_c = new File(args[2]);
@@ -62,27 +62,25 @@ public class ConstraintsTest {
 		}
 		c_eq = converter2.getConcentrationsArray();
 		System.out.println("done reading");
-		
+
 		System.out.print("read gibbs array: [ ");
 		for (int i = 0; i < gibbs_eq.length; i++) {
 			System.out.print(gibbs_eq[i] + " ");
 		}
 		System.out.print("]");
 		System.out.println();
-		
-		
+
+
 		//Constraints:
 		Constraints constraints = new Constraints(sbml);
 		constraints.setEquilibriumConcentrations(c_eq);
 		constraints.setEquilibriumGibbsEnergies(gibbs_eq);
-		
+
 		//testing if computing r_max works
 		double[] fluxVector = FluxMinimizationUtils.computeFluxVector(null, sbml);
-		double r_max[] = constraints.computeR_max(fluxVector);
-		for ( int i = 0; i < r_max.length; i++) {
-			System.out.println(r_max[i]);
-		}
-		
+		double r_max = constraints.computeR_max(fluxVector);
+		System.out.println("r_max: " + r_max);
+
 		System.out.println("the computed Gibbs energies:");
 		for (int i = 0; i < constraints.getComputedGibbsEnergies().length; i++) {
 			System.out.print(FluxMinimizationUtils.getExpandedDocument(sbml).getModel().getReaction(i).getId() + "  ");

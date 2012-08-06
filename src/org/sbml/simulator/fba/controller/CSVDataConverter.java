@@ -185,8 +185,6 @@ public class CSVDataConverter {
 				keys[i] = data[i][0];
 			}
 
-			System.out.println("gibbs: " + isGibbsFile + " conc: " + isConcentrationFile + " SB: " + isSystemBoundariesFile);
-			
 			if (isGibbsFile != null && isGibbsFile) {
 				initializeGibbsArray();
 				for(int i = 0; i < values.length; i++) {
@@ -219,8 +217,6 @@ public class CSVDataConverter {
 				for (int i = 0; i < values.length; i++) {
 					if (modifiedDocument.getModel().containsSpecies(keys[i])) {
 						int index = modifiedDocument.getModel().getListOfSpecies().getIndex(modifiedDocument.getModel().getSpecies(keys[i]));
-						// TODO sysout entfernen
-//						System.out.println(i + ": " + keys[i] + " ... " + values[i]);
 						if (values[i].equals("-")){
 							systemBoundariesArray[index] = -1;
 						}

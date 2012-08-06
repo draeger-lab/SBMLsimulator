@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBO;
@@ -110,10 +109,6 @@ public class FluxMinimizationUtils {
 		steadyStateMatrix = ConservationRelations.calculateConsRelations(new StoichiometricMatrix(NwithoutZeroRows.transpose().getArray(),NwithoutZeroRows.getColumnDimension(),NwithoutZeroRows.getRowDimension()));
 //		StabilityMatrix steadyStateMatrix = (new StoichiometricMatrix(NwithoutZeroRows.transpose().getArray(),NwithoutZeroRows.getColumnDimension(),NwithoutZeroRows.getRowDimension())).getConservationRelations();
 		double[] fluxVector = new double[steadyStateMatrix.getColumnDimension()];
-
-		//TODO sysouts entfernen
-		System.out.println();
-		System.out.println("N.getColumnDimension() " + N_int_sys.getColumnDimension() + "   N.getRowDimension() " + N_int_sys.getRowDimension() + ", steadyStateMatrix.getColumnDimension() " + steadyStateMatrix.getColumnDimension() + "   steadyStateMatrix.getRowDimension() " +  steadyStateMatrix.getRowDimension());
 		
 		// fill the fluxVector
 		for (int column = 0; column < steadyStateMatrix.getColumnDimension(); column++) {
@@ -521,7 +516,7 @@ public class FluxMinimizationUtils {
 				systemBoundaryReaction.setMetaId(metaIdPrefix + reactionId);
 
 				SpeciesReference specRef =  new SpeciesReference(species);
-				specRef.setMetaId(metaIdPrefix + speciesId);
+				specRef.setMetaId(metaIdPrefix + speciesId + "_" + reactionId);
 				specRef.setStoichiometry(Math.abs(systemBoundaries[index]));
 				if (Math.signum(systemBoundaries[index]) == -1) {
 					systemBoundaryReaction.addReactant(specRef);

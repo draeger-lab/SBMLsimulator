@@ -168,8 +168,7 @@ public class Constraints {
 			for (int reacIndex = 0; reacIndex < modModel.getReactionCount(); reacIndex++) {
 				String reactionID = modModel.getReaction(reacIndex).getId();
 				if (reactionID.startsWith(FluxMinimizationUtils.degradationPrefix)) {
-					System.out.println(reactionID);
-					computedGibbsEnergies[reacIndex] = 0.0; // for system boundary added reactions
+					computedGibbsEnergies[reacIndex] = Double.NaN; // for system boundary added reactions
 				}
 			}
 		}
@@ -248,8 +247,6 @@ public class Constraints {
 				// if you divide by NaN, r_max will be NaN and if you divide by zero, you get r_max = infinity
 				if (!Double.isNaN(computedGibbsEnergies[i]) && computedGibbsEnergies[i] != 0) {
 					double d = Math.abs(fluxVector[i])/Math.abs(computedGibbsEnergies[i]);
-					//TODO: sysout
-//					System.out.println(fluxVector[i] + "/" + computedGibbsEnergies[i] + "=" + d);
 					r_max = Math.max(r_max,(d));
 				}
 			}
