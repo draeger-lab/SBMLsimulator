@@ -130,22 +130,30 @@ public class FluxBalanceAnalysisTest {
 //		fba.setLambda2(0);
 //		fba.setLambda3(0);
 //		fba.setLambda4(0);
-		fba.setConstraintJG(false);
-		fba.setConstraintJ_rmaxG(false);
-		fba.setConstraintJ0(false);
+		fba.setConstraintJG(true);
+		fba.setConstraintJ_rmaxG(true);
+		fba.setConstraintJ0(true);
 		fba.setCplexIterations(4000);
-		fba.solve();
 		
+		
+
+		SBMLDocument modifiedDocument = FluxMinimizationUtils.getExpandedDocument(originalSBMLDoc, systemBoundaries);
+		Model modModel = modifiedDocument.getModel();
+
 		System.out.println();
 		System.out.println("--------steady state matrix--------");
+		for (int i = 0; i < modModel.getReactionCount(); i++){
+			System.out.print(modModel.getReaction(i) + " ");
+		}
+		System.out.println();
 		System.out.println(FluxMinimizationUtils.getSteadyStateMatrix().toString());
+		
+		fba.solve();
 		
 		System.out.println();
 		//print flux solution:
 		double[] fluxSolution = fba.solutionFluxVector;
 		System.out.println("--------solution for the fluxes:--------");
-		SBMLDocument modifiedDocument = FluxMinimizationUtils.getExpandedDocument(originalSBMLDoc, systemBoundaries);
-		Model modModel = modifiedDocument.getModel();
 		for (int i = 0; i < fluxSolution.length; i++) {
 			System.out.println(modModel.getReaction(i).getId() + "   " + fluxSolution[i]);
 		}
@@ -180,28 +188,28 @@ public class FluxBalanceAnalysisTest {
 				fluxSum.put(sr.getSpeciesInstance(), helper);
 			}
 		}
-		System.out.println();
-		System.out.println("--------sum of the in- and outgoing fluxes (incl. stoichiometry)--------");
-		for (int i = 0; i< modModel.getSpeciesCount(); i++ ) {
-			System.out.println(modModel.getSpecies(i) + " : " + fluxSum.get(modModel.getSpecies(i)));
-		}
-		
-		System.out.println();
-		//print conc solution:
-		double[] concSolution = fba.solutionConcentrations;
-		System.out.println("--------solution for the concentrations:--------");
-		for (int i = 0; i < concSolution.length; i++) {
-			System.out.println(originalSBMLDoc.getModel().getSpecies(i).getId() + "   " + concSolution[i]);
-		}
-		
-		System.out.println();
-		System.out.println("--------species at the system boundaries----------");
-		double[] sb = constraints.getSystemBoundaries();
-		for (int i = 0; i < sb.length; i++){
-			if (!Double.isNaN(sb[i])) {
-				System.out.println(originalSBMLDoc.getModel().getSpecies(i));
-			}
-		}
+//		System.out.println();
+//		System.out.println("--------sum of the in- and outgoing fluxes (incl. stoichiometry)--------");
+//		for (int i = 0; i< modModel.getSpeciesCount(); i++ ) {
+//			System.out.println(modModel.getSpecies(i) + " : " + fluxSum.get(modModel.getSpecies(i)));
+//		}
+//		
+//		System.out.println();
+//		//print conc solution:
+//		double[] concSolution = fba.solutionConcentrations;
+//		System.out.println("--------solution for the concentrations:--------");
+//		for (int i = 0; i < concSolution.length; i++) {
+//			System.out.println(originalSBMLDoc.getModel().getSpecies(i).getId() + "   " + concSolution[i]);
+//		}
+//		
+//		System.out.println();
+//		System.out.println("--------species at the system boundaries----------");
+//		double[] sb = constraints.getSystemBoundaries();
+//		for (int i = 0; i < sb.length; i++){
+//			if (!Double.isNaN(sb[i])) {
+//				System.out.println(originalSBMLDoc.getModel().getSpecies(i));
+//			}
+//		}
 		
 	}
 
