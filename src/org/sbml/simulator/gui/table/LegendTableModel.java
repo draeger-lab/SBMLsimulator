@@ -57,7 +57,7 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 	 */
 	private static final int boolCol = 0, colorCol = 1, nsbCol = 2,
 			unitCol = 3;
-
+	
 	/**
 	 * 
 	 */
@@ -67,8 +67,8 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 	 * A {@link Logger} for this class.
 	 */
 	private static final transient Logger logger = Logger.getLogger(LegendTableModel.class.getName());
-	
-  /**
+
+	/**
 	 * Generated serial version identifier.
 	 */
 	private static final long serialVersionUID = 7360401460080111135L;
@@ -86,8 +86,8 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 	public static int getColumnPlot() {
 		return boolCol;
 	}
-
-	/**
+	
+  /**
 	 * @return
 	 */
 	public static int getColumnUnit() {
@@ -100,17 +100,23 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 	public static int getNamedSBaseColumn() {
 		return nsbCol;
 	}
-	
+
 	/**
 	 * A colored button for each model component and
 	 */
 	private Object[][] data;
 
 	/**
+	 * Decides whether or not some column elements (currently only boolean column
+	 * and color column) are editable.
+	 */
+	private boolean editable = true;
+
+	/**
 	 * A mapping between the ids in the table and the corresponding row.
 	 */
 	private Hashtable<String, Integer> id2Row;
-
+	
 	/**
 	 * Switch of whether or not to include reactions in the legend.
 	 */
@@ -126,7 +132,7 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 	 */
 	private Model model;
 
-  /**
+	/**
    * The number of selected items in the table.
    */
   private int selectedCount;
@@ -139,15 +145,15 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 	  selectedCount = 0;
 	}
 
-	/**
+  /**
 	 * @param model
 	 */
 	public LegendTableModel(Model model) {
 		this();
 		setModel(model);
 	}
-  
-  /**
+
+	/**
 	 * @param model
 	 * @param includeReactions
 	 */
@@ -171,8 +177,8 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
     data[rowIndex][nsbCol] = nsb;
     id2Row.put(nsb.getId(), Integer.valueOf(rowIndex));
   }
-
-	/**
+  
+  /**
    * Determines the currently specified {@link Color} for the {@link NamedSBase}
    * with the given <code>id</code>.
    * 
@@ -205,7 +211,7 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 				return getValueAt(0, c).getClass();
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see javax.swing.table.TableModel#getColumnCount()
 	 */
@@ -233,7 +239,7 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
     throw new IndexOutOfBoundsException(MessageFormat.format(
       bundle.getString("UNKOWN_CLUMN_EXC"), getColumnCount(), column));
 	}
-
+	
 	/**
 	 * @param rowIndex
 	 * @return
@@ -291,7 +297,7 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 	public NamedSBaseWithDerivedUnit getSBase(int rowIndex) {
 		return (NamedSBaseWithDerivedUnit) getValueAt(rowIndex, getNamedSBaseColumn());
 	}
-	
+
 	/**
    * @return the selectedCount the number of selected components in the model.
    */
@@ -305,7 +311,7 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		return data[rowIndex][columnIndex];
 	}
-
+	
 	/**
 	 * 
 	 */
@@ -348,7 +354,14 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 	 */
 	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		return (columnIndex == colorCol) || (columnIndex == boolCol);
+		return editable && ((columnIndex == colorCol) || (columnIndex == boolCol));
+	}
+
+	/**
+	 * @return the editable
+	 */
+	public boolean isEditable() {
+		return editable;
 	}
 
 	/**
@@ -358,7 +371,7 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 	public boolean isSelected(int rowIndex) {
 		return ((Boolean) data[rowIndex][boolCol]).booleanValue();
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if the {@link NamedSBase} belonging to the given
    * <code>id</code> is selected for being shown in the plot.
@@ -373,7 +386,7 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 		}
 		return false;
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
 	 */
@@ -388,6 +401,13 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 					getColumnUnit(), TableModelEvent.UPDATE));
 			}
 		}
+	}
+
+	/**
+	 * @param editable the editable to set
+	 */
+	public void setEditable(boolean editable) {
+		this.editable = editable;
 	}
 	
 	/**
