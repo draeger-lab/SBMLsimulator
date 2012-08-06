@@ -541,12 +541,12 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
     }
 
     /**
-     * Enable/disable legendpanel e.g. in case of video generating
+     * Enable/disable {@link LegendPanel}, e.g., in case of video generating
+     * 
      * @param b
      */
     public void setEnableLegend(boolean b) {
-//        legend.setEnabled(b);
-        GUITools.setEnabledForAll(b, legend.getComponents());
+    	legend.getLegendTableModel().setEditable(b);
     }
     
     /**
