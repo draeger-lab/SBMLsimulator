@@ -273,7 +273,8 @@ public class FluxBalanceAnalysis {
 		// TODO do this for all steady state fluxes...
 		double[] steadyStateFluxes = targetFunction.getFluxVector();
 		double[] compGibbs = constraints.getComputedGibbsEnergies();
-		double[] r_max = constraints.computeR_max(steadyStateFluxes);
+		double r_max = constraints.computeR_max(steadyStateFluxes);
+		System.out.println("r_max: "+  r_max); //TODO
 		System.out.println("1: " + isConstraintJ_rmaxG() + " 2: " + isConstraintJ0() + " 3: " + isConstraintJG());
 		for (int j = 0; j< counter[1]; j++) {
 			//jg is the expression for J_j * G_j
@@ -286,9 +287,9 @@ public class FluxBalanceAnalysis {
 			if (isConstraintJ_rmaxG()) {
 				IloNumExpr rmaxG = cplex.numExpr();
 				if (!Double.isNaN(compGibbs[j]) && !Double.isInfinite(compGibbs[j])) {
-					rmaxG = cplex.prod(r_max[j], cplex.abs(cplex.constant(compGibbs[j])));
+					rmaxG = cplex.prod(r_max, cplex.abs(cplex.constant(compGibbs[j])));
 				} else {
-					rmaxG = cplex.prod(r_max[j], x[k]);
+					rmaxG = cplex.prod(r_max, x[k]);
 				}
 				
 				cplex.addLe(cplex.diff(j_j, rmaxG), -Double.MIN_VALUE);
@@ -311,7 +312,7 @@ public class FluxBalanceAnalysis {
 					jg = cplex.prod(cplex.prod(steadyStateFluxes[j], x[j]),x[k]);
 				}
 				
-				cplex.addLe(jg, -Double.MIN_VALUE);
+				cplex.addLe(jg, 0);
 				// TODO sysout
 				System.out.println(modifiedDocument.getModel().getReaction(j) + ": " + jg + " < " + 0);
 				logger.log(Level.DEBUG, String.format("constraint J_j * G_j: " + jg + " < " + 0));

@@ -185,7 +185,9 @@ public class CSVDataConverter {
 				keys[i] = data[i][0];
 			}
 
-			if (isGibbsFile != null && isGibbsFile) {// TODO check if doubled
+			System.out.println("gibbs: " + isGibbsFile + " conc: " + isConcentrationFile + " SB: " + isSystemBoundariesFile);
+			
+			if (isGibbsFile != null && isGibbsFile) {
 				initializeGibbsArray();
 				for(int i = 0; i < values.length; i++) {
 					if (modifiedDocument.getModel().containsReaction(keys[i])) {
@@ -202,7 +204,7 @@ public class CSVDataConverter {
 						}
 					}
 				}
-			} else if(isConcentrationFile != null && isConcentrationFile){// TODO check if doubled
+			} else if(isConcentrationFile != null && isConcentrationFile){
 				initializeConcentrationArray();
 				for(int i = 0; i < values.length; i++) {
 					if (modifiedDocument.getModel().containsSpecies(keys[i])) {
@@ -212,13 +214,13 @@ public class CSVDataConverter {
 						fileMatchToDocument++;
 					}
 				}
-			} else if (isSystemBoundariesFile != null && isSystemBoundariesFile) { // TODO check if doubled
+			} else if (isSystemBoundariesFile != null && isSystemBoundariesFile) { 
 				initializeSystemBoundariesArray();
 				for (int i = 0; i < values.length; i++) {
 					if (modifiedDocument.getModel().containsSpecies(keys[i])) {
 						int index = modifiedDocument.getModel().getListOfSpecies().getIndex(modifiedDocument.getModel().getSpecies(keys[i]));
 						// TODO sysout entfernen
-						System.out.println(i + ": " + keys[i] + " ... " + values[i]);
+//						System.out.println(i + ": " + keys[i] + " ... " + values[i]);
 						if (values[i].equals("-")){
 							systemBoundariesArray[index] = -1;
 						}

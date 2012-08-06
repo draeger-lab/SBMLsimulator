@@ -62,7 +62,7 @@ public class Constraints {
 	 * The ideal gas constant R in J/(mol * K)
 	 */
 	private double R = 8.3144621;
-	
+
 	/**
 	 * contains the species specific information whether the species belongs to the system boundary or not.
 	 * NaN if species is not at the system boundary
@@ -72,7 +72,7 @@ public class Constraints {
 	 */
 	private double[] systemBoundaries;
 
-	
+
 	/**
 	 * Constructor, that gets a {@link SBMLDocument} and creates a new
 	 * array of Gibbs energies, that stays empty if the user doesn't check
@@ -97,7 +97,7 @@ public class Constraints {
 	public Constraints (SBMLDocument originalDoc, double[] gibbs_eq, double[] c_eq, double[] systemBoundaries) throws Exception {
 		this(originalDoc, gibbs_eq, c_eq, systemBoundaries, false);
 	}
-	
+
 	/**
 	 * Constructor that computes the GibbsEnergies from the incoming gibbs_eq and c_eq.
 	 * 
@@ -112,7 +112,7 @@ public class Constraints {
 		originalDocument = originalDoc;
 		equilibriumConcentrations = c_eq;
 		this.systemBoundaries = systemBoundaries;
-			
+
 		if (kiloJoule) {
 			equilibriumGibbsEnergies = getEquillibriumGibbsEnergiesfromkKiloJoule(gibbs_eq);
 		}
@@ -144,13 +144,13 @@ public class Constraints {
 	 */
 	private double[] computeGibbsEnergies(double[] equilibriumsGibbs) throws Exception {
 		if ((equilibriumsGibbs != null) && (this.originalDocument != null) && (equilibriumConcentrations != null)) {
-			
+
 			// initialize
 			StoichiometricMatrix N = FluxMinimizationUtils.getExpandedStoichiometricMatrix(originalDocument);
 			SBMLDocument modifiedDocument = FluxMinimizationUtils.getExpandedDocument(originalDocument, systemBoundaries);
 			computedGibbsEnergies = new double[equilibriumsGibbs.length];
 			Model modModel = modifiedDocument.getModel();
-			
+
 			// compute delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum(N[i][j] * ln(S[i])) 
 			for (int j = 0; j < modModel.getReactionCount(); j++) {
 				double sum = 0;
@@ -164,14 +164,16 @@ public class Constraints {
 
 				computedGibbsEnergies[j] = (equilibriumsGibbs[j]) + (R*T*sum);
 			}
-		}
-		
-		for (int i = 0; i < computedGibbsEnergies.length; i++) {
-			if (!Double.isNaN(systemBoundaries[i])) {
-				computedGibbsEnergies[i] = 0.0; // for system boundary added reactions
+
+			for (int reacIndex = 0; reacIndex < modModel.getReactionCount(); reacIndex++) {
+				String reactionID = modModel.getReaction(reacIndex).getId();
+				if (reactionID.startsWith(FluxMinimizationUtils.degradationPrefix)) {
+					System.out.println(reactionID);
+					computedGibbsEnergies[reacIndex] = 0.0; // for system boundary added reactions
+				}
 			}
 		}
-		
+
 		// return the computed Gibbs energies
 		return computedGibbsEnergies;
 	}
@@ -222,8 +224,8 @@ public class Constraints {
 	public void setSystemBoundaries(double[] systemBoundaries) {
 		this.systemBoundaries = systemBoundaries;
 	}
-	
-	
+
+
 	/**
 	 * 
 	 * @return
@@ -231,25 +233,24 @@ public class Constraints {
 	public double[] getSystemBoundaries() {
 		return systemBoundaries;
 	}
-	
+
 	/**
 	 * Computes the maximum of J_j / G_j for every reaction j in the model
 	 * @param fluxVector
 	 * @return r_max
 	 */
-	public double[] computeR_max(double[] fluxVector) {
-		double[] r_max = new double[fluxVector.length]; 
-		
+	public double computeR_max(double[] fluxVector) {
 		// initialization
-		for (int i = 0; i < r_max.length; i++) {
-			r_max[i] = Double.MIN_NORMAL; 
-		}
-		
+		double r_max = Double.MIN_NORMAL; 
+
 		if (computedGibbsEnergies != null) {
-			for (int i = 0; i < r_max.length; i++) {
+			for (int i = 0; i < fluxVector.length; i++) {
 				// if you divide by NaN, r_max will be NaN and if you divide by zero, you get r_max = infinity
 				if (!Double.isNaN(computedGibbsEnergies[i]) && computedGibbsEnergies[i] != 0) {
-					r_max[i] = Math.max(r_max[i],(fluxVector[i]/computedGibbsEnergies[i]));
+					double d = Math.abs(fluxVector[i])/Math.abs(computedGibbsEnergies[i]);
+					//TODO: sysout
+//					System.out.println(fluxVector[i] + "/" + computedGibbsEnergies[i] + "=" + d);
+					r_max = Math.max(r_max,(d));
 				}
 			}
 		}

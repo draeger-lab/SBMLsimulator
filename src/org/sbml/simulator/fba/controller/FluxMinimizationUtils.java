@@ -105,7 +105,8 @@ public class FluxMinimizationUtils {
 	public static double[] computeFluxVector(StoichiometricMatrix N_int_sys, String[] targetFluxes, SBMLDocument doc) {
 		StoichiometricMatrix eliminateZeroRows = eliminateZeroRows(N_int_sys);
 		StoichiometricMatrix NwithoutZeroRows = new StoichiometricMatrix(eliminateZeroRows.getArray(), eliminateZeroRows.getRowDimension(), eliminateZeroRows.getColumnDimension());
-		NwithoutZeroRows.getReducedMatrix();
+//		StoichiometricMatrix NwithoutZeroRows = N_int_sys;
+//		NwithoutZeroRows.getReducedMatrix();
 		steadyStateMatrix = ConservationRelations.calculateConsRelations(new StoichiometricMatrix(NwithoutZeroRows.transpose().getArray(),NwithoutZeroRows.getColumnDimension(),NwithoutZeroRows.getRowDimension()));
 //		StabilityMatrix steadyStateMatrix = (new StoichiometricMatrix(NwithoutZeroRows.transpose().getArray(),NwithoutZeroRows.getColumnDimension(),NwithoutZeroRows.getRowDimension())).getConservationRelations();
 		double[] fluxVector = new double[steadyStateMatrix.getColumnDimension()];
@@ -237,7 +238,7 @@ public class FluxMinimizationUtils {
 		int metaid = 0;
 		for (int i = 0; i < doc.getModel().getReactionCount(); i++) {
 			Reaction reversibleReac = revReacDoc.getModel().getReaction(doc.getModel().getReaction(i).getId());
-			if (reversibleReac.isSetReversible() && reversibleReac.isReversible()) {
+			if (reversibleReac.isReversible()) { // TODO for SBML L3 add if "isSetreversible"
 				reversibleReactions.add(reversibleReac.getId());
 				reversibleReactions.add(reversibleReac.getId() + endingForBackwardReaction);
 				Reaction backwardReac = reversibleReac.clone();
@@ -299,18 +300,14 @@ public class FluxMinimizationUtils {
 			for (int row = 0; row <N.getRowDimension(); row++){
 				//flagZeros is true if this row contains only zeros
 				boolean flagZeros = true;
-				int i = 0;
 				for (int col = 0; col <N.getColumnDimension(); col++) {
 					if (N.get(row, col) != 0.0) {
 						flagZeros = false;
-						i++;
 					}
 				}
-	//			if (!flagZeros && i > 1) {
 				if (!flagZeros) {
 					remainingList.add(row);
 				}
-				
 			}
 			
 			S = new StoichiometricMatrix(remainingList.size(), N.getColumnDimension());
