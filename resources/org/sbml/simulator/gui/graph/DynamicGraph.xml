@@ -42,6 +42,10 @@
   <entry key="GENERATE_VIDEO">Generate video with {0}x{1} pixel.</entry>
   <entry key="SCREENSHOT_DONE">Picture sucessfully saved.</entry>
   
+  <!-- DynamicController -->
+  
+  <entry key="VIDEO_FILEFILTER">Videofiles (*.mov, *.avi, *.mp4, *.mpg, *.wmv, *.flv)</entry>
+  
   <!-- DynamicView -->
   
   <entry key="SIMULATION_DATA">Simulation Data</entry> 
