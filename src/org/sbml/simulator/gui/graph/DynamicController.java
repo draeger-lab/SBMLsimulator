@@ -41,6 +41,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.filechooser.FileFilter;
 
 import org.sbml.simulator.gui.graph.DynamicControlPanel.Items;
 import org.sbml.simulator.gui.graph.DynamicView.Manipulators;
@@ -192,9 +193,34 @@ public class DynamicController implements ChangeListener, ActionListener,
                                         .getString("INFO_COMP"));
                     }
                     
+                    /*
+                     * Videofilefilter
+                     */
+                    FileFilter videoFiles = new FileFilter() {
+                        
+                        @Override
+                        public String getDescription() {
+                            return bundle.getString("VIDEO_FILEFILTER");
+                        }
+                        
+                        @Override
+                        public boolean accept(File f) {
+                            String fileName = f.getName().toLowerCase();
+                            if (fileName.endsWith(".mov")
+                                    || fileName.endsWith(".avi")
+                                    || fileName.endsWith(".mp4")
+                                    || fileName.endsWith(".mpg")
+                                    || fileName.endsWith(".wmv")
+                                    || fileName.endsWith(".flv")) {
+                                return true;
+                            }
+                            return false;
+                        }
+                    };
+                    
                     File destinationFile = GUITools.saveFileDialog(view,
                             System.getProperty("user.home"), true, false,
-                            JFileChooser.FILES_ONLY);
+                            JFileChooser.FILES_ONLY, videoFiles);
                     
                     if (destinationFile != null) {
                         controlPanel.setVideoStatus();
