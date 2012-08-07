@@ -206,6 +206,11 @@ public class DynamicCore {
              * Notify observer.
              */
             observer.donePlay();
+            
+            /*
+             * Remove playworker.
+             */
+            playWorker = null;
         }
 
         /*

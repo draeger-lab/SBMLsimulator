@@ -39,7 +39,6 @@ import org.simulator.math.odes.MultiTable;
 
 import de.zbit.graph.gui.TranslatorSBMLgraphPanel;
 import de.zbit.graph.io.SBML2GraphML;
-import de.zbit.gui.GUITools;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.SBPreferences;
 
