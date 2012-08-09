@@ -324,17 +324,14 @@ public class StabilityMatrix extends Matrix {
 	 * @return
 	 */
 	public boolean allZero() {
-		boolean result = true;
-		int i = 0;
-
-		while (result && i < this.getRowDimension()) {
-			if (getColIndecesEqual(i, 0).size() != this.getColumnDimension()) {
-				result = false;
+		for (int i = 0; i < this.getRowDimension(); i++) {
+			for (int j = 0; j < this.getColumnDimension(); j++) {
+				if (this.get(i, j) != 0d){
+					return false;
+				}
 			}
-			i++;
 		}
-
-		return result;
+		return true;
 	}
 
 	/**
