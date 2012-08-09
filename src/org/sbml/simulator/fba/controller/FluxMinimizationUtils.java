@@ -17,6 +17,9 @@
  */
 package org.sbml.simulator.fba.controller;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -100,14 +103,54 @@ public class FluxMinimizationUtils {
 	 * @param targetFluxes 
 	 * @param doc 
 	 * @return double[] flux vector
+	 * @throws IOException 
 	 */
-	public static double[] computeFluxVector(StoichiometricMatrix N_int_sys, String[] targetFluxes, SBMLDocument doc) {
+	public static double[] computeFluxVector(StoichiometricMatrix N_int_sys, String[] targetFluxes, SBMLDocument doc) throws IOException {
 		StoichiometricMatrix eliminateZeroRows = eliminateZeroRows(N_int_sys);
 		StoichiometricMatrix NwithoutZeroRows = new StoichiometricMatrix(eliminateZeroRows.getArray(), eliminateZeroRows.getRowDimension(), eliminateZeroRows.getColumnDimension());
+		System.out.println(NwithoutZeroRows.getRowDimension() + " " + NwithoutZeroRows.getColumnDimension());
 //		StoichiometricMatrix NwithoutZeroRows = N_int_sys;
 //		NwithoutZeroRows.getReducedMatrix();
+//		double [][] matrix = {
+//				{0.0,0.0,1.0,1.0,1.0,1.0,1.0,1.0},{1.0,1.0,0.0,0.0,1.0,1.0,1.0,1.0}};
+//		steadyStateMatrix = new StoichiometricMatrix(matrix, matrix.length, matrix[0].length);
 		steadyStateMatrix = ConservationRelations.calculateConsRelations(new StoichiometricMatrix(NwithoutZeroRows.transpose().getArray(),NwithoutZeroRows.getColumnDimension(),NwithoutZeroRows.getRowDimension()));
 //		StabilityMatrix steadyStateMatrix = (new StoichiometricMatrix(NwithoutZeroRows.transpose().getArray(),NwithoutZeroRows.getColumnDimension(),NwithoutZeroRows.getRowDimension())).getConservationRelations();
+		
+		System.out.println();
+		
+		String steadyStateVariable = "double [][] matrix = {";
+		for (int i = 0; i < steadyStateMatrix.getRowDimension(); i++) {
+			steadyStateVariable = addText(steadyStateVariable, "\n{");
+			for (int j = 0; j < steadyStateMatrix.getColumnDimension(); j++) {
+				steadyStateVariable = addText(steadyStateVariable, steadyStateMatrix.get(i, j) + ",");
+			}
+			if (steadyStateVariable.endsWith(",")) {
+				String helper = steadyStateVariable;
+				steadyStateVariable = helper.substring(0, (steadyStateVariable.length() -1));
+			}
+			steadyStateVariable = addText(steadyStateVariable, "},");
+		}
+		if (steadyStateVariable.endsWith(",")) {
+			String helper = steadyStateVariable;
+			steadyStateVariable = helper.substring(0, (steadyStateVariable.length() -1));
+		}
+		steadyStateVariable = addText(steadyStateVariable, "};");
+		
+		steadyStateVariable = addText(steadyStateVariable, "\nsteadyStateMatrix = new StoichiometricMatrix(matrix, matrix.length, matrix[0].length);");
+		System.out.println( steadyStateVariable);
+		
+//		System.exit(0);
+		// TODO delete ausgabe:
+		
+		File file = new File("/home/tscherneck/Desktop/testMeike/steadyStateMatrixModell");
+		FileWriter output = new FileWriter(file ,false);
+		output.write(steadyStateVariable);
+		output.close();
+		
+		// -------------------------
+		
+		
 		double[] fluxVector = new double[steadyStateMatrix.getColumnDimension()];
 		
 		// fill the fluxVector
@@ -131,6 +174,17 @@ public class FluxMinimizationUtils {
 			}
 		}
 		return fluxVector;
+	}
+
+	/**
+	 * 
+	 * @param older
+	 * @param newer
+	 * @return
+	 */
+	private static String addText(String older, String newer) {
+		String helper = older + newer;
+		return helper;
 	}
 
 	/**
@@ -460,7 +514,12 @@ public class FluxMinimizationUtils {
 		SBMLDocument doc = modDoc.clone();
 		double[] systemBoundaries = new double[n_int.getRowDimension()];
 		for (int row = 0; row < n_int.getRowDimension(); row++) {
-			systemBoundaries[row] = -(sumOfRowOrCol(n_int.getRow(row)));
+			if (sumOfRowOrCol(n_int.getRow(row)) != 0) {
+				systemBoundaries[row] = -(sumOfRowOrCol(n_int.getRow(row)));
+			}
+			else {
+				systemBoundaries[row] = Double.NaN;
+			}
 		}
 		FluxMinimizationUtils.systemBoundaries = systemBoundaries;
 		doc = addNewReactionEntriesToDoc(systemBoundaries, doc);
