@@ -42,7 +42,7 @@ public class FluxMinimizationUtilsTest {
 	 * @throws XMLStreamException 
 	 */
 	public static void main(String[] args) throws XMLStreamException, IOException {
-//		final SBMLDocument sbml = (new SBMLReader()).readSBML(args[0]);
+		SBMLDocument sbml = (new SBMLReader()).readSBML(args[0]);
 //
 //		// test the method to compute the manhattan norm of a vector:
 //		System.out.println("Manhattan-Norm of the vector (1,-1,2):");
@@ -75,21 +75,27 @@ public class FluxMinimizationUtilsTest {
 //		}
 //
 //
-//		// test the method to compute the flux vector:
-//		System.out.println();
-//		System.out.println("Flux vector:");
-//		double[] fluxvector;
-//		System.out.println(FluxMinimizationUtils.eliminatedReactions.toString());
-//		try {
-//			fluxvector = FluxMinimizationUtils.computeFluxVector(null, sbml);
-//			for (int i= 0; i < fluxvector.length; i++) {
-//				System.out.print(FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(sbml).getModel().getReaction(i).getId() + "  ");
-//				System.out.println(fluxvector[i] + " ");
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//
+		// test the method to compute the flux vector:
+		System.out.println();
+		try {
+			sbml = FluxMinimizationUtils.getExpandedDocument(sbml);
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		System.out.println("Flux vector:");
+		double[] fluxvector;
+		System.out.println(FluxMinimizationUtils.eliminatedReactions.toString());
+		try {
+			fluxvector = FluxMinimizationUtils.computeFluxVector(null, sbml);
+			for (int i= 0; i < fluxvector.length; i++) {
+				System.out.print(sbml.getModel().getReaction(i).getId() + "  ");
+				System.out.println(fluxvector[i] + " ");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 //		// test the method to eliminate transport reactions:
 //		System.out.println();
 //		System.out.println();
