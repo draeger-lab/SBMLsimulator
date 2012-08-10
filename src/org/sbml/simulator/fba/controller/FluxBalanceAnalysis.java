@@ -81,6 +81,11 @@ public class FluxBalanceAnalysis {
 	 * Contains the solutions of cplex for the fluxes.
 	 */
 	public double[] solutionFluxVector;
+	
+	/**
+	 * Contains the solutions of cplex for the errors.
+	 */
+	public double[] solutionErrors;
 
 	/**
 	 * Contains the {@link# solution_fluxVector} in a {@link MultiTable} for visualization.
@@ -94,10 +99,13 @@ public class FluxBalanceAnalysis {
 	private boolean constraintJ_rmaxG = true;
 
 	private boolean constraintJ0 = true;
+	
+	private boolean constraintError = true;
 
 	private int cplexIterations = 600;
 
 	private int target_length_without_all_flux_values;
+
 
 	// CONSTRUCTORS:	
 
@@ -158,7 +166,7 @@ public class FluxBalanceAnalysis {
 			lb[lAndE] = -100000;
 			ub[lAndE] = 100000;
 		}
-		
+
 		// counter[3] is the index of the gibbs values
 		for (int gibbsBounds = target_length_without_all_flux_values -	targetfunc.getGibbs().length; gibbsBounds < target_length_without_all_flux_values; gibbsBounds++) {
 			lb[gibbsBounds] = -100000;
@@ -173,7 +181,8 @@ public class FluxBalanceAnalysis {
 
 		// init solution arrays
 		this.solutionFluxVector = new double[targetfunc.getFluxVector().length];
-		this.solutionConcentrations = new double[targetFunction.getConcentrations().length];
+		this.solutionConcentrations = new double[concentrations.length];
+		this.solutionErrors = new double[constraints.getComputedGibbsEnergies().length];
 	}
 
 
@@ -281,6 +290,10 @@ public class FluxBalanceAnalysis {
 				cplex.addGe(cplex.prod(steadyStateFluxes[j], x[0]), 0);
 			}
 
+			// constraint to compute the error
+			if (isConctraintError()) {
+				cplex.addEq(cplex.prod(compGibbs[j], x[k]), cplex.prod(compGibbs[j], x[j+1]));
+			}
 
 
 			// constraint J_j * G_j < 0
@@ -313,6 +326,9 @@ public class FluxBalanceAnalysis {
 		for (int i = 0; i < counter[1]; i++) {
 			// the first counter[1]-values are corresponding to the fluxes
 			solutionFluxVector[i] = steadyStateFluxes[i] * solution[0];
+		}
+		for (int i = 1; i < constraints.getComputedGibbsEnergies().length; i++) {
+			solutionErrors[i] = solution[i];
 		}
 		for (int j = 0; j < concentrations.length; j++) {
 			// the last values in x are corresponding to the concentrations
@@ -509,11 +525,28 @@ public class FluxBalanceAnalysis {
 	}
 
 	/**
+	 * constraint Delta_G = Delta_G - Error
+	 * @return the constraintError
+	 */
+	public boolean isConctraintError() {
+		return constraintError;
+	}
+	
+	/**
+	 * constraint Delta_G = Delta_G - Error
+	 * @param constraintError
+	 */
+	public void setConctraintError(boolean constraintError) {
+		this.constraintError = constraintError;
+	}
+	
+	/**
 	 * @return the cplexIterations
 	 */
 	public int getCplexIterations() {
 		return cplexIterations;
 	}
+	
 
 	/**
 	 * @param cplexIterations the cplexIterations to set
