@@ -134,6 +134,7 @@ public class FluxBalanceAnalysisTest {
 		fba.setConstraintJG(true);
 		fba.setConstraintJ_rmaxG(true);
 		fba.setConstraintJ0(true);
+		fba.setConctraintError(true);
 		fba.setCplexIterations(40000);
 		
 		
@@ -216,6 +217,12 @@ public class FluxBalanceAnalysisTest {
 		System.out.println("time:----------------");
 		end = System.currentTimeMillis();
 		System.out.println((end - start) + " ms");
+		
+		System.out.println("Error:-----------------");
+		double[] errorSolutions = fba.solutionErrors;
+		for (int i = 0; i < errorSolutions.length; i++) {
+			System.out.println(modModel.getReaction(i).getId() + "    " + errorSolutions[i]);
+		}
 	}
 
 }
