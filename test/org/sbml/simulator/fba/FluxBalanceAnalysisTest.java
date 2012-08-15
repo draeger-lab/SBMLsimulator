@@ -46,10 +46,13 @@ public class FluxBalanceAnalysisTest {
 	
 	static double[] equilibriumsConcentrations = null;
 	static double[] equilibriumsGibbsEnergies = null;
-	static double[] systemBoundaries = null; // TODO {Double.NaN,Double.NaN,Double.NaN,Double.NaN,Double.NaN,Double.NaN,1,-1};
+	static double[] systemBoundaries = null;
 	static String[] targetFluxes = null;
 	static SBMLDocument originalSBMLDoc = null;
 	static Constraints constraints = null;
+	
+	private static long start;
+	private static long end;
 	
 	/**
 	 * @param args[0] the SBMLDocument-File
@@ -58,21 +61,11 @@ public class FluxBalanceAnalysisTest {
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
+		start = System.currentTimeMillis();
 		originalSBMLDoc = (new SBMLReader()).readSBML(args[0]);
 		logger.info("document read: " + args[0]);
 
-		/*
-		 * initialize a system boundary array covering all species with value Double.NaN
-		 * NaN stands for case if species is not at the system boundary
-		 * fill with following:
-		 * -1  if -HC00083_i : case if species can only consumed 
-		 * +1  if +HC00083_i : case if species can only be produced
-		 *  0  if =HC00083_i : case if species can be consumed or produced
-		 * 
-		 * put it in the field "systemBoundaries" of this class
-		 * 
-		 */
-		// TODO read system boundaries:
+		// read system boundaries:
 		CSVDataConverter cu0;
 
 		File systemBoundariesFile = null;		
@@ -91,9 +84,17 @@ public class FluxBalanceAnalysisTest {
 			//wait
 			System.out.print(".");
 		}
+		System.out.println();
 		systemBoundaries = cu0.getSystemBoundariesArray();
+		System.out.println();
+		// get the corrected systems boundaries
+		systemBoundaries = FluxMinimizationUtils.getCorrectedSystemBoundaries(originalSBMLDoc, systemBoundaries);
+		
 		logger.info("system boundaries are read: " + systemBoundariesFile);
-		System.out.println("SB");
+		System.out.println();
+		for (int i = 0; i < systemBoundaries.length; i++) {
+			System.out.println("SB:" + originalSBMLDoc.getModel().getSpecies(i).getId() + " : " + systemBoundaries[i]);
+		}
 		
 		CSVDataConverter cu1 = new CSVDataConverter(originalSBMLDoc, systemBoundaries);
 		CSVDataConverter cu2 = new CSVDataConverter(originalSBMLDoc, systemBoundaries);
@@ -133,7 +134,8 @@ public class FluxBalanceAnalysisTest {
 		fba.setConstraintJG(true);
 		fba.setConstraintJ_rmaxG(true);
 		fba.setConstraintJ0(true);
-		fba.setCplexIterations(4000);
+		fba.setCplexIterations(40000);
+		
 		
 		
 
@@ -146,7 +148,7 @@ public class FluxBalanceAnalysisTest {
 			System.out.print(modModel.getReaction(i) + " ");
 		}
 		System.out.println();
-		System.out.println(FluxMinimizationUtils.getSteadyStateMatrix().toString());
+//		System.out.println(FluxMinimizationUtils.getSteadyStateMatrix().toString());
 		
 		fba.solve();
 		
@@ -193,14 +195,14 @@ public class FluxBalanceAnalysisTest {
 //		for (int i = 0; i< modModel.getSpeciesCount(); i++ ) {
 //			System.out.println(modModel.getSpecies(i) + " : " + fluxSum.get(modModel.getSpecies(i)));
 //		}
-//		
-//		System.out.println();
-//		//print conc solution:
-//		double[] concSolution = fba.solutionConcentrations;
-//		System.out.println("--------solution for the concentrations:--------");
-//		for (int i = 0; i < concSolution.length; i++) {
-//			System.out.println(originalSBMLDoc.getModel().getSpecies(i).getId() + "   " + concSolution[i]);
-//		}
+		
+		System.out.println();
+		//print conc solution:
+		double[] concSolution = fba.solutionConcentrations;
+		System.out.println("--------solution for the concentrations:--------");
+		for (int i = 0; i < concSolution.length; i++) {
+			System.out.println(originalSBMLDoc.getModel().getSpecies(i).getId() + "   " + concSolution[i]);
+		}
 //		
 //		System.out.println();
 //		System.out.println("--------species at the system boundaries----------");
@@ -211,6 +213,9 @@ public class FluxBalanceAnalysisTest {
 //			}
 //		}
 		
+		System.out.println("time:----------------");
+		end = System.currentTimeMillis();
+		System.out.println((end - start) + " ms");
 	}
 
 }

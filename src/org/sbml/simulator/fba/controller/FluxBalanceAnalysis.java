@@ -169,7 +169,7 @@ public class FluxBalanceAnalysis {
 
 		// counter[3] is the index of the gibbs values
 		for (int gibbsBounds = target_length_without_all_flux_values -	targetfunc.getGibbs().length; gibbsBounds < target_length_without_all_flux_values; gibbsBounds++) {
-			lb[gibbsBounds] = -100000;
+			lb[gibbsBounds] = -1000;
 			ub[gibbsBounds] = -Double.MIN_VALUE;
 		}
 
@@ -240,7 +240,7 @@ public class FluxBalanceAnalysis {
 				// where cplex.square(x) = x^2
 				sum = cplex.sum(temp, cplex.square(c_i), cplex.sum(cplex.prod(c_i, ((-2) * c_eq[i])), cplex.square(cplex.constant(c_eq[i]))));
 			} else if(!Double.isNaN(c_eq[i])){
-				sum = cplex.sum(temp, cplex.square(x[i + target_length_without_all_flux_values]),cplex.sum(cplex.prod(x[i + target.length], ((-2) * c_eq[i])), cplex.square(cplex.constant(c_eq[i]))));
+				sum = cplex.sum(temp, cplex.square(x[i + target_length_without_all_flux_values]),cplex.sum(cplex.prod(x[i + target_length_without_all_flux_values], ((-2) * c_eq[i])), cplex.square(cplex.constant(c_eq[i]))));
 			} else {
 				sum = cplex.sum(temp ,cplex.square(x[i + target_length_without_all_flux_values]));
 			}
@@ -300,7 +300,12 @@ public class FluxBalanceAnalysis {
 			if (isConstraintJG()) {
 				IloNumExpr jg = cplex.numExpr();
 				if (!Double.isNaN(compGibbs[j]) && !Double.isInfinite(compGibbs[j])) {
-					jg = cplex.prod(cplex.prod(steadyStateFluxes[j], x[0]),compGibbs[j]);
+					if(Math.signum(steadyStateFluxes[j]) == Math.signum(compGibbs[j])) {
+						//the sign is equal, so the gibbs energy must be changed
+						jg = cplex.prod(cplex.prod(steadyStateFluxes[j], x[0]),cplex.prod(compGibbs[j],x[k]));
+					} else {
+						jg = cplex.prod(cplex.prod(steadyStateFluxes[j], x[0]),compGibbs[j]);
+					}
 				} else { //cplex.prod(steadyStateFluxes[j], x[j])
 					jg = cplex.prod(steadyStateFluxes[j],x[k]);
 				}
@@ -342,7 +347,7 @@ public class FluxBalanceAnalysis {
 		cplex.end();
 
 		// create the MultiTable for visualization
-		//fluxesForVisualization = createMultiTableForVisualizing();
+		fluxesForVisualization = createMultiTableForVisualizing();
 		return solution;
 
 	}
@@ -411,16 +416,18 @@ public class FluxBalanceAnalysis {
 	/**
 	 * Creates a {@link MultiTable} that contains the computed fluxes for visualization.
 	 * @return MultiTable
+	 * @throws Exception 
 	 */
-	private MultiTable createMultiTableForVisualizing(){
+	private MultiTable createMultiTableForVisualizing() throws Exception{
 		double[] time = {0};
-		String[] idsOfReactions = new String[constraints.originalDocument.getModel().getReactionCount()];
-		for (int i = 0; i < constraints.originalDocument.getModel().getReactionCount(); i++){
-			idsOfReactions[i] = constraints.originalDocument.getModel().getReaction(i).getId();
+		String[] idsOfReactions = new String[FluxMinimizationUtils.getExpandedDocument(constraints.originalDocument).getModel().getReactionCount()+1];
+		idsOfReactions[0] = "time";
+		for (int i = 0; i < FluxMinimizationUtils.getExpandedDocument(constraints.originalDocument).getModel().getReactionCount(); i++){
+			idsOfReactions[i+1] = FluxMinimizationUtils.getExpandedDocument(constraints.originalDocument).getModel().getReaction(i).getId();
 		}
-		double[][] fluxes = new double[solutionFluxVector.length][1];
+		double[][] fluxes = new double[1][solutionFluxVector.length];
 		for (int j = 0; j < solutionFluxVector.length; j++) {
-			fluxes[j][0] = solutionFluxVector[j];
+			fluxes[0][j] = solutionFluxVector[j];
 		}
 		MultiTable mt = new MultiTable(time, fluxes, idsOfReactions);
 

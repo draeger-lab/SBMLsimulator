@@ -244,6 +244,7 @@ public class FluxMinimization extends TargetFunction {
 		// this is a pointer, which counts in the target vector the actually position
 
 		int counter = 0;
+		
 
 		// fill the target with the flux vector: ||J|| 
 		for (int i=0; i< this.fluxVector.length; i++) {
