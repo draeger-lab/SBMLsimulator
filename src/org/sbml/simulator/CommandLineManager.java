@@ -519,7 +519,7 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 		// set the initial EvA problem here
 		goParams.setProblem(estimationProblem);
 		goParams.setOptimizer(new DifferentialEvolution());
-		goParams.setTerminator(new EvaluationTerminator(3000));
+		goParams.setTerminator(new EvaluationTerminator(100000));
 		
 		InterfaceOptimizer optimizer = goParams.getOptimizer();
 		optimizer.init();
