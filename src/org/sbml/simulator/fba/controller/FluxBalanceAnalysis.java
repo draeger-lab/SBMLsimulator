@@ -81,7 +81,7 @@ public class FluxBalanceAnalysis {
 	 * Contains the solutions of cplex for the fluxes.
 	 */
 	public double[] solutionFluxVector;
-	
+
 	/**
 	 * Contains the solutions of cplex for the errors.
 	 */
@@ -99,7 +99,7 @@ public class FluxBalanceAnalysis {
 	private boolean constraintJ_rmaxG = true;
 
 	private boolean constraintJ0 = true;
-	
+
 	private boolean constraintError = true;
 
 	private int cplexIterations = 600;
@@ -292,7 +292,15 @@ public class FluxBalanceAnalysis {
 
 			// constraint to compute the error
 			if (isConctraintError()) {
-				cplex.addEq(cplex.prod(compGibbs[j], x[k]), cplex.prod(compGibbs[j], x[j+1]));
+				if (!Double.isNaN(compGibbs[j])) {
+
+					/*
+					 *  x[j+1] are the variables for the error vector, because in the target-array
+					 *  the error vector comes after the fluxvector and the fluxes have only one
+					 *  variable to be optimized
+					 */
+					cplex.addEq(cplex.prod(compGibbs[j], x[k]), cplex.prod(compGibbs[j], x[j+1]));
+				}
 			}
 
 
@@ -333,7 +341,9 @@ public class FluxBalanceAnalysis {
 			solutionFluxVector[i] = steadyStateFluxes[i] * solution[0];
 		}
 		for (int i = 1; i < constraints.getComputedGibbsEnergies().length; i++) {
-			solutionErrors[i] = solution[i];
+			if(!Double.isNaN(compGibbs[i])) {
+				solutionErrors[i] = solution[i];
+			}
 		}
 		for (int j = 0; j < concentrations.length; j++) {
 			// the last values in x are corresponding to the concentrations
@@ -538,7 +548,7 @@ public class FluxBalanceAnalysis {
 	public boolean isConctraintError() {
 		return constraintError;
 	}
-	
+
 	/**
 	 * constraint Delta_G = Delta_G - Error
 	 * @param constraintError
@@ -546,14 +556,14 @@ public class FluxBalanceAnalysis {
 	public void setConctraintError(boolean constraintError) {
 		this.constraintError = constraintError;
 	}
-	
+
 	/**
 	 * @return the cplexIterations
 	 */
 	public int getCplexIterations() {
 		return cplexIterations;
 	}
-	
+
 
 	/**
 	 * @param cplexIterations the cplexIterations to set

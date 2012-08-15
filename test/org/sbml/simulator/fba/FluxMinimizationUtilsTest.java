@@ -42,7 +42,7 @@ public class FluxMinimizationUtilsTest {
 	 * @throws XMLStreamException 
 	 */
 	public static void main(String[] args) throws XMLStreamException, IOException {
-		SBMLDocument sbml = (new SBMLReader()).readSBML(args[0]);
+//		SBMLDocument sbml = (new SBMLReader()).readSBML(args[0]);
 //
 //		// test the method to compute the manhattan norm of a vector:
 //		System.out.println("Manhattan-Norm of the vector (1,-1,2):");
@@ -75,26 +75,26 @@ public class FluxMinimizationUtilsTest {
 //		}
 //
 //
-		// test the method to compute the flux vector:
-		System.out.println();
-		try {
-			sbml = FluxMinimizationUtils.getExpandedDocument(sbml);
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		System.out.println("Flux vector:");
-		double[] fluxvector;
-		System.out.println(FluxMinimizationUtils.eliminatedReactions.toString());
-		try {
-			fluxvector = FluxMinimizationUtils.computeFluxVector(null, sbml);
-			for (int i= 0; i < fluxvector.length; i++) {
-				System.out.print(sbml.getModel().getReaction(i).getId() + "  ");
-				System.out.println(fluxvector[i] + " ");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//		// test the method to compute the flux vector:
+//		System.out.println();
+//		try {
+//			sbml = FluxMinimizationUtils.getExpandedDocument(sbml);
+//		} catch (Exception e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//		System.out.println("Flux vector:");
+//		double[] fluxvector;
+//		System.out.println(FluxMinimizationUtils.eliminatedReactions.toString());
+//		try {
+//			fluxvector = FluxMinimizationUtils.computeFluxVector(null, sbml);
+//			for (int i= 0; i < fluxvector.length; i++) {
+//				System.out.print(sbml.getModel().getReaction(i).getId() + "  ");
+//				System.out.println(fluxvector[i] + " ");
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 
 //		// test the method to eliminate transport reactions:
 //		System.out.println();
@@ -112,31 +112,38 @@ public class FluxMinimizationUtilsTest {
 //		}
 //
 //		System.out.println();
-		System.out.println("Test if the flux is right computed: (it should be (1,1,1,1))");
+//		System.out.println("Test if the flux is right computed: (it should be (1,1,1,1))");
 //		double[][] sMatrix = {{-1,0,0,1}, {1,-1,0,0}, {0,1,-1,0}, {0,0,1,-1}};
-		double[][] sMatrix = {{1,-1,0,0,-1,0}, {0,1,-1,0,0,0},{0,0,1,-1,0,1},{0,0,0,0,1,-1}};
-		StabilityMatrix S = new StabilityMatrix(sMatrix, 4,6);
-		StabilityMatrix steadyStateMatrix  = ConservationRelations.calculateConsRelations(S.transpose());
+//		double[][] sMatrix = {{1,-1,0,0,-1,0}, {0,1,-1,0,0,0},{0,0,1,-1,0,1},{0,0,0,0,1,-1}};
+//		StabilityMatrix S = new StabilityMatrix(sMatrix, 4,6);
+//		StabilityMatrix steadyStateMatrix  = ConservationRelations.calculateConsRelations(S.transpose());
 		//S = new StoichiometricMatrix(S.transpose().getArray(), 6,4);
 		
 		//StabilityMatrix steadyStateMatrix = S.getConservationRelations(); 
 		//= S.getSteadyStateFluxes();
 		//double[] fluxVector = new double[steadyStateMatrix.getRowDimension()];
-		System.out.println("Flux of S:");
+//		System.out.println("Flux of S:");
+//		
+//		System.out.println(steadyStateMatrix.toString());
+//		
+//		//System.out.println(steadyStateMatrix.times(S).toString());
+//		
+//		for (int row = 0; row < steadyStateMatrix.getColumnDimension(); row++) {
+//			//fluxVector[row] = steadyStateMatrix.get(row, steadyStateMatrix.getColumnDimension()-1);
+//			//System.out.print(fluxVector[row] + " ");
+//		}
+//		
+//		System.out.println();
+//		System.out.println("-----");
+//		System.out.println("S:");
+//		System.out.println(S.toString());
 		
-		System.out.println(steadyStateMatrix.toString());
-		
-		//System.out.println(steadyStateMatrix.times(S).toString());
-		
-		for (int row = 0; row < steadyStateMatrix.getColumnDimension(); row++) {
-			//fluxVector[row] = steadyStateMatrix.get(row, steadyStateMatrix.getColumnDimension()-1);
-			//System.out.print(fluxVector[row] + " ");
-		}
-		
-		System.out.println();
 		System.out.println("-----");
-		System.out.println("S:");
-		System.out.println(S.toString());
+		
+		double[][] Matrix = {{-1,1,0},{0,-1,1}, {1,0,-1}};
+		StoichiometricMatrix sm = new StoichiometricMatrix(Matrix, 3, 4);
+		StabilityMatrix s = ConservationRelations.calculateConsRelations(sm);
+		System.out.println(s.toString());
 
 
 	}
