@@ -66,9 +66,9 @@ public class Constraints {
 	/**
 	 * contains the species specific information whether the species belongs to the system boundary or not.
 	 * NaN if species is not at the system boundary
-	 * -1  if -HC00083_i : case if species can only be consumed 
-	 * +1  if +HC00083_i : case if species can only be produced
-	 *  0  if =HC00083_i : case if species can be consumed or produced
+	 * -1  if HC00083_i \t - : case if species can only be consumed 
+	 * +1  if HC00083_i \t + : case if species can only be produced
+	 *  0  if HC00083_i \t = : case if species can be consumed or produced
 	 */
 	private double[] systemBoundaries;
 
