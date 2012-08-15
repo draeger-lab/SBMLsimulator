@@ -17,10 +17,13 @@
  */
 package org.sbml.simulator.fba.controller;
 
+import ilog.concert.IloException;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -104,52 +107,28 @@ public class FluxMinimizationUtils {
 	 * @param doc 
 	 * @return double[] flux vector
 	 * @throws IOException 
+	 * @throws IloException 
 	 */
-	public static double[] computeFluxVector(StoichiometricMatrix N_int_sys, String[] targetFluxes, SBMLDocument doc) throws IOException {
-		StoichiometricMatrix eliminateZeroRows = eliminateZeroRows(N_int_sys);
-		StoichiometricMatrix NwithoutZeroRows = new StoichiometricMatrix(eliminateZeroRows.getArray(), eliminateZeroRows.getRowDimension(), eliminateZeroRows.getColumnDimension());
-		System.out.println(NwithoutZeroRows.getRowDimension() + " " + NwithoutZeroRows.getColumnDimension());
-//		StoichiometricMatrix NwithoutZeroRows = N_int_sys;
-//		NwithoutZeroRows.getReducedMatrix();
-//		double [][] matrix = {
-//				{0.0,0.0,1.0,1.0,1.0,1.0,1.0,1.0},{1.0,1.0,0.0,0.0,1.0,1.0,1.0,1.0}};
-//		steadyStateMatrix = new StoichiometricMatrix(matrix, matrix.length, matrix[0].length);
-		steadyStateMatrix = ConservationRelations.calculateConsRelations(new StoichiometricMatrix(NwithoutZeroRows.transpose().getArray(),NwithoutZeroRows.getColumnDimension(),NwithoutZeroRows.getRowDimension()));
-//		StabilityMatrix steadyStateMatrix = (new StoichiometricMatrix(NwithoutZeroRows.transpose().getArray(),NwithoutZeroRows.getColumnDimension(),NwithoutZeroRows.getRowDimension())).getConservationRelations();
-		
+	public static double[] computeFluxVector(StoichiometricMatrix N_int_sys, String[] targetFluxes, SBMLDocument doc) throws IOException, IloException {
+		double[][] NwithoutZeroRows = eliminateZeroRows(N_int_sys).getArray();
+		// pre-processing: sort the matrix to speed up the computation of the steady state matrix
+		double[][] sortedMatrixArray = getSortedArray(NwithoutZeroRows);
+		System.out.print("leer, ");
+		for (int i = 0; i < systemBoundaryDocument.getModel().getReactionCount(); i++) {
+			System.out.print(systemBoundaryDocument.getModel().getReaction(i) + ", ");
+		}
 		System.out.println();
-		
-		String steadyStateVariable = "double [][] matrix = {";
-		for (int i = 0; i < steadyStateMatrix.getRowDimension(); i++) {
-			steadyStateVariable = addText(steadyStateVariable, "\n{");
-			for (int j = 0; j < steadyStateMatrix.getColumnDimension(); j++) {
-				steadyStateVariable = addText(steadyStateVariable, steadyStateMatrix.get(i, j) + ",");
-			}
-			if (steadyStateVariable.endsWith(",")) {
-				String helper = steadyStateVariable;
-				steadyStateVariable = helper.substring(0, (steadyStateVariable.length() -1));
-			}
-			steadyStateVariable = addText(steadyStateVariable, "},");
+		for (int i = 0; i < sortedMatrixArray.length; i++) {
+			System.out.println(systemBoundaryDocument.getModel().getSpecies(i) + ", " + Arrays.toString(sortedMatrixArray[i]));
 		}
-		if (steadyStateVariable.endsWith(",")) {
-			String helper = steadyStateVariable;
-			steadyStateVariable = helper.substring(0, (steadyStateVariable.length() -1));
-		}
-		steadyStateVariable = addText(steadyStateVariable, "};");
 		
-		steadyStateVariable = addText(steadyStateVariable, "\nsteadyStateMatrix = new StoichiometricMatrix(matrix, matrix.length, matrix[0].length);");
-		System.out.println( steadyStateVariable);
-		
-//		System.exit(0);
-		// TODO delete ausgabe:
-		
-		File file = new File("/home/tscherneck/Desktop/testMeike/steadyStateMatrixModell");
-		FileWriter output = new FileWriter(file ,false);
-		output.write(steadyStateVariable);
-		output.close();
-		
-		// -------------------------
-		
+		StoichiometricMatrix sortedMatrix = new StoichiometricMatrix(sortedMatrixArray, sortedMatrixArray.length, sortedMatrixArray[0].length);
+		steadyStateMatrix = ConservationRelations.calculateConsRelations(sortedMatrix.transpose());
+
+		// post-processing: delete rows with only forward and backward of a reaction
+		steadyStateMatrix = getCorrectedSteadyStateMatrix(steadyStateMatrix);
+
+		System.out.println("steadyStateMatrix.getRowDimension() " + steadyStateMatrix.getRowDimension() + "      steadyStateMatrix.getColumnDimension() " + steadyStateMatrix.getColumnDimension());
 		
 		double[] fluxVector = new double[steadyStateMatrix.getColumnDimension()];
 		
@@ -157,10 +136,10 @@ public class FluxMinimizationUtils {
 		for (int column = 0; column < steadyStateMatrix.getColumnDimension(); column++) {
 			if (steadyStateMatrix.getRowDimension() > 0) {
 				if (((targetFluxes == null) || isNoTargetFlux(column, targetFluxes, doc))) {
-					//TODO: save all possible fluxes and pick that one, that gets the best fba-solution. 
+					//TODO: save all possible fluxes and pick that one, that gets the best fba-solution, 
 //					fluxVector[column] = steadyStateMatrix.get(0,column);
 					
-					// TODO or get the linear combination of all steady state fluxes
+					// or get the linear combination of all steady state fluxes
 					fluxVector[column] = sumOfRowOrCol(steadyStateMatrix.getColumn(column));
 
 					if (Math.abs(fluxVector[column]) < Math.pow(10, -15)) {
@@ -173,18 +152,124 @@ public class FluxMinimizationUtils {
 				}
 			}
 		}
+//		System.out.println(Arrays.toString(fluxVector));
+		for (int i = 0; i < fluxVector.length; i++) {
+			System.out.println(systemBoundaryDocument.getModel().getReaction(i).getId() + ": " + fluxVector[i]);
+		}
+		
+		
 		return fluxVector;
+	}
+	
+	/**
+	 * delete the rows of the steadyStateMatrix with conservation relations of a reversible reactions
+	 * (rows with a conservation relation of only the forward and backward flux of a splitted reversible reaction)
+	 * 
+	 * @param ssMatrix
+	 * @return the corrected SteadyStateMatrix
+	 */
+	private static StabilityMatrix getCorrectedSteadyStateMatrix(StabilityMatrix ssMatrix) {
+		boolean[] deleting = new boolean[ssMatrix.getRowDimension()];
+		int toDeleteCnt = 0;
+		for (int i = 0; i < ssMatrix.getRowDimension(); i++) {
+			if (isForwardBackwardConservation(ssMatrix.getRow(i))) {
+				deleting[i] = true;
+				toDeleteCnt++;
+			}
+		}
+		StabilityMatrix helperMatrix = ssMatrix.clone();
+		System.out.println(toDeleteCnt);
+		ssMatrix = new StabilityMatrix((helperMatrix.getRowDimension() - toDeleteCnt), helperMatrix.getColumnDimension());
+		int i = 0;
+		for (int j = 0; j < helperMatrix.getRowDimension(); j++) {
+			if (!deleting[j]) {
+				ssMatrix.setRow(i, helperMatrix.getRow(j));
+				i++;
+			}
+		}
+		return ssMatrix;
+	}
+
+	/**
+	 * sort the matrix:
+	 * rows of metabolites, which occur in many reactions (e.g. ATP) should moved to the end of the matrix and vice versa
+	 * this results in a faster computation of the tableau algorithm, which searches for combinations of rows.
+	 * applying this preprocessing we reduce the number of possible combinations in the beginning 
+	 * and therefore speed up the following computation of the steadyStateMatrix
+	 * 
+	 * @param arrayToSort
+	 * @return the sorted matrix as double[][]
+	 */
+	private static double[][] getSortedArray(double[][] arrayToSort) {
+		double[][] sortedMatrixArray = new double[arrayToSort.length][arrayToSort[0].length];
+		int[] counter = new int[arrayToSort.length];
+		for (int i = 0; i < arrayToSort.length; i++) {
+			counter[i] = getParticipatingCount(arrayToSort[i]);
+		}
+		int[] sortedCounter = counter.clone();
+		Arrays.sort(sortedCounter);
+
+		int[] indices = new int[counter.length]; // contains the new indices after sorting
+		for (int i = 0; i < counter.length; i++) {
+			for (int j = 0; j < sortedCounter.length; j++) {
+				if ((counter[i] == sortedCounter[j])) {
+					indices[i] = j;
+					sortedCounter[j] = -1; // set the used index to a never again matching value
+					j = sortedCounter.length-1; // set j to the last iteration-index, so that next iteration of i starts
+				}
+			}
+		}
+		
+		for (int i = 0; i < indices.length; i++) {
+			sortedMatrixArray[indices[i]] = arrayToSort[i];
+		}
+		
+		return sortedMatrixArray;
 	}
 
 	/**
 	 * 
-	 * @param older
-	 * @param newer
-	 * @return
+	 * @param row
+	 * @return true if the row only contains a forward and the corresponding backward direction of a reversible reaction
 	 */
-	private static String addText(String older, String newer) {
-		String helper = older + newer;
-		return helper;
+	private static boolean isForwardBackwardConservation(double[] row) {
+		int counter = 0;
+		int indexCounter = 0;
+		int[] index = new int[2];
+		for (int i = 0; i < row.length; i++) {
+			if (row[i] != 0) {
+				if (counter < 2) {
+					index[indexCounter] = i;
+					indexCounter++;
+					counter++;
+				}
+				else return false;
+			}
+		}
+		if (counter == 2) {
+			String r1 = systemBoundaryDocument.getModel().getReaction(index[0]).getId();
+			String r2 = systemBoundaryDocument.getModel().getReaction(index[1]).getId();
+			if (r2.startsWith(r1) || r1.startsWith(r2)) {
+				return true;
+			}
+			else return false;
+		}
+		else return false;
+	}
+
+	/**
+	 * 
+	 * @param array
+	 * @return the number of non-zero entries
+	 */
+	private static int getParticipatingCount(double[] array) {
+		int counter = 0;
+		for (int i = 0; i < array.length; i++) {
+			if (array[i] != 0) {
+				counter++;
+			}
+		}
+		return counter;
 	}
 
 	/**
@@ -199,8 +284,6 @@ public class FluxMinimizationUtils {
 	public static double[] computeFluxVector(String[] targetFluxes, SBMLDocument doc) throws Exception {
 		return computeFluxVector(getExpandedStoichiometricMatrix(doc), targetFluxes, doc);
 	}
-
-
 
 	/**
 	 * Looks if the reaction with the index column is one of the target fluxes. Therefore
@@ -338,33 +421,33 @@ public class FluxMinimizationUtils {
 	}
 
 	/**
-		 * Method to eliminate the rows in the {@link StoichiometricMatrix} that contains only zeros.
-		 * @param {@link StoichiometricMatrix} N
-		 * @return {@link StoichiometricMatrix} without the zero-rows.
-		 */
-		private static StoichiometricMatrix eliminateZeroRows(StoichiometricMatrix N) {
-			// initialize the new StoichiometricMatrix (without the zero-rows)
-			StoichiometricMatrix S;
-			
-			for (int row = 0; row <N.getRowDimension(); row++){
-				//flagZeros is true if this row contains only zeros
-				boolean flagZeros = true;
-				for (int col = 0; col <N.getColumnDimension(); col++) {
-					if (N.get(row, col) != 0.0) {
-						flagZeros = false;
-					}
-				}
-				if (!flagZeros) {
-					remainingList.add(row);
+	 * Method to eliminate the rows in the {@link StoichiometricMatrix} that contains only zeros.
+	 * @param {@link StoichiometricMatrix} N
+	 * @return {@link StoichiometricMatrix} without the zero-rows.
+	 */
+	private static StoichiometricMatrix eliminateZeroRows(StoichiometricMatrix N) {
+		// initialize the new StoichiometricMatrix (without the zero-rows)
+		StoichiometricMatrix S;
+
+		for (int row = 0; row <N.getRowDimension(); row++){
+			//flagZeros is true if this row contains only zeros
+			boolean flagZeros = true;
+			for (int col = 0; col <N.getColumnDimension(); col++) {
+				if (N.get(row, col) != 0.0) {
+					flagZeros = false;
 				}
 			}
-			
-			S = new StoichiometricMatrix(remainingList.size(), N.getColumnDimension());
-			for (int j = 0; j < S.getRowDimension(); j++) {
-				S.setRow(j, N.getRow(remainingList.get(j)));
+			if (!flagZeros) {
+				remainingList.add(row);
 			}
-			return S;
 		}
+
+		S = new StoichiometricMatrix(remainingList.size(), N.getColumnDimension());
+		for (int j = 0; j < S.getRowDimension(); j++) {
+			S.setRow(j, N.getRow(remainingList.get(j)));
+		}
+		return S;
+	}
 
 	/**
 	 * Computes the Manhattan-Norm ||vector|| = sum up from 1 to |vector|: |v_i|        
@@ -497,7 +580,6 @@ public class FluxMinimizationUtils {
 	 * @throws Exception
 	 */
 	private static void expandDocument(SBMLDocument originalDocument, double[] systemBoundaries) throws Exception {
-		// TODO implement and exchange
 		SBMLDocument modifiedDocument = eliminateTransportsAndSplitReversibleReactions(originalDocument);
 		systemBoundaryDocument = addSystemBoundaries(modifiedDocument, systemBoundaries);
 		N_int_sys = SBMLDocToStoichMatrix(systemBoundaryDocument);
@@ -531,11 +613,50 @@ public class FluxMinimizationUtils {
 	 * @param modDoc
 	 * @param systemBoundaries
 	 * @return
+	 * @throws Exception 
 	 */
-	private static SBMLDocument addSystemBoundaries(SBMLDocument modDoc, double[] systemBoundaries) {
+	private static SBMLDocument addSystemBoundaries(SBMLDocument modDoc, double[] systemBoundaries) throws Exception {
 		SBMLDocument doc = modDoc.clone();
 		doc = addNewReactionEntriesToDoc(systemBoundaries, doc);
 		return doc;
+	}
+
+	/**
+	 * 
+	 * @param n_int
+	 * @param rawSystemBoundaries
+	 * @return
+	 */
+	private static double[] getCorrectedSystemBoundaries(
+			StoichiometricMatrix n_int, double[] rawSystemBoundaries) {
+		double[] sb = rawSystemBoundaries.clone();
+		
+		for (int row = 0; row < rawSystemBoundaries.length; row++) {
+			if (rawSystemBoundaries[row] == 0) {
+				if (sumOfRowOrCol(n_int.getRow(row)) != 0) {
+					sb[row] = -(sumOfRowOrCol(n_int.getRow(row)));
+				}
+				else {
+					sb[row] = Double.NaN;
+				}
+			}
+		}
+		return sb;
+	}
+	
+	/**
+	 * 
+	 * @param oriDoc
+	 * @param rawSystemBoundaries
+	 * @return the corrected system boundaries
+	 * @throws Exception
+	 */
+	public static double[] getCorrectedSystemBoundaries(SBMLDocument oriDoc, double[] rawSystemBoundaries) throws Exception {
+		SBMLDocument modifiedDocument = eliminateTransportsAndSplitReversibleReactions(oriDoc);
+		StoichiometricMatrix n_int = SBMLDocToStoichMatrix(modifiedDocument);
+		double[] sb = getCorrectedSystemBoundaries(n_int, rawSystemBoundaries);
+		systemBoundaries = sb;
+		return sb;
 	}
 
 	/**
@@ -576,15 +697,15 @@ public class FluxMinimizationUtils {
 
 				SpeciesReference specRef =  new SpeciesReference(species);
 				specRef.setMetaId(metaIdPrefix + speciesId + "_" + reactionId);
-				specRef.setStoichiometry(Math.abs(systemBoundaries[index]));
+				// TODO choose which is better (give stoichiometry or 1)
+//				specRef.setStoichiometry(Math.abs(systemBoundaries[index]));
+				specRef.setStoichiometry(1);
+				
 				if (Math.signum(systemBoundaries[index]) == -1) {
 					systemBoundaryReaction.addReactant(specRef);
 				} 
 				else if (Math.signum(systemBoundaries[index]) == +1) {
 					systemBoundaryReaction.addProduct(specRef);
-				}
-				else { // if 0
-					// TODO add the corresponding reaction
 				}
 				systemBoundaryReaction.setReversible(false);
 				modified.getModel().addReaction(systemBoundaryReaction);
