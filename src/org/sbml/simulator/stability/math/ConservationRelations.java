@@ -47,25 +47,30 @@ public class ConservationRelations {
 
 
 		List<Set<Integer>> listOfSetsS;
+//		int[][] combinations = new int[0][2];
 		List<int[]> combinations = new ArrayList<int[]>();
 		List<Integer> listOfZeroRows = new ArrayList<Integer>();
 		//		LinkedList<double[]> tableauLeft = new LinkedList<double[]>();
 		double[][] tableauLeft = stoichiometric.getArray();
-
-		LinkedList<double[]> tableauRight = new LinkedList<double[]>();
+		double[][] tableauRight = ident.getArray();
+		
+		double[][] backupLeft;
+		double[][] backupRight;
 
 		//		for (int i = 0; i < stoichiometric.getRowDimension(); i++) {
 		//			tableauLeft.add(stoichiometric.getRow(i));
 		//		}
-		for (int i = 0; i < ident.getRowDimension(); i++) {
-			tableauRight.add(ident.getRow(i));
-		}
+//		for (int i = 0; i < ident.getRowDimension(); i++) {
+//			tableauRight.add(ident.getRow(i));
+//		}
 
 		int j = 0, i = 0, rownum = 0;
 		// for each column and as long as there are remaining tableaux to build
 		// and matrixS contains not only zero values
-		for (j = 0; j < stoichiometric.getColumnDimension() && !allZero(tableauLeft, j); j++) {
-			System.out.println("j" + j + "size: " + tableauLeft.length);
+		int columnDimension = stoichiometric.getColumnDimension();
+		System.out.println(columnDimension);
+		for (j = 0; j < columnDimension && !allZero(tableauLeft, j); j++) {
+//			System.out.println("j: " + j + ".." + tableauLeft.length);
 			// System.out.println("j: " + j + " / " +
 			// tableauLeft.getColumnDimension() + " rowDimension" +
 			// tableauLeft.getRowDimension());
@@ -115,8 +120,9 @@ public class ConservationRelations {
 			// 0);
 
 			// backup variables for the tableaux
-			LinkedList<double[]> backupLeft = new LinkedList<double[]>();
-			LinkedList<double[]> backupRight = new LinkedList<double[]>();
+			int rows = combinations.size() + listOfZeroRows.size();
+			backupLeft = new double[rows][columnDimension];
+			backupRight = new double[rows][columnDimension];
 
 			// build T(j+1)
 
@@ -140,50 +146,67 @@ public class ConservationRelations {
 				// ith element of column j in left tableau
 
 				// theta left:
-				backupLeft.add(combine(rowS1, rowS2, 
+				backupLeft = addRow(backupLeft, rownum, (combine(rowS1, rowS2, 
 						Math.abs(tableauLeft[combinations.get(rownum)[1]][j]), 
 						Math.abs(tableauLeft[combinations.get(rownum)[0]][j])
-				));
+				)));
 
 				// calculate a row for the right tableau
 				// ith row of right tableau
-				rowI1 = tableauRight.get(combinations.get(rownum)[0]);
+				rowI1 = tableauRight[combinations.get(rownum)[0]];
 				// kth element of jth column in left tableau (because j is in
 				// [0,..,r])
 
 				// kth row of right tableau
-				rowI2 = tableauRight.get(combinations.get(rownum)[1]);
+				rowI2 = tableauRight[combinations.get(rownum)[1]];
 
 				// ith element of jth column in left tableau
 				// theta right:
 
-				backupRight.add(combine(rowI1, rowI2, 
+				backupRight = addRow(backupRight, rownum, (combine(rowI1, rowI2, 
 						Math.abs(tableauLeft[combinations.get(rownum)[1]][j]), 
-						Math.abs(tableauLeft[combinations.get(rownum)[0]][j])));
+						Math.abs(tableauLeft[combinations.get(rownum)[0]][j])
+				)));
+				
 			}
 
 			// takes over all rows from T(j) to T(j+1) where the entry at column
 			// j is zero
 			for (i = 0; i < listOfZeroRows.size(); i++) {
-				backupLeft.add(tableauLeft[listOfZeroRows.get(i).intValue()]);
-				backupRight.add(tableauRight.get(listOfZeroRows.get(i).intValue()));
+				backupLeft = addRow(backupLeft, rownum, (tableauLeft[listOfZeroRows.get(i).intValue()]));
+				backupRight = addRow(backupRight, rownum, (tableauRight[listOfZeroRows.get(i).intValue()]));
 				rownum++;
 			}
 			//			tableauLeft = (LinkedList<double[]>) backupLeft.clone();
-			tableauLeft = setBackupToTableau(backupLeft);
-			tableauRight = (LinkedList<double[]>) backupRight.clone();
+			tableauLeft = backupLeft.clone();
+			tableauRight = backupRight.clone();
 
 			combinations.clear();
 			listOfZeroRows.clear();
 
 		}
-		ret = new StabilityMatrix(tableauRight.size(), stoichiometric.getRowDimension());
+		ret = new StabilityMatrix(tableauRight.length, stoichiometric.getRowDimension());
 		for (int k = 0; k < ret.getRowDimension(); k++) {
-			ret.setRow(k, tableauRight.get(k));
+			ret.setRow(k, tableauRight[k]);
 		}
 
 
 		return ret;
+	}
+
+	private static int[][] addCombination(int[][] combinations, int firstRow, int secondRow) {
+		int[][] combinationArray = new int[combinations.length + 1][2];
+		// at first copy the old array
+		
+		
+		combinationArray[combinations.length + 1][0] = firstRow;
+		combinationArray[combinations.length + 1][1] = secondRow;
+		return combinationArray;
+	}
+
+	private static double[][] addRow(double[][] backup, int rowCounter, double[] nextRow) {
+		backup[rowCounter] = nextRow;
+		return backup;		
 	}
 
 	private static double[][] setBackupToTableau(
@@ -192,7 +215,7 @@ public class ConservationRelations {
 		for (int i = 0; i < backup.size(); i++) {
 			tableau[i] = backup.get(i);
 		}
-		return null;
+		return tableau;
 	}
 
 	public static double get(LinkedList<double[]> rows, int i, int j) {
@@ -229,11 +252,11 @@ public class ConservationRelations {
 	 * @param listofsets
 	 *            ArrayList to save the sets
 	 */
-	private static List<Set<Integer>> buildSets(List<double[]> rows) {
+	private static List<Set<Integer>> buildSets(double[][] tableauRight) {
 
 		List<Set<Integer>> listOfSets = new LinkedList<Set<Integer>>();
-		for (int i = 0; i < rows.size(); i++) {
-			double[] row = rows.get(i);
+		for (int i = 0; i < tableauRight.length; i++) {
+			double[] row = tableauRight[i];
 			//HashSet<Integer> set = new HashSet<Integer>();
 			TreeSet<Integer> set = new TreeSet<Integer>();
 
