@@ -251,7 +251,7 @@ public class FluxBalanceAnalysis {
 		// only for FluxMinimization the target function has to be minimized
 		if (targetFunction instanceof FluxMinimization) {
 			cplex.addMinimize(cplex_target);
-		} else {
+		} else { //TODO: implement more target functions
 			cplex.addMaximize(cplex_target);
 		}
 
@@ -314,7 +314,7 @@ public class FluxBalanceAnalysis {
 					} else {
 						jg = cplex.prod(cplex.prod(steadyStateFluxes[j], x[0]),compGibbs[j]);
 					}
-				} else { //cplex.prod(steadyStateFluxes[j], x[j])
+				} else {
 					jg = cplex.prod(steadyStateFluxes[j],x[k]);
 				}
 
@@ -340,9 +340,10 @@ public class FluxBalanceAnalysis {
 			// the first counter[1]-values are corresponding to the fluxes
 			solutionFluxVector[i] = steadyStateFluxes[i] * solution[0];
 		}
-		for (int i = 1; i < constraints.getComputedGibbsEnergies().length; i++) {
-			if(!Double.isNaN(compGibbs[i])) {
-				solutionErrors[i] = solution[i];
+		for (int i = 1; i <= constraints.getComputedGibbsEnergies().length; i++) {
+			// after the flux vector is the error vector in the target function
+			if(!Double.isNaN(compGibbs[i-1])) {
+				solutionErrors[i-1] = solution[i];
 			}
 		}
 		for (int j = 0; j < concentrations.length; j++) {
@@ -358,8 +359,8 @@ public class FluxBalanceAnalysis {
 
 		// create the MultiTable for visualization
 		fluxesForVisualization = createMultiTableForVisualizing();
+		
 		return solution;
-
 	}
 
 	/**
