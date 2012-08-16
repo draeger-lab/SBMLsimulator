@@ -370,7 +370,10 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 					"Running FBA failed",
 					JOptionPane.ERROR_MESSAGE);
 		}
-
+		
+		//visualize fba
+		simultorPanel.getDynamicGraphView().addFluxbilance(fba.fluxesForVisualization);
+		
 		if (theFirstCall) {
 			vod.setFluxes(fba.solutionFluxVector);
 			vod.setConcentrations(fba.solutionConcentrations);
