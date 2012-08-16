@@ -33,6 +33,7 @@ import org.sbml.jsbml.LocalParameter;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.Reaction;
+import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.SBMLWriter;
 import org.sbml.jsbml.Species;
@@ -345,11 +346,11 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 		else {
 			multiShoot = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_MULTI_SHOOT));
 		}
-		Model clonedModel = simulationManager.getSimulationConfiguration().getModel().clone();
-		
+		SBMLDocument clonedDocument = simulationManager.getSimulationConfiguration().getModel().getSBMLDocument().clone();
+		Model clonedModel = clonedDocument.getModel();
 		//Create quantity ranges from file or with standard preferences
 		QuantityRange[] quantityRanges = null;
-		if(props.contains(EstimationOptions.EST_TARGETS)) {
+		if(props.containsKey(EstimationOptions.EST_TARGETS)) {
 			String file = String.valueOf(props.get(EstimationOptions.EST_TARGETS));
 			try {
 				quantityRanges = EstimationProblem.readQuantityRangesFromFile(file, clonedModel);
@@ -483,7 +484,6 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 		for (int i = 0; i < estimationProblem.getQuantities().length; i++) {
 			quantityIds[i] = estimationProblem.getQuantities()[i].getId();
 		}
-		
 		MultiTable reference = estimationProblem.getReferenceData()[0];
 		for (int col = 0; col < reference.getColumnCount(); col++) {
 			String id = reference.getColumnIdentifier(col);
@@ -519,7 +519,7 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 		// set the initial EvA problem here
 		goParams.setProblem(estimationProblem);
 		goParams.setOptimizer(new DifferentialEvolution());
-		goParams.setTerminator(new EvaluationTerminator(100000));
+		goParams.setTerminator(new EvaluationTerminator(10));
 		
 		InterfaceOptimizer optimizer = goParams.getOptimizer();
 		optimizer.init();
