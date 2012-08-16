@@ -216,6 +216,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
          */
         simulationCores = new ArrayList<DynamicCore>(5);
         experimentalCores = new ArrayList<DynamicCore>(5);
+        fluxbilanceCores = new ArrayList<DynamicCore>(5);
         
         add(graphWithLegend);
         add(controlPanel);
