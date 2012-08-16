@@ -161,10 +161,10 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
     private ArrayList<DynamicCore> experimentalCores;
     
     /**
-     * Pointer to fluxbilance data {@link DynamicCore}. Once computed, store that
+     * Pointer to fluxbalance data {@link DynamicCore}. Once computed, store that
      * core for immediate change of data set.
      */
-    private ArrayList<DynamicCore> fluxbilanceCores;
+    private ArrayList<DynamicCore> fluxbalanceCores;
 
     /**
      * Used {@link SBMLDocument}.
@@ -216,7 +216,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
          */
         simulationCores = new ArrayList<DynamicCore>(5);
         experimentalCores = new ArrayList<DynamicCore>(5);
-        fluxbilanceCores = new ArrayList<DynamicCore>(5);
+        fluxbalanceCores = new ArrayList<DynamicCore>(5);
         
         add(graphWithLegend);
         add(controlPanel);
@@ -271,12 +271,12 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
     }
     
     /**
-     * Add Fluxbilance data to display it in the graph.
-     * @param data containing fluxbilance for this graph
+     * Add Fluxbalance data to display it in the graph.
+     * @param data containing fluxbalance for this graph
      */
-    public void addFluxbilance(MultiTable data) {
+    public void addFluxbalance(MultiTable data) {
         final DynamicView thisView = this;
-        final MultiTable fluxbilance = data;
+        final MultiTable fluxbalance = data;
         SwingWorker<Void, Void> computationOfLimits = new SwingWorker<Void, Void>() {
             
             /*
@@ -290,7 +290,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
                  * the simulation is finished, the control panel is
                  * consistent with the simulated data.
                  */
-                fluxbilanceCores.add(new DynamicCore(thisView, fluxbilance, document));
+                fluxbalanceCores.add(new DynamicCore(thisView, fluxbalance, document));
                 return null;
             }
 
@@ -302,9 +302,9 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
             protected void done() {
                 super.done();
                 String dataName = bundle
-                        .getString("FLUXBILANCE_DATA")
+                        .getString("FLUXBALANCE_DATA")
                         + " "
-                        + fluxbilanceCores.size();
+                        + fluxbalanceCores.size();
                 controlPanel.addToDataList(dataName);
                 controlPanel.setSelectedVisualizationData(dataName);
             }
@@ -653,9 +653,9 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
                 return true;
             }
             return false;
-        } else if (dataName.contains(bundle.getString("FLUXBILANCE_DATA"))) {
-            if (!fluxbilanceCores.isEmpty()) {
-                activateView(fluxbilanceCores.get(index));
+        } else if (dataName.contains(bundle.getString("FLUXBALANCE_DATA"))) {
+            if (!fluxbalanceCores.isEmpty()) {
+                activateView(fluxbalanceCores.get(index));
                 return true;
             }
             return false;
