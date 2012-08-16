@@ -795,5 +795,12 @@ public class SimulationPanel extends JPanel implements
 	public void setTabbedPane(JTabbedPane tabbedPane) {
 		this.tabbedPane = tabbedPane;
 	}
+
+    /**
+     * @return the dynamicGraphView
+     */
+    public DynamicView getDynamicGraphView() {
+        return dynamicGraphView;
+    }
   
 }
