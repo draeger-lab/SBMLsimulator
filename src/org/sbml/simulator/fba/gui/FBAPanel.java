@@ -372,7 +372,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 		}
 		
 		//visualize fba
-		simultorPanel.getDynamicGraphView().addFluxbilance(fba.fluxesForVisualization);
+		simultorPanel.getDynamicGraphView().addFluxbalance(fba.fluxesForVisualization);
 		
 		if (theFirstCall) {
 			vod.setFluxes(fba.solutionFluxVector);

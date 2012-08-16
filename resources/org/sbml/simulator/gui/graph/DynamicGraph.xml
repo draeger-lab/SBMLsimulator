@@ -48,9 +48,9 @@
   
   <!-- DynamicView -->
   
-  <entry key="SIMULATION_DATA">Simulation Data</entry> 
-  <entry key="EXPERIMENTAL_DATA">Experimental Data</entry>
-  <entry key="FLUXBILANCE_DATA">Experimental Data</entry>      
+  <entry key="SIMULATION_DATA">Simulation data</entry> 
+  <entry key="EXPERIMENTAL_DATA">Experimental data</entry>
+  <entry key="FLUXBALANCE_DATA">Fluxbalance data</entry>      
   
   <!-- DynamicCore -->
   
