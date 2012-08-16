@@ -154,6 +154,8 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 
 	private boolean theFirstCall = true;
 
+	private SimulationPanel simultorPanel;
+
 	/**
 	 * Constructor that sets all the different panels
 	 * @param document
@@ -239,6 +241,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	 * @param simPanel
 	 */
 	public void setSimulatorPanel(SimulationPanel simPanel) {
+		simultorPanel = simPanel;
 		init();
 	}
 
