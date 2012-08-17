@@ -149,7 +149,7 @@ public class FluxBalanceAnalysisTest {
 			System.out.print(modModel.getReaction(i) + " ");
 		}
 		System.out.println();
-//		System.out.println(FluxMinimizationUtils.getSteadyStateMatrix().toString());
+		System.out.println(FluxMinimizationUtils.getSteadyStateMatrix().toString());
 		
 		fba.solve();
 		
@@ -197,13 +197,13 @@ public class FluxBalanceAnalysisTest {
 //			System.out.println(modModel.getSpecies(i) + " : " + fluxSum.get(modModel.getSpecies(i)));
 //		}
 		
-		System.out.println();
-		//print conc solution:
-		double[] concSolution = fba.solutionConcentrations;
-		System.out.println("--------solution for the concentrations:--------");
-		for (int i = 0; i < concSolution.length; i++) {
-			System.out.println(originalSBMLDoc.getModel().getSpecies(i).getId() + "   " + concSolution[i]);
-		}
+//		System.out.println();
+//		//print conc solution:
+//		double[] concSolution = fba.solutionConcentrations;
+//		System.out.println("--------solution for the concentrations:--------");
+//		for (int i = 0; i < concSolution.length; i++) {
+//			System.out.println(originalSBMLDoc.getModel().getSpecies(i).getId() + "   " + concSolution[i]);
+//		}
 //		
 //		System.out.println();
 //		System.out.println("--------species at the system boundaries----------");
@@ -214,15 +214,15 @@ public class FluxBalanceAnalysisTest {
 //			}
 //		}
 		
-		System.out.println("time:----------------");
-		end = System.currentTimeMillis();
-		System.out.println((end - start) + " ms");
-		
-		System.out.println("Error:-----------------");
-		double[] errorSolutions = fba.solutionErrors;
-		for (int i = 0; i < errorSolutions.length; i++) {
-			System.out.println(modModel.getReaction(i).getId() + "    " + errorSolutions[i]);
-		}
+//		System.out.println("time:----------------");
+//		end = System.currentTimeMillis();
+//		System.out.println((end - start) + " ms");
+//		
+//		System.out.println("Error:-----------------");
+//		double[] errorSolutions = fba.solutionErrors;
+//		for (int i = 0; i < errorSolutions.length; i++) {
+//			System.out.println(modModel.getReaction(i).getId() + "    " + errorSolutions[i]);
+//		}
 	}
 
 }
