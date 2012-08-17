@@ -165,10 +165,10 @@ public class Constraints {
 				computedGibbsEnergies[j] = (equilibriumsGibbs[j]) + (R*T*sum);
 			}
 
-			for (int reacIndex = 0; reacIndex < modModel.getReactionCount(); reacIndex++) {
-				String reactionID = modModel.getReaction(reacIndex).getId();
+			for (int j = 0; j < modModel.getReactionCount(); j++) {
+				String reactionID = modModel.getReaction(j).getId();
 				if (reactionID.startsWith(FluxMinimizationUtils.degradationPrefix)) {
-					computedGibbsEnergies[reacIndex] = Double.NaN; // for system boundary added reactions
+					computedGibbsEnergies[j] = Double.NaN; // for system boundary added reactions
 				}
 			}
 		}

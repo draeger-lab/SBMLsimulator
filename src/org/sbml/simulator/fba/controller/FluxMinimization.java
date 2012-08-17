@@ -239,7 +239,7 @@ public class FluxMinimization extends TargetFunction {
 		double[] target = new double[fluxVector.length + 				// ||J||
 		                             L.length +							// ||L||
 		                             errorArray.length + 				// ||E||
-		                             computedGibbsEnergies.length];	// ||deltaG||
+		                             computedGibbsEnergies.length];		// ||deltaG||
 
 		// this is a pointer, which counts in the target vector the actually position
 
