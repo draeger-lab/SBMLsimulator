@@ -18,6 +18,7 @@
 package org.sbml.simulator.stability.math;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,7 +47,7 @@ public class ConservationRelations {
 		StabilityMatrix ret;
 
 
-		List<Set<Integer>> listOfSetsS;
+		List<BitSet> listOfSetsS;
 //		int[][] combinations = new int[0][2];
 		List<int[]> combinations = new ArrayList<int[]>();
 		List<Integer> listOfZeroRows = new ArrayList<Integer>();
@@ -93,15 +94,17 @@ public class ConservationRelations {
 					//System.out.println(get(tableauLeft, i, j) + " "+get(tableauLeft, k, j));
 					if ((tableauLeft[i][j] * tableauLeft[k][j]) < 0) {
 						// condition (3.7) satisfied now checking (3.8)
-						//Set<Integer> intersection = new HashSet<Integer>(listOfSetsS.get(i));
-						Set<Integer> intersection = new TreeSet<Integer>(listOfSetsS.get(i));
-						intersection.retainAll(listOfSetsS.get(k));
+						BitSet intersection = (BitSet) listOfSetsS.get(i).clone();
+						intersection.and(listOfSetsS.get(k));
 						boolean isSubset = false;
 						for (int l = 0; l < listOfSetsS.size() && !isSubset; l++) {
 							if ((l == k) || (l == i)) {
 								continue;
 							}
-							if (listOfSetsS.get(l).containsAll(intersection))
+							BitSet containsAll = (BitSet) listOfSetsS.get(l).clone(); 
+							containsAll.and(intersection);
+							containsAll.xor(intersection);
+							if (containsAll.isEmpty())
 								isSubset = true;
 						}
 						if (!isSubset){ // condition (3.8) satisfied
@@ -252,17 +255,16 @@ public class ConservationRelations {
 	 * @param listofsets
 	 *            ArrayList to save the sets
 	 */
-	private static List<Set<Integer>> buildSets(double[][] tableauRight) {
+	private static List<BitSet> buildSets(double[][] tableauRight) {
 
-		List<Set<Integer>> listOfSets = new LinkedList<Set<Integer>>();
+		List<BitSet> listOfSets = new LinkedList<BitSet>();
 		for (int i = 0; i < tableauRight.length; i++) {
 			double[] row = tableauRight[i];
-			//HashSet<Integer> set = new HashSet<Integer>();
-			TreeSet<Integer> set = new TreeSet<Integer>();
+			BitSet set = new BitSet(row.length);
 
 			for (int j = 0; j < row.length; j++) {
 				if (row[j] == 0d) {
-					set.add(j);
+					set.set(j);
 				}				
 			}
 			listOfSets.add(set);
