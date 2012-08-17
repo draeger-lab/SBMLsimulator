@@ -46,19 +46,14 @@ import org.jfree.data.category.SlidingCategoryDataset;
 public class VODPanel extends JPanel implements ActionListener{
 
 	/**
-	 * default serial version
+	 * Contains the computed values for the concentrations
 	 */
-	private static final long serialVersionUID = 1L;
+	private double[] concentrations;
 
 	/**
 	 * Contains the computed values for the fluxes
 	 */
 	private double[] fluxes;
-	
-	/**
-	 * Contains the computed values for the concentrations
-	 */
-	private double[] concentrations;
 	
 	/**
 	 * Contains the plot
@@ -67,10 +62,66 @@ public class VODPanel extends JPanel implements ActionListener{
 
 
 	/**
+	 * default serial version
+	 */
+	private static final long serialVersionUID = 1L;
+
+
+	/**
 	 * Default constructor
 	 */
 	public VODPanel() {
 		plot = new JPanel(new BorderLayout());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO: make button pressed answer
+	
+	}
+
+	/**
+	 * Sets the conditions of the plot (name, axes, etc.)
+	 * @param dataset
+	 * @return
+	 */
+	private static JFreeChart createChart(SlidingCategoryDataset dataset) {
+		JFreeChart jfreechart = ChartFactory.createBarChart("Steady-State Fluxes", "Reaction", "Value", dataset, false);
+		CategoryPlot cplot = (CategoryPlot) jfreechart.getPlot();
+	
+		CategoryAxis domainAxis = cplot.getDomainAxis();
+		domainAxis.setMaximumCategoryLabelWidthRatio(0.8f);
+		domainAxis.setLowerMargin(0.02);
+		domainAxis.setUpperMargin(0.02);
+	
+		// disable bar outlines...
+		BarRenderer renderer = (BarRenderer) cplot.getRenderer();
+		renderer.setDrawBarOutline(false);
+	
+		// set up gradient paints for series...
+		GradientPaint gp0 = new GradientPaint(0.0f, 0.0f, Color.blue,
+				0.0f, 0.0f, new Color(0, 0, 64));
+		renderer.setSeriesPaint(0, gp0);
+	
+		return jfreechart;
+	}
+
+	/**
+	 * @return the concentrations
+	 */
+	public double[] getConcentrations() {
+		return concentrations;
+	}
+
+	/**
+	 * @return the fluxes
+	 */
+	public double[] getFluxes() {
+		return fluxes;
 	}
 
 	/**
@@ -98,37 +149,10 @@ public class VODPanel extends JPanel implements ActionListener{
 	}
 
 	/**
-	 * Sets the conditions of the plot (name, axes, etc.)
-	 * @param dataset
-	 * @return
+	 * @param concentrations the concentrations to set
 	 */
-	private static JFreeChart createChart(SlidingCategoryDataset dataset) {
-		JFreeChart jfreechart = ChartFactory.createBarChart("Steady-State Fluxes", "Reaction", "Value", dataset, false);
-		CategoryPlot cplot = (CategoryPlot) jfreechart.getPlot();
-
-		CategoryAxis domainAxis = cplot.getDomainAxis();
-		domainAxis.setMaximumCategoryLabelWidthRatio(0.8f);
-		domainAxis.setLowerMargin(0.02);
-		domainAxis.setUpperMargin(0.02);
-
-		// disable bar outlines...
-		BarRenderer renderer = (BarRenderer) cplot.getRenderer();
-		renderer.setDrawBarOutline(false);
-
-		// set up gradient paints for series...
-		GradientPaint gp0 = new GradientPaint(0.0f, 0.0f, Color.blue,
-				0.0f, 0.0f, new Color(0, 0, 64));
-		renderer.setSeriesPaint(0, gp0);
-
-		return jfreechart;
-	}
-
-
-	/**
-	 * @return the fluxes
-	 */
-	public double[] getFluxes() {
-		return fluxes;
+	public void setConcentrations(double[] concentrations) {
+		this.concentrations = concentrations;
 	}
 
 	/**
@@ -136,30 +160,6 @@ public class VODPanel extends JPanel implements ActionListener{
 	 */
 	public void setFluxes(double[] fluxes) {
 		this.fluxes = fluxes;
-	}
-
-	/**
-	 * @return the concentrations
-	 */
-	public double[] getConcentrations() {
-		return concentrations;
-	}
-
-	/**
-	 * @param concentrations the concentrations to set
-	 */
-	public void setConcentrations(double[] concentrations) {
-		this.concentrations = concentrations;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO: make button pressed answer
-
 	}
 
 

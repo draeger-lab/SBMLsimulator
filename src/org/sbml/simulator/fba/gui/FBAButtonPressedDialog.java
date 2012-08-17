@@ -43,21 +43,15 @@ import javax.swing.JTextField;
  */
 public class FBAButtonPressedDialog extends JDialog implements ActionListener{
 
+	/**
+	 * Cancel button to exit the dialog without loading a file
+	 */
+	private JButton buttonCancel;
 
 	/**
-	 * default serial version
+	 * button which opens a file chooser to choose a file
 	 */
-	private static final long serialVersionUID = 1L;
-
-	/**
-	 * the incoming Gibbs energie file
-	 */
-	private File energieFile;
-
-	/**
-	 * the incoming concentration file
-	 */
-	private File concentrationFile;
+	private JButton buttonConcentrationsFile;
 
 	/**
 	 * button which opens a file chooser to choose a file
@@ -65,9 +59,31 @@ public class FBAButtonPressedDialog extends JDialog implements ActionListener{
 	private JButton buttonEnergieDatei;
 
 	/**
-	 * field to write in the Gibbs energie file path
+	 * OK button which closes the dialog, when files are loaded
 	 */
-	private JTextField textFieldEnergieFile;
+	private JButton buttonOk;
+
+	/**
+	 * the incoming concentration file
+	 */
+	private File concentrationFile;
+
+	/**
+	 * the incoming Gibbs energie file
+	 */
+	private File energieFile;
+
+	/**
+	 * boolean that is true if files were loaded
+	 */
+	private boolean hasFiles;
+
+	/**
+	 * default serial version
+	 */
+	private static final long serialVersionUID = 1L;
+
+
 
 	/**
 	 * field to write in the concentration file path
@@ -75,26 +91,9 @@ public class FBAButtonPressedDialog extends JDialog implements ActionListener{
 	private JTextField textFieldConcentrationsFile;
 
 	/**
-	 * button which opens a file chooser to choose a file
+	 * field to write in the Gibbs energie file path
 	 */
-	private JButton buttonConcentrationsFile;
-	
-	/**
-	 * OK button which closes the dialog, when files are loaded
-	 */
-	private JButton buttonOk;
-	
-	/**
-	 * Cancel button to exit the dialog without loading a file
-	 */
-	private JButton buttonCancel;
-	
-	/**
-	 * boolean that is true if files were loaded
-	 */
-	private boolean hasFiles;
-
-
+	private JTextField textFieldEnergieFile;
 
 	/**
 	 * Creates a new dialog to load the files for flux balance analysis.
@@ -106,6 +105,78 @@ public class FBAButtonPressedDialog extends JDialog implements ActionListener{
 		super(windowAncestor, documentModal);
 		initialize();
 		hasFiles = false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
+	public void actionPerformed(ActionEvent e) {
+		JFileChooser filechooser = new JFileChooser();
+		filechooser.setMultiSelectionEnabled(false);
+		filechooser.setDialogType(JFileChooser.OPEN_DIALOG);
+		filechooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+	
+		if (e.getSource().equals(buttonEnergieDatei)) {
+			if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+				energieFile = filechooser.getSelectedFile();
+				textFieldEnergieFile.setText(energieFile.getPath());
+			} else {
+				energieFile = null;
+				textFieldEnergieFile.setText("");
+			}
+			checkOk();
+		}
+		if (e.getSource().equals(buttonConcentrationsFile)) {
+			if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+				concentrationFile = filechooser.getSelectedFile();
+				textFieldConcentrationsFile.setText(concentrationFile.getPath());
+			} else {
+				concentrationFile = null;
+				textFieldConcentrationsFile.setText("");
+			}
+			checkOk();
+		}
+		if (e.getSource().equals(buttonCancel)) {
+			dispose();
+		}
+		if (e.getSource().equals(buttonOk)) {
+			hasFiles = true;
+			dispose();
+		}
+	}
+
+	/**
+	 * Sets the ok-button enabled if there is no file entered
+	 */
+	private void checkOk() {
+		if (energieFile != null || concentrationFile != null) {
+			buttonOk.setEnabled(true);
+		} else {
+			buttonOk.setEnabled(false);
+		}
+	}
+
+	/**
+	 * 
+	 * @return the incoming concentration file
+	 */
+	public File getConcentrationFile() {
+		return concentrationFile;
+	}
+
+	/**
+	 * @return the incoming Gibbs energie file
+	 */
+	public File getEnergieFile() {
+		return energieFile;
+	}
+
+	/**
+	 * @return hasFiles
+	 */
+	public boolean hasFiles() {
+		return hasFiles;
 	}
 
 	/**
@@ -157,77 +228,5 @@ public class FBAButtonPressedDialog extends JDialog implements ActionListener{
 
 		add(container, BorderLayout.NORTH);
 		setSize(new Dimension(450, 200));
-	}
-
-	/**
-	 * Sets the ok-button enabled if there is no file entered
-	 */
-	private void checkOk() {
-		if (energieFile != null || concentrationFile != null) {
-			buttonOk.setEnabled(true);
-		} else {
-			buttonOk.setEnabled(false);
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	public void actionPerformed(ActionEvent e) {
-		JFileChooser filechooser = new JFileChooser();
-		filechooser.setMultiSelectionEnabled(false);
-		filechooser.setDialogType(JFileChooser.OPEN_DIALOG);
-		filechooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-
-		if (e.getSource().equals(buttonEnergieDatei)) {
-			if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-				energieFile = filechooser.getSelectedFile();
-				textFieldEnergieFile.setText(energieFile.getPath());
-			} else {
-				energieFile = null;
-				textFieldEnergieFile.setText("");
-			}
-			checkOk();
-		}
-		if (e.getSource().equals(buttonConcentrationsFile)) {
-			if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-				concentrationFile = filechooser.getSelectedFile();
-				textFieldConcentrationsFile.setText(concentrationFile.getPath());
-			} else {
-				concentrationFile = null;
-				textFieldConcentrationsFile.setText("");
-			}
-			checkOk();
-		}
-		if (e.getSource().equals(buttonCancel)) {
-			dispose();
-		}
-		if (e.getSource().equals(buttonOk)) {
-			hasFiles = true;
-			dispose();
-		}
-	}
-
-	/**
-	 * @return hasFiles
-	 */
-	public boolean hasFiles() {
-		return hasFiles;
-	}
-
-	/**
-	 * @return the incoming Gibbs energie file
-	 */
-	public File getEnergieFile() {
-		return energieFile;
-	}
-
-	/**
-	 * 
-	 * @return the incoming concentration file
-	 */
-	public File getConcentrationFile() {
-		return concentrationFile;
 	}
 }

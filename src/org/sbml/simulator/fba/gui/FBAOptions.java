@@ -66,6 +66,27 @@ public interface FBAOptions extends KeyProvider {
 
 
 	/**
+	 * Choose to activate the constraint J*G < 0
+	 */
+	public static final Option<Boolean> ACTIVATE_CONSTRAINT_JG_LESS_THAN_0 = new Option<Boolean>(
+			"ACTIVATE_CONSTRAINT_JG_LESS_THAN_0", Boolean.class, bundle, Boolean.FALSE);
+
+
+	/**
+	 * Choose to activate the constraint |J|-r_max*|G| < 0
+	 */
+	public static final Option<Boolean> ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0 = new Option<Boolean>(
+			"ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0", Boolean.class, bundle, Boolean.FALSE);
+
+
+	/**
+	 * Choose to activate the constraint J>0
+	 */
+	public static final Option<Boolean> ACTIVATE_CONSTRAINT_J_GREATER_THAN_0 = new Option<Boolean>(
+			"ACTIVATE_CONSTRAINT_J_GREATER_THAN_0", Boolean.class, bundle, Boolean.FALSE);
+
+
+	/**
 	 * Choose a target function
 	 */
 	public static final Option<String> DEFAULT_TARGET_FUNCTION = new Option<String>(
@@ -96,6 +117,57 @@ public interface FBAOptions extends KeyProvider {
 			"LAMBDA4", Double.class, bundle, Double.valueOf(TargetFunction.lambda4));
 		
 	/**
+	 * Load a concentration file
+	 */
+	public static final Option<File> LOAD_CONCENTRATION_FILE = new Option<File>(
+			"LOAD_CONCENTRATION_FILE", File.class, bundle, new Range<File>(File.class,
+					SBFileFilter.createCSVFileFilter()), new File(
+					System.getProperty("user.dir")));
+
+
+	/**
+	 * Load a Gibbs file
+	 */
+	public static final Option<File> LOAD_GIBBS_FILE = new Option<File>(
+			"LOAD_GIBBS_FILE", File.class, bundle, new Range<File>(File.class,
+					SBFileFilter.createCSVFileFilter()), new File(
+					System.getProperty("user.dir")));
+
+
+	/**
+	 * Load a System Boundaries file
+	 */
+	public static final Option<File> LOAD_SYSTEM_BOUNDARIES_FILE = new Option<File>(
+			"LOAD_SYSTEM_BOUNDARIES_FILE", File.class, bundle, new Range<File>(File.class,
+					SBFileFilter.createTextFileFilter()), new File(
+					System.getProperty("user.dir")));
+
+
+	/**
+	 * Group to active some constraints
+	 */
+	@SuppressWarnings("unchecked")
+	public static final OptionGroup<Boolean> SET_CONSTRAINTS = new OptionGroup<Boolean>(
+			"SET_CONSTRAINTS", bundle, ACTIVATE_CONSTRAINT_JG_LESS_THAN_0, ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0, ACTIVATE_CONSTRAINT_J_GREATER_THAN_0);
+
+
+	/**
+	 * Set the iterations for the CPLEX algorithm
+	 */
+	public static final Option<Integer> SET_ITERATIONS = new Option<Integer>(
+			"SET_ITERATIONS", Integer.class, bundle, new Range<Integer>(
+	                Integer.class, "{(1, 100000]}"), Integer.valueOf(600));
+
+
+	/**
+	 * Group to load files
+	 */
+	@SuppressWarnings("unchecked")
+	public static final OptionGroup<File> SET_FILES_GROUP = new OptionGroup<File>(
+			"SET_FILES_GROUP", bundle, LOAD_GIBBS_FILE, LOAD_CONCENTRATION_FILE, LOAD_SYSTEM_BOUNDARIES_FILE);
+
+
+	/**
 	 * Group of lambdas
 	 */
 	@SuppressWarnings("unchecked")
@@ -104,70 +176,11 @@ public interface FBAOptions extends KeyProvider {
 			LAMBDA2, LAMBDA3, LAMBDA4);
 		
 	/**
-	 * Set the iterations for the CPLEX algorithm
-	 */
-	public static final Option<Integer> SET_ITERATIONS = new Option<Integer>(
-			"SET_ITERATIONS", Integer.class, bundle, new Range<Integer>(
-                    Integer.class, "{(1, 100000]}"), Integer.valueOf(600));
-	
-	/**
-	 * Choose to activate the constraint J*G < 0
-	 */
-	public static final Option<Boolean> ACTIVATE_CONSTRAINT_JG_LESS_THAN_0 = new Option<Boolean>(
-			"ACTIVATE_CONSTRAINT_JG_LESS_THAN_0", Boolean.class, bundle, Boolean.FALSE);
-	
-	
-	/**
-	 * Choose to activate the constraint |J|-r_max*|G| < 0
-	 */
-	public static final Option<Boolean> ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0 = new Option<Boolean>(
-			"ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0", Boolean.class, bundle, Boolean.FALSE);
-	
-	/**
-	 * Choose to activate the constraint J>0
-	 */
-	public static final Option<Boolean> ACTIVATE_CONSTRAINT_J_GREATER_THAN_0 = new Option<Boolean>(
-			"ACTIVATE_CONSTRAINT_J_GREATER_THAN_0", Boolean.class, bundle, Boolean.FALSE);
-	
-	
-	/**
-	 * Group to active some constraints
-	 */
-	@SuppressWarnings("unchecked")
-	public static final OptionGroup<Boolean> SET_CONSTRAINTS = new OptionGroup<Boolean>(
-			"SET_CONSTRAINTS", bundle, ACTIVATE_CONSTRAINT_JG_LESS_THAN_0, ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0, ACTIVATE_CONSTRAINT_J_GREATER_THAN_0);
-
-	/**
 	 * Group to set the target function and the iterations
 	 */
 	@SuppressWarnings("unchecked")
 	public static final OptionGroup<?> SET_TARGET_AND_ITERATIONS = new OptionGroup<Object>(
 			"SET_TARGET_AND_ITERATIONS", bundle, DEFAULT_TARGET_FUNCTION, SET_ITERATIONS);
-
-
-	/**
-	 * load a Gibbs file
-	 */
-	public static final Option<File> LOAD_GIBBS_FILE = new Option<File>(
-			"LOAD_GIBBS_FILE", File.class, bundle, new Range<File>(File.class,
-					SBFileFilter.createCSVFileFilter()), new File(
-					System.getProperty("user.dir")));
-	
-	/**
-	 * Load a concentration file
-	 */
-	public static final Option<File> LOAD_CONCENTRATION_FILE = new Option<File>(
-			"LOAD_CONCENTRATION_FILE", File.class, bundle, new Range<File>(File.class,
-					SBFileFilter.createCSVFileFilter()), new File(
-					System.getProperty("user.dir")));
-	
-	
-	/**
-	 * Group to load files
-	 */
-	@SuppressWarnings("unchecked")
-	public static final OptionGroup<File> FILES = new OptionGroup<File>(
-			"FILES", bundle, LOAD_GIBBS_FILE, LOAD_CONCENTRATION_FILE);
 
 	
 }

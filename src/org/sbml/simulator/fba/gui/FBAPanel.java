@@ -65,14 +65,19 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	private ChartPanel chartFlux;
 
 	/**
-	 * The setting panel wich contains the upper and lower bounds of fluxes and concentrations
+	 * The concentration file
 	 */
-	private FBASettingPanel settings;
+	private File concFile;
 
 	/**
-	 * Contains the visualization of data
+	 * The concentration lower bounds
 	 */
-	private VODPanel vod;
+	private double[] ConcLowerBound;
+
+	/**
+	 * The concentration upper bounds
+	 */
+	private double[] ConcUpperBound;
 
 	/**
 	 * The current opened {@link SBMLDocument}
@@ -85,24 +90,24 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	private FluxBalanceAnalysis fba;
 
 	/**
+	 * The fluxes lower bounds
+	 */
+	private double[] FluxLowerBound;
+
+	/**
+	 * The fluxes upper bounds
+	 */
+	private double[] FluxUpperBound;
+
+	/**
 	 * the Gibbs energy file
 	 */
 	private File gibbsFile;
 
 	/**
-	 * The concentration file
+	 * Number of iterations for CPLEX
 	 */
-	private File concFile;
-
-	/**
-	 * The target fluxes
-	 */
-	private String[] targetFluxes = null;
-
-	/**
-	 * serial version number
-	 */
-	private static final long serialVersionUID = 1L;
+	private int iterations;
 
 	/**
 	 * Constraint J*G < 0 is on, when this variable is set true
@@ -110,19 +115,14 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	private boolean JG_less_than_0;
 
 	/**
-	 * Constraint |J| - r_max*|G| < 0 is on, when this variable is set true
-	 */
-	private boolean J_rmax_G_less_than_0;
-
-	/**
 	 * Constraint J > 0 is on, when this variable is set true
 	 */
 	private boolean J_greater_0;
 
 	/**
-	 * Number of iterations for CPLEX
+	 * Constraint |J| - r_max*|G| < 0 is on, when this variable is set true
 	 */
-	private int iterations;
+	private boolean J_rmax_G_less_than_0;
 
 	/**
 	 * weighted factor lambda1 to weight the concentrations
@@ -144,17 +144,32 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	 */
 	private double lambda4;
 
-	private double[] FluxLowerBound;
+	private SimulationPanel simultorPanel;
 
-	private double[] FluxUpperBound;
+	/**
+	 * serial version number
+	 */
+	private static final long serialVersionUID = 1L;
 
-	private double[] ConcLowerBound;
+	/**
+	 * The setting panel wich contains the upper and lower bounds of fluxes and concentrations
+	 */
+	private FBASettingPanel settings;
 
-	private double[] ConcUpperBound;
+	/**
+	 * The target fluxes
+	 */
+	private String[] targetFluxes = null;
 
+	/**
+	 * Contains if this is the first call of FBA
+	 */
 	private boolean theFirstCall = true;
 
-	private SimulationPanel simultorPanel;
+	/**
+	 * Contains the visualization of data
+	 */
+	private VODPanel vod;
 
 	/**
 	 * Constructor that sets all the different panels
@@ -172,42 +187,70 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	}
 
 
-	/**
-	 * Initialize the whole FBA frame
+	/*
+	 * (non-Javadoc)
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
-	private void init() {
-		JSplitPane jsp = new JSplitPane();
-		vod.setBorder(BorderFactory.createLoweredBevelBorder());
-
-		// legend panel
-		LegendPanel legendPanel = new LegendPanel(currentDoc.getModel(), true);
-		legendPanel.addTableModelListener(this);
-		legendPanel.setBorder(BorderFactory.createLoweredBevelBorder());
-
-		// split left components
-		JSplitPane topDown = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true,
-				legendPanel, settings);
-		topDown.setDividerLocation(topDown.getDividerLocation() + 100);
-
-		JTabbedPane tabs = new JTabbedPane();
-		tabs.add("Visualization", vod);
-		tabs.add("Table Concentrations", chartConc);
-		tabs.add("Table Fluxes", chartFlux);
-
-		// split all
-		jsp.setLeftComponent(topDown);
-		jsp.setRightComponent(tabs);
-		jsp.setDividerLocation(topDown.getDividerLocation() + 200);
-
-		add(jsp);
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+	
 	}
 
 	/**
-	 * @param settings the settings to set
+	 * check if the options were changed
 	 */
-	public void setFBASettingPanel(FBASettingPanel settings) {
-		this.settings = settings;
+	private void checkPreferences() {
+		SBPreferences sbPrefs = SBPreferences.getPreferencesFor(FBAOptions.class);
+		if (sbPrefs.getFile(FBAOptions.LOAD_CONCENTRATION_FILE) != null) {
+			concFile = sbPrefs.getFile(FBAOptions.LOAD_CONCENTRATION_FILE);
+		}
+		if (sbPrefs.getFile(FBAOptions.LOAD_GIBBS_FILE)!= null) {
+			gibbsFile = sbPrefs.getFile(FBAOptions.LOAD_GIBBS_FILE);
+		}
+		JG_less_than_0 = sbPrefs.getBoolean(FBAOptions.ACTIVATE_CONSTRAINT_JG_LESS_THAN_0);
+		J_rmax_G_less_than_0 = sbPrefs.getBoolean(FBAOptions.ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0);
+		J_greater_0 = sbPrefs.getBoolean(FBAOptions.ACTIVATE_CONSTRAINT_J_GREATER_THAN_0);
+		iterations = sbPrefs.getInt(FBAOptions.SET_ITERATIONS);
+	
+		//check lambdas
+		lambda1 = sbPrefs.getDouble(FBAOptions.LAMBDA1);
+		lambda2 = sbPrefs.getDouble(FBAOptions.LAMBDA2);
+		lambda3 = sbPrefs.getDouble(FBAOptions.LAMBDA3);
+		lambda4 = sbPrefs.getDouble(FBAOptions.LAMBDA4);
+	
+		//check upper and lower bounds
+		FluxLowerBound = settings.getFluxLowerBoundValues();
+		FluxUpperBound = settings.getFluxUpperBoundValues();
+		ConcLowerBound = settings.getConcLowerBoundValues();
+		ConcUpperBound = settings.getConcUpperBoundValues();
+	
 	}
+
+
+	/**
+	 * @return the concFile
+	 */
+	public File getConcFile() {
+		return concFile;
+	}
+
+
+	/**
+	 * @return the currentDoc
+	 */
+	public SBMLDocument getCurrentDoc() {
+		return currentDoc;
+	}
+
+
+	/**
+	 * @return the fba
+	 */
+	public FluxBalanceAnalysis getFba() {
+		return fba;
+	}
+
 
 	/**
 	 * @return the settings
@@ -216,12 +259,14 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 		return settings;
 	}
 
+
 	/**
-	 * @param vod the vod to set
+	 * @return the gibbsFile
 	 */
-	public void setVODPanel(VODPanel vod) {
-		this.vod = vod;
+	public File getGibbsFile() {
+		return gibbsFile;
 	}
+
 
 	/**
 	 * @return the vod
@@ -231,45 +276,58 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	}
 
 	/**
-	 * @return the fba
+	 * Initialize the whole FBA frame
 	 */
-	public FluxBalanceAnalysis getFba() {
-		return fba;
+	private void init() {
+		JSplitPane jsp = new JSplitPane();
+		vod.setBorder(BorderFactory.createLoweredBevelBorder());
+	
+		// legend panel
+		LegendPanel legendPanel = new LegendPanel(currentDoc.getModel(), true);
+		legendPanel.addTableModelListener(this);
+		legendPanel.setBorder(BorderFactory.createLoweredBevelBorder());
+	
+		// split left components
+		JSplitPane topDown = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true,
+				legendPanel, settings);
+		topDown.setDividerLocation(topDown.getDividerLocation() + 100);
+	
+		JTabbedPane tabs = new JTabbedPane();
+		tabs.add("Visualization", vod);
+		tabs.add("Table Concentrations", chartConc);
+		tabs.add("Table Fluxes", chartFlux);
+	
+		// split all
+		jsp.setLeftComponent(topDown);
+		jsp.setRightComponent(tabs);
+		jsp.setDividerLocation(topDown.getDividerLocation() + 200);
+	
+		add(jsp);
+	}
+
+
+	/**
+	 * @return true if all bounds are set, else false.
+	 */
+	private boolean isSetBounds() {
+		return FluxLowerBound != null && FluxUpperBound!= null && ConcLowerBound != null && ConcUpperBound != null;
+	}
+
+
+	/**
+	 * @return the first call boolean
+	 */
+	public boolean isTheFirstCall() {
+		return theFirstCall;
 	}
 
 	/**
-	 * @param simPanel
+	 * @param concFile the concFile to set
 	 */
-	public void setSimulatorPanel(SimulationPanel simPanel) {
-		simultorPanel = simPanel;
-		init();
+	public void setConcFile(File concFile) {
+		this.concFile = concFile;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see javax.swing.event.TableModelListener#tableChanged(javax.swing.event.TableModelEvent)
-	 */
-	@Override
-	public void tableChanged(TableModelEvent arg0) {
-		// TODO Auto-generated method stub
-	}
-
-	/**
-	 * @return the currentDoc
-	 */
-	public SBMLDocument getCurrentDoc() {
-		return currentDoc;
-	}
 
 	/**
 	 * @param currentDoc the currentDoc to set
@@ -277,6 +335,15 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	public void setCurrentDoc(SBMLDocument currentDoc) {
 		this.currentDoc = currentDoc;
 	}
+
+
+	/**
+	 * @param settings the settings to set
+	 */
+	public void setFBASettingPanel(FBASettingPanel settings) {
+		this.settings = settings;
+	}
+
 
 	/**
 	 * @param gibbsFile the gibbsFile to set
@@ -287,25 +354,30 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 		startFBA();
 	}
 
-	/**
-	 * @return the gibbsFile
-	 */
-	public File getGibbsFile() {
-		return gibbsFile;
-	}
 
 	/**
-	 * @param concFile the concFile to set
+	 * @param simPanel
 	 */
-	public void setConcFile(File concFile) {
-		this.concFile = concFile;
+	public void setSimulatorPanel(SimulationPanel simPanel) {
+		simultorPanel = simPanel;
+		init();
 	}
 
+
 	/**
-	 * @return the concFile
+	 * @param firstCall set the boolean that contains true if
+	 * this is the first call
 	 */
-	public File getConcFile() {
-		return concFile;
+	public void setTheFirstCall(boolean firstCall) {
+		theFirstCall = firstCall;
+	}
+
+
+	/**
+	 * @param vod the vod to set
+	 */
+	public void setVODPanel(VODPanel vod) {
+		this.vod = vod;
 	}
 
 
@@ -332,19 +404,19 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 			}
 			Constraints c = new Constraints(currentDoc, csvConverterGibbs.getGibbsArray(), csvConverterConc.getConcentrationsArray(), null);
 			fba = new FluxBalanceAnalysis(currentDoc, c, targetFluxes);
-
+	
 			//set constraints and iterations
 			fba.setConstraintJG(JG_less_than_0);
 			fba.setConstraintJ_rmaxG(J_rmax_G_less_than_0);
 			fba.setCplexIterations(iterations);
 			fba.setConstraintJ0(J_greater_0);
-
+	
 			//set lambdas
 			fba.setLambda1(lambda1);
 			fba.setLambda2(lambda2);
 			fba.setLambda3(lambda3);
 			fba.setLambda4(lambda4);
-
+	
 			//set bounds
 			if (isSetBounds() && settings.isBoundsAreChanged()) {
 				fba.setLbOfConcentrations(ConcLowerBound);
@@ -352,7 +424,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 				fba.setUbOfConcentrations(ConcUpperBound);
 				fba.setUbOfReactions(FluxUpperBound);
 			}
-
+	
 			//solve
 			try{
 			fba.solve();
@@ -407,58 +479,14 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 		}
 	}
 
-	/**
-	 * @return the first call boolean
+
+	/*
+	 * (non-Javadoc)
+	 * @see javax.swing.event.TableModelListener#tableChanged(javax.swing.event.TableModelEvent)
 	 */
-	public boolean isTheFirstCall() {
-		return theFirstCall;
-	}
-
-	/**
-	 * @param firstCall set the boolean that contains true if
-	 * this is the first call
-	 */
-	public void setTheFirstCall(boolean firstCall) {
-		theFirstCall = firstCall;
-	}
-
-
-	/**
-	 * @return true if all bounds are set, else false.
-	 */
-	private boolean isSetBounds() {
-		return FluxLowerBound != null && FluxUpperBound!= null && ConcLowerBound != null && ConcUpperBound != null;
-	}
-
-
-	/**
-	 * check if the options were changed
-	 */
-	private void checkPreferences() {
-		SBPreferences sbPrefs = SBPreferences.getPreferencesFor(FBAOptions.class);
-		if (sbPrefs.getFile(FBAOptions.LOAD_CONCENTRATION_FILE) != null) {
-			concFile = sbPrefs.getFile(FBAOptions.LOAD_CONCENTRATION_FILE);
-		}
-		if (sbPrefs.getFile(FBAOptions.LOAD_GIBBS_FILE)!= null) {
-			gibbsFile = sbPrefs.getFile(FBAOptions.LOAD_GIBBS_FILE);
-		}
-		JG_less_than_0 = sbPrefs.getBoolean(FBAOptions.ACTIVATE_CONSTRAINT_JG_LESS_THAN_0);
-		J_rmax_G_less_than_0 = sbPrefs.getBoolean(FBAOptions.ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0);
-		J_greater_0 = sbPrefs.getBoolean(FBAOptions.ACTIVATE_CONSTRAINT_J_GREATER_THAN_0);
-		iterations = sbPrefs.getInt(FBAOptions.SET_ITERATIONS);
-
-		//check lambdas
-		lambda1 = sbPrefs.getDouble(FBAOptions.LAMBDA1);
-		lambda2 = sbPrefs.getDouble(FBAOptions.LAMBDA2);
-		lambda3 = sbPrefs.getDouble(FBAOptions.LAMBDA3);
-		lambda4 = sbPrefs.getDouble(FBAOptions.LAMBDA4);
-
-		//check upper and lower bounds
-		FluxLowerBound = settings.getFluxLowerBoundValues();
-		FluxUpperBound = settings.getFluxUpperBoundValues();
-		ConcLowerBound = settings.getConcLowerBoundValues();
-		ConcUpperBound = settings.getConcUpperBoundValues();
-
+	@Override
+	public void tableChanged(TableModelEvent arg0) {
+		// TODO Auto-generated method stub
 	}
 
 }
