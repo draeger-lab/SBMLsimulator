@@ -38,6 +38,21 @@ import eva2.tools.math.Jama.Matrix;
 public class FluxMinimization extends TargetFunction {
 
 	/**
+	 * Contains the computed gibbs energies in the model.
+	 */
+	private double[] computedGibbsEnergies;
+
+	/**
+	 * counts the lengths of the components in the target array
+	 */
+	private int[] counterArray;
+
+	/**
+	 * Contains the concentrations in the model in steady-state.
+	 */
+	private double[] equilibriumsConcentrations;
+
+	/**
 	 * To compute a flux minimization, we need an error-value-array 
 	 * that contains the computed errors, which will be minimized in FBA. 
 	 */
@@ -55,25 +70,10 @@ public class FluxMinimization extends TargetFunction {
 	private double[] initialConcentrations;
 
 	/**
-	 * Contains the concentrations in the model in steady-state.
-	 */
-	private double[] equilibriumsConcentrations;
-
-	/**
-	 * Contains the computed gibbs energies in the model.
-	 */
-	private double[] computedGibbsEnergies;
-
-	/**
 	 * Vector that is made up of the transposed null space matrix K and
 	 * the corresponding gibbs energies.
 	 */
 	private double[] L = {};
-
-	/**
-	 * counts the lengths of the components in the target array
-	 */
-	private int[] counterArray;
 
 	/**
 	 * Contains the computed stoichiometric matrix N.
@@ -184,6 +184,67 @@ public class FluxMinimization extends TargetFunction {
 	}
 
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.fba.controller.TargetFunction#computeTargetFunctionForQuadraticProgramming()
+	 */
+	@Override
+	public double[] computeTargetFunctionForQuadraticProgramming() {
+		// the function to minimize is: ||J|| + lambda1*sum((c_i - c_eq)^2) + lambda2*||L|| + lambda3*||E|| + lambda4*||deltaG||
+	
+		// create the target vector 
+		double[] target = new double[fluxVector.length + 				// ||J||
+		                             L.length +							// ||L||
+		                             errorArray.length + 				// ||E||
+		                             computedGibbsEnergies.length];		// ||deltaG||
+	
+		// this is a pointer, which counts in the target vector the actually position
+	
+		int counter = 0;
+		
+	
+		// fill the target with the flux vector: ||J|| 
+		for (int i=0; i< this.fluxVector.length; i++) {
+			target[i] = Math.abs(fluxVector[i]);
+			counter++;
+		}
+	
+		/*
+		 *  concentrations left out because they are quadratic and must be computed in 
+		 *  FluxBalanceAnalysis
+		 *  
+		 */
+	
+	
+		// ||L||: lambda2*||L||
+		for (int h = 0; h < this.L.length; h++) {
+			if (!Double.isNaN(L[h])) {
+				target[counter] = lambda2 * Math.abs(L[h]);
+			} else {
+				target[counter] = lambda2;
+			}
+			counter++;
+		}
+	
+		// the weighted error: lambda3*||E||
+		for (int k = 0; k < this.errorArray.length; k++) {
+			target[counter] = lambda3 * Math.abs(errorArray[k]);
+			counter++;
+		}
+	
+		// the weighted Gibbs energy: lambda4*||G||
+		for (int l = 0; l < this.computedGibbsEnergies.length; l++) {
+			if (!Double.isNaN(computedGibbsEnergies[l]) && !Double.isInfinite(computedGibbsEnergies[l])) {
+				target[counter] = lambda4 * Math.abs(computedGibbsEnergies[l]);
+			} else {
+				target[counter] = lambda4;
+			}
+			counter++;
+		}
+		return target;
+	}
+
+
 	/**
 	 * Fills the concentrations-array with the initial concentrations/amounts of
 	 * the {@link Species} in this {@link Model}.
@@ -227,65 +288,28 @@ public class FluxMinimization extends TargetFunction {
 	}
 
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.sbml.simulator.fba.controller.TargetFunction#computeTargetFunctionForQuadraticProgramming()
+	/**
+	 * Fills the {@link# counterArray} to save the indices of the components in the target array.
+	 * 
+	 * @param length1: fluxVector length
+	 * @param length2: errorArray length
+	 * @param length3: L array length
 	 */
-	@Override
-	public double[] computeTargetFunctionForQuadraticProgramming() {
-		// the function to minimize is: ||J|| + lambda1*sum((c_i - c_eq)^2) + lambda2*||L|| + lambda3*||E|| + lambda4*||deltaG||
-
-		// create the target vector 
-		double[] target = new double[fluxVector.length + 				// ||J||
-		                             L.length +							// ||L||
-		                             errorArray.length + 				// ||E||
-		                             computedGibbsEnergies.length];		// ||deltaG||
-
-		// this is a pointer, which counts in the target vector the actually position
-
-		int counter = 0;
-		
-
-		// fill the target with the flux vector: ||J|| 
-		for (int i=0; i< this.fluxVector.length; i++) {
-			target[i] = Math.abs(fluxVector[i]);
-			counter++;
-		}
-
-		/*
-		 *  concentrations left out because they are quadratic and must be computed in 
-		 *  FluxBalanceAnalysis
-		 *  
-		 */
-
-
-		// ||L||: lambda2*||L||
-		for (int h = 0; h < this.L.length; h++) {
-			if (!Double.isNaN(L[h])) {
-				target[counter] = lambda2 * Math.abs(L[h]);
-			} else {
-				target[counter] = lambda2;
-			}
-			counter++;
-		}
-
-		// the weighted error: lambda3*||E||
-		for (int k = 0; k < this.errorArray.length; k++) {
-			target[counter] = lambda3 * Math.abs(errorArray[k]);
-			counter++;
-		}
-
-		// the weighted gibbs energy: lambda4*||G||
-		for (int l = 0; l < this.computedGibbsEnergies.length; l++) {
-			if (!Double.isNaN(computedGibbsEnergies[l]) && !Double.isInfinite(computedGibbsEnergies[l])) {
-				target[counter] = lambda4 * Math.abs(computedGibbsEnergies[l]);
-			} else {
-				target[counter] = lambda4;
-			}
-			counter++;
-		}
-		return target;
+	private void fillCounterArray(int length1, int length2, int length3) {
+		counterArray[0] = 0;
+		counterArray[1] = length1;
+		counterArray[2] = counterArray[1] + length2;
+		counterArray[3] = counterArray[2] + length3;
 	}
+
+
+	/**
+	 * @return the equilibriumsConcentrations
+	 */
+	public double[] getC_eq() {
+		return equilibriumsConcentrations;
+	}
+
 
 	/*
 	 * (non-Javadoc)
@@ -296,18 +320,52 @@ public class FluxMinimization extends TargetFunction {
 	}
 
 	/**
-	 * @param concentrations the concentrations to set
+	 * counterArray[0] = fluxvector index;
+	 * counterArray[1] = errorArray index;
+	 * counterArray[2] = L array index;
+	 * counterArray[3] = Gibbs array index;
+	 * 
+	 * @return the counterArray
 	 */
-	public void setConcentrations(double[] concentrations) {
-		this.initialConcentrations = concentrations;
+	public int[] getCounterArray() {
+		return counterArray;
 	}
 
-	/**
-	 * @return the equilibriumsConcentrations
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.fba.controller.TargetFunction#getFluxVector()
 	 */
-	public double[] getC_eq() {
-		return equilibriumsConcentrations;
+	public double[] getFluxVector() {
+		return this.fluxVector;
 	}
+
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.fba.controller.TargetFunction#getGibbs()
+	 */
+	public double[] getGibbs() {
+		return computedGibbsEnergies;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.fba.controller.TargetFunction#getStoichiometricMatrix()
+	 */
+	public double[][] getStoichiometricMatrix() {
+		return N.getArray();
+	}
+
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.sbml.simulator.fba.controller.TargetFunction#isMinProblem()
+	 */
+	public boolean isMinProblem() {
+		return true;
+	}
+
 
 	/**
 	 * If the incoming array is not null, then set it, 
@@ -326,73 +384,20 @@ public class FluxMinimization extends TargetFunction {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.sbml.simulator.fba.controller.TargetFunction#getGibbs()
+
+	/**
+	 * @param concentrations the concentrations to set
 	 */
-	public double[] getGibbs() {
-		return computedGibbsEnergies;
+	public void setConcentrations(double[] concentrations) {
+		this.initialConcentrations = concentrations;
 	}
+
 
 	/**
 	 * @param gibbs the gibbs to set
 	 */
 	public void setGibbs(double[] gibbs) {
 		this.computedGibbsEnergies = gibbs;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.sbml.simulator.fba.controller.TargetFunction#isMinProblem()
-	 */
-	public boolean isMinProblem() {
-		return true;
-	}
-
-
-	/**
-	 * Fills the {@link# counterArray} to save the indices of the components in the target array.
-	 * 
-	 * @param length1: fluxVector length
-	 * @param length2: errorArray length
-	 * @param length3: L array length
-	 */
-	private void fillCounterArray(int length1, int length2, int length3) {
-		counterArray[0] = 0;
-		counterArray[1] = length1;
-		counterArray[2] = counterArray[1] + length2;
-		counterArray[3] = counterArray[2] + length3;
-	}
-
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.sbml.simulator.fba.controller.TargetFunction#getFluxVector()
-	 */
-	public double[] getFluxVector() {
-		return this.fluxVector;
-	}
-
-
-	/**
-	 * counterArray[0] = fluxvector index;
-	 * counterArray[1] = errorArray index;
-	 * counterArray[2] = L array index;
-	 * counterArray[3] = Gibbs array index;
-	 * 
-	 * @return the counterArray
-	 */
-	public int[] getCounterArray() {
-		return counterArray;
-	}
-
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.sbml.simulator.fba.controller.TargetFunction#getStoichiometricMatrix()
-	 */
-	public double[][] getStoichiometricMatrix() {
-		return N.getArray();
 	}
 
 }

@@ -60,10 +60,16 @@ public abstract class TargetFunction {
 	public abstract double[] computeTargetFunctionForQuadraticProgramming();
 
 	/**
-	 * @return true, if the target function belongs to a minimization problem
+	 * @return the computed concentrations
 	 */
-	public abstract boolean isMinProblem();
-	
+	public abstract double[] getConcentrations();
+
+	/**
+	 * @return the counter array to see where in the target array the different components 
+	 * like the flux vector are.
+	 */
+	public abstract int[] getCounterArray();
+
 	/**
 	 * @return the computed flux vector
 	 */
@@ -75,19 +81,13 @@ public abstract class TargetFunction {
 	public abstract double[] getGibbs();
 
 	/**
-	 * @return the computed concentrations
-	 */
-	public abstract double[] getConcentrations();
-	
-	/**
-	 * @return the counter array to see where in the target array the different components 
-	 * like the flux vector are.
-	 */
-	public abstract int[] getCounterArray();
-	
-	/**
 	 * @return the computed stoichiometric matrix N.
 	 */
 	public abstract double[][] getStoichiometricMatrix();
+	
+	/**
+	 * @return true, if the target function belongs to a minimization problem
+	 */
+	public abstract boolean isMinProblem();
 
 }

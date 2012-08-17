@@ -36,34 +36,15 @@ import de.zbit.io.csv.CSVWriter;
  */
 public class CSVDataConverter {
 
+	/**
+	 * key string for concentration values
+	 */
 	public static final String KEY_CONCENTRATIONS = "concentration";
 
+	/**
+	 * key string for Gibbs values
+	 */
 	public static final String KEY_GIBBS = "gibbs";
-
-	/**
-	 * Containing the corresponding {@link SBMLDocument}.
-	 */
-	private SBMLDocument modifiedDocument;
-
-	/**
-	 * true if a gibbs file is given
-	 */
-	private Boolean isGibbsFile;
-
-	/**
-	 * true if a concentration file is given
-	 */
-	private Boolean isConcentrationFile;
-	
-	/**
-	 * true if a system boundaries file is given
-	 */
-	private Boolean isSystemBoundariesFile;
-
-	/**
-	 * Containing the read Gibbs energies.
-	 */
-	private double[] gibbsArray;
 
 	/**
 	 * Containing the read concentrations.
@@ -71,14 +52,39 @@ public class CSVDataConverter {
 	private double[] concentrationsArray;
 
 	/**
-	 * Containing the species indices of species at the system boundaries
+	 * Containing the read Gibbs energies.
 	 */
-	private double[] systemBoundariesArray;
+	private double[] gibbsArray;
+
+	/**
+	 * true if a concentration file is given
+	 */
+	private Boolean isConcentrationFile;
+
+	/**
+	 * true if a gibbs file is given
+	 */
+	private Boolean isGibbsFile;
+
+	/**
+	 * true if a system boundaries file is given
+	 */
+	private Boolean isSystemBoundariesFile;
+
+	/**
+	 * Containing the corresponding {@link SBMLDocument}.
+	 */
+	private SBMLDocument modifiedDocument;
 
 	/**
 	 * Containing the reader to read the csv files
 	 */
 	private CSVDataReader reader;
+
+	/**
+	 * Containing the species indices of species at the system boundaries
+	 */
+	private double[] systemBoundariesArray;
 
 	/**
 	 * Call this constructor if no system boundaries file is given, 
@@ -111,18 +117,63 @@ public class CSVDataConverter {
 	}
 
 	/**
-	 * Reads out the Gibbs energies from a given file and writes it in the array gibbsEnergies
-	 *
-	 * @param file
-	 * @return gibbsArray
-	 * @throws Exception 
+	 * @return the concentrationsArray
 	 */
-	public double[] readGibbsFromFile(File file) throws Exception {
-		this.isGibbsFile = true;
-		this.isConcentrationFile = null;
-		this.isSystemBoundariesFile = null;
-		readFromFile(file);
+	public double[] getConcentrationsArray() {
+		return concentrationsArray;
+	}
+
+	/**
+	 * @return the gibbsArray
+	 */
+	public double[] getGibbsArray() {
 		return gibbsArray;
+	}
+
+	/**
+	 * 
+	 * @return the csv-Reader
+	 */
+	public CSVDataReader getReader(){
+		return reader;
+	}
+
+	/**
+	 * 
+	 * @return the systemBoundariesArray
+	 */
+	public double[] getSystemBoundariesArray() {
+		return systemBoundariesArray;
+	}
+
+	/**
+	 * Initializes the Concentration-array, so that every cell is filled with 10^(-11),
+	 * because that is the normal minimal amount in nature, and when there is
+	 * read a file with concentrations, the content will be overwritten.
+	 */
+	private void initializeConcentrationArray() {
+		concentrationsArray = new double[modifiedDocument.getModel().getSpeciesCount()];
+		for (int i = 0; i < concentrationsArray.length; i++) {
+			concentrationsArray[i] = Math.pow(10, -11);
+		}
+	}
+
+	/**
+	 * Initializes the Gibbs-array, so that every cell is filled with NaN and when there is
+	 * read a file with Gibbs energies, the content will be overwritten.
+	 */
+	private void initializeGibbsArray() {
+		gibbsArray = new double[modifiedDocument.getModel().getReactionCount()];
+		for (int i = 0; i < gibbsArray.length; i++) {
+			gibbsArray[i] = Double.NaN;
+		}
+	}
+
+	private void initializeSystemBoundariesArray() {
+		systemBoundariesArray = new double[modifiedDocument.getModel().getSpeciesCount()];
+		for (int i =0; i < systemBoundariesArray.length; i++) {
+			systemBoundariesArray[i] = Double.NaN;
+		}
 	}
 
 	/**
@@ -141,6 +192,33 @@ public class CSVDataConverter {
 	}
 
 	/**
+	 * Reads out the Gibbs energies or concentrations from a given file and writes it in an array, that the method returns.
+	 * 
+	 * @param file
+	 * @throws Exception 
+	 */
+	private void readFromFile(File file) throws Exception {
+		reader = new CSVDataReader(file,null);
+		reader.addPropertyChangeListener(EventHandler.create(PropertyChangeListener.class, this, "writeDataInArray", "newValue"));
+		reader.cancel(true);
+	}
+
+	/**
+	 * Reads out the Gibbs energies from a given file and writes it in the array gibbsEnergies
+	 *
+	 * @param file
+	 * @return gibbsArray
+	 * @throws Exception 
+	 */
+	public double[] readGibbsFromFile(File file) throws Exception {
+		this.isGibbsFile = true;
+		this.isConcentrationFile = null;
+		this.isSystemBoundariesFile = null;
+		readFromFile(file);
+		return gibbsArray;
+	}
+
+	/**
 	 * 
 	 * @param file
 	 * @return
@@ -154,16 +232,46 @@ public class CSVDataConverter {
 		return systemBoundariesArray;
 	}
 
+	//TODO: call this method in the gui --> create a button for that
 	/**
-	 * Reads out the Gibbs energies or concentrations from a given file and writes it in an array, that the method returns.
-	 * 
+	 * Writes the computed values of the flux balance analysis in the given csv-File, which has 2 columns and for every reaction/ species a line.
+	 * The first line contains the heading "Reaction_id" or "Species_id" (first column) and "steady_state_value" (second column).
+	 * @param computed_solution
 	 * @param file
-	 * @throws Exception 
+	 * @throws IOException
 	 */
-	private void readFromFile(File file) throws Exception {
-		reader = new CSVDataReader(file,null);
-		reader.addPropertyChangeListener(EventHandler.create(PropertyChangeListener.class, this, "writeDataInArray", "newValue"));
-		reader.cancel(true);
+	public void writeComputedValuesInCSV(double[] computed_solution, File file) throws IOException {
+		CSVWriter writer = new CSVWriter();
+		String[][] data = null;
+		Boolean isFluxSolution = null;
+		Boolean isConcSolution = null;
+		if (computed_solution.length == modifiedDocument.getModel().getReactionCount()) {
+			data = new String[modifiedDocument.getModel().getReactionCount()+1][2];
+			data[0][0] = "Reaction_id";
+			isFluxSolution = true;
+		} else if (computed_solution.length == modifiedDocument.getModel().getSpeciesCount()) {
+			data = new String[modifiedDocument.getModel().getSpeciesCount()+1][2];
+			data[0][0] = "Species_id";
+			isConcSolution = true;
+		}
+		if (isConcSolution == null && isFluxSolution == null) {
+			// then the array has the wrong length
+			throw new IllegalArgumentException("Solution is neither corressponding to the reactions in this model nor to " +
+			"the species.");
+		}
+		data[0][1] = "steady_state_value";
+		for (int i = 1; i < modifiedDocument.getModel().getReactionCount(); i++) {
+			if (isFluxSolution) {
+				// write the reactions ids
+				data[i][0] = modifiedDocument.getModel().getReaction(i).getId();
+			} else if (isConcSolution) {
+				// write the species ids
+				data[i][0] = modifiedDocument.getModel().getSpecies(i).getId();
+			}
+			// write the solution
+			data[i][1] = Double.toString(computed_solution[i]);
+		}
+		writer.write(data, file);
 	}
 
 	/**
@@ -184,7 +292,7 @@ public class CSVDataConverter {
 				values[i] = data[i][1];
 				keys[i] = data[i][0];
 			}
-
+	
 			if (isGibbsFile != null && isGibbsFile) {
 				initializeGibbsArray();
 				for(int i = 0; i < values.length; i++) {
@@ -228,116 +336,11 @@ public class CSVDataConverter {
 						}
 						fileMatchToDocument++;
 					}
-					// TODO
 				}
-				
 			}
 			if (fileMatchToDocument == 0) {
 				throw new Exception("given file does not match with opened SBMLDocument");				
 			}
 		}
-	}
-
-	/**
-	 * Initializes the Gibbs-array, so that every cell is filled with NaN and when there is
-	 * read a file with Gibbs energies, the content will be overwritten.
-	 */
-	private void initializeGibbsArray() {
-		gibbsArray = new double[modifiedDocument.getModel().getReactionCount()];
-		for (int i = 0; i < gibbsArray.length; i++) {
-			gibbsArray[i] = Double.NaN;
-		}
-	}
-	
-	/**
-	 * Initializes the Concentration-array, so that every cell is filled with 10^(-11),
-	 * because that is the normal minimal amount in nature, and when there is
-	 * read a file with concentrations, the content will be overwritten.
-	 */
-	private void initializeConcentrationArray() {
-		concentrationsArray = new double[modifiedDocument.getModel().getSpeciesCount()];
-		for (int i = 0; i < concentrationsArray.length; i++) {
-			concentrationsArray[i] = Math.pow(10, -11);
-		}
-	}
-
-	private void initializeSystemBoundariesArray() {
-		systemBoundariesArray = new double[modifiedDocument.getModel().getSpeciesCount()];
-		for (int i =0; i < systemBoundariesArray.length; i++) {
-			systemBoundariesArray[i] = Double.NaN;
-		}
-	}
-
-	/**
-	 * @return the gibbsArray
-	 */
-	public double[] getGibbsArray() {
-		return gibbsArray;
-	}
-
-	/**
-	 * @return the concentrationsArray
-	 */
-	public double[] getConcentrationsArray() {
-		return concentrationsArray;
-	}
-
-	/**
-	 * 
-	 * @return the systemBoundariesArray
-	 */
-	public double[] getSystemBoundariesArray() {
-		return systemBoundariesArray;
-	}
-
-	/**
-	 * 
-	 * @return the csv-Reader
-	 */
-	public CSVDataReader getReader(){
-		return reader;
-	}
-
-	
-	//TODO: call this method in the gui --> create a button for that
-	/**
-	 * Writes the computed values of the flux balance analysis in the given csv-File, which has 2 columns and for every reaction/ species a line.
-	 * The first line contains the heading "Reaction_id" or "Species_id" (first column) and "steady_state_value" (second column).
-	 * @param computed_solution
-	 * @param file
-	 * @throws IOException
-	 */
-	public void writeComputedValuesInCSV(double[] computed_solution, File file) throws IOException {
-		CSVWriter writer = new CSVWriter();
-		String[][] data = null;
-		Boolean isFluxSolution = null;
-		Boolean isConcSolution = null;
-		if (computed_solution.length == modifiedDocument.getModel().getReactionCount()) {
-			data = new String[modifiedDocument.getModel().getReactionCount()+1][2];
-			data[0][0] = "Reaction_id";
-			isFluxSolution = true;
-		} else if (computed_solution.length == modifiedDocument.getModel().getSpeciesCount()) {
-			data = new String[modifiedDocument.getModel().getSpeciesCount()+1][2];
-			data[0][0] = "Species_id";
-			isConcSolution = true;
-		}
-		if (isConcSolution == null && isFluxSolution == null) {
-			// then the array has the wrong length
-			throw new IllegalArgumentException("Solution is neither corressponding to the reactions in this model nor to " +
-			"the species.");
-		}
-		data[0][1] = "steady_state_value";
-		for (int i = 1; i < modifiedDocument.getModel().getReactionCount(); i++) {
-			if (isFluxSolution) {
-				// write the reactions ids
-				data[i][0] = modifiedDocument.getModel().getReaction(i).getId();
-			} else if (isConcSolution) {
-				// write the species ids
-				data[i][0] = modifiedDocument.getModel().getSpecies(i).getId();
-			}
-			// write the solution
-			data[i][1] = Double.toString(computed_solution[i]);
-		}
-		writer.write(data, file);
 	}
 }

@@ -19,8 +19,6 @@ package org.sbml.simulator.fba.controller;
 
 import ilog.concert.IloException;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,14 +47,19 @@ import org.sbml.simulator.stability.math.StoichiometricMatrix;
 public class FluxMinimizationUtils {
 
 	/**
-	 * contains the suffix for integrated backward reactions of reversible reactions.
-	 */
-	protected static final String endingForBackwardReaction = "_rev";
-	
-	/**
 	 * contains prefix for a degradation reaction
 	 */
 	protected static final String degradationPrefix = "deg_";
+
+	/**
+	 * List contains the eliminated reactions (the transport reactions).
+	 */
+	public static List<String> eliminatedReactions = new ArrayList<String>();
+
+	/**
+	 * contains the suffix for integrated backward reactions of reversible reactions.
+	 */
+	protected static final String endingForBackwardReaction = "_rev";
 	
 	/**
 	 * contains prefix for the metaID
@@ -64,14 +67,29 @@ public class FluxMinimizationUtils {
 	protected static final String metaIdPrefix = "meta_";
 	
 	/**
-	 * List contains the eliminated reactions (the transport reactions).
+	 * contains the {@link StoichiometricMatrix} with added system boundaries
 	 */
-	public static List<String> eliminatedReactions = new ArrayList<String>();
-	
+	private static StoichiometricMatrix N_int_sys;
+
+	/**
+	 * contains the indices of the remaining rows, which are not only zeros
+	 */
+	public static List<Integer> remainingList = new LinkedList<Integer>();
+
 	/**
 	 * List contains the reversible reactions.
 	 */
 	public static List<String> reversibleReactions = new ArrayList<String>();
+
+	/**
+	 * contains the steadyStateMatrix
+	 */
+	private static StabilityMatrix steadyStateMatrix;
+
+	/**
+	 * contains the system boundaries array
+	 */
+	private static double[] systemBoundaries;
 
 	/**
 	 * contains the {@link SBMLDocument} with added systems boundaries
@@ -79,88 +97,303 @@ public class FluxMinimizationUtils {
 	private static SBMLDocument systemBoundaryDocument;
 
 	/**
-	 * contains the {@link StoichiometricMatrix} with added system boundaries
-	 */
-	private static StoichiometricMatrix N_int_sys;
+		 * 
+		 * @param indexOfSpecies
+		 * @param doc
+		 * @param stoichiometry
+		 * @return
+		 */
+		private static SBMLDocument addNewReactionEntriesToDoc(double[] systemBoundaries, SBMLDocument doc) {
+			SBMLDocument modified = doc.clone();
 	
-	/**
-	 * contains the indices of the remaining rows, which are not only zeros
-	 */
-	public static List<Integer> remainingList = new LinkedList<Integer>();
+			for (int index = 0; index < systemBoundaries.length; index++) {
+				
+				if (!Double.isNaN(systemBoundaries[index])){
+					// get species
+					Species species = modified.getModel().getSpecies(index);
+					String speciesId = species.getId();
+	
+					// new reaction
+					String reactionId = degradationPrefix + speciesId;
+					Reaction systemBoundaryReaction = new Reaction(reactionId, doc.getModel().getLevel(), doc.getModel().getVersion());
+					systemBoundaryReaction.setMetaId(metaIdPrefix + reactionId);
+	
+					SpeciesReference specRef =  new SpeciesReference(species);
+					specRef.setMetaId(metaIdPrefix + speciesId + "_" + reactionId);
+					// TODO choose which is better (give stoichiometry or 1)
+	//				specRef.setStoichiometry(Math.abs(systemBoundaries[index]));
+					specRef.setStoichiometry(1);
+					
+					if (Math.signum(systemBoundaries[index]) == -1) {
+						systemBoundaryReaction.addReactant(specRef);
+					} 
+					else if (Math.signum(systemBoundaries[index]) == +1) {
+						systemBoundaryReaction.addProduct(specRef);
+					}
+					systemBoundaryReaction.setReversible(false);
+					modified.getModel().addReaction(systemBoundaryReaction);
+				}
+			}
+			return modified;
+		}
 
 	/**
-	 * contains the system boundaries array
+	 * 
+	 * @param modDoc
+	 * @param systemBoundaries
+	 * @return
+	 * @throws Exception 
 	 */
-	private static double[] systemBoundaries; 
-			
+	private static SBMLDocument addSystemBoundaries(SBMLDocument modDoc, double[] systemBoundaries) throws Exception {
+		SBMLDocument doc = modDoc.clone();
+		doc = addNewReactionEntriesToDoc(systemBoundaries, doc);
+		return doc;
+	}
+
 	/**
-	 * contains the steadyStateMatrix
+	 * 
+	 * @param n_int
+	 * @param modDoc
+	 * @return
 	 */
-	private static StabilityMatrix steadyStateMatrix; 
+	private static SBMLDocument addSystemBoundaries(StoichiometricMatrix n_int,
+			SBMLDocument modDoc) {
+		SBMLDocument doc = modDoc.clone();
+		double[] systemBoundaries = new double[n_int.getRowDimension()];
+		for (int row = 0; row < n_int.getRowDimension(); row++) {
+			if (sumOfRowOrCol(n_int.getRow(row)) != 0) {
+				systemBoundaries[row] = -(sumOfRowOrCol(n_int.getRow(row)));
+			}
+			else {
+				systemBoundaries[row] = Double.NaN;
+			}
+		}
+		FluxMinimizationUtils.systemBoundaries = systemBoundaries;
+		doc = addNewReactionEntriesToDoc(systemBoundaries, doc);
+		return doc;
+	}
+
+	/**
+	 * Computes the error for the target function with the given dimension
+	 * @param length 
+	 * @return double[]
+	 */
+	public static double[] computeError(int length) {
+		double[] error = new double[length];
+		// fill the error-vector with ones, so that it only consists of the variables
+		for (int i = 0; i < error.length; i++) {
+			error[i] = 1.0;
+		}
+		return error;
+	}
+
+	/**
+		 * Gets a {@link StoichiometricMatrix} and gives back the corresponding flux-vector in Manhattan-Norm, without the given 
+		 * target fluxes.
+		 * 
+		 * @param N_int_sys
+		 * @param targetFluxes 
+		 * @param doc 
+		 * @return double[] flux vector
+		 * @throws IOException 
+		 * @throws IloException 
+		 */
+		public static double[] computeFluxVector(StoichiometricMatrix N_int_sys, String[] targetFluxes, SBMLDocument doc) throws IOException, IloException {
+			double[][] NwithoutZeroRows = eliminateZeroRows(N_int_sys).getArray();
+			// pre-processing: sort the matrix to speed up the computation of the steady state matrix
+			double[][] sortedMatrixArray = getSortedArray(NwithoutZeroRows);
+			System.out.print("leer, ");
+			for (int i = 0; i < systemBoundaryDocument.getModel().getReactionCount(); i++) {
+				System.out.print(systemBoundaryDocument.getModel().getReaction(i) + ", ");
+			}
+			System.out.println();
+			for (int i = 0; i < sortedMatrixArray.length; i++) {
+				System.out.println(systemBoundaryDocument.getModel().getSpecies(i) + ", " + Arrays.toString(sortedMatrixArray[i]));
+			}
+			
+			StoichiometricMatrix sortedMatrix = new StoichiometricMatrix(sortedMatrixArray, sortedMatrixArray.length, sortedMatrixArray[0].length);
+			steadyStateMatrix = ConservationRelations.calculateConsRelations(sortedMatrix.transpose());
 	
+			// post-processing: delete rows with only forward and backward of a reaction
+			steadyStateMatrix = getCorrectedSteadyStateMatrix(steadyStateMatrix);
+	
+			System.out.println("steadyStateMatrix.getRowDimension() " + steadyStateMatrix.getRowDimension() + "      steadyStateMatrix.getColumnDimension() " + steadyStateMatrix.getColumnDimension());
+			
+			double[] fluxVector = new double[steadyStateMatrix.getColumnDimension()];
+			
+			// fill the fluxVector
+			for (int column = 0; column < steadyStateMatrix.getColumnDimension(); column++) {
+				if (steadyStateMatrix.getRowDimension() > 0) {
+					if (((targetFluxes == null) || isNoTargetFlux(column, targetFluxes, doc))) {
+						//TODO: save all possible fluxes and pick that one, that gets the best fba-solution, 
+	//					fluxVector[column] = steadyStateMatrix.get(0,column);
+						
+						// or get the linear combination of all steady state fluxes
+						fluxVector[column] = sumOfRowOrCol(steadyStateMatrix.getColumn(column));
+	
+						if (Math.abs(fluxVector[column]) < Math.pow(10, -15)) {
+							//then the value is similar to 0 and the flux is 0
+							fluxVector[column] = 0d;
+						}
+	
+					} else {
+						// TODO use the targetflux ...
+					}
+				}
+			}
+			for (int i = 0; i < fluxVector.length; i++) {
+				System.out.println(systemBoundaryDocument.getModel().getReaction(i).getId() + ": " + fluxVector[i]);
+			}
+			return fluxVector;
+		}
+
 	/**
 	 * Gets a {@link StoichiometricMatrix} and gives back the corresponding flux-vector in Manhattan-Norm, without the given 
 	 * target fluxes.
 	 * 
-	 * @param N_int_sys
-	 * @param targetFluxes 
-	 * @param doc 
-	 * @return double[] flux vector
-	 * @throws IOException 
-	 * @throws IloException 
+	 * @param targetFluxes
+	 * @param doc
+	 * @return
+	 * @throws Exception 
 	 */
-	public static double[] computeFluxVector(StoichiometricMatrix N_int_sys, String[] targetFluxes, SBMLDocument doc) throws IOException, IloException {
-		double[][] NwithoutZeroRows = eliminateZeroRows(N_int_sys).getArray();
-		// pre-processing: sort the matrix to speed up the computation of the steady state matrix
-		double[][] sortedMatrixArray = getSortedArray(NwithoutZeroRows);
-		System.out.print("leer, ");
-		for (int i = 0; i < systemBoundaryDocument.getModel().getReactionCount(); i++) {
-			System.out.print(systemBoundaryDocument.getModel().getReaction(i) + ", ");
+	public static double[] computeFluxVector(String[] targetFluxes, SBMLDocument doc) throws Exception {
+		return computeFluxVector(getExpandedStoichiometricMatrix(doc), targetFluxes, doc);
+	}
+
+	/**
+	 * Computes the Manhattan-Norm ||vector|| = sum up from 1 to |vector|: |v_i|        
+	 * e.g.:
+	 * vector = (1,-2,3) than ||vector|| = ||(1,-2,3)|| = |1| + |-2| + |3| = 1 + 2 + 3 = 6
+	 * 
+	 * @param vector
+	 * @return Manhattan-Norm of the vector
+	 */
+	public static double computeManhattenNorm(double[] vector) {
+		double norm = 0;
+		for (int i = 0; i < vector.length; i++) {
+			norm += Math.abs(vector[i]);
 		}
-		System.out.println();
-		for (int i = 0; i < sortedMatrixArray.length; i++) {
-			System.out.println(systemBoundaryDocument.getModel().getSpecies(i) + ", " + Arrays.toString(sortedMatrixArray[i]));
-		}
-		
-		StoichiometricMatrix sortedMatrix = new StoichiometricMatrix(sortedMatrixArray, sortedMatrixArray.length, sortedMatrixArray[0].length);
-		steadyStateMatrix = ConservationRelations.calculateConsRelations(sortedMatrix.transpose());
+		return norm;
+	}
 
-		// post-processing: delete rows with only forward and backward of a reaction
-		steadyStateMatrix = getCorrectedSteadyStateMatrix(steadyStateMatrix);
-
-		System.out.println("steadyStateMatrix.getRowDimension() " + steadyStateMatrix.getRowDimension() + "      steadyStateMatrix.getColumnDimension() " + steadyStateMatrix.getColumnDimension());
-		
-		double[] fluxVector = new double[steadyStateMatrix.getColumnDimension()];
-		
-		// fill the fluxVector
-		for (int column = 0; column < steadyStateMatrix.getColumnDimension(); column++) {
-			if (steadyStateMatrix.getRowDimension() > 0) {
-				if (((targetFluxes == null) || isNoTargetFlux(column, targetFluxes, doc))) {
-					//TODO: save all possible fluxes and pick that one, that gets the best fba-solution, 
-//					fluxVector[column] = steadyStateMatrix.get(0,column);
-					
-					// or get the linear combination of all steady state fluxes
-					fluxVector[column] = sumOfRowOrCol(steadyStateMatrix.getColumn(column));
-
-					if (Math.abs(fluxVector[column]) < Math.pow(10, -15)) {
-						//then the value is similar to 0 and the flux is 0
-						fluxVector[column] = 0d;
-					}
-
-				} else {
-					// TODO use the targetflux ...
-				}
+	/**
+	 * Eliminates the transport-reactions and gives back the new {@link SBMLDocument}.
+	 * @param doc
+	 * @return a new SBMLDocument without transport reactions
+	 */
+	public static SBMLDocument eliminateTransports(SBMLDocument doc) {
+		SBMLDocument newDoc = doc.clone();
+		for (int i = 0; i < doc.getModel().getReactionCount(); i++) {
+			String id = doc.getModel().getReaction(i).getId();
+			if (SBO.isChildOf(doc.getModel().getReaction(i).getSBOTerm(), SBO.getTransport())) {
+				// reaction i is a transport reaction: remove it
+				newDoc.getModel().removeReaction(id);
+				eliminatedReactions.add(id);
 			}
 		}
-//		System.out.println(Arrays.toString(fluxVector));
-		for (int i = 0; i < fluxVector.length; i++) {
-			System.out.println(systemBoundaryDocument.getModel().getReaction(i).getId() + ": " + fluxVector[i]);
-		}
-		
-		
-		return fluxVector;
+		return newDoc;
 	}
+
+	/**
+	 * Gets a {@link SBMLDocument} and searches the reversible reactions. Than it creates
+	 * a new SBMLDocument without the transport reactions and the reversible reactions split in two
+	 * irreversible reaction to both sides.
+	 * @param document
+	 * @return {@link SBMLDocument}
+	 */
+	public static SBMLDocument eliminateTransportsAndSplitReversibleReactions(
+			SBMLDocument document) {
+		// first eliminate the transports
+		SBMLDocument doc = eliminateTransports(document);
+		SBMLDocument revReacDoc = doc.clone();
+		//split the reversible reactions
+		int metaid = 0;
+		for (int i = 0; i < doc.getModel().getReactionCount(); i++) {
+			Reaction reversibleReac = revReacDoc.getModel().getReaction(doc.getModel().getReaction(i).getId());
+			if (reversibleReac.isReversible()) { // TODO for SBML L3 add if "isSetreversible"
+				reversibleReactions.add(reversibleReac.getId());
+				reversibleReactions.add(reversibleReac.getId() + endingForBackwardReaction);
+				Reaction backwardReac = reversibleReac.clone();
+				backwardReac.setId(reversibleReac.getId() + endingForBackwardReaction);
+				backwardReac.setMetaId(reversibleReac.getMetaId() + endingForBackwardReaction);
+				backwardReac.setName(reversibleReac.getName() + endingForBackwardReaction);
+				backwardReac.getListOfProducts().clear();
+				backwardReac.getListOfReactants().clear();
+				for (int j = 0; j < reversibleReac.getReactantCount(); j++) {
+					SpeciesReference sr = reversibleReac.getReactant(j).clone();
+					sr.setMetaId(metaid + endingForBackwardReaction);
+					metaid++;
+					backwardReac.addProduct(sr);
+				}
 	
+				for (int k = 0; k < reversibleReac.getProductCount(); k++) {
+					SpeciesReference sr = reversibleReac.getProduct(k).clone();
+					sr.setMetaId(metaid + endingForBackwardReaction);
+					metaid++;
+					backwardReac.addReactant(sr);
+				}
+				backwardReac.setReversible(false);
+				revReacDoc.getModel().addReaction(backwardReac);
+				reversibleReac.setReversible(false);
+			}
+		}
+		// return the new document
+		return revReacDoc;
+	}
+
+	/**
+	 * Method to eliminate the rows in the {@link StoichiometricMatrix} that contains only zeros.
+	 * @param {@link StoichiometricMatrix} N
+	 * @return {@link StoichiometricMatrix} without the zero-rows.
+	 */
+	private static StoichiometricMatrix eliminateZeroRows(StoichiometricMatrix N) {
+		// initialize the new StoichiometricMatrix (without the zero-rows)
+		StoichiometricMatrix S;
+	
+		for (int row = 0; row <N.getRowDimension(); row++){
+			//flagZeros is true if this row contains only zeros
+			boolean flagZeros = true;
+			for (int col = 0; col <N.getColumnDimension(); col++) {
+				if (N.get(row, col) != 0.0) {
+					flagZeros = false;
+				}
+			}
+			if (!flagZeros) {
+				remainingList.add(row);
+			}
+		}
+	
+		S = new StoichiometricMatrix(remainingList.size(), N.getColumnDimension());
+		for (int j = 0; j < S.getRowDimension(); j++) {
+			S.setRow(j, N.getRow(remainingList.get(j)));
+		}
+		return S;
+	}
+
+	/**
+	 * Expands the {@link SBMLDocument} and computes itself the system boundaries.
+	 * @param originalDocument
+	 * @throws Exception
+	 */
+	private static void expandDocument(SBMLDocument originalDocument) throws Exception {
+		SBMLDocument modifiedDocument = eliminateTransportsAndSplitReversibleReactions(originalDocument);
+		StoichiometricMatrix N_int = SBMLDocToStoichMatrix(modifiedDocument);
+		systemBoundaryDocument = addSystemBoundaries(N_int, modifiedDocument);
+		N_int_sys = SBMLDocToStoichMatrix(systemBoundaryDocument);
+	}
+
+	/**
+	 * Expands the {@link SBMLDocument} with the given system boundaries.
+	 * @param originalDocument
+	 * @param systemBoundaries
+	 * @throws Exception
+	 */
+	private static void expandDocument(SBMLDocument originalDocument, double[] systemBoundaries) throws Exception {
+		SBMLDocument modifiedDocument = eliminateTransportsAndSplitReversibleReactions(originalDocument);
+		systemBoundaryDocument = addSystemBoundaries(modifiedDocument, systemBoundaries);
+		N_int_sys = SBMLDocToStoichMatrix(systemBoundaryDocument);
+	}
+
 	/**
 	 * delete the rows of the steadyStateMatrix with conservation relations of a reversible reactions
 	 * (rows with a conservation relation of only the forward and backward flux of a splitted reversible reaction)
@@ -188,6 +421,109 @@ public class FluxMinimizationUtils {
 			}
 		}
 		return ssMatrix;
+	}
+
+	/**
+	 * @param oriDoc
+	 * @param rawSystemBoundaries
+	 * @return the corrected system boundaries
+	 * @throws Exception
+	 */
+	public static double[] getCorrectedSystemBoundaries(SBMLDocument oriDoc, double[] rawSystemBoundaries) throws Exception {
+		SBMLDocument modifiedDocument = eliminateTransportsAndSplitReversibleReactions(oriDoc);
+		StoichiometricMatrix n_int = SBMLDocToStoichMatrix(modifiedDocument);
+		double[] sb = getCorrectedSystemBoundaries(n_int, rawSystemBoundaries);
+		systemBoundaries = sb;
+		return sb;
+	}
+
+	/**
+	 * Corrects the incoming system boundaries and the corresponding {@link StoichiometricMatrix}.
+	 * @param n_int
+	 * @param rawSystemBoundaries
+	 * @return
+	 */
+	private static double[] getCorrectedSystemBoundaries(
+			StoichiometricMatrix n_int, double[] rawSystemBoundaries) {
+		double[] sb = rawSystemBoundaries.clone();
+		
+		for (int row = 0; row < rawSystemBoundaries.length; row++) {
+			if (rawSystemBoundaries[row] == 0) {
+				if (sumOfRowOrCol(n_int.getRow(row)) != 0) {
+					sb[row] = -(sumOfRowOrCol(n_int.getRow(row)));
+				}
+				else {
+					sb[row] = Double.NaN;
+				}
+			}
+		}
+		return sb;
+	}
+
+	/**
+	 * returns the expanded {@link SBMLDocument} with the computed system boundaries.
+	 * @param originalDocument
+	 * @return SBMLDocument with added system boundaries
+	 * @throws Exception
+	 */
+	public static SBMLDocument getExpandedDocument(SBMLDocument originalDocument) throws Exception {
+		if (systemBoundaryDocument == null) {
+			expandDocument(originalDocument);
+		}
+		return systemBoundaryDocument;
+	}
+
+	/**
+	 * returns the expanded {@link SBMLDocument} with the added incoming system boundaries.
+	 * @param originalDocument
+	 * @param systemBoundaries
+	 * @return SBMLDocument with added system boundaries
+	 * @throws Exception
+	 */
+	public static SBMLDocument getExpandedDocument(SBMLDocument originalDocument, double[] systemBoundaries) throws Exception {
+		if (systemBoundaryDocument == null) {
+			expandDocument(originalDocument, systemBoundaries);
+		}
+		return systemBoundaryDocument;
+	}
+
+	/**
+	 * @param originalDocument
+	 * @return StoichiometricMatrix with added system boundaries
+	 * @throws Exception 
+	 */
+	public static StoichiometricMatrix getExpandedStoichiometricMatrix(SBMLDocument originalDocument) throws Exception {
+		if (N_int_sys == null) {
+			getExpandedDocument(originalDocument);
+		}
+		return N_int_sys;
+	}
+
+	/**
+	 * @param originalDocument
+	 * @param systemBoundaries
+	 * @return StoichiometricMatrix with added system boundaries
+	 * @throws Exception 
+	 */
+	public static StoichiometricMatrix getExpandedStoichiometricMatrix(SBMLDocument originalDocument, double[] systemBoundaries) throws Exception {
+		if (N_int_sys == null) {
+			getExpandedDocument(originalDocument, systemBoundaries);
+		}
+		return N_int_sys;
+	}
+
+	/**
+	 * @param array
+	 * @return the number of non-zero entries
+	 */
+	private static int getParticipatingCount(double[] array) {
+		int counter = 0;
+		for (int i = 0; i < array.length; i++) {
+			if (array[i] != 0) {
+				counter++;
+			}
+		}
+		return counter;
 	}
 
 	/**
@@ -219,16 +555,41 @@ public class FluxMinimizationUtils {
 				}
 			}
 		}
-		
 		for (int i = 0; i < indices.length; i++) {
 			sortedMatrixArray[indices[i]] = arrayToSort[i];
 		}
-		
 		return sortedMatrixArray;
 	}
 
 	/**
-	 * 
+	 * @return the steady state matrix
+	 */
+	public static StabilityMatrix getSteadyStateMatrix() {
+		return steadyStateMatrix;
+	}
+
+	/**
+	 * @return the system boundaries
+	 */
+	public static double[] getSystemBoundaries() {
+		return systemBoundaries;
+	}
+
+	/**
+	 * Returns the system boundaries created from the stoichiometric matrix.
+	 * @param doc
+	 * @return the system boundaries created from the stoichiometric matrix
+	 * @throws Exception 
+	 */
+	public static double[] getSystemBoundaries(SBMLDocument doc) throws Exception {
+		if (systemBoundaries == null) {
+			expandDocument(doc);
+		}
+		return systemBoundaries;
+	}
+
+	/**
+	 * TODO: add comment
 	 * @param row
 	 * @return true if the row only contains a forward and the corresponding backward direction of a reversible reaction
 	 */
@@ -258,34 +619,6 @@ public class FluxMinimizationUtils {
 	}
 
 	/**
-	 * 
-	 * @param array
-	 * @return the number of non-zero entries
-	 */
-	private static int getParticipatingCount(double[] array) {
-		int counter = 0;
-		for (int i = 0; i < array.length; i++) {
-			if (array[i] != 0) {
-				counter++;
-			}
-		}
-		return counter;
-	}
-
-	/**
-	 * Gets a {@link StoichiometricMatrix} and gives back the corresponding flux-vector in Manhattan-Norm, without the given 
-	 * target fluxes.
-	 * 
-	 * @param targetFluxes
-	 * @param doc
-	 * @return
-	 * @throws Exception 
-	 */
-	public static double[] computeFluxVector(String[] targetFluxes, SBMLDocument doc) throws Exception {
-		return computeFluxVector(getExpandedStoichiometricMatrix(doc), targetFluxes, doc);
-	}
-
-	/**
 	 * Looks if the reaction with the index column is one of the target fluxes. Therefore
 	 * this method looks if the id of the reaction is in the String-array targetFluxes.
 	 * 
@@ -303,8 +636,6 @@ public class FluxMinimizationUtils {
 		}
 		return true;
 	}
-
-	
 
 	/**
 	 * Gets the original {@link SBMLDocument} and gives back the corresponding {@link StoichiometricMatrix}.
@@ -345,7 +676,6 @@ public class FluxMinimizationUtils {
 				}
 			}
 		}
-		
 		for (int i = 0; i< sMatrix.getRowDimension(); i++) {
 			double[] d = sMatrix.getRow(i);
 			if (d.equals(sMatrix.getRowShallow(i)))
@@ -355,312 +685,7 @@ public class FluxMinimizationUtils {
 	}
 
 	/**
-	 * Gets a {@link SBMLDocument} and searches the reversible reactions. Than it creates
-	 * a new SBMLDocument without the transport reactions and the reversible reactions split in two
-	 * irreversible reaction to both sides.
-	 * @param document
-	 * @return {@link SBMLDocument}
-	 */
-	public static SBMLDocument eliminateTransportsAndSplitReversibleReactions(
-			SBMLDocument document) {
-		// first eliminate the transports
-		SBMLDocument doc = eliminateTransports(document);
-		SBMLDocument revReacDoc = doc.clone();
-		//split the reversible reactions
-		int metaid = 0;
-		for (int i = 0; i < doc.getModel().getReactionCount(); i++) {
-			Reaction reversibleReac = revReacDoc.getModel().getReaction(doc.getModel().getReaction(i).getId());
-			if (reversibleReac.isReversible()) { // TODO for SBML L3 add if "isSetreversible"
-				reversibleReactions.add(reversibleReac.getId());
-				reversibleReactions.add(reversibleReac.getId() + endingForBackwardReaction);
-				Reaction backwardReac = reversibleReac.clone();
-				backwardReac.setId(reversibleReac.getId() + endingForBackwardReaction);
-				backwardReac.setMetaId(reversibleReac.getMetaId() + endingForBackwardReaction);
-				backwardReac.setName(reversibleReac.getName() + endingForBackwardReaction);
-				backwardReac.getListOfProducts().clear();
-				backwardReac.getListOfReactants().clear();
-				for (int j = 0; j < reversibleReac.getReactantCount(); j++) {
-					SpeciesReference sr = reversibleReac.getReactant(j).clone();
-					sr.setMetaId(metaid + endingForBackwardReaction);
-					metaid++;
-					backwardReac.addProduct(sr);
-				}
-
-				for (int k = 0; k < reversibleReac.getProductCount(); k++) {
-					SpeciesReference sr = reversibleReac.getProduct(k).clone();
-					sr.setMetaId(metaid + endingForBackwardReaction);
-					metaid++;
-					backwardReac.addReactant(sr);
-				}
-				backwardReac.setReversible(false);
-				revReacDoc.getModel().addReaction(backwardReac);
-				reversibleReac.setReversible(false);
-			}
-		}
-		// return the new document
-		return revReacDoc;
-	}
-
-
-	/**
-	 * Eliminates the transport-reactions and gives back the new {@link SBMLDocument}.
-	 * @param doc
-	 * @return a new SBMLDocument without transport reactions
-	 */
-	public static SBMLDocument eliminateTransports(SBMLDocument doc) {
-		SBMLDocument newDoc = doc.clone();
-		for (int i = 0; i < doc.getModel().getReactionCount(); i++) {
-			String id = doc.getModel().getReaction(i).getId();
-			if (SBO.isChildOf(doc.getModel().getReaction(i).getSBOTerm(), SBO.getTransport())) {
-				// reaction i is a transport reaction: remove it
-				newDoc.getModel().removeReaction(id);
-				eliminatedReactions.add(id);
-			}
-		}
-		return newDoc;
-	}
-
-	/**
-	 * Method to eliminate the rows in the {@link StoichiometricMatrix} that contains only zeros.
-	 * @param {@link StoichiometricMatrix} N
-	 * @return {@link StoichiometricMatrix} without the zero-rows.
-	 */
-	private static StoichiometricMatrix eliminateZeroRows(StoichiometricMatrix N) {
-		// initialize the new StoichiometricMatrix (without the zero-rows)
-		StoichiometricMatrix S;
-
-		for (int row = 0; row <N.getRowDimension(); row++){
-			//flagZeros is true if this row contains only zeros
-			boolean flagZeros = true;
-			for (int col = 0; col <N.getColumnDimension(); col++) {
-				if (N.get(row, col) != 0.0) {
-					flagZeros = false;
-				}
-			}
-			if (!flagZeros) {
-				remainingList.add(row);
-			}
-		}
-
-		S = new StoichiometricMatrix(remainingList.size(), N.getColumnDimension());
-		for (int j = 0; j < S.getRowDimension(); j++) {
-			S.setRow(j, N.getRow(remainingList.get(j)));
-		}
-		return S;
-	}
-
-	/**
-	 * Computes the Manhattan-Norm ||vector|| = sum up from 1 to |vector|: |v_i|        
-	 * e.g.:
-	 * vector = (1,-2,3) than ||vector|| = ||(1,-2,3)|| = |1| + |-2| + |3| = 1 + 2 + 3 = 6
-	 * 
-	 * @param vector
-	 * @return Manhattan-Norm of the vector
-	 */
-	public static double computeManhattenNorm(double[] vector) {
-		double norm = 0;
-		for (int i = 0; i < vector.length; i++) {
-			norm += Math.abs(vector[i]);
-		}
-		return norm;
-	}
-
-	/**
-	 * Computes the error for the target function with the given dimension
-	 * @param length 
-	 * @return double[]
-	 */
-	public static double[] computeError(int length) {
-		double[] error = new double[length];
-		// fill the error-vector with ones, so that it only consists of the variables
-		for (int i = 0; i < error.length; i++) {
-			error[i] = 1.0;
-		}
-		return error;
-	}
-	
-	
-	/**
-	 * 
-	 * @param originalDocument
-	 * @return SBMLDocument with added system boundaries
-	 * @throws Exception
-	 */
-	public static SBMLDocument getExpandedDocument(SBMLDocument originalDocument) throws Exception {
-		if (systemBoundaryDocument == null) {
-			expandDocument(originalDocument);
-		}
-		return systemBoundaryDocument;
-	}
-	
-	/**
-	 * 
-	 * @param originalDocument
-	 * @param systemBoundaries
-	 * @return SBMLDocument with added system boundaries
-	 * @throws Exception
-	 */
-	public static SBMLDocument getExpandedDocument(SBMLDocument originalDocument, double[] systemBoundaries) throws Exception {
-		if (systemBoundaryDocument == null) {
-			expandDocument(originalDocument, systemBoundaries);
-		}
-		return systemBoundaryDocument;
-	}
-	
-	/**
-	 * @param originalDocument
-	 * @return StoichiometricMatrix with added system boundaries
-	 * @throws Exception 
-	 */
-	public static StoichiometricMatrix getExpandedStoichiometricMatrix(SBMLDocument originalDocument) throws Exception {
-		if (N_int_sys == null) {
-			getExpandedDocument(originalDocument);
-		}
-		return N_int_sys;
-	}
-	
-	/**
-	 * @param originalDocument
-	 * @param systemBoundaries
-	 * @return StoichiometricMatrix with added system boundaries
-	 * @throws Exception 
-	 */
-	public static StoichiometricMatrix getExpandedStoichiometricMatrix(SBMLDocument originalDocument, double[] systemBoundaries) throws Exception {
-		if (N_int_sys == null) {
-			getExpandedDocument(originalDocument, systemBoundaries);
-		}
-		return N_int_sys;
-	}
-	
-	/**
-	 * 
-	 * @return the steady state matrix
-	 */
-	public static StabilityMatrix getSteadyStateMatrix() {
-		return steadyStateMatrix;
-	}
-	
-	/**
-	 * 
-	 * @return the system boundaries
-	 */
-	public static double[] getSystemBoundaries() {
-		return systemBoundaries;
-	}
-	
-	/**
-	 * 
-	 * @param doc
-	 * @return the system boundaries created from the stoichiometric matrix
-	 * @throws Exception 
-	 */
-	public static double[] getSystemBoundaries(SBMLDocument doc) throws Exception {
-		if (systemBoundaries == null) {
-			expandDocument(doc);
-		}
-		return systemBoundaries;
-	}
-	
-	/**
-	 * 
-	 * @param originalDocument
-	 * @throws Exception
-	 */
-	private static void expandDocument(SBMLDocument originalDocument) throws Exception {
-		SBMLDocument modifiedDocument = eliminateTransportsAndSplitReversibleReactions(originalDocument);
-		StoichiometricMatrix N_int = SBMLDocToStoichMatrix(modifiedDocument);
-		systemBoundaryDocument = addSystemBoundaries(N_int, modifiedDocument);
-		N_int_sys = SBMLDocToStoichMatrix(systemBoundaryDocument);
-	}
-	
-	/**
-	 * 
-	 * @param originalDocument
-	 * @param systemBoundaries
-	 * @throws Exception
-	 */
-	private static void expandDocument(SBMLDocument originalDocument, double[] systemBoundaries) throws Exception {
-		SBMLDocument modifiedDocument = eliminateTransportsAndSplitReversibleReactions(originalDocument);
-		systemBoundaryDocument = addSystemBoundaries(modifiedDocument, systemBoundaries);
-		N_int_sys = SBMLDocToStoichMatrix(systemBoundaryDocument);
-	}
-
-	/**
-	 * 
-	 * @param n_int
-	 * @param modDoc
-	 * @return
-	 */
-	private static SBMLDocument addSystemBoundaries(StoichiometricMatrix n_int,
-			SBMLDocument modDoc) {
-		SBMLDocument doc = modDoc.clone();
-		double[] systemBoundaries = new double[n_int.getRowDimension()];
-		for (int row = 0; row < n_int.getRowDimension(); row++) {
-			if (sumOfRowOrCol(n_int.getRow(row)) != 0) {
-				systemBoundaries[row] = -(sumOfRowOrCol(n_int.getRow(row)));
-			}
-			else {
-				systemBoundaries[row] = Double.NaN;
-			}
-		}
-		FluxMinimizationUtils.systemBoundaries = systemBoundaries;
-		doc = addNewReactionEntriesToDoc(systemBoundaries, doc);
-		return doc;
-	}
-	
-	/**
-	 * 
-	 * @param modDoc
-	 * @param systemBoundaries
-	 * @return
-	 * @throws Exception 
-	 */
-	private static SBMLDocument addSystemBoundaries(SBMLDocument modDoc, double[] systemBoundaries) throws Exception {
-		SBMLDocument doc = modDoc.clone();
-		doc = addNewReactionEntriesToDoc(systemBoundaries, doc);
-		return doc;
-	}
-
-	/**
-	 * 
-	 * @param n_int
-	 * @param rawSystemBoundaries
-	 * @return
-	 */
-	private static double[] getCorrectedSystemBoundaries(
-			StoichiometricMatrix n_int, double[] rawSystemBoundaries) {
-		double[] sb = rawSystemBoundaries.clone();
-		
-		for (int row = 0; row < rawSystemBoundaries.length; row++) {
-			if (rawSystemBoundaries[row] == 0) {
-				if (sumOfRowOrCol(n_int.getRow(row)) != 0) {
-					sb[row] = -(sumOfRowOrCol(n_int.getRow(row)));
-				}
-				else {
-					sb[row] = Double.NaN;
-				}
-			}
-		}
-		return sb;
-	}
-	
-	/**
-	 * 
-	 * @param oriDoc
-	 * @param rawSystemBoundaries
-	 * @return the corrected system boundaries
-	 * @throws Exception
-	 */
-	public static double[] getCorrectedSystemBoundaries(SBMLDocument oriDoc, double[] rawSystemBoundaries) throws Exception {
-		SBMLDocument modifiedDocument = eliminateTransportsAndSplitReversibleReactions(oriDoc);
-		StoichiometricMatrix n_int = SBMLDocToStoichMatrix(modifiedDocument);
-		double[] sb = getCorrectedSystemBoundaries(n_int, rawSystemBoundaries);
-		systemBoundaries = sb;
-		return sb;
-	}
-
-	/**
-	 * 
+	 * Computes the sum of all values in the incoming column- or row-array.
 	 * @param indices
 	 * @return
 	 */
@@ -670,48 +695,6 @@ public class FluxMinimizationUtils {
 			sum += indices[column];
 		}
 		return sum;
-	}
-	
-	
-	/**
-	 * 
-	 * @param indexOfSpecies
-	 * @param doc
-	 * @param stoichiometry
-	 * @return
-	 */
-	private static SBMLDocument addNewReactionEntriesToDoc(double[] systemBoundaries, SBMLDocument doc) {
-		SBMLDocument modified = doc.clone();
-
-		for (int index = 0; index < systemBoundaries.length; index++) {
-			
-			if (!Double.isNaN(systemBoundaries[index])){
-				// get species
-				Species species = modified.getModel().getSpecies(index);
-				String speciesId = species.getId();
-
-				// new reaction
-				String reactionId = degradationPrefix + speciesId;
-				Reaction systemBoundaryReaction = new Reaction(reactionId, doc.getModel().getLevel(), doc.getModel().getVersion());
-				systemBoundaryReaction.setMetaId(metaIdPrefix + reactionId);
-
-				SpeciesReference specRef =  new SpeciesReference(species);
-				specRef.setMetaId(metaIdPrefix + speciesId + "_" + reactionId);
-				// TODO choose which is better (give stoichiometry or 1)
-//				specRef.setStoichiometry(Math.abs(systemBoundaries[index]));
-				specRef.setStoichiometry(1);
-				
-				if (Math.signum(systemBoundaries[index]) == -1) {
-					systemBoundaryReaction.addReactant(specRef);
-				} 
-				else if (Math.signum(systemBoundaries[index]) == +1) {
-					systemBoundaryReaction.addProduct(specRef);
-				}
-				systemBoundaryReaction.setReversible(false);
-				modified.getModel().addReaction(systemBoundaryReaction);
-			}
-		}
-		return modified;
 	}
 	
 }

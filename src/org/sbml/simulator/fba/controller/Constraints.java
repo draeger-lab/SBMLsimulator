@@ -34,16 +34,6 @@ import org.sbml.simulator.stability.math.StoichiometricMatrix;
 public class Constraints {
 
 	/**
-	 * Contains the opened {@link SBMLDocument}
-	 */
-	public SBMLDocument originalDocument;
-
-	/**
-	 * Contains the Gibbs energies in steady state
-	 */
-	private double[] equilibriumGibbsEnergies;
-
-	/**
 	 * Contains the computed Gibbs energies
 	 */
 	private double[] computedGibbsEnergies;
@@ -54,9 +44,14 @@ public class Constraints {
 	private double[] equilibriumConcentrations;
 
 	/**
-	 * Contains the temperature in Kelvin under standard conditions (25 degree Celsius)
+	 * Contains the Gibbs energies in steady state
 	 */
-	private double T = 298.15;
+	private double[] equilibriumGibbsEnergies;
+
+	/**
+	 * Contains the opened {@link SBMLDocument}
+	 */
+	public SBMLDocument originalDocument;
 
 	/**
 	 * The ideal gas constant R in J/(mol * K)
@@ -72,6 +67,10 @@ public class Constraints {
 	 */
 	private double[] systemBoundaries;
 
+	/**
+	 * Contains the temperature in Kelvin under standard conditions (25 degree Celsius)
+	 */
+	private double T = 298.15;
 
 	/**
 	 * Constructor, that gets a {@link SBMLDocument} and creates a new
@@ -123,6 +122,94 @@ public class Constraints {
 	}
 
 	/**
+	 * Computes the Gibbs energies with the formula delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * ln(sum( N[j][i] * c_eq[j] )).
+	 * @param equilibriumsGibbs in kJ/mol
+	 * @throws Exception 
+	 */
+	private double[] computeGibbsEnergies(double[] equilibriumsGibbs) throws Exception {
+		if ((equilibriumsGibbs != null) && (this.originalDocument != null) && (equilibriumConcentrations != null)) {
+	
+			// initialize
+			StoichiometricMatrix N = FluxMinimizationUtils.getExpandedStoichiometricMatrix(originalDocument);
+			SBMLDocument modifiedDocument = FluxMinimizationUtils.getExpandedDocument(originalDocument, systemBoundaries);
+			computedGibbsEnergies = new double[equilibriumsGibbs.length];
+			Model modModel = modifiedDocument.getModel();
+	
+			// compute delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum(N[i][j] * ln(S[i])) 
+			for (int j = 0; j < modModel.getReactionCount(); j++) {
+				double sum = 0;
+				// compute sum( N[i][j] * ln(S_eq[i]) ) equals to the sum( N[i][j] * c_eq[i] ) 
+				for (int i = 0; i < modModel.getSpeciesCount(); i++) {
+					if (!Double.isNaN(equilibriumConcentrations[i])) {
+						sum += N.get(i, j) * Math.log(equilibriumConcentrations[i]);
+					} 
+				}
+				// delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum( N[i][j] * ln(c_eq[i]) )
+	
+				computedGibbsEnergies[j] = (equilibriumsGibbs[j]) + (R*T*sum);
+			}
+	
+			for (int j = 0; j < modModel.getReactionCount(); j++) {
+				String reactionID = modModel.getReaction(j).getId();
+				if (reactionID.startsWith(FluxMinimizationUtils.degradationPrefix)) {
+					computedGibbsEnergies[j] = Double.NaN; // for system boundary added reactions
+				}
+			}
+		}
+	
+		// return the computed Gibbs energies
+		return computedGibbsEnergies;
+	}
+
+
+	/**
+	 * Computes the maximum of J_j / G_j for every reaction j in the model
+	 * @param fluxVector
+	 * @return r_max
+	 */
+	public double computeR_max(double[] fluxVector) {
+		// initialization
+		double r_max = Double.MIN_NORMAL; 
+	
+		if (computedGibbsEnergies != null) {
+			for (int i = 0; i < fluxVector.length; i++) {
+				// if you divide by NaN, r_max will be NaN and if you divide by zero, you get r_max = infinity
+				if (!Double.isNaN(computedGibbsEnergies[i]) && computedGibbsEnergies[i] != 0) {
+					double d = Math.abs(fluxVector[i])/Math.abs(computedGibbsEnergies[i]);
+					r_max = Math.max(r_max,(d));
+				}
+			}
+		}
+		return r_max;
+	}
+
+	
+	/**
+	 * Computed Gibbs energies by 
+	 * delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum( N[i][j] * ln(S[i]) )
+	 * @return the computed gibbsEnergies
+	 */
+	public double[] getComputedGibbsEnergies() {
+		return computedGibbsEnergies;
+	}
+
+
+	/**
+	 * @return the equilibrium concentrations
+	 */
+	public double[] getEquilibriumConcentrations() {
+		return equilibriumConcentrations;
+	}
+
+
+	/**
+	 * @return the gibbsEnergies
+	 */
+	public double[] getEquilibriumGibbsEnergies() {
+		return equilibriumGibbsEnergies;
+	}
+
+	/**
 	 * Converts Gibbs values given in [kJ/mol] to [J/mol].
 	 * 
 	 * @param gibbs_eq
@@ -138,44 +225,21 @@ public class Constraints {
 
 
 	/**
-	 * Computes the Gibbs energies with the formula delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * ln(sum( N[j][i] * c_eq[j] )).
-	 * @param equilibriumsGibbs in kJ/mol
-	 * @throws Exception 
+	 * 
+	 * @return
 	 */
-	private double[] computeGibbsEnergies(double[] equilibriumsGibbs) throws Exception {
-		if ((equilibriumsGibbs != null) && (this.originalDocument != null) && (equilibriumConcentrations != null)) {
-
-			// initialize
-			StoichiometricMatrix N = FluxMinimizationUtils.getExpandedStoichiometricMatrix(originalDocument);
-			SBMLDocument modifiedDocument = FluxMinimizationUtils.getExpandedDocument(originalDocument, systemBoundaries);
-			computedGibbsEnergies = new double[equilibriumsGibbs.length];
-			Model modModel = modifiedDocument.getModel();
-
-			// compute delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum(N[i][j] * ln(S[i])) 
-			for (int j = 0; j < modModel.getReactionCount(); j++) {
-				double sum = 0;
-				// compute sum( N[i][j] * ln(S_eq[i]) ) equals to the sum( N[i][j] * c_eq[i] ) 
-				for (int i = 0; i < modModel.getSpeciesCount(); i++) {
-					if (!Double.isNaN(equilibriumConcentrations[i])) {
-						sum += N.get(i, j) * Math.log(equilibriumConcentrations[i]);
-					} 
-				}
-				// delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum( N[i][j] * ln(c_eq[i]) )
-
-				computedGibbsEnergies[j] = (equilibriumsGibbs[j]) + (R*T*sum);
-			}
-
-			for (int j = 0; j < modModel.getReactionCount(); j++) {
-				String reactionID = modModel.getReaction(j).getId();
-				if (reactionID.startsWith(FluxMinimizationUtils.degradationPrefix)) {
-					computedGibbsEnergies[j] = Double.NaN; // for system boundary added reactions
-				}
-			}
-		}
-
-		// return the computed Gibbs energies
-		return computedGibbsEnergies;
+	public double[] getSystemBoundaries() {
+		return systemBoundaries;
 	}
+
+
+	/**
+	 * @param c_eq the equilibrium concentrations to set
+	 */
+	public void setEquilibriumConcentrations(double[] c_eq) {
+		this.equilibriumConcentrations = c_eq;
+	}
+
 
 	/**
 	 * @param gibbsEnergies the gibbsEnergies to set
@@ -186,35 +250,6 @@ public class Constraints {
 		computeGibbsEnergies(gibbsEnergies);
 	}
 
-	/**
-	 * @return the gibbsEnergies
-	 */
-	public double[] getEquilibriumGibbsEnergies() {
-		return equilibriumGibbsEnergies;
-	}
-
-	/**
-	 * @param c_eq the equilibrium concentrations to set
-	 */
-	public void setEquilibriumConcentrations(double[] c_eq) {
-		this.equilibriumConcentrations = c_eq;
-	}
-
-	/**
-	 * @return the equilibrium concentrations
-	 */
-	public double[] getEquilibriumConcentrations() {
-		return equilibriumConcentrations;
-	}
-
-	/**
-	 * Computed Gibbs energies by 
-	 * delta(Gibbs)_j = delta(Gibbs)_j_eq + R * T * sum( N[i][j] * ln(S[i]) )
-	 * @return the computed gibbsEnergies
-	 */
-	public double[] getComputedGibbsEnergies() {
-		return computedGibbsEnergies;
-	}
 
 	/**
 	 * 
@@ -222,36 +257,6 @@ public class Constraints {
 	 */
 	public void setSystemBoundaries(double[] systemBoundaries) {
 		this.systemBoundaries = systemBoundaries;
-	}
-
-
-	/**
-	 * 
-	 * @return
-	 */
-	public double[] getSystemBoundaries() {
-		return systemBoundaries;
-	}
-
-	/**
-	 * Computes the maximum of J_j / G_j for every reaction j in the model
-	 * @param fluxVector
-	 * @return r_max
-	 */
-	public double computeR_max(double[] fluxVector) {
-		// initialization
-		double r_max = Double.MIN_NORMAL; 
-
-		if (computedGibbsEnergies != null) {
-			for (int i = 0; i < fluxVector.length; i++) {
-				// if you divide by NaN, r_max will be NaN and if you divide by zero, you get r_max = infinity
-				if (!Double.isNaN(computedGibbsEnergies[i]) && computedGibbsEnergies[i] != 0) {
-					double d = Math.abs(fluxVector[i])/Math.abs(computedGibbsEnergies[i]);
-					r_max = Math.max(r_max,(d));
-				}
-			}
-		}
-		return r_max;
 	}
 
 }

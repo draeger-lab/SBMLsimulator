@@ -21,13 +21,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.TableModel;
 
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.simulator.fba.controller.FluxBalanceAnalysis;
 import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
-
 
 /**
  * this class visualizes the table/chart in which the computed data
@@ -41,11 +38,6 @@ import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 public class ChartPanel extends JPanel{
 
 	/**
-	 * Default serial version number
-	 */
-	private static final long serialVersionUID = 1L;
-
-	/**
 	 * 2D-Array that contains the data of the computed fluxes in {@link FluxBalanceAnalysis}
 	 */
 	private String[][] dataFluxes;
@@ -56,21 +48,34 @@ public class ChartPanel extends JPanel{
 	private String[][] dataConc;
 	
 	/**
-	 * The table that shows the computed values of fluxes
+	 * The current {@link SBMLDocument}
 	 */
-	private JTable tableFluxes;
-	
+	private SBMLDocument doc;
+
+	/**
+	 * Default serial version number
+	 */
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Table that shows the computed values of concentrations
 	 */
 	private JTable tableConc;
 
 	/**
-	 * The current {@link SBMLDocument}
+	 * The table that shows the computed values of fluxes
 	 */
-	private SBMLDocument doc;
-
+	private JTable tableFluxes;
 	
+	/**
+	 * Constructor that gets only the {@link SBMLDocument}
+	 * @param document
+	 */
+	public ChartPanel(SBMLDocument document) {
+		super();
+		doc = document;
+	}
+
 	/**
 	 * Constructor that creates the tables of the incoming data-arrays
 	 * @param rowDataFluxes
@@ -89,12 +94,46 @@ public class ChartPanel extends JPanel{
 	}
 
 	/**
-	 * Constructor that gets only the {@link SBMLDocument}
-	 * @param document
+	 * @return the tableConc
 	 */
-	public ChartPanel(SBMLDocument document) {
-		super();
-		doc = document;
+	public JTable getTableConc() {
+		return tableConc;
+	}
+
+	/**
+	 * @return the tableFluxes
+	 */
+	public JTable getTableFluxes() {
+		return tableFluxes;
+	}
+
+	/**
+	 * Initializes the whole panel
+	 */
+	public void init() {
+		if (dataFluxes != null) {
+			String[] columns = {"Id", "Value"};
+			tableFluxes = new JTable(dataFluxes, columns);
+		} 
+		if (dataConc != null) {
+			String[] columns = {"Id", "Value"};
+			tableConc = new JTable(dataConc, columns);
+		}
+		JPanel panel = new JPanel();
+	
+		if (dataFluxes != null) {
+			JScrollPane scrollPane = new JScrollPane(tableFluxes);
+			tableFluxes.setFillsViewportHeight(true);
+			panel.add(scrollPane);
+		}
+	
+		if (dataConc != null) {
+			JScrollPane scrollPane = new JScrollPane(tableConc);
+			tableConc.setFillsViewportHeight(true);			
+			panel.add(scrollPane);
+		}
+	
+		this.add(panel);
 	}
 
 	/**
@@ -119,35 +158,6 @@ public class ChartPanel extends JPanel{
 	}
 
 	/**
-	 * Initializes the whole panel
-	 */
-	public void init() {
-		if (dataFluxes != null) {
-			String[] columns = {"Id", "Value"};
-			tableFluxes = new JTable(dataFluxes, columns);
-		} 
-		if (dataConc != null) {
-			String[] columns = {"Id", "Value"};
-			tableConc = new JTable(dataConc, columns);
-		}
-		JPanel panel = new JPanel();
-
-		if (dataFluxes != null) {
-			JScrollPane scrollPane = new JScrollPane(tableFluxes);
-			tableFluxes.setFillsViewportHeight(true);
-			panel.add(scrollPane);
-		}
-
-		if (dataConc != null) {
-			JScrollPane scrollPane = new JScrollPane(tableConc);
-			tableConc.setFillsViewportHeight(true);			
-			panel.add(scrollPane);
-		}
-
-		this.add(panel);
-	}
-
-	/**
 	 * Sets the fluxes and creates the table of fluxes, if the incoming array is not null.
 	 * @param solution_fluxVector
 	 * @throws Exception 
@@ -166,19 +176,5 @@ public class ChartPanel extends JPanel{
 				dataFluxes[i][1] = Double.toString(solution_fluxVector[i]);
 			}
 		}
-	}
-
-	/**
-	 * @return the tableFluxes
-	 */
-	public JTable getTableFluxes() {
-		return tableFluxes;
-	}
-
-	/**
-	 * @return the tableConc
-	 */
-	public JTable getTableConc() {
-		return tableConc;
 	}
 }

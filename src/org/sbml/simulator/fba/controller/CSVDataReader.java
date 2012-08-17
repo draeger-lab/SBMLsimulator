@@ -38,19 +38,19 @@ import de.zbit.io.csv.CSVReader;
 public class CSVDataReader extends SwingWorker<String[][], Void>{
 
 	/**
-	 * The read data in a 2D-String-Array.
+	 * The corresponding CSVImporterV2
 	 */
-	private String[][] stringData;
-	
+	private CSVImporterV2 converter;
+
 	/**
 	 * boolean doRead
 	 */
 	private boolean doRead = true;
-	
+
 	/**
-	 * The corresponding CSVImporterV2
+	 * The read data in a 2D-String-Array.
 	 */
-	private CSVImporterV2 converter;
+	private String[][] stringData;
 
 	/**
 	 * Constructor that calls the read-method.
