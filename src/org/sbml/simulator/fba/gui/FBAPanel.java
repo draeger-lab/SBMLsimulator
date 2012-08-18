@@ -85,6 +85,11 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	private SBMLDocument currentDoc;
 
 	/**
+	 * Constraint compute Error is on, when this variable is set true.
+	 */
+	private boolean Error_constraint;
+
+	/**
 	 * The current computed {@link FluxBalanceAnalysis}
 	 */
 	private FluxBalanceAnalysis fba;
@@ -110,12 +115,12 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	private int iterations;
 
 	/**
-	 * Constraint J*G < 0 is on, when this variable is set true
+	 * Constraint J*G < 0 is on, when this variable is set true.
 	 */
 	private boolean JG_less_than_0;
 
 	/**
-	 * Constraint J > 0 is on, when this variable is set true
+	 * Constraint J > 0 is on, when this variable is set true.
 	 */
 	private boolean J_greater_0;
 
@@ -144,6 +149,9 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	 */
 	private double lambda4;
 
+	/**
+	 * Contains the parent simulator panel.
+	 */
 	private SimulationPanel simultorPanel;
 
 	/**
@@ -155,6 +163,11 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	 * The setting panel wich contains the upper and lower bounds of fluxes and concentrations
 	 */
 	private FBASettingPanel settings;
+
+	/**
+	 * Contains the system boundaries file.
+	 */
+	private File systemBoundariesFile;
 
 	/**
 	 * The target fluxes
@@ -171,10 +184,6 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	 */
 	private VODPanel vod;
 
-	private File systemBoundariesFile;
-
-	private boolean Error_constraint;
-
 	/**
 	 * Constructor that sets all the different panels
 	 * @param document
@@ -182,10 +191,14 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	public FBAPanel (SBMLDocument document) {
 		super(new BorderLayout());
 		currentDoc = document;
+		
+		//set the panels
 		this.chartConc = new ChartPanel(document);
 		this.chartFlux = new ChartPanel(document);
 		this.settings = new FBASettingPanel(this);
 		this.vod = new VODPanel();
+		
+		//init the fba panel
 		init();
 		setVisible(true);
 	}
@@ -201,7 +214,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	}
 
 	/**
-	 * check if the options were changed
+	 * Check if the options were changed.
 	 */
 	private void checkPreferences() {
 		//check files
@@ -229,10 +242,10 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 		lambda4 = sbPrefs.getDouble(FBAOptions.LAMBDA4);
 	
 		//check upper and lower bounds
-		FluxLowerBound = settings.getFluxLowerBoundValues();
-		FluxUpperBound = settings.getFluxUpperBoundValues();
 		ConcLowerBound = settings.getConcLowerBoundValues();
 		ConcUpperBound = settings.getConcUpperBoundValues();
+		FluxLowerBound = settings.getFluxLowerBoundValues();
+		FluxUpperBound = settings.getFluxUpperBoundValues();
 	}
 
 
@@ -284,7 +297,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	}
 
 	/**
-	 * Initialize the whole FBA frame
+	 * Initialize the whole FBA frame.
 	 */
 	private void init() {
 		JSplitPane jsp = new JSplitPane();
