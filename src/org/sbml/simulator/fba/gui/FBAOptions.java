@@ -86,7 +86,7 @@ public interface FBAOptions extends KeyProvider {
 			"ACTIVATE_CONSTRAINT_J_GREATER_THAN_0", Boolean.class, bundle, Boolean.FALSE);
 	
 	/**
-	 * Choose to activate the constraint J>0
+	 * Choose to activate the constraint to compute the errors
 	 */
 	public static final Option<Boolean> ACTIVATE_CONSTRAINT_ERROR = new Option<Boolean>(
 			"ACTIVATE_CONSTRAINT_ERROR", Boolean.class, bundle, Boolean.FALSE);
