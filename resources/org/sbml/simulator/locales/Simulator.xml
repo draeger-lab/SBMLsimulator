@@ -90,6 +90,7 @@
   <entry key="ACTIVATE_CONSTRAINT_JG_LESS_THAN_0">Set the constraint J*G less than 0  on</entry>
   <entry key="ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0">Set the constraint |J| - r_max*|G| less than 0 on</entry>
   <entry key="ACTIVATE_CONSTRAINT_J_GREATER_THAN_0">Set the constraint J greater than 0 on</entry>
+  <entry key="ACTIVATE_CONSTRAINT_ERROR">Set the constraint to compute the error on</entry>
   <entry key="DEFAULT_TARGET_FUNCTION">The default target function is always flux minimization</entry>
   <entry key="FILES">Load files</entry>
   <entry key="LAMBDA1">A double value required to weight the concentrations</entry>
@@ -98,6 +99,7 @@
   <entry key="LAMBDA4">A double value required to weight the computed Gibbs energies</entry>
   <entry key="LOAD_CONCENTRATION_FILE">Load a concentration file for FBA</entry>
   <entry key="LOAD_GIBBS_FILE">Load a Gibbs file for FBA</entry>
+  <entry key="LOAD_SYSTEM_BOUNDARIES_FILE">Load a system boundaries file for FBA</entry>
   <entry key="SET_CONSTRAINTS">Constraints</entry>
   <entry key="SET_LAMBDAS">Lambdas</entry>
   <entry key="SET_TARGET_AND_ITERATIONS">Target function and iterations</entry>

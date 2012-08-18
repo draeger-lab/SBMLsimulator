@@ -84,8 +84,14 @@ public interface FBAOptions extends KeyProvider {
 	 */
 	public static final Option<Boolean> ACTIVATE_CONSTRAINT_J_GREATER_THAN_0 = new Option<Boolean>(
 			"ACTIVATE_CONSTRAINT_J_GREATER_THAN_0", Boolean.class, bundle, Boolean.FALSE);
+	
+	/**
+	 * Choose to activate the constraint J>0
+	 */
+	public static final Option<Boolean> ACTIVATE_CONSTRAINT_ERROR = new Option<Boolean>(
+			"ACTIVATE_CONSTRAINT_ERROR", Boolean.class, bundle, Boolean.FALSE);
 
-
+	
 	/**
 	 * Choose a target function
 	 */
@@ -148,7 +154,7 @@ public interface FBAOptions extends KeyProvider {
 	 */
 	@SuppressWarnings("unchecked")
 	public static final OptionGroup<Boolean> SET_CONSTRAINTS = new OptionGroup<Boolean>(
-			"SET_CONSTRAINTS", bundle, ACTIVATE_CONSTRAINT_JG_LESS_THAN_0, ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0, ACTIVATE_CONSTRAINT_J_GREATER_THAN_0);
+			"SET_CONSTRAINTS", bundle, ACTIVATE_CONSTRAINT_JG_LESS_THAN_0, ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0, ACTIVATE_CONSTRAINT_J_GREATER_THAN_0, ACTIVATE_CONSTRAINT_ERROR);
 
 
 	/**

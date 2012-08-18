@@ -171,6 +171,10 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	 */
 	private VODPanel vod;
 
+	private File systemBoundariesFile;
+
+	private boolean Error_constraint;
+
 	/**
 	 * Constructor that sets all the different panels
 	 * @param document
@@ -194,13 +198,13 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
-	
 	}
 
 	/**
 	 * check if the options were changed
 	 */
 	private void checkPreferences() {
+		//check files
 		SBPreferences sbPrefs = SBPreferences.getPreferencesFor(FBAOptions.class);
 		if (sbPrefs.getFile(FBAOptions.LOAD_CONCENTRATION_FILE) != null) {
 			concFile = sbPrefs.getFile(FBAOptions.LOAD_CONCENTRATION_FILE);
@@ -208,6 +212,11 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 		if (sbPrefs.getFile(FBAOptions.LOAD_GIBBS_FILE)!= null) {
 			gibbsFile = sbPrefs.getFile(FBAOptions.LOAD_GIBBS_FILE);
 		}
+		if (sbPrefs.getFile(FBAOptions.LOAD_SYSTEM_BOUNDARIES_FILE) != null) {
+			systemBoundariesFile = sbPrefs.getFile(FBAOptions.LOAD_SYSTEM_BOUNDARIES_FILE);
+		}
+		//check constraints and interations
+		Error_constraint = sbPrefs.getBoolean(FBAOptions.ACTIVATE_CONSTRAINT_ERROR);
 		JG_less_than_0 = sbPrefs.getBoolean(FBAOptions.ACTIVATE_CONSTRAINT_JG_LESS_THAN_0);
 		J_rmax_G_less_than_0 = sbPrefs.getBoolean(FBAOptions.ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0);
 		J_greater_0 = sbPrefs.getBoolean(FBAOptions.ACTIVATE_CONSTRAINT_J_GREATER_THAN_0);
@@ -224,7 +233,6 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 		FluxUpperBound = settings.getFluxUpperBoundValues();
 		ConcLowerBound = settings.getConcLowerBoundValues();
 		ConcUpperBound = settings.getConcUpperBoundValues();
-	
 	}
 
 
@@ -402,10 +410,17 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 					//wait while reading
 				}
 			}
+			if (systemBoundariesFile != null) {
+				csvConverterGibbs.readSystemBoundariesFromFile(systemBoundariesFile);
+				while(csvConverterGibbs.getSystemBoundariesArray() == null) {
+					//wait while reading
+				}
+			}
 			Constraints c = new Constraints(currentDoc, csvConverterGibbs.getGibbsArray(), csvConverterConc.getConcentrationsArray(), null);
 			fba = new FluxBalanceAnalysis(currentDoc, c, targetFluxes);
 	
 			//set constraints and iterations
+			fba.setConctraintError(Error_constraint);
 			fba.setConstraintJG(JG_less_than_0);
 			fba.setConstraintJ_rmaxG(J_rmax_G_less_than_0);
 			fba.setCplexIterations(iterations);
@@ -451,10 +466,6 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 			vod.setConcentrations(fba.solutionConcentrations);
 			vod.init();
 			chartFlux.setFluxes(fba.solutionFluxVector);
-			 //TODO syso
-			for (int i = 0; i < fba.solutionFluxVector.length; i++) {
-				System.out.print( " " + fba.solutionFluxVector[i]);
-			}
 			chartConc.setConcentrations(fba.solutionConcentrations);
 			chartFlux.init();
 			chartConc.init();
@@ -464,10 +475,6 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 			vod.setFluxes(fba.solutionFluxVector);
 			vod.setConcentrations(fba.solutionConcentrations);
 			vod.updateUI();
-			//TODO syso
-			for (int i = 0; i < fba.solutionFluxVector.length; i++) {
-				System.out.print( " " + fba.solutionFluxVector[i]);
-			}
 			chartFlux.setFluxes(fba.solutionFluxVector);
 			chartConc.setConcentrations(fba.solutionConcentrations);
 			chartFlux.getTableFluxes().revalidate();
