@@ -34,6 +34,7 @@ import org.sbml.jsbml.SBMLDocument;
 import org.sbml.simulator.fba.controller.CSVDataConverter;
 import org.sbml.simulator.fba.controller.Constraints;
 import org.sbml.simulator.fba.controller.FluxBalanceAnalysis;
+import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.gui.LegendPanel;
 import org.sbml.simulator.gui.SimulationPanel;
 
@@ -82,7 +83,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	/**
 	 * The current opened {@link SBMLDocument}
 	 */
-	private SBMLDocument currentDoc;
+	private SBMLDocument originalDoc;
 
 	/**
 	 * Constraint compute Error is on, when this variable is set true.
@@ -190,7 +191,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	 */
 	public FBAPanel (SBMLDocument document) {
 		super(new BorderLayout());
-		currentDoc = document;
+		originalDoc = document;
 		
 		//set the panels
 		this.chartConc = new ChartPanel(document);
@@ -261,7 +262,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	 * @return the currentDoc
 	 */
 	public SBMLDocument getCurrentDoc() {
-		return currentDoc;
+		return originalDoc;
 	}
 
 
@@ -304,7 +305,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 		vod.setBorder(BorderFactory.createLoweredBevelBorder());
 	
 		// legend panel
-		LegendPanel legendPanel = new LegendPanel(currentDoc.getModel(), true);
+		LegendPanel legendPanel = new LegendPanel(originalDoc.getModel(), true);
 		legendPanel.addTableModelListener(this);
 		legendPanel.setBorder(BorderFactory.createLoweredBevelBorder());
 	
@@ -354,7 +355,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	 * @param currentDoc the currentDoc to set
 	 */
 	public void setCurrentDoc(SBMLDocument currentDoc) {
-		this.currentDoc = currentDoc;
+		this.originalDoc = currentDoc;
 	}
 
 
@@ -409,28 +410,39 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 	public void startFBA() throws Exception {
 		checkPreferences();
 		try {
-			CSVDataConverter csvConverterGibbs = new CSVDataConverter(currentDoc);
-			CSVDataConverter csvConverterConc = new CSVDataConverter(currentDoc);
+			CSVDataConverter csvConverterSysBounds;
+			
+			if (systemBoundariesFile != null) {
+				csvConverterSysBounds = new CSVDataConverter(originalDoc, true);
+				csvConverterSysBounds.readSystemBoundariesFromFile(systemBoundariesFile);
+			}
+			else {
+				csvConverterSysBounds = new CSVDataConverter(originalDoc);
+			}
+
+			while(csvConverterSysBounds.getSystemBoundariesArray() == null) {
+				//wait while reading
+			}
+
+			double[] sysBounds = FluxMinimizationUtils.getCorrectedSystemBoundaries(originalDoc, csvConverterSysBounds.getSystemBoundariesArray());
+			CSVDataConverter csvConverterConc = new CSVDataConverter(originalDoc, sysBounds);
 			if (concFile != null) {
 				csvConverterConc.readConcentrationsFromFile(concFile);
 				while(csvConverterConc.getConcentrationsArray() == null) {
 					//wait while reading
 				}
 			} 
+			
+			CSVDataConverter csvConverterGibbs = new CSVDataConverter(originalDoc, sysBounds);
 			if (gibbsFile != null) {
 				csvConverterGibbs.readGibbsFromFile(gibbsFile);
 				while(csvConverterGibbs.getGibbsArray() == null) {
 					//wait while reading
 				}
 			}
-			if (systemBoundariesFile != null) {
-				csvConverterGibbs.readSystemBoundariesFromFile(systemBoundariesFile);
-				while(csvConverterGibbs.getSystemBoundariesArray() == null) {
-					//wait while reading
-				}
-			}
-			Constraints c = new Constraints(currentDoc, csvConverterGibbs.getGibbsArray(), csvConverterConc.getConcentrationsArray(), null);
-			fba = new FluxBalanceAnalysis(currentDoc, c, targetFluxes);
+
+			Constraints c = new Constraints(originalDoc, csvConverterGibbs.getGibbsArray(), csvConverterConc.getConcentrationsArray(), sysBounds, true);
+			fba = new FluxBalanceAnalysis(originalDoc, c, targetFluxes);
 	
 			//set constraints and iterations
 			fba.setConctraintError(Error_constraint);
@@ -475,6 +487,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 		simultorPanel.getDynamicGraphView().addFluxbalance(fba.fluxesForVisualization);
 		
 		if (theFirstCall) {
+			vod.setDocument(FluxMinimizationUtils.getExpandedDocument(originalDoc));
 			vod.setFluxes(fba.solutionFluxVector);
 			vod.setConcentrations(fba.solutionConcentrations);
 			vod.init();
@@ -485,6 +498,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 			settings.setFBA(fba);
 			this.repaint();
 		} else {
+			vod.setDocument(FluxMinimizationUtils.getExpandedDocument(originalDoc));
 			vod.setFluxes(fba.solutionFluxVector);
 			vod.setConcentrations(fba.solutionConcentrations);
 			vod.updateUI();

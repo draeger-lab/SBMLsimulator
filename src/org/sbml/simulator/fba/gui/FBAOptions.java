@@ -69,27 +69,27 @@ public interface FBAOptions extends KeyProvider {
 	 * Choose to activate the constraint J*G < 0
 	 */
 	public static final Option<Boolean> ACTIVATE_CONSTRAINT_JG_LESS_THAN_0 = new Option<Boolean>(
-			"ACTIVATE_CONSTRAINT_JG_LESS_THAN_0", Boolean.class, bundle, Boolean.FALSE);
+			"ACTIVATE_CONSTRAINT_JG_LESS_THAN_0", Boolean.class, bundle, Boolean.TRUE);
 
 
 	/**
 	 * Choose to activate the constraint |J|-r_max*|G| < 0
 	 */
 	public static final Option<Boolean> ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0 = new Option<Boolean>(
-			"ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0", Boolean.class, bundle, Boolean.FALSE);
+			"ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0", Boolean.class, bundle, Boolean.TRUE);
 
 
 	/**
 	 * Choose to activate the constraint J>0
 	 */
 	public static final Option<Boolean> ACTIVATE_CONSTRAINT_J_GREATER_THAN_0 = new Option<Boolean>(
-			"ACTIVATE_CONSTRAINT_J_GREATER_THAN_0", Boolean.class, bundle, Boolean.FALSE);
+			"ACTIVATE_CONSTRAINT_J_GREATER_THAN_0", Boolean.class, bundle, Boolean.TRUE);
 	
 	/**
 	 * Choose to activate the constraint to compute the errors
 	 */
 	public static final Option<Boolean> ACTIVATE_CONSTRAINT_ERROR = new Option<Boolean>(
-			"ACTIVATE_CONSTRAINT_ERROR", Boolean.class, bundle, Boolean.FALSE);
+			"ACTIVATE_CONSTRAINT_ERROR", Boolean.class, bundle, Boolean.TRUE);
 
 	
 	/**

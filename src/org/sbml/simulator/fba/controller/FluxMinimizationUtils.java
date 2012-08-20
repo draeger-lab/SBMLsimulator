@@ -395,6 +395,7 @@ public class FluxMinimizationUtils {
 		SBMLDocument modifiedDocument = eliminateTransportsAndSplitReversibleReactions(originalDocument);
 		systemBoundaryDocument = addSystemBoundaries(modifiedDocument, systemBoundaries);
 		N_int_sys = SBMLDocToStoichMatrix(systemBoundaryDocument);
+		System.out.println();
 	}
 
 	/**

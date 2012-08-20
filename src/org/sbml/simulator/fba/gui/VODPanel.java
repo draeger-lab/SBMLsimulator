@@ -32,6 +32,7 @@ import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.category.SlidingCategoryDataset;
+import org.sbml.jsbml.SBMLDocument;
 
 
 /**
@@ -59,6 +60,8 @@ public class VODPanel extends JPanel implements ActionListener{
 	 * Contains the plot
 	 */
 	private JPanel plot;
+
+	private SBMLDocument modDoc;
 
 
 	/**
@@ -130,9 +133,9 @@ public class VODPanel extends JPanel implements ActionListener{
 	public void init() {
 		DefaultCategoryDataset underlying = new DefaultCategoryDataset();
 		for (int i = 0; i < fluxes.length; i++) {
-			underlying.setValue(fluxes[i], "", Integer.toString(i));
+			underlying.setValue(fluxes[i], "", modDoc.getModel().getReaction(i).getId());
 		}
-		SlidingCategoryDataset scd = new SlidingCategoryDataset(underlying, 0, fluxes.length-1);
+		SlidingCategoryDataset scd = new SlidingCategoryDataset(underlying, 0, fluxes.length);
 
 		JFreeChart jfreechart = createChart(scd);
 		org.jfree.chart.ChartPanel chartpanel = new org.jfree.chart.ChartPanel(jfreechart);
@@ -160,6 +163,10 @@ public class VODPanel extends JPanel implements ActionListener{
 	 */
 	public void setFluxes(double[] fluxes) {
 		this.fluxes = fluxes;
+	}
+
+	public void setDocument(SBMLDocument expandedDocument) {
+		modDoc = expandedDocument;
 	}
 
 
