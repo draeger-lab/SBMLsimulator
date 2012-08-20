@@ -202,14 +202,16 @@ public class FluxMinimizationUtils {
 			double[][] NwithoutZeroRows = eliminateZeroRows(N_int_sys).getArray();
 			// pre-processing: sort the matrix to speed up the computation of the steady state matrix
 			double[][] sortedMatrixArray = getSortedArray(NwithoutZeroRows);
-			System.out.print("leer, ");
-			for (int i = 0; i < systemBoundaryDocument.getModel().getReactionCount(); i++) {
-				System.out.print(systemBoundaryDocument.getModel().getReaction(i) + ", ");
-			}
-			System.out.println();
-			for (int i = 0; i < sortedMatrixArray.length; i++) {
-				System.out.println(systemBoundaryDocument.getModel().getSpecies(i) + ", " + Arrays.toString(sortedMatrixArray[i]));
-			}
+			
+			//TODO:sysout
+//			System.out.print("leer, ");
+//			for (int i = 0; i < systemBoundaryDocument.getModel().getReactionCount(); i++) {
+//				System.out.print(systemBoundaryDocument.getModel().getReaction(i) + ", ");
+//			}
+//			System.out.println();
+//			for (int i = 0; i < sortedMatrixArray.length; i++) {
+//				System.out.println(systemBoundaryDocument.getModel().getSpecies(i) + ", " + Arrays.toString(sortedMatrixArray[i]));
+//			}
 			
 			StoichiometricMatrix sortedMatrix = new StoichiometricMatrix(sortedMatrixArray, sortedMatrixArray.length, sortedMatrixArray[0].length);
 			steadyStateMatrix = ConservationRelations.calculateConsRelations(sortedMatrix.transpose());
@@ -217,7 +219,8 @@ public class FluxMinimizationUtils {
 			// post-processing: delete rows with only forward and backward of a reaction
 			steadyStateMatrix = getCorrectedSteadyStateMatrix(steadyStateMatrix);
 	
-			System.out.println("steadyStateMatrix.getRowDimension() " + steadyStateMatrix.getRowDimension() + "      steadyStateMatrix.getColumnDimension() " + steadyStateMatrix.getColumnDimension());
+			//TODO:sysout
+//			System.out.println("steadyStateMatrix.getRowDimension() " + steadyStateMatrix.getRowDimension() + "      steadyStateMatrix.getColumnDimension() " + steadyStateMatrix.getColumnDimension());
 			
 			double[] fluxVector = new double[steadyStateMatrix.getColumnDimension()];
 			

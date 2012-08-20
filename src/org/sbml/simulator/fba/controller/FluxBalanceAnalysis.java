@@ -27,6 +27,7 @@ import ilog.cplex.IloCplex;
 
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
+import org.sbml.simulator.stability.math.StoichiometricMatrix;
 import org.simulator.math.odes.MultiTable;
 
 /**
@@ -124,6 +125,8 @@ public class FluxBalanceAnalysis {
 	 */
 	private double[] ub;
 
+	private StoichiometricMatrix N;
+
 
 	/**
 	 * Constructor that gets a {@link Constraints}-Object and a {@link SBMLDocument} 
@@ -160,6 +163,7 @@ public class FluxBalanceAnalysis {
 		this.targetFunction = targetfunc;
 		this.constraints = constraints;
 		SBMLDocument modDoc = FluxMinimizationUtils.getExpandedDocument(constraints.originalDocument);
+		N = FluxMinimizationUtils.getExpandedStoichiometricMatrix(modDoc);
 		target_length_without_all_flux_values = modDoc.getModel().getReactionCount()*4 + 1 - targetfunc.getFluxVector().length;
 		this.target = new double[modDoc.getModel().getReactionCount()*4];
 
@@ -178,14 +182,14 @@ public class FluxBalanceAnalysis {
 
 		// everything between counter[1] and the length of the target-array is: L-vector, Errorarray and computedGibbsArray
 		for (int lAndE = 1; lAndE < target_length_without_all_flux_values -	targetfunc.getGibbs().length; lAndE++) {
-			lb[lAndE] = -100000;
+			lb[lAndE] = 0.0;
 			ub[lAndE] = 100000;
 		}
 
 		// counter[3] is the index of the gibbs values
 		for (int gibbsBounds = target_length_without_all_flux_values -	targetfunc.getGibbs().length; gibbsBounds < target_length_without_all_flux_values; gibbsBounds++) {
 			lb[gibbsBounds] = -1000;
-			ub[gibbsBounds] = -Double.MIN_VALUE;
+			ub[gibbsBounds] = 1;
 		}
 
 		// bounds for concentrations
@@ -221,7 +225,7 @@ public class FluxBalanceAnalysis {
 			fluxes[0][j] = solutionFluxVector[j];
 		}
 		MultiTable mt = new MultiTable(time, fluxes, idsOfReactions);
-	
+
 		return mt;
 	}
 
@@ -503,14 +507,14 @@ public class FluxBalanceAnalysis {
 	private double[] solveWithQuadraticProgramming() throws Exception {
 		// create the cplex solver
 		IloCplex cplex = new IloCplex();
-	
+
 		// TARGET
 		// create upper bounds (ub) and lower bounds (lb) for the variables x
 		int[] counter = targetFunction.getCounterArray();
-	
+
 		// create variables with upper bounds and lower bounds
 		IloNumVar[] x = cplex.numVarArray((target_length_without_all_flux_values  + concentrations.length), lb, ub);
-	
+
 		//compute the target function for cplex with the scalar product (lin)
 		IloNumExpr lin = cplex.numExpr();
 		for (int i = 0; i < counter[1]; i++) {
@@ -521,8 +525,8 @@ public class FluxBalanceAnalysis {
 		for (int i = counter[1]; i < target.length; i++) {
 			lin = cplex.sum(lin, cplex.prod(target[i], x[i + 1 - counter[1]]));
 		}
-	
-	
+
+
 		//lambda1*sum((c_i - c_eq)^2)
 		double[] c_eq = constraints.getEquilibriumConcentrations();
 		IloNumExpr sum = cplex.numExpr();
@@ -541,31 +545,31 @@ public class FluxBalanceAnalysis {
 		}
 		// now put the variables together  
 		IloNumExpr cplex_target = cplex.sum(cplex.prod(TargetFunction.lambda1, sum),lin);
-	
+
 		// only for FluxMinimization the target function has to be minimized
 		if (targetFunction instanceof FluxMinimization) {
 			cplex.addMinimize(cplex_target);
 		} else { //TODO: implement more target functions
 			cplex.addMaximize(cplex_target);
 		}
-	
+
 		//CONSTRAINTS
-	
+
 		SBMLDocument modifiedDocument = FluxMinimizationUtils.getExpandedDocument(constraints.originalDocument, constraints.getSystemBoundaries());
-	
+
 		double[] steadyStateFluxes = targetFunction.getFluxVector();
 		double[] compGibbs = constraints.getComputedGibbsEnergies();
 		double r_max = constraints.computeR_max(steadyStateFluxes);
-	
+
 		//TODO
 		System.out.println("ConstraintJ_rmaxG<0: " + isConstraintJ_rmaxG() + " ConstraintJ>0: " + isConstraintJ0() + " ConstraintJG: " + isConstraintJG());
 		for (int j = 0; j< counter[1]; j++) {
 			//jg is the expression for J_j * G_j
 			//and j_rmaxG the expression for |J_j| - r_max * |G_j|
 			int k = j + target_length_without_all_flux_values -	compGibbs.length;
-	
+
 			IloNumExpr j_j = cplex.abs(cplex.prod(Math.abs(steadyStateFluxes[j]), x[0]));
-	
+
 			// constraint |J_j| - r_max * |G_j| < 0
 			if (isConstraintJ_rmaxG()) {
 				IloNumExpr rmaxG = cplex.numExpr();
@@ -574,20 +578,19 @@ public class FluxBalanceAnalysis {
 				} else {
 					rmaxG = cplex.prod(r_max, cplex.abs(x[k]));
 				}
-	
+
 				cplex.addLe(cplex.diff(j_j, rmaxG), -Double.MIN_VALUE);
 				logger.log(Level.DEBUG, String.format("constraint |J_j| - r_max * |G_j| < 0:  "+ cplex.diff(j_j, rmaxG)+ " < " + 0 ));
 			}
-	
+
 			// constraint J_j >= 0
 			if (isConstraintJ0()) {
 				cplex.addGe(cplex.prod(steadyStateFluxes[j], x[0]), 0);
 			}
-	
+
 			// constraint to compute the error
 			if (isConctraintError()) {
 				if (!Double.isNaN(compGibbs[j])) {
-	
 					/*
 					 *  x[j+1] are the variables for the error vector, because in the target-array
 					 *  the error vector comes after the fluxvector and the fluxes have only one
@@ -595,9 +598,31 @@ public class FluxBalanceAnalysis {
 					 */
 					cplex.addEq(cplex.prod(compGibbs[j], x[k]), cplex.prod(compGibbs[j], x[j+1]));
 				}
+				IloNumExpr sumConcentrations = cplex.numExpr();
+				double sumPrint = 0;
+				for (int i = 0; i < concentrations.length; i++) {
+					if (!Double.isNaN(concentrations[i])) {
+						sumConcentrations = cplex.sum(cplex.prod(N.get(i, j),cplex.prod(Math.log(concentrations[i]),x[target_length_without_all_flux_values+i])),sumConcentrations);
+						sumPrint += N.get(i, j) * Math.log(concentrations[i]);
+					} else { //use only the variable
+						sumConcentrations = cplex.sum(cplex.prod(N.get(i, j), x[target_length_without_all_flux_values+i]),sumConcentrations);
+					}
+				}
+				if (!Double.isNaN(compGibbs[j]) && constraints.getEquilibriumGibbsEnergies()[j] >= 0){
+					//there is a problem if gibbs_eq < 0 TODO: fix it
+					IloNumExpr delta_G_computation = cplex.sum(cplex.prod(constraints.R, cplex.prod(constraints.T, sumConcentrations)), cplex.diff(constraints.getEquilibriumGibbsEnergies()[j],x[j+1]));
+					cplex.addGe(delta_G_computation, cplex.prod(compGibbs[j], x[k]));
+					//TODO: syso
+					//					System.out.println(modifiedDocument.getModel().getReaction(j) + ": " + constraints.R + "*" + constraints.T + "*" + sumPrint + cplex.diff(constraints.getEquilibriumGibbsEnergies()[j],x[j+1]) + " = " + cplex.prod(compGibbs[j], x[k]));
+				} else {
+					IloNumExpr delta_G_computation = cplex.sum(cplex.prod(constraints.R, cplex.prod(constraints.T, sumConcentrations)), cplex.prod(-1, x[j+1]));
+					cplex.addGe(delta_G_computation, x[k]);
+					//TODO: syso
+					//				    System.out.println(modifiedDocument.getModel().getReaction(j) + ": " + cplex.sum((constraints.R * constraints.T * sumPrint),cplex.prod(-1, x[j+1])) + " = " + x[k]);
+				}
 			}
-	
-	
+
+
 			// constraint J_j * G_j < 0
 			if (isConstraintJG()) {
 				IloNumExpr jg = cplex.numExpr();
@@ -611,22 +636,22 @@ public class FluxBalanceAnalysis {
 				} else {
 					jg = cplex.prod(steadyStateFluxes[j],x[k]);
 				}
-	
+
 				cplex.addLe(jg, 0);
 				// TODO sysout
-				System.out.println(modifiedDocument.getModel().getReaction(j) + ": " + jg + " =< " + 0);
+				//				System.out.println(modifiedDocument.getModel().getReaction(j) + ": " + jg + " =< " + 0);
 				logger.log(Level.DEBUG, String.format("constraint J_j * G_j: " + jg + " < " + 0));
 			}
 		}
-	
+
 		// now solve the problem and get the solution array for the variables x,
 		// cplex.setOut(null) stops the logger massages of cplex
 		double[] solution = null;
 		//		cplex.setOut(null);
-	
+
 		//set the iteration limit: without doing this, cplex iterates 2100000000 times...
 		cplex.setParam(IloCplex.IntParam.BarItLim, cplexIterations );
-	
+
 		cplex.solve();
 		// get the from cplex computed values for the variables x
 		solution = cplex.getValues(x);
@@ -650,10 +675,10 @@ public class FluxBalanceAnalysis {
 			}
 		}
 		cplex.end();
-	
+
 		// create the MultiTable for visualization
 		fluxesForVisualization = createMultiTableForVisualizing();
-		
+
 		return solution;
 	}
 

@@ -143,13 +143,13 @@ public class FluxBalanceAnalysisTest {
 		SBMLDocument modifiedDocument = FluxMinimizationUtils.getExpandedDocument(originalSBMLDoc, systemBoundaries);
 		Model modModel = modifiedDocument.getModel();
 
+//		System.out.println();
+//		System.out.println("--------steady state matrix--------");
+//		for (int i = 0; i < modModel.getReactionCount(); i++){
+//			System.out.print(modModel.getReaction(i) + " ");
+//		}
 		System.out.println();
-		System.out.println("--------steady state matrix--------");
-		for (int i = 0; i < modModel.getReactionCount(); i++){
-			System.out.print(modModel.getReaction(i) + " ");
-		}
-		System.out.println();
-		System.out.println(FluxMinimizationUtils.getSteadyStateMatrix().toString());
+//		System.out.println(FluxMinimizationUtils.getSteadyStateMatrix().toString());
 		
 		fba.solve();
 		
@@ -157,8 +157,8 @@ public class FluxBalanceAnalysisTest {
 		//print flux solution:
 		double[] fluxSolution = fba.solutionFluxVector;
 		System.out.println("--------solution for the fluxes:--------");
-		for (int i = 0; i < fluxSolution.length; i++) {
-			System.out.println(modModel.getReaction(i).getId() + "   " + fluxSolution[i]);
+		for (int i = 0; i < fluxSolution.length-45; i++) {
+			System.out.println(modModel.getReaction(i).getId() + " & " + fluxSolution[i] + " & " + modModel.getReaction(i+45).getId() + " & " + fluxSolution[i+45] + "**");
 		}
 		
 		// print sum of all in- and outgoing fluxes are 0?
@@ -223,6 +223,10 @@ public class FluxBalanceAnalysisTest {
 //		for (int i = 0; i < errorSolutions.length; i++) {
 //			System.out.println(modModel.getReaction(i).getId() + "    " + errorSolutions[i]);
 //		}
+		
+		cu0.writeComputedValuesInCSV(fluxSolution, new File("C:/Users/Meike/Desktop/fluxSolutionFBATest2.csv"));
+		cu1.writeComputedValuesInCSV(fba.solutionConcentrations, new File("C:/Users/Meike/Desktop/concSolutionFBATest2.csv"));
+		cu2.writeComputedValuesInCSV(fba.solutionErrors, new File("C:/Users/Meike/Desktop/errorSolutionFBATest2.csv"));
 	}
 
 }

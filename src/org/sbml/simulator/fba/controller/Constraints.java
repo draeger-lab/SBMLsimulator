@@ -56,7 +56,7 @@ public class Constraints {
 	/**
 	 * The ideal gas constant R in J/(mol * K)
 	 */
-	private double R = 8.3144621;
+	public double R = 8.3144621;
 
 	/**
 	 * contains the species specific information whether the species belongs to the system boundary or not.
@@ -70,7 +70,7 @@ public class Constraints {
 	/**
 	 * Contains the temperature in Kelvin under standard conditions (25 degree Celsius)
 	 */
-	private double T = 298.15;
+	public double T = 298.15;
 
 	/**
 	 * Constructor, that gets a {@link SBMLDocument} and creates a new

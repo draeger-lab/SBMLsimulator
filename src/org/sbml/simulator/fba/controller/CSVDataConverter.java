@@ -20,7 +20,6 @@ package org.sbml.simulator.fba.controller;
 import java.beans.EventHandler;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.io.IOException;
 
 import org.sbml.jsbml.SBMLDocument;
 
@@ -96,7 +95,7 @@ public class CSVDataConverter {
 		this.modifiedDocument = FluxMinimizationUtils.getExpandedDocument(originalDoc);
 		this.systemBoundariesArray = FluxMinimizationUtils.getSystemBoundaries(originalDoc);
 	}
-	
+
 	/**
 	 * Call this constructor for the creation of a the systems boundaries array.
 	 * @param originalDoc
@@ -105,7 +104,7 @@ public class CSVDataConverter {
 	public CSVDataConverter(SBMLDocument originalDoc, boolean systemBoundariesFile) {
 		this.modifiedDocument = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(originalDoc);
 	}
-	
+
 	/**
 	 * Call this constructor for the creation of the gibbs and the concentration array.
 	 * @param originalDoc
@@ -238,39 +237,43 @@ public class CSVDataConverter {
 	 * The first line contains the heading "Reaction_id" or "Species_id" (first column) and "steady_state_value" (second column).
 	 * @param computed_solution
 	 * @param file
-	 * @throws IOException
+	 * @throws Exception 
 	 */
-	public void writeComputedValuesInCSV(double[] computed_solution, File file) throws IOException {
+	public void writeComputedValuesInCSV(double[] computed_solution, File file) throws Exception {
+		modifiedDocument = FluxMinimizationUtils.getExpandedDocument(modifiedDocument);
 		CSVWriter writer = new CSVWriter();
 		String[][] data = null;
-		Boolean isFluxSolution = null;
+		Boolean isFluxOrErrorSolution = null;
 		Boolean isConcSolution = null;
 		if (computed_solution.length == modifiedDocument.getModel().getReactionCount()) {
 			data = new String[modifiedDocument.getModel().getReactionCount()+1][2];
 			data[0][0] = "Reaction_id";
-			isFluxSolution = true;
+			isFluxOrErrorSolution = true;
 		} else if (computed_solution.length == modifiedDocument.getModel().getSpeciesCount()) {
 			data = new String[modifiedDocument.getModel().getSpeciesCount()+1][2];
 			data[0][0] = "Species_id";
 			isConcSolution = true;
-		}
-		if (isConcSolution == null && isFluxSolution == null) {
+		} 
+		if (isConcSolution == null && isFluxOrErrorSolution == null) {
 			// then the array has the wrong length
 			throw new IllegalArgumentException("Solution is neither corressponding to the reactions in this model nor to " +
 			"the species.");
 		}
 		data[0][1] = "steady_state_value";
-		for (int i = 1; i < modifiedDocument.getModel().getReactionCount(); i++) {
-			if (isFluxSolution) {
-				// write the reactions ids
-				data[i][0] = modifiedDocument.getModel().getReaction(i).getId();
-			} else if (isConcSolution) {
-				// write the species ids
-				data[i][0] = modifiedDocument.getModel().getSpecies(i).getId();
+		if (isFluxOrErrorSolution != null && isFluxOrErrorSolution) {
+			// write the reactions ids
+			for (int j = 1; j < modifiedDocument.getModel().getReactionCount(); j++) {
+				data[j][0] = modifiedDocument.getModel().getReaction(j).getId();
+				data[j][1] = Double.toString(computed_solution[j]);
 			}
-			// write the solution
-			data[i][1] = Double.toString(computed_solution[i]);
+		} else if (isConcSolution != null && isConcSolution) {
+			// write the species ids
+			for (int i = 1; i < modifiedDocument.getModel().getSpeciesCount(); i++) {
+				data[i][0] = modifiedDocument.getModel().getSpecies(i).getId();
+				data[i][1] = Double.toString(computed_solution[i]);
+			}
 		}
+		// write the solution
 		writer.write(data, file);
 	}
 
@@ -292,7 +295,7 @@ public class CSVDataConverter {
 				values[i] = data[i][1];
 				keys[i] = data[i][0];
 			}
-	
+
 			if (isGibbsFile != null && isGibbsFile) {
 				initializeGibbsArray();
 				for(int i = 0; i < values.length; i++) {
