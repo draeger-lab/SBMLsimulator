@@ -134,7 +134,7 @@ public class FluxBalanceAnalysisTest {
 		fba.setConstraintJG(true);
 		fba.setConstraintJ_rmaxG(true);
 		fba.setConstraintJ0(true);
-		fba.setConctraintError(true);
+		fba.setConctraintError(false);
 		fba.setCplexIterations(40000);
 		
 		
@@ -224,9 +224,9 @@ public class FluxBalanceAnalysisTest {
 //			System.out.println(modModel.getReaction(i).getId() + "    " + errorSolutions[i]);
 //		}
 		
-		cu0.writeComputedValuesInCSV(fluxSolution, new File("C:/Users/Meike/Desktop/fluxSolutionFBATest2.csv"));
-		cu1.writeComputedValuesInCSV(fba.solutionConcentrations, new File("C:/Users/Meike/Desktop/concSolutionFBATest2.csv"));
-		cu2.writeComputedValuesInCSV(fba.solutionErrors, new File("C:/Users/Meike/Desktop/errorSolutionFBATest2.csv"));
+//		cu0.writeComputedValuesInCSV(fluxSolution, new File("C:/Users/Meike/Desktop/fluxSolutionFBATest2.csv"));
+//		cu1.writeComputedValuesInCSV(fba.solutionConcentrations, new File("C:/Users/Meike/Desktop/concSolutionFBATest2.csv"));
+//		cu2.writeComputedValuesInCSV(fba.solutionErrors, new File("C:/Users/Meike/Desktop/errorSolutionFBATest2.csv"));
 	}
 
 }
