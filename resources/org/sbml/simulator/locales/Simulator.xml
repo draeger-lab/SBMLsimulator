@@ -92,7 +92,7 @@
   <entry key="ACTIVATE_CONSTRAINT_J_GREATER_THAN_0">Set the constraint J greater than 0 on</entry>
   <entry key="ACTIVATE_CONSTRAINT_ERROR">Set the constraint to compute the error on</entry>
   <entry key="DEFAULT_TARGET_FUNCTION">The default target function is always flux minimization</entry>
-  <entry key="FILES">Load files</entry>
+  <entry key="SET_FILES_GROUP">Load files</entry>
   <entry key="LAMBDA1">A double value required to weight the concentrations</entry>
   <entry key="LAMBDA2">A double value required to weight the errors</entry>
   <entry key="LAMBDA3">A double value required to weight the L-matrix</entry>
