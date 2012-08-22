@@ -125,7 +125,15 @@ public class FluxBalanceAnalysis {
 	 */
 	private double[] ub;
 
+	/**
+	 * The stoichiometric matrix
+	 */
 	private StoichiometricMatrix N;
+
+	/**
+	 * the solutions for the gibbs values
+	 */
+	public double[] solutionGibbs;
 
 
 	/**
@@ -201,6 +209,7 @@ public class FluxBalanceAnalysis {
 		// init solution arrays
 		this.solutionFluxVector = new double[targetfunc.getFluxVector().length];
 		this.solutionConcentrations = new double[concentrations.length];
+		this.solutionGibbs = new double[constraints.getComputedGibbsEnergies().length];
 		this.solutionErrors = new double[constraints.getComputedGibbsEnergies().length];
 	}
 
@@ -661,10 +670,16 @@ public class FluxBalanceAnalysis {
 		}
 		for (int i = 1; i <= constraints.getComputedGibbsEnergies().length; i++) {
 			// after the flux vector is the error vector in the target function
+			int gibbsIndex = target_length_without_all_flux_values - targetFunction.getGibbs().length;
 			if(!Double.isNaN(compGibbs[i-1])) {
 				solutionErrors[i-1] = solution[i];
+				solutionGibbs[i] = compGibbs[i-1] * solution[gibbsIndex + i];
+			} else {
+				solutionGibbs[i] = solution[gibbsIndex + i];
 			}
 		}
+
+			
 		for (int j = 0; j < concentrations.length; j++) {
 			// the last values in x are corresponding to the concentrations
 			if (!Double.isNaN(concentrations[j])) {
