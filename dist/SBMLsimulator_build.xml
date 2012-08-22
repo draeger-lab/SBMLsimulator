@@ -76,11 +76,9 @@
       </fileset>
     	
     	<!-- All libs without projects at the ZBIT -->
-      <zipfileset excludes="META-INF/*.SF" src="${base}/lib/commons-math-2.2.jar"/>
       <zipfileset excludes="META-INF/*.SF" src="${base}/lib/jcommon-1.0.17.jar"/>
       <zipfileset excludes="META-INF/*.SF" src="${base}/lib/jfreechart-1.0.15_beta.jar"/>
-      <zipfileset excludes="META-INF/*.SF" src="${base}/lib/servlet.jar"/>
-    	
+
       <!-- =================================== -->
       <!-- All libs WITH projects at the ZBIT -->
     	<!-- Every single one of them could be replaced by including the project itself, instead of the jar -->
@@ -111,7 +109,7 @@
             <exclude name="overview.html"/>
           </fileset>
           	
-          <zipfileset excludes="META-INF/*.SF" src="${base}/lib/SBML2LaTeX-0.9.9_slim.jar"/>
+          <!-- <zipfileset excludes="META-INF/*.SF" src="${base}/lib/SBML2LaTeX-0.9.9_slim.jar"/> -->
     	
           <!--<zipfileset excludes="META-INF/*.SF" src="${base}/lib/jsbml-1.0-a1-with-dependencies.jar"/>-->
           <fileset dir="${JSBMLPath}/bin">
