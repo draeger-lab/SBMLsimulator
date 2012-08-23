@@ -207,10 +207,11 @@ public class FluxBalanceAnalysis {
 		}
 
 		// init solution arrays
+		System.out.println("targetFunction.getGibbs().length: " + targetFunction.getGibbs().length);
 		this.solutionFluxVector = new double[targetfunc.getFluxVector().length];
 		this.solutionConcentrations = new double[concentrations.length];
-		this.solutionGibbs = new double[constraints.getComputedGibbsEnergies().length];
-		this.solutionErrors = new double[constraints.getComputedGibbsEnergies().length];
+		this.solutionGibbs = new double[targetFunction.getGibbs().length];
+		this.solutionErrors = new double[targetFunction.getGibbs().length];
 	}
 
 
@@ -674,7 +675,7 @@ public class FluxBalanceAnalysis {
 			// the first counter[1]-values are corresponding to the fluxes
 			solutionFluxVector[i] = steadyStateFluxes[i] * solution[0];
 		}
-		for (int i = 1; i <= constraints.getComputedGibbsEnergies().length; i++) {
+		for (int i = 1; i <= targetFunction.getGibbs().length; i++) {
 			// after the flux vector is the error vector in the target function
 			int gibbsIndex = target_length_without_all_flux_values - targetFunction.getGibbs().length;
 			if(!Double.isNaN(compGibbs[i-1])) {
