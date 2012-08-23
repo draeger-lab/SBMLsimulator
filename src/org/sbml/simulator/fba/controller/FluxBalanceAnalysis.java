@@ -571,7 +571,7 @@ public class FluxBalanceAnalysis {
 		double r_max = constraints.computeR_max(steadyStateFluxes);
 
 		//TODO
-		System.out.println("ConstraintJ_rmaxG<0: " + isConstraintJ_rmaxG() + " ConstraintJ>0: " + isConstraintJ0() + " ConstraintJG: " + isConstraintJG() + "Error: " + isConstraintError());
+		System.out.println("J_rmaxG<0: " + isConstraintJ_rmaxG() + " J>0: " + isConstraintJ0() + " JG: " + isConstraintJG() + " Error: " + isConstraintError());
 		for (int j = 0; j< counter[1]; j++) {
 			//jg is the expression for J_j * G_j
 			//and j_rmaxG the expression for |J_j| - r_max * |G_j|
@@ -679,9 +679,9 @@ public class FluxBalanceAnalysis {
 			int gibbsIndex = target_length_without_all_flux_values - targetFunction.getGibbs().length;
 			if(!Double.isNaN(compGibbs[i-1])) {
 				solutionErrors[i-1] = solution[i];
-				solutionGibbs[i] = compGibbs[i-1] * solution[gibbsIndex + i];
+				solutionGibbs[i-1] = compGibbs[i-1] * solution[gibbsIndex + i];
 			} else {
-				solutionGibbs[i] = solution[gibbsIndex + i];
+				solutionGibbs[i-1] = solution[gibbsIndex + i];
 			}
 		}
 
