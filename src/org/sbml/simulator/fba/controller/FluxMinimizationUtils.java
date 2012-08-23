@@ -113,8 +113,15 @@ public class FluxMinimizationUtils {
 					Species species = modified.getModel().getSpecies(index);
 					String speciesId = species.getId();
 	
+					String inOut = "";
 					// new reaction
-					String reactionId = degradationPrefix + speciesId;
+					if (Math.signum(systemBoundaries[index]) == -1) {
+						inOut = "out";
+					}
+					else if (Math.signum(systemBoundaries[index]) == 1) {
+						inOut = "in";
+					}
+					String reactionId = degradationPrefix + inOut + speciesId;
 					Reaction systemBoundaryReaction = new Reaction(reactionId, doc.getModel().getLevel(), doc.getModel().getVersion());
 					systemBoundaryReaction.setMetaId(metaIdPrefix + reactionId);
 	

@@ -196,7 +196,7 @@ public class FluxBalanceAnalysis {
 
 		// counter[3] is the index of the gibbs values
 		for (int gibbsBounds = target_length_without_all_flux_values -	targetfunc.getGibbs().length; gibbsBounds < target_length_without_all_flux_values; gibbsBounds++) {
-			lb[gibbsBounds] = -1000;
+			lb[gibbsBounds] = -1;
 			ub[gibbsBounds] = 1;
 		}
 
@@ -282,7 +282,7 @@ public class FluxBalanceAnalysis {
 	 * constraint Delta_G = Delta_G - Error
 	 * @return the constraintError
 	 */
-	public boolean isConctraintError() {
+	public boolean isConstraintError() {
 		return constraintError;
 	}
 
@@ -571,7 +571,7 @@ public class FluxBalanceAnalysis {
 		double r_max = constraints.computeR_max(steadyStateFluxes);
 
 		//TODO
-		System.out.println("ConstraintJ_rmaxG<0: " + isConstraintJ_rmaxG() + " ConstraintJ>0: " + isConstraintJ0() + " ConstraintJG: " + isConstraintJG());
+		System.out.println("ConstraintJ_rmaxG<0: " + isConstraintJ_rmaxG() + " ConstraintJ>0: " + isConstraintJ0() + " ConstraintJG: " + isConstraintJG() + "Error: " + isConstraintError());
 		for (int j = 0; j< counter[1]; j++) {
 			//jg is the expression for J_j * G_j
 			//and j_rmaxG the expression for |J_j| - r_max * |G_j|
@@ -583,12 +583,18 @@ public class FluxBalanceAnalysis {
 			if (isConstraintJ_rmaxG()) {
 				IloNumExpr rmaxG = cplex.numExpr();
 				if (!Double.isNaN(compGibbs[j]) && !Double.isInfinite(compGibbs[j])) {
-					rmaxG = cplex.prod(r_max, cplex.abs(cplex.constant(compGibbs[j])));
+					if ((r_max * Math.abs(compGibbs[j])) < steadyStateFluxes[j]) {
+						rmaxG = cplex.prod(r_max, cplex.abs(x[k]));
+					} else {
+						rmaxG = cplex.prod(r_max, cplex.abs(cplex.constant(compGibbs[j])));
+					}
 				} else {
 					rmaxG = cplex.prod(r_max, cplex.abs(x[k]));
 				}
 
 				cplex.addLe(cplex.diff(j_j, rmaxG), -Double.MIN_VALUE);
+				// TODO sysout
+//				System.out.println("constraint |J_j| - r_max * |G_j| < 0:  "+ cplex.diff(j_j, rmaxG)+ " < " + 0 );
 				logger.log(Level.DEBUG, String.format("constraint |J_j| - r_max * |G_j| < 0:  "+ cplex.diff(j_j, rmaxG)+ " < " + 0 ));
 			}
 
@@ -598,7 +604,7 @@ public class FluxBalanceAnalysis {
 			}
 
 			// constraint to compute the error
-			if (isConctraintError()) {
+			if (isConstraintError()) {
 				if (!Double.isNaN(compGibbs[j])) {
 					/*
 					 *  x[j+1] are the variables for the error vector, because in the target-array
@@ -648,7 +654,7 @@ public class FluxBalanceAnalysis {
 
 				cplex.addLe(jg, 0);
 				// TODO sysout
-				//				System.out.println(modifiedDocument.getModel().getReaction(j) + ": " + jg + " =< " + 0);
+				System.out.println(modifiedDocument.getModel().getReaction(j) + ": " + jg + " =< " + 0);
 				logger.log(Level.DEBUG, String.format("constraint J_j * G_j: " + jg + " < " + 0));
 			}
 		}
