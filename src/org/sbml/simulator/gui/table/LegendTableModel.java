@@ -373,7 +373,7 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 	}
 
 	/**
-	 * Returns <code>true</code> if the {@link NamedSBase} belonging to the given
+	 * Returns {@code true} if the {@link NamedSBase} belonging to the given
    * <code>id</code> is selected for being shown in the plot.
    * 
 	 * @param id

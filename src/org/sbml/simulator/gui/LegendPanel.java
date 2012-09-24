@@ -37,7 +37,6 @@ import javax.swing.JTable;
 import javax.swing.UIManager;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import org.sbml.jsbml.Compartment;
@@ -268,7 +267,7 @@ public class LegendPanel extends JPanel implements TableModelListener,
         LegendTableModel.getColumnColor(), LegendTableModel.getColumnUnit() };
     int width[] = new int[] { 80, 50, 100 };
     for (int i = 0; i < index.length; i++) {
-    	if(colModel.getColumnCount() >= index[i] + 1) {
+    	if (colModel.getColumnCount() >= index[i] + 1) {
     		colModel.getColumn(index[i]).setPreferredWidth(width[i]);
     	}
     }
