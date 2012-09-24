@@ -636,7 +636,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
      * @param dataName
      *            last character has to be an integer, representing the dataset
      *            number
-     * @return true, if data could be visualized<br>
+     * @return {@code true}, if data could be visualized<br>
      *         false, if data could not be visualized.
      */
     public boolean visualizeData(String dataName){
