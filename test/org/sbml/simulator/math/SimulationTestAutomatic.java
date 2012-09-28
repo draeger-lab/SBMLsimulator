@@ -22,8 +22,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -138,11 +140,25 @@ public class SimulationTestAutomatic {
 			// int start = Integer.valueOf(props.getProperty("start"));
 			double duration = Double.valueOf(props.getProperty("duration"));
 			double steps = Double.valueOf(props.getProperty("steps"));
+			Map <String,Boolean> amountHash = new HashMap<String,Boolean>();
+			String[] amounts = String.valueOf(props.getProperty("amount")).trim().split(",");
+			String[] concentrations = String.valueOf(props.getProperty("concentration")).split(",");
 			// double absolute = Double.valueOf(props.getProperty("absolute"));
 			// double relative = Double.valueOf(props.getProperty("relative"));
-			/*
-			 * Other variables: variables: S1, S2 amount: concentration:
-			 */
+			
+			for(String s: amounts) {
+				s=s.trim();
+				if(!s.equals("")) {
+					amountHash.put(s, true);
+				}
+			}
+			
+			for(String s: concentrations) {
+				s=s.trim();
+				if(!s.equals("")) {
+					amountHash.put(s, false);
+				}
+			}
 			// String[] sbmlFileTypes = { "-sbml-l1v2.xml", "-sbml-l2v1.xml",
 			// "-sbml-l2v2.xml", "-sbml-l2v3.xml", "-sbml-l2v4.xml",
 			// "-sbml-l3v1.xml" };
@@ -175,7 +191,7 @@ public class SimulationTestAutomatic {
 						solver.reset();
 						try {
 							double dist = testModel(solver, model, inputData, duration
-									/ steps);
+									/ steps, amountHash);
 							if (dist > 0.1) {
 								logger.log(Level.INFO, sbmlFileType + ": "
 										+ "relative distance for model-" + modelnr
@@ -235,7 +251,7 @@ public class SimulationTestAutomatic {
 		int nModels=0;
 		int correctSimulations=0;
 		AbstractDESSolver solver = new RosenbrockSolver();
-		for (int modelnr = 1; modelnr <= 980; modelnr++) {
+		for (int modelnr = 1; modelnr <= 1123; modelnr++) {
 			System.out.println("model " + modelnr);
 
 			StringBuilder modelFile = new StringBuilder();
@@ -255,11 +271,26 @@ public class SimulationTestAutomatic {
 			// int start = Integer.valueOf(props.getProperty("start"));
 			double duration = Double.valueOf(props.getProperty("duration"));
 			double steps = Double.valueOf(props.getProperty("steps"));
+			Map <String,Boolean> amountHash = new HashMap<String,Boolean>();
+			String[] amounts = String.valueOf(props.getProperty("amount")).trim().split(",");
+			String[] concentrations = String.valueOf(props.getProperty("concentration")).split(",");
 			// double absolute = Double.valueOf(props.getProperty("absolute"));
 			// double relative = Double.valueOf(props.getProperty("relative"));
-			/*
-			 * Other variables: variables: S1, S2 amount: concentration:
-			 */
+			
+			for(String s: amounts) {
+				s=s.trim();
+				if(!s.equals("")) {
+					amountHash.put(s, true);
+				}
+			}
+			
+			for(String s: concentrations) {
+				s=s.trim();
+				if(!s.equals("")) {
+					amountHash.put(s, false);
+				}
+			}
+			
 			
 			String[] sbmlFileTypes = {"-sbml-l1v2.xml", "-sbml-l2v1.xml", "-sbml-l2v2.xml",
 					"-sbml-l2v3.xml", "-sbml-l2v4.xml", "-sbml-l3v1.xml" };
@@ -280,7 +311,7 @@ public class SimulationTestAutomatic {
 							- timepoints[0];
 					solver.reset();
 					try {
-						double dist=testModel(solver, model, inputData, duration / steps);
+						double dist=testModel(solver, model, inputData, duration / steps, amountHash);
 						if (dist > 0.1) {
 							logger.log(Level.INFO, sbmlFileType + ": "
 							+ "relative distance for model-" + modelnr
@@ -331,7 +362,7 @@ public class SimulationTestAutomatic {
 		int nModels = 0;
 		AbstractDESSolver solver = new RosenbrockSolver();
 		
-		for (int modelnr = 14; modelnr <= 409; modelnr++) {
+		for (int modelnr = 235; modelnr <= 235; modelnr++) {
 			System.out.println("Biomodel " + modelnr);
 			Model model = null;
 			try {
@@ -357,7 +388,7 @@ public class SimulationTestAutomatic {
 					SBMLinterpreter interpreter = new SBMLinterpreter(model);
 					
 					if ((solver != null) && (interpreter != null)) {
-						solver.setStepSize(0.01);
+						solver.setStepSize(0.1);
 						
 						// solve
 						solver.solve(interpreter, interpreter.getInitialValues(), 0, 10);
@@ -395,10 +426,10 @@ public class SimulationTestAutomatic {
 	 * @throws DerivativeException 
 	 */
 	private static double testModel(AbstractDESSolver solver, Model model,
-			MultiTable inputData, double stepSize) throws SBMLException,
+			MultiTable inputData, double stepSize, Map<String,Boolean> amountHash) throws SBMLException,
 			ModelOverdeterminedException, DerivativeException {
 		// initialize interpreter
-		SBMLinterpreter interpreter = new SBMLinterpreter(model);
+		SBMLinterpreter interpreter = new SBMLinterpreter(model, 0, 0, 1, amountHash);
 
 		if ((solver != null) && (interpreter != null)) {
 			solver.setStepSize(stepSize);
