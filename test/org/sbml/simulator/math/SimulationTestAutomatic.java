@@ -33,13 +33,15 @@ import java.util.logging.Logger;
 import org.apache.commons.math.ode.DerivativeException;
 import org.junit.Assert;
 import org.junit.Test;
-
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.jsbml.xml.stax.SBMLReader;
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.io.CSVDataImporter;
+import org.simulator.math.EuclideanDistance;
+import org.simulator.math.QualityMeasure;
+import org.simulator.math.RelativeEuclideanDistance;
 import org.simulator.math.odes.AbstractDESSolver;
 import org.simulator.math.odes.MultiTable;
 import org.simulator.math.odes.RosenbrockSolver;
@@ -362,7 +364,7 @@ public class SimulationTestAutomatic {
 		int nModels = 0;
 		AbstractDESSolver solver = new RosenbrockSolver();
 		
-		for (int modelnr = 235; modelnr <= 235; modelnr++) {
+		for (int modelnr = 408; modelnr <= 423; modelnr++) {
 			System.out.println("Biomodel " + modelnr);
 			Model model = null;
 			try {
