@@ -34,7 +34,6 @@ import org.simulator.math.odes.MultiTable;
 import org.simulator.sbml.SBMLinterpreter;
 
 import de.zbit.util.ResourceManager;
-
 import eva2.tools.math.Mathematics;
 
 /**

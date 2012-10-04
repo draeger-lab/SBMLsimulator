@@ -56,13 +56,12 @@ import org.sbml.simulator.SimulationManager;
 import org.sbml.simulator.SimulationOptions;
 import org.sbml.simulator.gui.graph.DynamicView;
 import org.sbml.simulator.gui.plot.Plot;
-import org.sbml.simulator.math.PearsonCorrelation;
-import org.sbml.simulator.math.QualityMeasure;
+import org.simulator.math.PearsonCorrelation;
+import org.simulator.math.QualityMeasure;
 import org.simulator.math.odes.DESSolver;
 import org.simulator.math.odes.MultiTable;
 
 import y.view.Graph2D;
-
 import de.zbit.graph.io.Graph2Dwriter;
 import de.zbit.gui.BaseFrameTab;
 import de.zbit.gui.GUIOptions;

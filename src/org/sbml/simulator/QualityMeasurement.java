@@ -23,11 +23,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.sbml.optimization.problem.EstimationOptions;
-import org.sbml.simulator.math.EuclideanDistance;
-import org.sbml.simulator.math.N_Metric;
-import org.sbml.simulator.math.QualityMeasure;
-import org.sbml.simulator.math.RelativeEuclideanDistance;
-import org.sbml.simulator.math.Relative_N_Metric;
+import org.simulator.math.EuclideanDistance;
+import org.simulator.math.N_Metric;
+import org.simulator.math.QualityMeasure;
+import org.simulator.math.RelativeEuclideanDistance;
+import org.simulator.math.Relative_N_Metric;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.util.prefs.SBPreferences;

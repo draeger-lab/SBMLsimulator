@@ -20,13 +20,13 @@ package org.sbml.optimization.problem;
 import java.util.ResourceBundle;
 
 import org.sbml.simulator.SBMLsimulator;
-import org.sbml.simulator.math.EuclideanDistance;
-import org.sbml.simulator.math.ManhattanDistance;
-import org.sbml.simulator.math.N_Metric;
-import org.sbml.simulator.math.RelativeEuclideanDistance;
-import org.sbml.simulator.math.RelativeManhattanDistance;
-import org.sbml.simulator.math.RelativeSquaredError;
-import org.sbml.simulator.math.Relative_N_Metric;
+import org.simulator.math.EuclideanDistance;
+import org.simulator.math.ManhattanDistance;
+import org.simulator.math.N_Metric;
+import org.simulator.math.RelativeEuclideanDistance;
+import org.simulator.math.RelativeManhattanDistance;
+import org.simulator.math.RelativeSquaredError;
+import org.simulator.math.Relative_N_Metric;
 
 import de.zbit.util.ResourceManager;
 import de.zbit.util.objectwrapper.ValuePairUncomparable;
