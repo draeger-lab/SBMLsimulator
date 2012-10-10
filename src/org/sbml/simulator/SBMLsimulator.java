@@ -100,14 +100,14 @@ public class SBMLsimulator extends Launcher {
 		//	AVAILABLE_QUALITY_MEASURES = Reflect.getAllClassesInPackage(MATH_PACKAGE,
 		//	true, true, QualityMeasure.class, JAR_LOCATION, true);
 		String classes[] = new String[] {
-				"org.sbml.simulator.math.EuclideanDistance",
-				"org.sbml.simulator.math.ManhattanDistance",
-				"org.sbml.simulator.math.N_Metric",
-				"org.sbml.simulator.math.PearsonCorrelation",
-				"org.sbml.simulator.math.RelativeEuclideanDistance",
-				"org.sbml.simulator.math.RelativeManhattanDistance",
-				"org.sbml.simulator.math.RelativeSquaredError",
-				"org.sbml.simulator.math.Relative_N_Metric" };
+				"org.simulator.math.EuclideanDistance",
+				"org.simulator.math.ManhattanDistance",
+				"org.simulator.math.N_Metric",
+				"org.simulator.math.PearsonCorrelation",
+				"org.simulator.math.RelativeEuclideanDistance",
+				"org.simulator.math.RelativeManhattanDistance",
+				"org.simulator.math.RelativeSquaredError",
+				"org.simulator.math.Relative_N_Metric" };
 		AVAILABLE_QUALITY_MEASURES = new Class[classes.length];
 		for (i = 0; i < classes.length; i++) {
 			try {
