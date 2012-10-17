@@ -445,7 +445,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 			fba = new FluxBalanceAnalysis(originalDoc, c, targetFluxes);
 	
 			//set constraints and iterations
-			fba.setConctraintError(Error_constraint);
+			fba.setConstraintError(Error_constraint);
 			fba.setConstraintJG(JG_less_than_0);
 			fba.setConstraintJ_rmaxG(J_rmax_G_less_than_0);
 			fba.setCplexIterations(iterations);
