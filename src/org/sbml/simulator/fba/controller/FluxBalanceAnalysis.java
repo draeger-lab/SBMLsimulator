@@ -197,7 +197,7 @@ public class FluxBalanceAnalysis {
 		// counter[3] is the index of the gibbs values
 		for (int gibbsBounds = target_length_without_all_flux_values -	targetfunc.getGibbs().length; gibbsBounds < target_length_without_all_flux_values; gibbsBounds++) {
 			lb[gibbsBounds] = -100000;
-			ub[gibbsBounds] = 1;
+			ub[gibbsBounds] = 100;
 		}
 
 		// bounds for concentrations
@@ -315,7 +315,7 @@ public class FluxBalanceAnalysis {
 	 * constraint Delta_G = Delta_G - Error
 	 * @param constraintError
 	 */
-	public void setConctraintError(boolean constraintError) {
+	public void setConstraintError(boolean constraintError) {
 		this.constraintError = constraintError;
 	}
 
@@ -627,24 +627,25 @@ public class FluxBalanceAnalysis {
 				IloNumExpr sumConcentrations = cplex.numExpr();
 				double sumPrint = 0;
 				for (int i = 0; i < concentrations.length; i++) {
-					if (!Double.isNaN(concentrations[i])) {
+					if (!Double.isNaN(concentrations[i]) && concentrations[i] !=0) {
 						sumConcentrations = cplex.sum(cplex.prod(N.get(i, j),cplex.prod(Math.log(concentrations[i]),x[target_length_without_all_flux_values+i])),sumConcentrations);
 						sumPrint += N.get(i, j) * Math.log(concentrations[i]);
 					} else { //use only the variable
 						sumConcentrations = cplex.sum(cplex.prod(N.get(i, j), x[target_length_without_all_flux_values+i]),sumConcentrations);
 					}
 				}
-				if (!Double.isNaN(compGibbs[j]) && constraints.getEquilibriumGibbsEnergies()[j] >= 0){
+
+				if (!Double.isNaN(compGibbs[j])){
 					//there is a problem if gibbs_eq < 0 TODO: fix it
 					IloNumExpr delta_G_computation = cplex.sum(cplex.prod(constraints.R, cplex.prod(constraints.T, sumConcentrations)), cplex.diff(constraints.getEquilibriumGibbsEnergies()[j],x[j+1]));
 					cplex.addGe(delta_G_computation, cplex.prod(compGibbs[j], x[k]));
 					//TODO: syso
-					//					System.out.println(modifiedDocument.getModel().getReaction(j) + ": " + constraints.R + "*" + constraints.T + "*" + sumPrint + cplex.diff(constraints.getEquilibriumGibbsEnergies()[j],x[j+1]) + " = " + cplex.prod(compGibbs[j], x[k]));
+										System.out.println(modifiedDocument.getModel().getReaction(j) + ": " + constraints.R + "*" + constraints.T + "*" + sumPrint + cplex.diff(constraints.getEquilibriumGibbsEnergies()[j],x[j+1]) + " = " + cplex.prod(compGibbs[j], x[k]));
 				} else {
 					IloNumExpr delta_G_computation = cplex.sum(cplex.prod(constraints.R, cplex.prod(constraints.T, sumConcentrations)), cplex.prod(-1, x[j+1]));
 					cplex.addGe(delta_G_computation, x[k]);
 					//TODO: syso
-					//				    System.out.println(modifiedDocument.getModel().getReaction(j) + ": " + cplex.sum((constraints.R * constraints.T * sumPrint),cplex.prod(-1, x[j+1])) + " = " + x[k]);
+									    System.out.println(modifiedDocument.getModel().getReaction(j) + ": " + cplex.sum((constraints.R * constraints.T * sumPrint),cplex.prod(-1, x[j+1])) + " = " + x[k]);
 				}
 			}
 
@@ -668,6 +669,7 @@ public class FluxBalanceAnalysis {
 				System.out.println(modifiedDocument.getModel().getReaction(j) + ": J_j * G_j <= 0: " + jg + " <= " + 0);
 				logger.log(Level.DEBUG, String.format("constraint J_j * G_j: " + jg + " <= " + 0));
 			}
+			System.out.println();
 		}
 
 		// now solve the problem and get the solution array for the variables x,
