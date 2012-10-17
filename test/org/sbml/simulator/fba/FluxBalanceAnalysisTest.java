@@ -18,6 +18,7 @@
 package org.sbml.simulator.fba;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -33,6 +34,8 @@ import org.sbml.simulator.fba.controller.CSVDataConverter;
 import org.sbml.simulator.fba.controller.Constraints;
 import org.sbml.simulator.fba.controller.FluxBalanceAnalysis;
 import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
+
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 /**
  * @author Meike Aichele
@@ -122,7 +125,12 @@ public class FluxBalanceAnalysisTest {
 		equilibriumsConcentrations = cu2.getConcentrationsArray();
 		logger.info("concentrations are read: " + concFile.getName());
 		
+		System.out.println("gibbs...");
+		System.out.println(Arrays.toString(equilibriumsGibbsEnergies));
 		
+		System.out.println("konz...");
+		System.out.println(Arrays.toString(equilibriumsConcentrations));
+
 
 		//create FluxBalanceAnalysis object and solve it:
 		constraints =  new Constraints(originalSBMLDoc, equilibriumsGibbsEnergies, equilibriumsConcentrations, systemBoundaries, true);
@@ -134,7 +142,7 @@ public class FluxBalanceAnalysisTest {
 		fba.setConstraintJG(true);
 		fba.setConstraintJ_rmaxG(true);
 		fba.setConstraintJ0(true);
-		fba.setConctraintError(false);
+		fba.setConstraintError(true);
 		fba.setCplexIterations(40000);
 		
 		
@@ -145,20 +153,30 @@ public class FluxBalanceAnalysisTest {
 
 //		System.out.println();
 //		System.out.println("--------steady state matrix--------");
-//		for (int i = 0; i < modModel.getReactionCount(); i++){
-//			System.out.print(modModel.getReaction(i) + " ");
-//		}
+		for (int i = 0; i < modModel.getReactionCount(); i++){
+			System.out.print(modModel.getReaction(i) + " ");
+		}
 		System.out.println();
 //		System.out.println(FluxMinimizationUtils.getSteadyStateMatrix().toString());
 		
 		fba.solve();
 		
+		//------------------------print stoichiometric matrix---------------
+//		System.out.println();
+//		double[][] sMatrix = FluxMinimizationUtils.getExpandedStoichiometricMatrix(originalSBMLDoc).getArray();
+//		for (int i = 0; i < sMatrix.length; i++) {
+//			System.out.println(modModel.getSpecies(i) + "\t" + Arrays.toString(sMatrix[i]));
+//		}
+		
+		
+		
+		
 		System.out.println();
 		//print flux solution:
 		double[] fluxSolution = fba.solutionFluxVector;
 		System.out.println("--------solution for the fluxes:--------");
-		for (int i = 0; i < fluxSolution.length-45; i++) {
-			System.out.println(modModel.getReaction(i).getId() + " & " + fluxSolution[i] + " & " + modModel.getReaction(i+45).getId() + " & " + fluxSolution[i+45] + "**");
+		for (int i = 0; i < fluxSolution.length; i++) {
+			System.out.println(modModel.getReaction(i).getId() + " & " + fluxSolution[i]);
 		}
 		
 		// print sum of all in- and outgoing fluxes are 0?
@@ -191,19 +209,29 @@ public class FluxBalanceAnalysisTest {
 				fluxSum.put(sr.getSpeciesInstance(), helper);
 			}
 		}
+		
+		double[] gibbsSolution = fba.solutionGibbs;
+		
+		System.out.println();
+		System.out.println("--------------gibbs-------------");
+		for (int i = 0; i < gibbsSolution.length; i++) {
+			System.out.println(modModel.getReaction(i).getId() + "    " + gibbsSolution[i]);
+		}
+		
+		
 //		System.out.println();
 //		System.out.println("--------sum of the in- and outgoing fluxes (incl. stoichiometry)--------");
 //		for (int i = 0; i< modModel.getSpeciesCount(); i++ ) {
 //			System.out.println(modModel.getSpecies(i) + " : " + fluxSum.get(modModel.getSpecies(i)));
 //		}
 		
-//		System.out.println();
-//		//print conc solution:
-//		double[] concSolution = fba.solutionConcentrations;
-//		System.out.println("--------solution for the concentrations:--------");
-//		for (int i = 0; i < concSolution.length; i++) {
-//			System.out.println(originalSBMLDoc.getModel().getSpecies(i).getId() + "   " + concSolution[i]);
-//		}
+		System.out.println();
+		//print conc solution:
+		double[] concSolution = fba.solutionConcentrations;
+		System.out.println("--------solution for the concentrations:--------");
+		for (int i = 0; i < concSolution.length; i++) {
+			System.out.println(originalSBMLDoc.getModel().getSpecies(i).getId() + "   " + concSolution[i]);
+		}
 //		
 //		System.out.println();
 //		System.out.println("--------species at the system boundaries----------");
@@ -218,11 +246,11 @@ public class FluxBalanceAnalysisTest {
 //		end = System.currentTimeMillis();
 //		System.out.println((end - start) + " ms");
 //		
-//		System.out.println("Error:-----------------");
-//		double[] errorSolutions = fba.solutionErrors;
-//		for (int i = 0; i < errorSolutions.length; i++) {
-//			System.out.println(modModel.getReaction(i).getId() + "    " + errorSolutions[i]);
-//		}
+		System.out.println("Error:-----------------");
+		double[] errorSolutions = fba.solutionErrors;
+		for (int i = 0; i < errorSolutions.length; i++) {
+			System.out.println(modModel.getReaction(i).getId() + "    " + errorSolutions[i]);
+		}
 		
 //		cu0.writeComputedValuesInCSV(fluxSolution, new File("C:/Users/Meike/Desktop/fluxSolutionFBATest2.csv"));
 //		cu1.writeComputedValuesInCSV(fba.solutionConcentrations, new File("C:/Users/Meike/Desktop/concSolutionFBATest2.csv"));
