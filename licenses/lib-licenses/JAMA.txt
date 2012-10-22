@@ -1,0 +1,10 @@
+
+As explained in the JAMA web page, NIST and the MathWorks have
+given JAMA to the public domain.  In doing so they have relinquished
+all rights to the software.  It is not burdened by any licensing
+restrictions.  It can be used for any purpose whatsoever.
+
+An acknowledgement to the MathWorks and NIST for developing the
+package would be appreciated, however.
+
+See http://cio.nist.gov/esd/emaildir/lists/jama/msg01162.html
