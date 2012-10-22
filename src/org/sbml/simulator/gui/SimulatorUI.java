@@ -73,6 +73,7 @@ import de.zbit.gui.GUIOptions;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.SerialWorker;
 import de.zbit.gui.actioncommand.ActionCommand;
+import de.zbit.io.OpenedFile;
 import de.zbit.io.csv.CSVOptions;
 import de.zbit.io.filefilter.SBFileFilter;
 import de.zbit.sbml.gui.SBMLReadingTask;
@@ -517,8 +518,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		// First the model(s):
 		if ((modelFiles != null) && (modelFiles.length > 0)) {
 			try {
-				SBMLReadingTask task1 = new SBMLReadingTask(modelFiles[0], this);
-				task1.addPropertyChangeListener(EventHandler.create(PropertyChangeListener.class, this, "setSBMLDocument", "newValue"));
+				SBMLReadingTask task1 = new SBMLReadingTask(modelFiles[0], this, EventHandler.create(PropertyChangeListener.class, this, "setSBMLDocument", "newValue"));
 				worker.add(task1);
 			} catch (Exception exc) {
 				GUITools.showErrorMessage(this, exc);
@@ -698,43 +698,47 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	 * 
 	 * @param obj must be an instance of {@link SBMLDocument}.
 	 */
+	@SuppressWarnings("unchecked")
 	public void setSBMLDocument(Object obj) {
 		if ((obj == null) || !(obj instanceof SBMLDocument)) {
 			if (obj == null) {
 				logger.fine("Cannot set the SBMLDocument to a null value.");
+				return;
+			} else if (obj instanceof OpenedFile<?>) {
+				obj = ((OpenedFile<SBMLDocument>) obj).getDocument();
 			} else {
 				logger.fine(MessageFormat.format(
 				  "The given object of type {0} is ignored because it cannot be cast to SBMLDocument.",
 					obj.getClass().getName()));
+				return;
 			}
-		} else {
-			SBMLDocument doc = (SBMLDocument) obj;
-			if ((doc != null) && (doc.isSetModel())) {
-				
-				if ((simPanel != null) && !closeFile(false)) {
-					return;
-				}
-				
-				Model model = doc.getModel();
-				simPanel = new SimulationPanel(model);
-				getContentPane().add(simPanel, BorderLayout.CENTER);
-				addPreferenceChangeListener(simPanel);
-				
-				GUITools.swapAccelerator(getJMenuBar(), BaseAction.FILE_OPEN ,Command.OPEN_DATA);
-				GUITools.setEnabled(false, getJMenuBar(), BaseAction.FILE_OPEN);
-				GUITools.setEnabled(true, getJMenuBar(), toolBar,
+		}
+		SBMLDocument doc = (SBMLDocument) obj;
+		if ((doc != null) && (doc.isSetModel())) {
+
+			if ((simPanel != null) && !closeFile(false)) {
+				return;
+			}
+
+			Model model = doc.getModel();
+			simPanel = new SimulationPanel(model);
+			getContentPane().add(simPanel, BorderLayout.CENTER);
+			addPreferenceChangeListener(simPanel);
+
+			GUITools.swapAccelerator(getJMenuBar(), BaseAction.FILE_OPEN ,Command.OPEN_DATA);
+			GUITools.setEnabled(false, getJMenuBar(), BaseAction.FILE_OPEN);
+			GUITools.setEnabled(true, getJMenuBar(), toolBar,
 					BaseAction.FILE_SAVE_AS, Command.SIMULATION_START,
 					Command.SHOW_OPTIONS, Command.OPEN_DATA);
-				//			setTitle(String.format("%s - %s", getApplicationName(),
-				//				modelFiles[0].getAbsolutePath()));
-				validate();
-				
-			} else {
-				// TODO
-				//			JOptionPane.showMessageDialog(this, StringUtil.toHTML(
-				//				MessageFormat.format(bundle.getString("COULD_NOT_OPEN_MODEL"),
-				//					modelFiles[0].getAbsolutePath()), StringUtil.TOOLTIP_LINE_LENGTH));
-			}
+			//			setTitle(String.format("%s - %s", getApplicationName(),
+			//				modelFiles[0].getAbsolutePath()));
+			validate();
+
+		} else {
+			// TODO
+			//			JOptionPane.showMessageDialog(this, StringUtil.toHTML(
+			//				MessageFormat.format(bundle.getString("COULD_NOT_OPEN_MODEL"),
+			//					modelFiles[0].getAbsolutePath()), StringUtil.TOOLTIP_LINE_LENGTH));
 		}
 	}
 
