@@ -220,6 +220,13 @@ public class SBMLsimulator extends Launcher {
 	public SBMLsimulator(String[] args) {
 		super(args);
 	}
+	
+	/**
+	 * 
+	 */
+	public SBMLsimulator() {
+		super();
+	}
 
 	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#commandLineMode(de.zbit.AppConf)
@@ -318,7 +325,7 @@ public class SBMLsimulator extends Launcher {
 	 * @see de.zbit.Launcher#getVersionNumber()
 	 */
 	public String getVersionNumber() {
-		return "1.0";
+		return "1.1";
 	}
 
 	/* (non-Javadoc)
