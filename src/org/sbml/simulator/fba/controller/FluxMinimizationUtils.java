@@ -317,7 +317,6 @@ public class FluxMinimizationUtils {
 		SBMLDocument doc = eliminateTransports(document);
 		SBMLDocument revReacDoc = doc.clone();
 		//split the reversible reactions
-		int metaid = 0;
 		for (int i = 0; i < doc.getModel().getReactionCount(); i++) {
 			Reaction reversibleReac = revReacDoc.getModel().getReaction(doc.getModel().getReaction(i).getId());
 			if (reversibleReac.isReversible()) { // TODO for SBML L3 add if "isSetreversible"
@@ -331,15 +330,13 @@ public class FluxMinimizationUtils {
 				backwardReac.getListOfReactants().clear();
 				for (int j = 0; j < reversibleReac.getReactantCount(); j++) {
 					SpeciesReference sr = reversibleReac.getReactant(j).clone();
-					sr.setMetaId(metaid + endingForBackwardReaction);
-					metaid++;
+					sr.setMetaId(reversibleReac.getReactant(j).getMetaId() + endingForBackwardReaction);
 					backwardReac.addProduct(sr);
 				}
 	
 				for (int k = 0; k < reversibleReac.getProductCount(); k++) {
 					SpeciesReference sr = reversibleReac.getProduct(k).clone();
-					sr.setMetaId(metaid + endingForBackwardReaction);
-					metaid++;
+					sr.setMetaId(reversibleReac.getProduct(k).getMetaId() + endingForBackwardReaction);
 					backwardReac.addReactant(sr);
 				}
 				backwardReac.setReversible(false);
