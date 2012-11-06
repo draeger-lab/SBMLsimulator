@@ -34,8 +34,8 @@ import org.sbml.simulator.fba.controller.CSVDataConverter;
 import org.sbml.simulator.fba.controller.Constraints;
 import org.sbml.simulator.fba.controller.FluxBalanceAnalysis;
 import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
-
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
+import org.sbml.simulator.io.CSVDataImporter;
+import org.simulator.math.odes.MultiTable;
 
 /**
  * @author Meike Aichele
@@ -116,13 +116,21 @@ public class FluxBalanceAnalysisTest {
 		
 		
 		// read concentrations
-		cu2.readConcentrationsFromFile(concFile);
+		CSVDataImporter importer = new CSVDataImporter();
+		MultiTable concentrationMT = importer.convert(concFile.getAbsolutePath());
+		int speciesCount = concentrationMT.getColumnCount()-1;
+		equilibriumsConcentrations = new double[speciesCount];
+		for(int i=0; i<speciesCount; i++) {
+			equilibriumsConcentrations[i] = concentrationMT.getValueAt(0, i+1);
+		}
+		
+		/*cu2.readConcentrationsFromFile(concFile);
 		while(cu2.getConcentrationsArray() == null) {
 			//wait
 			System.out.print(".");
 //			logger.info("cu2.getConcentrationsArray() == null");
 		}
-		equilibriumsConcentrations = cu2.getConcentrationsArray();
+		equilibriumsConcentrations = cu2.getConcentrationsArray();*/
 		logger.info("concentrations are read: " + concFile.getName());
 		
 		System.out.println("gibbs...");
