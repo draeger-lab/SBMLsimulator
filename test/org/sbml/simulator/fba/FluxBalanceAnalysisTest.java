@@ -120,9 +120,16 @@ public class FluxBalanceAnalysisTest {
 		MultiTable concentrationMT = importer.convert(concFile);
 		int speciesCount = originalSBMLDoc.getModel().getSpeciesCount();
 		equilibriumsConcentrations = new double[speciesCount];
-		// TODO The multitable does not contain all species
+		// The multitable does not contain all species
+		ListOf<Species> listOfSpecies = originalSBMLDoc.getModel().getListOfSpecies();
 		for(int i = 0; i < speciesCount; i++) {
-			equilibriumsConcentrations[i] = concentrationMT.getValueAt(0, i);
+			String currentSpeciesId = listOfSpecies.get(i).getId();
+			int columnIndexMT = concentrationMT.getColumnIndex(currentSpeciesId);
+			if (columnIndexMT == -1) {
+				equilibriumsConcentrations[i] = Double.NaN;
+			} else {
+				equilibriumsConcentrations[i] = concentrationMT.getValueAt(0, columnIndexMT);
+			}
 		}
 		
 		logger.info("concentrations are read: " + concFile);
