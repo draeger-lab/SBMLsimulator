@@ -102,7 +102,7 @@ public class FluxBalanceAnalysisTest {
 		CSVDataConverter cu1 = new CSVDataConverter(originalSBMLDoc, systemBoundaries);
 		CSVDataConverter cu2 = new CSVDataConverter(originalSBMLDoc, systemBoundaries);
 		File gibbsFile = new File(args[1]);
-		File concFile = new File(args[2]);
+		String concFile = args[2];
 		
 		// read gibbs energies
 		cu1.readGibbsFromFile(gibbsFile);
@@ -117,21 +117,15 @@ public class FluxBalanceAnalysisTest {
 		
 		// read concentrations
 		CSVDataImporter importer = new CSVDataImporter();
-		MultiTable concentrationMT = importer.convert(concFile.getAbsolutePath());
-		int speciesCount = concentrationMT.getColumnCount()-1;
+		MultiTable concentrationMT = importer.convert(concFile);
+		int speciesCount = originalSBMLDoc.getModel().getSpeciesCount();
 		equilibriumsConcentrations = new double[speciesCount];
-		for(int i=0; i<speciesCount; i++) {
-			equilibriumsConcentrations[i] = concentrationMT.getValueAt(0, i+1);
+		// TODO The multitable does not contain all species
+		for(int i = 0; i < speciesCount; i++) {
+			equilibriumsConcentrations[i] = concentrationMT.getValueAt(0, i);
 		}
 		
-		/*cu2.readConcentrationsFromFile(concFile);
-		while(cu2.getConcentrationsArray() == null) {
-			//wait
-			System.out.print(".");
-//			logger.info("cu2.getConcentrationsArray() == null");
-		}
-		equilibriumsConcentrations = cu2.getConcentrationsArray();*/
-		logger.info("concentrations are read: " + concFile.getName());
+		logger.info("concentrations are read: " + concFile);
 		
 		System.out.println("gibbs...");
 		System.out.println(Arrays.toString(equilibriumsGibbsEnergies));
