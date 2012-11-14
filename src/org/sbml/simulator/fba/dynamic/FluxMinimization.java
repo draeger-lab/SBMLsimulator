@@ -20,14 +20,22 @@ package org.sbml.simulator.fba.dynamic;
 import org.simulator.math.odes.MultiTable;
 
 /**
+ * 
  * @author Robin F&auml;hnrich
  * @version $Rev$
  * @since 1.0
  */
 public class FluxMinimization implements TargetFunction {
 	
+	private double[] optimizedFluxVector;
+	
+	private MultiTable optimizedConcentrations;
+	
+	private double[] optimizedGibbsEnergies;
+	
+	
 	/**
-	 * @return the computed flux vector optimized by CPLEX
+	 * @return The computed flux vector optimized by CPLEX
 	 */
 	public double[] getOptimizedFluxVector() {
 		// TODO implement method
