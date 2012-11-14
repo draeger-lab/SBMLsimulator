@@ -17,6 +17,8 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
+import org.simulator.math.odes.MultiTable;
+
 /**
  * @author Robin F&auml;hnrich
  * @version $Rev$
@@ -25,10 +27,28 @@ package org.sbml.simulator.fba.dynamic;
 public class FluxMinimization implements TargetFunction {
 	
 	/**
-	 * @return a computed flux vector optimized by CPLEX
+	 * @return the computed flux vector optimized by CPLEX
 	 */
 	public double[] getOptimizedFluxVector() {
 		// TODO implement method
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getOptimizedConcentrations()
+	 */
+	@Override
+	public MultiTable getOptimizedConcentrations() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getOptimizedGibbsEnergies()
+	 */
+	@Override
+	public double[] getOptimizedGibbsEnergies() {
+		// TODO Auto-generated method stub
 		return null;
 	}
 
