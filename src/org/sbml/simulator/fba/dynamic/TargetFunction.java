@@ -17,6 +17,8 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
+import org.simulator.math.odes.MultiTable;
+
 /**
  * @author Robin F&auml;hnrich
  * @version $Rev$
@@ -25,12 +27,22 @@ package org.sbml.simulator.fba.dynamic;
 public interface TargetFunction {
 	
 	/**
-	 * @return true if a target function belongs to a minimization problem
+	 * @return the computed concentrations optimized by the target function
+	 */
+	public MultiTable getOptimizedConcentrations();
+	
+	/**
+	 * @return the computed gibbs energies optimized by the target function
+	 */
+	public double[] getOptimizedGibbsEnergies();
+	
+	/**
+	 * @return true if the target function belongs to a minimization problem
 	 */
 	public boolean isMinProblem();
 	
 	/**
-	 * @return true if a target function belongs to a maximization problem
+	 * @return true if the target function belongs to a maximization problem
 	 */
 	public boolean isMaxProblem();
 	
