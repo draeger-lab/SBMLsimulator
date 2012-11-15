@@ -1,5 +1,5 @@
 /*
- * $Id:  TargetFunction.java 11:31:26 faehnrich$
+ * $Id:  DynamicFBA.java 13:11:23 faehnrich$
  * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
@@ -17,34 +17,11 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
-import org.simulator.math.odes.MultiTable;
-
 /**
- * 
  * @author Robin F&auml;hnrich
  * @version $Rev$
  * @since 1.0
  */
-public interface TargetFunction {
-	
-	/**
-	 * @return The computed concentrations optimized by the target function
-	 */
-	public MultiTable getOptimizedConcentrations();
-	
-	/**
-	 * @return The computed gibbs energies optimized by the target function
-	 */
-	public double[] getOptimizedGibbsEnergies();
-	
-	/**
-	 * @return <CODE>true</CODE> if the target function belongs to a minimization problem
-	 */
-	public boolean isMinProblem();
-	
-	/**
-	 * @return <CODE>true</CODE> if the target function belongs to a maximization problem
-	 */
-	public boolean isMaxProblem();
-	
+public class DynamicFBA {
+	// TODO implement class
 }

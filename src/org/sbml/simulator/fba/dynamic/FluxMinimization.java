@@ -1,5 +1,5 @@
 /*
- * $Id:  FluxMinimization.java 11:34:24 Robin$
+ * $Id:  FluxMinimization.java 11:34:24 faehnrich$
  * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
