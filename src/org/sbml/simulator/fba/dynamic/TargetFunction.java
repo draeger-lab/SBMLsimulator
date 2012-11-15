@@ -25,26 +25,31 @@ import org.simulator.math.odes.MultiTable;
  * @version $Rev$
  * @since 1.0
  */
-public interface TargetFunction {
+public abstract class TargetFunction {
 	
 	/**
 	 * @return The computed concentrations optimized by the target function
 	 */
-	public MultiTable getOptimizedConcentrations();
+	public abstract MultiTable getOptimizedConcentrations();
+	
+	/**
+	 * @return The computed flux vector optimized by the target function
+	 */
+	public abstract double[] getOptimizedFluxVector();
 	
 	/**
 	 * @return The computed gibbs energies optimized by the target function
 	 */
-	public double[] getOptimizedGibbsEnergies();
+	public abstract double[] getOptimizedGibbsEnergies();
 	
 	/**
 	 * @return <CODE>true</CODE> if the target function belongs to a minimization problem
 	 */
-	public boolean isMinProblem();
+	public abstract boolean isMinProblem();
 	
 	/**
 	 * @return <CODE>true</CODE> if the target function belongs to a maximization problem
 	 */
-	public boolean isMaxProblem();
+	public abstract boolean isMaxProblem();
 	
 }
