@@ -25,28 +25,29 @@ import org.simulator.math.odes.MultiTable;
  * @version $Rev$
  * @since 1.0
  */
-public class FluxMinimization implements TargetFunction {
-	
-	private double[] optimizedFluxVector;
+public class FluxMinimization extends TargetFunction {
 	
 	private MultiTable optimizedConcentrations;
+	
+	private double[] optimizedFluxVector;
 	
 	private double[] optimizedGibbsEnergies;
 	
 	
-	/**
-	 * @return The computed flux vector optimized by CPLEX
-	 */
-	public double[] getOptimizedFluxVector() {
-		// TODO implement method
-		return null;
-	}
-
 	/* (non-Javadoc)
 	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getOptimizedConcentrations()
 	 */
 	@Override
 	public MultiTable getOptimizedConcentrations() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getOptimizedFluxVector()
+	 */
+	@Override
+	public double[] getOptimizedFluxVector() {
 		// TODO Auto-generated method stub
 		return null;
 	}
