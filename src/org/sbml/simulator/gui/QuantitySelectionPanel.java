@@ -46,13 +46,16 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
 
+import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.LocalParameter;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.Reaction;
+import org.sbml.jsbml.Species;
 import org.sbml.jsbml.UnitDefinition;
 import org.sbml.optimization.QuantityRange;
+import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.simulator.gui.table.LegendTableCellRenderer;
 
 import de.zbit.gui.GUITools;
@@ -64,6 +67,7 @@ import de.zbit.gui.table.renderer.DecimalCellRenderer;
 import de.zbit.sbml.gui.UnitDefinitionCellRenderer;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
+import de.zbit.util.prefs.SBPreferences;
 
 /**
  * With this element the user can decide which model components should be
@@ -421,6 +425,26 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	public QuantitySelectionPanel(Model model) {
 		super();
 		this.model = model;
+		
+		SBPreferences prefs = SBPreferences.getPreferencesFor(EstimationOptions.class);
+		double swap;
+		swap = prefs.getDouble(EstimationOptions.EST_INIT_MIN_VALUE);
+		if (!Double.isNaN(swap)) {
+			initMinValue = swap;
+		}
+		swap = prefs.getDouble(EstimationOptions.EST_INIT_MAX_VALUE);
+		if (!Double.isNaN(swap)) {
+			initMaxValue = swap;
+		}
+		swap = prefs.getDouble(EstimationOptions.EST_MIN_VALUE);
+		if (!Double.isNaN(swap)) {
+			minValue = swap;
+		}
+		swap = prefs.getDouble(EstimationOptions.EST_MAX_VALUE);
+		if (!Double.isNaN(swap)) {
+			maxValue = swap;
+		}
+		
 		quantityBlocks = new QuantityRange[model.getSymbolCount()
 				+ model.getLocalParameterCount()];
 		// One button each for every group of elements
@@ -597,11 +621,14 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	 */
 	private JPanel createQuantityPanel(
 		List<? extends Quantity> listOfQuantities, int curr, int tabIndex) {
-		boolean isLocalParameter = false;
 		boolean select = true;
+		SBPreferences prefs = SBPreferences.getPreferencesFor(EstimationOptions.class);
 		for (Quantity q : listOfQuantities) {
-			isLocalParameter |= q instanceof LocalParameter;
-			select = isLocalParameter || (q instanceof Parameter) || !q.isSetValue() || Double.isNaN(q.getValue());
+			select = ((q instanceof LocalParameter) && (prefs.getBoolean(EstimationOptions.EST_ALL_LOCAL_PARAMETERS)))
+					|| ((q instanceof Parameter) && (prefs.getBoolean(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS)))
+					|| ((q instanceof Compartment) && (prefs.getBoolean(EstimationOptions.EST_ALL_COMPARTMENTS)))
+					|| ((q instanceof Species) && (prefs.getBoolean(EstimationOptions.EST_ALL_SPECIES)))
+					|| ((!q.isSetValue() || Double.isNaN(q.getValue())) && (prefs.getBoolean(EstimationOptions.EST_ALL_UNDEFINED_QUANTITIES)));
 			quantityBlocks[curr++] = new QuantityRange(q, select, initMinValue, initMaxValue,
 				minValue, maxValue);
 		}

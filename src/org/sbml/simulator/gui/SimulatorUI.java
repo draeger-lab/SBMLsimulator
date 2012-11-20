@@ -505,7 +505,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 			} else { 
 				// Open (experimental) data files
 				dataFiles = GUITools.openFileDialog(this,
-					prefs.get(GUIOptions.OPEN_DIR), true, false, JFileChooser.FILES_ONLY,
+					prefs.get(GUIOptions.OPEN_DIR), true, true, JFileChooser.FILES_ONLY,
 					SBFileFilter.createCSVFileFilter());
 			}
 		}

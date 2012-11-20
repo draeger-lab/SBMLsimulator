@@ -27,9 +27,11 @@ import java.util.List;
 import javax.xml.stream.XMLStreamException;
 
 import org.sbml.jsbml.Compartment;
+import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.LocalParameter;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Parameter;
+import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.Species;
@@ -386,11 +388,17 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 		else {
 			allCompartments = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_COMPARTMENTS));
 		}
+  		boolean allUndefinedQuantities = false;
+  		if (props.containsKey(EstimationOptions.EST_ALL_UNDEFINED_QUANTITIES)) {
+  			allUndefinedQuantities = props.getBoolean(EstimationOptions.EST_ALL_UNDEFINED_QUANTITIES);
+  		} else {
+  			allUndefinedQuantities = prefsEst.getBoolean(EstimationOptions.EST_ALL_UNDEFINED_QUANTITIES);
+  		}
 		
 		Model clonedModel = simulationManager.getSimulationConfiguration().getModel().clone();
 		try {
 			estimationProblem = new EstimationProblem(simulationManager.getSimulationConfiguration().getSolver(), simulationManager.getQualityMeasurement().getDistance(), clonedModel, simulationManager.getQualityMeasurement().getMeasurements(),
-				multiShoot, createQuantityRanges(clonedModel, allGlobalParameters, allLocalParameters, allSpecies, allCompartments, initMin, initMax, min, max));
+				multiShoot, createQuantityRanges(clonedModel, allGlobalParameters, allLocalParameters, allSpecies, allCompartments, allUndefinedQuantities, initMin, initMax, min, max));
 		} catch (SBMLException e) {
 			e.printStackTrace();
 		} catch (ModelOverdeterminedException e) {
@@ -457,7 +465,7 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 	 */
 	private QuantityRange[] createQuantityRanges(Model model,
 		boolean allGlobalParameters, boolean allLocalParameters,
-		boolean allSpecies, boolean allCompartments, double initMin, double initMax, double min, double max) {
+		boolean allSpecies, boolean allCompartments, boolean allUndefinedQuantities, double initMin, double initMax, double min, double max) {
 		ArrayList<QuantityRange> quantities = new ArrayList<QuantityRange>();
 		
 		if (allGlobalParameters) {
@@ -487,9 +495,37 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 				}
 			}
 		}
+		if (allUndefinedQuantities) {
+			addAllUndefinedQuantities(quantities, model.getListOfParameters(), initMin, initMax, min, max);
+			addAllUndefinedQuantities(quantities, model.getListOfSpecies(), initMin, initMax, min, max);
+			addAllUndefinedQuantities(quantities, model.getListOfCompartments(), initMin, initMax, min, max);
+			for (Reaction r : model.getListOfReactions()) {
+				if (r.isSetKineticLaw() && r.getKineticLaw().isSetListOfLocalParameters()) {
+					addAllUndefinedQuantities(quantities, r.getKineticLaw().getListOfLocalParameters(), initMin, initMax, min, max);
+				}
+			}
+		}
 		
 		return quantities.toArray(new QuantityRange[quantities.size()]);
 	}
+	
+	/**
+	 * 
+	 * @param quantities
+	 * @param listOfQuantities
+	 * @param initMin
+	 * @param initMax
+	 * @param min
+	 * @param max
+	 */
+	private void addAllUndefinedQuantities(List<QuantityRange> quantities, ListOf<? extends Quantity> listOfQuantities, double initMin, double initMax, double min, double max) {
+		for (Quantity q : listOfQuantities) {
+			if ((!q.isSetValue() || Double.isNaN(q.getValue())) && !quantities.contains(q)) {
+				quantities.add(new QuantityRange(q, true, initMin, initMax, min, max));
+			}
+		}
+	}
+
 
 	/* (non-Javadoc)
 	 * @see java.lang.Runnable#run()

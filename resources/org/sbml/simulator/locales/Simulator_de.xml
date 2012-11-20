@@ -54,6 +54,8 @@
   <entry key="EST_ALL_LOCAL_PARAMETERS_TOOLTIP">Legen Sie fest, ob die Werte aller lokalen Parameter des gegebenen Modells als Optimierungsziele ausgewählt werden sollen.</entry>
   <entry key="EST_ALL_SPECIES">Anfangswerte der Spezies</entry>
   <entry key="EST_ALL_SPECIES_TOOLTIP">Wenn diese Option ausgewählt ist, werden die Anfangswerte aller Spezies des Modells als Optimierungsziele ausgewählt.</entry>
+  <entry key="EST_ALL_UNDEFINED_QUANTITIES">Alle undefinierten Werte</entry>
+  <entry key="EST_ALL_UNDEFINED_QUANTITIES_TOOLTIP">Schätzt die Werte all jener Quantitäten des Modells, deren Werte entweder undefiniert oder auf 'Not a Number' (NaN) gesetzt sind.</entry>
   <entry key="EST_INIT_MAX_VALUE">Obere Schranke während der Initialisierung</entry>
   <entry key="EST_INIT_MAX_VALUE_TOOLTIP">Der maximal mögliche Wert für einen zu optimierenden Wert in der Initialisierungsphase der gewählten Schätzmethode.</entry>
   <entry key="EST_INIT_MIN_VALUE">Untere Schranke während der Initialisierung</entry>
