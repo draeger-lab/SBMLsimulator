@@ -516,10 +516,10 @@ PropertyChangeListener {
 				modelFiles = GUITools.openFileDialog(this,
 						prefs.get(GUIOptions.OPEN_DIR).toString(), false, false,
 						JFileChooser.FILES_ONLY, SBFileFilter.createSBMLFileFilterList());
-			} else { 
+			} else {
 				// Open (experimental) data files
 				dataFiles = GUITools.openFileDialog(this,
-						prefs.get(GUIOptions.OPEN_DIR), true, false, JFileChooser.FILES_ONLY,
+						prefs.get(GUIOptions.OPEN_DIR), true, true, JFileChooser.FILES_ONLY,
 						SBFileFilter.createCSVFileFilter());
 			}
 		}
@@ -610,8 +610,7 @@ PropertyChangeListener {
 				for (int col = 0; col < reference.getColumnCount(); col++) {
 					String id = reference.getColumnIdentifier(col);
 					if (Arrays.binarySearch(selectedQuantityIds, id) < 0) {
-						double value = ((Double) reference.getValueAt(0, col))
-						.doubleValue();
+						double value = ((Double) reference.getValueAt(0, col)).doubleValue();
 						if (!Double.isNaN(value)) {
 							Species sp = model.getSpecies(id);
 							if (sp != null) {

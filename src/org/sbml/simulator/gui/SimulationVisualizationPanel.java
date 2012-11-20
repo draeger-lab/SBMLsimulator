@@ -96,7 +96,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	/**
 	 * The maximal allowable values.
 	 */
-	private double maxCompartmentValue = maxSpinVal,
+	private double minValue, maxCompartmentValue = maxSpinVal,
 			maxParameterValue = maxSpinVal, maxSpeciesValue = maxSpinVal;
 
 	/**
@@ -138,19 +138,23 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 			if (plot) {
 				plot();
 			}
-			LegendTableModel legend = legendPanel.getLegendTableModel();
-			String id;
-			int columnIndex;
-			boolean selected;
-			for (int i = 0; i < legend.getRowCount(); i++) {
-				id = legend.getId(i);
-				columnIndex = data.getColumnIndex(id);
-				selected = columnIndex > -1;
-				if (selected) {
-					String name = legend.getNameFor(id);
-					logger.fine(String.format("Set %s = %s selected = %b", id, name, selected));
-					legend.setSelected(i, selected);
-				}
+			selectLegendItems(data);
+		}
+	}
+
+	private void selectLegendItems(MultiTable data) {
+		LegendTableModel legend = legendPanel.getLegendTableModel();
+		String id;
+		int columnIndex;
+		boolean selected;
+		for (int i = 0; i < legend.getRowCount(); i++) {
+			id = legend.getId(i);
+			columnIndex = data.getColumnIndex(id);
+			selected = columnIndex > -1;
+			if (selected) {
+				String name = legend.getNameFor(id);
+				logger.fine(String.format("Set %s = %s selected = %b", id, name, selected));
+				legend.setSelected(i, selected);
 			}
 		}
 	}
@@ -206,6 +210,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 		maxSpinVal = 2000;
 		paramStepSize = .1d;
 		maxCompartmentValue = maxSpeciesValue =  maxParameterValue = 1E8;
+		minValue = -maxParameterValue;
 		updateUI();
 	}
 
@@ -330,7 +335,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 		// plot.removeMouseListener(listeners[i]);
 		// }
 		//
-		interactiveScanPanel = new InteractiveScanPanel(model,
+		interactiveScanPanel = new InteractiveScanPanel(model, minValue,
 				maxCompartmentValue, maxSpeciesValue, maxParameterValue,
 				paramStepSize);
 		interactiveScanPanel
@@ -382,6 +387,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 		}
 		this.simData = simData;
 		this.simData.addTableModelListener(this);
+		selectLegendItems(simData);
 		plot();
 	}
 

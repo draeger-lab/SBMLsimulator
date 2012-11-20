@@ -52,13 +52,16 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
 
+import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.LocalParameter;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.Reaction;
+import org.sbml.jsbml.Species;
 import org.sbml.jsbml.UnitDefinition;
 import org.sbml.optimization.QuantityRange;
+import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.gui.table.LegendTableCellRenderer;
 
@@ -431,6 +434,26 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	public QuantitySelectionPanel(Model model) {
 		super();
 		this.model = model;
+		
+		SBPreferences prefs = SBPreferences.getPreferencesFor(EstimationOptions.class);
+		double swap;
+		swap = prefs.getDouble(EstimationOptions.EST_INIT_MIN_VALUE);
+		if (!Double.isNaN(swap)) {
+			initMinValue = swap;
+		}
+		swap = prefs.getDouble(EstimationOptions.EST_INIT_MAX_VALUE);
+		if (!Double.isNaN(swap)) {
+			initMaxValue = swap;
+		}
+		swap = prefs.getDouble(EstimationOptions.EST_MIN_VALUE);
+		if (!Double.isNaN(swap)) {
+			minValue = swap;
+		}
+		swap = prefs.getDouble(EstimationOptions.EST_MAX_VALUE);
+		if (!Double.isNaN(swap)) {
+			maxValue = swap;
+		}
+		
 		quantityBlocks = new QuantityRange[model.getSymbolCount()
 				+ model.getLocalParameterCount()];
 		// One button each for every group of elements
@@ -488,15 +511,14 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 		
 		LayoutHelper lh = new LayoutHelper(this);
 		lh.add(new JLabel(StringUtil.toHTMLToolTip(bundle.getString("EXPLANATION"))), 1d, 0d);
-		// TODO: Localize
 		JButton fileButton = GUITools.createButton(
-			"Load", UIManager.getIcon("ICON_OPEN_16"), this, "loadFromFile",
+			bundle.getString("OPEN"), UIManager.getIcon("ICON_OPEN_16"), this, "loadFromFile",
 			"Load preferences from file");
 		JButton saveButton = GUITools.createButton(
-			"Save", UIManager.getIcon("ICON_SAVE_16"), this, "saveToFile",
+			bundle.getString("SAVE"), UIManager.getIcon("ICON_SAVE_16"), this, "saveToFile",
 			"Save preferences to file");
 		JPanel p = new JPanel();
-		p.setBorder(BorderFactory.createTitledBorder(" Load or save configuration "));
+		p.setBorder(BorderFactory.createTitledBorder(' '+ bundle.getString("OPEN_OR_SAVE_CONFIG") + ' '));
 		p.add(fileButton);
 		p.add(saveButton);
 		lh.add(p);
@@ -651,11 +673,14 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
 	 */
 	private JPanel createQuantityPanel(
 		List<? extends Quantity> listOfQuantities, int curr, int tabIndex) {
-		boolean isLocalParameter = false;
 		boolean select = true;
+		SBPreferences prefs = SBPreferences.getPreferencesFor(EstimationOptions.class);
 		for (Quantity q : listOfQuantities) {
-			isLocalParameter |= q instanceof LocalParameter;
-			select = isLocalParameter || (q instanceof Parameter) || !q.isSetValue() || Double.isNaN(q.getValue());
+			select = ((q instanceof LocalParameter) && (prefs.getBoolean(EstimationOptions.EST_ALL_LOCAL_PARAMETERS)))
+					|| ((q instanceof Parameter) && (prefs.getBoolean(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS)))
+					|| ((q instanceof Compartment) && (prefs.getBoolean(EstimationOptions.EST_ALL_COMPARTMENTS)))
+					|| ((q instanceof Species) && (prefs.getBoolean(EstimationOptions.EST_ALL_SPECIES)))
+					|| ((!q.isSetValue() || Double.isNaN(q.getValue())) && (prefs.getBoolean(EstimationOptions.EST_ALL_UNDEFINED_QUANTITIES)));
 			quantityBlocks[curr++] = new QuantityRange(q, select, initMinValue, initMaxValue,
 				minValue, maxValue);
 		}

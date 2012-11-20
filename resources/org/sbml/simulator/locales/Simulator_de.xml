@@ -54,6 +54,8 @@
   <entry key="EST_ALL_LOCAL_PARAMETERS_TOOLTIP">Legen Sie fest, ob die Werte aller lokalen Parameter des gegebenen Modells als Optimierungsziele ausgewählt werden sollen.</entry>
   <entry key="EST_ALL_SPECIES">Anfangswerte der Spezies</entry>
   <entry key="EST_ALL_SPECIES_TOOLTIP">Wenn diese Option ausgewählt ist, werden die Anfangswerte aller Spezies des Modells als Optimierungsziele ausgewählt.</entry>
+  <entry key="EST_ALL_UNDEFINED_QUANTITIES">Alle undefinierten Werte</entry>
+  <entry key="EST_ALL_UNDEFINED_QUANTITIES_TOOLTIP">Schätzt die Werte all jener Quantitäten des Modells, deren Werte entweder undefiniert oder auf 'Not a Number' (NaN) gesetzt sind.</entry>
   <entry key="EST_INIT_MAX_VALUE">Obere Schranke während der Initialisierung</entry>
   <entry key="EST_INIT_MAX_VALUE_TOOLTIP">Der maximal mögliche Wert für einen zu optimierenden Wert in der Initialisierungsphase der gewählten Schätzmethode.</entry>
   <entry key="EST_INIT_MIN_VALUE">Untere Schranke während der Initialisierung</entry>
@@ -116,6 +118,7 @@
   <entry key="PLOT_COLUMN">Anzeigen</entry>
   <entry key="COLOR_COLUMN">Farbe</entry>
   <entry key="COMPONENT_COLUMN">Komponente</entry>
+  <entry key="VALUE_COLUMN">Anfangswert</entry>
   <entry key="UNIT_COLUMN">Einheit</entry>
   <entry key="UNKOWN_CLUMN_EXC">Nur {0,number} Spalten, keine Spalte {1,number}</entry>
   
@@ -173,6 +176,8 @@
   <entry key="MINIMUM">Minimum</entry>
   <entry key="MAXIMUM">Maximum</entry>
   <entry key="INIT_MIN_MAX_SPINNER_TOOL_TIP">Wählen Sie den Zulässigen {0}-Wert für dieses {1}-Element namens {2} in der Initialisierungsphase der Schätzmethode.</entry>
+  <entry key="OPEN_OR_SAVE_CONFIG">Öffnen oder Speichern einer Konfiguration</entry>
+  <entry key="SAVE">Speichern</entry>
   <entry key="TAB_TOOL_TIP">In diesem Reiter können Sie die {0}-Elemente des Modells auswählen, deren Werte geschetzt werden sollen.</entry>
   
   <!-- SelectionCommand -->

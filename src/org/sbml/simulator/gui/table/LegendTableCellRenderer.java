@@ -125,6 +125,12 @@ public class LegendTableCellRenderer extends JLabel implements TableCellRenderer
 					}
 				}
 				setText(value.toString());
+			} else if (value instanceof Double) {
+				if (Double.isNaN(((Double) value).doubleValue())) {
+					setText(" - ");
+				} else {
+					setText(StringUtil.toString(((Double) value).doubleValue()));
+				}
 			} else if (value instanceof String) {
 				setText(value.toString());
 			}

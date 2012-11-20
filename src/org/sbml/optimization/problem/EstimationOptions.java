@@ -86,6 +86,13 @@ public interface EstimationOptions extends KeyProvider {
 		"EST_ALL_SPECIES", Boolean.class, bundle, Boolean.FALSE);
 	
 	/**
+	 * Estimates the values for all those quantities in the model whose values are
+	 * either undefined or set to 'Not a Number' (NaN).
+	 */
+	public static final Option<Boolean> EST_ALL_UNDEFINED_QUANTITIES = new Option<Boolean>(
+			"EST_ALL_UNDEFINED_QUANTITIES", Boolean.class, bundle, Boolean.FALSE);
+	
+	/**
 	 * The maximal value of the initialization range in a parameter estimation
 	 * procedure.
 	 */
