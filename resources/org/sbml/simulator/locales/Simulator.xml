@@ -55,6 +55,8 @@
   <entry key="EST_ALL_LOCAL_PARAMETERS_TOOLTIP">Decide whether or not by default all local parameters in a model should be considered the target of an optimization, i.e., value estimation.</entry>
   <entry key="EST_ALL_SPECIES">Initial species values</entry>
   <entry key="EST_ALL_SPECIES_TOOLTIP">Decide whether or not by default all species in a model should be considered the target of an optimization, i.e., value estimation.</entry>
+  <entry key="EST_ALL_UNDEFINED_QUANTITIES">All undefined quantities</entry>
+  <entry key="EST_ALL_UNDEFINED_QUANTITIES_TOOLTIP">Estimates the values for all those quantities in the model whose values are either undefined or set to 'Not a Number' (NaN).</entry>
   <entry key="EST_INIT_MAX_VALUE">Upper bound of initial estimates</entry>
   <entry key="EST_INIT_MAX_VALUE_TOOLTIP">The maximal value of the initialization range in a parameter estimation procedure.</entry>
   <entry key="EST_INIT_MIN_VALUE">Lower bound of initial estimates</entry>
@@ -143,6 +145,7 @@
   <entry key="COLOR_COLUMN">Color</entry>
   <entry key="COMPONENT_COLUMN">Component</entry>
   <entry key="UNIT_COLUMN">Unit</entry>
+  <entry key="VALUE_COLUMN">Initial value</entry>
   <entry key="UNKOWN_CLUMN_EXC">Only {0,number} columns, no column {1,number}</entry>
     
   <!-- Metrics -->
@@ -199,6 +202,8 @@
   <entry key="MINIMUM">minimum</entry>
   <entry key="MAXIMUM">maximum</entry>
   <entry key="INIT_MIN_MAX_SPINNER_TOOL_TIP">Select the {0} allowable value for this {1} named {2} in the initialization.</entry>
+  <entry key="OPEN_OR_SAVE_CONFIG">Load or save configuration</entry>
+  <entry key="SAVE">Save</entry>
   <entry key="TAB_TOOL_TIP">In this tab you can select the {0} in the model whose values are to be optimized.</entry>
   
   <!-- SelectionCommand -->

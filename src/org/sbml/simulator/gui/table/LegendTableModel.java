@@ -35,6 +35,7 @@ import org.sbml.jsbml.Model;
 import org.sbml.jsbml.NamedSBase;
 import org.sbml.jsbml.NamedSBaseWithDerivedUnit;
 import org.sbml.jsbml.Parameter;
+import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.Species;
 import org.sbml.jsbml.UnitDefinition;
@@ -56,7 +57,7 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 	 * Column indices for the content
 	 */
 	private static final int boolCol = 0, colorCol = 1, nsbCol = 2,
-			unitCol = 3;
+			valueCol = 3, unitCol = 4;
 	
 	/**
 	 * 
@@ -149,17 +150,20 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 	 * @param model
 	 */
 	public LegendTableModel(Model model) {
-		this();
-		setModel(model);
+		this(model, false);
 	}
 
 	/**
 	 * @param model
 	 * @param includeReactions
 	 */
-	public LegendTableModel(Model model, boolean includeReactions, TableModelListener listener) {
+	public LegendTableModel(Model model, boolean includeReactions, TableModelListener... listener) {
 		this();
-		addTableModelListener(listener);
+		if ((listener != null) && (listener.length > 0)) {
+			for (TableModelListener l : listener) {
+				addTableModelListener(l);
+			}
+		}
 		setModel(model, includeReactions);
 	}
 
@@ -175,6 +179,7 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
     }
     data[rowIndex][colorCol] = ColorPalette.indexToColor(rowIndex);
     data[rowIndex][nsbCol] = nsb;
+    data[rowIndex][valueCol] = (nsb instanceof Quantity) ? ((Quantity) nsb).getValue() : Double.NaN;
     id2Row.put(nsb.getId(), Integer.valueOf(rowIndex));
   }
   
@@ -205,6 +210,8 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 				return Color.class;
 			case nsbCol:
 				return NamedSBaseWithDerivedUnit.class;
+			case valueCol:
+				return Double.class;
 			case unitCol:
 				return UnitDefinition.class;
 			default:
@@ -231,6 +238,8 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 			return bundle.getString("COLOR_COLUMN");
 		case nsbCol:
 			return bundle.getString("COMPONENT_COLUMN");
+		case valueCol:
+			return bundle.getString("VALUE_COLUMN");
 		case unitCol:
 			return bundle.getString("UNIT_COLUMN");
 		default:
@@ -323,9 +332,9 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 		}
 		id2Row = new Hashtable<String, Integer>();
 		lastQueried = null;
-		data = new Object[dim][4];
+		data = new Object[dim][5];
 		int i, j;
-		for (i=0; i<data.length; i++) {
+		for (i = 0; i<data.length; i++) {
 			data[i][unitCol] = "";
 		}
 		
@@ -354,7 +363,7 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
 	 */
 	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		return editable && ((columnIndex == colorCol) || (columnIndex == boolCol));
+		return editable && ((columnIndex == colorCol) || (columnIndex == boolCol)) || (columnIndex == valueCol);
 	}
 
 	/**
@@ -521,11 +530,17 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
       } else if (!plot && plotNew && (selectedCount < getRowCount())) {
         selectedCount++;
       }
+    } else if (columnIndex == getColumnValue()) {
+    	// TODO
     }
 		if (!oldValue.equals(aValue)) {
 			data[rowIndex][columnIndex] = aValue;
 			fireTableCellUpdated(rowIndex, columnIndex);
 		}
+	}
+
+	public int getColumnValue() {
+		return valueCol;
 	}
 
 	/**

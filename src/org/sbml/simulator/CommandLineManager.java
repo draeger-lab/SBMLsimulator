@@ -29,9 +29,11 @@ import java.util.List;
 import javax.xml.stream.XMLStreamException;
 
 import org.sbml.jsbml.Compartment;
+import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.LocalParameter;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Parameter;
+import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLException;
@@ -340,16 +342,16 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 		
 		boolean multiShoot;
 		if (props.containsKey(EstimationOptions.EST_MULTI_SHOOT)) {
-			multiShoot = Boolean.valueOf(props.get(EstimationOptions.EST_MULTI_SHOOT));
+			multiShoot = props.getBoolean(EstimationOptions.EST_MULTI_SHOOT);
 		}
 		else {
-			multiShoot = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_MULTI_SHOOT));
+			multiShoot = prefsEst.getBoolean(EstimationOptions.EST_MULTI_SHOOT);
 		}
 		SBMLDocument clonedDocument = simulationManager.getSimulationConfiguration().getModel().getSBMLDocument().clone();
 		Model clonedModel = clonedDocument.getModel();
 		//Create quantity ranges from file or with standard preferences
 		QuantityRange[] quantityRanges = null;
-		if(props.containsKey(EstimationOptions.EST_TARGETS)) {
+		if (props.containsKey(EstimationOptions.EST_TARGETS)) {
 			String file = String.valueOf(props.get(EstimationOptions.EST_TARGETS));
 			try {
 				quantityRanges = EstimationProblem.readQuantityRangesFromFile(file, clonedModel);
@@ -392,47 +394,51 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
   		
   		boolean allGlobalParameters;
   		if (props.containsKey(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS)) {
-  			allGlobalParameters = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS));
+  			allGlobalParameters = props.getBoolean(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS);
   		}
   		else {
-  			allGlobalParameters = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS));
+  			allGlobalParameters = prefsEst.getBoolean(EstimationOptions.EST_ALL_GLOBAL_PARAMETERS);
   		}
   		
   		boolean allLocalParameters;
   		if (props.containsKey(EstimationOptions.EST_ALL_LOCAL_PARAMETERS)) {
-  			allLocalParameters = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_LOCAL_PARAMETERS));
+  			allLocalParameters = props.getBoolean(EstimationOptions.EST_ALL_LOCAL_PARAMETERS);
   		}
   		else {
-  			allLocalParameters = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_LOCAL_PARAMETERS));
+  			allLocalParameters = prefsEst.getBoolean(EstimationOptions.EST_ALL_LOCAL_PARAMETERS);
   		}
   		
-  		boolean allSpecies=false;
+  		boolean allSpecies = false;
   		if (props.containsKey(EstimationOptions.EST_ALL_SPECIES)) {
-  			allSpecies = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_SPECIES));
-  		}
-  		else {
-  			allSpecies = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_SPECIES));
+  			allSpecies = props.getBoolean(EstimationOptions.EST_ALL_SPECIES);
+  		} else {
+  			allSpecies = prefsEst.getBoolean(EstimationOptions.EST_ALL_SPECIES);
   		}
   		
   		boolean allCompartments = false;
   		if (props.containsKey(EstimationOptions.EST_ALL_COMPARTMENTS)) {
-  			allCompartments = Boolean.valueOf(props.get(EstimationOptions.EST_ALL_COMPARTMENTS));
+  			allCompartments = props.getBoolean(EstimationOptions.EST_ALL_COMPARTMENTS);
+  		} else {
+  			allCompartments = prefsEst.getBoolean(EstimationOptions.EST_ALL_COMPARTMENTS);
   		}
-  		else {
-  			allCompartments = Boolean.valueOf(prefsEst.get(EstimationOptions.EST_ALL_COMPARTMENTS));
+  		boolean allUndefinedQuantities = false;
+  		if (props.containsKey(EstimationOptions.EST_ALL_UNDEFINED_QUANTITIES)) {
+  			allUndefinedQuantities = props.getBoolean(EstimationOptions.EST_ALL_UNDEFINED_QUANTITIES);
+  		} else {
+  			allUndefinedQuantities = prefsEst.getBoolean(EstimationOptions.EST_ALL_UNDEFINED_QUANTITIES);
   		}
   		try {
-  			quantityRanges = createQuantityRanges(clonedModel, allGlobalParameters, allLocalParameters, allSpecies, allCompartments, initMin, initMax, min, max);
+  			quantityRanges = createQuantityRanges(clonedModel, allGlobalParameters, allLocalParameters, allSpecies, allCompartments, allUndefinedQuantities, initMin, initMax, min, max);
   		} catch (Exception e) {
   			e.printStackTrace();
   		} 
 		}
 		boolean fitToSplines = false;
 		if (props.containsKey(EstimationOptions.FIT_TO_SPLINES)) {
-			fitToSplines = Boolean.valueOf(props.get(EstimationOptions.FIT_TO_SPLINES));
+			fitToSplines = props.getBoolean(EstimationOptions.FIT_TO_SPLINES);
 		}
 		else {
-			fitToSplines = Boolean.valueOf(prefsEst.get(EstimationOptions.FIT_TO_SPLINES));
+			fitToSplines = prefsEst.getBoolean(EstimationOptions.FIT_TO_SPLINES);
 		}
 		
 		int numSplineSamples = 0;
@@ -449,7 +455,7 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 					numSplineSamples));
 			}
 		}
-		if((quantityRanges != null) && (quantityRanges.length >= 0)) {
+		if ((quantityRanges != null) && (quantityRanges.length >= 0)) {
 			try {
 				estimationProblem = new EstimationProblem(simulationManager.getSimulationConfiguration().getSolver(), simulationManager.getQualityMeasurement().getDistance(), clonedModel, simulationManager.getQualityMeasurement().getMeasurements(),
 				multiShoot, quantityRanges);
@@ -561,11 +567,14 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 	 * @param allLocalParameters
 	 * @param allSpecies
 	 * @param allCompartments
+	 * @param allUndefinedQuantities 
 	 * @return
 	 */
 	private QuantityRange[] createQuantityRanges(Model model,
 		boolean allGlobalParameters, boolean allLocalParameters,
-		boolean allSpecies, boolean allCompartments, double initMin, double initMax, double min, double max) {
+		boolean allSpecies, boolean allCompartments,
+		boolean allUndefinedQuantities, double initMin, double initMax, double min,
+		double max) {
 		ArrayList<QuantityRange> quantities = new ArrayList<QuantityRange>();
 		
 		if (allGlobalParameters) {
@@ -596,7 +605,35 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 			}
 		}
 		
+		if (allUndefinedQuantities) {
+			addAllUndefinedQuantities(quantities, model.getListOfParameters(), initMin, initMax, min, max);
+			addAllUndefinedQuantities(quantities, model.getListOfSpecies(), initMin, initMax, min, max);
+			addAllUndefinedQuantities(quantities, model.getListOfCompartments(), initMin, initMax, min, max);
+			for (Reaction r : model.getListOfReactions()) {
+				if (r.isSetKineticLaw() && r.getKineticLaw().isSetListOfLocalParameters()) {
+					addAllUndefinedQuantities(quantities, r.getKineticLaw().getListOfLocalParameters(), initMin, initMax, min, max);
+				}
+			}
+		}
+		
 		return quantities.toArray(new QuantityRange[quantities.size()]);
+	}
+
+	/**
+	 * 
+	 * @param quantities
+	 * @param listOfQuantities
+	 * @param initMin
+	 * @param initMax
+	 * @param min
+	 * @param max
+	 */
+	private void addAllUndefinedQuantities(List<QuantityRange> quantities, ListOf<? extends Quantity> listOfQuantities, double initMin, double initMax, double min, double max) {
+		for (Quantity q : listOfQuantities) {
+			if ((!q.isSetValue() || Double.isNaN(q.getValue())) && !quantities.contains(q)) {
+				quantities.add(new QuantityRange(q, true, initMin, initMax, min, max));
+			}
+		}
 	}
 
 	/* (non-Javadoc)

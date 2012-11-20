@@ -134,14 +134,20 @@ public class QuantityRange implements Cloneable, Serializable {
 		this.gaussianInitialization = false;
 	}
 	
+	/**
+	 * 
+	 * @param q
+	 * @param selected
+	 * @param initMin
+	 * @param initMax
+	 * @param min
+	 * @param max
+	 * @param initialGaussianValue
+	 * @param gaussianStandardDeviation
+	 */
 	public QuantityRange(Quantity q, boolean selected, double initMin,
 		double initMax, double min, double max, double initialGaussianValue, double gaussianStandardDeviation) {
-		quantity = q;
-		this.selected = Boolean.valueOf(selected);
-		this.initMin = Double.valueOf(initMin);
-		this.initMax = Double.valueOf(initMax);
-		this.minimum = Double.valueOf(min);
-		this.maximum = Double.valueOf(max);
+		this(q, selected, initMin, initMax, min, max);
 		this.initialGaussianValue = initialGaussianValue;
 		this.gaussianStandardDeviation = gaussianStandardDeviation;
 		this.gaussianInitialization = true;

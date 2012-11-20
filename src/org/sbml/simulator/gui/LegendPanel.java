@@ -259,6 +259,7 @@ public class LegendPanel extends JPanel implements TableModelListener,
 		tab.setDefaultRenderer(NamedSBaseWithDerivedUnit.class, new LegendTableCellRenderer());
 		tab.setDefaultRenderer(UnitDefinition.class, new UnitDefinitionCellRenderer());
 		tab.setDefaultRenderer(Boolean.class, new ColoredBooleanRenderer());
+		tab.setDefaultRenderer(Double.class, new LegendTableCellRenderer());
 		tab.getModel().addTableModelListener(this);
 		JTableSearch.setQuickSearch(tab);
     //		tab.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
