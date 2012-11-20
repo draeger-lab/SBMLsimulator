@@ -158,17 +158,24 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
   /**
 	 * 
 	 */
-  private double paramStepSize, maxCompartmentValue, maxParameterValue,
+  private double paramStepSize, minValue, maxCompartmentValue, maxParameterValue,
       maxSpeciesValue;
   
   /**
-	 * 
-	 */
-  public InteractiveScanPanel(Model model, double maxCompartmentValue,
+   * 
+   * @param model
+   * @param minValue
+   * @param maxCompartmentValue
+   * @param maxSpeciesValue
+   * @param maxParameterValue
+   * @param paramStepSize
+   */
+  public InteractiveScanPanel(Model model, double minValue, double maxCompartmentValue,
     double maxSpeciesValue, double maxParameterValue, double paramStepSize) {
     super(new BorderLayout());
     loadPreferences();
     this.paramStepSize = paramStepSize;
+    this.minValue = minValue;
     this.maxCompartmentValue = maxCompartmentValue;
     this.maxParameterValue = maxParameterValue;
     this.maxSpeciesValue = maxSpeciesValue;
@@ -200,27 +207,27 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
       this.hasLocalParameters = false;
       this.tab.add(
         bundle.getString("COMPARTMENTS"),
-        interactiveScanScrollPane(model.getListOfCompartments(),
+        interactiveScanScrollPane(model.getListOfCompartments(), minValue, 
           maxCompartmentValue, paramStepSize, offset));
       offset += model.getCompartmentCount();
       tab.setEnabledAt(0, model.getCompartmentCount() > 0);
       
       tab.add(
         bundle.getString("SPECIES"),
-        interactiveScanScrollPane(model.getListOfSpecies(), maxParameterValue,
+        interactiveScanScrollPane(model.getListOfSpecies(), minValue, maxParameterValue,
           paramStepSize, offset));
       offset += model.getSpeciesCount();
       tab.setEnabledAt(1, model.getSpeciesCount() > 0);
       
       tab.add(
         bundle.getString("GLOBAL_PARAMETERS"),
-        interactiveScanScrollPane(model.getListOfParameters(), maxSpeciesValue,
+        interactiveScanScrollPane(model.getListOfParameters(), minValue, maxSpeciesValue,
           paramStepSize, offset));
       tab.setEnabledAt(2, model.getParameterCount() > 0);
       
       tab.add(
         bundle.getString("LOCAL_PARAMETERS"),
-        new JScrollPane(interactiveScanLocalParameters(maxParameterValue,
+        new JScrollPane(interactiveScanLocalParameters(maxParameterValue, minValue,
           paramStepSize, model.getSymbolCount(), model.getListOfReactions())));
       tab.setEnabledAt(3, hasLocalParameters);
       for (int i = tab.getTabCount() - 1; i >= 0; i--) {
@@ -299,14 +306,16 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
   }
   
   /**
+   * 
    * @param maxParameterValue
    * @param paramStepSize
+   * @param minValue
    * @param offset
    * @param listOfReactions
    * @return
    */
   private JPanel interactiveScanLocalParameters(double maxParameterValue,
-    double paramStepSize, int offset, ListOf<Reaction> listOfReactions) {
+    double paramStepSize, double minValue, int offset, ListOf<Reaction> listOfReactions) {
     JPanel parameterPanel = new JPanel();
     parameterPanel
         .setLayout(new BoxLayout(parameterPanel, BoxLayout.PAGE_AXIS));
@@ -314,7 +323,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
       if (r.isSetKineticLaw() && r.getKineticLaw().getLocalParameterCount() > 0) {
         hasLocalParameters = true;
         JPanel panel = interactiveScanTable(r.getKineticLaw()
-            .getListOfLocalParameters(), maxParameterValue, paramStepSize,
+            .getListOfLocalParameters(), minValue, maxParameterValue, paramStepSize,
           offset);
         offset += r.getKineticLaw().getLocalParameterCount();
         panel.setBorder(BorderFactory.createTitledBorder(MessageFormat.format(
@@ -326,16 +335,18 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
   }
   
   /**
+   * 
    * @param list
+   * @param minValue
    * @param maxValue
    * @param stepSize
    * @param offset
    * @return
    */
   private JScrollPane interactiveScanScrollPane(
-    ListOf<? extends QuantityWithUnit> list, double maxValue, double stepSize,
+    ListOf<? extends QuantityWithUnit> list, double minValue, double maxValue, double stepSize,
     int offset) {
-		return new JScrollPane(interactiveScanTable(list, maxValue, stepSize,
+		return new JScrollPane(interactiveScanTable(list, minValue, maxValue, stepSize,
 			offset));
   }
   
@@ -347,7 +358,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
    *        index offset
    * @return
    */
-  private JPanel interactiveScanTable(ListOf<? extends QuantityWithUnit> list,
+  private JPanel interactiveScanTable(ListOf<? extends QuantityWithUnit> list, double minValue,
     double maxValue, double stepSize, int offset) {
     JPanel panel = new JPanel();
     LayoutHelper lh = new LayoutHelper(panel);
@@ -380,8 +391,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
       }
       maxValue = Math.max(value, maxValue);
       index = i + offset;
-      spinQuantity[index] = new JSpinner(new SpinnerNumberModel(value,
-        Math.min(0d, value), maxValue, stepSize));
+      spinQuantity[index] = new JSpinner(new SpinnerNumberModel(value, Math.min(minValue, value), maxValue, stepSize));
       originalValues[index] = value; // backup.
       quantities[index] = p;
       quantities[index].addTreeNodeChangeListener(this);

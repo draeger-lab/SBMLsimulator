@@ -59,6 +59,13 @@ public interface EstimationOptions extends KeyProvider {
 		"EST_ALL_COMPARTMENTS", Boolean.class, bundle, Boolean.FALSE);
 	
 	/**
+	 * Estimates the values for all those quantities in the model whose values are
+	 * either undefined or set to 'Not a Number' (NaN).
+	 */
+	public static final Option<Boolean> EST_ALL_UNDEFINED_QUANTITIES = new Option<Boolean>(
+			"EST_ALL_UNDEFINED_QUANTITIES", Boolean.class, bundle, Boolean.FALSE);
+	
+	/**
 	 * Decide whether or not by default all global parameters in a model should be
 	 * considered the target of an optimization, i.e., value estimation.
 	 */
