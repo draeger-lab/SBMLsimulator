@@ -387,7 +387,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 		}
 		this.simData = simData;
 		this.simData.addTableModelListener(this);
-		selectLegendItems(simData);
+		//selectLegendItems(simData);
 		plot();
 	}
 

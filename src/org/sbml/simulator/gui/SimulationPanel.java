@@ -425,12 +425,12 @@ public class SimulationPanel extends JPanel implements
    * @see eva2.server.stat.InterfaceStatisticsListener#notifyGenerationPerformed(java.lang.String[], java.lang.Object[], java.lang.Double[])
    */
   public void notifyGenerationPerformed(String[] header, Object[] statObjects, Double[] statDoubles) {
-    SimulationToolPanel tools = (SimulationToolPanel) simulationToolPanel.getComponent(0);
+    //SimulationToolPanel tools = (SimulationToolPanel) simulationToolPanel.getComponent(0);
     if((simulationDataIndex == 0) && (runBestIndex == 0)) {
     	this.notifyRunStarted(0, 1, header, null);
     }
     
-    double currentDistance = tools.getCurrentQuality();
+    //double currentDistance = tools.getCurrentQuality();
     //if (Double.isNaN(currentDistance)) {
         //|| (currentDistance > statDoubles[runBestIndex].doubleValue())) {
       if (statObjects[simulationDataIndex] instanceof MultiTable) {
@@ -457,13 +457,26 @@ public class SimulationPanel extends JPanel implements
    * @see eva2.server.stat.InterfaceStatisticsListener#notifyMultiRunFinished(java.lang.String[], java.util.List)
    */
   public boolean notifyMultiRunFinished(String[] header, List<Object[]> multiRunFinalObjectData) {
+	  int i;
     for (Object[] obj: multiRunFinalObjectData) {
-      String[] solutionString = obj[solutionIndex].toString().replace("{","").replace("}","").split(", ");
+      String tmp = obj[solutionIndex].toString();
+      StringBuilder sb = new StringBuilder();
+      char curr;
+      for (i = 0; i < tmp.length(); i++) {
+    	  curr = tmp.charAt(i);
+    	  if ((curr != '{') && (curr != '}')) {
+    		  sb.append(curr);
+    		  if ((curr == ',') && (tmp.charAt(i + 1) == '-')) {
+    			  sb.append(' ');
+    		  }
+    	  }
+      }
+      String[] solutionString = sb.toString().split(", ");
       logger.info("Fitness: " + ((Double) obj[1]));
-      for (int i = 0; i < selectedQuantityIds.length; i++) {
-        double currentQuantity=Double.parseDouble(solutionString[i].replace(',', '.'));
-        visualizationPanel.updateQuantity(selectedQuantityIds[i], currentQuantity);
-        logger.info(selectedQuantityIds[i] + ": " + currentQuantity);
+      for (i = 0; i < selectedQuantityIds.length; i++) {
+    	  double currentQuantity = Double.parseDouble(solutionString[i].replace(',', '.'));
+    	  visualizationPanel.updateQuantity(selectedQuantityIds[i], currentQuantity);
+    	  logger.info(selectedQuantityIds[i] + ": " + currentQuantity);
       }
     }
     return true;
