@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
-Created-By: Fat Jar Eclipse Plug-In
+Created-By: Center for Bioinformatics Tuebingen (ZBIT)
 Main-Class: org.sbml.simulator.SBMLsimulator
 SplashScreen-Image: org/sbml/simulator/gui/img/Splash.gif
 
-Name: org/apache/log4j/
-Implementation-Title: log4j
-Implementation-Version: 1.2.8
-Implementation-Vendor: "Apache Software Foundation"
+Name: SBMLsimulator
+Implementation-Title: SBMLsimulator
+Implementation-Version: 1.1
+Implementation-Vendor: Center for Bioinformatics Tuebingen (ZBIT)

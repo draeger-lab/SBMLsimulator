@@ -320,17 +320,21 @@ public class EstimationProblem extends AbstractProblemDouble implements
 				initConditions = referenceData[0];
 			} else {
 				// merge all identifiers
-				ArrayList<String> identifiers = new ArrayList<String>();
+				List<String> identifiers = new ArrayList<String>();
 				for (String s : referenceData[0].getBlock(0).getIdentifiers()) {
 					identifiers.add(s);
 				}
 				int i, j, index;
 				for (i = 1; i < referenceData.length; i++) {
 					for (j = 0; j < referenceData[i].getBlock(0).getColumnCount(); j++) {
-						index = Arrays.binarySearch((String[]) identifiers.toArray(),
+						index = Arrays.binarySearch(identifiers.toArray(new String[0]),
 							referenceData[i].getBlock(0).getIdentifiers()[j]);
 						if (index < 0) {
-							identifiers.add(-index + 1, referenceData[i].getBlock(0).getIdentifiers()[j]);
+							index = -index + 1;
+							if (index > identifiers.size()) {
+								index = identifiers.size();
+							}
+							identifiers.add(index, referenceData[i].getBlock(0).getIdentifiers()[j]);
 						}
 					}
 				}
@@ -344,10 +348,10 @@ public class EstimationProblem extends AbstractProblemDouble implements
 						for (index = 0; index < referenceData.length; index++) {
 							block = referenceData[index].getBlock(0);
 							if (block.containsColumn(identifiers.get(j))) {
-								data[j][j] += block.getColumn(j).getValue(i) / referenceData.length;
+								data[i][j] += block.getColumn(identifiers.get(j)).getValue(i) / referenceData.length;
 							} else {
 								// If one value is not available, this data point will become null! 
-								data[j][j] = Double.NaN;
+								data[i][j] = Double.NaN;
 							}
 						}
 					}
@@ -380,7 +384,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 			if (referenceData.length == 1) {
 				this.timePoints = referenceData[0].getTimePoints();
 			} else {
-				ArrayList<Double> tp = new ArrayList<Double>();
+				List<Double> tp = new ArrayList<Double>();
 				for (double d : referenceData[0].getTimePoints()) {
 					tp.add(Double.valueOf(d));
 				}
@@ -389,7 +393,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 				for (i = 1; i < referenceData.length; i++) {
 					for (j = 0; j < referenceData[i].getTimePoints().length; j++) {
 						t = referenceData[i].getTimePoint(j);
-						index = Arrays.binarySearch((Double[]) tp.toArray(), t);
+						index = Arrays.binarySearch(tp.toArray(new Double[0]), t);
 						if (index < 0) {
 							tp.add(-index + 1, Double.valueOf(t));
 						}
