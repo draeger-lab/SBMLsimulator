@@ -69,7 +69,8 @@ public abstract class TargetFunction {
 	}
 	
 	/**
-	 * 
+	 * If the target function belongs to a minimization problem, minimize it,
+	 * if the target function belongs to a maximization problem, maximize it.
 	 * @param cplex
 	 * @param expr
 	 * @throws IloException 
@@ -85,10 +86,11 @@ public abstract class TargetFunction {
 	}
 	
 	/**
-	 * 
+	 * Let CPLEX solve the optimization problem (if necessary check the CPLEX 
+	 * iterations) and get the solution of the variables in a double array.
 	 * @param cplex
 	 * @param vars
-	 * @return
+	 * @return The array with the solution variables optimized by CPLEX
 	 * @throws IloException
 	 */
 	public double[] solveAndFinishCplex(IloCplex cplex, IloNumVar[] vars) throws IloException {
