@@ -44,11 +44,11 @@
     <!-- the path to JSBML -->
     <property name="JSBMLPath" location="${base}/../jSBML" />
     <!-- the path to SBML2LaTeX -->
-    <property name="SBML2LaTeXPath" location="${base}/../SBML2LaTeX" />
+    <!--<property name="SBML2LaTeXPath" location="${base}/../SBML2LaTeX" />-->
     <!-- the path to SBMLsimulatorCore -->
-    <property name="SBMLsimulatorCorePath" location="${base}/../SBMLsimulatorCore" />
+    <property name="SBMLsimulatorCorePath" location="../lib/SimulationCoreLibrary_v1.1.1_slim.jar" />
     <!-- the path to SBMLsqueezer -->
-    <property name="SBMLsqueezerPath" location="${base}/../SBMLsqueezer" />
+    <!--<property name="SBMLsqueezerPath" location="${base}/../SBMLsqueezer" />-->
     <!-- =================================== -->
   	
   </target>
@@ -72,7 +72,7 @@
       <zipfileset excludes="META-INF/*.SF" src="${base}/lib/commons-math-2.2.jar"/>
       <zipfileset excludes="META-INF/*.SF" src="${base}/lib/jcommon-1.0.17.jar"/>
       <zipfileset excludes="META-INF/*.SF" src="${base}/lib/jfreechart-1.0.15_beta.jar"/>
-      <zipfileset excludes="META-INF/*.SF" src="${base}/lib/servlet.jar"/>
+      <!--<zipfileset excludes="META-INF/*.SF" src="${base}/lib/servlet.jar"/>-->
     	
       <!-- =================================== -->
       <!-- All libs WITH projects at the ZBIT -->
@@ -97,15 +97,15 @@
           <zipfileset excludes="META-INF/*" src="${SysBioPath}/lib/quaqua.jar"/>
           <zipfileset excludes="META-INF/*" src="${SysBioPath}/lib/sysbio-osx-support.jar"/>
     	
-          <zipfileset excludes="META-INF/*.SF" src="${base}/lib/sbmlsqueezer.jar"/>
+          <!--<zipfileset excludes="META-INF/*.SF" src="${base}/lib/sbmlsqueezer.jar"/>-->
     	
-          <!--<zipfileset excludes="META-INF/*.SF" src="${base}/lib/SBMLsimulatorCore.jar"/>-->
-          <fileset dir="${SBMLsimulatorCorePath}/bin">
+          <zipfileset excludes="META-INF/*.SF" src="${base}/lib/SimulationCoreLibrary_v1.1.1_slim.jar"/>
+          <!--<fileset dir="${SBMLsimulatorCorePath}/bin">
             <exclude name="**/package.html"/>
             <exclude name="overview.html"/>
-          </fileset>
+          </fileset>-->
           	
-          <zipfileset excludes="META-INF/*.SF" src="${base}/lib/SBML2LaTeX-0.9.9_slim.jar"/>
+          <!--<zipfileset excludes="META-INF/*.SF" src="${base}/lib/SBML2LaTeX-0.9.9_slim.jar"/>-->
     	
           <!--<zipfileset excludes="META-INF/*.SF" src="${base}/lib/jsbml-1.0-a1-with-dependencies.jar"/>-->
           <fileset dir="${JSBMLPath}/bin">
