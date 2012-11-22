@@ -17,12 +17,16 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
+import java.util.logging.Logger;
+
 import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
 import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
 
 import org.simulator.math.odes.MultiTable;
+
+import de.zbit.sbml.util.CellDesignerAnnotationParser;
 
 /**
  * 
@@ -31,6 +35,11 @@ import org.simulator.math.odes.MultiTable;
  * @since 1.0
  */
 public abstract class TargetFunction {
+	
+	/**
+	 * Logger
+	 */
+	private static final transient Logger logger = Logger.getLogger(TargetFunction.class.getName());
 	
 	/**
 	 * @return The computed concentrations optimized by the target function
@@ -103,7 +112,8 @@ public abstract class TargetFunction {
 			solution = cplex.getValues(vars);
 		} else {
 			solution = null;
-			System.err.println("No feasible solution found!");
+//			System.err.println("No feasible solution found!");
+			logger.warning("No feasible solution found!");
 		}
 		
 		cplex.end();
