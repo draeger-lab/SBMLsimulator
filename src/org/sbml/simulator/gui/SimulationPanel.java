@@ -443,11 +443,8 @@ public class SimulationPanel extends JPanel implements
       firePropertyChange("quality", getSimulationToolPanel().getCurrentQuality(), newValue);
       String[] solutionString = statObjects[solutionIndex].toString().replace("{","").replace("}","").split(", ");
       for (int i = 0; i < selectedQuantityIds.length; i++) {
-    	  if(solutionString.length == selectedQuantityIds.length) {
+    	  if (solutionString.length == selectedQuantityIds.length) {
     		  visualizationPanel.updateQuantity(selectedQuantityIds[i], Double.parseDouble(solutionString[i].replace(',', '.')));
-    	  }
-    	  else {
-    		  System.out.println();
     	  }
       }
     //}
