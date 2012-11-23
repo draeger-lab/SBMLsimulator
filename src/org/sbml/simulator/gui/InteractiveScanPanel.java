@@ -315,7 +315,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
    * @return
    */
   private JPanel interactiveScanLocalParameters(double maxParameterValue,
-    double paramStepSize, double minValue, int offset, ListOf<Reaction> listOfReactions) {
+    double minValue, double paramStepSize, int offset, ListOf<Reaction> listOfReactions) {
     JPanel parameterPanel = new JPanel();
     parameterPanel
         .setLayout(new BoxLayout(parameterPanel, BoxLayout.PAGE_AXIS));

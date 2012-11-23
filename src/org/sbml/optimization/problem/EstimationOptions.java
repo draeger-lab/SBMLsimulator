@@ -132,8 +132,9 @@ public interface EstimationOptions extends KeyProvider {
    */
 	@SuppressWarnings("unchecked")
 	public static final OptionGroup<Boolean> OPTIMIZATION_TARGETS = new OptionGroup<Boolean>(
-		"OPTIMIZATION_TARGETS", bundle, EST_ALL_COMPARTMENTS,
-		EST_ALL_GLOBAL_PARAMETERS, EST_ALL_LOCAL_PARAMETERS, EST_ALL_SPECIES);
+			"OPTIMIZATION_TARGETS", bundle, EST_ALL_COMPARTMENTS,
+			EST_ALL_GLOBAL_PARAMETERS, EST_ALL_LOCAL_PARAMETERS,
+			EST_ALL_SPECIES, EST_ALL_UNDEFINED_QUANTITIES);
 	
 	/**
 	 * 
