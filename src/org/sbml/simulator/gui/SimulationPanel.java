@@ -217,7 +217,8 @@ public class SimulationPanel extends JPanel implements
         double relTol = prefs.getDouble(SimulationOptions.REL_TOL);
         prefs = SBPreferences.getPreferencesFor(EstimationOptions.class);
         clazz = prefs.get(EstimationOptions.QUALITY_MEASURE);
-        QualityMeasure quality = (QualityMeasure) Class.forName(clazz.substring(clazz.indexOf(' ') + 1)).newInstance();
+        QualityMeasure quality;
+        quality = (QualityMeasure) Class.forName(clazz.substring(clazz.indexOf(' ') + 1)).newInstance();
         QualityMeasurement measurement = new QualityMeasurement(quality);
         simulationManager = new SimulationManager(measurement,
           new SimulationConfiguration(model, solver, timeStart, timeEnd, stepSize, includeReactions, absTol, relTol));

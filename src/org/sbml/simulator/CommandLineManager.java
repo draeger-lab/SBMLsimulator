@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -80,7 +81,12 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 	private SimulationManager simulationManager;
 	
 	/**
-	 * 
+	 * A {@link Logger} for this class.
+	 */
+	private static final Logger logger = Logger.getLogger(CommandLineManager.class.getName());
+	
+	/**
+	 *  
 	 */
 	private String openFile;
 	
@@ -535,9 +541,9 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 		ESIndividualDoubleData best = (ESIndividualDoubleData)optimizer.getPopulation().get(0);
 		double[] estimations = best.getDoubleData();
 		double fitness = best.getFitness()[0];
-		System.out.println("Fitness: " + fitness);
-		for (int i=0; i!=estimations.length; i++) {
-			System.out.println(estimationProblem.getQuantityRanges()[i].getQuantity().getName() + ": " + estimations[i]);
+		logger.info("Fitness: " + fitness);
+		for (int i = 0; i != estimations.length; i++) {
+			logger.info(estimationProblem.getQuantityRanges()[i].getQuantity().getName() + ": " + estimations[i]);
 		}
 		
 		//Refresh model
