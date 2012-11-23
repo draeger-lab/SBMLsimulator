@@ -585,13 +585,13 @@ PropertyChangeListener {
 			return;
 		}
 		URL baseDir = getClass().getClassLoader().getResource("");
-		if (baseDir == null) {
-			GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.OPTIMIZATION);
-			JOptionPane.showMessageDialog(this,
-					StringUtil.toHTMLToolTip(bundle.getString("CANNOT_LAUNCH_EVA2")),
-					bundle.getString("ERROR_MESSAGE"), JOptionPane.ERROR_MESSAGE);
-			return;
-		}
+//		if (baseDir == null) {
+//			GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.OPTIMIZATION);
+//			JOptionPane.showMessageDialog(this,
+//					StringUtil.toHTMLToolTip(bundle.getString("CANNOT_LAUNCH_EVA2")),
+//					bundle.getString("ERROR_MESSAGE"), JOptionPane.ERROR_MESSAGE);
+//			return;
+//		}
 		setSimulationAndOptimizationEnabled(false);
 		SBMLDocument doc1 = simPanel.getModel().getSBMLDocument();
 		SBMLDocument doc2 = doc1.clone();
