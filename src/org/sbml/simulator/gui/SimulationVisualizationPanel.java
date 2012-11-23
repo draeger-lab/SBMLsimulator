@@ -96,7 +96,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 	/**
 	 * The maximal allowable values.
 	 */
-	private double minValue, maxCompartmentValue = maxSpinVal,
+	private double minValue = -maxSpinVal, maxCompartmentValue = maxSpinVal,
 			maxParameterValue = maxSpinVal, maxSpeciesValue = maxSpinVal;
 
 	/**

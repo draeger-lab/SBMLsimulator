@@ -34,7 +34,6 @@ import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
-import org.sbml.optimization.EstimationInitOperator;
 import org.sbml.optimization.QuantityRange;
 import org.simulator.math.PearsonCorrelation;
 import org.simulator.math.QualityMeasure;
@@ -47,7 +46,6 @@ import de.zbit.io.csv.CSVReader;
 import de.zbit.io.csv.CSVWriter;
 import de.zbit.util.ResourceManager;
 import eva2.server.go.PopulationInterface;
-import eva2.server.go.individuals.AbstractEAIndividual;
 import eva2.server.go.populations.Population;
 import eva2.server.go.problems.AbstractProblemDouble;
 import eva2.server.go.problems.InterfaceAdditionalPopulationInformer;
@@ -202,17 +200,37 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		Model model, List<MultiTable> list, QuantityRange... quantityRanges)
 		throws ModelOverdeterminedException, SBMLException {
 		super();
-		defaultValue = 10000;
-		negationOfDistance=false;
-		multishoot = false;
+		initialize(1E4d, false, false, solver, distance, 1E3d, model, list.toArray(new MultiTable[0]), quantityRanges);
+	}
+
+	/**
+	 * 
+	 * @param defaultValue
+	 * @param negationOfDistance
+	 * @param multishoot
+	 * @param solver
+	 * @param distance
+	 * @param defaultDistVal
+	 * @param model
+	 * @param referenceData
+	 * @param quantityRanges
+	 * @throws SBMLException
+	 * @throws ModelOverdeterminedException
+	 */
+	private void initialize(double defaultValue, boolean negationOfDistance, boolean multishoot,
+			DESSolver solver, QualityMeasure distance, double defaultDistVal, Model model,
+			MultiTable[] referenceData, QuantityRange[] quantityRanges) throws SBMLException, ModelOverdeterminedException {
+		this.defaultValue = defaultValue;
+		this.negationOfDistance = negationOfDistance;
+		this.multishoot = multishoot;
 		setSolver(solver);
 		setDistance(distance);
-		distance.setDefaultValue(1000);
+		distance.setDefaultValue(defaultDistVal);
 		if (distance instanceof PearsonCorrelation) {
-			negationOfDistance=true;
+			negationOfDistance = true;
 		}
 		setModel(model);
-		setReferenceData(list.toArray(new MultiTable[0]));
+		setReferenceData(referenceData);
 		setQuantityRanges(quantityRanges);
 	}
 
@@ -221,19 +239,14 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 */
 	public EstimationProblem(EstimationProblem problem) {
 		super(problem);
-		defaultValue = 10000;
-		setSolver(problem.getSolver());
-		negationOfDistance=false;
-		setDistance(problem.getDistance());
-		if (distance instanceof PearsonCorrelation) {
-			negationOfDistance=true;
-		}
 		try {
-			setModel(problem.getModel());
+			initialize(this.defaultValue, this.negationOfDistance,
+					this.multishoot, this.solver, this.distance,
+					this.distance.getDefaultValue(), getModel(),
+					this.referenceData, this.quantityRanges);
 		} catch (Exception e) {
 			// can never happen.
 		}
-		setQuantityRanges(problem.getQuantityRanges());
 	}
 
 	/**
@@ -531,24 +544,18 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		return quantityRanges[dim].getMaximum();
 	}
 	
-	/*
-	 * (non-Javadoc)
+	/* (non-Javadoc)
 	 * @see eva2.server.go.problems.AbstractProblemDouble#initPopulation(eva2.server.go.populations.Population)
 	 */
+	@Override
 	public void initPopulation(Population population) {
-			initTemplate();
-			AbstractEAIndividual tmpIndy;
-			population.clear();
-     
-     for (int i = 0; i < population.getTargetSize(); i++) {
-         tmpIndy = (AbstractEAIndividual)((AbstractEAIndividual)m_Template).clone();
-         tmpIndy.setInitOperator(new EstimationInitOperator(quantityRanges));
-         tmpIndy.init(this);
-         population.add(tmpIndy);
-     }
-     // population init must be last
-     // it sets fitcalls and generation to zero
-     population.init();
+		// TODO: Provide more elaborated possibilities, such as a distribution around the current solution... Not just a copy.
+		super.initPopulation(population);
+		boolean keepCurrentSolution = true;
+		if ((population.size() > 0) && keepCurrentSolution) {
+//			InterfaceDataTypeDouble individual = (InterfaceDataTypeDouble) population.getIndividual(RNG.randomInt(0, population.size()));
+//			individual.SetDoubleGenotype(getOriginalValues());
+		}
 	}
 
 	/**

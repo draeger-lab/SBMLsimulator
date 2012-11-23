@@ -221,7 +221,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
       
       tab.add(
         bundle.getString("LOCAL_PARAMETERS"),
-        new JScrollPane(interactiveScanLocalParameters(minValue, maxParameterValue,
+        new JScrollPane(interactiveScanLocalParameters(maxParameterValue, minValue, 
           paramStepSize, model.getSymbolCount(), model.getListOfReactions())));
       tab.setEnabledAt(3, hasLocalParameters);
       for (int i = tab.getTabCount() - 1; i >= 0; i--) {
@@ -306,7 +306,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
    * @param listOfReactions
    * @return
    */
-  private JPanel interactiveScanLocalParameters(double minValue, double maxParameterValue,
+  private JPanel interactiveScanLocalParameters(double maxParameterValue, double minValue, 
     double paramStepSize, int offset, ListOf<Reaction> listOfReactions) {
     JPanel parameterPanel = new JPanel();
     parameterPanel
