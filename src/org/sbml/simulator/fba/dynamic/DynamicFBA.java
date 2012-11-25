@@ -17,11 +17,57 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
+import org.simulator.math.odes.MultiTable;
+
+import ilog.concert.IloException;
+import ilog.concert.IloNumExpr;
+import ilog.cplex.IloCplex;
+
 /**
  * @author Robin F&auml;hnrich
  * @version $Rev$
  * @since 1.0
  */
 public class DynamicFBA {
-	// TODO implement class
+	
+	/**
+	 * A {@link MultiTable} with all solved values (flux, concentration, gibbs energy),
+	 * optimized by CPLEX, for each point in time of the dynamic flux balance analysis.
+	 */
+	public MultiTable solutionMultiTable;
+	
+	/*
+	 * Point in time when the dynamic flux balance analysis is started.
+	 */
+	private double startTimePoint;
+	
+	/*
+	 * Point in time when the dynamic flux balance analysis is finished.
+	 */
+	private double endTimePoint;
+	
+	
+	/**
+	 * 
+	 * @param fluxMinimization
+	 * @throws IloException
+	 */
+	public void minimizeFlux(FluxMinimization fluxMinimization) throws IloException {
+		// Initialize a new CPLEX object
+		IloCplex cplex = new IloCplex();
+		
+		/*
+		 * These steps of CPLEX operations should find a solution to the flux
+		 * minimization problem
+		 */
+		fluxMinimization.prepareCplex(cplex);
+		IloNumExpr targetFunction = fluxMinimization.createTargetFunction(cplex);
+		fluxMinimization.optimizeTargetFunction(cplex, targetFunction);
+		fluxMinimization.addConstraintsToTargetFunction(cplex);
+		fluxMinimization.solveCplex(cplex);
+		
+		// Stop CPLEX stream
+		cplex.end();
+	}
+	
 }
