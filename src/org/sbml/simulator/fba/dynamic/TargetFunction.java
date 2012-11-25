@@ -24,10 +24,6 @@ import ilog.concert.IloNumExpr;
 import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
 
-import org.simulator.math.odes.MultiTable;
-
-import de.zbit.sbml.util.CellDesignerAnnotationParser;
-
 /**
  * 
  * @author Robin F&auml;hnrich
@@ -37,14 +33,53 @@ import de.zbit.sbml.util.CellDesignerAnnotationParser;
 public abstract class TargetFunction {
 	
 	/**
-	 * Logger
+	 * A {@link Logger} for this class.
 	 */
 	private static final transient Logger logger = Logger.getLogger(TargetFunction.class.getName());
+	
+	/*
+	 * Alternatively (for use when needed):
+	 * Save the target coefficients of the CPLEX object in a double array
+	 */
+	protected double[] coefficients;
+	
+	/*
+	 * Save the variables of the CPLEX object in a {@link IloNumVar[]}
+	 */
+	protected IloNumVar[] variables;
+	
+	/*
+	 * Save the variables that are solved by CPLEX in a double array
+	 */
+	private double[] solution;
+	
+	
+	/**
+	 * Alternatively (for use when needed).
+	 * @return The target coefficients of the CPLEX object
+	 */
+	public double[] getCoefficients() {
+		return this.coefficients;
+	}
+	
+	/**
+	 * @return The variables of the CPLEX object
+	 */
+	public IloNumVar[] getVariables() {
+		return this.variables;
+	}
+	
+	/**
+	 * @return The solution to the variables of the optimization problem
+	 */
+	public double[] getSolution() {
+		return this.solution;
+	}
 	
 	/**
 	 * @return The computed concentrations optimized by the target function
 	 */
-	public abstract MultiTable getOptimizedConcentrations();
+	public abstract double[] getOptimizedConcentrations();
 	
 	/**
 	 * @return The computed flux vector optimized by the target function
@@ -67,58 +102,61 @@ public abstract class TargetFunction {
 	public abstract boolean isMaxProblem();
 	
 	/**
-	 * 
-	 * @return
+	 * Prepare CPLEX by setting the variables with lower and upper bounds and 
+	 * alternatively the target coefficients.
+	 * @param cplex
 	 * @throws IloException
 	 */
-	public IloCplex prepareCplex() throws IloException {
-		IloCplex cplex = new IloCplex();
-		// TODO implement method
-		return cplex;
-	}
+	public abstract void prepareCplex(IloCplex cplex) throws IloException;
+	
+	/**
+	 * Create a new target function that will be solved by CPLEX.
+	 * @param cplex
+	 * @return The target function in a {@link IloNumExpr}
+	 * @throws IloException
+	 */
+	public abstract IloNumExpr createTargetFunction(IloCplex cplex) throws IloException;
 	
 	/**
 	 * If the target function belongs to a minimization problem, minimize it,
 	 * if the target function belongs to a maximization problem, maximize it.
 	 * @param cplex
-	 * @param expr
-	 * @throws IloException 
+	 * @param expr The target function in a {@link IloNumExpr}
+	 * @throws IloException
 	 */
-	public void minOrMaxTargetFunction(IloCplex cplex, IloNumExpr expr) throws IloException {
+	public void optimizeTargetFunction(IloCplex cplex, IloNumExpr expr) throws IloException {
 		if (isMinProblem()) {
 			cplex.addMinimize(expr);
 		} else if (isMaxProblem()) {
 			cplex.addMaximize(expr);
 		} else {
-			System.err.println("No minimization or maximization problem!");
+			logger.warning("No minimization or maximization problem!");
 		}
 	}
 	
 	/**
-	 * Let CPLEX solve the optimization problem (if necessary check the CPLEX 
-	 * iterations) and get the solution of the variables in a double array.
+	 * Add constraints to the CPLEX target function.
 	 * @param cplex
-	 * @param vars
-	 * @return The array with the solution variables optimized by CPLEX
 	 * @throws IloException
 	 */
-	public double[] solveAndFinishCplex(IloCplex cplex, IloNumVar[] vars) throws IloException {
+	public abstract void addConstraintsToTargetFunction(IloCplex cplex) throws IloException;
+	
+	/**
+	 * Let CPLEX solve the optimization problem (if necessary check the CPLEX 
+	 * iterations) and set the solution of the variables.
+	 * @param cplex
+	 * @throws IloException
+	 */
+	public void solveCplex(IloCplex cplex) throws IloException {
 		// TODO write method to set cplexIterations (now: 600)
 		cplex.setParam(IloCplex.IntParam.BarItLim, 600);
 		
-		double[] solution;
-		
 		if (cplex.solve()) {
-			solution = cplex.getValues(vars);
+			this.solution = cplex.getValues(getVariables());
 		} else {
-			solution = null;
-//			System.err.println("No feasible solution found!");
+			this.solution = null;
 			logger.warning("No feasible solution found!");
 		}
-		
-		cplex.end();
-		
-		return solution;
 	}
 	
 }
