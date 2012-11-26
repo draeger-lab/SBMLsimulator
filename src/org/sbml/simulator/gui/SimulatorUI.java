@@ -52,6 +52,7 @@ import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 
+import org.jfree.data.statistics.Statistics;
 import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Parameter;
@@ -68,6 +69,7 @@ import org.sbml.simulator.math.SplineCalculation;
 import org.simulator.math.odes.AdaptiveStepsizeIntegrator;
 import org.simulator.math.odes.DESSolver;
 import org.simulator.math.odes.MultiTable;
+import org.simulator.math.odes.MultiTable.Block.Column;
 
 import de.zbit.AppConf;
 import de.zbit.gui.BaseFrame;
@@ -606,11 +608,20 @@ PropertyChangeListener {
 				final WindowListener wl = EventHandler.create(WindowListener.class,
 						this, "optimizationFinished", "source", "windowClosed");
 				final SimulatorUI ui = this;
-				MultiTable reference = simPanel.getExperimentalData(0);
-				for (int col = 0; col < reference.getColumnCount(); col++) {
-					String id = reference.getColumnIdentifier(col);
+				List<MultiTable> references = simPanel.getExperimentalData();
+				for (int col = 0; col < references.get(0).getColumnCount(); col++) {
+					String id = references.get(0).getColumnIdentifier(col);
 					if (Arrays.binarySearch(selectedQuantityIds, id) < 0) {
-						double value = ((Double) reference.getValueAt(0, col)).doubleValue();
+						List<Double> values = new LinkedList<Double>();
+						for(int table=0; table != references.size();table++) {
+							MultiTable mt = references.get(table);
+							Column column = mt.getColumn(id);
+							if(column != null) {
+								values.add(((Double) column.getValue(0)).doubleValue());
+							}
+							
+						}
+						double value = Statistics.calculateMedian(values);
 						if (!Double.isNaN(value)) {
 							Species sp = model.getSpecies(id);
 							if (sp != null) {
