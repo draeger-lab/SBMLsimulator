@@ -17,6 +17,8 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
+import java.util.logging.Logger;
+
 import org.simulator.math.odes.MultiTable;
 
 import ilog.concert.IloException;
@@ -31,24 +33,63 @@ import ilog.cplex.IloCplex;
 public class DynamicFBA {
 	
 	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final transient Logger logger = Logger.getLogger(DynamicFBA.class.getName());
+	
+	/*
 	 * A {@link MultiTable} with all solved values (flux, concentration, gibbs energy),
-	 * optimized by CPLEX, for each point in time of the dynamic flux balance analysis.
+	 * optimized by CPLEX, for each point in time of the dynamic flux balance analysis
 	 */
-	public MultiTable solutionMultiTable;
+	private MultiTable solutionMultiTable;
 	
 	/*
-	 * Point in time when the dynamic flux balance analysis is started.
+	 * Saves all read point in times of the dynamic flux balance analysis
 	 */
-	private double startTimePoint;
+	private double[] timePoints;
 	
 	/*
-	 * Point in time when the dynamic flux balance analysis is finished.
+	 * Saves all data values of the fluxes (position 0), gibbs energies and
+	 * reactions in a double matrix
 	 */
-	private double endTimePoint;
+	private double[][][] data;
+	
+	/*
+	 * Saves the flux (position 0), gibbs energies and reaction identifiers
+	 * in a String matrix
+	 */
+	private String[][] columnIdentifiers;
 	
 	
 	/**
-	 * 
+	 * @return The solution MultiTable for visualization
+	 */
+	public MultiTable getSolutionMultiTable() {
+		return this.solutionMultiTable;
+	}
+	
+	/**
+	 * Create the solution {@link MultiTable} for visualization.
+	 * This {@link MultiTable} contains multiple {@link MultiTable.Block}s.
+	 */
+	public void createSolutionMultiTable() {
+		/* Create MultiTable only for the fluxes that are 
+		 * saved in the first place of each data structure */ 
+		this.solutionMultiTable = new MultiTable(this.timePoints, data[0], columnIdentifiers[0]);
+		
+		// Add Block for each new column identifier
+		for (int i=1; i<this.columnIdentifiers.length; i++) {
+			this.solutionMultiTable.addBlock(this.columnIdentifiers[i]);
+		}
+		
+		// Add data that is saved in the next matrix for each new Block
+		for (int i=1; i<this.data.length; i++) {
+			this.solutionMultiTable.getBlock(i).setData(this.data[i]);
+		}
+	}
+	
+	/**
+	 * CPLEX solves the flux minimization problem.
 	 * @param fluxMinimization
 	 * @throws IloException
 	 */
@@ -56,17 +97,15 @@ public class DynamicFBA {
 		// Initialize a new CPLEX object
 		IloCplex cplex = new IloCplex();
 		
-		/*
-		 * These steps of CPLEX operations should find a solution to the flux
-		 * minimization problem
-		 */
+		/* These steps of CPLEX operations should find a solution to the flux
+		 * minimization problem */
 		fluxMinimization.prepareCplex(cplex);
 		IloNumExpr targetFunction = fluxMinimization.createTargetFunction(cplex);
 		fluxMinimization.optimizeTargetFunction(cplex, targetFunction);
 		fluxMinimization.addConstraintsToTargetFunction(cplex);
 		fluxMinimization.solveCplex(cplex);
 		
-		// Stop CPLEX stream
+		// Stop the CPLEX stream
 		cplex.end();
 	}
 	
