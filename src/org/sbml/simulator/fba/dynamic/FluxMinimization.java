@@ -120,6 +120,14 @@ public class FluxMinimization extends TargetFunction {
 		
 	}
 	
-	// TODO write method to assign the solution values to the actual arrays
+	/**
+	 * Assign the solved values to the actual arrays, in fact to the concentrations,
+	 * the flux vector and the gibbs energies array.
+	 */
+	public void assignOptimizedSolution() {
+		double[] solution = getSolution();
+		/* getSolution() and assign the variables to: optimizedConc., optimizedFluxV. etc.
+		 * problem: which variables to which array? */
+	}
 	
 }
