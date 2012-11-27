@@ -17,6 +17,7 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
+import java.util.Arrays;
 import java.util.logging.Logger;
 
 import org.simulator.math.odes.MultiTable;
@@ -49,16 +50,24 @@ public class DynamicFBA {
 	private double[] timePoints;
 	
 	/*
-	 * Saves all data values of the fluxes (position 0), gibbs energies and
-	 * reactions in a double matrix
+	 * Saves each data values of the fluxes (position 0), concentrations
+	 * (position 1) and gibbs energies (position 2) in a double matrix
 	 */
-	private double[][][] data;
+	private double[][][] data = new double[3][][];
 	
 	/*
-	 * Saves the flux (position 0), gibbs energies and reaction identifiers
-	 * in a String matrix
+	 * Saves each flux (position 0), species (position 1) and reaction
+	 * (position 2) identifiers in a String array
 	 */
 	private String[][] columnIdentifiers;
+	
+	/**
+	 * 
+	 */
+	public DynamicFBA() {
+		// TODO read concentration file to get point in times
+		// TODO read files to get the column identifier...
+	}
 	
 	
 	/**
@@ -66,6 +75,13 @@ public class DynamicFBA {
 	 */
 	public MultiTable getSolutionMultiTable() {
 		return this.solutionMultiTable;
+	}
+
+	/**
+	 * @return The point in times in which the dynamic FBA will be performed
+	 */
+	public double[] getTimePoints() {
+		return this.timePoints;
 	}
 	
 	/**
@@ -107,6 +123,38 @@ public class DynamicFBA {
 		
 		// Stop the CPLEX stream
 		cplex.end();
+	}
+	
+	// TODO move this method to another invoking class
+	public void runDynamicFBA() throws IloException {
+		// DynamicFBA dfba = new DynamicFBA(...);
+		FluxMinimization fluxMin;
+		
+		double[][] fluxValues = new double[getTimePoints().length][];
+		double[][] concValues = new double[getTimePoints().length][];
+		double[][] gibbsValues = new double[getTimePoints().length][];
+		
+		for (int i=0; i<getTimePoints().length; i++) {
+			/* TODO new FluxMinimization object with new 
+			 * concentrations of the next point in time */
+			fluxMin = new FluxMinimization();
+			minimizeFlux(fluxMin);
+			fluxMin.assignOptimizedSolution();
+			
+			double[] flux = fluxMin.getOptimizedFluxVector();
+			double[] gibbs = fluxMin.getOptimizedGibbsEnergies();
+			double[] conc = fluxMin.getOptimizedConcentrations();
+			
+			fluxValues[i] = flux;
+			concValues[i] = conc;
+			gibbsValues[i] = gibbs;
+		}
+		
+		this.data[0] = fluxValues;
+		this.data[1] = concValues;
+		this.data[2] = gibbsValues;
+		
+		createSolutionMultiTable();
 	}
 	
 }
