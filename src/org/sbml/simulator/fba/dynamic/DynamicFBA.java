@@ -17,7 +17,6 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
-import java.util.Arrays;
 import java.util.logging.Logger;
 
 import org.simulator.math.odes.MultiTable;
@@ -106,28 +105,28 @@ public class DynamicFBA {
 	
 	/**
 	 * CPLEX solves the flux minimization problem.
-	 * @param fluxMinimization
+	 * @param cplex
+	 * @param fluxMin
 	 * @throws IloException
 	 */
-	public void minimizeFlux(FluxMinimization fluxMinimization) throws IloException {
+	public void minimizeFlux(IloCplex cplex, FluxMinimization fluxMin) throws IloException {
+		/* These steps of CPLEX operations should find a solution to the flux
+		 * minimization problem */
+		fluxMin.prepareCplex(cplex);
+		IloNumExpr targetFunction = fluxMin.createTargetFunction(cplex);
+		fluxMin.optimizeTargetFunction(cplex, targetFunction);
+		fluxMin.addConstraintsToTargetFunction(cplex);
+		fluxMin.solveCplex(cplex);
+	}
+	
+	/**
+	 * 
+	 * @throws IloException
+	 */
+	public void runDynamicFBA() throws IloException {
 		// Initialize a new CPLEX object
 		IloCplex cplex = new IloCplex();
 		
-		/* These steps of CPLEX operations should find a solution to the flux
-		 * minimization problem */
-		fluxMinimization.prepareCplex(cplex);
-		IloNumExpr targetFunction = fluxMinimization.createTargetFunction(cplex);
-		fluxMinimization.optimizeTargetFunction(cplex, targetFunction);
-		fluxMinimization.addConstraintsToTargetFunction(cplex);
-		fluxMinimization.solveCplex(cplex);
-		
-		// Stop the CPLEX stream
-		cplex.end();
-	}
-	
-	// TODO move this method to another invoking class
-	public void runDynamicFBA() throws IloException {
-		// DynamicFBA dfba = new DynamicFBA(...);
 		FluxMinimization fluxMin;
 		
 		double[][] fluxValues = new double[getTimePoints().length][];
@@ -138,17 +137,16 @@ public class DynamicFBA {
 			/* TODO new FluxMinimization object with new 
 			 * concentrations of the next point in time */
 			fluxMin = new FluxMinimization();
-			minimizeFlux(fluxMin);
+			minimizeFlux(cplex, fluxMin);
 			fluxMin.assignOptimizedSolution();
 			
-			double[] flux = fluxMin.getOptimizedFluxVector();
-			double[] gibbs = fluxMin.getOptimizedGibbsEnergies();
-			double[] conc = fluxMin.getOptimizedConcentrations();
-			
-			fluxValues[i] = flux;
-			concValues[i] = conc;
-			gibbsValues[i] = gibbs;
+			fluxValues[i] = fluxMin.getOptimizedFluxVector();
+			concValues[i] = fluxMin.getOptimizedConcentrations();
+			gibbsValues[i] = fluxMin.getOptimizedGibbsEnergies();
 		}
+
+		// Stop the CPLEX stream
+		cplex.end();
 		
 		this.data[0] = fluxValues;
 		this.data[1] = concValues;
