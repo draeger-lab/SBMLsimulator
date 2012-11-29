@@ -58,7 +58,7 @@ public class DynamicFBA {
 	 * Saves each flux (position 0), species (position 1) and reaction
 	 * (position 2) identifiers in a String array
 	 */
-	private String[][] columnIdentifiers;
+	private String[][] identifierMatrix;
 	
 	/**
 	 * 
@@ -90,11 +90,11 @@ public class DynamicFBA {
 	public void createSolutionMultiTable() {
 		/* Create MultiTable only for the fluxes that are 
 		 * saved in the first place of each data structure */ 
-		this.solutionMultiTable = new MultiTable(this.timePoints, data[0], columnIdentifiers[0]);
+		this.solutionMultiTable = new MultiTable(this.timePoints, data[0], identifierMatrix[0]);
 		
 		// Add Block for each new column identifier
-		for (int i=1; i<this.columnIdentifiers.length; i++) {
-			this.solutionMultiTable.addBlock(this.columnIdentifiers[i]);
+		for (int i=1; i<this.identifierMatrix.length; i++) {
+			this.solutionMultiTable.addBlock(this.identifierMatrix[i]);
 		}
 		
 		// Add data that is saved in the next matrix for each new Block
