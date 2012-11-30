@@ -49,13 +49,7 @@ public class DynamicFBA {
 	private double[] timePoints;
 	
 	/*
-	 * Saves each data values of the fluxes (position 0), concentrations
-	 * (position 1) and gibbs energies (position 2) in a double matrix
-	 */
-	private double[][][] data = new double[3][][];
-	
-	/*
-	 * Saves each flux (position 0), species (position 1) and reaction
+	 * Saves each species (position 0), flux (position 1) and reaction
 	 * (position 2) identifiers in a String array
 	 */
 	private String[][] identifierMatrix;
@@ -83,24 +77,21 @@ public class DynamicFBA {
 		return this.timePoints;
 	}
 	
-	/**
-	 * Create the solution {@link MultiTable} for visualization.
+	/*
+	 * Initialize the solution {@link MultiTable} for visualization.
 	 * This {@link MultiTable} contains multiple {@link MultiTable.Block}s.
 	 */
-	public void createSolutionMultiTable() {
-		/* Create MultiTable only for the fluxes that are 
-		 * saved in the first place of each data structure */ 
-		this.solutionMultiTable = new MultiTable(this.timePoints, data[0], identifierMatrix[0]);
+	private void initializeSolutionMultiTable() {
+		this.solutionMultiTable = new MultiTable();
 		
-		// Add Block for each new column identifier
-		for (int i=1; i<this.identifierMatrix.length; i++) {
-			this.solutionMultiTable.addBlock(this.identifierMatrix[i]);
-		}
+		//this.solutionMultiTable.setName(name);
+		//this.solutionMultiTable.setTimeName(timeName);
+		this.solutionMultiTable.setTimePoints(this.timePoints);
 		
-		// Add data that is saved in the next matrix for each new Block
-		for (int i=1; i<this.data.length; i++) {
-			this.solutionMultiTable.getBlock(i).setData(this.data[i]);
-		}
+		// Add concentrations, fluxes and gibbs energies each in a new Block
+		this.solutionMultiTable.addBlock(this.identifierMatrix[0]); // concentrations Block
+		this.solutionMultiTable.addBlock(this.identifierMatrix[1]); // fluxes Block
+		this.solutionMultiTable.addBlock(this.identifierMatrix[2]); // gibbs energies Block
 	}
 	
 	/**
@@ -121,38 +112,34 @@ public class DynamicFBA {
 	
 	/**
 	 * 
+	 * @param fluxMin
 	 * @throws IloException
 	 */
-	public void runDynamicFBA() throws IloException {
+	public void runDynamicFBA(FluxMinimization fluxMin) throws IloException {
 		// Initialize a new CPLEX object
 		IloCplex cplex = new IloCplex();
 		
-		FluxMinimization fluxMin;
+		// Initialize the solution MultiTable
+		initializeSolutionMultiTable();
 		
-		double[][] fluxValues = new double[getTimePoints().length][];
-		double[][] concValues = new double[getTimePoints().length][];
-		double[][] gibbsValues = new double[getTimePoints().length][];
-		
-		for (int i=0; i<getTimePoints().length; i++) {
+		for (int i=0; i<this.timePoints.length; i++) {
 			/* TODO new FluxMinimization object with new 
 			 * concentrations of the next point in time */
 			fluxMin = new FluxMinimization();
 			minimizeFlux(cplex, fluxMin);
 			fluxMin.assignOptimizedSolution();
 			
-			fluxValues[i] = fluxMin.getOptimizedFluxVector();
-			concValues[i] = fluxMin.getOptimizedConcentrations();
-			gibbsValues[i] = fluxMin.getOptimizedGibbsEnergies();
+			double[] currentOptimizedConcentrations = fluxMin.getOptimizedConcentrations();
+			double[] currentOptimizedFluxVector = fluxMin.getOptimizedFluxVector();
+			double[] currentOptimizedGibbsEnergies = fluxMin.getOptimizedGibbsEnergies();
+
+			this.solutionMultiTable.getBlock(0).setRowData(i, currentOptimizedConcentrations);
+			this.solutionMultiTable.getBlock(1).setRowData(i, currentOptimizedFluxVector);
+			this.solutionMultiTable.getBlock(2).setRowData(i, currentOptimizedGibbsEnergies);
 		}
 
 		// Stop the CPLEX stream
 		cplex.end();
-		
-		this.data[0] = fluxValues;
-		this.data[1] = concValues;
-		this.data[2] = gibbsValues;
-		
-		createSolutionMultiTable();
 	}
 	
 }
