@@ -41,12 +41,12 @@ public abstract class TargetFunction {
 	 * Alternatively (for use when needed):
 	 * Save the target coefficients of the CPLEX object in a double array
 	 */
-	protected double[] coefficients;
+	private double[] coefficients;
 	
 	/*
 	 * Save the variables of the CPLEX object in a {@link IloNumVar[]}
 	 */
-	protected IloNumVar[] variables;
+	private IloNumVar[] variables;
 	
 	/*
 	 * Save the variables that are solved by CPLEX in a double array
@@ -63,10 +63,27 @@ public abstract class TargetFunction {
 	}
 	
 	/**
+	 * Alternatively (for use when needed):
+	 * Set the target coefficients of the CPLEX object.
+	 * @param coefficients
+	 */
+	public void setCoefficients(double[] coefficients) {
+		this.coefficients = coefficients;
+	}
+	
+	/**
 	 * @return The variables of the CPLEX object
 	 */
 	public IloNumVar[] getVariables() {
 		return this.variables;
+	}
+	
+	/**
+	 * Set the variables of the CPLEX object.
+	 * @param variables
+	 */
+	public void setVariables(IloNumVar[] variables) {
+		this.variables = variables;
 	}
 	
 	/**
@@ -152,7 +169,7 @@ public abstract class TargetFunction {
 		cplex.setParam(IloCplex.IntParam.BarItLim, 600);
 		
 		if (cplex.solve()) {
-			this.solution = cplex.getValues(getVariables());
+			this.solution = cplex.getValues(this.variables);
 		} else {
 			this.solution = null;
 			logger.warning("No feasible solution found!");
