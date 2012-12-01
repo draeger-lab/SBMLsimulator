@@ -98,7 +98,7 @@ public class FluxMinimization extends TargetFunction {
 	@Override
 	public void prepareCplex(IloCplex cplex) throws IloException {
 		// TODO Auto-generated method stub
-		
+		// (set variables with setVariables(IloNumVar[] vars))
 	}
 
 	/* (non-Javadoc)
