@@ -19,6 +19,7 @@ package org.sbml.simulator.fba.dynamic;
 
 import java.util.logging.Logger;
 
+import org.sbml.jsbml.SBMLDocument;
 import org.simulator.math.odes.MultiTable;
 
 import ilog.concert.IloException;
@@ -38,6 +39,11 @@ public class DynamicFBA {
 	private static final transient Logger logger = Logger.getLogger(DynamicFBA.class.getName());
 	
 	/*
+	 * The SBML document on which the dynamic FBA performs
+	 */
+	private SBMLDocument model;
+	
+	/*
 	 * A {@link MultiTable} with all solved values (flux, concentration, gibbs energy),
 	 * optimized by CPLEX, for each point in time of the dynamic flux balance analysis
 	 */
@@ -51,8 +57,10 @@ public class DynamicFBA {
 	/*
 	 * Saves each species (position 0), flux (position 1) and reaction
 	 * (position 2) identifiers in a String array
+	 * TODO how to get the identifiers?
 	 */
 	private String[][] identifierMatrix;
+	
 	
 	/**
 	 * 
@@ -111,7 +119,7 @@ public class DynamicFBA {
 	}
 	
 	/**
-	 * 
+	 * A dynamic flux balance analysis for the flux minimization problem will be performed.
 	 * @param fluxMin
 	 * @throws IloException
 	 */
@@ -127,7 +135,7 @@ public class DynamicFBA {
 			 * concentrations of the next point in time */
 			fluxMin = new FluxMinimization();
 			minimizeFlux(cplex, fluxMin);
-			fluxMin.assignOptimizedSolution();
+			fluxMin.assignOptimizedSolution(this.model);
 			
 			double[] currentOptimizedConcentrations = fluxMin.getOptimizedConcentrations();
 			double[] currentOptimizedFluxVector = fluxMin.getOptimizedFluxVector();
