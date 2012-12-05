@@ -19,9 +19,12 @@ package org.sbml.simulator.fba.dynamic;
 
 import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
+import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
 
 import java.util.logging.Logger;
+
+import org.sbml.jsbml.SBMLDocument;
 
 /**
  * 
@@ -37,6 +40,11 @@ public class FluxMinimization extends TargetFunction {
 	private static final transient Logger logger = Logger.getLogger(FluxMinimization.class.getName());
 	
 	/*
+	 * This vector contains the fluxes that are computed by the Tableau algorithm applied to S
+	 */
+	private double[] fluxVector;
+	
+	/*
 	 * Save the optimized concentrations vector in a double array
 	 */
 	private double[] optimizedConcentrations;
@@ -50,6 +58,16 @@ public class FluxMinimization extends TargetFunction {
 	 * Save the optimized gibbs energies vector in a double array
 	 */
 	private double[] optimizedGibbsEnergies;
+	
+	/*
+	 * Lower bounds for CPLEX variables saved in a double array
+	 */
+	private double[] lowerBounds;
+	
+	/*
+	 * Upper bounds for CPLEX variables saved in a double array
+	 */
+	private double[] upperBounds;
 	
 	
 	/* (non-Javadoc)
@@ -98,8 +116,10 @@ public class FluxMinimization extends TargetFunction {
 	@Override
 	public void prepareCplex(IloCplex cplex) throws IloException {
 		// TODO Auto-generated method stub
+		// IloNumVar[] variables = cplex.numVarArray(...length, this.lowerBounds, this.upperBounds);
+		// ...
 		// (set variables with setVariables(IloNumVar[] vars))
-	}
+		}
 
 	/* (non-Javadoc)
 	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#createTargetFunction(ilog.cplex.IloCplex)
@@ -123,11 +143,28 @@ public class FluxMinimization extends TargetFunction {
 	/**
 	 * Assign the solved values to the actual arrays, in fact to the concentrations,
 	 * the flux vector and the gibbs energies array.
+	 * @param document
 	 */
-	public void assignOptimizedSolution() {
+	public void assignOptimizedSolution(SBMLDocument document) {
 		double[] solution = getSolution();
-		/* getSolution() and assign the variables to: optimizedConc., optimizedFluxV. etc.
-		 * problem: which variables to which array? */
+		
+		this.optimizedFluxVector = new double[this.fluxVector.length];
+		// solution[0] contains the optimized value for the flux vector
+		for (int i=0; i<this.fluxVector.length; i++) {
+			this.optimizedFluxVector[i] = solution[0] * this.fluxVector[i];
+		}
+		
+		int concLength = document.getModel().getSpeciesCount();
+		this.optimizedConcentrations = new double[concLength];
+		for (int i=0; i<concLength; i++) {
+			this.optimizedConcentrations[i] = solution[i+1];
+		}
+		
+		int gibbsLength = document.getModel().getReactionCount();
+		this.optimizedGibbsEnergies = new double[gibbsLength];
+		for (int i=0; i<gibbsLength; i++) {
+			this.optimizedGibbsEnergies[i] = solution[i+1+concLength];
+		}
 	}
 	
 }
