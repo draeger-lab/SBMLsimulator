@@ -158,35 +158,35 @@ public class DynamicFBA {
 	
 	
 	public static void main(String[] args) throws Exception {
-		
-		/* Read concentrations*/
+
+		/* Read concentrations */
 		SBMLReader reader = new SBMLReader();
 		Model testModel = reader.readSBML(args[0]).getModel();
 		String concFile = args[1];
 		CSVDataImporter importer = new CSVDataImporter();
-		
+
 		MultiTable concMT = importer.convert(testModel, concFile);
 		double[][] completeConcentrations = new double[concMT.getTimePoints().length][];
 		int speciesCount = testModel.getSpeciesCount();
-		double[] currentConcentrations = new double[speciesCount];
 		// The multitable does not contain all species
 		ListOf<Species> listOfSpecies = testModel.getListOfSpecies();
-		for (int i=0; i<concMT.getTimePoints().length; i++) {
-			for (int j=0; j<speciesCount; j++) {
+		for (int i = 0; i < concMT.getTimePoints().length; i++) {
+			double[] currentConcentrations = new double[speciesCount];
+			for (int j = 0; j < speciesCount; j++) {
 				String currentSpeciesId = listOfSpecies.get(j).getId();
 				int columnIndexMT = concMT.getColumnIndex(currentSpeciesId);
 				if (columnIndexMT == -1) {
 					currentConcentrations[j] = Double.NaN;
-					} else {
-						currentConcentrations[j] = concMT.getValueAt(j, columnIndexMT);
-						}
+				} else {
+					currentConcentrations[j] = concMT.getValueAt(i, columnIndexMT);
 				}
+			}
 			completeConcentrations[i] = currentConcentrations;
 		}
-		
-		for (int i=0; i< completeConcentrations.length; i++) {
-			System.out.println(Arrays.toString(completeConcentrations[i]));
-		}
+
+//		for (int i = 0; i < completeConcentrations.length; i++) {
+//			System.out.println(Arrays.toString(completeConcentrations[i]));
+//		}
 	}
 	
 }
