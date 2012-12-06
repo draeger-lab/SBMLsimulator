@@ -17,9 +17,15 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
+import java.util.Arrays;
 import java.util.logging.Logger;
 
+import org.sbml.jsbml.ListOf;
+import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLDocument;
+import org.sbml.jsbml.SBMLReader;
+import org.sbml.jsbml.Species;
+import org.sbml.simulator.io.CSVDataImporter;
 import org.simulator.math.odes.MultiTable;
 
 import ilog.concert.IloException;
@@ -148,6 +154,39 @@ public class DynamicFBA {
 
 		// Stop the CPLEX stream
 		cplex.end();
+	}
+	
+	
+	public static void main(String[] args) throws Exception {
+		
+		/* Read concentrations*/
+		SBMLReader reader = new SBMLReader();
+		Model testModel = reader.readSBML(args[0]).getModel();
+		String concFile = args[1];
+		CSVDataImporter importer = new CSVDataImporter();
+		
+		MultiTable concMT = importer.convert(testModel, concFile);
+		double[][] completeConcentrations = new double[concMT.getTimePoints().length][];
+		int speciesCount = testModel.getSpeciesCount();
+		double[] currentConcentrations = new double[speciesCount];
+		// The multitable does not contain all species
+		ListOf<Species> listOfSpecies = testModel.getListOfSpecies();
+		for (int i=0; i<concMT.getTimePoints().length; i++) {
+			for (int j=0; j<speciesCount; j++) {
+				String currentSpeciesId = listOfSpecies.get(j).getId();
+				int columnIndexMT = concMT.getColumnIndex(currentSpeciesId);
+				if (columnIndexMT == -1) {
+					currentConcentrations[j] = Double.NaN;
+					} else {
+						currentConcentrations[j] = concMT.getValueAt(j, columnIndexMT);
+						}
+				}
+			completeConcentrations[i] = currentConcentrations;
+		}
+		
+		for (int i=0; i< completeConcentrations.length; i++) {
+			System.out.println(Arrays.toString(completeConcentrations[i]));
+		}
 	}
 	
 }
