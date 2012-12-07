@@ -19,7 +19,6 @@ package org.sbml.simulator.fba.dynamic;
 
 import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
-import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
 
 import java.util.logging.Logger;
@@ -38,6 +37,12 @@ public class FluxMinimization extends TargetFunction {
 	 * A {@link Logger} for this class.
 	 */
 	private static final transient Logger logger = Logger.getLogger(FluxMinimization.class.getName());
+	
+	/*
+	 * The array contains the current interpolated concentrations for this step
+	 * of optimization by CPLEX
+	 */
+	private double[] currentConcentrations;
 	
 	/*
 	 * This vector contains the fluxes that are computed by the Tableau algorithm applied to S
@@ -69,6 +74,14 @@ public class FluxMinimization extends TargetFunction {
 	 */
 	private double[] upperBounds;
 	
+	
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#setCurrenConcentrations(double[])
+	 */
+	@Override
+	public void setCurrentConcentrations(double[] currentConcentrations) {
+		this.currentConcentrations = currentConcentrations;
+	}
 	
 	/* (non-Javadoc)
 	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getOptimizedConcentrations()
@@ -111,41 +124,11 @@ public class FluxMinimization extends TargetFunction {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#prepareCplex(ilog.cplex.IloCplex)
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#assignOptimizedSolution(org.sbml.jsbml.SBMLDocument)
 	 */
 	@Override
-	public void prepareCplex(IloCplex cplex) throws IloException {
-		// TODO Auto-generated method stub
-		// IloNumVar[] variables = cplex.numVarArray(...length, this.lowerBounds, this.upperBounds);
-		// ...
-		// (set variables with setVariables(IloNumVar[] vars))
-		}
-
-	/* (non-Javadoc)
-	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#createTargetFunction(ilog.cplex.IloCplex)
-	 */
-	@Override
-	public IloNumExpr createTargetFunction(IloCplex cplex) throws IloException {
-		IloNumExpr targetFunction = cplex.numExpr();
-		// TODO Auto-generated method stub
-		return targetFunction;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#addConstraintsToTargetFunction(ilog.cplex.IloCplex)
-	 */
-	@Override
-	public void addConstraintsToTargetFunction(IloCplex cplex) throws IloException {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	/**
-	 * Assign the solved values to the actual arrays, in fact to the concentrations,
-	 * the flux vector and the gibbs energies array.
-	 * @param document
-	 */
 	public void assignOptimizedSolution(SBMLDocument document) {
+		// TODO method is incomplete! Check for other assignments!
 		double[] solution = getSolution();
 		
 		this.optimizedFluxVector = new double[this.fluxVector.length];
@@ -165,6 +148,37 @@ public class FluxMinimization extends TargetFunction {
 		for (int i=0; i<gibbsLength; i++) {
 			this.optimizedGibbsEnergies[i] = solution[i+1+concLength];
 		}
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#prepareCplex(ilog.cplex.IloCplex)
+	 */
+	@Override
+	public void prepareCplex(IloCplex cplex) throws IloException {
+		// TODO Auto-generated method stub
+		// IloNumVar[] variables = cplex.numVarArray(...length, this.lowerBounds, this.upperBounds);
+		// ...
+		// (set variables with setVariables(IloNumVar[] vars))
+	}
+
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#createTargetFunction(ilog.cplex.IloCplex)
+	 */
+	@Override
+	public IloNumExpr createTargetFunction(IloCplex cplex) throws IloException {
+		IloNumExpr targetFunction = cplex.numExpr();
+		// TODO Auto-generated method stub
+		return targetFunction;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#addConstraintsToTargetFunction(ilog.cplex.IloCplex)
+	 */
+	@Override
+	public void addConstraintsToTargetFunction(IloCplex cplex) throws IloException {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }
