@@ -19,6 +19,8 @@ package org.sbml.simulator.fba.dynamic;
 
 import java.util.logging.Logger;
 
+import org.sbml.jsbml.SBMLDocument;
+
 import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
 import ilog.concert.IloNumVar;
@@ -87,6 +89,12 @@ public abstract class TargetFunction {
 	}
 	
 	/**
+	 * 
+	 * @param currentConcentrations
+	 */
+	public abstract void setCurrentConcentrations(double[] currentConcentrations);
+	
+	/**
 	 * @return The solution to the variables of the optimization problem
 	 */
 	public double[] getSolution() {
@@ -117,6 +125,13 @@ public abstract class TargetFunction {
 	 * @return <CODE>true</CODE> if the target function belongs to a maximization problem
 	 */
 	public abstract boolean isMaxProblem();
+	
+	/**
+	 * Assign the solved values to the actual arrays, in fact to the concentrations,
+	 * the flux vector and the gibbs energies array.
+	 * @param document
+	 */
+	public abstract void assignOptimizedSolution(SBMLDocument document);
 	
 	/**
 	 * Prepare CPLEX by setting the variables with lower and upper bounds and 
@@ -174,6 +189,24 @@ public abstract class TargetFunction {
 			this.solution = null;
 			logger.warning("No feasible solution found!");
 		}
+	}
+	
+	/**
+	 * CPLEX solves the optimization problem.
+	 * @param cplex
+	 * @throws IloException
+	 */
+	public void optimizeProblem(IloCplex cplex) throws IloException {
+		// Prepare CPLEX
+		prepareCplex(cplex);
+		// Create target function
+		IloNumExpr targetFunction = createTargetFunction(cplex);
+		// Optimize target function
+		optimizeTargetFunction(cplex, targetFunction);
+		// Add constraints to target function
+		addConstraintsToTargetFunction(cplex);
+		// Solve the optimization problem
+		solveCplex(cplex);
 	}
 	
 }
