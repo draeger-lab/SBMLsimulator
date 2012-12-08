@@ -67,9 +67,9 @@ public class DynamicFBA {
 	
 	/**
 	 * 
-	 * @param function
+	 * @param document - The SBML document on which the dynamic FBA performs
 	 * @param table - The concentrations in a {@link MultiTable}
-	 * @param document
+	 * @param timePointCount - The number of points in time at which the dynamic FBA performs
 	 */
 	public DynamicFBA(SBMLDocument document, MultiTable table, int timePointCount) {
 		// Fit SBML document
@@ -87,18 +87,11 @@ public class DynamicFBA {
 	
 	 /**
 	  * 
-	  * @param document
-	  * @param table
+	  * @param document - The SBML document on which the dynamic FBA performs
+	  * @param table - The concentrations in a {@link MultiTable}
 	  */
 	public DynamicFBA(SBMLDocument document, MultiTable table) {
 		this(document, table, table.getTimePoints().length);
-	}
-	
-	/**
-	 * TODO consider hiding this constructor
-	 */
-	public DynamicFBA() {
-		
 	}
 	
 	
@@ -150,9 +143,9 @@ public class DynamicFBA {
 		}
 		
 		// Add concentrations, fluxes and gibbs energies each in a new block
-		this.solutionMultiTable.addBlock(speciesIds); // concentrations block
-		this.solutionMultiTable.addBlock(reactionIds); // fluxes block
-		this.solutionMultiTable.addBlock(reactionIds); // gibbs energies block
+		this.solutionMultiTable.addBlock(speciesIds); //concentrations block
+		this.solutionMultiTable.addBlock(reactionIds); //fluxes block
+		this.solutionMultiTable.addBlock(reactionIds); //gibbs energies block
 	}
 	
 	/**
@@ -165,16 +158,19 @@ public class DynamicFBA {
 		IloCplex cplex = new IloCplex();
 		
 		for (int i=0; i<this.dFBAtimePoints.length; i++) {
+			// Get current concentrations of the current point in time
 			int speciesCount = this.document.getModel().getSpeciesCount();
 			double[] currentConcentrations = new double[speciesCount];
 			for (int j = 0; j < speciesCount; j++) {
 				currentConcentrations[j] = this.dFBAconcentrations.getValueAt(i, j);
 			}
 			
+			// Let CPLEX solve the optimization problem...
 			function.setCurrentConcentrations(currentConcentrations);
 			function.optimizeProblem(cplex);
 			function.assignOptimizedSolution(this.document);
 			
+			// ... and assign the optimized concentrations, fluxes and gibbs energies
 			double[] currentOptimizedConcentrations = function.getOptimizedConcentrations();
 			double[] currentOptimizedFluxVector = function.getOptimizedFluxVector();
 			double[] currentOptimizedGibbsEnergies = function.getOptimizedGibbsEnergies();
@@ -190,9 +186,10 @@ public class DynamicFBA {
 	
 	/**
 	 * (Use it only if each point in time has the same distance from its neighboring point in time).
+	 * 
 	 * @param table
 	 * @param timePointCount
-	 * @return
+	 * @return The MultiTable with all linearly interpolated values
 	 */
 	public MultiTable calculateLinearInterpolation(MultiTable table, int timePointCount) {
 		// Start initialize new MultiTable
