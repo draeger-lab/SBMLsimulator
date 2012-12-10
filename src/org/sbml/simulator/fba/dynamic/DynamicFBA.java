@@ -49,9 +49,9 @@ public class DynamicFBA {
 	
 	/*
 	 * A {@link MultiTable} with all linearly interpolated concentration values of
-	 * the set dynamic FBA point in times
+	 * the set dynamic FBA points in time
 	 */
-	private MultiTable dFBAconcentrations;
+	private MultiTable dFBAConcentrations;
 	
 	/*
 	 * A {@link MultiTable} with all solved values (flux, concentration, gibbs energy),
@@ -60,9 +60,9 @@ public class DynamicFBA {
 	private MultiTable solutionMultiTable;
 	
 	/*
-	 * Saves all set point in times of the dynamic flux balance analysis
+	 * Saves all set points in time of the dynamic flux balance analysis
 	 */
-	private double[] dFBAtimePoints;
+	private double[] dFBATimePoints;
 	
 	
 	/**
@@ -74,9 +74,11 @@ public class DynamicFBA {
 	public DynamicFBA(SBMLDocument document, MultiTable table, int timePointCount) {
 		// Fit SBML document
 		this.document = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(document);
+		// TODO incomplete modification of sbml document, call next modifying methods!
+		// FluxMinimizationUtils.getExpandedDocument(document) ???
 		
 		// Interpolate linearly
-		this.dFBAconcentrations = calculateLinearInterpolation(table, timePointCount);
+		this.dFBAConcentrations = calculateLinearInterpolation(table, timePointCount);
 		
 		// Initialize the solution MultiTable
 		initializeSolutionMultiTable(table);
@@ -98,8 +100,8 @@ public class DynamicFBA {
 	/**
 	 * @return The concentrations of each point in time in a {@link MultiTable}
 	 */
-	public MultiTable getDFBAconcentrations() {
-		return this.dFBAconcentrations;
+	public MultiTable getDFBAConcentrations() {
+		return this.dFBAConcentrations;
 	}
 	
 	/**
@@ -110,10 +112,10 @@ public class DynamicFBA {
 	}
 	
 	/**
-	 * @return The point in times in which the dynamic FBA will be performed
+	 * @return The points in time in which the dynamic FBA will be performed
 	 */
 	public double[] getDFBATimePoints() {
-		return this.dFBAtimePoints;
+		return this.dFBATimePoints;
 	}
 	
 	/*
@@ -157,12 +159,12 @@ public class DynamicFBA {
 		// Initialize a new CPLEX object
 		IloCplex cplex = new IloCplex();
 		
-		for (int i=0; i<this.dFBAtimePoints.length; i++) {
+		for (int i=0; i<this.dFBATimePoints.length; i++) {
 			// Get current concentrations of the current point in time
 			int speciesCount = this.document.getModel().getSpeciesCount();
 			double[] currentConcentrations = new double[speciesCount];
 			for (int j = 0; j < speciesCount; j++) {
-				currentConcentrations[j] = this.dFBAconcentrations.getValueAt(i, j);
+				currentConcentrations[j] = this.dFBAConcentrations.getValueAt(i, j);
 			}
 			
 			// Let CPLEX solve the optimization problem...
@@ -189,7 +191,7 @@ public class DynamicFBA {
 	 * 
 	 * @param table
 	 * @param timePointCount
-	 * @return The MultiTable with all linearly interpolated values
+	 * @return The MultiTable with all linearly interpolated values of the concentrations
 	 */
 	public MultiTable calculateLinearInterpolation(MultiTable table, int timePointCount) {
 		// Start initialize new MultiTable
@@ -239,8 +241,8 @@ public class DynamicFBA {
 			fullTimePointMultiTable = SplineCalculation.calculateSplineValues(fullSpeciesMultiTable, inBetweenTimePoints);
 		}
 		
-		// Set the dynamic FBA point in times
-		this.dFBAtimePoints = fullTimePointMultiTable.getTimePoints();
+		// Set the dynamic FBA points in time
+		this.dFBATimePoints = fullTimePointMultiTable.getTimePoints();
 		
 		return fullTimePointMultiTable;
 	}
