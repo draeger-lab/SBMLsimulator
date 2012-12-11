@@ -45,7 +45,14 @@ public class DynamicFBA {
 	/*
 	 * The SBML document on which the dynamic FBA performs
 	 */
-	private SBMLDocument document;
+	private SBMLDocument originalDocument;
+	
+	/*
+	 * The expanded SBML document, in fact:
+	 * transport reactions eliminated and reversible reactions split,
+	 * compensated reactions added (computed from system boundaries)
+	 */
+	private SBMLDocument expandedDocument;
 	
 	/*
 	 * A {@link MultiTable} with all linearly interpolated concentration values of
@@ -72,13 +79,14 @@ public class DynamicFBA {
 	 * @param timePointCount - The number of points in time at which the dynamic FBA performs
 	 */
 	public DynamicFBA(SBMLDocument document, MultiTable table, int timePointCount) {
-		// Fit SBML document
-		this.document = FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(document);
-		// TODO incomplete modification of sbml document, call next modifying methods!
-		// FluxMinimizationUtils.getExpandedDocument(document) ???
-		
-		// Interpolate linearly
+		// Save original SBML document
+		this.originalDocument = document;
+
+		// Interpolate concentrations linearly
 		this.dFBAConcentrations = calculateLinearInterpolation(table, timePointCount);
+		
+		// Fit and expand original document
+		// FluxMinimizationUtils.getExpandedDocument(originalDocument) ???
 		
 		// Initialize the solution MultiTable
 		initializeSolutionMultiTable(table);
@@ -105,7 +113,7 @@ public class DynamicFBA {
 	}
 	
 	/**
-	 * @return The solution MultiTable for visualization
+	 * @return The solution {@link MultiTable} for visualization
 	 */
 	public MultiTable getSolutionMultiTable() {
 		return this.solutionMultiTable;
@@ -126,19 +134,19 @@ public class DynamicFBA {
 		this.solutionMultiTable = new MultiTable();
 		
 		this.solutionMultiTable.setTimeName(table.getTimeName());
-		this.solutionMultiTable.setTimePoints(getDFBATimePoints());
+		this.solutionMultiTable.setTimePoints(this.dFBATimePoints);
 		
-		// Species Ids fors the concentrations block
-		ListOf<Species> listOfSpecies = this.document.getModel().getListOfSpecies();
-		int speciesCount = this.document.getModel().getSpeciesCount();
+		// Species Ids for the concentrations block
+		ListOf<Species> listOfSpecies = this.expandedDocument.getModel().getListOfSpecies();
+		int speciesCount = this.expandedDocument.getModel().getSpeciesCount();
 		String[] speciesIds = new String[speciesCount];
 		for (int i = 0; i < speciesCount; i++) {
 			speciesIds[i] = listOfSpecies.get(i).getId();
 		}
 		
 		// Reaction Ids for the fluxes and gibbs energies block
-		ListOf<Reaction> listOfReactions = this.document.getModel().getListOfReactions();
-		int reactionCount = this.document.getModel().getReactionCount();
+		ListOf<Reaction> listOfReactions = this.expandedDocument.getModel().getListOfReactions();
+		int reactionCount = this.expandedDocument.getModel().getReactionCount();
 		String[] reactionIds = new String[reactionCount];
 		for (int i = 0; i < reactionCount; i++) {
 			reactionIds[i] = listOfReactions.get(i).getId();
@@ -161,7 +169,7 @@ public class DynamicFBA {
 		
 		for (int i=0; i<this.dFBATimePoints.length; i++) {
 			// Get current concentrations of the current point in time
-			int speciesCount = this.document.getModel().getSpeciesCount();
+			int speciesCount = this.expandedDocument.getModel().getSpeciesCount();
 			double[] currentConcentrations = new double[speciesCount];
 			for (int j = 0; j < speciesCount; j++) {
 				currentConcentrations[j] = this.dFBAConcentrations.getValueAt(i, j);
@@ -170,7 +178,7 @@ public class DynamicFBA {
 			// Let CPLEX solve the optimization problem...
 			function.setCurrentConcentrations(currentConcentrations);
 			function.optimizeProblem(cplex);
-			function.assignOptimizedSolution(this.document);
+			function.assignOptimizedSolution(this.expandedDocument);
 			
 			// ... and assign the optimized concentrations, fluxes and gibbs energies
 			double[] currentOptimizedConcentrations = function.getOptimizedConcentrations();
@@ -191,16 +199,16 @@ public class DynamicFBA {
 	 * 
 	 * @param table
 	 * @param timePointCount
-	 * @return The MultiTable with all linearly interpolated values of the concentrations
+	 * @return The {@link MultiTable} with all linearly interpolated values of the concentrations
 	 */
 	public MultiTable calculateLinearInterpolation(MultiTable table, int timePointCount) {
 		// Start initialize new MultiTable
 		MultiTable fullSpeciesMultiTable = new MultiTable();
-		int speciesCount = this.document.getModel().getSpeciesCount();
+		int speciesCount = this.originalDocument.getModel().getSpeciesCount();
 		fullSpeciesMultiTable.setTimeName(table.getTimeName()); //TODO time name gets lost! check class SplineCalculation
 		fullSpeciesMultiTable.setTimePoints(table.getTimePoints());
 		
-		ListOf<Species> listOfSpecies = this.document.getModel().getListOfSpecies();
+		ListOf<Species> listOfSpecies = this.originalDocument.getModel().getListOfSpecies();
 		String[] speciesIds = new String[speciesCount];
 		for (int i = 0; i < speciesCount; i++) {
 			speciesIds[i] = listOfSpecies.get(i).getId();
