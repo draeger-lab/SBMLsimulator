@@ -56,6 +56,7 @@ public class SplineCalculation {
 		
 		double[][] data = new double[timePoints.length][table.getBlock(0).getColumnCount()];
 		MultiTable result = new MultiTable(timePoints, data, table.getBlock(0).getIdentifiers(),table.getBlock(0).getColumnNames());
+		result.setTimeName(table.getTimeName());
 		for(int col = 1; col != table.getColumnCount(); col++) {
 			Column c = table.getColumn(col);
 			double[] values = new double[table.getRowCount()];
