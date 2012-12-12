@@ -19,7 +19,6 @@ package org.sbml.simulator.fba.dynamic;
 
 import java.util.logging.Logger;
 
-import org.sbml.jsbml.SBMLDocument;
 
 import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
@@ -127,13 +126,6 @@ public abstract class TargetFunction {
 	public abstract boolean isMaxProblem();
 	
 	/**
-	 * Assign the solved values to the actual arrays, in fact to the concentrations,
-	 * the flux vector and the gibbs energies array.
-	 * @param document
-	 */
-	public abstract void assignOptimizedSolution(SBMLDocument document);
-	
-	/**
 	 * Prepare CPLEX by setting the variables with lower and upper bounds and 
 	 * alternatively the target coefficients.
 	 * @param cplex
@@ -208,5 +200,11 @@ public abstract class TargetFunction {
 		// Solve the optimization problem
 		solveCplex(cplex);
 	}
+
+	/**
+	 * Assign the solved values to the actual arrays, in fact to the concentrations,
+	 * the flux vector and the gibbs energies array.
+	 */
+	public abstract void assignOptimizedSolution();
 	
 }
