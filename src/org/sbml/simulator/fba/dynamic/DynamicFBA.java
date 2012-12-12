@@ -45,14 +45,14 @@ public class DynamicFBA {
 	/*
 	 * The SBML document on which the dynamic FBA performs
 	 */
-	private SBMLDocument originalDocument;
+	protected static SBMLDocument originalDocument;
 	
 	/*
 	 * The expanded SBML document, in fact:
 	 * transport reactions eliminated and reversible reactions split,
 	 * compensated reactions added (computed from system boundaries)
 	 */
-	private SBMLDocument expandedDocument;
+	protected static SBMLDocument expandedDocument;
 	
 	/*
 	 * A {@link MultiTable} with all linearly interpolated concentration values of
@@ -80,7 +80,7 @@ public class DynamicFBA {
 	 */
 	public DynamicFBA(SBMLDocument document, MultiTable table, int timePointCount) {
 		// Save original SBML document
-		this.originalDocument = document;
+		originalDocument = document;
 
 		// Interpolate concentrations linearly
 		this.dFBAConcentrations = calculateLinearInterpolation(table, timePointCount);
@@ -88,12 +88,12 @@ public class DynamicFBA {
 		// Move this ->
 		
 		// Fit and expand original document
-		// FluxMinimizationUtils.getExpandedDocument(originalDocument) ???
+		//expandedDocument = FluxMinimizationUtils.getExpandedDocument(originalDocument);
 		
 		// Initialize the solution MultiTable
 		//initializeSolutionMultiTable(table);
 		
-		// to another invoking method
+		// <- to another invoking method
 		
 	}
 	
@@ -139,16 +139,16 @@ public class DynamicFBA {
 		this.solutionMultiTable.setTimePoints(this.dFBATimePoints);
 		
 		// Species Ids for the concentrations block
-		ListOf<Species> listOfSpecies = this.expandedDocument.getModel().getListOfSpecies();
-		int speciesCount = this.expandedDocument.getModel().getSpeciesCount();
+		ListOf<Species> listOfSpecies = expandedDocument.getModel().getListOfSpecies();
+		int speciesCount = expandedDocument.getModel().getSpeciesCount();
 		String[] speciesIds = new String[speciesCount];
 		for (int i = 0; i < speciesCount; i++) {
 			speciesIds[i] = listOfSpecies.get(i).getId();
 		}
 		
 		// Reaction Ids for the fluxes and gibbs energies block
-		ListOf<Reaction> listOfReactions = this.expandedDocument.getModel().getListOfReactions();
-		int reactionCount = this.expandedDocument.getModel().getReactionCount();
+		ListOf<Reaction> listOfReactions = expandedDocument.getModel().getListOfReactions();
+		int reactionCount = expandedDocument.getModel().getReactionCount();
 		String[] reactionIds = new String[reactionCount];
 		for (int i = 0; i < reactionCount; i++) {
 			reactionIds[i] = listOfReactions.get(i).getId();
@@ -171,7 +171,7 @@ public class DynamicFBA {
 		
 		for (int i = 0; i < this.dFBATimePoints.length; i++) {
 			// Get current concentrations of the current point in time
-			int speciesCount = this.expandedDocument.getModel().getSpeciesCount();
+			int speciesCount = expandedDocument.getModel().getSpeciesCount();
 			double[] currentConcentrations = new double[speciesCount];
 			for (int j = 0; j < speciesCount; j++) {
 				currentConcentrations[j] = this.dFBAConcentrations.getValueAt(i, j);
@@ -180,7 +180,7 @@ public class DynamicFBA {
 			// Let CPLEX solve the optimization problem...
 			function.setCurrentConcentrations(currentConcentrations);
 			function.optimizeProblem(cplex);
-			function.assignOptimizedSolution(this.expandedDocument);
+			function.assignOptimizedSolution();
 			
 			// ... and assign the optimized concentrations, fluxes and gibbs energies
 			double[] currentOptimizedConcentrations = function.getOptimizedConcentrations();
@@ -206,11 +206,11 @@ public class DynamicFBA {
 	public MultiTable calculateLinearInterpolation(MultiTable table, int timePointCount) {
 		// Start initialize new MultiTable
 		MultiTable fullSpeciesMultiTable = new MultiTable();
-		int speciesCount = this.originalDocument.getModel().getSpeciesCount();
+		int speciesCount = originalDocument.getModel().getSpeciesCount();
 		fullSpeciesMultiTable.setTimeName(table.getTimeName());
 		fullSpeciesMultiTable.setTimePoints(table.getTimePoints());
 		
-		ListOf<Species> listOfSpecies = this.originalDocument.getModel().getListOfSpecies();
+		ListOf<Species> listOfSpecies = originalDocument.getModel().getListOfSpecies();
 		String[] speciesIds = new String[speciesCount];
 		for (int i = 0; i < speciesCount; i++) {
 			speciesIds[i] = listOfSpecies.get(i).getId();
