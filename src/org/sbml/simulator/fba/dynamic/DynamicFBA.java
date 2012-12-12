@@ -85,13 +85,15 @@ public class DynamicFBA {
 		// Interpolate concentrations linearly
 		this.dFBAConcentrations = calculateLinearInterpolation(table, timePointCount);
 		
+		// Move this ->
+		
 		// Fit and expand original document
 		// FluxMinimizationUtils.getExpandedDocument(originalDocument) ???
 		
 		// Initialize the solution MultiTable
-		initializeSolutionMultiTable(table);
+		//initializeSolutionMultiTable(table);
 		
-		// ...
+		// to another invoking method
 		
 	}
 	
@@ -167,7 +169,7 @@ public class DynamicFBA {
 		// Initialize a new CPLEX object
 		IloCplex cplex = new IloCplex();
 		
-		for (int i=0; i<this.dFBATimePoints.length; i++) {
+		for (int i = 0; i < this.dFBATimePoints.length; i++) {
 			// Get current concentrations of the current point in time
 			int speciesCount = this.expandedDocument.getModel().getSpeciesCount();
 			double[] currentConcentrations = new double[speciesCount];
@@ -205,7 +207,7 @@ public class DynamicFBA {
 		// Start initialize new MultiTable
 		MultiTable fullSpeciesMultiTable = new MultiTable();
 		int speciesCount = this.originalDocument.getModel().getSpeciesCount();
-		fullSpeciesMultiTable.setTimeName(table.getTimeName()); //TODO time name gets lost! check class SplineCalculation
+		fullSpeciesMultiTable.setTimeName(table.getTimeName());
 		fullSpeciesMultiTable.setTimePoints(table.getTimePoints());
 		
 		ListOf<Species> listOfSpecies = this.originalDocument.getModel().getListOfSpecies();
@@ -232,7 +234,7 @@ public class DynamicFBA {
 		
 		// First, check if timePointCount is a valid number...
 		int givenTimePointLength = table.getTimePoints().length;
-		if ((Integer.MIN_VALUE < timePointCount) && (timePointCount < givenTimePointLength)) {
+		if (timePointCount < givenTimePointLength) {
 			logger.warning("TimePointCount (" + timePointCount + ") has to be greater than the given timePoint length (" + givenTimePointLength + ")!");
 			return fullSpeciesMultiTable;
 		}
