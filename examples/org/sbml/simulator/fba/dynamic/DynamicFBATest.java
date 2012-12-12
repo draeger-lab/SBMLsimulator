@@ -17,10 +17,14 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
+import java.util.Arrays;
+
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
 import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.io.CSVDataImporter;
+import org.sbml.simulator.stability.math.SBMLMatrixParser;
+import org.sbml.simulator.stability.math.StoichiometricMatrix;
 import org.simulator.math.odes.MultiTable;
 import org.simulator.math.odes.MultiTable.Block.Column;
 
@@ -38,23 +42,21 @@ public class DynamicFBATest {
 	 */
 	public static void main(String[] args) throws Exception {
 		
-		// Read sbml document and concentration file
+		// Read SBML document and concentration file
 		SBMLReader reader = new SBMLReader();
 		SBMLDocument testDocument = reader.readSBML(args[0]);
 		String concFile = args[1];
 		CSVDataImporter importer = new CSVDataImporter();
 		MultiTable concMT = importer.convert(testDocument.getModel(), concFile);
 		
-		// Test multitable output
+		// Test MultiTable output
 		DynamicFBA dfba = new DynamicFBA(testDocument, concMT, 44);
-		System.out.println(dfba.getSolutionMultiTable().toString());
-		System.out.println(dfba.getDFBAconcentrations().toString());
+		//System.out.println("Solution MultiTable: " + dfba.getSolutionMultiTable().toString());
+		System.out.println("DFBA concentrations MultiTable: " + dfba.getDFBAConcentrations().toString());
 		
 		// Test linear interpolation
-		Column testColumn = dfba.getDFBAconcentrations().getColumn("HC00685_i");
-		System.out.println(testColumn.toString());
-		
-		
+		Column testColumn = dfba.getDFBAConcentrations().getColumn("HC00685_i");
+		System.out.println("HC00685_i concentrations: " + testColumn.toString());
 	}
 
 }
