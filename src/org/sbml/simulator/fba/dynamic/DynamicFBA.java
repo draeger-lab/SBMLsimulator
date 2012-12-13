@@ -31,6 +31,7 @@ import ilog.concert.IloException;
 import ilog.cplex.IloCplex;
 
 /**
+ * 
  * @author Robin F&auml;hnrich
  * @version $Rev$
  * @since 1.0
@@ -49,8 +50,8 @@ public class DynamicFBA {
 	
 	/*
 	 * The expanded SBML document, in fact:
-	 * transport reactions eliminated and reversible reactions split,
-	 * compensated reactions added (computed from system boundaries)
+	 * - transport reactions eliminated and reversible reactions split,
+	 * - compensated reactions added (computed from system boundaries)
 	 */
 	protected static SBMLDocument expandedDocument;
 	
@@ -77,8 +78,9 @@ public class DynamicFBA {
 	 * @param document - The SBML document on which the dynamic FBA performs
 	 * @param table - The concentrations in a {@link MultiTable}
 	 * @param timePointCount - The number of points in time at which the dynamic FBA performs
+	 * @throws Exception
 	 */
-	public DynamicFBA(SBMLDocument document, MultiTable table, int timePointCount) {
+	public DynamicFBA(SBMLDocument document, MultiTable table, int timePointCount) throws Exception {
 		// Save original SBML document
 		originalDocument = document;
 
@@ -89,9 +91,7 @@ public class DynamicFBA {
 		
 		// Fit and expand original document
 		//expandedDocument = FluxMinimizationUtils.getExpandedDocument(originalDocument);
-		
-		// Initialize the solution MultiTable
-		//initializeSolutionMultiTable(table);
+		//expandedDocument = FluxMinimizationUtils.getExpandedDocument(originalDocument, double[] sysBounds);
 		
 		// <- to another invoking method
 		
@@ -101,8 +101,9 @@ public class DynamicFBA {
 	  * 
 	  * @param document - The SBML document on which the dynamic FBA performs
 	  * @param table - The concentrations in a {@link MultiTable}
+	 * @throws Exception
 	  */
-	public DynamicFBA(SBMLDocument document, MultiTable table) {
+	public DynamicFBA(SBMLDocument document, MultiTable table) throws Exception {
 		this(document, table, table.getTimePoints().length);
 	}
 	
@@ -128,14 +129,16 @@ public class DynamicFBA {
 		return this.dFBATimePoints;
 	}
 	
-	/*
-	 * Initialize the solution {@link MultiTable} for visualization.
-	 * This {@link MultiTable} contains multiple {@link MultiTable.Block}s.
+	/**
+	 * Initialize the solution {@link MultiTable} for visualization. This
+	 * {@link MultiTable} contains multiple {@link MultiTable.Block}s.
+	 * 
+	 * @param function
 	 */
-	private void initializeSolutionMultiTable(MultiTable table) {
+	public void initializeSolutionMultiTable(TargetFunction function) {
 		this.solutionMultiTable = new MultiTable();
 		
-		this.solutionMultiTable.setTimeName(table.getTimeName());
+		this.solutionMultiTable.setTimeName(this.dFBAConcentrations.getTimeName());
 		this.solutionMultiTable.setTimePoints(this.dFBATimePoints);
 		
 		// Species Ids for the concentrations block
@@ -154,20 +157,32 @@ public class DynamicFBA {
 			reactionIds[i] = listOfReactions.get(i).getId();
 		}
 		
-		// Add concentrations, fluxes and gibbs energies each in a new block
-		this.solutionMultiTable.addBlock(speciesIds); //concentrations block
-		this.solutionMultiTable.addBlock(reactionIds); //fluxes block
-		this.solutionMultiTable.addBlock(reactionIds); //gibbs energies block
+		// Add concentrations block
+		if (function.isConcentrationsOptimization()) {
+			this.solutionMultiTable.addBlock(speciesIds);
+		}
+		
+		// Add fluxes block
+		this.solutionMultiTable.addBlock(reactionIds);
+		
+		// Add gibbs energies block
+		if (function.isGibbsEnergiesOptimization()) {
+			this.solutionMultiTable.addBlock(reactionIds);
+		}
 	}
 	
 	/**
 	 * A dynamic flux balance analysis will be performed.
+	 * 
 	 * @param fluxMin
 	 * @throws IloException
 	 */
 	public void runDynamicFBA(TargetFunction function) throws IloException {
 		// Initialize a new CPLEX object
 		IloCplex cplex = new IloCplex();
+		
+		// Initialize the solution MultiTable
+		initializeSolutionMultiTable(function);
 		
 		for (int i = 0; i < this.dFBATimePoints.length; i++) {
 			// Get current concentrations of the current point in time
@@ -182,14 +197,24 @@ public class DynamicFBA {
 			function.optimizeProblem(cplex);
 			function.assignOptimizedSolution();
 			
-			// ... and assign the optimized concentrations, fluxes and gibbs energies
-			double[] currentOptimizedConcentrations = function.getOptimizedConcentrations();
+			// ... and assign the optimized values
+			int block = 0;
+			
+			if (function.isConcentrationsOptimization()) {
+				double[] currentOptimizedConcentrations = function.getOptimizedConcentrations();
+				this.solutionMultiTable.getBlock(block).setRowData(i, currentOptimizedConcentrations);
+				block++;
+			}
+			
 			double[] currentOptimizedFluxVector = function.getOptimizedFluxVector();
-			double[] currentOptimizedGibbsEnergies = function.getOptimizedGibbsEnergies();
-
-			this.solutionMultiTable.getBlock(0).setRowData(i, currentOptimizedConcentrations);
-			this.solutionMultiTable.getBlock(1).setRowData(i, currentOptimizedFluxVector);
-			this.solutionMultiTable.getBlock(2).setRowData(i, currentOptimizedGibbsEnergies);
+			this.solutionMultiTable.getBlock(block).setRowData(i, currentOptimizedFluxVector);
+			block++;
+			
+			if (function.isGibbsEnergiesOptimization()) {
+				double[] currentOptimizedGibbsEnergies = function.getOptimizedGibbsEnergies();
+				this.solutionMultiTable.getBlock(block).setRowData(i, currentOptimizedGibbsEnergies);
+				
+			}
 		}
 
 		// Stop the CPLEX stream
