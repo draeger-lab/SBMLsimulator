@@ -57,6 +57,7 @@ public abstract class TargetFunction {
 	
 	/**
 	 * Alternatively (for use when needed).
+	 * 
 	 * @return The target coefficients of the CPLEX object
 	 */
 	public double[] getCoefficients() {
@@ -66,6 +67,7 @@ public abstract class TargetFunction {
 	/**
 	 * Alternatively (for use when needed):
 	 * Set the target coefficients of the CPLEX object.
+	 * 
 	 * @param coefficients
 	 */
 	public void setCoefficients(double[] coefficients) {
@@ -81,6 +83,7 @@ public abstract class TargetFunction {
 	
 	/**
 	 * Set the variables of the CPLEX object.
+	 * 
 	 * @param variables
 	 */
 	public void setVariables(IloNumVar[] variables) {
@@ -88,17 +91,24 @@ public abstract class TargetFunction {
 	}
 	
 	/**
+	 * @return The solution to the variables of the optimization problem
+	 */
+	public double[] getSolution() {
+		return this.solution;
+	}
+	
+	/**
+	 * Set the current interpolated concentrations for this step of optimization
+	 * by CPLEX
 	 * 
 	 * @param currentConcentrations
 	 */
 	public abstract void setCurrentConcentrations(double[] currentConcentrations);
 	
 	/**
-	 * @return The solution to the variables of the optimization problem
+	 * @return <CODE>true</CODE> if the concentrations are supposed to be optimized
 	 */
-	public double[] getSolution() {
-		return this.solution;
-	}
+	public abstract boolean isConcentrationsOptimization();
 	
 	/**
 	 * @return The computed concentrations optimized by the target function
@@ -109,6 +119,11 @@ public abstract class TargetFunction {
 	 * @return The computed flux vector optimized by the target function
 	 */
 	public abstract double[] getOptimizedFluxVector();
+	
+	/**
+	 * @return <CODE>true</CODE> if the gibbs energies are supposed to be optimized
+	 */
+	public abstract boolean isGibbsEnergiesOptimization();
 	
 	/**
 	 * @return The computed gibbs energies optimized by the target function
@@ -126,8 +141,9 @@ public abstract class TargetFunction {
 	public abstract boolean isMaxProblem();
 	
 	/**
-	 * Prepare CPLEX by setting the variables with lower and upper bounds and 
+	 * Prepare CPLEX by setting the variables with lower and upper bounds and
 	 * alternatively the target coefficients.
+	 * 
 	 * @param cplex
 	 * @throws IloException
 	 */
@@ -135,6 +151,7 @@ public abstract class TargetFunction {
 	
 	/**
 	 * Create a new target function that will be solved by CPLEX.
+	 * 
 	 * @param cplex
 	 * @return The target function in a {@link IloNumExpr}
 	 * @throws IloException
@@ -142,8 +159,9 @@ public abstract class TargetFunction {
 	public abstract IloNumExpr createTargetFunction(IloCplex cplex) throws IloException;
 	
 	/**
-	 * If the target function belongs to a minimization problem, minimize it,
-	 * if the target function belongs to a maximization problem, maximize it.
+	 * If the target function belongs to a minimization problem, minimize it, if
+	 * the target function belongs to a maximization problem, maximize it.
+	 * 
 	 * @param cplex
 	 * @param expr The target function in a {@link IloNumExpr}
 	 * @throws IloException
@@ -160,14 +178,16 @@ public abstract class TargetFunction {
 	
 	/**
 	 * Add constraints to the CPLEX target function.
+	 * 
 	 * @param cplex
 	 * @throws IloException
 	 */
 	public abstract void addConstraintsToTargetFunction(IloCplex cplex) throws IloException;
 	
 	/**
-	 * Let CPLEX solve the optimization problem (if necessary check the CPLEX 
+	 * Let CPLEX solve the optimization problem (if necessary check the CPLEX
 	 * iterations) and set the solution of the variables.
+	 * 
 	 * @param cplex
 	 * @throws IloException
 	 */
@@ -185,6 +205,7 @@ public abstract class TargetFunction {
 	
 	/**
 	 * CPLEX solves the optimization problem.
+	 * 
 	 * @param cplex
 	 * @throws IloException
 	 */
@@ -202,8 +223,8 @@ public abstract class TargetFunction {
 	}
 
 	/**
-	 * Assign the solved values to the actual arrays, in fact to the concentrations,
-	 * the flux vector and the gibbs energies array.
+	 * Assign the solved values to the actual arrays; at least the flux values
+	 * to the optimized flux vector.
 	 */
 	public abstract void assignOptimizedSolution();
 	
