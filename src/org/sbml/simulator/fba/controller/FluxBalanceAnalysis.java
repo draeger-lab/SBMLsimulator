@@ -555,6 +555,7 @@ public class FluxBalanceAnalysis {
 			} else if(!Double.isNaN(c_eq[i])){
 				sum = cplex.sum(temp, cplex.square(x[i + target_length_without_all_flux_values]),cplex.sum(cplex.prod(x[i + target_length_without_all_flux_values], ((-2) * c_eq[i])), cplex.square(cplex.constant(c_eq[i]))));
 			} else {
+				//TODO delete
 				sum = cplex.sum(temp ,cplex.square(x[i + target_length_without_all_flux_values]));
 			}
 		}
@@ -637,6 +638,7 @@ public class FluxBalanceAnalysis {
 
 				if (!Double.isNaN(compGibbs[j])){
 					//there is a problem if gibbs_eq < 0 TODO: fix it
+					//6.43
 					IloNumExpr delta_G_computation = cplex.sum(cplex.prod(constraints.R, cplex.prod(constraints.T, sumConcentrations)), cplex.diff(constraints.getEquilibriumGibbsEnergies()[j],x[j+1]));
 					cplex.addGe(delta_G_computation, cplex.prod(compGibbs[j], x[k]));
 					//TODO: syso
