@@ -27,6 +27,12 @@ import java.util.logging.Logger;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
 /**
+ * FluxMinimization target function:
+ * minimize (||J|| +
+ * lambda_1 * Sum_i^m (c_i - c_eq)² +
+ * lambda_2 * ||L|| +
+ * lambda_3 * ||E|| +
+ * lambda_4 * ||delta_r G||)
  * 
  * @author Robin F&auml;hnrich
  * @version $Rev$
@@ -40,9 +46,9 @@ public class FluxMinimization extends TargetFunction {
 	private static final transient Logger logger = Logger.getLogger(FluxMinimization.class.getName());
 	
 	/*
-	 * The complete stoichiometric matrix S that is essential for the Tableau algorithm
+	 * The complete stoichiometric matrix N that is essential for the Tableau algorithm
 	 */
-	private StoichiometricMatrix S;
+	private StoichiometricMatrix N;
 	
 	/*
 	 * The array contains the current interpolated concentrations for this step
@@ -52,7 +58,7 @@ public class FluxMinimization extends TargetFunction {
 	
 	/*
 	 * This vector contains the fluxes that are computed by the Tableau algorithm
-	 * applied to S
+	 * applied to N
 	 */
 	private double[] fluxVector;
 	
@@ -94,6 +100,14 @@ public class FluxMinimization extends TargetFunction {
 	public void setCurrentConcentrations(double[] currentConcentrations) {
 		this.currentConcentrations = currentConcentrations;
 	}
+
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#isConcentrationsOptimization()
+	 */
+	@Override
+	public boolean isConcentrationsOptimization() {
+		return true;
+	}
 	
 	/* (non-Javadoc)
 	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getOptimizedConcentrations()
@@ -112,13 +126,21 @@ public class FluxMinimization extends TargetFunction {
 	}
 
 	/* (non-Javadoc)
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#isGibbsEnergiesOptimization()
+	 */
+	@Override
+	public boolean isGibbsEnergiesOptimization() {
+		return true;
+	}
+
+	/* (non-Javadoc)
 	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getOptimizedGibbsEnergies()
 	 */
 	@Override
 	public double[] getOptimizedGibbsEnergies() {
 		return this.optimizedGibbsEnergies;
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#isMinProblem()
 	 */
@@ -134,16 +156,6 @@ public class FluxMinimization extends TargetFunction {
 	public boolean isMaxProblem() {
 		return false;
 	}
-	
-	/*
-	 * FluxMinimization target function:
-	 * minimize (
-	 * ||J||
-	 * + lambda_1 * Sum_i^m (c_i - c_eq)²
-	 * + lambda_2 * ||L||
-	 * + lambda_3 * ||E||
-	 * + lambda_4 * ||delta_r G||)
-	 */
 	
 	/**
 	 * @return The length of each variable vector in an int array (attend the order!)
