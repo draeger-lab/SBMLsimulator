@@ -54,6 +54,11 @@ public abstract class TargetFunction {
 	 */
 	private double[] solution;
 	
+	/*
+	 * Save the CPLEX iterations; default value of 600 iterations
+	 */
+	private int cplexIterations = 600;
+	
 	
 	/**
 	 * Alternatively (for use when needed).
@@ -95,6 +100,15 @@ public abstract class TargetFunction {
 	 */
 	public double[] getSolution() {
 		return this.solution;
+	}
+	
+	/**
+	 * Set the CPLEX iterations (default: 600 iterations).
+	 * 
+	 * @param iterations
+	 */
+	public void setCplexIterations(int iterations) {
+		this.cplexIterations = iterations;
 	}
 	
 	/**
@@ -192,8 +206,7 @@ public abstract class TargetFunction {
 	 * @throws IloException
 	 */
 	public void solveCplex(IloCplex cplex) throws IloException {
-		// TODO write method to set cplexIterations (now: 600)
-		cplex.setParam(IloCplex.IntParam.BarItLim, 600);
+		cplex.setParam(IloCplex.IntParam.BarItLim, this.cplexIterations);
 		
 		if (cplex.solve()) {
 			this.solution = cplex.getValues(this.variables);
