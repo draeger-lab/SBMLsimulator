@@ -155,13 +155,13 @@ public abstract class TargetFunction {
 	public abstract boolean isMaxProblem();
 	
 	/**
-	 * Prepare CPLEX by setting the variables with lower and upper bounds and
+	 * Initialize the CPLEX variables with lower and upper bounds and
 	 * alternatively the target coefficients.
 	 * 
 	 * @param cplex
 	 * @throws IloException
 	 */
-	public abstract void prepareCplex(IloCplex cplex) throws IloException;
+	public abstract void initCplexVariables(IloCplex cplex) throws IloException;
 	
 	/**
 	 * Create a new target function that will be solved by CPLEX.
@@ -223,8 +223,6 @@ public abstract class TargetFunction {
 	 * @throws IloException
 	 */
 	public void optimizeProblem(IloCplex cplex) throws IloException {
-		// Prepare CPLEX
-		prepareCplex(cplex);
 		// Create target function
 		IloNumExpr targetFunction = createTargetFunction(cplex);
 		// Optimize target function

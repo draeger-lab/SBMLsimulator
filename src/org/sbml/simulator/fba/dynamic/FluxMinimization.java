@@ -285,7 +285,7 @@ public class FluxMinimization extends TargetFunction {
 	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#prepareCplex(ilog.cplex.IloCplex)
 	 */
 	@Override
-	public void prepareCplex(IloCplex cplex) throws IloException {
+	public void initCplexVariables(IloCplex cplex) throws IloException {
 		int fullVariableLength = 0;
 		for (int i = 0; i < getTargetVariablesLengths().length; i++) {
 			fullVariableLength += getTargetVariablesLengths()[i];
