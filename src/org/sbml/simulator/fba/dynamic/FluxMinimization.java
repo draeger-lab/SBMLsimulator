@@ -77,7 +77,7 @@ public class FluxMinimization extends TargetFunction {
 	/*
 	 * The L vector
 	 */
-	private double[] lVector;
+	private double[] LVector;
 	
 	/*
 	 * The error values
@@ -89,6 +89,11 @@ public class FluxMinimization extends TargetFunction {
 	 * document reactions
 	 */
 	private double[] gibbsEnergies;
+
+	/*
+	 * Save the optimized flux vector in a double array
+	 */
+	private double[] optimizedFluxVector;
 	
 	/*
 	 * Save the optimized concentrations vector in a double array
@@ -96,9 +101,14 @@ public class FluxMinimization extends TargetFunction {
 	private double[] optimizedConcentrations;
 	
 	/*
-	 * Save the optimized flux vector in a double array
+	 * Save the optimized L vector in a double array
 	 */
-	private double[] optimizedFluxVector;
+	private double[] optimizedLVector;
+	
+	/*
+	 * Save the optimized error values in a double array
+	 */
+	private double[] optimizedErrors;
 	
 	/*
 	 * Save the optimized gibbs energies vector in a double array
@@ -175,6 +185,14 @@ public class FluxMinimization extends TargetFunction {
 	public void setCurrentConcentrations(double[] currentConcentrations) {
 		this.currentConcentrations = currentConcentrations;
 	}
+
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getOptimizedFluxVector()
+	 */
+	@Override
+	public double[] getOptimizedFluxVector() {
+		return this.optimizedFluxVector;
+	}
 	
 	/* (non-Javadoc)
 	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getOptimizedConcentrations()
@@ -183,13 +201,19 @@ public class FluxMinimization extends TargetFunction {
 	public double[] getOptimizedConcentrations() {
 		return this.optimizedConcentrations;
 	}
-
-	/* (non-Javadoc)
-	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getOptimizedFluxVector()
+	
+	/**
+	 * @return The computed L vector optimized by the target function
 	 */
-	@Override
-	public double[] getOptimizedFluxVector() {
-		return this.optimizedFluxVector;
+	public double[] getOptimizedLVector() {
+		return this.optimizedLVector;
+	}
+	
+	/**
+	 * @return The computed error values optimized by the target function
+	 */
+	public double[] getOptimizedErrors() {
+		return this.optimizedErrors;
 	}
 
 	/* (non-Javadoc)
@@ -335,8 +359,8 @@ public class FluxMinimization extends TargetFunction {
 		IloNumExpr l = cplex.numExpr();
 		int lPosition = concentrationPosition + getTargetVariablesLengths()[1];
 		for (int i = 0; i < getTargetVariablesLengths()[2]; i++) {
-			if (!Double.isNaN(this.lVector[i])) {
-				l = cplex.sum(cplex.prod((this.lambda_2 * Math.abs(this.lVector[i])), getVariables()[i + lPosition]), l);
+			if (!Double.isNaN(this.LVector[i])) {
+				l = cplex.sum(cplex.prod((this.lambda_2 * Math.abs(this.LVector[i])), getVariables()[i + lPosition]), l);
 			} else {
 				// TODO check!
 				l = cplex.sum(cplex.prod(this.lambda_2, getVariables()[i + lPosition]), l);
@@ -399,11 +423,19 @@ public class FluxMinimization extends TargetFunction {
 			this.optimizedConcentrations[i] = solution[i + concentrationPosition];
 		}
 		
-		// 3. L vector assignment?
+		// 3. L vector assignment
 		int lPosition = concentrationPosition + getTargetVariablesLengths()[1];
+//		this.optimizedLVector = new double[getTargetVariablesLengths()[2]];
+//		for (int i = 0; i < getTargetVariablesLengths()[2]; i++) {
+//			this.optimizedLVector[i] = solution[i + lPosition];
+//		}
 		
-		// 4. Error vector assignment?
+		// 4. Error vector assignment
 		int errorPosition = lPosition + getTargetVariablesLengths()[2];
+//		this.optimizedErrors = new double[getTargetVariablesLengths()[3]];
+//		for (int i = 0; i < getTargetVariablesLengths()[3]; i++) {
+//			this.optimizedErrors[i] = solution[i + errorPosition];
+//		}
 		
 		// 5. Gibbs energy vector assignment
 		int gibbsPosition = errorPosition + getTargetVariablesLengths()[3];
