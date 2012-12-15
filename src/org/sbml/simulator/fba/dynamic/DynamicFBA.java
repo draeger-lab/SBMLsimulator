@@ -78,9 +78,8 @@ public class DynamicFBA {
 	 * @param document - The SBML document on which the dynamic FBA performs
 	 * @param table - The concentrations in a {@link MultiTable}
 	 * @param timePointCount - The number of points in time at which the dynamic FBA performs
-	 * @throws Exception
 	 */
-	public DynamicFBA(SBMLDocument document, MultiTable table, int timePointCount) throws Exception {
+	public DynamicFBA(SBMLDocument document, MultiTable table, int timePointCount) {
 		// Save original SBML document
 		originalDocument = document;
 
@@ -101,9 +100,8 @@ public class DynamicFBA {
 	  * 
 	  * @param document - The SBML document on which the dynamic FBA performs
 	  * @param table - The concentrations in a {@link MultiTable}
-	 * @throws Exception
 	  */
-	public DynamicFBA(SBMLDocument document, MultiTable table) throws Exception {
+	public DynamicFBA(SBMLDocument document, MultiTable table) {
 		this(document, table, table.getTimePoints().length);
 	}
 	
@@ -180,6 +178,8 @@ public class DynamicFBA {
 	public void runDynamicFBA(TargetFunction function) throws IloException {
 		// Initialize a new CPLEX object
 		IloCplex cplex = new IloCplex();
+		// Initialize the CPLEX variables
+		function.initCplexVariables(cplex);
 		
 		// Initialize the solution MultiTable
 		initializeSolutionMultiTable(function);
@@ -197,7 +197,7 @@ public class DynamicFBA {
 			function.optimizeProblem(cplex);
 			function.assignOptimizedSolution();
 			
-			// ... and assign the optimized values
+			// ... and fill the solution MultiTable
 			int block = 0;
 			
 			if (function.isConcentrationsOptimization()) {
