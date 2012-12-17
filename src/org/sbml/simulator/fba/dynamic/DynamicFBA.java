@@ -23,8 +23,11 @@ import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.Species;
+import org.sbml.simulator.fba.controller.Constraints;
 import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.math.SplineCalculation;
+import org.sbml.simulator.stability.math.SBMLMatrixParser;
+import org.sbml.simulator.stability.math.StoichiometricMatrix;
 import org.simulator.math.odes.MultiTable;
 
 import ilog.concert.IloException;
@@ -56,6 +59,28 @@ public class DynamicFBA {
 	protected static SBMLDocument expandedDocument;
 	
 	/*
+	 * Save the read system boundaries in a double array
+	 */
+	private double[] systemBoundaries;
+	
+	/*
+	 * Save the read gibbs energies in a double array
+	 */
+	private double[] gibbsEnergies;
+	
+	/*
+	 * If the system boundaries are read from file, set system boundaries and
+	 * <CODE>true</CODE>
+	 */
+	private boolean isSystemBoundaries = false;
+	
+	/*
+	 * If the gibbs energies are read from file, set gibbs energies and
+	 * <CODE>true</CODE>
+	 */
+	private boolean isGibbsEnergies = false;
+	
+	/*
 	 * A {@link MultiTable} with all linearly interpolated concentration values of
 	 * the set dynamic FBA points in time
 	 */
@@ -84,16 +109,7 @@ public class DynamicFBA {
 		originalDocument = document;
 
 		// Interpolate concentrations linearly
-		this.dFBAConcentrations = calculateLinearInterpolation(table, timePointCount);
-		
-		// Move this ->
-		
-		// Fit and expand original document
-		//expandedDocument = FluxMinimizationUtils.getExpandedDocument(originalDocument);
-		//expandedDocument = FluxMinimizationUtils.getExpandedDocument(originalDocument, double[] sysBounds);
-		
-		// <- to another invoking method
-		
+		this.dFBAConcentrations = calculateLinearInterpolation(table, timePointCount);		
 	}
 	
 	 /**
@@ -105,6 +121,26 @@ public class DynamicFBA {
 		this(document, table, table.getTimePoints().length);
 	}
 	
+	
+	/**
+	 * Set the read system boundaries.
+	 * 
+	 * @param systemBoundaries
+	 */
+	public void setSystemBoundaries(double[] systemBoundaries) {
+		this.systemBoundaries = systemBoundaries;
+		this.isSystemBoundaries = true;
+	}
+	
+	/**
+	 * Set the read gibbs energies.
+	 * 
+	 * @param gibbsEnergies
+	 */
+	public void setGibbsEnergies(double[] gibbsEnergies) {
+		this.gibbsEnergies = gibbsEnergies;
+		this.isGibbsEnergies = true;
+	}
 	
 	/**
 	 * @return The concentrations of each point in time in a {@link MultiTable}
@@ -167,6 +203,51 @@ public class DynamicFBA {
 		if (function.isGibbsEnergiesOptimization()) {
 			this.solutionMultiTable.addBlock(reactionIds);
 		}
+	}
+	
+	/**
+	 * Prepare the dynamic FBA for the {@link FluxMinimization}.
+	 * 
+	 * @param fm
+	 * @throws Exception
+	 */
+	public void prepareDynamicFBA(FluxMinimization fm) throws Exception {
+		// If gibbs energies are read from file...
+		if (this.isGibbsEnergies) {
+			
+		} else {
+			//... or aren't available
+			
+		}
+		
+		// If system boundaries are read from file...
+		if (this.isSystemBoundaries) {
+			expandedDocument = FluxMinimizationUtils.getExpandedDocument(originalDocument, this.systemBoundaries);
+			StoichiometricMatrix N_with_read_sysBounds = FluxMinimizationUtils.getExpandedStoichiometricMatrix(originalDocument, this.systemBoundaries);
+			fm.setNIntSys(N_with_read_sysBounds);
+			// Compute and set flux vector with Tableau algorithm
+			double[] fluxVector = FluxMinimizationUtils.computeFluxVector(N_with_read_sysBounds, null, expandedDocument);
+			fm.setComputedFluxVector(fluxVector);
+		} else {
+			//... or aren't available
+			expandedDocument = FluxMinimizationUtils.getExpandedDocument(originalDocument);
+			StoichiometricMatrix N_with_computed_sysBounds = FluxMinimizationUtils.getExpandedStoichiometricMatrix(originalDocument);
+			fm.setNIntSys(N_with_computed_sysBounds);
+			// Compute and set flux vector with Tableau algorithm
+			double[] fluxVector = FluxMinimizationUtils.computeFluxVector(N_with_computed_sysBounds, null, expandedDocument);
+			fm.setComputedFluxVector(fluxVector);
+		}
+		
+		// Compute and set errors
+		double[] errors = FluxMinimizationUtils.computeError(expandedDocument.getModel().getReactionCount());
+		fm.setErrors(errors);
+		
+		// Compute and set L vector
+		
+		
+		// Compute and set r_max
+		
+		
 	}
 	
 	/**
