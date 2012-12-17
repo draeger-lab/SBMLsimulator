@@ -17,18 +17,14 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
-import java.util.Arrays;
-
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
-import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.io.CSVDataImporter;
-import org.sbml.simulator.stability.math.SBMLMatrixParser;
-import org.sbml.simulator.stability.math.StoichiometricMatrix;
 import org.simulator.math.odes.MultiTable;
 import org.simulator.math.odes.MultiTable.Block.Column;
 
 /**
+ * 
  * @author Robin F&auml;hnrich
  * @version $Rev$
  * @since 1.0
@@ -36,27 +32,44 @@ import org.simulator.math.odes.MultiTable.Block.Column;
 public class DynamicFBATest {
 
 	/**
-	 * Test the methods of {@link DynamicFBA}.
+	 * Test the methods of class {@link DynamicFBA}.
+	 * 
 	 * @param args
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
 		
-		// Read SBML document and concentration file
+		// Read SBML document file
 		SBMLReader reader = new SBMLReader();
 		SBMLDocument testDocument = reader.readSBML(args[0]);
+		
+		// Read concentration file
 		String concFile = args[1];
 		CSVDataImporter importer = new CSVDataImporter();
 		MultiTable concMT = importer.convert(testDocument.getModel(), concFile);
 		
-		// Test MultiTable output
-		DynamicFBA dfba = new DynamicFBA(testDocument, concMT, 44);
-		//System.out.println("Solution MultiTable: " + dfba.getSolutionMultiTable().toString());
-		System.out.println("DFBA concentrations MultiTable: " + dfba.getDFBAConcentrations().toString());
+		// Read gibbs energy file
+		String gibbsFile = args[2];
+		// ...
+		double[] gibbsEnergies = null;
 		
-		// Test linear interpolation
-		Column testColumn = dfba.getDFBAConcentrations().getColumn("HC00685_i");
-		System.out.println("HC00685_i concentrations: " + testColumn.toString());
+		// Read system boundary file
+		String sysBoundFile = args[3];
+		// ...
+		double[] sysBounds = null;
+		
+		// Test solution MultiTable output
+		DynamicFBA dfba = new DynamicFBA(testDocument, concMT, Integer.parseInt(args[4]));
+		dfba.setGibbsEnergies(gibbsEnergies);
+		dfba.setSystemBoundaries(sysBounds);
+		
+		FluxMinimization fm = new FluxMinimization();
+		dfba.prepareDynamicFBA(fm);
+		dfba.runDynamicFBA(fm);
+		
+		MultiTable solution = dfba.getSolutionMultiTable();
+		System.out.println(solution.toString());
+		
 	}
 
 }
