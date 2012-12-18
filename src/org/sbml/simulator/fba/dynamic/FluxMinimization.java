@@ -247,6 +247,15 @@ public class FluxMinimization extends TargetFunction {
 	public void setErrors(double[] errors) {
 		this.errors = errors;
 	}
+	
+	/**
+	 * Set the computed gibbs energies.
+	 * 
+	 * @param gibbsEnergies
+	 */
+	public void setComputedGibbsEnergies(double[] gibbsEnergies) {
+		this.computedGibbsEnergies = gibbsEnergies;
+	}
 
 	/* (non-Javadoc)
 	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getOptimizedFluxVector()
@@ -364,7 +373,7 @@ public class FluxMinimization extends TargetFunction {
 	public int[] getTargetVariablesLengths() {
 		int[] targetVariablesLength = new int[5];
 		targetVariablesLength[0] = 1; //1 variable for the flux vector
-		targetVariablesLength[1] = this.currentConcentrations.length; //variables for the concentrations
+		targetVariablesLength[1] = DynamicFBA.expandedDocument.getModel().getSpeciesCount(); //variables for the concentrations
 		targetVariablesLength[2] = this.computedLVector.length; //variables for the L vector
 		targetVariablesLength[3] = this.errors.length; //variables for the error vector
 		targetVariablesLength[4] = this.computedGibbsEnergies.length; //variables for the gibbs energies
@@ -569,11 +578,6 @@ public class FluxMinimization extends TargetFunction {
 			// Constraint delta_G = delta_G - error
 			if (this.constraintError == true) {
 				// TODO implement constraint error
-			}
-			
-			// Constraint L
-			if (this.constraintL == true) {
-				// TODO implement constraint L
 			}
 		}
 	}
