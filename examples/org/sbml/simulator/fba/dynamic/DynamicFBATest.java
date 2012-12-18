@@ -17,11 +17,15 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
+import java.io.File;
+import java.util.Arrays;
+
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
+import org.sbml.simulator.fba.controller.CSVDataConverter;
+import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.io.CSVDataImporter;
 import org.simulator.math.odes.MultiTable;
-import org.simulator.math.odes.MultiTable.Block.Column;
 
 /**
  * 
@@ -43,30 +47,52 @@ public class DynamicFBATest {
 		SBMLReader reader = new SBMLReader();
 		SBMLDocument testDocument = reader.readSBML(args[0]);
 		
+		System.out.println("SBML document read");
+		
 		// Read concentration file
 		String concFile = args[1];
 		CSVDataImporter importer = new CSVDataImporter();
 		MultiTable concMT = importer.convert(testDocument.getModel(), concFile);
 		
-		// Read gibbs energy file
-		String gibbsFile = args[2];
-		// ...
-		double[] gibbsEnergies = null;
+		System.out.println("Concentrations read");
 		
 		// Read system boundary file
-		String sysBoundFile = args[3];
-		// ...
-		double[] sysBounds = null;
+		File sysBoundFile = new File(args[2]);
+		CSVDataConverter sysBoundConverter = new CSVDataConverter(testDocument, true);
+		sysBoundConverter.readSystemBoundariesFromFile(sysBoundFile);
+		while (sysBoundConverter.getSystemBoundariesArray() == null) {
+			//wait
+		}
+		double[] sysBounds = sysBoundConverter.getSystemBoundariesArray();
+		// very unusual!
+		double[] correctedSysBounds = FluxMinimizationUtils.getCorrectedSystemBoundaries(testDocument, sysBounds);
 		
-		// Test solution MultiTable output
-		DynamicFBA dfba = new DynamicFBA(testDocument, concMT, Integer.parseInt(args[4]));
+		System.out.println("System boundaries read. Count: " + correctedSysBounds.length);
+		System.out.println(Arrays.toString(correctedSysBounds));
+		
+		// Read gibbs energy file
+		File gibbsFile = new File(args[3]);
+		CSVDataConverter gibbsConverter = new CSVDataConverter(testDocument, correctedSysBounds);
+		gibbsConverter.readGibbsFromFile(gibbsFile);
+		while(gibbsConverter.getGibbsArray() == null) {
+			//wait TODO check gibbs reading process, maybe wrong!
+			Thread.sleep(1000);
+		}
+		double[] gibbsEnergies = gibbsConverter.getGibbsArray();
+		
+		System.out.println("Gibbs energies read. Count: " + gibbsEnergies.length);
+		System.out.println(Arrays.toString(gibbsEnergies));
+		
+		// Run a dynamic FBA without linear interpolation
+		DynamicFBA dfba = new DynamicFBA(testDocument, concMT);
 		dfba.setGibbsEnergies(gibbsEnergies);
-		dfba.setSystemBoundaries(sysBounds);
+		dfba.setSystemBoundaries(correctedSysBounds);
 		
 		FluxMinimization fm = new FluxMinimization();
 		dfba.prepareDynamicFBA(fm);
 		dfba.runDynamicFBA(fm);
 		
+		// Print solution MultiTable
 		MultiTable solution = dfba.getSolutionMultiTable();
 		System.out.println(solution.toString());
 		
