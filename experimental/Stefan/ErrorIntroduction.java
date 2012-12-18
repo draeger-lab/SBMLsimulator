@@ -1,5 +1,3 @@
-
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -20,6 +18,7 @@ import org.simulator.math.odes.MultiTable;
 import de.zbit.io.csv.CSVWriter;
 
 public class ErrorIntroduction {
+	
   public static void introduceError(String dataFile, String outputFile, String modelFile, double averagePrecision, double systematicErrorPercentage, double baselinePercentage)
     throws XMLStreamException, IOException, SBMLException {
     //read file with data
@@ -154,7 +153,7 @@ public class ErrorIntroduction {
             averagePrecision=Math.round(averagePrecision*100)/100.0;
             systematicErrorPercentage=Math.round(systematicErrorPercentage);
             baselinePercentage=Math.round(baselinePercentage);
-            String file="C:/users/keller/workspace/SBMLsimulator/files/Testdaten/" + "dataWithError_" + (int)(averagePrecision*100) + "_" + (int)systematicErrorPercentage + "_" + (int)baselinePercentage + "_" + repetition  +".csv";
+            String file = "Dateipfad" + "dataWithError_" + (int)(averagePrecision*100) + "_" + (int)systematicErrorPercentage + "_" + (int)baselinePercentage + "_" + repetition  +".csv";
             introduceError(args[0],file,args[1],averagePrecision,systematicErrorPercentage,baselinePercentage);
           }
         }
