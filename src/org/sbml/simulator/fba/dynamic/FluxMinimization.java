@@ -52,6 +52,16 @@ public class FluxMinimization extends TargetFunction {
 	private StoichiometricMatrix N_int_sys;
 	
 	/*
+	 * Ideal Gas Constant
+	 */
+	private static final double R = 8.3144621;
+	
+	/*
+	 * Standard Ambient Temperature
+	 */
+	private static final double T = 298.15;
+	
+	/*
 	 * Contains the maximum of J_j / G_j for each reaction j in the model
 	 */
 	private double r_max;
@@ -67,6 +77,11 @@ public class FluxMinimization extends TargetFunction {
 	private double lambda_3 = 0.01;
 	
 	private double lambda_4 = 1.0;
+	
+	/*
+	 * The array contains the read gibbs energies in unit J/mol
+	 */
+	private double[] readGibbsEnergies;
 	
 	/*
 	 * This vector contains the fluxes that are computed by the Tableau algorithm
@@ -152,11 +167,6 @@ public class FluxMinimization extends TargetFunction {
 	 */
 	private boolean constraintError = true;
 	
-	/*
-	 * Constraint L
-	 */
-	private boolean constraintL = true;
-	
 	
 	/**
 	 * Set the expanded {@link StoichiometricMatrix} N_int_sys of the
@@ -202,6 +212,15 @@ public class FluxMinimization extends TargetFunction {
 	 */
 	public void setLambda3(double lambda3) {
 		this.lambda_3 = lambda3;
+	}
+	
+	/**
+	 * Set the read gibbs energies (unit J/mol)
+	 * 
+	 * @param gibbsEnergies
+	 */
+	public void setReadGibbsEnergies(double[] gibbsEnergies) {
+		this.readGibbsEnergies = gibbsEnergies;
 	}
 	
 	/**
@@ -357,14 +376,6 @@ public class FluxMinimization extends TargetFunction {
 	 */
 	public void setConstraintError(boolean constraintError) {
 		this.constraintError = constraintError;
-	}
-	
-	/**
-	 * Enable/Disable constraint L
-	 * @param constraintL
-	 */
-	public void setConstraintL(boolean constraintL) {
-		this.constraintL = constraintL;
 	}
 	
 	/**
@@ -531,7 +542,7 @@ public class FluxMinimization extends TargetFunction {
 		
 		for (int j = 0; j < reactionCount; j++) {
 			// Flux J_j
-			IloNumExpr j_j = cplex.abs(cplex.prod(Math.abs(this.computedFluxVector[j]), getVariables()[0]));
+			IloNumExpr j_j = cplex.abs(cplex.prod(Math.abs(this.computedFluxVector[j]), getVariables()[fluxPosition]));
 			
 			// Constraint J_j * G_j < 0
 			if (this.constraintJG == true) {
@@ -541,10 +552,10 @@ public class FluxMinimization extends TargetFunction {
 					// Check if algebraic sign is equal
 					if (Math.signum(this.computedFluxVector[j]) == Math.signum(this.computedGibbsEnergies[j])) {
 						// It is equal, so the gibbs energies sign must be changed
-						jg = cplex.prod(cplex.prod(this.computedFluxVector[j], getVariables()[0]), cplex.prod(this.computedGibbsEnergies[j], getVariables()[gibbsPosition + j]));
+						jg = cplex.prod(cplex.prod(this.computedFluxVector[j], getVariables()[fluxPosition]), cplex.prod(this.computedGibbsEnergies[j], getVariables()[gibbsPosition + j]));
 					} else {
 						// It is NOT equal, so the constraint can be implemented without changes
-						jg = cplex.prod(cplex.prod(this.computedFluxVector[j], getVariables()[0]), this.computedGibbsEnergies[j]);
+						jg = cplex.prod(cplex.prod(this.computedFluxVector[j], getVariables()[fluxPosition]), this.computedGibbsEnergies[j]);
 					}
 				} else {
 					jg = cplex.prod(this.computedFluxVector[j], getVariables()[gibbsPosition + j]);
@@ -572,12 +583,34 @@ public class FluxMinimization extends TargetFunction {
 
 			// Constraint J_j >= 0
 			if (this.constraintJ0 == true) {
-				cplex.addGe(cplex.prod(this.computedFluxVector[j], getVariables()[0]), 0);
+				cplex.addGe(cplex.prod(this.computedFluxVector[j], getVariables()[fluxPosition]), 0);
 			}
 			
 			// Constraint delta_G = delta_G - error
 			if (this.constraintError == true) {
-				// TODO implement constraint error
+				if (!Double.isNaN(this.computedGibbsEnergies[j])) {
+					cplex.addEq(cplex.prod(this.computedGibbsEnergies[j], getVariables()[gibbsPosition + j]), cplex.prod(this.computedGibbsEnergies[j], getVariables()[errorPosition + j]));
+				}
+				
+				IloNumExpr sumConcentrations = cplex.numExpr();
+				for (int i = 0; i < getTargetVariablesLengths()[1]; i++) {
+					if (!Double.isNaN(this.currentConcentrations[i]) && (this.currentConcentrations[i] !=0)) {
+						sumConcentrations = cplex.sum(cplex.prod(this.N_int_sys.get(i, j),cplex.prod(Math.log(this.currentConcentrations[i]), getVariables()[concentrationPosition + i])), sumConcentrations);
+					} else { //use only the variable
+						sumConcentrations = cplex.sum(cplex.prod(this.N_int_sys.get(i, j), getVariables()[concentrationPosition + i]), sumConcentrations);
+					}
+				}
+				
+				if (!Double.isNaN(this.computedGibbsEnergies[j])){
+					//there is a problem if gibbs_eq < 0 TODO: fix it
+					//6.43
+					IloNumExpr delta_G_computation = cplex.sum(cplex.prod(R, cplex.prod(T, sumConcentrations)), cplex.diff(this.readGibbsEnergies[j], getVariables()[errorPosition + j]));
+					cplex.addGe(delta_G_computation, cplex.prod(this.computedGibbsEnergies[j], getVariables()[gibbsPosition + j]));
+				} else {
+					IloNumExpr delta_G_computation = cplex.sum(cplex.prod(R, cplex.prod(T, sumConcentrations)), cplex.prod(-1, getVariables()[errorPosition + j]));
+					cplex.addGe(delta_G_computation, getVariables()[gibbsPosition + j]);
+				}
+				
 			}
 		}
 	}
