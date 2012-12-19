@@ -55,9 +55,9 @@ public abstract class TargetFunction {
 	private double[] solution;
 	
 	/*
-	 * Save the CPLEX iterations; default value of 600 iterations
+	 * Save the CPLEX iterations; default value of 10000 iterations
 	 */
-	private int cplexIterations = 600;
+	private int cplexIterations = 10000;
 	
 	
 	/**
@@ -103,7 +103,7 @@ public abstract class TargetFunction {
 	}
 	
 	/**
-	 * Set the CPLEX iterations (default: 600 iterations).
+	 * Set the CPLEX iterations (default: 10000 iterations).
 	 * 
 	 * @param iterations
 	 */
