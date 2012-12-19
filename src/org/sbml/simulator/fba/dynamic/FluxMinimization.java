@@ -622,42 +622,45 @@ public class FluxMinimization extends TargetFunction {
 	public void assignOptimizedSolution() {
 		double[] solution = getSolution();
 		
-		// 1. Flux vector assignment
-		int fluxPosition = getTargetVariablesLengths()[0] - 1;
-		this.optimizedFluxVector = new double[this.computedFluxVector.length];
-		// solution[0] contains the optimized value for the flux vector
-		for (int i = 0; i < this.computedFluxVector.length; i++) {
-			this.optimizedFluxVector[i] = solution[fluxPosition] * this.computedFluxVector[i];
+		if (solution == null) {
+			logger.warning("Solution doesn't exist, no assignment possible!");
+		} else {
+			// 1. Flux vector assignment
+			int fluxPosition = getTargetVariablesLengths()[0] - 1;
+			this.optimizedFluxVector = new double[this.computedFluxVector.length];
+			// solution[0] contains the optimized value for the flux vector
+			for (int i = 0; i < this.computedFluxVector.length; i++) {
+				this.optimizedFluxVector[i] = solution[fluxPosition] * this.computedFluxVector[i];
+			}
+			
+			// 2. Concentration vector assignment
+			int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
+			this.optimizedConcentrations = new double[getTargetVariablesLengths()[1]];
+			for (int i = 0; i < getTargetVariablesLengths()[1]; i++) {
+				this.optimizedConcentrations[i] = solution[i + concentrationPosition];
+			}
+			
+			// 3. L vector assignment
+			int lPosition = concentrationPosition + getTargetVariablesLengths()[1];
+//			this.optimizedLVector = new double[getTargetVariablesLengths()[2]];
+//			for (int i = 0; i < getTargetVariablesLengths()[2]; i++) {
+//				this.optimizedLVector[i] = solution[i + lPosition];
+//			}
+			
+			// 4. Error vector assignment
+			int errorPosition = lPosition + getTargetVariablesLengths()[2];
+//			this.optimizedErrors = new double[getTargetVariablesLengths()[3]];
+//			for (int i = 0; i < getTargetVariablesLengths()[3]; i++) {
+//				this.optimizedErrors[i] = solution[i + errorPosition];
+//			}
+			
+			// 5. Gibbs energy vector assignment
+			int gibbsPosition = errorPosition + getTargetVariablesLengths()[3];
+			this.optimizedGibbsEnergies = new double[getTargetVariablesLengths()[4]];
+			for (int i = 0; i < getTargetVariablesLengths()[4]; i++) {
+				this.optimizedGibbsEnergies[i] = solution[i + gibbsPosition];
+			}
 		}
-		
-		// 2. Concentration vector assignment
-		int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
-		this.optimizedConcentrations = new double[getTargetVariablesLengths()[1]];
-		for (int i = 0; i < getTargetVariablesLengths()[1]; i++) {
-			this.optimizedConcentrations[i] = solution[i + concentrationPosition];
-		}
-		
-		// 3. L vector assignment
-		int lPosition = concentrationPosition + getTargetVariablesLengths()[1];
-//		this.optimizedLVector = new double[getTargetVariablesLengths()[2]];
-//		for (int i = 0; i < getTargetVariablesLengths()[2]; i++) {
-//			this.optimizedLVector[i] = solution[i + lPosition];
-//		}
-		
-		// 4. Error vector assignment
-		int errorPosition = lPosition + getTargetVariablesLengths()[2];
-//		this.optimizedErrors = new double[getTargetVariablesLengths()[3]];
-//		for (int i = 0; i < getTargetVariablesLengths()[3]; i++) {
-//			this.optimizedErrors[i] = solution[i + errorPosition];
-//		}
-		
-		// 5. Gibbs energy vector assignment
-		int gibbsPosition = errorPosition + getTargetVariablesLengths()[3];
-		this.optimizedGibbsEnergies = new double[getTargetVariablesLengths()[4]];
-		for (int i = 0; i < getTargetVariablesLengths()[4]; i++) {
-			this.optimizedGibbsEnergies[i] = solution[i + gibbsPosition];
-		}
-		
 	}
 	
 }
