@@ -23,10 +23,8 @@ import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.Species;
-import org.sbml.simulator.fba.controller.Constraints;
 import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.math.SplineCalculation;
-import org.sbml.simulator.stability.math.SBMLMatrixParser;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 import org.simulator.math.odes.MultiTable;
 
@@ -214,6 +212,9 @@ public class DynamicFBA {
 	public void prepareDynamicFBA(FluxMinimization fm) throws Exception {
 		// If gibbs energies are read from file...
 		if (this.isGibbsEnergies) {
+			// TODO check if gibbs energies are in unit J/mol, no? -> compute!
+			fm.setReadGibbsEnergies(this.gibbsEnergies);
+			// Compute the gibbs energies
 			
 		} else {
 			//... or aren't available
@@ -225,7 +226,7 @@ public class DynamicFBA {
 			expandedDocument = FluxMinimizationUtils.getExpandedDocument(originalDocument, this.systemBoundaries);
 			StoichiometricMatrix N_with_read_sysBounds = FluxMinimizationUtils.getExpandedStoichiometricMatrix(originalDocument, this.systemBoundaries);
 			fm.setNIntSys(N_with_read_sysBounds);
-			// Compute and set flux vector with Tableau algorithm
+			// Compute (with Tableau algorithm) and set flux vector
 			double[] fluxVector = FluxMinimizationUtils.computeFluxVector(N_with_read_sysBounds, null, expandedDocument);
 			fm.setComputedFluxVector(fluxVector);
 		} else {
@@ -233,7 +234,7 @@ public class DynamicFBA {
 			expandedDocument = FluxMinimizationUtils.getExpandedDocument(originalDocument);
 			StoichiometricMatrix N_with_computed_sysBounds = FluxMinimizationUtils.getExpandedStoichiometricMatrix(originalDocument);
 			fm.setNIntSys(N_with_computed_sysBounds);
-			// Compute and set flux vector with Tableau algorithm
+			// Compute (with Tableau algorithm) and set flux vector
 			double[] fluxVector = FluxMinimizationUtils.computeFluxVector(N_with_computed_sysBounds, null, expandedDocument);
 			fm.setComputedFluxVector(fluxVector);
 		}
