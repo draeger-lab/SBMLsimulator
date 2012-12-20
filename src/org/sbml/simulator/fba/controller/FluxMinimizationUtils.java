@@ -469,6 +469,20 @@ public class FluxMinimizationUtils {
 	}
 
 	/**
+	 * Converts Gibbs values given in [kJ/mol] to [J/mol].
+	 * 
+	 * @param gibbs_eq
+	 * @return adapted Gibbs energies
+	 */
+	public static double[] getEquillibriumGibbsEnergiesfromkKiloJoule(double[] gibbs_eq) {
+		double[] adaptedGibbsEnergies = new double[gibbs_eq.length];
+		for (int i = 0; i < gibbs_eq.length; i++) {
+			adaptedGibbsEnergies[i] = gibbs_eq[i] * 1000;
+		}
+		return adaptedGibbsEnergies;
+	}
+
+	/**
 	 * returns the expanded {@link SBMLDocument} with the computed system boundaries.
 	 * @param originalDocument
 	 * @return SBMLDocument with added system boundaries
