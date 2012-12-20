@@ -570,6 +570,8 @@ public class FluxMinimizationUtils {
 	}
 
 	/**
+	 * 
+	 * Returns K_int^T
 	 * @return the steady state matrix
 	 */
 	public static StabilityMatrix getSteadyStateMatrix() {
