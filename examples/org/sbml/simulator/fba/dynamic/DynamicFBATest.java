@@ -61,10 +61,12 @@ public class DynamicFBATest {
 		CSVDataConverter sysBoundConverter = new CSVDataConverter(testDocument, true);
 		sysBoundConverter.readSystemBoundariesFromFile(sysBoundFile);
 		while (sysBoundConverter.getSystemBoundariesArray() == null) {
-			//wait
+			//wait TODO check sysBound reading process, maybe wrong!
+			Thread.sleep(1000);
 		}
+		System.out.println();
 		double[] sysBounds = sysBoundConverter.getSystemBoundariesArray();
-		// very unusual!
+		// TODO remember: get corrected system boundaries after reading the sysBound file
 		double[] correctedSysBounds = FluxMinimizationUtils.getCorrectedSystemBoundaries(testDocument, sysBounds);
 		
 		System.out.println("System boundaries read. Count: " + correctedSysBounds.length);
@@ -78,17 +80,21 @@ public class DynamicFBATest {
 			//wait TODO check gibbs reading process, maybe wrong!
 			Thread.sleep(1000);
 		}
+		System.out.println();
 		double[] gibbsEnergies = gibbsConverter.getGibbsArray();
+		// TODO remember: get corrected gibbs energies after reading the gibbs file 
+		double[] correctedGibbsEnergies = FluxMinimizationUtils.getEquillibriumGibbsEnergiesfromkKiloJoule(gibbsEnergies);
 		
-		System.out.println("Gibbs energies read. Count: " + gibbsEnergies.length);
-		System.out.println(Arrays.toString(gibbsEnergies));
+		System.out.println("Gibbs energies read. Count: " + correctedGibbsEnergies.length);
+		System.out.println(Arrays.toString(correctedGibbsEnergies));
 		
 		// Run a dynamic FBA without linear interpolation
 		DynamicFBA dfba = new DynamicFBA(testDocument, concMT);
-		dfba.setGibbsEnergies(gibbsEnergies);
 		dfba.setSystemBoundaries(correctedSysBounds);
 		
 		FluxMinimization fm = new FluxMinimization();
+		fm.setReadGibbsEnergies(correctedGibbsEnergies);
+		
 		dfba.prepareDynamicFBA(fm);
 		dfba.runDynamicFBA(fm);
 		
