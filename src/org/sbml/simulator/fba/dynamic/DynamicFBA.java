@@ -242,6 +242,8 @@ public class DynamicFBA {
 			function.setCurrentConcentrations(currentConcentrations);
 			function.optimizeProblem(cplex);
 			function.assignOptimizedSolution();
+			// (Reset the CPLEX object! If not, a MultipleObjectiveException is waiting!)
+			cplex.clearModel();
 			
 			// ... and fill the solution MultiTable
 			int block = 0;
