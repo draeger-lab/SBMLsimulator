@@ -536,13 +536,13 @@ public class FluxMinimization extends TargetFunction {
 		int gibbsPosition = errorPosition + getTargetVariablesLengths()[3];
 		
 		for (int j = 0; j < reactionCount; j++) {
-			// Flux J_j TODO omit Math.abs()?
-			IloNumExpr j_j = cplex.abs(cplex.prod(Math.abs(this.computedFluxVector[j]), getVariables()[fluxPosition]));
+			// Flux J_j
+			IloNumExpr j_j = cplex.prod(this.computedFluxVector[j], getVariables()[fluxPosition]);
 			
 			// Constraint J_j * G_j < 0
 			if (this.constraintJG == true) {
 				IloNumExpr jg = cplex.numExpr();
-				jg = cplex.prod(cplex.prod(this.computedFluxVector[j], getVariables()[fluxPosition]), getVariables()[j + gibbsPosition]);
+				jg = cplex.prod(j_j, getVariables()[j + gibbsPosition]);
 				cplex.addLe(jg, 0);
 			}
 			
@@ -550,12 +550,12 @@ public class FluxMinimization extends TargetFunction {
 			if (this.constraintJ_rmaxG == true) {
 				IloNumExpr rmaxG = cplex.numExpr();
 				rmaxG = cplex.prod(this.r_max, cplex.abs(getVariables()[j + gibbsPosition]));
-				cplex.addLe(cplex.diff(j_j, rmaxG), 0);
+				cplex.addLe(cplex.diff(cplex.abs(j_j), rmaxG), 0);
 			}
 
 			// Constraint J_j >= 0
 			if (this.constraintJ0 == true) {
-				cplex.addGe(cplex.prod(this.computedFluxVector[j], getVariables()[fluxPosition]), 0);
+				cplex.addGe(j_j, 0);
 			}
 			
 			// Constraint delta_G = delta_G - error
