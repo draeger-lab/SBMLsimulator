@@ -592,7 +592,7 @@ public class FluxMinimization extends TargetFunction {
 			int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
 			this.optimizedConcentrations = new double[getTargetVariablesLengths()[1]];
 			for (int i = 0; i < getTargetVariablesLengths()[1]; i++) {
-				this.optimizedConcentrations[i] = solution[i + concentrationPosition];
+				this.optimizedConcentrations[i] = Math.pow(Math.E, solution[i + concentrationPosition]);
 			}
 			
 			// 3. L vector assignment
