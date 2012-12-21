@@ -25,6 +25,7 @@ import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.Species;
 import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.math.SplineCalculation;
+import org.sbml.simulator.stability.math.StabilityMatrix;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 import org.simulator.math.odes.MultiTable;
 
@@ -62,21 +63,10 @@ public class DynamicFBA {
 	private double[] systemBoundaries;
 	
 	/*
-	 * Save the read gibbs energies in a double array
-	 */
-	private double[] gibbsEnergies;
-	
-	/*
 	 * If the system boundaries are read from file, set system boundaries and
 	 * <CODE>true</CODE>
 	 */
 	private boolean isSystemBoundaries = false;
-	
-	/*
-	 * If the gibbs energies are read from file, set gibbs energies and
-	 * <CODE>true</CODE>
-	 */
-	private boolean isGibbsEnergies = false;
 	
 	/*
 	 * A {@link MultiTable} with all linearly interpolated concentration values of
@@ -128,16 +118,6 @@ public class DynamicFBA {
 	public void setSystemBoundaries(double[] systemBoundaries) {
 		this.systemBoundaries = systemBoundaries;
 		this.isSystemBoundaries = true;
-	}
-	
-	/**
-	 * Set the read gibbs energies.
-	 * 
-	 * @param gibbsEnergies
-	 */
-	public void setGibbsEnergies(double[] gibbsEnergies) {
-		this.gibbsEnergies = gibbsEnergies;
-		this.isGibbsEnergies = true;
 	}
 	
 	/**
@@ -210,17 +190,6 @@ public class DynamicFBA {
 	 * @throws Exception
 	 */
 	public void prepareDynamicFBA(FluxMinimization fm) throws Exception {
-		// If gibbs energies are read from file...
-		if (this.isGibbsEnergies) {
-			// TODO check if gibbs energies are in unit J/mol, no? -> compute!
-			fm.setReadGibbsEnergies(this.gibbsEnergies);
-			// Compute the gibbs energies
-			
-		} else {
-			//... or aren't available
-			
-		}
-		
 		// If system boundaries are read from file...
 		if (this.isSystemBoundaries) {
 			expandedDocument = FluxMinimizationUtils.getExpandedDocument(originalDocument, this.systemBoundaries);
@@ -229,6 +198,9 @@ public class DynamicFBA {
 			// Compute (with Tableau algorithm) and set flux vector
 			double[] fluxVector = FluxMinimizationUtils.computeFluxVector(N_with_read_sysBounds, null, expandedDocument);
 			fm.setComputedFluxVector(fluxVector);
+			// Set K_int_T
+			StabilityMatrix K_intTransposed = FluxMinimizationUtils.getSteadyStateMatrix();
+			fm.setKIntTransposed(K_intTransposed);
 		} else {
 			//... or aren't available
 			expandedDocument = FluxMinimizationUtils.getExpandedDocument(originalDocument);
@@ -237,18 +209,10 @@ public class DynamicFBA {
 			// Compute (with Tableau algorithm) and set flux vector
 			double[] fluxVector = FluxMinimizationUtils.computeFluxVector(N_with_computed_sysBounds, null, expandedDocument);
 			fm.setComputedFluxVector(fluxVector);
+			// Set K_int_T
+			StabilityMatrix K_intTransposed = FluxMinimizationUtils.getSteadyStateMatrix();
+			fm.setKIntTransposed(K_intTransposed);
 		}
-		
-		// Compute and set errors
-		double[] errors = FluxMinimizationUtils.computeError(expandedDocument.getModel().getReactionCount());
-		fm.setErrors(errors);
-		
-		// Compute and set L vector
-		
-		
-		// Compute and set r_max
-		
-		
 	}
 	
 	/**
