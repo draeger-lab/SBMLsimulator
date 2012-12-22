@@ -98,12 +98,6 @@ public class FluxMinimization extends TargetFunction {
 	private double[] currentConcentrations;
 	
 	/*
-	 * The computed L vector (L = K_int^T * delta_r G_int, where T is the
-	 * transposed matrix)
-	 */
-	private double[] computedLVector;
-	
-	/*
 	 * The array contains the read gibbs energies in unit J/mol
 	 */
 	private double[] readGibbsEnergies;
@@ -244,15 +238,6 @@ public class FluxMinimization extends TargetFunction {
 	@Override
 	public void setCurrentConcentrations(double[] concentrations) {
 		this.currentConcentrations = concentrations;
-	}
-	
-	/**
-	 * Set the computed L vector.
-	 * 
-	 * @param LVector
-	 */
-	public void setComputedLVector(double[] LVector) {
-		this.computedLVector = LVector;
 	}
 	
 	/**
@@ -491,8 +476,7 @@ public class FluxMinimization extends TargetFunction {
 		int lPosition = concentrationPosition + getTargetVariablesLengths()[1];
 		// Manhattan norm included
 		for (int i = 0; i < getTargetVariablesLengths()[2]; i++) {
-			l = cplex.sum(l, cplex.abs(cplex.prod(this.computedLVector[i], getVariables()[i + lPosition])));
-			//l = cplex.sum(l, cplex.abs(getVariables()[i + lPosition]));
+			l = cplex.sum(l, cplex.abs(getVariables()[i + lPosition]));
 		}
 		l = cplex.prod(cplex.constant(this.lambda_2), l);
 		
@@ -564,9 +548,13 @@ public class FluxMinimization extends TargetFunction {
 				for (int i = 0; i < getTargetVariablesLengths()[1]; i++) {
 					sumConcentrations = cplex.sum(sumConcentrations, cplex.prod(this.N_int_sys.get(i, j), getVariables()[i + concentrationPosition]));
 				}
-				IloNumExpr delta_G_computation = cplex.sum(cplex.prod(R, cplex.prod(T, sumConcentrations)), cplex.diff(this.readGibbsEnergies[j], getVariables()[j + errorPosition]));
+				IloNumExpr delta_G_tilde = cplex.diff(this.readGibbsEnergies[j], getVariables()[j + errorPosition]);
+				IloNumExpr delta_G_computation = cplex.sum(cplex.prod(R, cplex.prod(T, sumConcentrations)), delta_G_tilde);
 				cplex.addEq(delta_G_computation, getVariables()[j + gibbsPosition]);
 			}
+			
+			// Computation of the L vector
+			// TODO implement!
 		}
 	}
 	
