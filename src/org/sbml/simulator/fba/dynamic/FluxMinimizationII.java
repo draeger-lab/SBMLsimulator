@@ -38,44 +38,20 @@ public class FluxMinimizationII extends TargetFunction {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#isConcentrationsOptimization()
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getTargetVariablesIds()
 	 */
 	@Override
-	public boolean isConcentrationsOptimization() {
-		return true;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getOptimizedConcentrations()
-	 */
-	@Override
-	public double[] getOptimizedConcentrations() {
+	public String[][] getTargetVariablesIds() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	/* (non-Javadoc)
-	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getOptimizedFluxVector()
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getTargetVariablesLengths()
 	 */
 	@Override
-	public double[] getOptimizedFluxVector() {
+	public int[] getTargetVariablesLengths() {
 		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#isGibbsEnergiesOptimization()
-	 */
-	@Override
-	public boolean isGibbsEnergiesOptimization() {
-		return false;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getOptimizedGibbsEnergies()
-	 */
-	@Override
-	public double[] getOptimizedGibbsEnergies() {
 		return null;
 	}
 
@@ -96,7 +72,7 @@ public class FluxMinimizationII extends TargetFunction {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#prepareCplex(ilog.cplex.IloCplex)
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#initCplexVariables(ilog.cplex.IloCplex)
 	 */
 	@Override
 	public void initCplexVariables(IloCplex cplex) throws IloException {
@@ -124,13 +100,12 @@ public class FluxMinimizationII extends TargetFunction {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#assignOptimizedSolution()
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getOptimizedSolution()
 	 */
 	@Override
-	public void assignOptimizedSolution() {
+	public double[][] getOptimizedSolution() {
 		// TODO Auto-generated method stub
-		
+		return null;
 	}
-	
 	
 }

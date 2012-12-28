@@ -22,8 +22,14 @@ import ilog.concert.IloNumExpr;
 import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
 
+import java.util.Arrays;
 import java.util.logging.Logger;
 
+import org.sbml.jsbml.ListOf;
+import org.sbml.jsbml.Reaction;
+import org.sbml.jsbml.SBMLDocument;
+import org.sbml.jsbml.Species;
+import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.stability.math.StabilityMatrix;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
@@ -45,6 +51,13 @@ public class FluxMinimization extends TargetFunction {
 	 * A {@link Logger} for this class.
 	 */
 	private static final transient Logger logger = Logger.getLogger(FluxMinimization.class.getName());
+	
+	/*
+	 * The expanded SBML document, in fact:
+	 * - transport reactions eliminated and reversible reactions split,
+	 * - compensated reactions added (computed from system boundaries)
+	 */
+	private SBMLDocument expandedDocument;
 	
 	/*
 	 * The complete intern {@link StoichiometricMatrix} N (with system
@@ -101,31 +114,27 @@ public class FluxMinimization extends TargetFunction {
 	 * The array contains the read gibbs energies in unit J/mol
 	 */
 	private double[] readGibbsEnergies;
-
-	/*
-	 * Save the optimized flux vector in a double array
-	 */
-	private double[] optimizedFluxVector;
 	
 	/*
-	 * Save the optimized concentrations vector in a double array
+	 * The array contains the read system boundaries
 	 */
-	private double[] optimizedConcentrations;
+	private double[] readSystemBoundaries;
 	
 	/*
-	 * Save the optimized L vector in a double array
+	 * If the system boundaries are read from file, set system boundaries and
+	 * <CODE>true</CODE>
 	 */
-	private double[] optimizedLVector;
+	private boolean isSystemBoundaries = false;
 	
 	/*
-	 * Save the optimized error values in a double array
+	 * This object saves the optimized solution, in fact:
+	 * - the optimized fluxes in a double[]
+	 * - the optimized concentrations in a double[]
+	 * (- NOT the optimized error vector in a double[] -> Sysout)
+	 * (- NOT the optimized L vector in a double[] -> Sysout)
+	 * - the optimized gibbs energies in a double[]
 	 */
-	private double[] optimizedErrors;
-	
-	/*
-	 * Save the optimized gibbs energies vector in a double array
-	 */
-	private double[] optimizedGibbsEnergies;
+	private double[][] optimizedSolution;
 	
 	/*
 	 * Lower bounds for CPLEX variables saved in a double array
@@ -156,27 +165,6 @@ public class FluxMinimization extends TargetFunction {
 	 * Constraint delta_r G_j = delta_r G^0_j - E_j + RT...
 	 */
 	private boolean constraintError = true;
-	
-	
-	/**
-	 * Set the expanded {@link StoichiometricMatrix} N_int_sys of the
-	 * corresponding expanded SBML document.
-	 * 
-	 * @param N
-	 */
-	public void setNIntSys(StoichiometricMatrix N) {
-		this.N_int_sys = N;
-	}
-	
-	/**
-	 * Set the internal, reduced and transposed {@link StoichiometricMatrix}
-	 * K_int^T for the computation of the L vector.
-	 * 
-	 * @param K_intT
-	 */
-	public void setKIntTransposed(StabilityMatrix K_intT) {
-		this.K_intTransposed = K_intT;
-	}
 	
 	/**
 	 * Set the concentrations weighting factor lambda1 (default: 10.0).
@@ -214,15 +202,6 @@ public class FluxMinimization extends TargetFunction {
 		this.lambda_4 = lambda4;
 	}
 	
-	/**
-	 * Set the computed flux vector.
-	 * 
-	 * @param fluxVector
-	 */
-	public void setComputedFluxVector(double[] fluxVector) {
-		this.computedFluxVector = fluxVector;
-	}
-	
 	/* (non-Javadoc)
 	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#setCurrenConcentrations(double[])
 	 */
@@ -239,59 +218,45 @@ public class FluxMinimization extends TargetFunction {
 	public void setReadGibbsEnergies(double[] gibbsEnergies) {
 		this.readGibbsEnergies = gibbsEnergies;
 	}
-
-	/* (non-Javadoc)
-	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getOptimizedFluxVector()
-	 */
-	@Override
-	public double[] getOptimizedFluxVector() {
-		return this.optimizedFluxVector;
-	}
 	
-	/* (non-Javadoc)
-	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getOptimizedConcentrations()
+	/**
+	 * Set the read system boundaries.
+	 * 
+	 * @param systemBoundaries
 	 */
-	@Override
-	public double[] getOptimizedConcentrations() {
-		return this.optimizedConcentrations;
+	public void setReadSystemBoundaries(double[] systemBoundaries) {
+		this.readSystemBoundaries = systemBoundaries;
+		this.isSystemBoundaries = true;
 	}
 	
 	/**
-	 * @return The computed L vector optimized by the target function
+	 * Prepare the FluxMinimization by setting the:
+	 * - expanded SBML document
+	 * - matrix N_int_sys
+	 * - computed flux vector (Tableau algorithm)
+	 * - matrix K_int_T
+	 * all from the (read) system boundaries.
+	 * 
+	 * @throws Exception
 	 */
-	public double[] getOptimizedLVector() {
-		return this.optimizedLVector;
-	}
-	
-	/**
-	 * @return The computed error values optimized by the target function
-	 */
-	public double[] getOptimizedErrors() {
-		return this.optimizedErrors;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getOptimizedGibbsEnergies()
-	 */
-	@Override
-	public double[] getOptimizedGibbsEnergies() {
-		return this.optimizedGibbsEnergies;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#isConcentrationsOptimization()
-	 */
-	@Override
-	public boolean isConcentrationsOptimization() {
-		return true;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#isGibbsEnergiesOptimization()
-	 */
-	@Override
-	public boolean isGibbsEnergiesOptimization() {
-		return true;
+	private void prepareFluxMinimization() throws Exception {
+		// If system boundaries are read from file...
+		if (this.isSystemBoundaries) {
+			this.expandedDocument = FluxMinimizationUtils.getExpandedDocument(DynamicFBA.originalDocument, this.readSystemBoundaries);
+			this.N_int_sys = FluxMinimizationUtils.getExpandedStoichiometricMatrix(DynamicFBA.originalDocument, this.readSystemBoundaries);
+			// Compute (with Tableau algorithm) and set flux vector
+			this.computedFluxVector = FluxMinimizationUtils.computeFluxVector(this.N_int_sys, null, this.expandedDocument);
+			// Set K_int_T
+			this.K_intTransposed = FluxMinimizationUtils.getSteadyStateMatrix();
+		} else {
+			//... or aren't available
+			this.expandedDocument = FluxMinimizationUtils.getExpandedDocument(DynamicFBA.originalDocument);
+			this.N_int_sys = FluxMinimizationUtils.getExpandedStoichiometricMatrix(DynamicFBA.originalDocument);
+			// Compute (with Tableau algorithm) and set flux vector
+			this.computedFluxVector = FluxMinimizationUtils.computeFluxVector(this.N_int_sys, null, this.expandedDocument);
+			// Set K_int_T
+			this.K_intTransposed = FluxMinimizationUtils.getSteadyStateMatrix();
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -341,13 +306,45 @@ public class FluxMinimization extends TargetFunction {
 	public void setConstraintError(boolean constraintError) {
 		this.constraintError = constraintError;
 	}
-	
-	/**
-	 * @return The length of each variable vector in an int array (attend the order!)
+
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getTargetVariablesIds()
 	 */
+	@Override
+	public String[][] getTargetVariablesIds() {		
+		// Species Ids for the concentrations block
+		ListOf<Species> listOfSpecies = this.expandedDocument.getModel().getListOfSpecies();
+		int speciesCount = this.expandedDocument.getModel().getSpeciesCount();
+		String[] speciesIds = new String[speciesCount];
+		for (int i = 0; i < speciesCount; i++) {
+			speciesIds[i] = listOfSpecies.get(i).getId();
+		}
+
+		// Reaction Ids for the fluxes and gibbs energies block
+		ListOf<Reaction> listOfReactions = this.expandedDocument.getModel().getListOfReactions();
+		int reactionCount = this.expandedDocument.getModel().getReactionCount();
+		String[] reactionIds = new String[reactionCount];
+		for (int i = 0; i < reactionCount; i++) {
+			reactionIds[i] = listOfReactions.get(i).getId();
+		}
+		
+		String[][] targetVariablesIds = new String[3][];
+		targetVariablesIds[0] = speciesIds; // The concentration ID's
+		targetVariablesIds[1] = reactionIds; // The flux vector ID's
+		// Now: no assignment useful! There are no L vector ID's for the MultiTable
+		//targetVariablesIds[2] = reactionIds; // The error vector ID's
+		targetVariablesIds[2] = reactionIds; // The gibbs energies ID's
+
+		return targetVariablesIds;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getTargetVariablesLengths()
+	 */
+	@Override
 	public int[] getTargetVariablesLengths() {
-		int speciesCount = DynamicFBA.expandedDocument.getModel().getSpeciesCount();
-		int reactionCount = DynamicFBA.expandedDocument.getModel().getReactionCount();
+		int speciesCount = this.expandedDocument.getModel().getSpeciesCount();
+		int reactionCount = this.expandedDocument.getModel().getReactionCount();
 		int lDimension = this.K_intTransposed.getRowDimension();
 		
 		int[] targetVariablesLength = new int[5];
@@ -413,6 +410,13 @@ public class FluxMinimization extends TargetFunction {
 	 */
 	@Override
 	public void initCplexVariables(IloCplex cplex) throws IloException {
+		// Prepare the FluxMinimization
+		try {
+			prepareFluxMinimization();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		int fullVariableLength = 0;
 		for (int i = 0; i < getTargetVariablesLengths().length; i++) {
 			fullVariableLength += getTargetVariablesLengths()[i];
@@ -501,8 +505,8 @@ public class FluxMinimization extends TargetFunction {
 	 */
 	@Override
 	public void addConstraintsToTargetFunction(IloCplex cplex) throws IloException {
-		int reactionCount = DynamicFBA.expandedDocument.getModel().getReactionCount();
-		int speciesCount = DynamicFBA.expandedDocument.getModel().getSpeciesCount();
+		int reactionCount = this.expandedDocument.getModel().getReactionCount();
+		int speciesCount = this.expandedDocument.getModel().getSpeciesCount();
 
 		int fluxPosition = getTargetVariablesLengths()[0] - 1;
 		int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
@@ -599,48 +603,57 @@ public class FluxMinimization extends TargetFunction {
 	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#assignOptimizedSolution(org.sbml.jsbml.SBMLDocument)
 	 */
 	@Override
-	public void assignOptimizedSolution() {
+	public double[][] getOptimizedSolution() {
 		double[] solution = getSolution();
+		this.optimizedSolution = new double[3][];
 		
 		if (solution == null) {
-			logger.warning("Solution doesn't exist, no assignment possible!");
+			logger.warning("Can't get optimized solution! Solution doesn't exist!");
 		} else {
 			// 1. Flux vector assignment
 			int fluxPosition = getTargetVariablesLengths()[0] - 1;
-			this.optimizedFluxVector = new double[this.computedFluxVector.length];
+			double[] optimizedFluxVector = new double[this.computedFluxVector.length];
 			// solution[0] contains the optimized value for the flux vector
 			for (int i = 0; i < this.computedFluxVector.length; i++) {
-				this.optimizedFluxVector[i] = solution[fluxPosition] * this.computedFluxVector[i];
+				optimizedFluxVector[i] = solution[fluxPosition] * this.computedFluxVector[i];
 			}
+			this.optimizedSolution[1] = optimizedFluxVector; // 2nd position: flux vector
 			
 			// 2. Concentration vector assignment
 			int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
-			this.optimizedConcentrations = new double[getTargetVariablesLengths()[1]];
+			double[] optimizedConcentrations = new double[getTargetVariablesLengths()[1]];
 			for (int i = 0; i < getTargetVariablesLengths()[1]; i++) {
-				this.optimizedConcentrations[i] = Math.pow(Math.E, solution[i + concentrationPosition]);
+				optimizedConcentrations[i] = Math.pow(Math.E, solution[i + concentrationPosition]);
 			}
+			this.optimizedSolution[0] = optimizedConcentrations; // 1st position: concentrations
 			
 			// 3. L vector assignment
 			int lPosition = concentrationPosition + getTargetVariablesLengths()[1];
-			this.optimizedLVector = new double[getTargetVariablesLengths()[2]];
+			double[] optimizedLVector = new double[getTargetVariablesLengths()[2]];
 			for (int i = 0; i < getTargetVariablesLengths()[2]; i++) {
-				this.optimizedLVector[i] = solution[i + lPosition];
+				optimizedLVector[i] = solution[i + lPosition];
 			}
+			System.out.println("Optimized L vector: " + Arrays.toString(optimizedLVector));
+			// TODO now: no assignment useful! There are no L vector ID's for the MultiTable
 			
 			// 4. Error vector assignment
 			int errorPosition = lPosition + getTargetVariablesLengths()[2];
-			this.optimizedErrors = new double[getTargetVariablesLengths()[3]];
+			double[] optimizedErrors = new double[getTargetVariablesLengths()[3]];
 			for (int i = 0; i < getTargetVariablesLengths()[3]; i++) {
-				this.optimizedErrors[i] = solution[i + errorPosition];
+				optimizedErrors[i] = solution[i + errorPosition];
 			}
+			System.out.println("Optimized error Vector: " + Arrays.toString(optimizedErrors));
 			
 			// 5. Gibbs energy vector assignment
 			int gibbsPosition = errorPosition + getTargetVariablesLengths()[3];
-			this.optimizedGibbsEnergies = new double[getTargetVariablesLengths()[4]];
+			double[] optimizedGibbsEnergies = new double[getTargetVariablesLengths()[4]];
 			for (int i = 0; i < getTargetVariablesLengths()[4]; i++) {
-				this.optimizedGibbsEnergies[i] = solution[i + gibbsPosition];
+				optimizedGibbsEnergies[i] = solution[i + gibbsPosition];
 			}
+			this.optimizedSolution[2] = optimizedGibbsEnergies; // 3rd position: gibbs energies
 		}
+		
+		return this.optimizedSolution;
 	}
 	
 }

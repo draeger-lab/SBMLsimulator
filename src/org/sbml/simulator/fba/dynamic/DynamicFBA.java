@@ -20,13 +20,9 @@ package org.sbml.simulator.fba.dynamic;
 import java.util.logging.Logger;
 
 import org.sbml.jsbml.ListOf;
-import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.Species;
-import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.math.SplineCalculation;
-import org.sbml.simulator.stability.math.StabilityMatrix;
-import org.sbml.simulator.stability.math.StoichiometricMatrix;
 import org.simulator.math.odes.MultiTable;
 
 import ilog.concert.IloException;
@@ -49,24 +45,6 @@ public class DynamicFBA {
 	 * The SBML document on which the dynamic FBA performs
 	 */
 	protected static SBMLDocument originalDocument;
-	
-	/*
-	 * The expanded SBML document, in fact:
-	 * - transport reactions eliminated and reversible reactions split,
-	 * - compensated reactions added (computed from system boundaries)
-	 */
-	protected static SBMLDocument expandedDocument;
-	
-	/*
-	 * Save the read system boundaries in a double array
-	 */
-	private double[] systemBoundaries;
-	
-	/*
-	 * If the system boundaries are read from file, set system boundaries and
-	 * <CODE>true</CODE>
-	 */
-	private boolean isSystemBoundaries = false;
 	
 	/*
 	 * A {@link MultiTable} with all linearly interpolated concentration values of
@@ -109,17 +87,6 @@ public class DynamicFBA {
 		this(document, table, table.getTimePoints().length);
 	}
 	
-	
-	/**
-	 * Set the read system boundaries.
-	 * 
-	 * @param systemBoundaries
-	 */
-	public void setSystemBoundaries(double[] systemBoundaries) {
-		this.systemBoundaries = systemBoundaries;
-		this.isSystemBoundaries = true;
-	}
-	
 	/**
 	 * @return The concentrations of each point in time in a {@link MultiTable}
 	 */
@@ -153,65 +120,10 @@ public class DynamicFBA {
 		this.solutionMultiTable.setTimeName(this.dFBAConcentrations.getTimeName());
 		this.solutionMultiTable.setTimePoints(this.dFBATimePoints);
 		
-		// Species Ids for the concentrations block
-		ListOf<Species> listOfSpecies = expandedDocument.getModel().getListOfSpecies();
-		int speciesCount = expandedDocument.getModel().getSpeciesCount();
-		String[] speciesIds = new String[speciesCount];
-		for (int i = 0; i < speciesCount; i++) {
-			speciesIds[i] = listOfSpecies.get(i).getId();
-		}
-		
-		// Reaction Ids for the fluxes and gibbs energies block
-		ListOf<Reaction> listOfReactions = expandedDocument.getModel().getListOfReactions();
-		int reactionCount = expandedDocument.getModel().getReactionCount();
-		String[] reactionIds = new String[reactionCount];
-		for (int i = 0; i < reactionCount; i++) {
-			reactionIds[i] = listOfReactions.get(i).getId();
-		}
-		
-		// Add concentrations block
-		if (function.isConcentrationsOptimization()) {
-			this.solutionMultiTable.addBlock(speciesIds);
-		}
-		
-		// Add fluxes block
-		this.solutionMultiTable.addBlock(reactionIds);
-		
-		// Add gibbs energies block
-		if (function.isGibbsEnergiesOptimization()) {
-			this.solutionMultiTable.addBlock(reactionIds);
-		}
-	}
-	
-	/**
-	 * Prepare the dynamic FBA for the {@link FluxMinimization}.
-	 * 
-	 * @param fm
-	 * @throws Exception
-	 */
-	public void prepareDynamicFBA(FluxMinimization fm) throws Exception {
-		// If system boundaries are read from file...
-		if (this.isSystemBoundaries) {
-			expandedDocument = FluxMinimizationUtils.getExpandedDocument(originalDocument, this.systemBoundaries);
-			StoichiometricMatrix N_with_read_sysBounds = FluxMinimizationUtils.getExpandedStoichiometricMatrix(originalDocument, this.systemBoundaries);
-			fm.setNIntSys(N_with_read_sysBounds);
-			// Compute (with Tableau algorithm) and set flux vector
-			double[] fluxVector = FluxMinimizationUtils.computeFluxVector(N_with_read_sysBounds, null, expandedDocument);
-			fm.setComputedFluxVector(fluxVector);
-			// Set K_int_T
-			StabilityMatrix K_intTransposed = FluxMinimizationUtils.getSteadyStateMatrix();
-			fm.setKIntTransposed(K_intTransposed);
-		} else {
-			//... or aren't available
-			expandedDocument = FluxMinimizationUtils.getExpandedDocument(originalDocument);
-			StoichiometricMatrix N_with_computed_sysBounds = FluxMinimizationUtils.getExpandedStoichiometricMatrix(originalDocument);
-			fm.setNIntSys(N_with_computed_sysBounds);
-			// Compute (with Tableau algorithm) and set flux vector
-			double[] fluxVector = FluxMinimizationUtils.computeFluxVector(N_with_computed_sysBounds, null, expandedDocument);
-			fm.setComputedFluxVector(fluxVector);
-			// Set K_int_T
-			StabilityMatrix K_intTransposed = FluxMinimizationUtils.getSteadyStateMatrix();
-			fm.setKIntTransposed(K_intTransposed);
+		// Add specific blocks with each specific identifiers
+		String[][] identifiers = function.getTargetVariablesIds();
+		for (int idsNr = 0; idsNr < identifiers.length; idsNr++) {
+			this.solutionMultiTable.addBlock(identifiers[idsNr]);
 		}
 	}
 	
@@ -232,7 +144,7 @@ public class DynamicFBA {
 		
 		for (int i = 0; i < this.dFBATimePoints.length; i++) {
 			// Get current concentrations of the current point in time
-			int speciesCount = expandedDocument.getModel().getSpeciesCount();
+			int speciesCount = originalDocument.getModel().getSpeciesCount();
 			double[] currentConcentrations = new double[speciesCount];
 			for (int j = 0; j < speciesCount; j++) {
 				currentConcentrations[j] = this.dFBAConcentrations.getValueAt(i, j);
@@ -241,27 +153,14 @@ public class DynamicFBA {
 			// Let CPLEX solve the optimization problem...
 			function.setCurrentConcentrations(currentConcentrations);
 			function.optimizeProblem(cplex);
-			function.assignOptimizedSolution();
+			double[][] optimizedSolution = function.getOptimizedSolution();
 			// (Reset the CPLEX object! If not, a MultipleObjectiveException is waiting!)
 			cplex.clearModel();
 			
 			// ... and fill the solution MultiTable
-			int block = 0;
-			
-			if (function.isConcentrationsOptimization()) {
-				double[] currentOptimizedConcentrations = function.getOptimizedConcentrations();
-				this.solutionMultiTable.getBlock(block).setRowData(i, currentOptimizedConcentrations);
-				block++;
-			}
-			
-			double[] currentOptimizedFluxVector = function.getOptimizedFluxVector();
-			this.solutionMultiTable.getBlock(block).setRowData(i, currentOptimizedFluxVector);
-			block++;
-			
-			if (function.isGibbsEnergiesOptimization()) {
-				double[] currentOptimizedGibbsEnergies = function.getOptimizedGibbsEnergies();
-				this.solutionMultiTable.getBlock(block).setRowData(i, currentOptimizedGibbsEnergies);
-				
+			for (int block = 0; block < this.solutionMultiTable.getBlockCount(); block++) {
+				double[] currentSpecificSolution = optimizedSolution[block];
+				this.solutionMultiTable.getBlock(block).setRowData(i, currentSpecificSolution);
 			}
 		}
 
