@@ -120,29 +120,14 @@ public abstract class TargetFunction {
 	public abstract void setCurrentConcentrations(double[] currentConcentrations);
 	
 	/**
-	 * @return <CODE>true</CODE> if the concentrations are supposed to be optimized
+	 * @return The identifiers of each variable vector in a String array (attend your order!)
 	 */
-	public abstract boolean isConcentrationsOptimization();
+	public abstract String[][] getTargetVariablesIds();
 	
 	/**
-	 * @return The computed concentrations optimized by the target function
+	 * @return The length of each variable vector in an int array (attend your order!)
 	 */
-	public abstract double[] getOptimizedConcentrations();
-	
-	/**
-	 * @return The computed flux vector optimized by the target function
-	 */
-	public abstract double[] getOptimizedFluxVector();
-	
-	/**
-	 * @return <CODE>true</CODE> if the gibbs energies are supposed to be optimized
-	 */
-	public abstract boolean isGibbsEnergiesOptimization();
-	
-	/**
-	 * @return The computed gibbs energies optimized by the target function
-	 */
-	public abstract double[] getOptimizedGibbsEnergies();
+	public abstract int[] getTargetVariablesLengths();
 	
 	/**
 	 * @return <CODE>true</CODE> if the target function belongs to a minimization problem
@@ -234,11 +219,11 @@ public abstract class TargetFunction {
 		// Solve the optimization problem
 		solveCplex(cplex);
 	}
-
+	
 	/**
-	 * Assign the solved values to the actual arrays; at least the flux values
-	 * to the optimized flux vector.
+	 * @return The optimized solution of all variables set in
+	 *         getTargetVariablesLengths(), solved by CPLEX
 	 */
-	public abstract void assignOptimizedSolution();
+	public abstract double[][] getOptimizedSolution();
 	
 }
