@@ -61,7 +61,7 @@ public class DynamicFBA {
 	/*
 	 * Saves all set points in time of the dynamic flux balance analysis
 	 */
-	private double[] dFBATimePoints;
+	protected static double[] dFBATimePoints;
 	
 	
 	/**
@@ -102,13 +102,6 @@ public class DynamicFBA {
 	}
 	
 	/**
-	 * @return The points in time in which the dynamic FBA will be performed
-	 */
-	public double[] getDFBATimePoints() {
-		return this.dFBATimePoints;
-	}
-	
-	/**
 	 * Initialize the solution {@link MultiTable} for visualization. This
 	 * {@link MultiTable} contains multiple {@link MultiTable.Block}s.
 	 * 
@@ -118,7 +111,7 @@ public class DynamicFBA {
 		this.solutionMultiTable = new MultiTable();
 		
 		this.solutionMultiTable.setTimeName(this.dFBAConcentrations.getTimeName());
-		this.solutionMultiTable.setTimePoints(this.dFBATimePoints);
+		this.solutionMultiTable.setTimePoints(dFBATimePoints);
 		
 		// Add specific blocks with each specific identifiers
 		String[][] identifiers = function.getTargetVariablesIds();
@@ -142,7 +135,7 @@ public class DynamicFBA {
 		// Initialize the solution MultiTable
 		initializeSolutionMultiTable(function);
 		
-		for (int i = 0; i < this.dFBATimePoints.length; i++) {
+		for (int i = 0; i < dFBATimePoints.length; i++) {
 			// Get current concentrations of the current point in time
 			int speciesCount = originalDocument.getModel().getSpeciesCount();
 			double[] currentConcentrations = new double[speciesCount];
@@ -224,7 +217,7 @@ public class DynamicFBA {
 		}
 		
 		// Set the dynamic FBA points in time
-		this.dFBATimePoints = fullTimePointMultiTable.getTimePoints();
+		dFBATimePoints = fullTimePointMultiTable.getTimePoints();
 		
 		return fullTimePointMultiTable;
 	}
