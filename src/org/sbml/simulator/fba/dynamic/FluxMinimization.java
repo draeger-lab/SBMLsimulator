@@ -277,6 +277,7 @@ public class FluxMinimization extends TargetFunction {
 
 	/**
 	 * Enable/Disable constraint J_j * G_j < 0
+	 * 
 	 * @param constraintJG
 	 */
 	public void setConstraintJG(boolean constraintJG) {
@@ -285,6 +286,7 @@ public class FluxMinimization extends TargetFunction {
 
 	/**
 	 * Enable/Disable constraint |J_j| - r_max * |G_j| < 0
+	 * 
 	 * @param constraintJ_rmaxG
 	 */
 	public void setConstraintJ_rmaxG(boolean constraintJ_rmaxG) {
@@ -293,6 +295,7 @@ public class FluxMinimization extends TargetFunction {
 
 	/**
 	 * Enable/Disable constraint J_j >= 0
+	 * 
 	 * @param constraintJ0
 	 */
 	public void setConstraintJ0(boolean constraintJ0) {
@@ -301,6 +304,7 @@ public class FluxMinimization extends TargetFunction {
 	
 	/**
 	 * Enable/Disable constraint delta_r G_j = delta_r G^0_j - E_j + RT...
+	 * 
 	 * @param constraintError
 	 */
 	public void setConstraintError(boolean constraintError) {
