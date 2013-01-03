@@ -91,12 +91,18 @@ public class DynamicFBATest {
 		// Run a dynamic FBA without linear interpolation
 		DynamicFBA dfba = new DynamicFBA(testDocument, concMT);
 		
-		FluxMinimization fm = new FluxMinimization();
+		/*FluxMinimization fm = new FluxMinimization();
 		fm.setCplexIterations(1000000);
 		fm.setReadGibbsEnergies(correctedGibbsEnergies);
 		fm.setReadSystemBoundaries(correctedSysBounds);
 		
-		dfba.runDynamicFBA(fm);
+		dfba.runDynamicFBA(fm);*/
+		
+		FluxMinimizationII fm2 = new FluxMinimizationII();
+		fm2.setCplexIterations(100000);
+		fm2.setReadSystemBoundaries(correctedSysBounds);
+		
+		dfba.runDynamicFBA(fm2);
 		
 		// Print solution MultiTable
 		MultiTable solution = dfba.getSolutionMultiTable();
