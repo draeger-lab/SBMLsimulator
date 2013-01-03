@@ -63,13 +63,13 @@ public class FluxMinimizationII extends TargetFunction {
 	private double[] computedFluxVector;
 	
 	/*
-	 * The array contains the current interpolated concentrations for this step
-	 * of optimization by CPLEX
+	 * The array contains the current (t_i+1) interpolated concentrations
+	 * for this step of optimization by CPLEX
 	 */
 	private double[] currentConcentrations;
 	
 	/*
-	 * The array contains the concentrations of the last point in time
+	 * The array contains the concentrations of the last point in time (t_i)
 	 */
 	private double[] lastConcentrations = null;
 	
@@ -301,7 +301,7 @@ public class FluxMinimizationII extends TargetFunction {
 		int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
 		double[] c_m_measured = this.currentConcentrations;
 		
-		for (int n = 0; n < this.currentConcentrations.length; n++) {
+		for (int n = 0; n < getTargetVariablesLengths()[1]; n++) {
 			IloNumExpr optimizingConcentration = cplex.numExpr();
 			
 			if (!Double.isNaN(c_m_measured[n])) {
@@ -350,7 +350,42 @@ public class FluxMinimizationII extends TargetFunction {
 			}
 		}
 		
-		// TODO implement z_m (t_i+1)!
+		// Computation of z_m (t_i+1)
+		
+		// Use this computation of delta_t:
+		// Only if each timepoint has the same distance to its neighboring timepoint
+		double delta_t = DynamicFBA.dFBATimePoints[1] - DynamicFBA.dFBATimePoints[0];
+		
+		for (int n = 0; n < getTargetVariablesLengths()[1]; n++) {
+			
+			if (this.lastConcentrations == null) {
+				// The array only is empty for the very first point in time
+				if (!Double.isNaN(this.currentConcentrations[n])) {
+					cplex.addEq(getVariables()[n + concentrationPosition], cplex.constant(this.currentConcentrations[n]));
+					} else {
+						// TODO if currentConcentrations[n] is NaN???
+					}
+				} else {
+				// In all other cases
+				if (!Double.isNaN(this.lastConcentrations[n])) {
+					IloNumExpr computedConcentration = cplex.numExpr();
+					IloNumExpr NJ = cplex.numExpr();
+					
+					for (int col = 0; col < this.N_int_sys.getColumnDimension(); col++) {
+						double[] currentN_row = this.N_int_sys.getRow(n);
+						NJ = cplex.sum(NJ, cplex.prod(cplex.constant(currentN_row[col]), cplex.prod(this.computedFluxVector[col], getVariables()[fluxPosition])));
+					}
+					// TODO check if concentration n is compatible with currentN_row
+					computedConcentration = cplex.sum(cplex.constant(this.lastConcentrations[n]), cplex.prod(NJ, cplex.constant(delta_t)));
+					cplex.addEq(getVariables()[n + concentrationPosition], computedConcentration);
+				} else {
+					// TODO if lastConcentrations[n] is NaN???
+				}
+			}
+			
+		}
+		
+		this.lastConcentrations = this.currentConcentrations;
 	}
 
 	/* (non-Javadoc)
