@@ -1,11 +1,8 @@
-package org.simulator.sedml;
-
 /*
- * $Id: SimulatorTest.java 15:40:12 draeger$ $URL:
- * https://sbml-simulator.svn.sourceforge
- * .net/svnroot/sbml-simulator/trunk/test/org/simulator/SimulatorTest.java $
- * --------------------------------------------------------------------- This
- * file is part of SBMLsimulator, a Java-based simulator for models of
+ * $Id$
+ * $URL$
+ * --------------------------------------------------------------------- 
+ * This file is part of SBMLsimulator, a Java-based simulator for models of
  * biochemical processes encoded in the modeling language SBML.
  * 
  * Copyright (C) 2007-2013 by the University of Tuebingen, Germany.
@@ -17,6 +14,8 @@ package org.simulator.sedml;
  * available online as <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
+package org.simulator.sedml;
+
 
 import java.awt.Dimension;
 import java.io.File;
@@ -44,7 +43,7 @@ import uk.ac.ed.csbe.sbsivisual.sbsiDataFormat.SBSIDataBuilder;
  * A simple program that performs a simulation of a model.
  * 
  * @author Andreas Dr&auml;ger
- * @version $Rev: 72 $
+ * @version $Rev$
  * @since 0.9
  */
 public class SimulatorTest {
