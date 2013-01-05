@@ -140,7 +140,7 @@ public class DynamicFBA {
 			int speciesCount = originalDocument.getModel().getSpeciesCount();
 			double[] currentConcentrations = new double[speciesCount];
 			for (int j = 0; j < speciesCount; j++) {
-				currentConcentrations[j] = this.dFBAConcentrations.getValueAt(i, j);
+				currentConcentrations[j] = this.dFBAConcentrations.getValueAt(i, j + 1);
 			}
 			
 			// Let CPLEX solve the optimization problem...
