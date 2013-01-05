@@ -345,36 +345,37 @@ public class FluxMinimizationII extends TargetFunction {
 			for (int m = 0; m < speciesCount; m++) {
 				// Concentration z_m (t_i+1)
 				IloNumExpr z_m = getVariables()[m + concentrationPosition];
-				
+
 				cplex.addGe(z_m, 0);
 			}
 		}
 		
 		// Computation of z_m (t_i+1)
-		
+
 		// Use this computation of delta_t:
 		// Only if each timepoint has the same distance to its neighboring timepoint
 		double delta_t = DynamicFBA.dFBATimePoints[1] - DynamicFBA.dFBATimePoints[0];
-		
+
 		for (int n = 0; n < getTargetVariablesLengths()[1]; n++) {
-			
+
 			if (this.lastConcentrations == null) {
 				// The array only is empty for the very first point in time
 				if (!Double.isNaN(this.currentConcentrations[n])) {
 					cplex.addEq(getVariables()[n + concentrationPosition], cplex.constant(this.currentConcentrations[n]));
-					} else {
-						// TODO if currentConcentrations[n] is NaN???
-					}
 				} else {
+					// TODO if currentConcentrations[n] is NaN???
+				}
+			} else {
 				// In all other cases
 				if (!Double.isNaN(this.lastConcentrations[n])) {
 					IloNumExpr computedConcentration = cplex.numExpr();
 					IloNumExpr NJ = cplex.numExpr();
-					
+
+					double[] currentN_row = this.N_int_sys.getRow(n);
 					for (int col = 0; col < this.N_int_sys.getColumnDimension(); col++) {
-						double[] currentN_row = this.N_int_sys.getRow(n);
 						NJ = cplex.sum(NJ, cplex.prod(cplex.constant(currentN_row[col]), cplex.prod(this.computedFluxVector[col], getVariables()[fluxPosition])));
 					}
+					
 					// TODO check if concentration n is compatible with currentN_row
 					computedConcentration = cplex.sum(cplex.constant(this.lastConcentrations[n]), cplex.prod(NJ, cplex.constant(delta_t)));
 					cplex.addEq(getVariables()[n + concentrationPosition], computedConcentration);
@@ -382,9 +383,9 @@ public class FluxMinimizationII extends TargetFunction {
 					// TODO if lastConcentrations[n] is NaN???
 				}
 			}
-			
+
 		}
-		
+
 		this.lastConcentrations = this.currentConcentrations;
 	}
 
