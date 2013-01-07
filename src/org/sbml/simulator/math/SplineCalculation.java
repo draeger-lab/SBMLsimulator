@@ -35,9 +35,10 @@ public class SplineCalculation {
 	 * 
 	 * @param table
 	 * @param inBetweenTimePoints
+	 * @param negativeValuesPossible
 	 * @return
 	 */
-	public static MultiTable calculateSplineValues(MultiTable table, int inBetweenTimePoints) {
+	public static MultiTable calculateSplineValues(MultiTable table, int inBetweenTimePoints, boolean negativeValuesPossible) {
 		SplineInterpolation sp = null;
 		try {
 			sp = new SplineInterpolation();
@@ -72,13 +73,30 @@ public class SplineCalculation {
 			}
 			for(int row = 0; row != result.getRowCount(); row++) {
 				try {
-					result.setValueAt(sp.getY(result.getTimePoint(row)), row, col);
+					double value = sp.getY(result.getTimePoint(row));
+					if(negativeValuesPossible) {
+						result.setValueAt(value, row, col);
+					}
+					else {
+						result.setValueAt(Math.max(value,0d), row, col);
+					}
+					
 				} catch (InterpolationException e) {
 					e.printStackTrace();
 				}
 			}
 		}
 		return result;
+	}
+	
+	/**
+	 * 
+	 * @param table
+	 * @param inBetweenTimePoints
+	 * @return
+	 */
+	public static MultiTable calculateSplineValues(MultiTable table, int inBetweenTimePoints) {
+		return calculateSplineValues(table, inBetweenTimePoints, true);
 	}
 
 }
