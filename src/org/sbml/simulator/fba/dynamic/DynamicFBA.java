@@ -208,12 +208,12 @@ public class DynamicFBA {
 		MultiTable fullTimePointMultiTable;
 		if (((timePointCount - 1) % (givenTimePointLength - 1)) == 0) {
 			int inBetweenTimePoints = (timePointCount - givenTimePointLength) / (givenTimePointLength - 1);
-			fullTimePointMultiTable = SplineCalculation.calculateSplineValues(fullSpeciesMultiTable, inBetweenTimePoints);
+			fullTimePointMultiTable = SplineCalculation.calculateSplineValues(fullSpeciesMultiTable, inBetweenTimePoints, false);
 		} else {
 			int multiplyFactor = (int) ((timePointCount - 1) / (givenTimePointLength - 1));
 			int inBetweenTimePoints = (((multiplyFactor * (givenTimePointLength - 1)) + 1) - givenTimePointLength) / (givenTimePointLength - 1);
 			logger.warning("TimePointCount (" + timePointCount + ") for better calculating set to: " + ((inBetweenTimePoints * (givenTimePointLength - 1)) + givenTimePointLength));
-			fullTimePointMultiTable = SplineCalculation.calculateSplineValues(fullSpeciesMultiTable, inBetweenTimePoints);
+			fullTimePointMultiTable = SplineCalculation.calculateSplineValues(fullSpeciesMultiTable, inBetweenTimePoints, false);
 		}
 		
 		// Set the dynamic FBA points in time
