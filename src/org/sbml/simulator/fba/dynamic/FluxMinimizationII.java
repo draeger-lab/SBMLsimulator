@@ -404,6 +404,7 @@ public class FluxMinimizationII extends TargetFunction {
 			int fluxPosition = getTargetVariablesLengths()[0] - 1;
 			double[] optimizedFluxVector = new double[this.computedFluxVector.length];
 			// solution[0] contains the optimized value for the flux vector
+			logger.info("Optimized flux value: " + solution[fluxPosition]);
 			for (int i = 0; i < this.computedFluxVector.length; i++) {
 				optimizedFluxVector[i] = solution[fluxPosition] * this.computedFluxVector[i];
 			}
