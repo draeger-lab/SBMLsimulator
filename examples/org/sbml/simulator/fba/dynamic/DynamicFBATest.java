@@ -88,8 +88,8 @@ public class DynamicFBATest {
 		System.out.println("Gibbs energies read. Count: " + correctedGibbsEnergies.length);
 		System.out.println(Arrays.toString(correctedGibbsEnergies));
 		
-		// Run a dynamic FBA without linear interpolation
-		DynamicFBA dfba = new DynamicFBA(testDocument, concMT);
+		// Run a dynamic FBA without interpolation
+		DynamicFBA dfba = new DynamicFBA(testDocument, concMT, 16);
 		
 		/*FluxMinimization fm = new FluxMinimization();
 		fm.setCplexIterations(1000000);
@@ -99,7 +99,7 @@ public class DynamicFBATest {
 		dfba.runDynamicFBA(fm);*/
 		
 		FluxMinimizationII fm2 = new FluxMinimizationII();
-		fm2.setCplexIterations(100000);
+		//fm2.setCplexIterations(1000000);
 		fm2.setReadSystemBoundaries(correctedSysBounds);
 		
 		dfba.runDynamicFBA(fm2);
