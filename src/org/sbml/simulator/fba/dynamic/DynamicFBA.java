@@ -47,8 +47,8 @@ public class DynamicFBA {
 	protected static SBMLDocument originalDocument;
 	
 	/*
-	 * A {@link MultiTable} with all linearly interpolated concentration values of
-	 * the set dynamic FBA points in time
+	 * A {@link MultiTable} with all interpolated concentration values of the
+	 * set dynamic FBA points in time
 	 */
 	private MultiTable dFBAConcentrations;
 	
@@ -74,8 +74,8 @@ public class DynamicFBA {
 		// Save original SBML document
 		originalDocument = document;
 
-		// Interpolate concentrations linearly
-		this.dFBAConcentrations = calculateLinearInterpolation(table, timePointCount);		
+		// Interpolate concentrations
+		this.dFBAConcentrations = calculateSplineInterpolation(table, timePointCount);		
 	}
 	
 	 /**
@@ -166,9 +166,9 @@ public class DynamicFBA {
 	 * 
 	 * @param table
 	 * @param timePointCount
-	 * @return The {@link MultiTable} with all linearly interpolated values of the concentrations
+	 * @return The {@link MultiTable} with all interpolated values of the concentrations
 	 */
-	public MultiTable calculateLinearInterpolation(MultiTable table, int timePointCount) {
+	public MultiTable calculateSplineInterpolation(MultiTable table, int timePointCount) {
 		// Start initialize new MultiTable
 		MultiTable fullSpeciesMultiTable = new MultiTable();
 		int speciesCount = originalDocument.getModel().getSpeciesCount();
@@ -204,7 +204,7 @@ public class DynamicFBA {
 			return fullSpeciesMultiTable;
 		}
 		
-		// ... then interpolate linearly
+		// ... then interpolate
 		MultiTable fullTimePointMultiTable;
 		if (((timePointCount - 1) % (givenTimePointLength - 1)) == 0) {
 			int inBetweenTimePoints = (timePointCount - givenTimePointLength) / (givenTimePointLength - 1);
