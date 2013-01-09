@@ -32,6 +32,10 @@ import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
 
 /**
+ * FluxMinimizationII target function:
+ * minimize (lambda_1 * ||J|| +
+ * lambda_2 * Sum_m^m~ [c_m(t_i+1) -(c_m(t_i) + N*J*delta_t)])
+ * 
  * @author Robin F&auml;hnrich
  * @version $Rev$
  * @since 1.0
@@ -55,6 +59,14 @@ public class FluxMinimizationII extends TargetFunction {
 	 * boundaries) that is essential for the Tableau algorithm
 	 */
 	private StoichiometricMatrix N_int_sys;
+	
+	/*
+	 * These numbers (lambda_i, i is el. of {1, 2}) weight the contributions
+	 * of each term in the optimization problem.
+	 */
+	private double lambda_1 = 1.0;
+	
+	private double lambda_2 = 1000.0;
 	
 	/*
 	 * This vector contains the fluxes that are computed by the Tableau algorithm
@@ -110,6 +122,24 @@ public class FluxMinimizationII extends TargetFunction {
 	 * Constraint z_m (t_i+1) >= 0
 	 */
 	private boolean constraintZm = true;
+	
+	/**
+	 * Set the flux' weighting factor lambda1 (default: 1.0).
+	 * 
+	 * @param lambda1
+	 */
+	public void setLambda1(double lambda1) {
+		this.lambda_1 = lambda1;
+	}
+	
+	/**
+	 * Set the concentrations weighting factor lambda2 (default: 1000.0).
+	 * 
+	 * @param lambda2
+	 */
+	public void setLambda2(double lambda2) {
+		this.lambda_2 = lambda2;
+	}
 
 	/* (non-Javadoc)
 	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#setCurrentConcentrations(double[])
@@ -295,6 +325,7 @@ public class FluxMinimizationII extends TargetFunction {
 		for (int i = 0; i < this.computedFluxVector.length; i++) {
 			flux = cplex.sum(flux, cplex.abs(cplex.prod(this.computedFluxVector[i], getVariables()[0])));
 		}
+		flux = cplex.prod(cplex.constant(this.lambda_1), flux);
 		
 		// Concentrations 
 		IloNumExpr concentrations = cplex.numExpr();
@@ -312,6 +343,7 @@ public class FluxMinimizationII extends TargetFunction {
 			
 			concentrations = cplex.sum(concentrations, optimizingConcentration);
 		}
+		concentrations = cplex.prod(cplex.constant(this.lambda_2), concentrations);
 		
 		// Sum up each term
 		function = cplex.sum(flux, concentrations);
