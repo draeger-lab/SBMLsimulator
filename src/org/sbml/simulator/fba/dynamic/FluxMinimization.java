@@ -375,7 +375,7 @@ public class FluxMinimization extends TargetFunction {
 		
 		// 1. Flux value bounds
 		int fluxPosition = getTargetVariablesLengths()[0] - 1;
-		this.lowerBounds[fluxPosition] = 1.0;
+		this.lowerBounds[fluxPosition] = 0.0;
 		this.upperBounds[fluxPosition] = 10.0;
 		
 		// 2. Concentration bounds
@@ -395,15 +395,15 @@ public class FluxMinimization extends TargetFunction {
 		// 4. Error bounds
 		int errorPosition = lPosition + getTargetVariablesLengths()[2];
 		for (int i = errorPosition; i < errorPosition + getTargetVariablesLengths()[3]; i++) {
-			this.lowerBounds[i] = 0.0;
-			this.upperBounds[i] = 100000.0;
+			this.lowerBounds[i] = -10000000.0;
+			this.upperBounds[i] = 10000000.0;
 		}
 		
 		// 5. Gibbs energy bounds
 		int gibbsPosition = errorPosition + getTargetVariablesLengths()[3];
 		for (int i = gibbsPosition; i < gibbsPosition + getTargetVariablesLengths()[4]; i++) {
-			this.lowerBounds[i] = -100000;
-			this.upperBounds[i] = 1000000;
+			this.lowerBounds[i] = -10000000;
+			this.upperBounds[i] = 0;
 		}
 	}
 	
@@ -447,7 +447,8 @@ public class FluxMinimization extends TargetFunction {
 		int fluxPosition = getTargetVariablesLengths()[0] - 1;
 		// Manhattan norm included
 		for (int i = 0; i < this.computedFluxVector.length; i++) {
-			flux = cplex.sum(flux, cplex.abs(cplex.prod(this.computedFluxVector[i], getVariables()[0])));
+			flux = cplex.sum(flux, cplex.prod(this.computedFluxVector[i], getVariables()[0]));
+			getVariables()[0].setName("flux");
 		}
 		
 		// Concentrations 
@@ -456,17 +457,17 @@ public class FluxMinimization extends TargetFunction {
 		double[] c_eq = this.currentConcentrations;
 		for (int i = 0; i < getTargetVariablesLengths()[1]; i++) {
 			IloNumExpr c_i = getVariables()[i + concentrationPosition];
+			getVariables()[i + concentrationPosition].setName("conc" + i);
 			if (!Double.isNaN(c_eq[i])) {
 				double logConc = Math.log(c_eq[i]);
-				// TODO ?
-				// if(Double.isInfinite(logConc)) {
-				// logConc = - Double.MAX_VALUE;
-				// }
+				if(Double.isInfinite(logConc)) {
+					logConc = this.lowerBounds[i + concentrationPosition];
+				}
 				conc = cplex.sum(conc, cplex.square(c_i), cplex.prod(c_i, (-2) * logConc), cplex.square(cplex.constant(logConc)));
 			} else {
 				double logcmin = this.lowerBounds[i + concentrationPosition];
 				double logcmax = this.upperBounds[i + concentrationPosition];
-				conc = cplex.sum(conc, cplex.max(cplex.max(0, cplex.diff(logcmin, c_i)), cplex.diff(c_i, logcmax)));
+				conc = cplex.sum(conc, cplex.max(cplex.max(cplex.constant(0d), cplex.diff(logcmin, c_i)), cplex.diff(c_i, logcmax)));
 			}
 		}
 		conc = cplex.prod(cplex.constant(this.lambda_1), conc);
@@ -476,6 +477,7 @@ public class FluxMinimization extends TargetFunction {
 		int lPosition = concentrationPosition + getTargetVariablesLengths()[1];
 		// Manhattan norm included
 		for (int i = 0; i < getTargetVariablesLengths()[2]; i++) {
+			getVariables()[i + lPosition].setName("l" + i);
 			l = cplex.sum(l, cplex.abs(getVariables()[i + lPosition]));
 		}
 		l = cplex.prod(cplex.constant(this.lambda_2), l);
@@ -485,6 +487,7 @@ public class FluxMinimization extends TargetFunction {
 		int errorPosition = lPosition + getTargetVariablesLengths()[2];
 		// Manhattan norm included
 		for (int i = 0; i < getTargetVariablesLengths()[3]; i++) {
+			getVariables()[i + errorPosition].setName("e" + i);
 			error = cplex.sum(error, cplex.abs(getVariables()[i + errorPosition]));
 		}
 		error = cplex.prod(cplex.constant(this.lambda_3), error);
@@ -494,6 +497,7 @@ public class FluxMinimization extends TargetFunction {
 		int gibbsPosition = errorPosition + getTargetVariablesLengths()[3];
 		// Manhattan norm included
 		for (int i = 0; i < getTargetVariablesLengths()[4]; i++) {
+			getVariables()[i + gibbsPosition].setName("l" + i);
 			gibbs = cplex.sum(gibbs, cplex.abs(getVariables()[i + gibbsPosition]));
 		}
 		gibbs = cplex.prod(cplex.constant(this.lambda_4), gibbs);
@@ -541,10 +545,9 @@ public class FluxMinimization extends TargetFunction {
 					sumConcentrations = cplex.sum(sumConcentrations, cplex.prod(this.N_int_sys.get(i, j), getVariables()[i + concentrationPosition]));
 				}
 				// TODO if readGibbsEnergies[i] is NaN???
-				IloNumExpr delta_G_tilde = cplex.diff(this.readGibbsEnergies[j], getVariables()[j + errorPosition]);
-				IloNumExpr delta_G_computation = cplex.sum(cplex.prod(R, cplex.prod(T, sumConcentrations)), delta_G_tilde);
+				IloNumExpr delta_E_computation = cplex.diff(cplex.sum(cplex.prod(R, cplex.prod(T, sumConcentrations)), this.readGibbsEnergies[j]), getVariables()[j + gibbsPosition]);
 				
-				cplex.addEq(delta_G_computation, getVariables()[j + gibbsPosition]);
+				cplex.addEq(delta_E_computation, getVariables()[j + errorPosition]);
 			}
 		}
 		
