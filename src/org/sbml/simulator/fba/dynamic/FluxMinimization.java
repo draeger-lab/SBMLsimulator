@@ -105,10 +105,9 @@ public class FluxMinimization extends TargetFunction {
 	private double[] computedFluxVector;
 	
 	/*
-	 * The array contains the current interpolated concentrations for this step
-	 * of optimization by CPLEX
+	 * The array contains the complete interpolated concentrations
 	 */
-	private double[] currentConcentrations;
+	private double[][] completeConcentrations;
 	
 	/*
 	 * The array contains the read gibbs energies in unit J/mol
@@ -203,11 +202,11 @@ public class FluxMinimization extends TargetFunction {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#setCurrenConcentrations(double[])
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#setInterpolatedConcentrations(double[][])
 	 */
 	@Override
-	public void setCurrentConcentrations(double[] concentrations) {
-		this.currentConcentrations = concentrations;
+	public void setInterpolatedConcentrations(double[][] concentrations) {
+		this.completeConcentrations = concentrations;
 	}
 	
 	/**
@@ -410,7 +409,7 @@ public class FluxMinimization extends TargetFunction {
 	//TODO write for each bound part a new set-method to set bounds!
 
 	/* (non-Javadoc)
-	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#prepareCplex(ilog.cplex.IloCplex)
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#initCplexVariables(ilog.cplex.IloCplex)
 	 */
 	@Override
 	public void initCplexVariables(IloCplex cplex) throws IloException {
@@ -454,7 +453,7 @@ public class FluxMinimization extends TargetFunction {
 		// Concentrations 
 		IloNumExpr conc = cplex.numExpr();
 		int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
-		double[] c_eq = this.currentConcentrations;
+		double[] c_eq = this.completeConcentrations[this.getTimePointStep()];
 		for (int i = 0; i < getTargetVariablesLengths()[1]; i++) {
 			IloNumExpr c_i = getVariables()[i + concentrationPosition];
 			getVariables()[i + concentrationPosition].setName("conc" + i);
@@ -607,7 +606,7 @@ public class FluxMinimization extends TargetFunction {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#assignOptimizedSolution(org.sbml.jsbml.SBMLDocument)
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getOptimizedSolution()
 	 */
 	@Override
 	public double[][] getOptimizedSolution() {
