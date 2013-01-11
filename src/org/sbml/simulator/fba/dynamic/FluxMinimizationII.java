@@ -69,15 +69,9 @@ public class FluxMinimizationII extends TargetFunction {
 	private double lambda_2 = 1000.0;
 	
 	/*
-	 * The array contains the current (t_i+1) interpolated concentrations
-	 * for this step of optimization by CPLEX
+	 * The array contains the complete interpolated concentrations
 	 */
-	private double[] currentConcentrations;
-	
-	/*
-	 * The array contains the concentrations of the last point in time (t_i)
-	 */
-	private double[] lastConcentrations = null;
+	private double[][] completeConcentrations;
 	
 	/*
 	 * The array contains the read system boundaries
@@ -136,11 +130,11 @@ public class FluxMinimizationII extends TargetFunction {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#setCurrentConcentrations(double[])
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#setInterpolatedConcentrations(double[][])
 	 */
 	@Override
-	public void setCurrentConcentrations(double[] concentrations) {
-		this.currentConcentrations = concentrations;
+	public void setInterpolatedConcentrations(double[][] concentrations) {
+		this.completeConcentrations = concentrations;
 	}
 	
 	/**
@@ -323,7 +317,8 @@ public class FluxMinimizationII extends TargetFunction {
 		// Concentrations 
 		IloNumExpr concentrations = cplex.numExpr();
 		int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
-		double[] c_m_measured = this.currentConcentrations;
+		double[] c_m_measured = this.completeConcentrations[this.getTimePointStep()];
+		// TODO if concentrations are not available anymore
 		
 		for (int n = 0; n < getTargetVariablesLengths()[1]; n++) {
 			IloNumExpr optimizingConcentration = cplex.numExpr();
@@ -380,16 +375,17 @@ public class FluxMinimizationII extends TargetFunction {
 
 		for (int n = 0; n < getTargetVariablesLengths()[1]; n++) {
 
-			if (this.lastConcentrations == null) {
-				// The array only is empty for the very first point in time
-				if (!Double.isNaN(this.currentConcentrations[n])) {
-					cplex.addEq(getVariables()[n + concentrationPosition], cplex.constant(this.currentConcentrations[n]));
+			if (this.getTimePointStep() == 0) {
+				// In the first time point step 0, there is no c_m (t_i+1).
+				// t_i+1 would be time point step 1, not 0!
+				if (!Double.isNaN(this.completeConcentrations[this.getTimePointStep()][n])) {
+					cplex.addEq(getVariables()[n + concentrationPosition], cplex.constant(this.completeConcentrations[this.getTimePointStep()][n]));
 				} else {
 					// TODO if currentConcentrations[n] is NaN???
 				}
 			} else {
 				// In all other cases
-				if (!Double.isNaN(this.lastConcentrations[n])) {
+				if (!Double.isNaN(completeConcentrations[this.getTimePointStep()-1][n])) {
 					IloNumExpr computedConcentration = cplex.numExpr();
 					IloNumExpr NJ = cplex.numExpr();
 
@@ -399,16 +395,13 @@ public class FluxMinimizationII extends TargetFunction {
 					}
 					
 					// TODO check if concentration n is compatible with currentN_row
-					computedConcentration = cplex.sum(cplex.constant(this.lastConcentrations[n]), cplex.prod(NJ, cplex.constant(delta_t)));
+					computedConcentration = cplex.sum(cplex.constant(completeConcentrations[this.getTimePointStep()-1][n]), cplex.prod(NJ, cplex.constant(delta_t)));
 					cplex.addEq(getVariables()[n + concentrationPosition], computedConcentration);
 				} else {
 					// TODO if lastConcentrations[n] is NaN???
 				}
 			}
-
 		}
-
-		this.lastConcentrations = this.currentConcentrations;
 	}
 
 	/* (non-Javadoc)

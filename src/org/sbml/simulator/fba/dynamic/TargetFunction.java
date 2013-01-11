@@ -50,6 +50,11 @@ public abstract class TargetFunction {
 	private IloNumVar[] variables;
 	
 	/*
+	 * Save the current step of points in time of the dynamic FBA.
+	 */
+	private int timePointStep;
+	
+	/*
 	 * Save the variables that are solved by CPLEX in a double array
 	 */
 	private double[] solution;
@@ -96,6 +101,22 @@ public abstract class TargetFunction {
 	}
 	
 	/**
+	 * @return The current step of points in time
+	 */
+	public int getTimePointStep() {
+		return this.timePointStep;
+	}
+	
+	/**
+	 * Set the current step of points in time.
+	 * 
+	 * @param timePointStep
+	 */
+	public void setTimePointStep(int timePointStep) {
+		this.timePointStep = timePointStep;
+	}
+	
+	/**
 	 * @return The solution to the variables of the optimization problem
 	 */
 	public double[] getSolution() {
@@ -112,12 +133,11 @@ public abstract class TargetFunction {
 	}
 	
 	/**
-	 * Set the current interpolated concentrations for this step of optimization
-	 * by CPLEX
+	 * Set the complete interpolated concentrations.
 	 * 
-	 * @param currentConcentrations
+	 * @param concentrations
 	 */
-	public abstract void setCurrentConcentrations(double[] currentConcentrations);
+	public abstract void setInterpolatedConcentrations(double[][] concentrations);
 	
 	/**
 	 * @return The identifiers of each variable vector in a String array (attend your order!)

@@ -135,16 +135,21 @@ public class DynamicFBA {
 		// Initialize the solution MultiTable
 		initializeSolutionMultiTable(function);
 		
+		// Set the complete interpolated concentrations
+		int speciesCount = originalDocument.getModel().getSpeciesCount();
+		double[][] concentrations = new double[dFBATimePoints.length][speciesCount];
 		for (int i = 0; i < dFBATimePoints.length; i++) {
-			// Get current concentrations of the current point in time
-			int speciesCount = originalDocument.getModel().getSpeciesCount();
-			double[] currentConcentrations = new double[speciesCount];
 			for (int j = 0; j < speciesCount; j++) {
-				currentConcentrations[j] = this.dFBAConcentrations.getValueAt(i, j + 1);
+				// Remember: first column of each MultiTable contains the timePoints -> j + 1
+				concentrations[i][j] = this.dFBAConcentrations.getValueAt(i, j + 1);
 			}
-			
+		}
+		function.setInterpolatedConcentrations(concentrations);
+		
+		// Iterate over the complete points in time of the dynamic FBA
+		for (int i = 0; i < dFBATimePoints.length; i++) {
 			// Let CPLEX solve the optimization problem...
-			function.setCurrentConcentrations(currentConcentrations);
+			function.setTimePointStep(i);
 			function.optimizeProblem(cplex);
 			double[][] optimizedSolution = function.getOptimizedSolution();
 			// (Reset the CPLEX object! If not, a MultipleObjectiveException is waiting!)
