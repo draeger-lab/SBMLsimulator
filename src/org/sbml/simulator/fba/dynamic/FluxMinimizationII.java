@@ -56,7 +56,7 @@ public class FluxMinimizationII extends TargetFunction {
 	
 	/*
 	 * The complete intern {@link StoichiometricMatrix} N (with system
-	 * boundaries) that is essential for the Tableau algorithm
+	 * boundaries)
 	 */
 	private StoichiometricMatrix N_int_sys;
 	
@@ -151,7 +151,6 @@ public class FluxMinimizationII extends TargetFunction {
 	 * Prepare the FluxMinimization by setting the:
 	 * - expanded SBML document
 	 * - matrix N_int_sys
-	 * - computed flux vector (Tableau algorithm)
 	 * all from the (read) system boundaries.
 	 * 
 	 * @throws Exception
@@ -260,7 +259,7 @@ public class FluxMinimizationII extends TargetFunction {
 		// 1. Flux value bounds
 		int fluxPosition = 0;
 		for (int i = fluxPosition; i < fluxPosition + getTargetVariablesLengths()[0]; i++) {
-			this.lowerBounds[i] = 1.0;
+			this.lowerBounds[i] = 0.0;
 			this.upperBounds[i] = 1000.0;
 		}
 		
@@ -318,13 +317,12 @@ public class FluxMinimizationII extends TargetFunction {
 		IloNumExpr concentrations = cplex.numExpr();
 		int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
 		double[] c_m_measured = this.completeConcentrations[this.getTimePointStep()];
-		// TODO if concentrations are not available anymore
 		
 		for (int n = 0; n < getTargetVariablesLengths()[1]; n++) {
 			IloNumExpr optimizingConcentration = cplex.numExpr();
 			
 			if (!Double.isNaN(c_m_measured[n])) {
-				optimizingConcentration = cplex.diff(c_m_measured[n], getVariables()[n + concentrationPosition]);
+				optimizingConcentration = cplex.diff(c_m_measured[n], getVariables()[concentrationPosition + n]);
 			} else {
 				// TODO if c_m_measured[n] is NaN???
 			}
@@ -361,9 +359,7 @@ public class FluxMinimizationII extends TargetFunction {
 		if (this.constraintZm == true) {
 			for (int m = 0; m < speciesCount; m++) {
 				// Concentration z_m (t_i+1)
-				IloNumExpr z_m = getVariables()[m + concentrationPosition];
-
-				cplex.addGe(z_m, 0);
+				cplex.addGe(getVariables()[concentrationPosition + m], 0);
 			}
 		}
 		
@@ -379,7 +375,7 @@ public class FluxMinimizationII extends TargetFunction {
 				// In the first time point step 0, there is no c_m (t_i+1).
 				// t_i+1 would be time point step 1, not 0!
 				if (!Double.isNaN(this.completeConcentrations[this.getTimePointStep()][n])) {
-					cplex.addEq(getVariables()[n + concentrationPosition], cplex.constant(this.completeConcentrations[this.getTimePointStep()][n]));
+					cplex.addEq(getVariables()[concentrationPosition + n], cplex.constant(this.completeConcentrations[this.getTimePointStep()][n]));
 				} else {
 					// TODO if currentConcentrations[n] is NaN???
 				}
@@ -394,11 +390,10 @@ public class FluxMinimizationII extends TargetFunction {
 						NJ = cplex.sum(NJ, cplex.prod(cplex.constant(currentN_row[col]), getVariables()[fluxPosition + col]));
 					}
 					
-					// TODO check if concentration n is compatible with currentN_row
-					computedConcentration = cplex.sum(cplex.constant(completeConcentrations[this.getTimePointStep()-1][n]), cplex.prod(NJ, cplex.constant(delta_t)));
-					cplex.addEq(getVariables()[n + concentrationPosition], computedConcentration);
+					computedConcentration = cplex.sum(cplex.constant(this.completeConcentrations[this.getTimePointStep()-1][n]), cplex.prod(NJ, cplex.constant(delta_t)));
+					cplex.addEq(getVariables()[concentrationPosition + n], computedConcentration);
 				} else {
-					// TODO if lastConcentrations[n] is NaN???
+					// TODO if last concentration (completeConcentrations[this.getTimePointStep()-1][n]) is NaN???
 				}
 			}
 		}
@@ -418,8 +413,6 @@ public class FluxMinimizationII extends TargetFunction {
 			// 1. Flux vector assignment
 			int fluxPosition = 0;
 			double[] optimizedFluxVector = new double[getTargetVariablesLengths()[0]];
-			// solution[0] contains the optimized value for the flux vector
-			//logger.info("Optimized flux value: " + solution[fluxPosition]);
 			for (int i = 0; i < getTargetVariablesLengths()[0]; i++) {
 				optimizedFluxVector[i] = solution[fluxPosition + i];
 			}
@@ -429,7 +422,7 @@ public class FluxMinimizationII extends TargetFunction {
 			int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
 			double[] optimizedConcentrations = new double[getTargetVariablesLengths()[1]];
 			for (int i = 0; i < getTargetVariablesLengths()[1]; i++) {
-				optimizedConcentrations[i] = solution[i + concentrationPosition];
+				optimizedConcentrations[i] = solution[concentrationPosition + i];
 			}
 			this.optimizedSolution[0] = optimizedConcentrations; // 1st position: concentrations
 		}
