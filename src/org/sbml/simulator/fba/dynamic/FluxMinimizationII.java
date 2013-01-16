@@ -17,6 +17,7 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
+import java.util.Arrays;
 import java.util.logging.Logger;
 
 import org.sbml.jsbml.ListOf;
@@ -416,6 +417,7 @@ public class FluxMinimizationII extends TargetFunction {
 			for (int i = 0; i < getTargetVariablesLengths()[0]; i++) {
 				optimizedFluxVector[i] = solution[fluxPosition + i];
 			}
+			System.out.println("-> Optimized Flux Vector: " + Arrays.toString(optimizedFluxVector));
 			this.optimizedSolution[1] = optimizedFluxVector; // 2nd position: flux vector
 			
 			// 2. Concentration vector assignment
@@ -424,6 +426,7 @@ public class FluxMinimizationII extends TargetFunction {
 			for (int i = 0; i < getTargetVariablesLengths()[1]; i++) {
 				optimizedConcentrations[i] = solution[concentrationPosition + i];
 			}
+			System.out.println("-> Optimized Concentrations: " + Arrays.toString(optimizedConcentrations));
 			this.optimizedSolution[0] = optimizedConcentrations; // 1st position: concentrations
 		}
 		
