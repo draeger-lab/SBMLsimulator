@@ -65,7 +65,7 @@ public class FluxMinimizationII extends TargetFunction {
 	 * These numbers (lambda_i, i is el. of {1, 2}) weight the contributions
 	 * of each term in the optimization problem.
 	 */
-	private double lambda_1 = 1.0;
+	private double lambda_1 = 0.1;
 	
 	private double lambda_2 = 1.0;
 	
@@ -113,7 +113,7 @@ public class FluxMinimizationII extends TargetFunction {
 	private boolean constraintZm = true;
 	
 	/**
-	 * Set the fluxes weighting factor lambda1 (default: 1.0).
+	 * Set the fluxes weighting factor lambda1 (default: 0.1).
 	 * 
 	 * @param lambda1
 	 */
