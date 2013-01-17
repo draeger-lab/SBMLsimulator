@@ -17,7 +17,7 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 import org.sbml.jsbml.ListOf;
@@ -67,7 +67,7 @@ public class FluxMinimizationII extends TargetFunction {
 	 */
 	private double lambda_1 = 1.0;
 	
-	private double lambda_2 = 1000.0;
+	private double lambda_2 = 1.0;
 	
 	/*
 	 * The array contains the complete interpolated concentrations
@@ -113,7 +113,7 @@ public class FluxMinimizationII extends TargetFunction {
 	private boolean constraintZm = true;
 	
 	/**
-	 * Set the flux' weighting factor lambda1 (default: 1.0).
+	 * Set the fluxes weighting factor lambda1 (default: 1.0).
 	 * 
 	 * @param lambda1
 	 */
@@ -122,7 +122,7 @@ public class FluxMinimizationII extends TargetFunction {
 	}
 	
 	/**
-	 * Set the concentrations weighting factor lambda2 (default: 1000.0).
+	 * Set the concentrations weighting factor lambda2 (default: 1.0).
 	 * 
 	 * @param lambda2
 	 */
@@ -310,9 +310,8 @@ public class FluxMinimizationII extends TargetFunction {
 		int fluxPosition = 0;
 		// Manhattan norm included
 		for (int i = 0; i < getTargetVariablesLengths()[0]; i++) {
-			flux = cplex.sum(flux, cplex.abs(getVariables()[fluxPosition + i]));
+			flux = cplex.prod(cplex.constant(this.lambda_1), cplex.sum(flux, cplex.abs(getVariables()[fluxPosition + i])));
 		}
-		flux = cplex.prod(cplex.constant(this.lambda_1), flux);
 		
 		// Concentrations 
 		IloNumExpr concentrations = cplex.numExpr();
@@ -328,9 +327,8 @@ public class FluxMinimizationII extends TargetFunction {
 				// TODO if c_m_measured[n] is NaN???
 			}
 			
-			concentrations = cplex.sum(concentrations, optimizingConcentration);
+			concentrations = cplex.prod(cplex.constant(this.lambda_2), cplex.sum(concentrations, optimizingConcentration));
 		}
-		concentrations = cplex.prod(cplex.constant(this.lambda_2), concentrations);
 		
 		// Sum up each term
 		function = cplex.sum(flux, concentrations);
@@ -413,20 +411,26 @@ public class FluxMinimizationII extends TargetFunction {
 		} else {
 			// 1. Flux vector assignment
 			int fluxPosition = 0;
+			HashMap<String, Number> fluxMap = new HashMap<String, Number>();
+			ListOf<Reaction> listOfReactions = this.expandedDocument.getModel().getListOfReactions();
 			double[] optimizedFluxVector = new double[getTargetVariablesLengths()[0]];
 			for (int i = 0; i < getTargetVariablesLengths()[0]; i++) {
 				optimizedFluxVector[i] = solution[fluxPosition + i];
+				fluxMap.put(listOfReactions.get(i).getId(), optimizedFluxVector[i]);
 			}
-			System.out.println("-> Optimized Flux Vector: " + Arrays.toString(optimizedFluxVector));
+			System.out.println(fluxMap.toString());
 			this.optimizedSolution[1] = optimizedFluxVector; // 2nd position: flux vector
 			
 			// 2. Concentration vector assignment
 			int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
+			HashMap<String, Number> concMap = new HashMap<String, Number>();
+			ListOf<Species> listOfSpecies = this.expandedDocument.getModel().getListOfSpecies();
 			double[] optimizedConcentrations = new double[getTargetVariablesLengths()[1]];
 			for (int i = 0; i < getTargetVariablesLengths()[1]; i++) {
 				optimizedConcentrations[i] = solution[concentrationPosition + i];
+				concMap.put(listOfSpecies.get(i).getId(), optimizedConcentrations[i]);
 			}
-			System.out.println("-> Optimized Concentrations: " + Arrays.toString(optimizedConcentrations));
+			System.out.println(concMap.toString());
 			this.optimizedSolution[0] = optimizedConcentrations; // 1st position: concentrations
 		}
 		
