@@ -65,9 +65,9 @@ public class FluxMinimizationII extends TargetFunction {
 	 * These numbers (lambda_i, i is el. of {1, 2}) weight the contributions
 	 * of each term in the optimization problem.
 	 */
-	private double lambda_1 = 0.1;
+	private double lambda_1 = 1.0;
 	
-	private double lambda_2 = 1.0;
+	private double lambda_2 = 1000.0;
 	
 	/*
 	 * The array contains the complete interpolated concentrations
@@ -310,7 +310,7 @@ public class FluxMinimizationII extends TargetFunction {
 		int fluxPosition = 0;
 		// Manhattan norm included
 		for (int i = 0; i < getTargetVariablesLengths()[0]; i++) {
-			flux = cplex.prod(cplex.constant(this.lambda_1), cplex.sum(flux, cplex.abs(getVariables()[fluxPosition + i])));
+			flux = cplex.sum(flux, cplex.prod(cplex.constant(this.lambda_1), cplex.abs(getVariables()[fluxPosition + i])));
 		}
 		
 		// Concentrations 
@@ -327,7 +327,7 @@ public class FluxMinimizationII extends TargetFunction {
 				// TODO if c_m_measured[n] is NaN???
 			}
 			
-			concentrations = cplex.prod(cplex.constant(this.lambda_2), cplex.sum(concentrations, optimizingConcentration));
+			concentrations = cplex.sum(concentrations, cplex.prod(cplex.constant(this.lambda_2), optimizingConcentration));
 		}
 		
 		// Sum up each term
