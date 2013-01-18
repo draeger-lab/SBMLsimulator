@@ -402,7 +402,7 @@ public class FluxMinimization extends TargetFunction {
 		int gibbsPosition = errorPosition + getTargetVariablesLengths()[3];
 		for (int i = gibbsPosition; i < gibbsPosition + getTargetVariablesLengths()[4]; i++) {
 			this.lowerBounds[i] = -10000000;
-			this.upperBounds[i] = 0;
+			this.upperBounds[i] = 100;
 		}
 	}
 	
@@ -493,7 +493,7 @@ public class FluxMinimization extends TargetFunction {
 		int gibbsPosition = errorPosition + getTargetVariablesLengths()[3];
 		// Manhattan norm included
 		for (int i = 0; i < getTargetVariablesLengths()[4]; i++) {
-			getVariables()[i + gibbsPosition].setName("l" + i);
+			getVariables()[i + gibbsPosition].setName("g" + i);
 			gibbs = cplex.sum(gibbs, cplex.prod(cplex.constant(this.lambda_4), cplex.abs(getVariables()[i + gibbsPosition])));
 		}
 		
@@ -525,9 +525,7 @@ public class FluxMinimization extends TargetFunction {
 				// Flux J_j
 				IloNumExpr j_j = cplex.prod(this.computedFluxVector[j], getVariables()[fluxPosition]);
 				// J_j * G_j
-				jg = cplex.prod(j_j, getVariables()[j + gibbsPosition]);
-				
-				cplex.addLe(jg, 0);
+				cplex.ifThen(cplex.not(cplex.eq(j_j, 0)),cplex.le(getVariables()[j + gibbsPosition],0));
 			}
 		}
 		
