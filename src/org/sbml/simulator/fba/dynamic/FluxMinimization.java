@@ -84,7 +84,7 @@ public class FluxMinimization extends TargetFunction {
 	/*
 	 * Contains the maximum of J_j / delta_r G_tilde_j for each reaction j in the model
 	 */
-	private IloNumExpr r_max;
+	private double r_max;
 	
 	/*
 	 * These numbers (lambda_i, i is el. of {1, ..., 4}) weight the contributions
@@ -405,8 +405,6 @@ public class FluxMinimization extends TargetFunction {
 			this.upperBounds[i] = 100;
 		}
 	}
-	
-	//TODO write for each bound part a new set-method to set bounds!
 
 	/* (non-Javadoc)
 	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#initCplexVariables(ilog.cplex.IloCplex)
@@ -519,8 +517,6 @@ public class FluxMinimization extends TargetFunction {
 		
 		// Constraint J_j * G_j < 0
 		if (this.constraintJG == true) {
-			IloNumExpr jg = cplex.numExpr();
-			
 			for (int j = 0; j < reactionCount; j++) {
 				// Flux J_j
 				IloNumExpr j_j = cplex.prod(this.computedFluxVector[j], getVariables()[fluxPosition]);
@@ -545,18 +541,14 @@ public class FluxMinimization extends TargetFunction {
 		}
 		
 		// Computation r_max = max(J_j / delta_r G_tilde_j)
-		IloNumExpr rmax = cplex.constant(1.0); // TODO default value - check!
+		double rmax = Double.MIN_NORMAL;
+		
 		for (int j = 0; j < reactionCount; j++) {
-			// Flux J_j
-			IloNumExpr j_j = cplex.prod(this.computedFluxVector[j], getVariables()[fluxPosition]);
-			// delta_r G_tilde_j TODO if readGibbsEnergies[i] is NaN???
-			//IloNumExpr delta_G_tilde = cplex.diff(this.readGibbsEnergies[j], getVariables()[j + errorPosition]);
-			
-			// J_j / delta_r G_tilde_j
-			// TODO there is no division operation in CPLEX??? Check this operation!
-			IloNumExpr jDivG = cplex.prod(j_j, 1.0 / this.readGibbsEnergies[j]); // here: just delta_r G^0_j, but delta_r G_tile_j needed?!
-			
-			rmax = cplex.max(jDivG, rmax);
+			// Division by NaN -> r_max = NaN, Division by zero -> r_max = +Infinity
+			if (!Double.isNaN(this.readGibbsEnergies[j]) && this.readGibbsEnergies[j] != 0) {
+				double current_r = Math.abs(this.computedFluxVector[j]) / Math.abs(this.readGibbsEnergies[j]);
+				rmax = Math.max(rmax, current_r);
+			}
 		}
 		this.r_max = rmax;
 		
