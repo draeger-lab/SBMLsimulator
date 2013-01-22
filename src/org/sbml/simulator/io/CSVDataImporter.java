@@ -121,6 +121,7 @@ public class CSVDataImporter {
     if ((parent == null) || CSVImporterV2.showDialog(parent, converter)) {
       CSVReader reader = converter.getCSVReader();
       String stringData[][] = reader.getData();
+      data.setTimeName(reader.getHeader()[0]);
       timeColumn = reader.getColumn(data.getTimeName());
       if (timeColumn > -1) {
         double timePoints[] = new double[stringData.length];
@@ -245,7 +246,12 @@ public class CSVDataImporter {
 					return model.getSpecies(index).getId();
 				}
 				index -= model.getNumSpecies();
-				return model.getParameter(index).getId();
+				if (index < model.getNumParameters()) {
+					return model.getParameter(index).getId();
+				}
+				
+				index -= model.getNumParameters();
+				return model.getReaction(index).getId();
 			}
 
 			/* (non-Javadoc)
@@ -253,7 +259,7 @@ public class CSVDataImporter {
 			 */
 			public int size() {
 				return model.getNumCompartments() + model.getNumSpecies()
-						+ model.getNumParameters();
+						+ model.getNumParameters() + model.getNumReactions();
 			}
 		};
 	}
