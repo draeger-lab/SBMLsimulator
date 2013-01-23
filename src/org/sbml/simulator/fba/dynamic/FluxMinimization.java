@@ -539,7 +539,7 @@ public class FluxMinimization extends TargetFunction {
 				// TODO if readGibbsEnergies[i] is NaN???
 				if(!Double.isNaN(this.readGibbsEnergies[j])) {
 					IloNumExpr delta_E_computation = cplex.diff(cplex.sum(cplex.prod(R, cplex.prod(T, sumConcentrations)), this.readGibbsEnergies[j]), getVariables()[j + gibbsPosition]);
-					cplex.addLe(delta_E_computation, getVariables()[j + errorPosition]);
+					cplex.addEq(delta_E_computation, getVariables()[j + errorPosition]);
 					cplex.addGe(delta_E_computation, 0);
 				}
 			}
