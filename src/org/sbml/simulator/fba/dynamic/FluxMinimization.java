@@ -374,7 +374,7 @@ public class FluxMinimization extends TargetFunction {
 		
 		// 1. Flux value bounds
 		int fluxPosition = getTargetVariablesLengths()[0] - 1;
-		this.lowerBounds[fluxPosition] = 0.0;
+		this.lowerBounds[fluxPosition] = 0.01;
 		this.upperBounds[fluxPosition] = 10.0;
 		
 		// 2. Concentration bounds
@@ -387,15 +387,15 @@ public class FluxMinimization extends TargetFunction {
 		// 3. L vector bounds
 		int lPosition = concentrationPosition + getTargetVariablesLengths()[1];
 		for (int i = lPosition; i < lPosition + getTargetVariablesLengths()[2]; i++) {
-			this.lowerBounds[i] = 0.0;
-			this.upperBounds[i] = 100000.0;
+			this.lowerBounds[i] = -10000000;
+			this.upperBounds[i] = 10000000;
 		}
 		
 		// 4. Error bounds
 		int errorPosition = lPosition + getTargetVariablesLengths()[2];
 		for (int i = errorPosition; i < errorPosition + getTargetVariablesLengths()[3]; i++) {
-			this.lowerBounds[i] = -10000000.0;
-			this.upperBounds[i] = 10000000.0;
+			this.lowerBounds[i] = 0;
+			this.upperBounds[i] = 10000000;
 		}
 		
 		// 5. Gibbs energy bounds
@@ -515,6 +515,8 @@ public class FluxMinimization extends TargetFunction {
 		int errorPosition = lPosition + getTargetVariablesLengths()[2];
 		int gibbsPosition = errorPosition + getTargetVariablesLengths()[3];
 		
+		cplex.addGe(getVariables()[fluxPosition], Double.MIN_VALUE);
+		
 		// Constraint J_j * G_j < 0
 		if (this.constraintJG == true) {
 			for (int j = 0; j < reactionCount; j++) {
@@ -522,6 +524,7 @@ public class FluxMinimization extends TargetFunction {
 				IloNumExpr j_j = cplex.prod(this.computedFluxVector[j], getVariables()[fluxPosition]);
 				// J_j * G_j
 				cplex.ifThen(cplex.not(cplex.eq(j_j, 0)),cplex.le(getVariables()[j + gibbsPosition],0));
+				cplex.ifThen(cplex.eq(j_j, 0),cplex.eq(getVariables()[j + gibbsPosition],0));
 			}
 		}
 		
@@ -534,12 +537,13 @@ public class FluxMinimization extends TargetFunction {
 					sumConcentrations = cplex.sum(sumConcentrations, cplex.prod(this.N_int_sys.get(i, j), getVariables()[i + concentrationPosition]));
 				}
 				// TODO if readGibbsEnergies[i] is NaN???
-				IloNumExpr delta_E_computation = cplex.diff(cplex.sum(cplex.prod(R, cplex.prod(T, sumConcentrations)), this.readGibbsEnergies[j]), getVariables()[j + gibbsPosition]);
-				
-				cplex.addEq(delta_E_computation, getVariables()[j + errorPosition]);
+				if(!Double.isNaN(this.readGibbsEnergies[j])) {
+					IloNumExpr delta_E_computation = cplex.diff(cplex.sum(cplex.prod(R, cplex.prod(T, sumConcentrations)), this.readGibbsEnergies[j]), getVariables()[j + gibbsPosition]);
+					cplex.addLe(delta_E_computation, getVariables()[j + errorPosition]);
+					cplex.addGe(delta_E_computation, 0);
+				}
 			}
 		}
-		
 		// Computation r_max = max(J_j / delta_r G_tilde_j)
 		double rmax = Double.MIN_NORMAL;
 		
@@ -583,8 +587,10 @@ public class FluxMinimization extends TargetFunction {
 			for (int kColumn = 0; kColumn < this.K_intTransposed.getColumnDimension(); kColumn++) {
 				double kVal = row[kColumn];
 				// TODO if readGibbsEnergies[i] is NaN???
-				IloNumExpr delta_G_tilde_j = cplex.diff(this.readGibbsEnergies[kColumn], getVariables()[kColumn + errorPosition]);
-				l_row = cplex.sum(l_row, cplex.prod(kVal, delta_G_tilde_j));
+				if(!Double.isNaN(this.readGibbsEnergies[kColumn])) {
+					IloNumExpr delta_G_tilde_j = cplex.diff(this.readGibbsEnergies[kColumn], getVariables()[kColumn + errorPosition]);
+				  l_row = cplex.sum(l_row, cplex.prod(kVal, delta_G_tilde_j)); 
+				}
 			}
 			
 			cplex.addEq(getVariables()[kRow + lPosition], l_row);
@@ -610,6 +616,7 @@ public class FluxMinimization extends TargetFunction {
 				optimizedFluxVector[i] = solution[fluxPosition] * this.computedFluxVector[i];
 			}
 			this.optimizedSolution[1] = optimizedFluxVector; // 2nd position: flux vector
+			System.out.println("Optimized Flux Vector: " + Arrays.toString(optimizedFluxVector));
 			
 			// 2. Concentration vector assignment
 			int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
@@ -618,6 +625,7 @@ public class FluxMinimization extends TargetFunction {
 				optimizedConcentrations[i] = Math.pow(Math.E, solution[i + concentrationPosition]);
 			}
 			this.optimizedSolution[0] = optimizedConcentrations; // 1st position: concentrations
+			System.out.println("Optimized concentration: " + Arrays.toString(optimizedConcentrations));
 			
 			// 3. L vector assignment
 			int lPosition = concentrationPosition + getTargetVariablesLengths()[1];
@@ -643,6 +651,8 @@ public class FluxMinimization extends TargetFunction {
 				optimizedGibbsEnergies[i] = solution[i + gibbsPosition];
 			}
 			this.optimizedSolution[2] = optimizedGibbsEnergies; // 3rd position: gibbs energies
+			System.out.println("G0 Gibbs Vector: " + Arrays.toString(this.readGibbsEnergies));
+			System.out.println("Optimized Gibbs Vector: " + Arrays.toString(optimizedGibbsEnergies));
 		}
 		
 		return this.optimizedSolution;
