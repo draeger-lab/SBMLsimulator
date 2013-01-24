@@ -519,8 +519,6 @@ public class FluxMinimization extends TargetFunction {
 		int errorPosition = lPosition + getTargetVariablesLengths()[2];
 		int gibbsPosition = errorPosition + getTargetVariablesLengths()[3];
 		
-		cplex.addGe(getVariables()[fluxPosition], Double.MIN_VALUE);
-		
 		// Constraint J_j * G_j < 0
 		if (this.constraintJG == true) {
 			for (int j = 0; j < reactionCount; j++) {
