@@ -27,6 +27,9 @@ import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.io.CSVDataImporter;
 import org.simulator.math.odes.MultiTable;
 
+import de.zbit.io.csv.CSVOptions;
+import de.zbit.io.csv.CSVWriter;
+
 /**
  * 
  * @author Robin F&auml;hnrich
@@ -91,12 +94,12 @@ public class DynamicFBATest {
 		// Run a dynamic FBA without interpolation
 		DynamicFBA dfba = new DynamicFBA(testDocument, concMT, 16);
 		
-		/*FluxMinimization fm = new FluxMinimization();
-		fm.setCplexIterations(1000000);
-		fm.setReadGibbsEnergies(correctedGibbsEnergies);
-		fm.setReadSystemBoundaries(correctedSysBounds);
-		
-		dfba.runDynamicFBA(fm);*/
+//		FluxMinimization fm = new FluxMinimization();
+//		fm.setCplexIterations(1000000);
+//		fm.setReadGibbsEnergies(correctedGibbsEnergies);
+//		fm.setReadSystemBoundaries(correctedSysBounds);
+//		
+//		dfba.runDynamicFBA(fm);
 		
 		FluxMinimizationII fm2 = new FluxMinimizationII();
 		//fm2.setCplexIterations(1000000);
@@ -107,6 +110,8 @@ public class DynamicFBATest {
 		// Print solution MultiTable
 		MultiTable solution = dfba.getSolutionMultiTable();
 		System.out.println(solution.toString());
+		
+		(new CSVWriter()).write(solution, ',', args[4]);
 		
 	}
 
