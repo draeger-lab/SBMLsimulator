@@ -17,11 +17,13 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.Species;
+import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.math.SplineCalculation;
 import org.simulator.math.odes.MultiTable;
 
@@ -164,6 +166,9 @@ public class DynamicFBA {
 
 		// Stop the CPLEX stream
 		cplex.end();
+		
+		// TODO calculate the netto flux according to the revers reaction saved in the map
+		Map<Integer, String> reversReaction = FluxMinimizationUtils.reversReaction;
 	}
 	
 	/**

@@ -19,7 +19,10 @@ package org.sbml.simulator.fba.controller;
 
 import java.beans.EventHandler;
 import java.beans.PropertyChangeListener;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 import org.sbml.jsbml.SBMLDocument;
 
@@ -277,73 +280,114 @@ public class CSVDataConverter {
 		writer.write(data, file);
 	}
 
-	/**
-	 * Writes the incoming data from the CSV-file in an array. When it was a Gibbs data file
-	 * the data will be written in the {@link# gibbsArray} else it was a concentration data file
-	 * and the data will be written in the {@link# concentrationsArray}.
-	 * @param obj
-	 * @throws Exception 
-	 */
-	public void writeDataInArray(Object obj) throws Exception {
-		if (obj instanceof String[][]) {
-			String[][] data = (String[][]) obj;
-			String[] values = new String[data.length];
-			String[] keys = new String[data.length];
-			int fileMatchToDocument = 0;
-			// values are in the second column and keys in the first column
-			for(int i = 0; i < data.length; i++) {
-				values[i] = data[i][1];
-				keys[i] = data[i][0];
-			}
+//	/**
+//	 * Writes the incoming data from the CSV-file in an array. When it was a Gibbs data file
+//	 * the data will be written in the {@link# gibbsArray} else it was a concentration data file
+//	 * and the data will be written in the {@link# concentrationsArray}.
+//	 * @param obj
+//	 * @throws Exception 
+//	 */
+//	public void writeDataInArray(Object obj) throws Exception {
+//		if (obj instanceof String[][]) {
+//			String[][] data = (String[][]) obj;
+//			String[] values = new String[data.length];
+//			String[] keys = new String[data.length];
+//			int fileMatchToDocument = 0;
+//			// values are in the second column and keys in the first column
+//			for(int i = 0; i < data.length; i++) {
+//				values[i] = data[i][1];
+//				keys[i] = data[i][0];
+//			}
+//
+//			if (isGibbsFile != null && isGibbsFile) {
+//				
+//			} else if(isConcentrationFile != null && isConcentrationFile){
+//				initializeConcentrationArray();
+//				for(int i = 0; i < values.length; i++) {
+//					if (modifiedDocument.getModel().containsSpecies(keys[i])) {
+//						modifiedDocument.getModel().getSpecies(keys[i]).putUserObject(KEY_CONCENTRATIONS, values[i]);
+//						int index = modifiedDocument.getModel().getListOfSpecies().getIndex(modifiedDocument.getModel().getSpecies(keys[i]));
+//						concentrationsArray[index] = Double.parseDouble(values[i]);
+//						fileMatchToDocument++;
+//					}
+//				}
+//			} 
+////			else if (isSystemBoundariesFile != null && isSystemBoundariesFile) {}
+//			if (fileMatchToDocument == 0) {
+//				throw new Exception("given file does not match with opened SBMLDocument");				
+//			}
+//		}
+//	}
+	
+	public double[] readGibbs(String file) throws IOException {
+		initializeGibbsArray();
 
-			if (isGibbsFile != null && isGibbsFile) {
-				initializeGibbsArray();
-				for(int i = 0; i < values.length; i++) {
-					if (modifiedDocument.getModel().containsReaction(keys[i])) {
-						if (!FluxMinimizationUtils.eliminatedReactions.contains(keys[i])) {
-							modifiedDocument.getModel().getReaction(keys[i]).putUserObject(KEY_GIBBS, Double.parseDouble(values[i]));
-							int index = modifiedDocument.getModel().getListOfReactions().getIndex(modifiedDocument.getModel().getReaction(keys[i]));
-							gibbsArray[index] = Double.parseDouble(values[i]);
-							fileMatchToDocument++;
-							if (modifiedDocument.getModel().containsReaction(keys[i] + FluxMinimizationUtils.endingForBackwardReaction)){
-								modifiedDocument.getModel().getReaction(keys[i] + FluxMinimizationUtils.endingForBackwardReaction).putUserObject(KEY_GIBBS, "isReverse");
-								int index2 = modifiedDocument.getModel().getListOfReactions().getIndex(modifiedDocument.getModel().getReaction(keys[i] + FluxMinimizationUtils.endingForBackwardReaction));
-								gibbsArray[index2] = -Double.parseDouble(values[i]);
-							}
+		String line;
+
+		BufferedReader input = new BufferedReader(new FileReader(file));
+		boolean header = true;
+		while ((line = input.readLine()) != null) {
+			if (!header) {
+				String[] helper = line.split("\t");
+				if (modifiedDocument.getModel().containsReaction(helper[0])) {
+					if (!FluxMinimizationUtils.eliminatedReactions.contains(helper[0])) {
+						modifiedDocument.getModel().getReaction(helper[0]).putUserObject(KEY_GIBBS, Double.parseDouble(helper[1]));
+						int index = modifiedDocument.getModel().getListOfReactions().getIndex(modifiedDocument.getModel().getReaction(helper[0]));
+						gibbsArray[index] = Double.parseDouble(helper[1]);
+						if (modifiedDocument.getModel().containsReaction(helper[0] + FluxMinimizationUtils.endingForBackwardReaction)){
+//							modifiedDocument.getModel().getReaction(helper[0] + FluxMinimizationUtils.endingForBackwardReaction).putUserObject(KEY_GIBBS, "isReverse");
+							modifiedDocument.getModel().getReaction(helper[0] + FluxMinimizationUtils.endingForBackwardReaction).putUserObject(KEY_GIBBS, -Double.parseDouble(helper[1]));
+							int index2 = modifiedDocument.getModel().getListOfReactions().getIndex(modifiedDocument.getModel().getReaction(helper[0] + FluxMinimizationUtils.endingForBackwardReaction));
+							gibbsArray[index2] = -Double.parseDouble(helper[1]);
 						}
 					}
 				}
-			} else if(isConcentrationFile != null && isConcentrationFile){
-				initializeConcentrationArray();
-				for(int i = 0; i < values.length; i++) {
-					if (modifiedDocument.getModel().containsSpecies(keys[i])) {
-						modifiedDocument.getModel().getSpecies(keys[i]).putUserObject(KEY_CONCENTRATIONS, values[i]);
-						int index = modifiedDocument.getModel().getListOfSpecies().getIndex(modifiedDocument.getModel().getSpecies(keys[i]));
-						concentrationsArray[index] = Double.parseDouble(values[i]);
-						fileMatchToDocument++;
-					}
-				}
-			} else if (isSystemBoundariesFile != null && isSystemBoundariesFile) { 
-				initializeSystemBoundariesArray();
-				for (int i = 0; i < values.length; i++) {
-					if (modifiedDocument.getModel().containsSpecies(keys[i])) {
-						int index = modifiedDocument.getModel().getListOfSpecies().getIndex(modifiedDocument.getModel().getSpecies(keys[i]));
-						if (values[i].equals("-")){
-							systemBoundariesArray[index] = -1;
-						}
-						else if (values[i].equals("+")) {
-							systemBoundariesArray[index] = +1;
-						}
-						else if (values[i].equals("=")) {
-							systemBoundariesArray[index] = 0;
-						}
-						fileMatchToDocument++;
-					}
+				else {
+					System.out.println(helper[0] + " unknown reaction");
 				}
 			}
-			if (fileMatchToDocument == 0) {
-				throw new Exception("given file does not match with opened SBMLDocument");				
+			else {
+				header = false;
 			}
 		}
+		return gibbsArray;
+	}
+	
+	public double[] readSystemBoundaries(String file) throws IOException {
+		initializeSystemBoundariesArray();
+
+		String line;
+
+		BufferedReader input = new BufferedReader(new FileReader(file));
+		boolean header = true;
+		while ((line = input.readLine()) != null) {
+			if (!header) {
+				String[] helper = line.split("\t");
+		
+			if (modifiedDocument.getModel().containsSpecies(helper[0])) {
+				int index = modifiedDocument.getModel().getListOfSpecies().getIndex(modifiedDocument.getModel().getSpecies(helper[0]));
+				if (helper[1].equals("-")){
+					systemBoundariesArray[index] = -1;
+				}
+				else if (helper[1].equals("+")) {
+					systemBoundariesArray[index] = +1;
+				}
+				else if (helper[1].equals("=")) {
+					systemBoundariesArray[index] = 0;
+				}
+				else {
+					System.out.println(helper[0] + " unknown sign");
+				}
+			}
+			else {
+				System.out.println(helper[0] + " unknown species");
+			}
+		
+			}
+			else {
+				header = false;
+			}
+		}
+		return systemBoundariesArray;
 	}
 }

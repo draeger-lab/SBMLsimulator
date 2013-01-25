@@ -22,8 +22,10 @@ import ilog.concert.IloException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.sbml.jsbml.ModifierSpeciesReference;
 import org.sbml.jsbml.Reaction;
@@ -81,6 +83,12 @@ public class FluxMinimizationUtils {
 	 * List contains the reversible reactions.
 	 */
 	public static List<String> reversibleReactions = new ArrayList<String>();
+	
+	/**
+	 * contains the corresponding backward reaction id in the modified sbml document 
+	 * to the i-th reaction in the original sbml document
+	 */
+	public static Map<Integer, String> reversReaction = new HashMap<Integer, String>(); 
 
 	/**
 	 * contains the steadyStateMatrix
@@ -349,6 +357,7 @@ public class FluxMinimizationUtils {
 				backwardReac.setReversible(false);
 				revReacDoc.getModel().addReaction(backwardReac);
 				reversibleReac.setReversible(false);
+				reversReaction.put(i, reversibleReac.getId());
 //				System.out.println("added: " + backwardReac.getId());
 			}
 		}
