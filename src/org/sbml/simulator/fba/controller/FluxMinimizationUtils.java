@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.sbml.jsbml.ModifierSpeciesReference;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBO;
@@ -210,7 +211,7 @@ public class FluxMinimizationUtils {
 			// pre-processing: sort the matrix to speed up the computation of the steady state matrix
 			double[][] sortedMatrixArray = getSortedArray(NwithoutZeroRows);
 			
-			//TODO:sysout
+			//TODO:sysout matrix
 //			System.out.print("leer, ");
 //			for (int i = 0; i < systemBoundaryDocument.getModel().getReactionCount(); i++) {
 //				System.out.print(systemBoundaryDocument.getModel().getReaction(i) + ", ");
@@ -328,6 +329,7 @@ public class FluxMinimizationUtils {
 				backwardReac.setName(reversibleReac.getName() + endingForBackwardReaction);
 				backwardReac.getListOfProducts().clear();
 				backwardReac.getListOfReactants().clear();
+				backwardReac.getListOfModifiers().clear();
 				for (int j = 0; j < reversibleReac.getReactantCount(); j++) {
 					SpeciesReference sr = reversibleReac.getReactant(j).clone();
 					sr.setMetaId(reversibleReac.getReactant(j).getMetaId() + endingForBackwardReaction);
@@ -339,9 +341,15 @@ public class FluxMinimizationUtils {
 					sr.setMetaId(reversibleReac.getProduct(k).getMetaId() + endingForBackwardReaction);
 					backwardReac.addReactant(sr);
 				}
+				for (int l = 0; l < reversibleReac.getModifierCount(); l++) {
+					ModifierSpeciesReference sr = reversibleReac.getModifier(l).clone();
+					sr.setMetaId(reversibleReac.getModifier(l).getMetaId() + endingForBackwardReaction);
+					backwardReac.addModifier(sr);
+				} 
 				backwardReac.setReversible(false);
 				revReacDoc.getModel().addReaction(backwardReac);
 				reversibleReac.setReversible(false);
+//				System.out.println("added: " + backwardReac.getId());
 			}
 		}
 		// return the new document
