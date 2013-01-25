@@ -17,7 +17,6 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
-import java.io.File;
 import java.util.Arrays;
 
 import org.sbml.jsbml.SBMLDocument;
@@ -27,7 +26,6 @@ import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.io.CSVDataImporter;
 import org.simulator.math.odes.MultiTable;
 
-import de.zbit.io.csv.CSVOptions;
 import de.zbit.io.csv.CSVWriter;
 
 /**
@@ -59,32 +57,33 @@ public class DynamicFBATest {
 		
 		System.out.println("Concentrations read");
 		
+		
 		// Read system boundary file
-		File sysBoundFile = new File(args[2]);
+		
+
+		//--------------------------------------------------------------
+//		File sysBoundFile = new File(args[2]);
 		CSVDataConverter sysBoundConverter = new CSVDataConverter(testDocument, true);
-		sysBoundConverter.readSystemBoundariesFromFile(sysBoundFile);
-		while (sysBoundConverter.getSystemBoundariesArray() == null) {
-			//wait TODO check sysBound reading process, maybe wrong!
-			Thread.sleep(1000);
-		}
+		double[] sysBounds = sysBoundConverter.readSystemBoundaries(args[2]);
 		System.out.println();
-		double[] sysBounds = sysBoundConverter.getSystemBoundariesArray();
 		// TODO remember: get corrected system boundaries after reading the sysBound file
 		double[] correctedSysBounds = FluxMinimizationUtils.getCorrectedSystemBoundaries(testDocument, sysBounds);
 		
 		System.out.println("System boundaries read. Count: " + correctedSysBounds.length);
 		System.out.println(Arrays.toString(correctedSysBounds));
+		//--------------------------------------------------------------
+
 		
 		// Read gibbs energy file
-		File gibbsFile = new File(args[3]);
+//		File gibbsFile = new File(args[3]);
 		CSVDataConverter gibbsConverter = new CSVDataConverter(testDocument, correctedSysBounds);
-		gibbsConverter.readGibbsFromFile(gibbsFile);
-		while(gibbsConverter.getGibbsArray() == null) {
-			//wait TODO check gibbs reading process, maybe wrong!
-			Thread.sleep(1000);
-		}
+		double[] gibbsEnergies = gibbsConverter.readGibbs(args[3]);
+//		while(gibbsConverter.getGibbsArray() == null) {
+//			//wait TODO check gibbs reading process, maybe wrong!
+//			Thread.sleep(1000);
+//		}
 		System.out.println();
-		double[] gibbsEnergies = gibbsConverter.getGibbsArray();
+//		gibbsConverter.getGibbsArray();
 		// TODO remember: get corrected gibbs energies after reading the gibbs file 
 		double[] correctedGibbsEnergies = FluxMinimizationUtils.getEquillibriumGibbsEnergiesfromkKiloJoule(gibbsEnergies);
 		
