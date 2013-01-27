@@ -427,10 +427,9 @@ public class FluxMinimization extends TargetFunction {
 		
 		// Set default bounds
 		setDefaultBounds();
-				
-		IloNumVar[] variables = cplex.numVarArray(fullVariableLength, this.lowerBounds, this.upperBounds);
 		
 		// Set the variables
+		IloNumVar[] variables = cplex.numVarArray(fullVariableLength, this.lowerBounds, this.upperBounds);
 		setVariables(variables);
 	}
 
@@ -592,7 +591,7 @@ public class FluxMinimization extends TargetFunction {
 
 			double[] row = this.K_intTransposed.getRow(kRow);
 			
-			IloNumExpr l_row = cplex.numExpr(); // remember: L is a vector!
+			IloNumExpr l_row = cplex.numExpr(); // Remember: L is a vector!
 			for (int kColumn = 0; kColumn < this.K_intTransposed.getColumnDimension(); kColumn++) {
 				double kVal = row[kColumn];
 				// TODO if readGibbsEnergies[i] is NaN???
@@ -643,7 +642,7 @@ public class FluxMinimization extends TargetFunction {
 				optimizedLVector[i] = solution[i + lPosition];
 			}
 			System.out.println("Optimized L vector: " + Arrays.toString(optimizedLVector));
-			// TODO now: no assignment useful! There are no L vector ID's for the MultiTable
+			// Now: no assignment useful! There are no L vector ID's for the MultiTable
 			
 			// 4. Error vector assignment
 			int errorPosition = lPosition + getTargetVariablesLengths()[2];
