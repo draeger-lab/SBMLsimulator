@@ -18,6 +18,7 @@
 package org.sbml.simulator.fba.dynamic;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.sbml.jsbml.ListOf;
@@ -26,6 +27,7 @@ import org.sbml.jsbml.Species;
 import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.math.SplineCalculation;
 import org.simulator.math.odes.MultiTable;
+import org.simulator.math.odes.MultiTable.Block.Column;
 
 import ilog.concert.IloException;
 import ilog.cplex.IloCplex;
@@ -167,8 +169,30 @@ public class DynamicFBA {
 		// Stop the CPLEX stream
 		cplex.end();
 		
-		// TODO calculate the netto flux according to the revers reaction saved in the map
+		// Calculate the netto fluxes according to the reverse reaction saved in the map
 		Map<Integer, String> reversReaction = FluxMinimizationUtils.reversReaction;
+		
+		String[] values = new String[reversReaction.size()];
+		int entry = 0;
+		for (Entry<Integer, String> map : reversReaction.entrySet()) {
+			values[entry] = map.getValue();
+			entry++;
+		}
+		
+		for (int i = 0; i < reversReaction.size(); i++) {
+			String currentRevReactionId = values[i];
+			Column currentReactionCol = this.solutionMultiTable.getBlock(1).getColumn(currentRevReactionId);
+			Column currentRevReactionCol = this.solutionMultiTable.getBlock(1).getColumn(currentRevReactionId + "_rev");
+			
+			for (int timePoint = 0; timePoint < this.solutionMultiTable.getRowCount(); timePoint++) {
+				double nettoFlux = currentReactionCol.getValue(timePoint) - currentRevReactionCol.getValue(timePoint);
+				
+				int block0Count = this.solutionMultiTable.getBlock(0).getColumnCount();
+				int specificColumn = block0Count + this.solutionMultiTable.getBlock(1).findColumn(currentReactionCol.getColumnName());
+				
+				this.solutionMultiTable.setValueAt(nettoFlux, timePoint, specificColumn+1);
+			}
+		}
 	}
 	
 	/**
