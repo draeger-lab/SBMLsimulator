@@ -29,6 +29,7 @@ import org.simulator.math.odes.MultiTable;
 import de.zbit.io.csv.CSVWriter;
 
 /**
+ * Test a dynamic flux balance analysis.
  * 
  * @author Robin F&auml;hnrich
  * @version $Rev$
@@ -50,6 +51,7 @@ public class DynamicFBATest {
 		
 		System.out.println("SBML document read");
 		
+		
 		// Read concentration file
 		String concFile = args[1];
 		CSVDataImporter importer = new CSVDataImporter();
@@ -59,58 +61,49 @@ public class DynamicFBATest {
 		
 		
 		// Read system boundary file
-		
-
-		//--------------------------------------------------------------
-//		File sysBoundFile = new File(args[2]);
 		CSVDataConverter sysBoundConverter = new CSVDataConverter(testDocument, true);
 		double[] sysBounds = sysBoundConverter.readSystemBoundaries(args[2]);
 		System.out.println();
-		// TODO remember: get corrected system boundaries after reading the sysBound file
-		double[] correctedSysBounds = FluxMinimizationUtils.getCorrectedSystemBoundaries(testDocument, sysBounds);
 		
+		// Remember: get corrected system boundaries after reading the sysBound file
+		double[] correctedSysBounds = FluxMinimizationUtils.getCorrectedSystemBoundaries(testDocument, sysBounds);
 		System.out.println("System boundaries read. Count: " + correctedSysBounds.length);
 		System.out.println(Arrays.toString(correctedSysBounds));
-		//--------------------------------------------------------------
 
 		
 		// Read gibbs energy file
-//		File gibbsFile = new File(args[3]);
 		CSVDataConverter gibbsConverter = new CSVDataConverter(testDocument, correctedSysBounds);
 		double[] gibbsEnergies = gibbsConverter.readGibbs(args[3]);
-//		while(gibbsConverter.getGibbsArray() == null) {
-//			//wait TODO check gibbs reading process, maybe wrong!
-//			Thread.sleep(1000);
-//		}
 		System.out.println();
-//		gibbsConverter.getGibbsArray();
-		// TODO remember: get corrected gibbs energies after reading the gibbs file 
-		double[] correctedGibbsEnergies = FluxMinimizationUtils.getEquillibriumGibbsEnergiesfromkKiloJoule(gibbsEnergies);
 		
+		// Remember: get corrected gibbs energies after reading the gibbs file 
+		double[] correctedGibbsEnergies = FluxMinimizationUtils.getEquillibriumGibbsEnergiesfromkKiloJoule(gibbsEnergies);
 		System.out.println("Gibbs energies read. Count: " + correctedGibbsEnergies.length);
 		System.out.println(Arrays.toString(correctedGibbsEnergies));
 		
-		// Run a dynamic FBA without interpolation
+		
+		// Run a dynamic FBA
 		DynamicFBA dfba = new DynamicFBA(testDocument, concMT, 16);
 		
-		FluxMinimization fm = new FluxMinimization();
+/*		FluxMinimization fm = new FluxMinimization();
 		fm.setCplexIterations(1000000);
 		fm.setReadGibbsEnergies(correctedGibbsEnergies);
 		fm.setReadSystemBoundaries(correctedSysBounds);
 		
-		dfba.runDynamicFBA(fm);
+		dfba.runDynamicFBA(fm);*/
 		
-//		FluxMinimizationII fm2 = new FluxMinimizationII();
-//		fm2.setCplexIterations(1000000);
-//		fm2.setReadSystemBoundaries(correctedSysBounds);
-//		
-//		dfba.runDynamicFBA(fm2);
-//		
+		FluxMinimizationII fm2 = new FluxMinimizationII();
+		fm2.setCplexIterations(1000000);
+		fm2.setReadSystemBoundaries(correctedSysBounds);
+		
+		dfba.runDynamicFBA(fm2);
+		
+		
 		// Print solution MultiTable
 		MultiTable solution = dfba.getSolutionMultiTable();
 		System.out.println(solution.toString());
 		
-		(new CSVWriter()).write(solution, ',', args[4]);
+		(new CSVWriter()).write(solution, ',', "C:/Users/Robin/Desktop/test2/RESULT.csv");
 		
 	}
 
