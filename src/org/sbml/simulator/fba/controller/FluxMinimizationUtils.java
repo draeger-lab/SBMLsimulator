@@ -88,7 +88,7 @@ public class FluxMinimizationUtils {
 	 * contains the corresponding backward reaction id in the modified sbml document 
 	 * to the i-th reaction in the original sbml document
 	 */
-	public static Map<Integer, String> reversReaction = new HashMap<Integer, String>(); 
+	public static Map<Integer, String> reverseReaction = new HashMap<Integer, String>(); 
 
 	/**
 	 * contains the steadyStateMatrix
@@ -357,7 +357,7 @@ public class FluxMinimizationUtils {
 				backwardReac.setReversible(false);
 				revReacDoc.getModel().addReaction(backwardReac);
 				reversibleReac.setReversible(false);
-				reversReaction.put(i, reversibleReac.getId());
+				reverseReaction.put(i, reversibleReac.getId());
 //				System.out.println("added: " + backwardReac.getId());
 			}
 		}
