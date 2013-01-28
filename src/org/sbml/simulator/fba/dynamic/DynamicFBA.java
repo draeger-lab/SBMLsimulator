@@ -170,26 +170,31 @@ public class DynamicFBA {
 		cplex.end();
 		
 		// Calculate the netto fluxes according to the reverse reaction saved in the map
-		Map<Integer, String> reversReaction = FluxMinimizationUtils.reversReaction;
+		Map<Integer, String> reverseReaction = FluxMinimizationUtils.reverseReaction;
 		
-		String[] values = new String[reversReaction.size()];
+		String[] values = new String[reverseReaction.size()];
 		int entry = 0;
-		for (Entry<Integer, String> map : reversReaction.entrySet()) {
+		for (Entry<Integer, String> map : reverseReaction.entrySet()) {
+			// Get every value of the map -> reaction IDs of the reverse fluxes
 			values[entry] = map.getValue();
 			entry++;
 		}
 		
-		for (int i = 0; i < reversReaction.size(); i++) {
+		for (int i = 0; i < reverseReaction.size(); i++) {
 			String currentRevReactionId = values[i];
+			// Block 1 contains the fluxes
 			Column currentReactionCol = this.solutionMultiTable.getBlock(1).getColumn(currentRevReactionId);
 			Column currentRevReactionCol = this.solutionMultiTable.getBlock(1).getColumn(currentRevReactionId + "_rev");
 			
 			for (int timePoint = 0; timePoint < this.solutionMultiTable.getRowCount(); timePoint++) {
+				// Netto flux = forward flux - reverse flux
 				double nettoFlux = currentReactionCol.getValue(timePoint) - currentRevReactionCol.getValue(timePoint);
 				
+				// Block 0 contains the concentrations
 				int block0Count = this.solutionMultiTable.getBlock(0).getColumnCount();
 				int specificColumn = block0Count + this.solutionMultiTable.getBlock(1).findColumn(currentReactionCol.getColumnName());
 				
+				// Overwrite the specific column value with the new netto flux
 				this.solutionMultiTable.setValueAt(nettoFlux, timePoint, specificColumn+1);
 			}
 		}
