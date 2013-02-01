@@ -67,7 +67,7 @@ public class FluxMinimization extends TargetFunction {
 	
 	/*
 	 * The internal, reduced and transposed {@link StoichiometricMatrix}
-	 * K_int^T for the computation of the L vector
+	 * K_int^T for the computation of the L vector and the flux vector
 	 */
 	private StabilityMatrix K_intTransposed;
 	
@@ -348,12 +348,12 @@ public class FluxMinimization extends TargetFunction {
 	public int[] getTargetVariablesLengths() {
 		int speciesCount = this.expandedDocument.getModel().getSpeciesCount();
 		int reactionCount = this.expandedDocument.getModel().getReactionCount();
-		int lDimension = this.K_intTransposed.getRowDimension();
+		int K_intT_rowDim = this.K_intTransposed.getRowDimension();
 		
 		int[] targetVariablesLength = new int[5];
-		targetVariablesLength[0] = 4; //4 variables for the flux vector
+		targetVariablesLength[0] = K_intT_rowDim; //variables for the flux vector
 		targetVariablesLength[1] = speciesCount; //variables for the concentrations
-		targetVariablesLength[2] = lDimension; //variables for the L vector
+		targetVariablesLength[2] = K_intT_rowDim; //variables for the L vector
 		targetVariablesLength[3] = reactionCount; //variables for the error vector
 		targetVariablesLength[4] = reactionCount; //variables for the gibbs energies
 		
@@ -444,16 +444,12 @@ public class FluxMinimization extends TargetFunction {
 		IloNumExpr flux = cplex.numExpr();
 		int fluxPosition = 0;
 		// Manhattan norm included
-		for (int i = 0; i < this.K_intTransposed.getRow(0).length; i++) {
-			flux = cplex.sum(flux, cplex.sum(cplex.prod(this.K_intTransposed.getRow(0)[i], getVariables()[0]),
-					cplex.prod(this.K_intTransposed.getRow(1)[i], getVariables()[1]),
-					cplex.prod(this.K_intTransposed.getRow(2)[i], getVariables()[2]),
-					cplex.prod(this.K_intTransposed.getRow(3)[i], getVariables()[3])));
+		for (int k = 0; k < getTargetVariablesLengths()[0]; k++) {
+			for (int i = 0; i < this.expandedDocument.getModel().getReactionCount(); i++) {
+				IloNumExpr k_var = cplex.prod(this.K_intTransposed.getRow(k)[i], getVariables()[k]);
+				flux = cplex.sum(flux, k_var);
+			}
 		}
-		getVariables()[0].setName("flux" + 0);
-		getVariables()[1].setName("flux" + 1);
-		getVariables()[2].setName("flux" + 2);
-		getVariables()[3].setName("flux" + 3);
 		
 		// Concentrations 
 		IloNumExpr conc = cplex.numExpr();
@@ -527,10 +523,11 @@ public class FluxMinimization extends TargetFunction {
 		if (this.constraintJG == true) {
 			for (int j = 0; j < reactionCount; j++) {
 				// Flux J_j
-				IloNumExpr j_j = cplex.sum(cplex.prod(this.K_intTransposed.getRow(0)[j], getVariables()[0]),
-						cplex.prod(this.K_intTransposed.getRow(1)[j], getVariables()[1]),
-						cplex.prod(this.K_intTransposed.getRow(2)[j], getVariables()[2]),
-						cplex.prod(this.K_intTransposed.getRow(3)[j], getVariables()[3]));
+				IloNumExpr j_j = cplex.numExpr();
+				for (int k = 0; k < getTargetVariablesLengths()[0]; k++) {
+					IloNumExpr k_var = cplex.prod(this.K_intTransposed.getRow(k)[j], getVariables()[k]);
+					j_j = cplex.sum(j_j, k_var);
+				}
 				
 				// J_j * G_j
 				cplex.ifThen(cplex.not(cplex.eq(j_j, 0)),cplex.le(getVariables()[j + gibbsPosition],0));
@@ -564,7 +561,7 @@ public class FluxMinimization extends TargetFunction {
 		for (int j = 0; j < reactionCount; j++) {
 			// Division by NaN -> r_max = NaN, Division by zero -> r_max = +Infinity
 			if (!Double.isNaN(this.readGibbsEnergies[j]) && this.readGibbsEnergies[j] != 0) {
-				// TODO computedFluxVector <-> 4 basis vectors of K_int_transposed??
+				// TODO computedFluxVector <-> basis vectors of K_int_transposed??
 				double current_r = Math.abs(this.computedFluxVector[j]) / Math.abs(this.readGibbsEnergies[j]);
 				rmax = Math.max(rmax, current_r);
 			}
@@ -575,10 +572,11 @@ public class FluxMinimization extends TargetFunction {
 		if (this.constraintJ_rmaxG == true) {
 			for (int j = 0; j < reactionCount; j++) {
 				// Flux J_j
-				IloNumExpr j_j = cplex.sum(cplex.prod(this.K_intTransposed.getRow(0)[j], getVariables()[0]),
-						cplex.prod(this.K_intTransposed.getRow(1)[j], getVariables()[1]),
-						cplex.prod(this.K_intTransposed.getRow(2)[j], getVariables()[2]),
-						cplex.prod(this.K_intTransposed.getRow(3)[j], getVariables()[3]));
+				IloNumExpr j_j = cplex.numExpr();
+				for (int k = 0; k < getTargetVariablesLengths()[0]; k++) {
+					IloNumExpr k_var = cplex.prod(this.K_intTransposed.getRow(k)[j], getVariables()[k]);
+					j_j = cplex.sum(j_j, k_var);
+				}
 				// |J_j| - r_max * |G_j|
 				IloNumExpr rmaxG = cplex.prod(this.r_max, cplex.abs(getVariables()[j + gibbsPosition]));
 				
@@ -590,10 +588,11 @@ public class FluxMinimization extends TargetFunction {
 		if (this.constraintJ0 == true) {
 			for (int j = 0; j < reactionCount; j++) {
 				// Flux J_j
-				IloNumExpr j_j = cplex.sum(cplex.prod(this.K_intTransposed.getRow(0)[j], getVariables()[0]),
-						cplex.prod(this.K_intTransposed.getRow(1)[j], getVariables()[1]),
-						cplex.prod(this.K_intTransposed.getRow(2)[j], getVariables()[2]),
-						cplex.prod(this.K_intTransposed.getRow(3)[j], getVariables()[3]));
+				IloNumExpr j_j = cplex.numExpr();
+				for (int k = 0; k < getTargetVariablesLengths()[0]; k++) {
+					IloNumExpr k_var = cplex.prod(this.K_intTransposed.getRow(k)[j], getVariables()[k]);
+					j_j = cplex.sum(j_j, k_var);
+				}
 				
 				cplex.addGe(j_j, 0);
 			}
@@ -631,13 +630,14 @@ public class FluxMinimization extends TargetFunction {
 		} else {
 			// 1. Flux vector assignment
 			int fluxPosition = 0;
-			double[] optimizedFluxVector = new double[this.K_intTransposed.getRow(0).length];
-			// solution[0] - solution[3] contain the optimized values for the flux vector
+			double[] optimizedFluxVector = new double[this.expandedDocument.getModel().getReactionCount()];
+			// solution[k] contains the optimized values for the flux vector (row dimension of K_int^T)
 			for (int i = 0; i < optimizedFluxVector.length; i++) {
-				optimizedFluxVector[i] = solution[0] * this.K_intTransposed.getRow(0)[i] +
-						solution[1] * this.K_intTransposed.getRow(1)[i] +
-						solution[2] * this.K_intTransposed.getRow(2)[i] +
-						solution[3] * this.K_intTransposed.getRow(3)[i];
+				double fluxVector = 0;
+				for (int k = 0; k < getTargetVariablesLengths()[0]; k++) {
+					fluxVector += solution[k] * this.K_intTransposed.getRow(k)[i];
+				}
+				optimizedFluxVector[i] = fluxVector;
 			}
 			this.optimizedSolution[1] = optimizedFluxVector; // 2nd position: flux vector
 			System.out.println("Optimized Flux Vector: " + Arrays.toString(optimizedFluxVector));
