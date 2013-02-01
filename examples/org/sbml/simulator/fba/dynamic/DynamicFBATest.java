@@ -51,11 +51,9 @@ public class DynamicFBATest {
 		
 		System.out.println("SBML document read");
 		
-		
 		// Read concentration file
-		String concFile = args[1];
 		CSVDataImporter importer = new CSVDataImporter();
-		MultiTable concMT = importer.convert(testDocument.getModel(), concFile);
+		MultiTable concMT = importer.convert(testDocument.getModel(), args[1]);
 		
 		System.out.println("Concentrations read");
 		
@@ -83,27 +81,27 @@ public class DynamicFBATest {
 		
 		
 		// Run a dynamic FBA
-		DynamicFBA dfba = new DynamicFBA(testDocument, concMT, 16);
+		DynamicFBA dfba = new DynamicFBA(testDocument, concMT);
 		
-/*		FluxMinimization fm = new FluxMinimization();
+		FluxMinimization fm = new FluxMinimization();
 		fm.setCplexIterations(1000000);
 		fm.setReadGibbsEnergies(correctedGibbsEnergies);
 		fm.setReadSystemBoundaries(correctedSysBounds);
 		
-		dfba.runDynamicFBA(fm);*/
+		dfba.runDynamicFBA(fm);
 		
-		FluxMinimizationII fm2 = new FluxMinimizationII();
+/*		FluxMinimizationII fm2 = new FluxMinimizationII();
 		fm2.setCplexIterations(1000000);
 		fm2.setReadSystemBoundaries(correctedSysBounds);
 		
-		dfba.runDynamicFBA(fm2);
+		dfba.runDynamicFBA(fm2);*/
 		
 		
 		// Print solution MultiTable
 		MultiTable solution = dfba.getSolutionMultiTable();
 		System.out.println(solution.toString());
 		
-		(new CSVWriter()).write(solution, ',', "C:/Users/Robin/Desktop/test2/RESULT.csv");
+		(new CSVWriter()).write(solution, ',', args[4]);
 		
 	}
 
