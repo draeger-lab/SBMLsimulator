@@ -538,7 +538,7 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 			optimizer.optimize();
 		}
 
-		ESIndividualDoubleData best = (ESIndividualDoubleData)optimizer.getPopulation().get(0);
+		ESIndividualDoubleData best = (ESIndividualDoubleData)optimizer.getPopulation().getBestEAIndividual();
 		double[] estimations = best.getDoubleData();
 		double fitness = best.getFitness()[0];
 		logger.info("Fitness: " + fitness);
