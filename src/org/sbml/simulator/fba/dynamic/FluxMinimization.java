@@ -533,8 +533,8 @@ public class FluxMinimization extends TargetFunction {
 				cplex.ifThen(cplex.not(cplex.eq(j_j, 0)),cplex.le(getVariables()[j + gibbsPosition],0));
 				
 				//TODO ?
-				cplex.ifThen(cplex.eq(j_j, 0),cplex.eq(getVariables()[j + gibbsPosition],0));
-				cplex.ifThen(cplex.eq(getVariables()[j + gibbsPosition],0),cplex.eq(j_j,0));
+				//cplex.ifThen(cplex.eq(j_j, 0),cplex.eq(getVariables()[j + gibbsPosition],0));
+				//cplex.ifThen(cplex.eq(getVariables()[j + gibbsPosition],0),cplex.eq(j_j,0));
 			}
 		}
 		
