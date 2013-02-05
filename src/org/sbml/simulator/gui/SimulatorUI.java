@@ -465,7 +465,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	 * @param file
 	 */
 	public File[] open(File... files) {
-    return openFileAndLogHistory(files);
+		return openFileAndLogHistory(files);
 	}
 
 	/* (non-Javadoc)
