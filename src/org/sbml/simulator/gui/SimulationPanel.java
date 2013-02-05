@@ -46,6 +46,7 @@ import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Quantity;
+import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLWriter;
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.optimization.problem.EstimationProblem;
@@ -68,10 +69,12 @@ import de.zbit.gui.GUIOptions;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.table.MultipleTableView;
 import de.zbit.gui.table.renderer.DecimalCellRenderer;
+import de.zbit.io.OpenedFile;
 import de.zbit.io.csv.CSVOptions;
 import de.zbit.io.csv.CSVWriter;
 import de.zbit.io.filefilter.SBFileFilter;
 import de.zbit.sbml.gui.SBMLModelSplitPane;
+import de.zbit.sbml.io.SBMLfileChangeListener;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
 import de.zbit.util.prefs.SBPreferences;
@@ -416,15 +419,15 @@ public class SimulationPanel extends JPanel implements
         dynamicGraphView.addPropertyChangeListener(this); //use of progressBar
 //        TranslatorSBMLgraphPanel graphView = new TranslatorSBMLgraphPanel(getModel().getSBMLDocument(), false);
         
+        OpenedFile<SBMLDocument> openFile = new OpenedFile<SBMLDocument>(simulationManager.getSimulationConfiguration().getModel().getSBMLDocument());
+        openFile.getDocument().addTreeNodeChangeListener(new SBMLfileChangeListener(openFile));
+        
         tabbedPane = new JTabbedPane();
         tabbedPane.add(bundle.getString("TAB_SIMULATION"), visualizationPanel);
         tabbedPane.add(bundle.getString("TAB_IN_SILICO_DATA"), simPanel);
         tabbedPane.add(bundle.getString("TAB_EXPERIMENTAL_DATA"), dataTableView);
-				tabbedPane.add(bundle.getString("TAB_MODEL_VIEW"),
-					new SBMLModelSplitPane(simulationManager.getSimulationConfiguration()
-							.getModel().getSBMLDocument(), true));
+				tabbedPane.add(bundle.getString("TAB_MODEL_VIEW"), new SBMLModelSplitPane(openFile, true));
 				tabbedPane.add(bundle.getString("TAB_GRAPH_VIEW"), dynamicGraphView);
-				
 				
         tabbedPane.setEnabledAt(TAB_SIMULATION_INDEX, true);
         tabbedPane.setEnabledAt(TAB_IN_SILICO_DATA_INDEX, false);
