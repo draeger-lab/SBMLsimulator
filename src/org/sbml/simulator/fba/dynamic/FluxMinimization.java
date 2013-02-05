@@ -23,6 +23,8 @@ import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
 
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.sbml.jsbml.ListOf;
@@ -396,15 +398,15 @@ public class FluxMinimization extends TargetFunction {
 		// 4. Error bounds
 		int errorPosition = lPosition + getTargetVariablesLengths()[2];
 		for (int i = errorPosition; i < errorPosition + getTargetVariablesLengths()[3]; i++) {
-			this.lowerBounds[i] = 0;
-			this.upperBounds[i] = 10000000;
+			this.lowerBounds[i] = -100000000;
+			this.upperBounds[i] = 100000000;
 		}
 		
 		// 5. Gibbs energy bounds
 		int gibbsPosition = errorPosition + getTargetVariablesLengths()[3];
 		for (int i = gibbsPosition; i < gibbsPosition + getTargetVariablesLengths()[4]; i++) {
 			this.lowerBounds[i] = -10000000;
-			this.upperBounds[i] = 100;
+			this.upperBounds[i] = 10000000;
 		}
 	}
 
@@ -531,10 +533,6 @@ public class FluxMinimization extends TargetFunction {
 				
 				// J_j * G_j
 				cplex.ifThen(cplex.not(cplex.eq(j_j, 0)),cplex.le(getVariables()[j + gibbsPosition],0));
-				
-				//TODO ?
-				//cplex.ifThen(cplex.eq(j_j, 0),cplex.eq(getVariables()[j + gibbsPosition],0));
-				//cplex.ifThen(cplex.eq(getVariables()[j + gibbsPosition],0),cplex.eq(j_j,0));
 			}
 		}
 		
@@ -548,9 +546,8 @@ public class FluxMinimization extends TargetFunction {
 				}
 				// TODO if readGibbsEnergies[i] is NaN???
 				if(!Double.isNaN(this.readGibbsEnergies[j])) {
-					IloNumExpr delta_E_computation = cplex.diff(cplex.sum(cplex.prod(R, cplex.prod(T, sumConcentrations)), this.readGibbsEnergies[j]), getVariables()[j + gibbsPosition]);
-					cplex.addEq(delta_E_computation, getVariables()[j + errorPosition]);
-					cplex.addGe(delta_E_computation, 0);
+					IloNumExpr delta_G_computation = cplex.diff(cplex.sum(cplex.prod(R, cplex.prod(T, sumConcentrations)), this.readGibbsEnergies[j]), getVariables()[j + errorPosition]);
+					cplex.addEq(getVariables()[j + gibbsPosition], delta_G_computation);
 				}
 			}
 		}
@@ -615,6 +612,20 @@ public class FluxMinimization extends TargetFunction {
 			
 			cplex.addEq(getVariables()[kRow + lPosition], l_row);
 		}
+		
+		//Ensure that the gibbs values of a reaction and the corresponding backward reaction correspond to each other
+		Map<Integer, Integer> reverseReaction = FluxMinimizationUtils.reverseReaction;
+		
+		
+		
+		for (Entry<Integer, Integer> map : reverseReaction.entrySet()) {
+			int index = map.getKey();
+			int revIndex= map.getValue();
+			cplex.addEq(cplex.sum(getVariables()[revIndex + errorPosition], readGibbsEnergies[revIndex]), cplex.prod(-1, cplex.sum(getVariables()[index + errorPosition],readGibbsEnergies[index])));
+			
+		}
+		
+		
 	}
 	
 	/* (non-Javadoc)
