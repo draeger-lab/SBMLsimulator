@@ -398,8 +398,8 @@ public class FluxMinimization extends TargetFunction {
 		// 4. Error bounds
 		int errorPosition = lPosition + getTargetVariablesLengths()[2];
 		for (int i = errorPosition; i < errorPosition + getTargetVariablesLengths()[3]; i++) {
-			this.lowerBounds[i] = -100000000;
-			this.upperBounds[i] = 100000000;
+			this.lowerBounds[i] = -10000000;
+			this.upperBounds[i] = 10000000;
 		}
 		
 		// 5. Gibbs energy bounds
@@ -501,8 +501,8 @@ public class FluxMinimization extends TargetFunction {
 		}
 		
 		// Sum up each term
-//		function = cplex.sum(flux, conc, l, error, gibbs);
-		function = cplex.sum(flux, conc, l, error);
+		function = cplex.sum(flux, conc, l, error, gibbs);
+		//function = cplex.sum(flux, conc, l, error);
 		
 		return function;
 	}
