@@ -62,7 +62,7 @@ public class FluxMinimizationUtils {
 	/**
 	 * contains the suffix for integrated backward reactions of reversible reactions.
 	 */
-	protected static final String endingForBackwardReaction = "_rev";
+	public static final String endingForBackwardReaction = "_rev";
 	
 	/**
 	 * contains prefix for the metaID
@@ -85,10 +85,10 @@ public class FluxMinimizationUtils {
 	public static List<String> reversibleReactions = new ArrayList<String>();
 	
 	/**
-	 * contains the corresponding backward reaction id in the modified sbml document 
-	 * to the i-th reaction in the original sbml document
+	 * contains the corresponding index of the backward reaction in the modified sbml document 
+	 * to the i-th reaction in the original sbml document for all reactions that are reversible
 	 */
-	public static Map<Integer, String> reverseReaction = new HashMap<Integer, String>(); 
+	public static Map<Integer, Integer> reverseReaction = new HashMap<Integer, Integer>(); 
 
 	/**
 	 * contains the steadyStateMatrix
@@ -330,7 +330,6 @@ public class FluxMinimizationUtils {
 			Reaction reversibleReac = revReacDoc.getModel().getReaction(doc.getModel().getReaction(i).getId());
 			if (reversibleReac.isReversible()) { // TODO for SBML L3 add if "isSetreversible"
 				reversibleReactions.add(reversibleReac.getId());
-				reversibleReactions.add(reversibleReac.getId() + endingForBackwardReaction);
 				Reaction backwardReac = reversibleReac.clone();
 				backwardReac.setId(reversibleReac.getId() + endingForBackwardReaction);
 				backwardReac.setMetaId(reversibleReac.getMetaId() + endingForBackwardReaction);
@@ -357,7 +356,7 @@ public class FluxMinimizationUtils {
 				backwardReac.setReversible(false);
 				revReacDoc.getModel().addReaction(backwardReac);
 				reversibleReac.setReversible(false);
-				reverseReaction.put(i, reversibleReac.getId());
+				reverseReaction.put(i, revReacDoc.getModel().getReactionCount() - 1);
 //				System.out.println("added: " + backwardReac.getId());
 			}
 		}

@@ -17,8 +17,7 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.sbml.jsbml.ListOf;
@@ -170,21 +169,13 @@ public class DynamicFBA {
 		cplex.end();
 		
 		// Calculate the netto fluxes according to the reverse reaction saved in the map
-		Map<Integer, String> reverseReaction = FluxMinimizationUtils.reverseReaction;
+		List<String> reversibleReactions = FluxMinimizationUtils.reversibleReactions;
 		
-		String[] values = new String[reverseReaction.size()];
-		int entry = 0;
-		for (Entry<Integer, String> map : reverseReaction.entrySet()) {
-			// Get every value of the map -> reaction IDs of the reverse fluxes
-			values[entry] = map.getValue();
-			entry++;
-		}
-		
-		for (int i = 0; i < reverseReaction.size(); i++) {
-			String currentRevReactionId = values[i];
+		for (int i = 0; i < reversibleReactions.size(); i++) {
+			String currentRevReactionId = reversibleReactions.get(i);
 			// Block 1 contains the fluxes
 			Column currentReactionCol = this.solutionMultiTable.getBlock(1).getColumn(currentRevReactionId);
-			Column currentRevReactionCol = this.solutionMultiTable.getBlock(1).getColumn(currentRevReactionId + "_rev");
+			Column currentRevReactionCol = this.solutionMultiTable.getBlock(1).getColumn(currentRevReactionId + FluxMinimizationUtils.endingForBackwardReaction);
 			
 			for (int timePoint = 0; timePoint < this.solutionMultiTable.getRowCount(); timePoint++) {
 				// Netto flux = forward flux - reverse flux
