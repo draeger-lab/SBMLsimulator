@@ -328,9 +328,10 @@ public class FluxMinimizationUtils {
 		//split the reversible reactions
 		for (int i = 0; i < doc.getModel().getReactionCount(); i++) {
 			Reaction reversibleReac = revReacDoc.getModel().getReaction(doc.getModel().getReaction(i).getId());
-			if (reversibleReac.isReversible()) { // TODO for SBML L3 add if "isSetreversible"
+			if (reversibleReac.isSetReversible() && reversibleReac.isReversible()) { // TODO for SBML L3 add if "isSetreversible"
 				reversibleReactions.add(reversibleReac.getId());
 				Reaction backwardReac = reversibleReac.clone();
+				backwardReac.setKineticLaw(null);
 				backwardReac.setId(reversibleReac.getId() + endingForBackwardReaction);
 				backwardReac.setMetaId(reversibleReac.getMetaId() + endingForBackwardReaction);
 				backwardReac.setName(reversibleReac.getName() + endingForBackwardReaction);
