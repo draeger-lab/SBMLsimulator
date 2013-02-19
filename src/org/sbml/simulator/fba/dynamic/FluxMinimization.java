@@ -501,8 +501,8 @@ public class FluxMinimization extends TargetFunction {
 		}
 		
 		// Sum up each term
-		function = cplex.sum(flux, conc, l, error, gibbs);
-		//function = cplex.sum(flux, conc, l, error);
+		//function = cplex.sum(flux, conc, l, error, gibbs);
+		function = cplex.sum(flux, conc, l, error);
 		
 		return function;
 	}
