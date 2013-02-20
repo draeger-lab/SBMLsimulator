@@ -35,7 +35,7 @@ import ilog.cplex.IloCplex;
 /**
  * FluxMinimizationII target function:
  * minimize (lambda_1 * ||J|| +
- * lambda_2 * Sum_m^m~ [c_m(t_i+1) -(c_m(t_i) + N*J*delta_t)])
+ * lambda_2 * Sum_k^m [c_k(t_i+1) -(c_k(t_i) + N*J*delta_t)])
  * 
  * @author Robin F&auml;hnrich
  * @version $Rev$
@@ -113,7 +113,7 @@ public class FluxMinimizationII extends TargetFunction {
 	private boolean constraintZm = true;
 	
 	/**
-	 * Set the fluxes weighting factor lambda1 (default: 0.1).
+	 * Set the fluxes weighting factor lambda1 (default: 1.0).
 	 * 
 	 * @param lambda1
 	 */
@@ -122,7 +122,7 @@ public class FluxMinimizationII extends TargetFunction {
 	}
 	
 	/**
-	 * Set the concentrations weighting factor lambda2 (default: 1.0).
+	 * Set the concentrations weighting factor lambda2 (default: 1000.0).
 	 * 
 	 * @param lambda2
 	 */
