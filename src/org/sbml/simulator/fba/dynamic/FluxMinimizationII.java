@@ -322,7 +322,7 @@ public class FluxMinimizationII extends TargetFunction {
 			IloNumExpr optimizingConcentration = cplex.numExpr();
 			
 			if (!Double.isNaN(c_m_measured[n])) {
-				optimizingConcentration = cplex.diff(c_m_measured[n], getVariables()[concentrationPosition + n]);
+				optimizingConcentration = cplex.abs(cplex.diff(c_m_measured[n], getVariables()[concentrationPosition + n]));
 			} else {
 				// TODO if c_m_measured[n] is NaN???
 			}
