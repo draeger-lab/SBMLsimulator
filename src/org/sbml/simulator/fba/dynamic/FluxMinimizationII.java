@@ -67,7 +67,7 @@ public class FluxMinimizationII extends TargetFunction {
 	 */
 	private double lambda_1 = 1.0;
 	
-	private double lambda_2 = 1000.0;
+	private double lambda_2 = 10.0;
 	
 	/*
 	 * The array contains the complete interpolated concentrations
@@ -122,7 +122,7 @@ public class FluxMinimizationII extends TargetFunction {
 	}
 	
 	/**
-	 * Set the concentrations weighting factor lambda2 (default: 1000.0).
+	 * Set the concentrations weighting factor lambda2 (default: 10.0).
 	 * 
 	 * @param lambda2
 	 */
