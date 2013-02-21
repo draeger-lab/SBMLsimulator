@@ -23,6 +23,7 @@ import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
@@ -201,6 +202,12 @@ public class FluxMinimization extends TargetFunction {
 	 */
 	public void setLambda4(double lambda4) {
 		this.lambda_4 = lambda4;
+	}
+	
+	public Map<Integer, Double> knownFluxes = new HashMap<Integer, Double>();
+	
+	public void setKnowFluxes(Map<Integer, Double> map) {
+		knownFluxes = map;
 	}
 	
 	/* (non-Javadoc)
