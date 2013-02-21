@@ -18,6 +18,7 @@
 package org.sbml.simulator.fba.dynamic;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
@@ -57,6 +58,44 @@ public class DynamicFBATest {
 		
 		System.out.println("Concentrations read");
 		
+
+		HashMap<String, Double> reaction2Fluxes = new HashMap<String, Double>();
+		HashMap<Integer, Double> knownFluxes = new HashMap<Integer, Double>();
+		//------------0nM Atorvastatin---------------------
+		reaction2Fluxes.put("lr003", -18.9);
+		reaction2Fluxes.put("r0171", -45.5);
+		reaction2Fluxes.put("r0317", 12.1);
+		reaction2Fluxes.put("r0426", -12.1);
+		reaction2Fluxes.put("lr014", 12.1);
+		reaction2Fluxes.put("r0258", -100.3);
+		reaction2Fluxes.put("r0104", 92.2);
+		reaction2Fluxes.put("r0080", 12.0);
+		reaction2Fluxes.put("r0323", -4.1);
+		reaction2Fluxes.put("r0123", 81.2);
+		reaction2Fluxes.put("r0334", -0.06);
+		//------------50nM Atorvastatin---------------------
+//		reaction2Fluxes.put("lr003", -18.9);
+//		reaction2Fluxes.put("r0171", -46.6);
+//		reaction2Fluxes.put("r0317", 10.8);
+//		reaction2Fluxes.put("r0426", -10.8);
+//		reaction2Fluxes.put("lr014", 10.8);
+//		reaction2Fluxes.put("r0258", -98.6);
+//		reaction2Fluxes.put("r0104", 88.2);
+//		reaction2Fluxes.put("r0080", 11.6);
+//		reaction2Fluxes.put("r0323", -4.9);
+//		reaction2Fluxes.put("r0123", 79.3);
+//		reaction2Fluxes.put("r0334", -0.04);
+
+		
+for (int i = 0; i < testDocument.getModel().getReactionCount(); i++) {
+	Double d = reaction2Fluxes.get(testDocument.getModel().getReaction(i));
+	if (d != null) {
+		knownFluxes.put(i, d);
+	}
+}
+		
+
+		
 		
 		// Read system boundary file
 		CSVDataConverter sysBoundConverter = new CSVDataConverter(testDocument, true);
@@ -84,6 +123,7 @@ public class DynamicFBATest {
 		DynamicFBA dfba = new DynamicFBA(testDocument, concMT);
 		
 		FluxMinimization fm = new FluxMinimization();
+		fm.setKnowFluxes(knownFluxes);
 		fm.setCplexIterations(1000000);
 		fm.setReadGibbsEnergies(correctedGibbsEnergies);
 		fm.setReadSystemBoundaries(correctedSysBounds);
