@@ -55,41 +55,41 @@ public class FluxMinimization extends TargetFunction {
 	 */
 	private static final transient Logger logger = Logger.getLogger(FluxMinimization.class.getName());
 	
-	/*
+	/**
 	 * The expanded SBML document, in fact:
 	 * - transport reactions eliminated and reversible reactions split,
 	 * - compensated reactions added (computed from system boundaries)
 	 */
 	private SBMLDocument expandedDocument;
 	
-	/*
+	/**
 	 * The complete intern {@link StoichiometricMatrix} N (with system
 	 * boundaries) that is essential for the Tableau algorithm
 	 */
 	private StoichiometricMatrix N_int_sys;
 	
-	/*
+	/**
 	 * The internal, reduced and transposed {@link StoichiometricMatrix}
 	 * K_int^T for the computation of the L vector and the flux vector
 	 */
 	private StabilityMatrix K_intTransposed;
 	
-	/*
+	/**
 	 * Ideal Gas Constant (unit J/mol*K)
 	 */
 	private static final double R = 8.3144621;
 	
-	/*
+	/**
 	 * Standard Ambient Temperature (unit Kelvin)
 	 */
 	private static final double T = 298.15;
 	
-	/*
+	/**
 	 * Contains the maximum of J_j / delta_r G_tilde_j for each reaction j in the model
 	 */
 	private double r_max;
 	
-	/*
+	/**
 	 * These numbers (lambda_i, i is el. of {1, ..., 4}) weight the contributions
 	 * of each term in the optimization problem. According to Ziller (2009), set:
 	 */
@@ -101,34 +101,34 @@ public class FluxMinimization extends TargetFunction {
 	
 	private double lambda_4 = 1.0;
 	
-	/*
+	/**
 	 * This vector contains the fluxes that are computed by the Tableau algorithm
 	 * applied to N_int_sys
 	 */
 	private double[] computedFluxVector;
 	
-	/*
+	/**
 	 * The array contains the complete interpolated concentrations
 	 */
 	private double[][] completeConcentrations;
 	
-	/*
+	/**
 	 * The array contains the read gibbs energies in unit J/mol
 	 */
 	private double[] readGibbsEnergies;
 	
-	/*
+	/**
 	 * The array contains the read system boundaries
 	 */
 	private double[] readSystemBoundaries;
 	
-	/*
+	/**
 	 * If the system boundaries are read from file, set system boundaries and
 	 * <CODE>true</CODE>
 	 */
 	private boolean isSystemBoundaries = false;
 	
-	/*
+	/**
 	 * This object saves the optimized solution, in fact:
 	 * - the optimized fluxes in a double[]
 	 * - the optimized concentrations in a double[]
@@ -138,32 +138,32 @@ public class FluxMinimization extends TargetFunction {
 	 */
 	private double[][] optimizedSolution;
 	
-	/*
+	/**
 	 * Lower bounds for CPLEX variables saved in a double array
 	 */
 	private double[] lowerBounds;
 	
-	/*
+	/**
 	 * Upper bounds for CPLEX variables saved in a double array
 	 */
 	private double[] upperBounds;
 	
-	/*
+	/**
 	 * Constraint J_j * G_j < 0
 	 */
 	private boolean constraintJG = true;
 	
-	/*
+	/**
 	 * Constraint |J_j| - r_max * |G_j| < 0
 	 */
 	private boolean constraintJ_rmaxG = true;
 	
-	/*
+	/**
 	 * Constraint J_j >= 0
 	 */
 	private boolean constraintJ0 = true;
 	
-	/*
+	/**
 	 * Constraint delta_r G_j = delta_r G^0_j - E_j + RT...
 	 */
 	private boolean constraintError = true;
