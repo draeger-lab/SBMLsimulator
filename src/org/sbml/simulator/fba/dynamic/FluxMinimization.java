@@ -480,9 +480,9 @@ public class FluxMinimization extends TargetFunction {
 				}
 				conc = cplex.sum(conc, cplex.prod(cplex.constant(this.lambda_1), cplex.sum(cplex.square(c_i), cplex.prod(c_i, (-2) * logConc), cplex.square(cplex.constant(logConc)))));
 			} else {
-//				double logcmin = Math.log(Math.pow(10, -10));
-//				double logcmax = Math.log(Math.pow(10, -1));
-//				conc = cplex.sum(conc, cplex.prod(cplex.constant(this.lambda_1), cplex.max(cplex.max(cplex.constant(0d), cplex.diff(logcmin, c_i)), cplex.diff(c_i, logcmax))));
+				double logcmin = Math.log(Math.pow(10, -10));
+				double logcmax = Math.log(Math.pow(10, -1));
+				conc = cplex.sum(conc, cplex.prod(cplex.constant(this.lambda_1), cplex.max(cplex.max(cplex.constant(0d), cplex.diff(logcmin, c_i)), cplex.diff(c_i, logcmax))));
 			}
 		}
 		
