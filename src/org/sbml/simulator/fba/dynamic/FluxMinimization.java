@@ -20,6 +20,7 @@ package org.sbml.simulator.fba.dynamic;
 import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
 import ilog.concert.IloNumVar;
+import ilog.concert.IloNumVarType;
 import ilog.cplex.IloCplex;
 
 import java.util.Arrays;
@@ -95,11 +96,11 @@ public class FluxMinimization extends TargetFunction {
 	 */
 	private double lambda_1 = 10.0;
 	
-	private double lambda_2 = 10.0;
+	private double lambda_2 = 10.0/1000;
 	
-	private double lambda_3 = 0.01;
+	private double lambda_3 = 0.01/1000;
 	
-	private double lambda_4 = 1.0;
+	private double lambda_4 = 1.0/1000;
 	
 	/**
 	 * This vector contains the fluxes that are computed by the Tableau algorithm
@@ -206,7 +207,7 @@ public class FluxMinimization extends TargetFunction {
 	
 	public Map<Integer, Double> knownFluxes = new HashMap<Integer, Double>();
 	
-	public void setKnowFluxes(Map<Integer, Double> map) {
+	public void setKnownFluxes(Map<Integer, Double> map) {
 		knownFluxes = map;
 	}
 	
@@ -384,8 +385,8 @@ public class FluxMinimization extends TargetFunction {
 		// 1. Flux value bounds
 		int fluxPosition = 0;
 		for (int i = fluxPosition; i < fluxPosition + getTargetVariablesLengths()[0]; i++) {
-			this.lowerBounds[i] = 0.01;
-			this.upperBounds[i] = 10.0;
+			this.lowerBounds[i] = 0d;
+			this.upperBounds[i] = 1000d;
 		}
 		
 		// 2. Concentration bounds
@@ -438,7 +439,11 @@ public class FluxMinimization extends TargetFunction {
 		setDefaultBounds();
 		
 		// Set the variables
-		IloNumVar[] variables = cplex.numVarArray(fullVariableLength, this.lowerBounds, this.upperBounds);
+		IloNumVarType[] types = new IloNumVarType[fullVariableLength];
+		for(int i=0; i != types.length; i++) {
+			types[i] = IloNumVarType.Float;
+		}
+		IloNumVar[] variables = cplex.numVarArray(fullVariableLength, this.lowerBounds, this.upperBounds, types);
 		setVariables(variables);
 	}
 
@@ -451,6 +456,7 @@ public class FluxMinimization extends TargetFunction {
 		
 		// One variable for all fluxes in the flux vector
 		IloNumExpr flux = cplex.numExpr();
+		
 		int fluxPosition = 0;
 		// Manhattan norm included
 		for (int k = 0; k < getTargetVariablesLengths()[0]; k++) {
@@ -474,9 +480,9 @@ public class FluxMinimization extends TargetFunction {
 				}
 				conc = cplex.sum(conc, cplex.prod(cplex.constant(this.lambda_1), cplex.sum(cplex.square(c_i), cplex.prod(c_i, (-2) * logConc), cplex.square(cplex.constant(logConc)))));
 			} else {
-				double logcmin = this.lowerBounds[i + concentrationPosition];
-				double logcmax = this.upperBounds[i + concentrationPosition];
-				conc = cplex.sum(conc, cplex.prod(cplex.constant(this.lambda_1), cplex.max(cplex.max(cplex.constant(0d), cplex.diff(logcmin, c_i)), cplex.diff(c_i, logcmax))));
+//				double logcmin = Math.log(Math.pow(10, -10));
+//				double logcmax = Math.log(Math.pow(10, -1));
+//				conc = cplex.sum(conc, cplex.prod(cplex.constant(this.lambda_1), cplex.max(cplex.max(cplex.constant(0d), cplex.diff(logcmin, c_i)), cplex.diff(c_i, logcmax))));
 			}
 		}
 		
@@ -537,19 +543,25 @@ public class FluxMinimization extends TargetFunction {
 					IloNumExpr k_var = cplex.prod(this.K_intTransposed.getRow(k)[j], getVariables()[k]);
 					j_j = cplex.sum(j_j, k_var);
 				}
-				
 				// J_j * G_j
-				cplex.ifThen(cplex.not(cplex.eq(j_j, 0)),cplex.le(getVariables()[j + gibbsPosition],0));
+				cplex.add(cplex.ifThen(cplex.not(cplex.eq(j_j, 0)),cplex.le(getVariables()[j + gibbsPosition],0)));
+				
+				if(knownFluxes.containsKey(j)) {
+					cplex.addEq(j_j, knownFluxes.get(j));
+				}
 			}
 		}
 		
 		// Constraint delta_r G_j = delta_r G^0_j - E_j + RT...
 		if (this.constraintError == true) {
+			double[] c_eq = this.completeConcentrations[this.getTimePointStep()];
 			for (int j = 0; j < reactionCount; j++) {
 				IloNumExpr sumConcentrations = cplex.numExpr();
 				
 				for (int i = 0; i < speciesCount; i++) {
-					sumConcentrations = cplex.sum(sumConcentrations, cplex.prod(this.N_int_sys.get(i, j), getVariables()[i + concentrationPosition]));
+					if (!Double.isNaN(c_eq[i])) {
+						sumConcentrations = cplex.sum(sumConcentrations, cplex.prod(this.N_int_sys.get(i, j), getVariables()[i + concentrationPosition]));
+					}
 				}
 				// TODO if readGibbsEnergies[i] is NaN???
 				if(!Double.isNaN(this.readGibbsEnergies[j])) {
@@ -603,33 +615,32 @@ public class FluxMinimization extends TargetFunction {
 		}
 		
 		// Computation of the L vector
-		for (int kRow = 0; kRow < this.K_intTransposed.getRowDimension(); kRow++) {
-
-			double[] row = this.K_intTransposed.getRow(kRow);
-			
-			IloNumExpr l_row = cplex.numExpr(); // Remember: L is a vector!
-			for (int kColumn = 0; kColumn < this.K_intTransposed.getColumnDimension(); kColumn++) {
-				double kVal = row[kColumn];
-				// TODO if readGibbsEnergies[i] is NaN???
-				if(!Double.isNaN(this.readGibbsEnergies[kColumn])) {
-					IloNumExpr delta_G_tilde_j = cplex.diff(this.readGibbsEnergies[kColumn], getVariables()[kColumn + errorPosition]);
-				  l_row = cplex.sum(l_row, cplex.prod(kVal, delta_G_tilde_j)); 
-				}
-			}
-			
-			cplex.addEq(getVariables()[kRow + lPosition], l_row);
-		}
+//		for (int kRow = 0; kRow < this.K_intTransposed.getRowDimension(); kRow++) {
+//
+//			double[] row = this.K_intTransposed.getRow(kRow);
+//			
+//			IloNumExpr l_row = cplex.numExpr(); // Remember: L is a vector!
+//			for (int kColumn = 0; kColumn < this.K_intTransposed.getColumnDimension(); kColumn++) {
+//				double kVal = row[kColumn];
+//				// TODO if readGibbsEnergies[i] is NaN???
+//				if(!Double.isNaN(this.readGibbsEnergies[kColumn])) {
+//					IloNumExpr delta_G_tilde_j = cplex.diff(this.readGibbsEnergies[kColumn], getVariables()[kColumn + errorPosition]);
+//				  l_row = cplex.sum(l_row, cplex.prod(kVal, delta_G_tilde_j)); 
+//				}
+//				else {
+//					l_row = cplex.sum(l_row, cplex.prod(kVal, getVariables()[kColumn + gibbsPosition])); 
+//				}
+//			}
+//			
+//			cplex.addEq(getVariables()[kRow + lPosition], l_row);
+//		}
 		
 		//Ensure that the gibbs values of a reaction and the corresponding backward reaction correspond to each other
 		Map<Integer, Integer> reverseReaction = FluxMinimizationUtils.reverseReaction;
-		
-		
-		
 		for (Entry<Integer, Integer> map : reverseReaction.entrySet()) {
 			int index = map.getKey();
 			int revIndex= map.getValue();
-			cplex.addEq(cplex.sum(getVariables()[revIndex + errorPosition], readGibbsEnergies[revIndex]), cplex.prod(-1, cplex.sum(getVariables()[index + errorPosition],readGibbsEnergies[index])));
-			
+			cplex.addEq(getVariables()[revIndex + gibbsPosition], cplex.prod(-1, getVariables()[index + gibbsPosition]));
 		}
 		
 		
@@ -649,16 +660,19 @@ public class FluxMinimization extends TargetFunction {
 			// 1. Flux vector assignment
 			int fluxPosition = 0;
 			double[] optimizedFluxVector = new double[this.expandedDocument.getModel().getReactionCount()];
+			double[] optimizedFluxFactors = new double[getTargetVariablesLengths()[0]];
 			// solution[k] contains the optimized values for the flux vector (row dimension of K_int^T)
 			for (int i = 0; i < optimizedFluxVector.length; i++) {
 				double fluxVector = 0;
 				for (int k = 0; k < getTargetVariablesLengths()[0]; k++) {
 					fluxVector += solution[k] * this.K_intTransposed.getRow(k)[i];
+					optimizedFluxFactors[k] = solution[k];
 				}
 				optimizedFluxVector[i] = fluxVector;
 			}
 			this.optimizedSolution[1] = optimizedFluxVector; // 2nd position: flux vector
 			System.out.println("Optimized Flux Vector: " + Arrays.toString(optimizedFluxVector));
+			System.out.println("Optimized Flux factor: " + Arrays.toString(optimizedFluxFactors));
 			
 			// 2. Concentration vector assignment
 			int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
