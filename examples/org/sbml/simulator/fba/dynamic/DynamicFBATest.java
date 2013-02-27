@@ -92,27 +92,27 @@ public class DynamicFBATest {
 		HashMap<String, Double> reaction2Fluxes = new HashMap<String, Double>();
 		HashMap<Integer, Double> knownFluxes = new HashMap<Integer, Double>();
 		//------------0nM Atorvastatin---------------------
-		reaction2Fluxes.put("lr003_rev", 18.9);
-		reaction2Fluxes.put("r0171_rev", 45.5);
-		reaction2Fluxes.put("r0317", 12.1);
-		reaction2Fluxes.put("r0426_rev", 12.1);
-		reaction2Fluxes.put("lr014", 12.1);
-		reaction2Fluxes.put("r0104", 92.2);
-		reaction2Fluxes.put("r0080", 12.0);
-		reaction2Fluxes.put("r0323_rev", 4.1);
-		reaction2Fluxes.put("r0123", 81.2);
-		reaction2Fluxes.put("r0334_rev", 0.06);
+//		reaction2Fluxes.put("lr003_rev", 18.9);
+//		reaction2Fluxes.put("r0171_rev", 45.5);
+//		reaction2Fluxes.put("r0317", 12.1);
+//		reaction2Fluxes.put("r0426_rev", 12.1);
+//		reaction2Fluxes.put("lr014", 12.1);
+//		reaction2Fluxes.put("r0104", 92.2);
+//		reaction2Fluxes.put("r0080", 12.0);
+//		reaction2Fluxes.put("r0323_rev", 4.1);
+//		reaction2Fluxes.put("r0123", 81.2);
+//		reaction2Fluxes.put("r0334_rev", 0.06);
 		//------------50nM Atorvastatin---------------------
-		//		reaction2Fluxes.put("lr003_rev", 18.9);
-		//		reaction2Fluxes.put("r0171_rev", 46.6);
-		//		reaction2Fluxes.put("r0317", 10.8);
-		//		reaction2Fluxes.put("r0426_rev", 10.8);
-		//		reaction2Fluxes.put("lr014", 10.8);
-		//		reaction2Fluxes.put("r0104", 88.2);
-		//		reaction2Fluxes.put("r0080", 11.6);
-		//		reaction2Fluxes.put("r0323_rev", 4.9);
-		//		reaction2Fluxes.put("r0123", 79.3);
-		//		reaction2Fluxes.put("r0334_rev", 0.04);
+		reaction2Fluxes.put("lr003_rev", 18.9);
+		reaction2Fluxes.put("r0171_rev", 46.6);
+		reaction2Fluxes.put("r0317", 10.8);
+		reaction2Fluxes.put("r0426_rev", 10.8);
+		reaction2Fluxes.put("lr014", 10.8);
+		reaction2Fluxes.put("r0104", 88.2);
+		reaction2Fluxes.put("r0080", 11.6);
+		reaction2Fluxes.put("r0323_rev", 4.9);
+		reaction2Fluxes.put("r0123", 79.3);
+		reaction2Fluxes.put("r0334_rev", 0.04);
 		
 		for (int i = 0; i < expandedDocument.getModel().getReactionCount(); i++) {
 			Double d = reaction2Fluxes.get(expandedDocument.getModel().getReaction(i).getId());
@@ -123,20 +123,22 @@ public class DynamicFBATest {
 		}
 		
 		// Run a dynamic FBA
-		DynamicFBA dfba = new DynamicFBA(testDocument, concMT, 20);
+		DynamicFBA dfba = new DynamicFBA(testDocument, concMT, 50);
 		
-		FluxMinimization fm = new FluxMinimization();
-		fm.setKnownFluxes(knownFluxes);
-		fm.setCplexIterations(1000);
-		fm.setReadGibbsEnergies(correctedGibbsEnergies);
-		fm.setReadSystemBoundaries(correctedSysBounds);
-		dfba.runDynamicFBA(fm);
+//		FluxMinimization fm = new FluxMinimization();
+//		fm.setKnownFluxes(knownFluxes);
+//		fm.setCplexIterations(1000);
+//		fm.setReadGibbsEnergies(correctedGibbsEnergies);
+//		fm.setReadSystemBoundaries(correctedSysBounds);
+//		dfba.runDynamicFBA(fm);
 		
-		//		FluxMinimizationII fm2 = new FluxMinimizationII();
-		//		fm2.setCplexIterations(1000000);
-		//		fm2.setReadSystemBoundaries(correctedSysBounds);
-		//		
-		//		dfba.runDynamicFBA(fm2);
+		FluxMinimizationII fm2 = new FluxMinimizationII();
+		fm2.setKnownFluxes(knownFluxes);
+		fm2.setLambda2(1000);
+		fm2.setCplexIterations(1000000);
+		fm2.setReadSystemBoundaries(correctedSysBounds);
+
+		dfba.runDynamicFBA(fm2);
 		
 		// Print solution MultiTable
 		MultiTable solution = dfba.getSolutionMultiTable();
