@@ -18,6 +18,7 @@
 package org.sbml.simulator.fba.dynamic;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.sbml.jsbml.ListOf;
@@ -146,6 +147,12 @@ public class FluxMinimizationII extends TargetFunction {
 	public void setReadSystemBoundaries(double[] systemBoundaries) {
 		this.readSystemBoundaries = systemBoundaries;
 		this.isSystemBoundaries = true;
+	}
+	
+	public Map<Integer, Double> knownFluxes = new HashMap<Integer, Double>();
+	
+	public void setKnownFluxes(Map<Integer, Double> map) {
+		knownFluxes = map;
 	}
 	
 	/**
@@ -309,8 +316,8 @@ public class FluxMinimizationII extends TargetFunction {
 		IloNumExpr flux = cplex.numExpr();
 		int fluxPosition = 0;
 		// Manhattan norm included
-		for (int i = 0; i < getTargetVariablesLengths()[0]; i++) {
-			flux = cplex.sum(flux, cplex.prod(cplex.constant(this.lambda_1), cplex.abs(getVariables()[fluxPosition + i])));
+		for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
+			flux = cplex.sum(flux, cplex.prod(cplex.constant(this.lambda_1), cplex.abs(getVariables()[fluxPosition + j])));
 		}
 		
 		// Concentrations 
@@ -318,11 +325,11 @@ public class FluxMinimizationII extends TargetFunction {
 		int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
 		double[] c_m_measured = this.completeConcentrations[this.getTimePointStep()];
 		
-		for (int n = 0; n < getTargetVariablesLengths()[1]; n++) {
+		for (int m = 0; m < getTargetVariablesLengths()[1]; m++) {
 			IloNumExpr optimizingConcentration = cplex.numExpr();
 			
-			if (!Double.isNaN(c_m_measured[n])) {
-				optimizingConcentration = cplex.abs(cplex.diff(c_m_measured[n], getVariables()[concentrationPosition + n]));
+			if (!Double.isNaN(c_m_measured[m])) {
+				optimizingConcentration = cplex.abs(cplex.diff(c_m_measured[m], getVariables()[concentrationPosition + m]));
 			} else {
 				// TODO if c_m_measured[n] is NaN???
 			}
@@ -350,7 +357,13 @@ public class FluxMinimizationII extends TargetFunction {
 		if (this.constraintJ0 == true) {
 			for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
 				// Flux J_j
-				cplex.addGe(getVariables()[fluxPosition + j], 0);
+				if (knownFluxes.containsKey(j)) {
+					Double eightyPercent = 0.8 * knownFluxes.get(j);
+					cplex.addGe(getVariables()[fluxPosition + j], (eightyPercent));
+				}
+				else {
+					cplex.addGe(getVariables()[fluxPosition + j], 0);
+				}
 			}
 		}
 		
