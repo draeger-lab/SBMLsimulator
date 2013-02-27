@@ -44,24 +44,29 @@ public class DynamicFBA {
 	 */
 	private static final transient Logger logger = Logger.getLogger(DynamicFBA.class.getName());
 	
-	/*
+	/**
 	 * The SBML document on which the dynamic FBA performs
 	 */
 	protected static SBMLDocument originalDocument;
 	
-	/*
+	/**
 	 * A {@link MultiTable} with all interpolated concentration values of the
 	 * set dynamic FBA points in time
 	 */
 	private MultiTable dFBAConcentrations;
 	
-	/*
+	/**
 	 * A {@link MultiTable} with all solved values (flux, concentration, gibbs energy),
 	 * optimized by CPLEX, for each point in time of the dynamic flux balance analysis
 	 */
 	private MultiTable solutionMultiTable;
 	
-	/*
+	/**
+	 * contains the default Time Name for the Multitable
+	 */
+	private static String defaultTimeName = "Time";
+	
+	/**
 	 * Saves all set points in time of the dynamic flux balance analysis
 	 */
 	protected static double[] dFBATimePoints;
@@ -113,7 +118,7 @@ public class DynamicFBA {
 	public void initializeSolutionMultiTable(TargetFunction function) {
 		this.solutionMultiTable = new MultiTable();
 		
-		this.solutionMultiTable.setTimeName(this.dFBAConcentrations.getTimeName());
+		this.solutionMultiTable.setTimeName(this.defaultTimeName);
 		this.solutionMultiTable.setTimePoints(dFBATimePoints);
 		
 		// Add specific blocks with each specific identifiers
