@@ -168,7 +168,7 @@ public class DynamicFBA {
 		// Stop the CPLEX stream
 		cplex.end();
 		
-		// Calculate the netto fluxes according to the reverse reaction saved in the map
+		// Calculate the net fluxes according to the reverse reaction saved in the map
 		List<String> reversibleReactions = FluxMinimizationUtils.reversibleReactions;
 		
 		for (int i = 0; i < reversibleReactions.size(); i++) {
@@ -178,15 +178,15 @@ public class DynamicFBA {
 			Column currentRevReactionCol = this.solutionMultiTable.getBlock(1).getColumn(currentRevReactionId + FluxMinimizationUtils.endingForBackwardReaction);
 			
 			for (int timePoint = 0; timePoint < this.solutionMultiTable.getRowCount(); timePoint++) {
-				// Netto flux = forward flux - reverse flux
-				double nettoFlux = currentReactionCol.getValue(timePoint) - currentRevReactionCol.getValue(timePoint);
+				// Net flux = forward flux - reverse flux
+				double netFlux = currentReactionCol.getValue(timePoint) - currentRevReactionCol.getValue(timePoint);
 				
 				// Block 0 contains the concentrations
 				int block0Count = this.solutionMultiTable.getBlock(0).getColumnCount();
 				int specificColumn = block0Count + this.solutionMultiTable.getBlock(1).findColumn(currentReactionCol.getColumnName());
 				
-				// Overwrite the specific column value with the new netto flux
-				this.solutionMultiTable.setValueAt(nettoFlux, timePoint, specificColumn+1);
+				// Overwrite the specific column value with the new net flux
+				this.solutionMultiTable.setValueAt(netFlux, timePoint, specificColumn+1);
 			}
 		}
 	}
