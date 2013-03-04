@@ -49,20 +49,31 @@ public class FluxMinimizationII extends TargetFunction {
 	 */
 	private static final transient Logger logger = Logger.getLogger(FluxMinimizationII.class.getName());
 	
-	/*
-	 * The expanded SBML document, in fact:
-	 * - transport reactions eliminated and reversible reactions split,
-	 * - compensated reactions added (computed from system boundaries)
-	 */
-	protected SBMLDocument expandedDocument;
+//	/**
+//	 * The expanded SBML document, in fact:
+//	 * - transport reactions eliminated and reversible reactions split,
+//	 * - compensated reactions added (computed from system boundaries)
+//	 */
+//	protected SBMLDocument expandedDocument;
 	
-	/*
-	 * The complete intern {@link StoichiometricMatrix} N (with system
-	 * boundaries)
+	/**
+	 * contains the {@link SBMLDocument} with all reaction including transports, 
+	 * which are splitted in case of reversibility
 	 */
-	protected StoichiometricMatrix N_int_sys;
+	protected SBMLDocument splittedDocument;
 	
-	/*
+//	/**
+//	 * The complete internal {@link StoichiometricMatrix} N (with system
+//	 * boundaries)
+//	 */
+//	protected StoichiometricMatrix N_int_sys;
+
+	/**
+	 * The complete {@link StoichiometricMatrix} N including transport reactions
+	 */
+	protected StoichiometricMatrix N_all;
+
+	/**
 	 * These numbers (lambda_i, i is el. of {1, 2}) weight the contributions
 	 * of each term in the optimization problem.
 	 */
@@ -70,45 +81,45 @@ public class FluxMinimizationII extends TargetFunction {
 	
 	protected double lambda_2 = 1000.0;
 	
-	/*
+	/**
 	 * The array contains the complete interpolated concentrations
 	 */
 	protected double[][] completeConcentrations;
 	
-	/*
+	/**
 	 * The array contains the read system boundaries
 	 */
 	private double[] readSystemBoundaries;
 	
-	/*
+	/**
 	 * If the system boundaries are read from file, set system boundaries and
 	 * <CODE>true</CODE>
 	 */
 	private boolean isSystemBoundaries = false;
 	
-	/*
+	/**
 	 * This object saves the optimized solution, in fact:
 	 * - the optimized fluxes in a double[]
 	 * - the optimized concentrations in a double[]
 	 */
 	private double[][] optimizedSolution;
 	
-	/*
+	/**
 	 * Lower bounds for CPLEX variables saved in a double array
 	 */
 	protected double[] lowerBounds;
 	
-	/*
+	/**
 	 * Upper bounds for CPLEX variables saved in a double array
 	 */
 	protected double[] upperBounds;
 	
-	/*
+	/**
 	 * Constraint J_j >= 0
 	 */
 	protected boolean constraintJ0 = true;
 	
-	/*
+	/**
 	 * Constraint z_m (t_i+1) >= 0
 	 */
 	protected boolean constraintZm = true;
@@ -149,30 +160,39 @@ public class FluxMinimizationII extends TargetFunction {
 		this.isSystemBoundaries = true;
 	}
 	
+	public double[][] transportFactors = null;
+	
+	/**
+	 * @param transportfactors
+	 */
+	public void setTransportFactors(double[][] transportfactors) {
+		this.transportFactors = transportfactors;
+		
+	}
+	
+	/**
+	 * maps the j-th reaction of the {@param splittedDocument} to the known fluxes
+	 */
 	public Map<Integer, Double> knownFluxes = new HashMap<Integer, Double>();
 	
+	/**
+	 * 
+	 * @param map containing the known fluxes
+	 */
 	public void setKnownFluxes(Map<Integer, Double> map) {
 		knownFluxes = map;
 	}
 	
 	/**
 	 * Prepare the FluxMinimization by setting the:
-	 * - expanded SBML document
-	 * - matrix N_int_sys
-	 * all from the (read) system boundaries.
+	 * - splitted SBML document
+	 * - matrix N_all
 	 * 
 	 * @throws Exception
 	 */
 	protected void prepareFluxMinimizationII() throws Exception {
-		// If system boundaries are read from file...
-		if (this.isSystemBoundaries) {
-			this.expandedDocument = FluxMinimizationUtils.getExpandedDocument(DynamicFBA.originalDocument, this.readSystemBoundaries);
-			this.N_int_sys = FluxMinimizationUtils.getExpandedStoichiometricMatrix(DynamicFBA.originalDocument, this.readSystemBoundaries);
-		} else {
-			//... or aren't available
-			this.expandedDocument = FluxMinimizationUtils.getExpandedDocument(DynamicFBA.originalDocument);
-			this.N_int_sys = FluxMinimizationUtils.getExpandedStoichiometricMatrix(DynamicFBA.originalDocument);
-		}
+			this.splittedDocument = FluxMinimizationUtils.splitAllReversibleReactions(DynamicFBA.originalDocument);
+			this.N_all = FluxMinimizationUtils.getStoichiometricMatrix(splittedDocument);
 	}
 
 	/* (non-Javadoc)
@@ -215,16 +235,16 @@ public class FluxMinimizationII extends TargetFunction {
 	@Override
 	public String[][] getTargetVariablesIds() {
 		// Species Ids for the concentrations block
-		ListOf<Species> listOfSpecies = this.expandedDocument.getModel().getListOfSpecies();
-		int speciesCount = this.expandedDocument.getModel().getSpeciesCount();
+		ListOf<Species> listOfSpecies = this.splittedDocument.getModel().getListOfSpecies();
+		int speciesCount = this.splittedDocument.getModel().getSpeciesCount();
 		String[] speciesIds = new String[speciesCount];
 		for (int i = 0; i < speciesCount; i++) {
 			speciesIds[i] = listOfSpecies.get(i).getId();
 		}
 
 		// Reaction Ids for the fluxes and gibbs energies block
-		ListOf<Reaction> listOfReactions = this.expandedDocument.getModel().getListOfReactions();
-		int reactionCount = this.expandedDocument.getModel().getReactionCount();
+		ListOf<Reaction> listOfReactions = this.splittedDocument.getModel().getListOfReactions();
+		int reactionCount = this.splittedDocument.getModel().getReactionCount();
 		String[] reactionIds = new String[reactionCount];
 		for (int i = 0; i < reactionCount; i++) {
 			reactionIds[i] = listOfReactions.get(i).getId();
@@ -242,8 +262,8 @@ public class FluxMinimizationII extends TargetFunction {
 	 */
 	@Override
 	public int[] getTargetVariablesLengths() {
-		int reactionCount = this.expandedDocument.getModel().getReactionCount();
-		int speciesCount = this.expandedDocument.getModel().getSpeciesCount();
+		int reactionCount = this.splittedDocument.getModel().getReactionCount();
+		int speciesCount = this.splittedDocument.getModel().getSpeciesCount();
 		
 		int[] targetVariablesLength = new int[2];
 		targetVariablesLength[0] = reactionCount; //variables for the fluxes
@@ -348,7 +368,7 @@ public class FluxMinimizationII extends TargetFunction {
 	 */
 	@Override
 	public void addConstraintsToTargetFunction(IloCplex cplex) throws IloException {
-		int speciesCount = this.expandedDocument.getModel().getSpeciesCount();
+		int speciesCount = this.splittedDocument.getModel().getSpeciesCount();
 
 		int fluxPosition = 0;
 		int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
@@ -397,8 +417,8 @@ public class FluxMinimizationII extends TargetFunction {
 					IloNumExpr computedConcentration = cplex.numExpr();
 					IloNumExpr NJ = cplex.numExpr();
 
-					double[] currentN_row = this.N_int_sys.getRow(n);
-					for (int col = 0; col < this.N_int_sys.getColumnDimension(); col++) {
+					double[] currentN_row = this.N_all.getRow(n);
+					for (int col = 0; col < this.N_all.getColumnDimension(); col++) {
 						NJ = cplex.sum(NJ, cplex.prod(cplex.constant(currentN_row[col]), getVariables()[fluxPosition + col]));
 					}
 					
@@ -425,7 +445,7 @@ public class FluxMinimizationII extends TargetFunction {
 			// 1. Flux vector assignment
 			int fluxPosition = 0;
 			HashMap<String, Number> fluxMap = new HashMap<String, Number>();
-			ListOf<Reaction> listOfReactions = this.expandedDocument.getModel().getListOfReactions();
+			ListOf<Reaction> listOfReactions = this.splittedDocument.getModel().getListOfReactions();
 			double[] optimizedFluxVector = new double[getTargetVariablesLengths()[0]];
 			for (int i = 0; i < getTargetVariablesLengths()[0]; i++) {
 				optimizedFluxVector[i] = solution[fluxPosition + i];
@@ -437,7 +457,7 @@ public class FluxMinimizationII extends TargetFunction {
 			// 2. Concentration vector assignment
 			int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
 			HashMap<String, Number> concMap = new HashMap<String, Number>();
-			ListOf<Species> listOfSpecies = this.expandedDocument.getModel().getListOfSpecies();
+			ListOf<Species> listOfSpecies = this.splittedDocument.getModel().getListOfSpecies();
 			double[] optimizedConcentrations = new double[getTargetVariablesLengths()[1]];
 			for (int i = 0; i < getTargetVariablesLengths()[1]; i++) {
 				optimizedConcentrations[i] = solution[concentrationPosition + i];
@@ -449,5 +469,7 @@ public class FluxMinimizationII extends TargetFunction {
 		
 		return this.optimizedSolution;
 	}
+
+	
 	
 }

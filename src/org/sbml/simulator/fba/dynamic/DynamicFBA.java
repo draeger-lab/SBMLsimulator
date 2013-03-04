@@ -118,7 +118,7 @@ public class DynamicFBA {
 	public void initializeSolutionMultiTable(TargetFunction function) {
 		this.solutionMultiTable = new MultiTable();
 		
-		this.solutionMultiTable.setTimeName(this.defaultTimeName);
+		this.solutionMultiTable.setTimeName(getDefaultTimeName());
 		this.solutionMultiTable.setTimePoints(dFBATimePoints);
 		
 		// Add specific blocks with each specific identifiers
@@ -255,6 +255,20 @@ public class DynamicFBA {
 		dFBATimePoints = fullTimePointMultiTable.getTimePoints();
 		
 		return fullTimePointMultiTable;
+	}
+
+	/**
+	 * @return the defaultTimeName
+	 */
+	public static String getDefaultTimeName() {
+		return defaultTimeName;
+	}
+
+	/**
+	 * @param defaultTimeName the defaultTimeName to set
+	 */
+	public static void setDefaultTimeName(String defaultTimeName) {
+		DynamicFBA.defaultTimeName = defaultTimeName;
 	}
 	
 }
