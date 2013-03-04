@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.sbml.jsbml.Model;
 import org.sbml.jsbml.ModifierSpeciesReference;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
@@ -73,6 +74,11 @@ public class FluxMinimizationUtils {
 	 * contains the {@link StoichiometricMatrix} with added system boundaries
 	 */
 	private static StoichiometricMatrix N_int_sys;
+	
+	/**
+	 * contains the {@link StoichiometricMatrix} incl. all reactions and transports
+	 */
+	private static StoichiometricMatrix N_all;
 
 	/**
 	 * contains the indices of the remaining rows, which are not only zeros
@@ -104,6 +110,11 @@ public class FluxMinimizationUtils {
 	 * contains the {@link SBMLDocument} with added systems boundaries
 	 */
 	private static SBMLDocument systemBoundaryDocument;
+	
+	/**
+	 * contains all factors for fluxes in transport reactions
+	 */
+	private static double[][] transportFactors = null;
 
 	/**
 		 * 
@@ -315,23 +326,21 @@ public class FluxMinimizationUtils {
 
 	/**
 	 * Gets a {@link SBMLDocument} and searches the reversible reactions. Than it creates
-	 * a new SBMLDocument without the transport reactions and the reversible reactions split in two
+	 * a new SBMLDocument and splits the reversible reactions in two
 	 * irreversible reaction to both sides.
 	 * @param document
 	 * @return {@link SBMLDocument}
 	 */
-	public static SBMLDocument eliminateTransportsAndSplitReversibleReactions(
-			SBMLDocument document) {
-		// first eliminate the transports
-		SBMLDocument doc = eliminateTransports(document);
-		SBMLDocument revReacDoc = doc.clone();
+	public static SBMLDocument splitAllReversibleReactions(SBMLDocument document) {
+		SBMLDocument revReacDoc = document.clone();
 		//split the reversible reactions
-		for (int i = 0; i < doc.getModel().getReactionCount(); i++) {
-			Reaction reversibleReac = revReacDoc.getModel().getReaction(doc.getModel().getReaction(i).getId());
-			if (reversibleReac.isSetReversible() && reversibleReac.isReversible()) { // TODO for SBML L3 add if "isSetreversible"
+		for (int i = 0; i < document.getModel().getReactionCount(); i++) {
+			Reaction reversibleReac = revReacDoc.getModel().getReaction(document.getModel().getReaction(i).getId());
+			if (reversibleReac.isSetReversible() && reversibleReac.isReversible()) { 
 				reversibleReactions.add(reversibleReac.getId());
 				Reaction backwardReac = reversibleReac.clone();
 				backwardReac.setKineticLaw(null);
+				backwardReac.setSBOTerm(reversibleReac.getSBOTerm());
 				backwardReac.setId(reversibleReac.getId() + endingForBackwardReaction);
 				backwardReac.setMetaId(reversibleReac.getMetaId() + endingForBackwardReaction);
 				backwardReac.setName(reversibleReac.getName() + endingForBackwardReaction);
@@ -363,6 +372,20 @@ public class FluxMinimizationUtils {
 		}
 		// return the new document
 		return revReacDoc;
+	}
+	
+	/**
+	 * Gets a {@link SBMLDocument} and searches the reversible reactions. Than it creates
+	 * a new SBMLDocument without the transport reactions and the reversible reactions split in two
+	 * irreversible reaction to both sides.
+	 * @param document
+	 * @return {@link SBMLDocument}
+	 */
+	public static SBMLDocument eliminateTransportsAndSplitReversibleReactions(
+			SBMLDocument document) {
+		// first eliminate the transports
+		SBMLDocument doc = eliminateTransports(document);
+		return splitAllReversibleReactions(doc);
 	}
 
 	/**
@@ -552,6 +575,19 @@ public class FluxMinimizationUtils {
 	}
 
 	/**
+	 * 
+	 * @param SBMLDocument
+	 * @return the {@link StoichiometricMatrix} of all reactions and transports
+	 * @throws Exception
+	 */
+	public static StoichiometricMatrix getStoichiometricMatrix(SBMLDocument doc) throws Exception {
+		if (N_all == null) {
+			N_all = SBMLDocToStoichMatrix(doc);
+		}
+		return N_all;
+	}
+	
+	/**
 	 * @param array
 	 * @return the number of non-zero entries
 	 */
@@ -614,6 +650,44 @@ public class FluxMinimizationUtils {
 	 */
 	public static double[] getSystemBoundaries() {
 		return systemBoundaries;
+	}
+	
+	/**
+	 * 
+	 * @return the factors for fluxes in transport reactions
+	 */
+	public static double[][] getTransportFactors() {
+		return transportFactors;
+	}
+	
+	/**
+	 * 
+	 * @param doc
+	 * @return the factors for fluxes in transport reactions
+	 */
+	public static double[][] calculateTransportFactors(SBMLDocument doc) {
+		Model m = doc.getModel();
+		//init the array
+		int reacCnt = m.getReactionCount();
+		int specCnt = m.getSpeciesCount();
+		transportFactors = new double[specCnt][reacCnt];
+		
+		for (int j = 0; j < reacCnt; j++) {
+			for (int i = 0; i < specCnt; i++) {
+			double d = 1.0;
+			if ((m != null) && (SBO.isChildOf(m.getReaction(j).getSBOTerm(), SBO.getTransport()))) {
+				Reaction r = m.getReaction(j);
+				Species s = m.getSpecies(i);
+				if (r.hasReactant(s) || r.hasProduct(s)) {
+					d = 1 / (m.getCompartment(s.getCompartment()).getSize());
+//					System.out.println("r " + r + " s " + s + " size: " + (m.getCompartment(s.getCompartment()).getSize()) + " d " + d);
+				}
+			}
+			transportFactors[i][j] = d;
+		}
+		}
+		
+		return transportFactors;
 	}
 
 	/**
@@ -679,13 +753,12 @@ public class FluxMinimizationUtils {
 	}
 
 	/**
-	 * Gets the original {@link SBMLDocument} and gives back the corresponding {@link StoichiometricMatrix}.
+	 * Gets the {@link SBMLDocument} and gives back the corresponding {@link StoichiometricMatrix}.
 	 * @param doc
 	 * @return {@link StoichiometricMatrix}
 	 * @throws Exception 
 	 */
 	public static StoichiometricMatrix SBMLDocToStoichMatrix(SBMLDocument doc) throws Exception{
-		doc = eliminateTransportsAndSplitReversibleReactions(doc);
 
 		// build a new StoichiometricMatrix with the number of species as the dimension of rows
 		// and the number of reactions as the dimension of columns

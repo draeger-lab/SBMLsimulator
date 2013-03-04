@@ -97,7 +97,7 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 	@Override
 	public void addConstraintsToTargetFunction(IloCplex cplex)
 		throws IloException {
-		int speciesCount = this.expandedDocument.getModel().getSpeciesCount();
+		int speciesCount = this.splittedDocument.getModel().getSpeciesCount();
 		
 		int fluxPosition = 0;
 		int concentrationPosition = getTargetVariablesLengths()[0];
@@ -149,8 +149,8 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 					IloNumExpr computedConcentration = cplex.numExpr();
 					IloNumExpr NJ = cplex.numExpr();
 					
-					double[] currentN_row = this.N_int_sys.getRow(n);
-					for (int col = 0; col < this.N_int_sys.getColumnDimension(); col++) {
+					double[] currentN_row = this.N_all.getRow(n);
+					for (int col = 0; col < this.N_all.getColumnDimension(); col++) {
 						NJ = cplex.sum(NJ, cplex.prod(cplex.constant(currentN_row[col]),
 							getVariables()[fluxPosition + col]));
 					}
