@@ -54,26 +54,26 @@ public class FluxMinimizationII extends TargetFunction {
 	 * - transport reactions eliminated and reversible reactions split,
 	 * - compensated reactions added (computed from system boundaries)
 	 */
-	private SBMLDocument expandedDocument;
+	protected SBMLDocument expandedDocument;
 	
 	/*
 	 * The complete intern {@link StoichiometricMatrix} N (with system
 	 * boundaries)
 	 */
-	private StoichiometricMatrix N_int_sys;
+	protected StoichiometricMatrix N_int_sys;
 	
 	/*
 	 * These numbers (lambda_i, i is el. of {1, 2}) weight the contributions
 	 * of each term in the optimization problem.
 	 */
-	private double lambda_1 = 1.0;
+	protected double lambda_1 = 1.0;
 	
-	private double lambda_2 = 10.0;
+	protected double lambda_2 = 1000.0;
 	
 	/*
 	 * The array contains the complete interpolated concentrations
 	 */
-	private double[][] completeConcentrations;
+	protected double[][] completeConcentrations;
 	
 	/*
 	 * The array contains the read system boundaries
@@ -96,22 +96,22 @@ public class FluxMinimizationII extends TargetFunction {
 	/*
 	 * Lower bounds for CPLEX variables saved in a double array
 	 */
-	private double[] lowerBounds;
+	protected double[] lowerBounds;
 	
 	/*
 	 * Upper bounds for CPLEX variables saved in a double array
 	 */
-	private double[] upperBounds;
+	protected double[] upperBounds;
 	
 	/*
 	 * Constraint J_j >= 0
 	 */
-	private boolean constraintJ0 = true;
+	protected boolean constraintJ0 = true;
 	
 	/*
 	 * Constraint z_m (t_i+1) >= 0
 	 */
-	private boolean constraintZm = true;
+	protected boolean constraintZm = true;
 	
 	/**
 	 * Set the fluxes weighting factor lambda1 (default: 1.0).
@@ -163,7 +163,7 @@ public class FluxMinimizationII extends TargetFunction {
 	 * 
 	 * @throws Exception
 	 */
-	private void prepareFluxMinimizationII() throws Exception {
+	protected void prepareFluxMinimizationII() throws Exception {
 		// If system boundaries are read from file...
 		if (this.isSystemBoundaries) {
 			this.expandedDocument = FluxMinimizationUtils.getExpandedDocument(DynamicFBA.originalDocument, this.readSystemBoundaries);
