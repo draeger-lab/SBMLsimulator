@@ -18,7 +18,6 @@ package org.sbml.simulator.fba.dynamic;
 
 import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
-import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
 
 /**
@@ -69,7 +68,7 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 				if(this.getTimePointStep() > 0) {
 					double previousValue = completeConcentrations[this.getTimePointStep()-1][n-1];
 					if((!Double.isNaN(previousValue)) && (previousValue > 0))  {
-						logarithms[n] = Math.max(-1 * Math.log10(previousValue), logarithms[n]);
+						logarithms[n] = Math.min(Math.max(-1 * Math.log10(previousValue), 0), logarithms[n]);
 					}
 				}
 				logarithms[n]=1;
@@ -125,7 +124,7 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		double delta_t = DynamicFBA.dFBATimePoints[1]
 				- DynamicFBA.dFBATimePoints[0];
 		
-		for (int n = 0; n < getTargetVariablesLengths()[1]; n++) {
+		for (int i = 0; i < getTargetVariablesLengths()[1]; i++) {
 			
 			// Concentrations 
 			double[] c_m_measured = this.completeConcentrations[this
@@ -135,31 +134,32 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 				// In the first time point step 0, there is no c_m (t_i+1).
 				// t_i+1 would be time point step 1, not 0!
 				if (!Double
-						.isNaN(this.completeConcentrations[this.getTimePointStep()][n])) {
+						.isNaN(this.completeConcentrations[this.getTimePointStep()][i])) {
 					cplex
-							.addEq(getVariables()[concentrationPosition + n],
+							.addEq(getVariables()[concentrationPosition + i],
 								cplex.constant(this.completeConcentrations[this
-										.getTimePointStep()][n]));
+										.getTimePointStep()][i]));
 				} else {
 					// TODO if currentConcentrations[n] is NaN???
 				}
 			} else {
 				if (!Double
-						.isNaN(completeConcentrations[this.getTimePointStep() - 1][n])) {
+						.isNaN(completeConcentrations[this.getTimePointStep() - 1][i])) {
 					IloNumExpr computedConcentration = cplex.numExpr();
 					IloNumExpr NJ = cplex.numExpr();
 					
-					double[] currentN_row = this.N_all.getRow(n);
-					for (int col = 0; col < this.N_all.getColumnDimension(); col++) {
-						NJ = cplex.sum(NJ, cplex.prod(cplex.constant(currentN_row[col]),
-							getVariables()[fluxPosition + col]));
+					double[] currentN_row = this.N_all.getRow(i);
+					for (int j = 0; j < this.N_all.getColumnDimension(); j++) {
+						double factor = transportFactors[i][j] * currentN_row[j];
+						NJ = cplex.sum(NJ, cplex.prod(cplex.constant(factor),
+							getVariables()[fluxPosition + j]));
 					}
 					
 					computedConcentration = cplex
 							.sum(cplex.constant(this.completeConcentrations[this
-									.getTimePointStep() - 1][n]), cplex.prod(NJ,
+									.getTimePointStep() - 1][i]), cplex.prod(NJ,
 								cplex.constant(delta_t)));
-					cplex.addEq(getVariables()[concentrationPosition + n],
+					cplex.addEq(getVariables()[concentrationPosition + i],
 						computedConcentration);
 //					if (!Double.isNaN(c_m_measured[n])) {
 //						cplex.addLe(cplex.abs(cplex.diff(getVariables()[concentrationPosition + n],
