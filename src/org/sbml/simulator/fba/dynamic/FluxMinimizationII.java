@@ -160,7 +160,7 @@ public class FluxMinimizationII extends TargetFunction {
 		this.isSystemBoundaries = true;
 	}
 	
-	public double[][] transportFactors = null;
+	protected double[][] transportFactors = null;
 	
 	/**
 	 * @param transportfactors
