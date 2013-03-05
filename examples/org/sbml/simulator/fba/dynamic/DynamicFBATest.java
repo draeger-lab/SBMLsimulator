@@ -123,23 +123,15 @@ public class DynamicFBATest {
 		}
 		
 		// Run a dynamic FBA
-		DynamicFBA dfba = new DynamicFBA(testDocument, concMT, 50);
+		DynamicFBA dfba = new DynamicFBA(testDocument, concMT, 1000);
 		
-//		FluxMinimization fm = new FluxMinimization();
-//		fm.setKnownFluxes(knownFluxes);
-//		fm.setCplexIterations(1000);
-//		fm.setReadGibbsEnergies(correctedGibbsEnergies);
-//		fm.setReadSystemBoundaries(correctedSysBounds);
-//		dfba.runDynamicFBA(fm);
-		
-		FluxMinimizationII fm2 = new FluxMinimizationII();
-		fm2.setKnownFluxes(knownFluxes);
-		fm2.setLambda2(1000);
-		fm2.setCplexIterations(1000000);
-		fm2.setReadSystemBoundaries(correctedSysBounds);
-
-		dfba.runDynamicFBA(fm2);
-		
+		FluxMinimization fm = new FluxMinimization();
+		fm.setKnownFluxes(knownFluxes);
+		fm.setCplexIterations(1000);
+		fm.setReadGibbsEnergies(correctedGibbsEnergies);
+		fm.setReadSystemBoundaries(correctedSysBounds);
+		dfba.runDynamicFBA(fm);
+			
 		// Print solution MultiTable
 		MultiTable solution = dfba.getSolutionMultiTable();
 		System.out.println(solution.toString());
