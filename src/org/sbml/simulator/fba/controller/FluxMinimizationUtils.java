@@ -230,25 +230,12 @@ public class FluxMinimizationUtils {
 			// pre-processing: sort the matrix to speed up the computation of the steady state matrix
 			double[][] sortedMatrixArray = getSortedArray(NwithoutZeroRows);
 			
-			//TODO:sysout matrix
-//			System.out.print("leer, ");
-//			for (int i = 0; i < systemBoundaryDocument.getModel().getReactionCount(); i++) {
-//				System.out.print(systemBoundaryDocument.getModel().getReaction(i) + ", ");
-//			}
-//			System.out.println();
-//			for (int i = 0; i < sortedMatrixArray.length; i++) {
-//				System.out.println(systemBoundaryDocument.getModel().getSpecies(i) + ", " + Arrays.toString(sortedMatrixArray[i]));
-//			}
-			
 			StoichiometricMatrix sortedMatrix = new StoichiometricMatrix(sortedMatrixArray, sortedMatrixArray.length, sortedMatrixArray[0].length);
 			steadyStateMatrix = ConservationRelations.calculateConsRelations(sortedMatrix.transpose());
 	
 			// post-processing: delete rows with only forward and backward of a reaction
 			steadyStateMatrix = getCorrectedSteadyStateMatrix(steadyStateMatrix);
 	
-			//TODO:sysout
-//			System.out.println("steadyStateMatrix.getRowDimension() " + steadyStateMatrix.getRowDimension() + "      steadyStateMatrix.getColumnDimension() " + steadyStateMatrix.getColumnDimension());
-			
 			double[] fluxVector = new double[steadyStateMatrix.getColumnDimension()];
 			
 			// fill the fluxVector
@@ -691,7 +678,6 @@ public class FluxMinimizationUtils {
 	}
 
 	/**
-	 * Returns the system boundaries created from the stoichiometric matrix.
 	 * @param doc
 	 * @return the system boundaries created from the stoichiometric matrix
 	 * @throws Exception 
@@ -704,7 +690,7 @@ public class FluxMinimizationUtils {
 	}
 
 	/**
-	 * TODO: add comment
+	 * checks whether one possible conservation only consists of a splitted reversible reaction
 	 * @param row
 	 * @return true if the row only contains a forward and the corresponding backward direction of a reversible reaction
 	 */
