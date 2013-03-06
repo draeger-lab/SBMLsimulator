@@ -163,11 +163,7 @@ public class DynamicFBA {
 			// (Reset the CPLEX object! If not, a MultipleObjectiveException is waiting!)
 			cplex.clearModel();
 			
-			// ... and fill the solution MultiTable
-			for (int block = 0; block < this.solutionMultiTable.getBlockCount(); block++) {
-				double[] currentSpecificSolution = optimizedSolution[block];
-				this.solutionMultiTable.getBlock(block).setRowData(i, currentSpecificSolution);
-			}
+			function.saveValuesForCurrentTimePoint(this.solutionMultiTable);
 		}
 
 		// Stop the CPLEX stream
