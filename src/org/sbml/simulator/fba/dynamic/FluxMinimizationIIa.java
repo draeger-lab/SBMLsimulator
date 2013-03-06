@@ -71,7 +71,6 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 						logarithms[n] = Math.min(Math.max(-1 * Math.log10(previousValue), 0), logarithms[n]);
 					}
 				}
-				logarithms[n]=1;
 				optimizingConcentration = cplex.prod(Math.pow(10, logarithms[n]), cplex.abs(cplex.diff(c_m_measured[n], getVariables()[concentrationPosition + n])));
 			} else {
 				// TODO if c_m_measured[n] is NaN???
@@ -134,11 +133,10 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 				// In the first time point step 0, there is no c_m (t_i+1).
 				// t_i+1 would be time point step 1, not 0!
 				if (!Double
-						.isNaN(this.completeConcentrations[this.getTimePointStep()][i])) {
+						.isNaN(c_m_measured[i])) {
 					cplex
 							.addEq(getVariables()[concentrationPosition + i],
-								cplex.constant(this.completeConcentrations[this
-										.getTimePointStep()][i]));
+								cplex.constant(c_m_measured[i]));
 				} else {
 					// TODO if currentConcentrations[n] is NaN???
 				}
@@ -148,9 +146,8 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 					IloNumExpr computedConcentration = cplex.numExpr();
 					IloNumExpr NJ = cplex.numExpr();
 					
-					double[] currentN_row = this.N_all.getRow(i);
 					for (int j = 0; j < this.N_all.getColumnDimension(); j++) {
-						double factor = transportFactors[i][j] * currentN_row[j];
+						double factor = transportFactors[i][j] * this.N_all.get(i, j);
 						NJ = cplex.sum(NJ, cplex.prod(cplex.constant(factor),
 							getVariables()[fluxPosition + j]));
 					}

@@ -76,39 +76,19 @@ public class DynamicFBAFluxMinIITest {
 		// Read known fluxes file
 		Map<String, Double> reaction2Fluxes = readKnownFluxes(args[2], true);
 		HashMap<Integer, Double> knownFluxes = new HashMap<Integer, Double>();
-		//------------0nM Atorvastatin---------------------
-//		reaction2Fluxes.put("lr003_rev", 18.9);
-//		reaction2Fluxes.put("r0171_rev", 45.5);
-//		reaction2Fluxes.put("r0317", 12.1);
-//		reaction2Fluxes.put("r0426_rev", 12.1);
-//		reaction2Fluxes.put("lr014", 12.1);
-//		reaction2Fluxes.put("r0104", 92.2);
-//		reaction2Fluxes.put("r0080", 12.0);
-//		reaction2Fluxes.put("r0323_rev", 4.1);
-//		reaction2Fluxes.put("r0123", 81.2);
-//		reaction2Fluxes.put("r0334_rev", 0.06);
-		//------------50nM Atorvastatin---------------------
-//		reaction2Fluxes.put("lr003_rev", 18.9);
-//		reaction2Fluxes.put("r0171_rev", 46.6);
-//		reaction2Fluxes.put("r0317", 10.8);
-//		reaction2Fluxes.put("r0426_rev", 10.8);
-//		reaction2Fluxes.put("lr014", 10.8);
-//		reaction2Fluxes.put("r0104", 88.2);
-//		reaction2Fluxes.put("r0080", 11.6);
-//		reaction2Fluxes.put("r0323_rev", 4.9);
-//		reaction2Fluxes.put("r0123", 79.3);
-//		reaction2Fluxes.put("r0334_rev", 0.04);
 		
 		for (int i = 0; i < expandedDocument.getModel().getReactionCount(); i++) {
 			Double d = reaction2Fluxes.get(expandedDocument.getModel().getReaction(i).getId());
-			System.out.println(expandedDocument.getModel().getReaction(i));
 			if (d != null) {
 				knownFluxes.put(i, d);
 			}
 		}
 		
 		// Run a dynamic FBA
-		DynamicFBA dfba = new DynamicFBA(oriDocument, concMT, 50);
+		// using splines
+//		DynamicFBA dfba = new DynamicFBA(oriDocument, concMT, 50);
+		// using no splines
+		DynamicFBA dfba = new DynamicFBA(oriDocument, concMT);
 		
 		FluxMinimizationIIa fm2 = new FluxMinimizationIIa();
 		fm2.setTransportFactors(transportfactors);
@@ -142,8 +122,8 @@ public class DynamicFBAFluxMinIITest {
 				Double d = Double.valueOf(helper[1]);
 				if (d < 0) {
 					reactionId.concat(FluxMinimizationUtils.endingForBackwardReaction);
-					Double neg = d;
-					d = neg * -1;
+					Double pos = d;
+					d = pos * -1;
 				}
 				reaction2Fluxes.put(reactionId, d);
 			}
