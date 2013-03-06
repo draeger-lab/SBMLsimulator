@@ -36,6 +36,7 @@ import org.sbml.jsbml.Species;
 import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.stability.math.StabilityMatrix;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
+import org.simulator.math.odes.MultiTable;
 
 /**
  * FluxMinimization target function:
@@ -712,6 +713,16 @@ public class FluxMinimization extends TargetFunction {
 		}
 		
 		return this.optimizedSolution;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#saveValuesForCurrentTimePoint(org.simulator.math.odes.MultiTable)
+	 */
+	public void saveValuesForCurrentTimePoint(MultiTable solutionMultiTable) {
+		for (int block = 0; block < solutionMultiTable.getBlockCount(); block++) {
+				double[] currentSpecificSolution = optimizedSolution[block];
+				solutionMultiTable.getBlock(block).setRowData(this.getTimePointStep(), currentSpecificSolution);
+		}
 	}
 	
 }

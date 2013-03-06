@@ -17,6 +17,7 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -27,6 +28,7 @@ import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.Species;
 import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
+import org.simulator.math.odes.MultiTable;
 
 import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
@@ -470,6 +472,25 @@ public class FluxMinimizationII extends TargetFunction {
 		return this.optimizedSolution;
 	}
 
-	
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#saveValuesForCurrentTimePoint(org.simulator.math.odes.MultiTable)
+	 */
+	public void saveValuesForCurrentTimePoint(MultiTable solutionMultiTable) {
+		for (int block = 0; block < solutionMultiTable.getBlockCount(); block++) {
+				double[] currentSpecificSolution = optimizedSolution[block];
+				if(block == 0) {
+					solutionMultiTable.getBlock(block).setRowData(this.getTimePointStep(), currentSpecificSolution);
+				}
+				else if((block == 1) && (this.getTimePointStep() > 0)){
+					solutionMultiTable.getBlock(block).setRowData(this.getTimePointStep() - 1, currentSpecificSolution);
+				}
+				
+				if((block == 1) && (this.getTimePointStep() == solutionMultiTable.getRowCount() - 1)) {
+					double[] nanArray = new double[optimizedSolution[1].length];
+					Arrays.fill(nanArray, Double.NaN);
+					solutionMultiTable.getBlock(block).setRowData(this.getTimePointStep(), nanArray);
+				}
+		}
+	}
 	
 }
