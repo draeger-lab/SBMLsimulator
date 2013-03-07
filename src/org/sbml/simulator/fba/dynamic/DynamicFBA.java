@@ -18,6 +18,7 @@
 package org.sbml.simulator.fba.dynamic;
 
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.sbml.jsbml.ListOf;
@@ -170,10 +171,9 @@ public class DynamicFBA {
 		cplex.end();
 		
 		// Calculate the net fluxes according to the reverse reaction saved in the map
-		List<String> reversibleReactions = FluxMinimizationUtils.reversibleReactions;
+		Set<String> reversibleReactions = FluxMinimizationUtils.reversibleReactions;
 		
-		for (int i = 0; i < reversibleReactions.size(); i++) {
-			String currentRevReactionId = reversibleReactions.get(i);
+		for (String currentRevReactionId: reversibleReactions) {
 			// Block 1 contains the fluxes
 			Column currentReactionCol = this.solutionMultiTable.getBlock(1).getColumn(currentRevReactionId);
 			Column currentRevReactionCol = this.solutionMultiTable.getBlock(1).getColumn(currentRevReactionId + FluxMinimizationUtils.endingForBackwardReaction);
