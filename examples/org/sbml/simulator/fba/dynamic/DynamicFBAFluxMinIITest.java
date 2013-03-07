@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
 import org.sbml.jsbml.SBO;
@@ -60,9 +61,10 @@ public class DynamicFBAFluxMinIITest {
 		// Read SBML document file
 		SBMLReader reader = new SBMLReader();
 		SBMLDocument oriDocument = reader.readSBML(args[0]);
-		SBMLDocument expandedDocument = FluxMinimizationUtils.splitAllReversibleReactions(oriDocument);
-		double[][] transportfactors = FluxMinimizationUtils.calculateTransportFactors(expandedDocument);
-		 
+		SBMLDocument splittedDocument = FluxMinimizationUtils.splitAllReversibleReactions(oriDocument);
+		double[][] transportfactors = FluxMinimizationUtils.calculateTransportFactors(splittedDocument);
+		double[][] previousFactors = FluxMinimizationUtils.calculatePreviousFactors(splittedDocument);
+		
 		System.out.println("SBML document read and splitted");
 		
 		// Read concentration file
@@ -71,27 +73,37 @@ public class DynamicFBAFluxMinIITest {
 		
 		System.out.println("Concentrations read");
 		
-	
+		Map<String, Integer> reactionIndices = new HashMap<String, Integer>();
+		for (int i = 0; i < splittedDocument.getModel().getReactionCount(); i++) {
+			reactionIndices.put(splittedDocument.getModel().getReaction(i).getId(), i);
+		}
+		
+		// constraint same fluxes
+		String[] sameFluxes = {
+				"r1027,lr008",
+				"r1027_rev,lr008_rev",
+				"r1534,lr009",
+				"r1494,lr009_rev",
+				"r1535,lr010",
+				"r1496,lr010_rev",
+				"r0396,r1032",
+				"r0353,r1032_rev" 
+				};
+		int[] fluxPairs = getReactionPairIndices(reactionIndices, sameFluxes);
 		
 		// Read known fluxes file
-		Map<String, Double> reaction2Fluxes = readKnownFluxes(args[2], true);
-		HashMap<Integer, Double> knownFluxes = new HashMap<Integer, Double>();
-		
-		for (int i = 0; i < expandedDocument.getModel().getReactionCount(); i++) {
-			Double d = reaction2Fluxes.get(expandedDocument.getModel().getReaction(i).getId());
-			if (d != null) {
-				knownFluxes.put(i, d);
-			}
-		}
+		Map<Integer, Double> knownFluxes = readKnownFluxes(args[2], true, reactionIndices);
 		
 		// Run a dynamic FBA
 		// using splines
-//		DynamicFBA dfba = new DynamicFBA(oriDocument, concMT, 50);
+		DynamicFBA dfba = new DynamicFBA(oriDocument, concMT, 100);
 		// using no splines
-		DynamicFBA dfba = new DynamicFBA(oriDocument, concMT);
+//		DynamicFBA dfba = new DynamicFBA(oriDocument, concMT);
 		
 		FluxMinimizationIIa fm2 = new FluxMinimizationIIa();
-		fm2.setTransportFactors(transportfactors);
+		fm2.setFluxPairs(fluxPairs);
+//		fm2.setTransportFactors(transportfactors);
+		fm2.setFactors(previousFactors);
 		fm2.setKnownFluxes(knownFluxes);
 		fm2.setLambda2(1000);
 		fm2.setCplexIterations(1000000);
@@ -107,11 +119,35 @@ public class DynamicFBAFluxMinIITest {
 	}
 
 	/**
-	 * @param string
-	 * @throws IOException 
+	 * 
+	 * @param reactionIndices
+	 * @param fluxPairs
+	 * @return
 	 */
-	private static Map<String, Double> readKnownFluxes(String knownFluxes, boolean header) throws IOException {
-		Map<String, Double> reaction2Fluxes = new HashMap<String, Double>();
+	private static int[] getReactionPairIndices(Map<String, Integer> reactionIndices, String[] fluxPairs) {
+		int[] pairIndices = new int[reactionIndices.size()];
+		// init unrealistic value for the rest of the reactions
+		for (int i = 0; i < pairIndices.length; i++) {
+			pairIndices[i] = 100000;
+		}
+		for (String s : fluxPairs) {
+			String[] helper = s.split(",");
+			pairIndices[reactionIndices.get(helper[0])] = reactionIndices.get(helper[1]); 
+		}
+		return pairIndices;
+	}
+
+
+	/**
+	 * 
+	 * @param knownFluxes
+	 * @param header
+	 * @param reactionIndices
+	 * @return
+	 * @throws IOException
+	 */
+	private static Map<Integer, Double> readKnownFluxes(String knownFluxes, boolean header, Map<String, Integer> reactionIndices) throws IOException {
+		Map<Integer, Double> fluxes = new HashMap<Integer, Double>();
 		String line;
 
 		BufferedReader input = new BufferedReader(new FileReader(knownFluxes));
@@ -125,12 +161,12 @@ public class DynamicFBAFluxMinIITest {
 					Double pos = d;
 					d = pos * -1;
 				}
-				reaction2Fluxes.put(reactionId, d);
+				fluxes.put(reactionIndices.get(reactionId), d);
 			}
 			else {header = false;}
 		}
 		
-		return reaction2Fluxes;
+		return fluxes;
 		
 	}
 }

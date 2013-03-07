@@ -115,6 +115,11 @@ public class FluxMinimizationUtils {
 	 * contains all factors for fluxes in transport reactions
 	 */
 	private static double[][] transportFactors = null;
+	
+	/**
+	 * contains all factors for fluxes in reactions
+	 */
+	private static double[][] previousFactors = null;
 
 	/**
 		 * 
@@ -677,6 +682,44 @@ public class FluxMinimizationUtils {
 		return transportFactors;
 	}
 
+	/**
+	 * 
+	 * @return the factors for fluxes in all reactions
+	 */
+	public static double[][] getPreviousFactors() {
+		return previousFactors;
+	}
+	
+	/**
+	 * 
+	 * @param doc
+	 * @return
+	 */
+	public static double[][] calculatePreviousFactors(SBMLDocument doc) {
+		Model m = doc.getModel();
+		//init the array
+		int reacCnt = m.getReactionCount();
+		int specCnt = m.getSpeciesCount();
+		previousFactors = new double[specCnt][reacCnt];
+		
+		for (int j = 0; j < reacCnt; j++) {
+			for (int i = 0; i < specCnt; i++) {
+			double d = 1.0;
+			if (m != null) {
+				Reaction r = m.getReaction(j);
+				Species s = m.getSpecies(i);
+				if (r.hasReactant(s) || r.hasProduct(s)) {
+					d = 1 / (m.getCompartment(s.getCompartment()).getSize());
+//					System.out.println("r " + r + " s " + s + " size: " + (m.getCompartment(s.getCompartment()).getSize()) + " d " + d);
+				}
+			}
+			previousFactors[i][j] = d;
+		}
+		}
+		
+		return previousFactors;
+	}
+	
 	/**
 	 * @param doc
 	 * @return the system boundaries created from the stoichiometric matrix

@@ -162,14 +162,28 @@ public class FluxMinimizationII extends TargetFunction {
 		this.isSystemBoundaries = true;
 	}
 	
-	protected double[][] transportFactors = null;
+	/**
+	 * contains the previous factors for reactions
+	 */
+	protected double[][] factors = null;
 	
 	/**
-	 * @param transportfactors
+	 * @param factors
 	 */
-	public void setTransportFactors(double[][] transportfactors) {
-		this.transportFactors = transportfactors;
-		
+	public void setFactors(double[][] factors) {
+		this.factors = factors;
+	}
+	
+	/**
+	 * contains the indices of paired fluxes
+	 */
+	protected int[] fluxPairs = null;
+	
+	/**
+	 * @param fluxPairs
+	 */
+	public void setFluxPairs(int[] fluxPairs) {
+		this.fluxPairs = fluxPairs;
 	}
 	
 	/**
@@ -345,13 +359,13 @@ public class FluxMinimizationII extends TargetFunction {
 		// Concentrations 
 		IloNumExpr concentrations = cplex.numExpr();
 		int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
-		double[] c_m_measured = this.completeConcentrations[this.getTimePointStep()];
+		double[] c_k_ti = this.completeConcentrations[this.getTimePointStep()];
 		
-		for (int m = 0; m < getTargetVariablesLengths()[1]; m++) {
+		for (int i = 0; i < getTargetVariablesLengths()[1]; i++) {
 			IloNumExpr optimizingConcentration = cplex.numExpr();
 			
-			if (!Double.isNaN(c_m_measured[m])) {
-				optimizingConcentration = cplex.abs(cplex.diff(c_m_measured[m], getVariables()[concentrationPosition + m]));
+			if (!Double.isNaN(c_k_ti[i])) {
+				optimizingConcentration = cplex.abs(cplex.diff(c_k_ti[i], getVariables()[concentrationPosition + i]));
 			} else {
 				// TODO if c_m_measured[n] is NaN???
 			}
@@ -374,6 +388,7 @@ public class FluxMinimizationII extends TargetFunction {
 
 		int fluxPosition = 0;
 		int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
+		
 		
 		// Constraint J_j >= 0
 		if (this.constraintJ0 == true) {
