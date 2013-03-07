@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.sbml.jsbml.ListOf;
+import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.Species;
 import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
@@ -206,27 +207,31 @@ public class DynamicFBA {
 		fullSpeciesMultiTable.setTimeName(table.getTimeName());
 		fullSpeciesMultiTable.setTimePoints(table.getTimePoints());
 		
-		ListOf<Species> listOfSpecies = originalDocument.getModel().getListOfSpecies();
+		Model m = originalDocument.getModel();
 		String[] speciesIds = new String[speciesCount];
 		for (int i = 0; i < speciesCount; i++) {
-			speciesIds[i] = listOfSpecies.get(i).getId();
+			speciesIds[i] = m.getSpecies(i).getId();
 		}
 		fullSpeciesMultiTable.addBlock(speciesIds);
 		
-		for (int i = 0; i < table.getTimePoints().length; i++) {
+		for (int t = 0; t < table.getTimePoints().length; t++) {
 			double[] currentConcentrations = new double[speciesCount];
-			for (int j = 0; j < speciesCount; j++) {
-				String currentSpeciesId = listOfSpecies.get(j).getId();
+			for (int i = 0; i < speciesCount; i++) {
+				String currentSpeciesId = m.getSpecies(i).getId();
 				int columnIndexMT = table.getColumnIndex(currentSpeciesId);
-				if (columnIndexMT == -1) {
-					currentConcentrations[j] = Double.NaN;
+				if (columnIndexMT == -1) { // no entry in the original multi table
+					currentConcentrations[i] = Double.NaN;
 				} else {
-					currentConcentrations[j] = table.getValueAt(i, columnIndexMT);
+					currentConcentrations[i] = table.getValueAt(t, columnIndexMT);
 				}
 			}
-			fullSpeciesMultiTable.getBlock(0).setRowData(i, currentConcentrations);
+			fullSpeciesMultiTable.getBlock(0).setRowData(t, currentConcentrations);
 		}
 		// Finish initialize new MultiTable
+
+		
+		// Set the dynamic FBA points in time
+		dFBATimePoints = fullSpeciesMultiTable.getTimePoints();
 		
 		// First, check if timePointCount is a valid number...
 		int givenTimePointLength = table.getTimePoints().length;
@@ -234,18 +239,22 @@ public class DynamicFBA {
 			logger.warning("TimePointCount (" + timePointCount + ") has to be greater than the given timePoint length (" + givenTimePointLength + ")!");
 			return fullSpeciesMultiTable;
 		}
+		else if (timePointCount == givenTimePointLength) {
+			return fullSpeciesMultiTable;
+		}
 		
 		// ... then interpolate
 		MultiTable fullTimePointMultiTable;
+		int inBetweenTimePoints = 0;
 		if (((timePointCount - 1) % (givenTimePointLength - 1)) == 0) {
-			int inBetweenTimePoints = (timePointCount - givenTimePointLength) / (givenTimePointLength - 1);
-			fullTimePointMultiTable = SplineCalculation.calculateSplineValues(fullSpeciesMultiTable, inBetweenTimePoints, false);
+			inBetweenTimePoints = (timePointCount - givenTimePointLength) / (givenTimePointLength - 1);
+			
 		} else {
 			int multiplyFactor = (int) ((timePointCount - 1) / (givenTimePointLength - 1));
-			int inBetweenTimePoints = (((multiplyFactor * (givenTimePointLength - 1)) + 1) - givenTimePointLength) / (givenTimePointLength - 1);
+			inBetweenTimePoints = (((multiplyFactor * (givenTimePointLength - 1)) + 1) - givenTimePointLength) / (givenTimePointLength - 1);
 			logger.info("TimePointCount (" + timePointCount + ") for better calculating set to: " + ((inBetweenTimePoints * (givenTimePointLength - 1)) + givenTimePointLength));
-			fullTimePointMultiTable = SplineCalculation.calculateSplineValues(fullSpeciesMultiTable, inBetweenTimePoints, false);
 		}
+		fullTimePointMultiTable = SplineCalculation.calculateSplineValues(fullSpeciesMultiTable, inBetweenTimePoints, false);
 		
 		// Set the dynamic FBA points in time
 		dFBATimePoints = fullTimePointMultiTable.getTimePoints();
