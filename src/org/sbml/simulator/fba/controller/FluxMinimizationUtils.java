@@ -81,6 +81,31 @@ public class FluxMinimizationUtils {
 	 * contains the {@link StoichiometricMatrix} incl. all reactions and transports
 	 */
 	private static StoichiometricMatrix N_all;
+	
+	/**
+	 * contains the splitted {@link SBMLDocument} 
+	 */
+	private static SBMLDocument splittedDocument = null;
+
+	/**
+	 * 
+	 * @param doc
+	 * @return
+	 */
+	public static SBMLDocument getSplittedDocument(SBMLDocument doc) {
+		if (splittedDocument == null) {
+			splittedDocument = splitAllReversibleReactions(doc);
+		}
+		return splittedDocument;
+	}
+
+	/**
+	 * 
+	 * @param splittedDocument
+	 */
+	public static void setSplittedDocument(SBMLDocument splittedDocument) {
+		FluxMinimizationUtils.splittedDocument = splittedDocument;
+	}
 
 	/**
 	 * contains the indices of the remaining rows, which are not only zeros

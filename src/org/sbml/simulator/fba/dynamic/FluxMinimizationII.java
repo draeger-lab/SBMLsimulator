@@ -209,7 +209,7 @@ public class FluxMinimizationII extends TargetFunction {
 	 * @throws Exception
 	 */
 	protected void prepareFluxMinimizationII() throws Exception {
-			this.splittedDocument = FluxMinimizationUtils.splitAllReversibleReactions(DynamicFBA.originalDocument);
+			this.splittedDocument = FluxMinimizationUtils.getSplittedDocument(DynamicFBA.originalDocument);
 			this.N_all = FluxMinimizationUtils.getStoichiometricMatrix(splittedDocument);
 	}
 

@@ -61,7 +61,7 @@ public class DynamicFBAFluxMinIITest {
 		// Read SBML document file
 		SBMLReader reader = new SBMLReader();
 		SBMLDocument oriDocument = reader.readSBML(args[0]);
-		SBMLDocument splittedDocument = FluxMinimizationUtils.splitAllReversibleReactions(oriDocument);
+		SBMLDocument splittedDocument = FluxMinimizationUtils.getSplittedDocument(oriDocument);
 		double[][] transportfactors = FluxMinimizationUtils.calculateTransportFactors(splittedDocument);
 		double[][] previousFactors = FluxMinimizationUtils.calculatePreviousFactors(splittedDocument);
 		
