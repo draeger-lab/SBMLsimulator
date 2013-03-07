@@ -98,7 +98,7 @@ public class DynamicFBAFluxMinIITest {
 		// using splines
 		DynamicFBA dfba = new DynamicFBA(oriDocument, concMT, 100);
 		// using no splines
-//		DynamicFBA dfba = new DynamicFBA(oriDocument, concMT);
+		//DynamicFBA dfba = new DynamicFBA(oriDocument, concMT);
 		
 		FluxMinimizationIIa fm2 = new FluxMinimizationIIa();
 		fm2.setFluxPairs(fluxPairs);
@@ -155,12 +155,7 @@ public class DynamicFBAFluxMinIITest {
 			if (!header) {
 				String[] helper = line.split("\t");
 				String reactionId = helper[0];
-				Double d = Double.valueOf(helper[1]);
-				if (d < 0) {
-					reactionId.concat(FluxMinimizationUtils.endingForBackwardReaction);
-					Double pos = d;
-					d = pos * -1;
-				}
+				Double d = Double.valueOf(helper[1]) * 4.248 / 1E3;
 				fluxes.put(reactionIndices.get(reactionId), d);
 			}
 			else {header = false;}
