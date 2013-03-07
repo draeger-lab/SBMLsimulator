@@ -16,6 +16,8 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
+import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
+
 import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
 import ilog.cplex.IloCplex;
@@ -99,6 +101,36 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		
 		int fluxPosition = 0;
 		int concentrationPosition = getTargetVariablesLengths()[0];
+		
+	// Constraint J_j >= 0
+		if (this.constraintJ0 == true) {
+			for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
+				cplex.addGe(getVariables()[fluxPosition + j], 0);
+			}
+		}
+		
+		for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
+			// Flux J_j
+			if (knownFluxes.containsKey(j)) {
+				double eightyPercent = 0.8 * knownFluxes.get(j);
+				
+				IloNumExpr j_j_min = cplex.numExpr();
+				if (FluxMinimizationUtils.reverseReaction.containsKey(j)) {
+					j_j_min = cplex.diff(
+						getVariables()[fluxPosition + j],
+						getVariables()[fluxPosition
+								+ FluxMinimizationUtils.reverseReaction.get(j)]);
+				} else {
+					j_j_min = getVariables()[fluxPosition + j];
+				}
+				
+				if (eightyPercent >= 0) {
+					cplex.addGe(j_j_min, eightyPercent);
+				} else {
+					cplex.addLe(j_j_min, eightyPercent);
+				}
+			}
+		}
 		
 		// Constraint flux pairs
 		if (fluxPairs != null) {
