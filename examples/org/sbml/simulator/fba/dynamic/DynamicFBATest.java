@@ -41,6 +41,11 @@ public class DynamicFBATest {
 	
 	/**
 	 * Test the methods of class {@link DynamicFBA}.
+	 * args[0] = sbml document
+	 * args[1] = concentration file as multitable
+	 * args[2] = system boundaries 
+	 * args[3] = gibbs energies as tab separated with headline
+	 * args[4] = output multitable file
 	 * 
 	 * @param args
 	 * @throws Exception
@@ -58,8 +63,6 @@ public class DynamicFBATest {
 		MultiTable concMT = importer.convert(testDocument.getModel(), args[1]);
 		
 		System.out.println("Concentrations read");
-		
-	
 		
 		// Read system boundary file
 		CSVDataConverter sysBoundConverter = new CSVDataConverter(testDocument,
@@ -87,46 +90,10 @@ public class DynamicFBATest {
 				+ correctedGibbsEnergies.length);
 		System.out.println(Arrays.toString(correctedGibbsEnergies));
 		
-		SBMLDocument expandedDocument = FluxMinimizationUtils.getExpandedDocument(testDocument, correctedSysBounds);
-		
-		HashMap<String, Double> reaction2Fluxes = new HashMap<String, Double>();
-		HashMap<Integer, Double> knownFluxes = new HashMap<Integer, Double>();
-		//------------0nM Atorvastatin---------------------
-//		reaction2Fluxes.put("lr003_rev", 18.9);
-//		reaction2Fluxes.put("r0171_rev", 45.5);
-//		reaction2Fluxes.put("r0317", 12.1);
-//		reaction2Fluxes.put("r0426_rev", 12.1);
-//		reaction2Fluxes.put("lr014", 12.1);
-//		reaction2Fluxes.put("r0104", 92.2);
-//		reaction2Fluxes.put("r0080", 12.0);
-//		reaction2Fluxes.put("r0323_rev", 4.1);
-//		reaction2Fluxes.put("r0123", 81.2);
-//		reaction2Fluxes.put("r0334_rev", 0.06);
-		//------------50nM Atorvastatin---------------------
-		reaction2Fluxes.put("lr003_rev", 18.9);
-		reaction2Fluxes.put("r0171_rev", 46.6);
-		reaction2Fluxes.put("r0317", 10.8);
-		reaction2Fluxes.put("r0426_rev", 10.8);
-		reaction2Fluxes.put("lr014", 10.8);
-		reaction2Fluxes.put("r0104", 88.2);
-		reaction2Fluxes.put("r0080", 11.6);
-		reaction2Fluxes.put("r0323_rev", 4.9);
-		reaction2Fluxes.put("r0123", 79.3);
-		reaction2Fluxes.put("r0334_rev", 0.04);
-		
-		for (int i = 0; i < expandedDocument.getModel().getReactionCount(); i++) {
-			Double d = reaction2Fluxes.get(expandedDocument.getModel().getReaction(i).getId());
-			System.out.println(expandedDocument.getModel().getReaction(i));
-			if (d != null) {
-				knownFluxes.put(i, d);
-			}
-		}
-		
 		// Run a dynamic FBA
 		DynamicFBA dfba = new DynamicFBA(testDocument, concMT, 1000);
 		
 		FluxMinimization fm = new FluxMinimization();
-		fm.setKnownFluxes(knownFluxes);
 		fm.setCplexIterations(1000);
 		fm.setReadGibbsEnergies(correctedGibbsEnergies);
 		fm.setReadSystemBoundaries(correctedSysBounds);
