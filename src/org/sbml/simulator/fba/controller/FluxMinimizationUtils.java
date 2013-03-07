@@ -23,9 +23,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.ModifierSpeciesReference;
@@ -88,7 +90,7 @@ public class FluxMinimizationUtils {
 	/**
 	 * List contains the reversible reactions.
 	 */
-	public static List<String> reversibleReactions = new ArrayList<String>();
+	public static Set<String> reversibleReactions = new HashSet<String>();
 	
 	/**
 	 * contains the corresponding index of the backward reaction in the modified sbml document 
