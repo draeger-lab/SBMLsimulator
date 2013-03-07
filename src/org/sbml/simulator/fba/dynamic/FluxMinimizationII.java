@@ -30,6 +30,8 @@ import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 import org.simulator.math.odes.MultiTable;
 
+import com.sun.org.apache.xpath.internal.axes.ReverseAxesWalker;
+
 import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
 import ilog.concert.IloNumVar;
@@ -393,17 +395,33 @@ public class FluxMinimizationII extends TargetFunction {
 		// Constraint J_j >= 0
 		if (this.constraintJ0 == true) {
 			for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
-				// Flux J_j
-				if (knownFluxes.containsKey(j)) {
-					Double eightyPercent = 0.8 * knownFluxes.get(j);
-					cplex.addGe(getVariables()[fluxPosition + j], (eightyPercent));
-				}
-				else {
-					cplex.addGe(getVariables()[fluxPosition + j], 0);
-				}
+				cplex.addGe(getVariables()[fluxPosition + j], 0);
 			}
 		}
 		
+		for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
+			// Flux J_j
+			if (knownFluxes.containsKey(j)) {
+				double eightyPercent = 0.8 * knownFluxes.get(j);
+				
+				IloNumExpr j_j_min = cplex.numExpr();
+				if (FluxMinimizationUtils.reverseReaction.containsKey(j)) {
+					j_j_min = cplex.diff(
+						getVariables()[fluxPosition + j],
+						getVariables()[fluxPosition
+								+ FluxMinimizationUtils.reverseReaction.get(j)]);
+				} else {
+					j_j_min = getVariables()[fluxPosition + j];
+				}
+				
+				if (eightyPercent >= 0) {
+					cplex.addGe(j_j_min, eightyPercent);
+				} else {
+					cplex.addLe(j_j_min, eightyPercent);
+				}
+			}
+		}
+			
 		// Constraint z_m (t_i+1) >= 0
 		if (this.constraintZm == true) {
 			for (int m = 0; m < speciesCount; m++) {
