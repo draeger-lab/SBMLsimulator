@@ -87,7 +87,14 @@ public class DynamicFBAFluxMinIITest {
 				"r1535,lr010",
 				"r1496,lr010_rev",
 				"r0396,r1032",
-				"r0353,r1032_rev" 
+				"r0353,r1032_rev", 
+				"r2524,r0080",
+				"r2524_rev,r0080_rev",
+				"r2525,r0078",
+				"r2525_rev,r0077",
+				"r2078,r0171_rev",
+				"r2078_rev,r0171",
+				
 				};
 		int[] fluxPairs = getReactionPairIndices(reactionIndices, sameFluxes);
 		
@@ -155,7 +162,7 @@ public class DynamicFBAFluxMinIITest {
 			if (!header) {
 				String[] helper = line.split("\t");
 				String reactionId = helper[0];
-				Double d = Double.valueOf(helper[1]) * 4.248 / 1E3;
+				Double d = (Double.valueOf(helper[1]) * 4.248) / 1E3;
 				fluxes.put(reactionIndices.get(reactionId), d);
 			}
 			else {header = false;}
