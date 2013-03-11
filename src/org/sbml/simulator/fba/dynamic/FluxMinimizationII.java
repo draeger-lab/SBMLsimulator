@@ -179,12 +179,12 @@ public class FluxMinimizationII extends TargetFunction {
 	/**
 	 * contains the indices of paired fluxes
 	 */
-	protected int[] fluxPairs = null;
+	protected String[] fluxPairs = null;
 	
 	/**
 	 * @param fluxPairs
 	 */
-	public void setFluxPairs(int[] fluxPairs) {
+	public void setFluxPairs(String[] fluxPairs) {
 		this.fluxPairs = fluxPairs;
 	}
 	

@@ -16,6 +16,9 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 
 import ilog.concert.IloException;
@@ -134,10 +137,43 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		
 		// Constraint flux pairs
 		if (fluxPairs != null) {
+			IloCplex c2 = new IloCplex();
 			for (int j = 0; j < fluxPairs.length; j++) {
-				if (this.splittedDocument.getModel().getReaction(fluxPairs[j]) != null) {
-					cplex.addEq(getVariables()[fluxPosition + j], getVariables()[fluxPosition + fluxPairs[j]]);
+				System.out.println(fluxPairs[j]);
+				if (fluxPairs[j].replaceAll("[\\+\\-\\=\\d]", "").length() > 0){
+					continue;
 				}
+				String[] hEq = fluxPairs[j].split("=");
+				int iLeft = Integer.parseInt(hEq[0]);
+				IloNumExpr leftReaction = getVariables()[fluxPosition + iLeft];
+				IloNumExpr sameFluxes = null;
+				
+				Pattern pPlus = Pattern.compile("\\+(\\d+)");
+				Pattern pMinus = Pattern.compile("\\-(\\d+)");
+				
+				Matcher mPlus = pPlus.matcher(hEq[1]);
+				while (mPlus.find()) {
+					int iPlus = Integer.parseInt(mPlus.group(1));
+					if (sameFluxes == null) {
+						sameFluxes = getVariables()[fluxPosition + iPlus];
+					}
+					else {
+						sameFluxes = c2.sum(sameFluxes, getVariables()[fluxPosition + iPlus]);
+					}
+				}
+				
+				Matcher mMinus = pMinus.matcher(hEq[1]);
+				while (mMinus.find()) {
+					int iMinus = Integer.parseInt(mMinus.group(1));
+					if (sameFluxes == null) {
+						sameFluxes = c2.negative(getVariables()[fluxPosition + iMinus]);
+					}
+					else {
+						sameFluxes = c2.sum(sameFluxes, c2.negative(getVariables()[fluxPosition + iMinus]));
+					}
+				}
+				
+				cplex.addEq(leftReaction, sameFluxes);
 			}
 		}
 				

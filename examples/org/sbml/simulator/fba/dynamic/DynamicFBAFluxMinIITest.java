@@ -80,23 +80,17 @@ public class DynamicFBAFluxMinIITest {
 		
 		// constraint same fluxes
 		String[] sameFluxes = {
-				"r1027,lr008",
-				"r1027_rev,lr008_rev",
-				"r1534,lr009",
-				"r1494,lr009_rev",
-				"r1535,lr010",
-				"r1496,lr010_rev",
-				"r0396,r1032",
-				"r0353,r1032_rev", 
-				"r2524,r0080",
-				"r2524_rev,r0080_rev",
-				"r2525,r0078",
-				"r2525_rev,r0077",
-				"r2078,r0171_rev",
-				"r2078_rev,r0171",
-				
+				"test=test2",
+				"lr008=+r1027",
+				"lr009=+r1534-r1494",
+				"lr010=+r1535-r1496",
+				"r1032=+r0396-r0353",
+				"r2526=+r0060+r0160",
+				"r2078=-r0171",
+				"r2524=+r0080-r0160",
+				"r2525=+r0078-r0077"
 				};
-		int[] fluxPairs = getReactionPairIndices(reactionIndices, sameFluxes);
+		String[] fluxPairs = getReactionPairIndices(reactionIndices, sameFluxes);
 		
 		// Read known fluxes file
 		Map<Integer, Double> knownFluxes = readKnownFluxes(args[2], true, reactionIndices);
@@ -131,17 +125,17 @@ public class DynamicFBAFluxMinIITest {
 	 * @param fluxPairs
 	 * @return
 	 */
-	private static int[] getReactionPairIndices(Map<String, Integer> reactionIndices, String[] fluxPairs) {
-		int[] pairIndices = new int[reactionIndices.size()];
-		// init unrealistic value for the rest of the reactions
-		for (int i = 0; i < pairIndices.length; i++) {
-			pairIndices[i] = 100000;
+	private static String[] getReactionPairIndices(Map<String, Integer> reactionIndices, String[] fluxPairs) {
+		String[] pairIndices = new String[fluxPairs.length];
+
+		for (Map.Entry<String, Integer> entry : reactionIndices.entrySet()) {
+			for (int i = 0; i < fluxPairs.length; i++) {
+				fluxPairs[i] = fluxPairs[i].replaceAll(entry.getKey(), entry.getValue().toString());
+			}
 		}
-		for (String s : fluxPairs) {
-			String[] helper = s.split(",");
-			pairIndices[reactionIndices.get(helper[0])] = reactionIndices.get(helper[1]); 
-		}
-		return pairIndices;
+		
+		
+		return fluxPairs;
 	}
 
 
@@ -162,6 +156,7 @@ public class DynamicFBAFluxMinIITest {
 			if (!header) {
 				String[] helper = line.split("\t");
 				String reactionId = helper[0];
+				// FIXME size of compartiment volume and conversion factor is fixed at the moment
 				Double d = (Double.valueOf(helper[1]) * 4.248) / 1E3;
 				fluxes.put(reactionIndices.get(reactionId), d);
 			}
