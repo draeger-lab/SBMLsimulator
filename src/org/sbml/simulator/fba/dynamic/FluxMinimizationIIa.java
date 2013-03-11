@@ -137,7 +137,6 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		
 		// Constraint flux pairs
 		if (fluxPairs != null) {
-			IloCplex c2 = new IloCplex();
 			for (int j = 0; j < fluxPairs.length; j++) {
 				System.out.println(fluxPairs[j]);
 				if (fluxPairs[j].replaceAll("[\\+\\-\\=\\d]", "").length() > 0){
@@ -158,7 +157,7 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 						sameFluxes = getVariables()[fluxPosition + iPlus];
 					}
 					else {
-						sameFluxes = c2.sum(sameFluxes, getVariables()[fluxPosition + iPlus]);
+						sameFluxes = cplex.sum(sameFluxes, getVariables()[fluxPosition + iPlus]);
 					}
 				}
 				
@@ -166,22 +165,14 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 				while (mMinus.find()) {
 					int iMinus = Integer.parseInt(mMinus.group(1));
 					if (sameFluxes == null) {
-						sameFluxes = c2.negative(getVariables()[fluxPosition + iMinus]);
+						sameFluxes = cplex.negative(getVariables()[fluxPosition + iMinus]);
 					}
 					else {
-						sameFluxes = c2.sum(sameFluxes, c2.negative(getVariables()[fluxPosition + iMinus]));
+						sameFluxes = cplex.diff(sameFluxes, getVariables()[fluxPosition + iMinus]);
 					}
 				}
 				
 				cplex.addEq(leftReaction, sameFluxes);
-			}
-		}
-				
-		// Constraint J_j >= 0
-		if (this.constraintJ0 == true) {
-			for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
-				// Flux J_j
-				cplex.addGe(getVariables()[fluxPosition + j], 0);
 			}
 		}
 		
