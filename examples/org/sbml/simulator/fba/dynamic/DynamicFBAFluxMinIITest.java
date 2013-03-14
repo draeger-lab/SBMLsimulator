@@ -46,6 +46,8 @@ import de.zbit.io.csv.CSVWriter;
 
 public class DynamicFBAFluxMinIITest {
 
+	private static Model model;
+	
 	/**
 	 * Test the methods of class {@link DynamicFBA}.
 	 * args[0] = sbml document
@@ -61,7 +63,9 @@ public class DynamicFBAFluxMinIITest {
 		// Read SBML document file
 		SBMLReader reader = new SBMLReader();
 		SBMLDocument oriDocument = reader.readSBML(args[0]);
+//		oriDocument.getModel().removeReaction("degPyr");
 		SBMLDocument splittedDocument = FluxMinimizationUtils.getSplittedDocument(oriDocument);
+		model = splittedDocument.getModel();
 		double[][] transportfactors = FluxMinimizationUtils.calculateTransportFactors(splittedDocument);
 		double[][] previousFactors = FluxMinimizationUtils.calculatePreviousFactors(splittedDocument);
 		
@@ -73,22 +77,49 @@ public class DynamicFBAFluxMinIITest {
 		
 		System.out.println("Concentrations read");
 		
+		
 		Map<String, Integer> reactionIndices = new HashMap<String, Integer>();
 		for (int i = 0; i < splittedDocument.getModel().getReactionCount(); i++) {
 			reactionIndices.put(splittedDocument.getModel().getReaction(i).getId(), i);
 		}
+		Map<String, Integer> speciesIndices = new HashMap<String, Integer>();
+		for (int i = 0; i < splittedDocument.getModel().getSpeciesCount(); i++) {
+			speciesIndices.put(splittedDocument.getModel().getSpecies(i).getId(), i);
+		}
+		
+		String[] trFluxes = {
+				"r2526=HC00068_e", // Serine
+				"r2524=HC00048_e", // Alanine
+				"r2078=HC00177_e", // Lactate
+				"tr002=HC00266_e", // Isocitrate
+				"r1144=HC00034_e", // Glutamate
+				"r2525=HC00067_e", // Glutamine
+				"r1027=HC01472_e",  // GCDCA
+				"r1534,r1494=HC00863_e", // GCA
+				"r1535,r1496=HC01378_e"  // TCA
+		};
+		
+		String[] transportFluxes = transportFluxesFromExtracellConcChanges(trFluxes, reactionIndices, speciesIndices);
+		double conversionFactor = (splittedDocument.getModel().getCompartment("int").getSize() / splittedDocument.getModel().getCompartment("default").getSize());
+
 		
 		// constraint same fluxes
 		String[] sameFluxes = {
-				"test=test2",
 				"lr008=+r1027",
-				"lr009=+r1534-r1494",
-				"lr010=+r1535-r1496",
-				"r1032=+r0396-r0353",
+				"lr008_rev=+r1027_rev",
+				"lr009=+r1534",
+				"lr009_rev=+r1494",
+				"lr010=+r1535",
+				"lr010_rev=+r1496",
+				"r1032=+r0396",
+				"r1032_rev=+r0353",
 				"r2526=+r0060+r0160",
-				"r2078=-r0171",
+				"r2078=+r0171_rev",
+				"r2078_rev=+r0171",
 				"r2524=+r0080-r0160",
-				"r2525=+r0078-r0077"
+				"r2524_rev=+r0080",
+				"r2525=+r0078",
+				"r2525_rev=+r0077"
 				};
 		String[] fluxPairs = getReactionPairIndices(reactionIndices, sameFluxes);
 		
@@ -105,6 +136,8 @@ public class DynamicFBAFluxMinIITest {
 		fm2.setFluxPairs(fluxPairs);
 //		fm2.setTransportFactors(transportfactors);
 		fm2.setFactors(previousFactors);
+		fm2.setTransportFluxes(transportFluxes);
+		fm2.setConversionFactor(conversionFactor);
 		fm2.setKnownFluxes(knownFluxes);
 		fm2.setLambda2(1000);
 		fm2.setCplexIterations(1000000);
@@ -120,21 +153,64 @@ public class DynamicFBAFluxMinIITest {
 	}
 
 	/**
+	 * @param transportFluxes
+	 * @param reactionIndices
+	 * @param speciesIndices
+	 * @return
+	 */
+	private static String[] transportFluxesFromExtracellConcChanges(
+			String[] transportFluxes, Map<String, Integer> reactionIndices, Map<String, Integer> speciesIndices) {
+		String[] tr = new String[transportFluxes.length];
+		
+		for (int i = 0; i < transportFluxes.length; i++) {
+			String[] helper = transportFluxes[i].split("=");
+			String r1, r2, ie;
+			if (helper[0].split(",").length == 2) {
+				r1 = helper[0].split(",")[0];
+				r2 = helper[0].split(",")[1];
+			}
+			else {
+				// get reversible if possible
+				r1 = helper[0];
+				r2 = helper[0] + FluxMinimizationUtils.endingForBackwardReaction;
+			}
+			int forward,backward;
+			if (model.getReaction(r1).getListOfReactants().contains(helper[1])) {
+				ie = "import";
+				forward = reactionIndices.get(r1);
+				backward = reactionIndices.get(r2);
+			}
+			else {
+				ie = "export";
+				backward = reactionIndices.get(r1);
+				forward = reactionIndices.get(r2);
+			}
+			
+			tr[i] = ie + ":" + forward + "," + backward + "=" + speciesIndices.get(helper[1]);
+		}
+		return tr;
+	}
+
+	/**
 	 * 
 	 * @param reactionIndices
 	 * @param fluxPairs
 	 * @return
 	 */
 	private static String[] getReactionPairIndices(Map<String, Integer> reactionIndices, String[] fluxPairs) {
-		String[] pairIndices = new String[fluxPairs.length];
-
-		for (Map.Entry<String, Integer> entry : reactionIndices.entrySet()) {
-			for (int i = 0; i < fluxPairs.length; i++) {
-				fluxPairs[i] = fluxPairs[i].replaceAll(entry.getKey(), entry.getValue().toString());
+		for (int i = 0; i < fluxPairs.length; i++) {
+			System.out.println(fluxPairs[i]);
+			for (Map.Entry<String, Integer> entry : reactionIndices.entrySet()) {
+				String forward = entry.getKey();
+				String reverse = forward + "_rev";
+				if (fluxPairs[i].contains(reverse)) {
+					continue;
+				}
+				else if (fluxPairs[i].contains(forward)){
+					fluxPairs[i] = fluxPairs[i].replaceAll(entry.getKey(), entry.getValue().toString());
+				}
 			}
 		}
-		
-		
 		return fluxPairs;
 	}
 

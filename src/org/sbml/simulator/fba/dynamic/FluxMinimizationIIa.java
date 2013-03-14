@@ -31,6 +31,8 @@ import ilog.cplex.IloCplex;
  */
 public class FluxMinimizationIIa extends FluxMinimizationII {
 	
+
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -105,6 +107,9 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		int fluxPosition = 0;
 		int concentrationPosition = getTargetVariablesLengths()[0];
 		
+		// TODO fixed assumptions 
+//		cplex.addGe(getVariables()[fluxPosition + 5], Double.MIN_VALUE);
+		
 	// Constraint J_j >= 0
 		if (this.constraintJ0 == true) {
 			for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
@@ -138,7 +143,7 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		// Constraint flux pairs
 		if (fluxPairs != null) {
 			for (int j = 0; j < fluxPairs.length; j++) {
-				System.out.println(fluxPairs[j]);
+//				System.out.println(fluxPairs[j]);
 				if (fluxPairs[j].replaceAll("[\\+\\-\\=\\d]", "").length() > 0){
 					continue;
 				}
@@ -174,6 +179,30 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 				
 				cplex.addEq(leftReaction, sameFluxes);
 			}
+		}
+		
+		// Constraint transport flux rules
+		if (this.transportFluxes != null && conversionFactor != null && this.getTimePointStep() != 0) {
+			for (int t = 0; t < transportFluxes.length; t++) {
+				String current = transportFluxes[t];
+				Double sign;
+				if (current.contains("import:")) {
+					current = current.replace("import:", "");
+					sign = -1.0;
+				}
+				else {
+					current = current.replace("export:", "");
+					sign = +1.0;
+				}
+				String[] h = current.split("=");
+				int forward = Integer.parseInt(h[0].split(",")[0]);
+				int backward = Integer.parseInt(h[0].split(",")[1]);
+				int species = Integer.parseInt(h[1]);
+				IloNumExpr netFlux = cplex.diff(getVariables()[fluxPosition + forward], getVariables()[fluxPosition + backward]);
+				double deltaConc = this.completeConcentrations[this.getTimePointStep()][species] - this.completeConcentrations[this.getTimePointStep() - 1][species];
+				cplex.addGe(netFlux, cplex.constant(sign * this.conversionFactor * deltaConc));
+			}
+			
 		}
 		
 		// Constraint z_m (t_i+1) >= 0
@@ -227,5 +256,7 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 			}
 		}
 	}
+
+	
 	
 }

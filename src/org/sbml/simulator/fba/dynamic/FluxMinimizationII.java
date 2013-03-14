@@ -189,6 +189,29 @@ public class FluxMinimizationII extends TargetFunction {
 	}
 	
 	/**
+	 * contains the rules for transport fluxes
+	 */
+	protected String[] transportFluxes = null;
+	
+	/**
+	 * @param transportFluxes
+	 */
+	public void setTransportFluxes(String[] transportFluxes) {
+		this.transportFluxes = transportFluxes;
+	}
+	
+	protected Double conversionFactor = null;
+	
+	/**
+	 * @param conversionFactor
+	 */
+	public void setConversionFactor(double conversionFactor) {
+		this.conversionFactor = conversionFactor;
+	}
+	
+	
+	
+	/**
 	 * maps the j-th reaction of the {@param splittedDocument} to the known fluxes
 	 */
 	public Map<Integer, Double> knownFluxes = new HashMap<Integer, Double>();
