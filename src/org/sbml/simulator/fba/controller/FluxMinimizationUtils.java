@@ -146,7 +146,7 @@ public class FluxMinimizationUtils {
 	/**
 	 * contains all factors for fluxes in reactions
 	 */
-	private static double[][] previousFactors = null;
+	private static double[] previousFactors = null;
 
 	/**
 		 * 
@@ -713,7 +713,7 @@ public class FluxMinimizationUtils {
 	 * 
 	 * @return the factors for fluxes in all reactions
 	 */
-	public static double[][] getPreviousFactors() {
+	public static double[] getPreviousFactors() {
 		return previousFactors;
 	}
 	
@@ -722,26 +722,20 @@ public class FluxMinimizationUtils {
 	 * @param doc
 	 * @return
 	 */
-	public static double[][] calculatePreviousFactors(SBMLDocument doc) {
+	public static double[] calculatePreviousFactors(SBMLDocument doc) {
 		Model m = doc.getModel();
 		//init the array
-		int reacCnt = m.getReactionCount();
 		int specCnt = m.getSpeciesCount();
-		previousFactors = new double[specCnt][reacCnt];
+		previousFactors = new double[specCnt];
 		
-		for (int j = 0; j < reacCnt; j++) {
-			for (int i = 0; i < specCnt; i++) {
+		for (int i = 0; i < specCnt; i++) {
 			double d = 1.0;
 			if (m != null) {
-				Reaction r = m.getReaction(j);
 				Species s = m.getSpecies(i);
-				if (r.hasReactant(s) || r.hasProduct(s)) {
-					d = 1 / (m.getCompartment(s.getCompartment()).getSize());
+				d = 1 / (m.getCompartment(s.getCompartment()).getSize());
 //					System.out.println("r " + r + " s " + s + " size: " + (m.getCompartment(s.getCompartment()).getSize()) + " d " + d);
 				}
-			}
-			previousFactors[i][j] = d;
-		}
+			previousFactors[i] = d;
 		}
 		
 		return previousFactors;
