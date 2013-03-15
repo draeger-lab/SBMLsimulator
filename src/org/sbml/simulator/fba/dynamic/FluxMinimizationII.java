@@ -30,7 +30,6 @@ import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 import org.simulator.math.odes.MultiTable;
 
-import com.sun.org.apache.xpath.internal.axes.ReverseAxesWalker;
 
 import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
@@ -83,24 +82,18 @@ public class FluxMinimizationII extends TargetFunction {
 	 */
 	protected double lambda_1 = 1.0;
 	
-	protected double lambda_2 = 1000.0;
+	protected double lambda_2 = 1.0;
 	
 	/**
 	 * The array contains the complete interpolated concentrations
 	 */
 	protected double[][] completeConcentrations;
-	
+		
 	/**
-	 * The array contains the read system boundaries
+	 * The estimated concentrations for the previous time point.
 	 */
-	private double[] readSystemBoundaries;
-	
-	/**
-	 * If the system boundaries are read from file, set system boundaries and
-	 * <CODE>true</CODE>
-	 */
-	private boolean isSystemBoundaries = false;
-	
+	protected double[] previousEstimatedConcentrations;
+		
 	/**
 	 * This object saves the optimized solution, in fact:
 	 * - the optimized fluxes in a double[]
@@ -129,6 +122,11 @@ public class FluxMinimizationII extends TargetFunction {
 	protected boolean constraintZm = true;
 	
 	/**
+	 * 
+	 */
+	protected boolean usePreviousEstimations = true;
+	
+	/**
 	 * Set the fluxes weighting factor lambda1 (default: 1.0).
 	 * 
 	 * @param lambda1
@@ -154,25 +152,16 @@ public class FluxMinimizationII extends TargetFunction {
 		this.completeConcentrations = concentrations;
 	}
 	
-	/**
-	 * Set the read system boundaries.
-	 * 
-	 * @param systemBoundaries
-	 */
-	public void setReadSystemBoundaries(double[] systemBoundaries) {
-		this.readSystemBoundaries = systemBoundaries;
-		this.isSystemBoundaries = true;
-	}
 	
 	/**
 	 * contains the previous factors for reactions
 	 */
-	protected double[][] factors = null;
+	protected double[] factors = null;
 	
 	/**
 	 * @param factors
 	 */
-	public void setFactors(double[][] factors) {
+	public void setFactors(double[] factors) {
 		this.factors = factors;
 	}
 	
@@ -515,14 +504,19 @@ public class FluxMinimizationII extends TargetFunction {
 			// 2. Concentration vector assignment
 			int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
 			HashMap<String, Number> concMap = new HashMap<String, Number>();
+			HashMap<String, Number> concMap2 = new HashMap<String, Number>();
 			ListOf<Species> listOfSpecies = this.splittedDocument.getModel().getListOfSpecies();
 			double[] optimizedConcentrations = new double[getTargetVariablesLengths()[1]];
 			for (int i = 0; i < getTargetVariablesLengths()[1]; i++) {
 				optimizedConcentrations[i] = solution[concentrationPosition + i];
 				concMap.put(listOfSpecies.get(i).getId(), optimizedConcentrations[i]);
+				concMap2.put(listOfSpecies.get(i).getId(), this.completeConcentrations[this.getTimePointStep()][i]);
 			}
-			System.out.println(concMap.toString());
+			System.out.println(concMap.get("HC00068_e").toString());
+			System.out.println(concMap2.get("HC00068_e").toString());
+			System.out.println(fluxMap.get("r2526").toString());
 			this.optimizedSolution[0] = optimizedConcentrations; // 1st position: concentrations
+			this.previousEstimatedConcentrations = optimizedConcentrations;
 		}
 		
 		return this.optimizedSolution;
@@ -535,6 +529,11 @@ public class FluxMinimizationII extends TargetFunction {
 		for (int block = 0; block < solutionMultiTable.getBlockCount(); block++) {
 				double[] currentSpecificSolution = optimizedSolution[block];
 				if(block == 0) {
+					for(double value: currentSpecificSolution) {
+						if(value <= 0) {
+							System.out.println();
+						}
+					}
 					solutionMultiTable.getBlock(block).setRowData(this.getTimePointStep(), currentSpecificSolution);
 				}
 				else if((block == 1) && (this.getTimePointStep() > 0)){

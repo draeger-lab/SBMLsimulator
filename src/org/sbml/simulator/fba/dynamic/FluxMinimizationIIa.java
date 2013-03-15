@@ -78,12 +78,12 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 						logarithms[n] = Math.min(Math.max(-1 * Math.log10(previousValue), 0), logarithms[n]);
 					}
 				}
+				double volume = 1/factors[n];
 				optimizingConcentration = cplex.prod(Math.pow(10, logarithms[n]), cplex.abs(cplex.diff(c_m_measured[n], getVariables()[concentrationPosition + n])));
+				concentrations = cplex.sum(concentrations, cplex.prod(cplex.constant(this.lambda_2), cplex.prod(volume, cplex.prod(1 / delta_t, optimizingConcentration))));
 			} else {
 				// TODO if c_m_measured[n] is NaN???
 			}
-			
-			concentrations = cplex.sum(concentrations, cplex.prod(cplex.constant(this.lambda_2), cplex.prod(1 / delta_t, optimizingConcentration)));
 		}
 		
 		// Sum up each term
@@ -200,9 +200,15 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 				int species = Integer.parseInt(h[1]);
 				IloNumExpr netFlux = cplex.diff(getVariables()[fluxPosition + forward], getVariables()[fluxPosition + backward]);
 				double deltaConc = this.completeConcentrations[this.getTimePointStep()][species] - this.completeConcentrations[this.getTimePointStep() - 1][species];
-				cplex.addGe(netFlux, cplex.constant(sign * this.conversionFactor * deltaConc));
-			}
+				
+				if(sign * deltaConc >= 0) {
+					cplex.addGe(netFlux, cplex.constant(sign * this.conversionFactor * deltaConc));
+				}
+				else {
+					cplex.addLe(netFlux, cplex.constant(sign * this.conversionFactor * deltaConc));
+				}
 			
+			}
 		}
 		
 		// Constraint z_m (t_i+1) >= 0
@@ -234,12 +240,15 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 				}
 			} else {
 				double[] c_k_ti_1 = completeConcentrations[this.getTimePointStep() - 1];
-				if (!Double.isNaN(c_k_ti_1[i])) {
+				if(this.usePreviousEstimations) {
+					c_k_ti_1 = previousEstimatedConcentrations;
+				}
+				if (!Double.isNaN(completeConcentrations[this.getTimePointStep() - 1][i])) {
 					IloNumExpr computedConcentration = cplex.numExpr();
 					IloNumExpr fNJ = cplex.numExpr();
 					
 					for (int j = 0; j < this.N_all.getColumnDimension(); j++) {
-						double factor = factors[i][j] * this.N_all.get(i, j);
+						double factor = factors[i] * this.N_all.get(i, j);
 						fNJ = cplex.sum(fNJ, cplex.prod(cplex.constant(factor),
 							getVariables()[fluxPosition + j]));
 					}
