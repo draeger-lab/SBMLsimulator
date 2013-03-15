@@ -67,7 +67,7 @@ public class DynamicFBAFluxMinIITest {
 		SBMLDocument splittedDocument = FluxMinimizationUtils.getSplittedDocument(oriDocument);
 		model = splittedDocument.getModel();
 		double[][] transportfactors = FluxMinimizationUtils.calculateTransportFactors(splittedDocument);
-		double[][] previousFactors = FluxMinimizationUtils.calculatePreviousFactors(splittedDocument);
+		double[] previousFactors = FluxMinimizationUtils.calculatePreviousFactors(splittedDocument);
 		
 		System.out.println("SBML document read and splitted");
 		
@@ -89,8 +89,8 @@ public class DynamicFBAFluxMinIITest {
 		
 		String[] trFluxes = {
 				"r2526=HC00068_e", // Serine
-				"r2524=HC00048_e", // Alanine
-				"r2078=HC00177_e", // Lactate
+//				"r2524=HC00048_e", // Alanine
+//				"r2078=HC00177_e", // Lactate
 				"tr002=HC00266_e", // Isocitrate
 				"r1144=HC00034_e", // Glutamate
 				"r2525=HC00067_e", // Glutamine
@@ -100,7 +100,7 @@ public class DynamicFBAFluxMinIITest {
 		};
 		
 		String[] transportFluxes = transportFluxesFromExtracellConcChanges(trFluxes, reactionIndices, speciesIndices);
-		double conversionFactor = (splittedDocument.getModel().getCompartment("int").getSize() / splittedDocument.getModel().getCompartment("default").getSize());
+		double conversionFactor = splittedDocument.getModel().getCompartment("default").getSize();
 
 		
 		// constraint same fluxes
@@ -114,10 +114,11 @@ public class DynamicFBAFluxMinIITest {
 				"r1032=+r0396",
 				"r1032_rev=+r0353",
 				"r2526=+r0060+r0160",
+				"r2526_rev=-r0060-r0160",
 				"r2078=+r0171_rev",
 				"r2078_rev=+r0171",
 				"r2524=+r0080-r0160",
-				"r2524_rev=+r0080",
+				"r2524_rev=+r0080_rev",
 				"r2525=+r0078",
 				"r2525_rev=+r0077"
 				};
@@ -137,7 +138,7 @@ public class DynamicFBAFluxMinIITest {
 //		fm2.setTransportFactors(transportfactors);
 		fm2.setFactors(previousFactors);
 		fm2.setTransportFluxes(transportFluxes);
-		fm2.setConversionFactor(conversionFactor);
+//		fm2.setConversionFactor(conversionFactor);
 		fm2.setKnownFluxes(knownFluxes);
 		fm2.setLambda2(1000);
 		fm2.setCplexIterations(1000000);
