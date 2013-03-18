@@ -31,7 +31,7 @@ import ilog.cplex.IloCplex;
  */
 public class FluxMinimizationIIa extends FluxMinimizationII {
 	
-
+	private static double epsilon = 1E-12;
 
 	/*
 	 * (non-Javadoc)
@@ -45,7 +45,6 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		double delta_t = DynamicFBA.dFBATimePoints[1]
 				- DynamicFBA.dFBATimePoints[0];
 		
-		double[] logarithms = new double[this.completeConcentrations[this.getTimePointStep()].length];
 		IloNumExpr function = cplex.numExpr();
 		
 		// One variable for all fluxes in the flux vector
@@ -65,21 +64,18 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 			IloNumExpr optimizingConcentration = cplex.numExpr();
 			
 			if (!Double.isNaN(c_m_measured[n])) {
-				
-				logarithms[n] = 0;
-				
-				if(c_m_measured[n] > 0) {
-					logarithms[n] = Math.max(-1 * Math.log10(c_m_measured[n]), logarithms[n]);
-				}
-				
+				double div = epsilon; 
 				if(this.getTimePointStep() > 0) {
 					double previousValue = completeConcentrations[this.getTimePointStep()-1][n-1];
-					if((!Double.isNaN(previousValue)) && (previousValue > 0))  {
-						logarithms[n] = Math.min(Math.max(-1 * Math.log10(previousValue), 0), logarithms[n]);
+					if((!Double.isNaN(previousValue)))  {
+						div+= previousValue;
 					}
 				}
+				else {
+					div+= c_m_measured[n];
+				}
 				double volume = 1/factors[n];
-				optimizingConcentration = cplex.prod(Math.pow(10, logarithms[n]), cplex.abs(cplex.diff(c_m_measured[n], getVariables()[concentrationPosition + n])));
+				optimizingConcentration = cplex.prod(1/div, cplex.abs(cplex.diff(c_m_measured[n], getVariables()[concentrationPosition + n])));
 				concentrations = cplex.sum(concentrations, cplex.prod(cplex.constant(this.lambda_2), cplex.prod(volume, cplex.prod(1 / delta_t, optimizingConcentration))));
 			} else {
 				// TODO if c_m_measured[n] is NaN???
