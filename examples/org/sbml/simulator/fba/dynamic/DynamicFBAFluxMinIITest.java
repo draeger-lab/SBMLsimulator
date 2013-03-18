@@ -105,22 +105,15 @@ public class DynamicFBAFluxMinIITest {
 		
 		// constraint same fluxes
 		String[] sameFluxes = {
-				"lr008=+r1027",
-				"lr008_rev=+r1027_rev",
-				"lr009=+r1534",
-				"lr009_rev=+r1494",
-				"lr010=+r1535",
-				"lr010_rev=+r1496",
-				"r1032=+r0396",
-				"r1032_rev=+r0353",
-				"r2526=+r0060+r0160",
-				"r2526_rev=-r0060-r0160",
-				"r2078=+r0171_rev",
-				"r2078_rev=+r0171",
-				"r2524=+r0080-r0160",
-				"r2524_rev=+r0080_rev",
-				"r2525=+r0078",
-				"r2525_rev=+r0077"
+				"+lr008-lr008_rev=+r1027-r1027_rev",
+				"+lr009-lr009_rev=+r1534-r1494",
+				"+lr010-lr010_rev=+r1535-r1496",
+				"+r1032-r1032_rev=+r0396-r0353",
+				"+r2526-r2526_rev=+r0060+r0160",
+				"+r2078-r2078_rev=+r0171_rev-r0171",
+				"+r2524-r2524_rev=+r0080-r0080_rev-r0160",
+				"+r2525-r2525_rev=+r0078-r0077"
+
 				};
 		String[] fluxPairs = getReactionPairIndices(reactionIndices, sameFluxes);
 		

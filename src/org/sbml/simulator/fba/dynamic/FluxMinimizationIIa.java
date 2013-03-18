@@ -148,9 +148,8 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 					continue;
 				}
 				String[] hEq = fluxPairs[j].split("=");
-				int iLeft = Integer.parseInt(hEq[0]);
-				IloNumExpr leftReaction = getVariables()[fluxPosition + iLeft];
-				IloNumExpr sameFluxes = null;
+				IloNumExpr leftFluxes = null;
+				IloNumExpr rightFluxes = null;
 				
 				Pattern pPlus = Pattern.compile("\\+(\\d+)");
 				Pattern pMinus = Pattern.compile("\\-(\\d+)");
@@ -158,26 +157,48 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 				Matcher mPlus = pPlus.matcher(hEq[1]);
 				while (mPlus.find()) {
 					int iPlus = Integer.parseInt(mPlus.group(1));
-					if (sameFluxes == null) {
-						sameFluxes = getVariables()[fluxPosition + iPlus];
+					if (rightFluxes == null) {
+						rightFluxes = getVariables()[fluxPosition + iPlus];
 					}
 					else {
-						sameFluxes = cplex.sum(sameFluxes, getVariables()[fluxPosition + iPlus]);
+						rightFluxes = cplex.sum(rightFluxes, getVariables()[fluxPosition + iPlus]);
 					}
 				}
-				
+
+				mPlus = pPlus.matcher(hEq[1]);
+				while (mPlus.find()) {
+					int iPlus = Integer.parseInt(mPlus.group(1));
+					if (leftFluxes == null) {
+						leftFluxes = getVariables()[fluxPosition + iPlus];
+					}
+					else {
+						leftFluxes = cplex.sum(leftFluxes, getVariables()[fluxPosition + iPlus]);
+					}
+				}
+
 				Matcher mMinus = pMinus.matcher(hEq[1]);
 				while (mMinus.find()) {
 					int iMinus = Integer.parseInt(mMinus.group(1));
-					if (sameFluxes == null) {
-						sameFluxes = cplex.negative(getVariables()[fluxPosition + iMinus]);
+					if (rightFluxes == null) {
+						rightFluxes = cplex.negative(getVariables()[fluxPosition + iMinus]);
 					}
 					else {
-						sameFluxes = cplex.diff(sameFluxes, getVariables()[fluxPosition + iMinus]);
+						rightFluxes = cplex.diff(rightFluxes, getVariables()[fluxPosition + iMinus]);
 					}
 				}
 				
-				cplex.addEq(leftReaction, sameFluxes);
+				mMinus = pMinus.matcher(hEq[1]);
+				while (mMinus.find()) {
+					int iMinus = Integer.parseInt(mMinus.group(1));
+					if (leftFluxes == null) {
+						leftFluxes = cplex.negative(getVariables()[fluxPosition + iMinus]);
+					}
+					else {
+						leftFluxes = cplex.diff(leftFluxes, getVariables()[fluxPosition + iMinus]);
+					}
+				}
+				
+				cplex.addEq(leftFluxes, rightFluxes);
 			}
 		}
 		
