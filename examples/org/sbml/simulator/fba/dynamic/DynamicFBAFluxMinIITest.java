@@ -18,7 +18,6 @@
 package org.sbml.simulator.fba.dynamic;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
@@ -26,20 +25,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.sbml.jsbml.Model;
+import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
-import org.sbml.jsbml.SBO;
-import org.sbml.jsbml.ext.qual.QualitativeSpecies;
 import org.sbml.simulator.fba.controller.CSVDataConverter;
 import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.io.CSVDataImporter;
 import org.simulator.math.odes.MultiTable;
+import org.simulator.math.odes.MultiTable.Block.Column;
 
 import de.zbit.io.csv.CSVWriter;
 
 /**
  * @author Stephanie Tscherneck, Robin F&auml;hnrich
- * @version $$Rev$$
+ * @version $Rev$
  * @since 1.0
  * ${tags}
  */
@@ -99,8 +98,8 @@ public class DynamicFBAFluxMinIITest {
 				"r1535,r1496=HC01378_e"  // TCA
 		};
 		
-		String[] transportFluxes = transportFluxesFromExtracellConcChanges(trFluxes, reactionIndices, speciesIndices);
-		double conversionFactor = splittedDocument.getModel().getCompartment("default").getSize();
+		//String[] transportFluxes = transportFluxesFromExtracellConcChanges(trFluxes, reactionIndices, speciesIndices);
+		//double conversionFactor = splittedDocument.getModel().getCompartment("default").getSize();
 
 		
 		// constraint same fluxes
@@ -117,26 +116,47 @@ public class DynamicFBAFluxMinIITest {
 				};
 		String[] fluxPairs = getReactionPairIndices(reactionIndices, sameFluxes);
 		
-		// Read known fluxes file
-		Map<Integer, Double> knownFluxes = readKnownFluxes(args[2], true, reactionIndices);
 		
 		// Run a dynamic FBA
-		// using splines
-		DynamicFBA dfba = new DynamicFBA(oriDocument, concMT, 100);
-		// using no splines
-		//DynamicFBA dfba = new DynamicFBA(oriDocument, concMT);
 		
-		FluxMinimizationIIa fm2 = new FluxMinimizationIIa();
-		fm2.setFluxPairs(fluxPairs);
-//		fm2.setTransportFactors(transportfactors);
-		fm2.setFactors(previousFactors);
-		fm2.setTransportFluxes(transportFluxes);
-//		fm2.setConversionFactor(conversionFactor);
-		fm2.setKnownFluxes(knownFluxes);
-		fm2.setLambda2(1000);
-		fm2.setCplexIterations(1000000);
-
-		dfba.runDynamicFBA(fm2);
+		// using splines
+		//DynamicFBA dfba = new DynamicFBA(oriDocument, concMT, 102);
+		
+		// using no splines
+		DynamicFBA dfba = new DynamicFBA(oriDocument, concMT);
+		
+		
+		// Read known fluxes file
+		MultiTable mt = concMT;
+//		Map<Integer, double[]> knownFluxes = readKnownFluxes(args[2], true,
+//			reactionIndices, mt.getTimePoints().length);
+		Map<Integer, double[]> knownFluxes = new HashMap<Integer, double[]>();
+		for (String id : mt.getBlock(0).getIdentifiers()) {
+			Reaction r = model.getReaction(id);
+			if (r != null) {
+				double[] values = new double[mt.getRowCount()];
+				Column c = mt.getColumn(id);
+				for (int i = 0; i != values.length; i++) {
+					values[i] = c.getValue(i);
+				}
+				knownFluxes.put(reactionIndices.get(id), values);
+				
+			}
+		}
+		
+		FluxMinimizationII fm2 = new FluxMinimizationII();
+		
+//			FluxMinimizationIIa fm2 = new FluxMinimizationIIa();
+//			fm2.setFactors(previousFactors);
+//		fm2.setFluxPairs(fluxPairs);
+////		fm2.setTransportFactors(transportfactors);
+	//		fm2.setTransportFluxes(transportFluxes);
+////		fm2.setConversionFactor(conversionFactor);
+			
+//		fm2.setLambda2(1000);
+			
+			fm2.setKnownFluxes(knownFluxes);
+			dfba.runDynamicFBA(fm2);
 		
 		// Print solution MultiTable
 		MultiTable solution = dfba.getSolutionMultiTable();
@@ -214,11 +234,12 @@ public class DynamicFBAFluxMinIITest {
 	 * @param knownFluxes
 	 * @param header
 	 * @param reactionIndices
+	 * @param length 
 	 * @return
 	 * @throws IOException
 	 */
-	private static Map<Integer, Double> readKnownFluxes(String knownFluxes, boolean header, Map<String, Integer> reactionIndices) throws IOException {
-		Map<Integer, Double> fluxes = new HashMap<Integer, Double>();
+	private static Map<Integer, double[]> readKnownFluxes(String knownFluxes, boolean header, Map<String, Integer> reactionIndices, int nTimepoints) throws IOException {
+		Map<Integer, double[]> fluxes = new HashMap<Integer, double[]>();
 		String line;
 
 		BufferedReader input = new BufferedReader(new FileReader(knownFluxes));
@@ -227,8 +248,10 @@ public class DynamicFBAFluxMinIITest {
 				String[] helper = line.split("\t");
 				String reactionId = helper[0];
 				// FIXME size of compartiment volume and conversion factor is fixed at the moment
-				Double d = (Double.valueOf(helper[1]) * 4.248) / 1E3;
-				fluxes.put(reactionIndices.get(reactionId), d);
+				Double d = Double.valueOf(helper[1]);
+				double[] values = new double[nTimepoints];
+				Arrays.fill(values, d);
+				fluxes.put(reactionIndices.get(reactionId), values);
 			}
 			else {header = false;}
 		}
