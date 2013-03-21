@@ -42,8 +42,10 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 	 */
 	@Override
 	public IloNumExpr createTargetFunction(IloCplex cplex) throws IloException {
-		double delta_t = DynamicFBA.dFBATimePoints[1]
-				- DynamicFBA.dFBATimePoints[0];
+		double delta_t = DynamicFBA.dFBATimePoints[1] - DynamicFBA.dFBATimePoints[0];
+		if(this.getTimePointStep() > 0) {
+			delta_t = DynamicFBA.dFBATimePoints[this.getTimePointStep()] - DynamicFBA.dFBATimePoints[this.getTimePointStep()-1];
+		}
 		
 		IloNumExpr function = cplex.numExpr();
 		
@@ -66,7 +68,7 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 			if (!Double.isNaN(c_m_measured[n])) {
 				double div = epsilon; 
 				if(this.getTimePointStep() > 0) {
-					double previousValue = completeConcentrations[this.getTimePointStep()-1][n-1];
+					double previousValue = completeConcentrations[this.getTimePointStep()-1][n];
 					if((!Double.isNaN(previousValue)))  {
 						div+= previousValue;
 					}
@@ -115,8 +117,8 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		
 		for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
 			// Flux J_j
-			if (knownFluxes.containsKey(j)) {
-				double eightyPercent = 0.8 * knownFluxes.get(j);
+			if ((knownFluxes.containsKey(j)) && (this.getTimePointStep() > 0)) {
+				double eightyPercent = 1 * knownFluxes.get(j)[this.getTimePointStep()-1];
 				
 				IloNumExpr j_j_min = cplex.numExpr();
 				if (FluxMinimizationUtils.reverseReaction.containsKey(j)) {
@@ -129,9 +131,9 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 				}
 				
 				if (eightyPercent >= 0) {
-					cplex.addGe(j_j_min, eightyPercent);
+					cplex.addEq(j_j_min, eightyPercent);
 				} else {
-					cplex.addLe(j_j_min, eightyPercent);
+					cplex.addEq(j_j_min, eightyPercent);
 				}
 			}
 		}
