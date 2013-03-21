@@ -80,9 +80,9 @@ public class FluxMinimizationII extends TargetFunction {
 	 * These numbers (lambda_i, i is el. of {1, 2}) weight the contributions
 	 * of each term in the optimization problem.
 	 */
-	protected double lambda_1 = 1.0;
+	protected double lambda_1 = 1;
 	
-	protected double lambda_2 = 1.0;
+	protected double lambda_2 = 1000;
 	
 	/**
 	 * The array contains the complete interpolated concentrations
@@ -203,13 +203,13 @@ public class FluxMinimizationII extends TargetFunction {
 	/**
 	 * maps the j-th reaction of the {@param splittedDocument} to the known fluxes
 	 */
-	public Map<Integer, Double> knownFluxes = new HashMap<Integer, Double>();
+	public Map<Integer, double[]> knownFluxes = new HashMap<Integer, double[]>();
 	
 	/**
 	 * 
 	 * @param map containing the known fluxes
 	 */
-	public void setKnownFluxes(Map<Integer, Double> map) {
+	public void setKnownFluxes(Map<Integer, double[]> map) {
 		knownFluxes = map;
 	}
 	
@@ -317,15 +317,15 @@ public class FluxMinimizationII extends TargetFunction {
 		// 1. Flux value bounds
 		int fluxPosition = 0;
 		for (int i = fluxPosition; i < fluxPosition + getTargetVariablesLengths()[0]; i++) {
-			this.lowerBounds[i] = 0.0;
-			this.upperBounds[i] = 1000.0;
+			this.lowerBounds[i] = 0;
+			this.upperBounds[i] = 200;
 		}
 		
 		// 2. Concentration bounds
 		int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
 		for (int i = concentrationPosition; i < concentrationPosition + getTargetVariablesLengths()[1]; i++) {
-			this.lowerBounds[i] = Math.pow(10, -10);
-			this.upperBounds[i] = Math.pow(10, -1);
+			this.lowerBounds[i] = 0;
+			this.upperBounds[i] = 3000;
 		}
 	}
 
@@ -367,7 +367,7 @@ public class FluxMinimizationII extends TargetFunction {
 		int fluxPosition = 0;
 		// Manhattan norm included
 		for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
-			flux = cplex.sum(flux, cplex.prod(cplex.constant(this.lambda_1), cplex.abs(getVariables()[fluxPosition + j])));
+			flux = cplex.sum(flux, cplex.abs(getVariables()[fluxPosition + j]));
 		}
 		
 		// Concentrations 
@@ -384,12 +384,11 @@ public class FluxMinimizationII extends TargetFunction {
 				// TODO if c_m_measured[n] is NaN???
 			}
 			
-			concentrations = cplex.sum(concentrations, cplex.prod(cplex.constant(this.lambda_2), optimizingConcentration));
+			concentrations = cplex.sum(concentrations, optimizingConcentration);
 		}
 		
 		// Sum up each term
-		function = cplex.sum(flux, concentrations);
-		
+		function = cplex.sum(cplex.prod(this.lambda_1, flux), cplex.prod(this.lambda_2, concentrations));
 		return function;
 	}
 
@@ -413,8 +412,8 @@ public class FluxMinimizationII extends TargetFunction {
 		
 		for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
 			// Flux J_j
-			if (knownFluxes.containsKey(j)) {
-				double eightyPercent = 0.8 * knownFluxes.get(j);
+			if ((knownFluxes.containsKey(j)) && (this.getTimePointStep() > 0)) {
+				double eightyPercent = knownFluxes.get(j)[this.getTimePointStep()-1];
 				
 				IloNumExpr j_j_min = cplex.numExpr();
 				if (FluxMinimizationUtils.reverseReaction.containsKey(j)) {
@@ -427,9 +426,9 @@ public class FluxMinimizationII extends TargetFunction {
 				}
 				
 				if (eightyPercent >= 0) {
-					cplex.addGe(j_j_min, eightyPercent);
+					cplex.addEq(j_j_min, eightyPercent);
 				} else {
-					cplex.addLe(j_j_min, eightyPercent);
+					cplex.addEq(j_j_min, eightyPercent);
 				}
 			}
 		}
@@ -447,6 +446,9 @@ public class FluxMinimizationII extends TargetFunction {
 		// Use this computation of delta_t:
 		// Only if each timepoint has the same distance to its neighboring timepoint
 		double delta_t = DynamicFBA.dFBATimePoints[1] - DynamicFBA.dFBATimePoints[0];
+		if(this.getTimePointStep() > 0) {
+			delta_t = DynamicFBA.dFBATimePoints[this.getTimePointStep()] - DynamicFBA.dFBATimePoints[this.getTimePointStep()-1];
+		}
 
 		for (int n = 0; n < getTargetVariablesLengths()[1]; n++) {
 
@@ -454,7 +456,7 @@ public class FluxMinimizationII extends TargetFunction {
 				// In the first time point step 0, there is no c_m (t_i+1).
 				// t_i+1 would be time point step 1, not 0!
 				if (!Double.isNaN(this.completeConcentrations[this.getTimePointStep()][n])) {
-					cplex.addEq(getVariables()[concentrationPosition + n], cplex.constant(this.completeConcentrations[this.getTimePointStep()][n]));
+					cplex.addEq(getVariables()[concentrationPosition + n], this.completeConcentrations[this.getTimePointStep()][n]);
 				} else {
 					// TODO if currentConcentrations[n] is NaN???
 				}
@@ -466,10 +468,10 @@ public class FluxMinimizationII extends TargetFunction {
 
 					double[] currentN_row = this.N_all.getRow(n);
 					for (int col = 0; col < this.N_all.getColumnDimension(); col++) {
-						NJ = cplex.sum(NJ, cplex.prod(cplex.constant(currentN_row[col]), getVariables()[fluxPosition + col]));
+						NJ = cplex.sum(NJ, cplex.prod(currentN_row[col], getVariables()[fluxPosition + col]));
 					}
 					
-					computedConcentration = cplex.sum(cplex.constant(this.completeConcentrations[this.getTimePointStep()-1][n]), cplex.prod(NJ, cplex.constant(delta_t)));
+					computedConcentration = cplex.sum(this.completeConcentrations[this.getTimePointStep()-1][n], cplex.prod(NJ, delta_t));
 					cplex.addEq(getVariables()[concentrationPosition + n], computedConcentration);
 				} else {
 					// TODO if last concentration (completeConcentrations[this.getTimePointStep()-1][n]) is NaN???
@@ -512,9 +514,6 @@ public class FluxMinimizationII extends TargetFunction {
 				concMap.put(listOfSpecies.get(i).getId(), optimizedConcentrations[i]);
 				concMap2.put(listOfSpecies.get(i).getId(), this.completeConcentrations[this.getTimePointStep()][i]);
 			}
-			System.out.println(concMap.get("HC00068_e").toString());
-			System.out.println(concMap2.get("HC00068_e").toString());
-			System.out.println(fluxMap.get("r2526").toString());
 			this.optimizedSolution[0] = optimizedConcentrations; // 1st position: concentrations
 			this.previousEstimatedConcentrations = optimizedConcentrations;
 		}

@@ -38,7 +38,7 @@ public class SplineCalculation {
 	 * @param negativeValuesPossible
 	 * @return
 	 */
-	public static MultiTable calculateSplineValues(MultiTable table, int inBetweenTimePoints, boolean negativeValuesPossible) {
+	public static MultiTable calculateSplineValues(MultiTable table, int block, int inBetweenTimePoints, boolean negativeValuesPossible) {
 		SplineInterpolation sp = null;
 		try {
 			sp = new SplineInterpolation();
@@ -55,8 +55,8 @@ public class SplineCalculation {
 		}
 		timePoints[timePoints.length-1] = table.getTimePoint(table.getTimePoints().length - 1);
 		
-		double[][] data = new double[timePoints.length][table.getBlock(0).getColumnCount()];
-		MultiTable result = new MultiTable(timePoints, data, table.getBlock(0).getIdentifiers(),table.getBlock(0).getColumnNames());
+		double[][] data = new double[timePoints.length][table.getBlock(block).getColumnCount()];
+		MultiTable result = new MultiTable(timePoints, data, table.getBlock(block).getIdentifiers(),table.getBlock(block).getColumnNames());
 		result.setTimeName(table.getTimeName());
 		for(int col = 1; col != table.getColumnCount(); col++) {
 			Column c = table.getColumn(col);
@@ -96,7 +96,7 @@ public class SplineCalculation {
 	 * @return
 	 */
 	public static MultiTable calculateSplineValues(MultiTable table, int inBetweenTimePoints) {
-		return calculateSplineValues(table, inBetweenTimePoints, true);
+		return calculateSplineValues(table, inBetweenTimePoints, 0, true);
 	}
 
 }

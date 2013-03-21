@@ -254,7 +254,13 @@ public class DynamicFBA {
 			inBetweenTimePoints = (((multiplyFactor * (givenTimePointLength - 1)) + 1) - givenTimePointLength) / (givenTimePointLength - 1);
 			logger.info("TimePointCount (" + timePointCount + ") for better calculating set to: " + ((inBetweenTimePoints * (givenTimePointLength - 1)) + givenTimePointLength));
 		}
-		fullTimePointMultiTable = SplineCalculation.calculateSplineValues(fullSpeciesMultiTable, inBetweenTimePoints, false);
+		fullTimePointMultiTable = SplineCalculation.calculateSplineValues(fullSpeciesMultiTable, 0, inBetweenTimePoints, false);
+		
+		//Also interpolate the given fluxes
+		MultiTable fluxesTable = SplineCalculation.calculateSplineValues(table, 0, inBetweenTimePoints, false);
+			
+		fullTimePointMultiTable.addBlock(fluxesTable.getBlock(0).getIdentifiers());
+		fullTimePointMultiTable.getBlock(1).setData(fluxesTable.getBlock(0).getData());
 		
 		// Set the dynamic FBA points in time
 		dFBATimePoints = fullTimePointMultiTable.getTimePoints();
