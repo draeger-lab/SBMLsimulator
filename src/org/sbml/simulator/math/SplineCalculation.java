@@ -96,7 +96,7 @@ public class SplineCalculation {
 	 * @return
 	 */
 	public static MultiTable calculateSplineValues(MultiTable table, int inBetweenTimePoints) {
-		return calculateSplineValues(table, inBetweenTimePoints, 0, true);
+		return calculateSplineValues(table, 0, inBetweenTimePoints, true);
 	}
 
 }
