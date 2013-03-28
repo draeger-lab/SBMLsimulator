@@ -9,52 +9,74 @@ import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
+import org.sbml.jsbml.Symbol;
 
 
 import de.zbit.io.csv.CSVReader;
+import de.zbit.io.filefilter.SBFileFilter;
 
 /**
- * This class analyzes the values of the parameters for multiple optimization-runs
- * @author Stefan Fischer
+ * This class analyzes the values of the parameters for multiple optimization runs
+ * @author Stef
  *
  */
 public class ParameterAnalysis {
 	
 	/**
-	 * Executes the parameter-analysis
+	 * Executes the parameter analysis
 	 * 
 	 * @param models
 	 * @param parameters
 	 */
-	public static void parameterAnalysis(List<Model> models, List<Parameter> parameters) {
+	public static void parameterAnalysis(Model originalModel, List<Model> models, List<Symbol> parameters) {
 
-		for(Parameter p: parameters) {
+		for(Symbol s: parameters) {
 	
 			double value = 0;
 			int modelCounter = 0;
 			double[] par = new double[models.size()];
 			
+			// the value of the parameter in the original model without errors
+			double originalValue = Double.NaN;
+			Parameter p = originalModel.getParameter(s.getId());
+			if(p != null) {
+				originalValue = p.getValue();
+			}
+			else {
+				originalValue = originalModel.getSpecies(s.getId()).getValue();
+			}
+			
+			
 			for(Model m: models) {
 				
-				par[modelCounter] = m.getParameter(p.getId()).getValue();
+				Parameter p2 = m.getParameter(s.getId());
+				if(p2 != null) {
+					par[modelCounter] = p2.getValue();
+				}
+				else {
+					par[modelCounter] = originalModel.getSpecies(s.getId()).getValue();
+				}
 				modelCounter++;
 			}
-			//calculate mean, standard deviation and variation coefficient of the current parameter
+			// calculate mean, standard deviation and variation coefficient of the current parameter
 			for(int i=0;i<par.length;i++){
 				value += par[i];
 			}
-			double mean = value/modelCounter;
+			double mean = value/par.length;
 			double sum = 0;
 			for(int i=0;i<par.length;i++){
-				sum += (Math.pow((par[i]-mean), 2));	
+				sum += ((par[i] - mean)*(par[i] - mean));
 			}
-			double stddev = ((1/(double)models.size())*sum);
-			double varCoeff = stddev/mean;
+			double stddev = Math.sqrt((sum/(par.length - 1.0)));
+			double varCoeff = (stddev/mean)*100;
 				
-			System.out.println(p.getId());
+			System.out.println();
+			System.out.println("Parameter: " + s.getId());
+			System.out.println();
+			System.out.println("Value in original model: " + originalValue);
 			System.out.println("Mean: " + mean);
 			System.out.println("Standarddeviation: " + stddev);
-			System.out.println("Variation coefficient: " + varCoeff);
+			System.out.println("Variation coefficient: " + varCoeff + "%");
 			System.out.println();
 			
 		}
@@ -62,23 +84,29 @@ public class ParameterAnalysis {
 	}
 
 	public static void main(String args[]) throws XMLStreamException, IOException {
-		File f = new File(args[0]);
+		
+		Model m = (new SBMLReader()).readSBML(args[0]).getModel();
+        
+		File f = new File(args[1]);
 
 		File[] modelFiles = f.listFiles();
 		List<Model> models = new LinkedList<Model>();
 		for(File modelFile: modelFiles) {
-			SBMLDocument doc = SBMLReader.read(modelFile);
-			models.add(doc.getModel());
+			if(SBFileFilter.isSBMLFile(modelFile)) {
+				SBMLDocument doc = SBMLReader.read(modelFile);
+				models.add(doc.getModel());
+			}
 		}
-		String parameterFilePath = args[1];
+		String parameterFilePath = args[2];
 		CSVReader reader = new CSVReader(parameterFilePath);
 		String[][] data = reader.getData();
 
-		List<Parameter> parameters = new LinkedList<Parameter>();
+		List<Symbol> parameters = new LinkedList<Symbol>();
 		for(int row=0; row != data.length; row++) {
 			parameters.add(new Parameter(data[row][0]));
 		}
 
-		parameterAnalysis(models, parameters);
+		parameterAnalysis(m, models, parameters);
 	}
+	
 }
