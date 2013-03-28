@@ -128,7 +128,7 @@ public class ErrorIntroduction {
             column);
         } else {
           //correct data with precision values
-          table.setValueAt(table.getValueAt(row, column) + currentError, row,
+          table.setValueAt(table.getValueAt(row, column) + random.nextGaussian() * precisions[column - 1] * table.getValueAt(row, column), row,
             column);
           
           //correct data with scaleFactors
@@ -174,4 +174,5 @@ public class ErrorIntroduction {
          return (m[middle-1] + m[middle]) / 2.0;
       }
   }//end method median
+  
 }

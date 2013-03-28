@@ -32,8 +32,10 @@ import org.simulator.math.odes.RosenbrockSolver;
 
 import de.zbit.io.csv.CSVReader;
 
+import eva2.server.go.individuals.AbstractEAIndividual;
 import eva2.server.go.individuals.ESIndividualDoubleData;
 import eva2.server.go.operators.terminators.EvaluationTerminator;
+import eva2.server.go.populations.Population;
 import eva2.server.go.strategies.DifferentialEvolution;
 import eva2.server.go.strategies.InterfaceOptimizer;
 import eva2.server.modules.GOParameters;
@@ -46,10 +48,14 @@ import eva2.server.modules.GOParameters;
 public class Optimization implements PropertyChangeListener{
 
 	/**
+	 * Part of the new model name with introduced errors
+	 */
+	private static String modelNameWithError;
+
+	/**
 	 * The simulation manager for the current simulation.
 	 */
 	private SimulationManager simulationManager;
-
 
 	private EstimationProblem estimationProblem;
 
@@ -58,7 +64,6 @@ public class Optimization implements PropertyChangeListener{
 	public Optimization(String openFile, String timeSeriesFile, String parameterFile) {
 		loadPreferences(openFile, timeSeriesFile, parameterFile);
 	}
-
 
 	/* (non-Javadoc)
 	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
@@ -72,23 +77,30 @@ public class Optimization implements PropertyChangeListener{
 	}
 
 
+
 	/**
-	 * 
+	 * Loads data form the experimental data file
 	 */
 	private void loadPreferences(String openFile, String timeSeriesFile, String parameterFile) {
 		AbstractDESSolver solver = null;
 		QualityMeasure qualityMeasure = null;
 		SimulationConfiguration simulationConfiguration;
-		double simEndTime, simStepSize, absoluteTolerance, relativeTolerance;
+		double simEndTime, simStepSize,absoluteTolerance, relativeTolerance;
 
-		//TODO
-		simEndTime = 600;//10;
-		simStepSize = 10;//0.1;
-		absoluteTolerance = 1E-10;
+		simEndTime = 600;
+		simStepSize = 10;
+		absoluteTolerance= 1E-10;
 		relativeTolerance = 1E-6;
 		solver = new RosenbrockSolver();
+		solver.setStepSize(simStepSize);
 		Model model = null;
-
+		try {
+			model = (new SBMLReader()).readSBML(openFile).getModel();
+		} catch (XMLStreamException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		simulationConfiguration = new SimulationConfiguration(model, solver, 0,
 				simEndTime, simStepSize, false, absoluteTolerance, relativeTolerance);
 
@@ -123,6 +135,7 @@ public class Optimization implements PropertyChangeListener{
 
 	}
 
+
 	/**
 	 * 
 	 */
@@ -131,7 +144,7 @@ public class Optimization implements PropertyChangeListener{
 
 		SBMLDocument clonedDocument = simulationManager.getSimulationConfiguration().getModel().getSBMLDocument().clone();
 		Model clonedModel = clonedDocument.getModel();
-		//Create quantity ranges from file or with standard preferences
+		// Create quantity ranges from file or with standard preferences
 		QuantityRange[] quantityRanges = null;
 		try {
 			quantityRanges = EstimationProblem.readQuantityRangesFromFile(parameterFile, clonedModel);
@@ -154,16 +167,17 @@ public class Optimization implements PropertyChangeListener{
 
 
 	/**
+	 * Executes the parameter optimization for models (with introduced errors)
 	 * 
 	 * @param openFile
 	 * @param timeSeriesFile
 	 * @param props
 	 */
-	private void performOptimization(int evaluations, int repetitions, String directory) {
+	private void performOptimization(int repetitions, int evaluations, String directory) {
 
-		for(int j = 0; j < repetitions; j++){
+		for(int j = 1; j <= repetitions; j++){
 
-			//Set initial values to values given in experimental data.
+			// Set initial values to values given in experimental data.
 			String[] quantityIds = new String[estimationProblem.getQuantities().length];
 			for (int i = 0; i < estimationProblem.getQuantities().length; i++) {
 				quantityIds[i] = estimationProblem.getQuantities()[i].getId();
@@ -195,7 +209,6 @@ public class Optimization implements PropertyChangeListener{
 				}
 			}
 
-
 			GOParameters goParams = new GOParameters(); // Instance for the general
 			// Genetic Optimization
 			// parameterization
@@ -210,8 +223,9 @@ public class Optimization implements PropertyChangeListener{
 			while (!goParams.getTerminator().isTerminated(optimizer.getPopulation()))  {
 				optimizer.optimize();
 			}
-
-			ESIndividualDoubleData best = (ESIndividualDoubleData)optimizer.getPopulation().get(0);
+			Population p = optimizer.getPopulation();
+			AbstractEAIndividual ind = p.getBestEAIndividual();
+			ESIndividualDoubleData best = (ESIndividualDoubleData) ind;
 			double[] estimations = best.getDoubleData();
 			double fitness = best.getFitness()[0];
 			System.out.println("Fitness: " + fitness);
@@ -219,18 +233,18 @@ public class Optimization implements PropertyChangeListener{
 				System.out.println(estimationProblem.getQuantityRanges()[i].getQuantity().getName() + ": " + estimations[i]);
 			}
 
-			//Refresh model
+			// Refresh model
 			for(int i=0; i!=estimations.length; i++) {
 				estimationProblem.getQuantities()[i].setValue(estimations[i]);
 			}
 
-			//Name of the new model
-			String outSBMLFile = directory + "/" + estimationProblem.getModel().getId()+ j + "_Fitness_ " + fitness + ".xml";
-
-			//Save model to file
+			// Name of the new model
+			//String outSBMLFile = directory + "/" + estimationProblem.getModel().getId()+ j + modelNameWithError + "_Fitness_ " + fitness + ".xml";
+			String outSBMLFile = estimationProblem.getModel().getId()+ "_" + modelNameWithError + "_Rep_ " + j + "_Fitness_ " + fitness + ".xml";
+			// Save model to file
 			if (outSBMLFile != null) {
 				try {
-					(new SBMLWriter()).write(estimationProblem.getModel().getSBMLDocument(), outSBMLFile);
+					(new SBMLWriter()).write(estimationProblem.getModel().getSBMLDocument(), directory + "/" + outSBMLFile);
 				} catch (SBMLException e) {
 					e.printStackTrace();
 				} catch (FileNotFoundException e) {
@@ -246,29 +260,49 @@ public class Optimization implements PropertyChangeListener{
 
 	public static void main(String args[]) throws XMLStreamException, IOException {
 
-		// model
+		// the model
 		String modelFile = args[0];
-		// experimental data
+		//experimental data
 		String experimentalFile = args[1];
-		// parameters that are being optimized
+		//parameters that are being optimized
 		String parameterFile = args[2];
 		// declares how often an optimization is performed for the model
 		int repetitions = Integer.parseInt(args[3]);
-		// declares how many optimization-steps are performed per optimization (evaluationTerminator)
+		// declares how many optimization steps are performed per optimization (evaluationTerminator)
 		int fitnessEvaluations = Integer.parseInt(args[4]);
-		// data path
+		// data path for the storage of the optimized models
 		String directory = args[5];
 
 
+		for(double averagePrecision=0.0;averagePrecision<=0.30;averagePrecision+=0.01) {
+			for(double systematicErrorPercentage=0.0;systematicErrorPercentage<=30.0;systematicErrorPercentage+=1.0) {
+				for(double baselinePercentage=0.0;baselinePercentage<=30.0;baselinePercentage+=1.0) {
 
-		// optimization	
-		//(new File(directory)).mkdir();
+					// create new dirctory for every error introduction repetition
+					File errorDirectory = new File(directory + "/Errors_" + (int)(averagePrecision*100) + "_" + (int)systematicErrorPercentage + "_" + (int)baselinePercentage);
+					errorDirectory.mkdir();
 
-		Optimization opt = new Optimization(modelFile, experimentalFile, parameterFile);
+					for(int i = 1; i <= repetitions; i++) {
+						averagePrecision=Math.round(averagePrecision*100)/100.0;
+						systematicErrorPercentage=Math.round(systematicErrorPercentage);
+						baselinePercentage=Math.round(baselinePercentage);
 
-		opt.performOptimization(fitnessEvaluations, repetitions, directory);
+						// error introduction
+						String fileName = errorDirectory.getAbsolutePath()+ "/Experimental" + i + ".csv";
+						ErrorIntroduction.introduceError(experimentalFile,fileName,modelFile,averagePrecision,systematicErrorPercentage,baselinePercentage);
 
+						modelNameWithError = "Errors_" + (int)(averagePrecision*100) + "_" + (int)systematicErrorPercentage + "_" + (int)baselinePercentage + "_Exp_" + i;
 
+						// parameter optimization for models with introduced errors
+
+						// (averagePrecision=0.0, systematicErrorPercentage=0.0) is equivalent to
+						// the optimization with the original experimental data
+						Optimization opt = new Optimization(modelFile, fileName, parameterFile);
+						opt.performOptimization(repetitions, fitnessEvaluations, errorDirectory.toString());
+
+						System.out.println();
+						System.out.println("Optimization for " + modelNameWithError + " is completed!");
+						System.out.println();}}}}
 	}
 
 }
