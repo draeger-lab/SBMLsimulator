@@ -17,16 +17,17 @@
  */
 package org.sbml.simulator.fba.controller;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
 import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
 import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
+import org.sbml.jsbml.Species;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 import org.simulator.math.odes.MultiTable;
 
@@ -42,7 +43,10 @@ import org.simulator.math.odes.MultiTable;
  */
 public class FluxBalanceAnalysis {
 
-	private static final transient Logger logger = Logger.getLogger(FluxBalanceAnalysis.class);
+	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final transient Logger logger = Logger.getLogger(FluxBalanceAnalysis.class.getName());
 
 	/**
 	 * Contains the concentrations computed in the targetFunc.
@@ -606,7 +610,7 @@ public class FluxBalanceAnalysis {
 				cplex.addLe(cplex.diff(j_j, rmaxG), 0);
 				// TODO sysout
 				System.out.println(modifiedDocument.getModel().getReaction(j) + ": " + "|J_j| - r_max * |G_j| <= 0:  "+ cplex.diff(j_j, rmaxG)+ " <= " + 0 );
-				logger.log(Level.DEBUG, String.format("constraint |J_j| - r_max * |G_j| < 0:  "+ cplex.diff(j_j, rmaxG)+ " < " + 0 ));
+				logger.log(Level.FINER, String.format("constraint |J_j| - r_max * |G_j| < 0:  "+ cplex.diff(j_j, rmaxG)+ " < " + 0 ));
 			}
 
 			// constraint J_j >= 0
@@ -669,7 +673,7 @@ public class FluxBalanceAnalysis {
 				cplex.addLe(jg, 0);
 				// TODO sysout
 				System.out.println(modifiedDocument.getModel().getReaction(j) + ": J_j * G_j <= 0: " + jg + " <= " + 0);
-				logger.log(Level.DEBUG, String.format("constraint J_j * G_j: " + jg + " <= " + 0));
+				logger.log(Level.FINER, String.format("constraint J_j * G_j: " + jg + " <= " + 0));
 			}
 			System.out.println();
 		}
