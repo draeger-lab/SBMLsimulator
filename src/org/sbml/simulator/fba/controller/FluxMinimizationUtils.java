@@ -361,25 +361,33 @@ public class FluxMinimizationUtils {
 				backwardReac.setKineticLaw(null);
 				backwardReac.setSBOTerm(reversibleReac.getSBOTerm());
 				backwardReac.setId(reversibleReac.getId() + endingForBackwardReaction);
-				backwardReac.setMetaId(reversibleReac.getMetaId() + endingForBackwardReaction);
+				if (reversibleReac.isSetMetaId()) {
+					backwardReac.setMetaId(reversibleReac.getMetaId() + endingForBackwardReaction);
+				}
 				backwardReac.setName(reversibleReac.getName() + endingForBackwardReaction);
 				backwardReac.getListOfProducts().clear();
 				backwardReac.getListOfReactants().clear();
 				backwardReac.getListOfModifiers().clear();
 				for (int j = 0; j < reversibleReac.getReactantCount(); j++) {
 					SpeciesReference sr = reversibleReac.getReactant(j).clone();
-					sr.setMetaId(reversibleReac.getReactant(j).getMetaId() + endingForBackwardReaction);
+					if (reversibleReac.getReactant(j).isSetMetaId()) {
+						sr.setMetaId(reversibleReac.getReactant(j).getMetaId() + endingForBackwardReaction);
+					}
 					backwardReac.addProduct(sr);
 				}
 	
 				for (int k = 0; k < reversibleReac.getProductCount(); k++) {
 					SpeciesReference sr = reversibleReac.getProduct(k).clone();
-					sr.setMetaId(reversibleReac.getProduct(k).getMetaId() + endingForBackwardReaction);
+					if (reversibleReac.getProduct(k).isSetMetaId()) {
+						sr.setMetaId(reversibleReac.getProduct(k).getMetaId() + endingForBackwardReaction);
+					}
 					backwardReac.addReactant(sr);
 				}
 				for (int l = 0; l < reversibleReac.getModifierCount(); l++) {
 					ModifierSpeciesReference sr = reversibleReac.getModifier(l).clone();
-					sr.setMetaId(reversibleReac.getModifier(l).getMetaId() + endingForBackwardReaction);
+					if (reversibleReac.getModifier(l).isSetMetaId()) {
+						sr.setMetaId(reversibleReac.getModifier(l).getMetaId() + endingForBackwardReaction);
+					}
 					backwardReac.addModifier(sr);
 				} 
 				backwardReac.setReversible(false);
@@ -725,19 +733,18 @@ public class FluxMinimizationUtils {
 	public static double[] calculatePreviousFactors(SBMLDocument doc) {
 		Model m = doc.getModel();
 		//init the array
-		int specCnt = m.getSpeciesCount();
-		previousFactors = new double[specCnt];
-		
-		for (int i = 0; i < specCnt; i++) {
-			double d = 1.0;
-			if (m != null) {
+		if (m != null) {
+			int specCnt = m.getSpeciesCount();
+			previousFactors = new double[specCnt];
+
+			for (int i = 0; i < specCnt; i++) {
+				double d = 1.0;
 				Species s = m.getSpecies(i);
 				d = 1 / (m.getCompartment(s.getCompartment()).getSize());
 //					System.out.println("r " + r + " s " + s + " size: " + (m.getCompartment(s.getCompartment()).getSize()) + " d " + d);
-				}
-			previousFactors[i] = d;
-		}
-		
+				previousFactors[i] = d;
+			}
+		}		
 		return previousFactors;
 	}
 	
