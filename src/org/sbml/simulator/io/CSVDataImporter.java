@@ -238,19 +238,19 @@ public class CSVDataImporter {
 			 * @see java.util.AbstractList#get(int)
 			 */
 			public String get(int index) {
-				if (index < model.getNumCompartments()) {
+				if (index < model.getCompartmentCount()) {
 					return model.getCompartment(index).getId();
 				}
-				index -= model.getNumCompartments();
-				if (index < model.getNumSpecies()) {
+				index -= model.getCompartmentCount();
+				if (index < model.getSpeciesCount()) {
 					return model.getSpecies(index).getId();
 				}
-				index -= model.getNumSpecies();
-				if (index < model.getNumParameters()) {
+				index -= model.getSpeciesCount();
+				if (index < model.getParameterCount()) {
 					return model.getParameter(index).getId();
 				}
 				
-				index -= model.getNumParameters();
+				index -= model.getParameterCount();
 				return model.getReaction(index).getId();
 			}
 
@@ -258,8 +258,8 @@ public class CSVDataImporter {
 			 * @see java.util.AbstractCollection#size()
 			 */
 			public int size() {
-				return model.getNumCompartments() + model.getNumSpecies()
-						+ model.getNumParameters() + model.getNumReactions();
+				return model.getCompartmentCount() + model.getSpeciesCount()
+						+ model.getParameterCount() + model.getReactionCount();
 			}
 		};
 	}
