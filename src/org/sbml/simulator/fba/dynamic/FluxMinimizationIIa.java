@@ -49,44 +49,114 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		
 		IloNumExpr function = cplex.numExpr();
 		
-		// One variable for all fluxes in the flux vector
+		// Fluxes term
 		IloNumExpr flux = cplex.numExpr();
 		int fluxPosition = 0;
-		// Manhattan norm included
-		for (int i = 0; i < getTargetVariablesLengths()[0]; i++) {
-			flux = cplex.sum(flux, cplex.prod(cplex.constant(this.lambda_1), cplex.abs(getVariables()[fluxPosition + i])));
+		int reactionCount = getTargetVariablesLengths()[0];
+		
+//		double[][] lastSolution = getOptimizedSolution();
+		
+		// Manhattan norm included in cplex.abs()
+		for (int j = 0; j < reactionCount; j++) {
+			IloNumExpr optimizingFluxes = cplex.numExpr();
+			
+			// penalty to support non zero fluxes
+			double notNullPenalty;
+			double lastFlux = 0;
+//			if (this.getTimePointStep() > 0) { // TODO use temporarmultitable 
+//				// get last flux
+//				if (!Double.isNaN(this.completeNetFluxes[this.getTimePointStep() - 1][j])) {
+//					lastFlux = this.completeNetFluxes[this.getTimePointStep() - 1][j];
+//				}
+//				else {
+//					lastFlux = lastSolution[1][j];
+//				}
+//			}
+//			else {
+//				if (!Double.isNaN(this.completeNetFluxes[this.getTimePointStep()][j])) {
+//					lastFlux = this.completeNetFluxes[this.getTimePointStep()][j];
+//				}
+//			}
+			notNullPenalty = 1/(lastFlux + epsilon);
+			
+			double delta_f = epsilon;
+			if (this.getTimePointStep() > 1) {
+				delta_f = Math.abs(this.tempSolutionMultiTable.getBlock(1).getValueAt(this.getTimePointStep() - 1, j)
+						- this.tempSolutionMultiTable.getBlock(1).getValueAt(this.getTimePointStep() - 2, j));
+			}
+			
+//			if (!this.splittedDocument.getModel().getReaction(j).isFast()) {
+//				IloNumExpr j_j_min = cplex.numExpr();
+//				if (FluxMinimizationUtils.reverseReaction.containsKey(j)) {
+//					j_j_min = cplex.diff(
+//						getVariables()[fluxPosition + j],
+//						getVariables()[fluxPosition	+ FluxMinimizationUtils.reverseReaction.get(j)]);
+//				} else {
+//					j_j_min = getVariables()[fluxPosition + j];
+//				}
+//					cplex.diff(j_j_min, cplex.constant(this.tempSolutionMultiTable.getBlock(1).getValueAt(this.getTimePointStep() - 1, j)));
+//			}
+
+			
+//			System.out.println(delta_f);
+			
+//			System.out.println("ncp:" + noChangePenalty);
+//			optimizingFluxes = cplex.prod(notNullPenalty, cplex.abs(getVariables()[fluxPosition + j]));
+//			optimizingFluxes = cplex.prod(1/delta_t, cplex.prod(notNullPenalty, getVariables()[fluxPosition + j]));
+//			optimizingFluxes = cplex.prod(delta_f, cplex.prod(1/delta_t, cplex.prod(notNullPenalty, getVariables()[fluxPosition + j])));
+//			optimizingFluxes = cplex.prod(1/delta_t, cplex.abs(getVariables()[fluxPosition + j]));
+//			optimizingFluxes = getVariables()[fluxPosition + j];
+			optimizingFluxes = cplex.abs(getVariables()[fluxPosition + j]);
+			
+			flux = cplex.sum(flux, optimizingFluxes);
 		}
 		
-		// Concentrations 
+		// Concentrations term
 		IloNumExpr concentrations = cplex.numExpr();
-		int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
+		int concentrationPosition = fluxPosition + reactionCount;
 		double[] c_m_measured = this.completeConcentrations[this.getTimePointStep()];
 		
-		for (int n = 0; n < getTargetVariablesLengths()[1]; n++) {
+		int speciesCount = getTargetVariablesLengths()[1];
+		for (int i = 0; i < speciesCount; i++) {
 			IloNumExpr optimizingConcentration = cplex.numExpr();
 			
-			if (!Double.isNaN(c_m_measured[n])) {
+			if (!Double.isNaN(c_m_measured[i])) {
+				// the bigger the change, the better it is (should supporting non zero concentrations)
 				double div = epsilon; 
+				// the bigger the concentration change, the more penalty it has
+				double delta_c = epsilon;
 				if(this.getTimePointStep() > 0) {
-					double previousValue = completeConcentrations[this.getTimePointStep()-1][n];
-					if((!Double.isNaN(previousValue)))  {
-						div+= previousValue;
+					double c_m_measured_previous = completeConcentrations[this.getTimePointStep()-1][i];
+					if((!Double.isNaN(c_m_measured_previous)))  {
+						div+= c_m_measured_previous;
+						delta_c = (c_m_measured_previous - c_m_measured[i]) * (c_m_measured_previous - c_m_measured[i]);
 					}
 				}
 				else {
-					div+= c_m_measured[n];
+					div+= c_m_measured[i];
+					delta_c = epsilon;
 				}
-				double volume = 1/factors[n];
-				optimizingConcentration = cplex.prod(1/div, cplex.abs(cplex.diff(c_m_measured[n], getVariables()[concentrationPosition + n])));
-				concentrations = cplex.sum(concentrations, cplex.prod(cplex.constant(this.lambda_2), cplex.prod(volume, cplex.prod(1 / delta_t, optimizingConcentration))));
+				
+//				System.out.println(delta_c);
+				double volume = 1/factors[i];
+//				optimizingConcentration = cplex.abs(cplex.diff(c_m_measured[i], getVariables()[concentrationPosition + i]));
+//				optimizingConcentration = cplex.prod(delta_c, cplex.abs(cplex.diff(c_m_measured[i], getVariables()[concentrationPosition + i])));
+//				optimizingConcentration = cplex.prod(1/div, cplex.prod(concChange, cplex.abs(cplex.diff(c_m_measured[i], getVariables()[concentrationPosition + i]))));
+				optimizingConcentration = cplex.prod(1/div, cplex.abs(cplex.diff(c_m_measured[i], getVariables()[concentrationPosition + i]))); // TODO roland
+				
+//				concentrations = cplex.sum(concentrations, cplex.prod(volume, optimizingConcentration));
+				concentrations = cplex.sum(concentrations, cplex.prod(volume, cplex.prod(1 / delta_t, optimizingConcentration))); // TODO roland
+//				concentrations = cplex.sum(concentrations, optimizingConcentration);
+				
 			} else {
-				// TODO if c_m_measured[n] is NaN???
+				// TODO if c_m_measured[i] is NaN??? is it possible to calculate from stoichiometric matrix and flux?
 			}
 		}
 		
 		// Sum up each term
-		function = cplex.sum(flux, concentrations);
+		function = cplex.sum(cplex.prod(cplex.constant(this.lambda_1), flux), cplex.prod(cplex.constant(this.lambda_2), concentrations));
 		
+//		System.out.println(function.toString());
 		return function;
 	}
 	
@@ -108,35 +178,89 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		// TODO fixed assumptions 
 //		cplex.addGe(getVariables()[fluxPosition + 5], Double.MIN_VALUE);
 		
-	// Constraint J_j >= 0
-		if (this.constraintJ0 == true) {
+		// Constraint J_j >= 0
+		if (isConstraintJ0()) {
 			for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
 				cplex.addGe(getVariables()[fluxPosition + j], 0);
 			}
 		}
 		
-		for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
-			// Flux J_j
-			if ((knownFluxes.containsKey(j)) && (this.getTimePointStep() > 0)) {
-				double eightyPercent = 1 * knownFluxes.get(j)[this.getTimePointStep()-1];
-				
+		// Constraint supporting little flux changes
+		if (isLittleFluxChanges()) {
+			for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
+				if (this.getTimePointStep() > 0) {
+					if (!this.splittedDocument.getModel().getReaction(j).isFast()) {
+						IloNumExpr j_j_min = cplex.numExpr();
+						j_j_min = getVariables()[fluxPosition + j];
+						cplex.diff(j_j_min, cplex.constant(this.tempSolutionMultiTable.getBlock(1).getValueAt(this.getTimePointStep() - 1, j)));
+					}
+					else {
+						// TODO add what should happen if the reaction is a fast reaction
+					}
+				}
+			}
+		}
+		
+		// Constraint supporting net fluxes greater then zero
+		if (isFluxDynamic()) {
+			for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
 				IloNumExpr j_j_min = cplex.numExpr();
 				if (FluxMinimizationUtils.reverseReaction.containsKey(j)) {
 					j_j_min = cplex.diff(
-						getVariables()[fluxPosition + j],
-						getVariables()[fluxPosition
-								+ FluxMinimizationUtils.reverseReaction.get(j)]);
+							getVariables()[fluxPosition + j],
+							getVariables()[fluxPosition	+ FluxMinimizationUtils.reverseReaction.get(j)]);
 				} else {
 					j_j_min = getVariables()[fluxPosition + j];
 				}
 				
-				if (eightyPercent >= 0) {
-					cplex.addEq(j_j_min, eightyPercent);
-				} else {
-					cplex.addEq(j_j_min, eightyPercent);
+//				cplex.addGe(cplex.constant(cplex.getValue(j_j_min)), epsilon);
+				
+				cplex.maximize(j_j_min);
+				
+				
+//				cplex.le(cplex.negative(j_j_min), (-1.0 * epsilon));
+//				cplex.or(cplex.addGe(j_j_min, epsilon), cplex.addLe(j_j_min, (-1.0 * epsilon)));
+			}
+		}
+		
+		// Constraint of using known fluxes from the given multitable
+		if (this.useKnownFluxes) {
+			for (int j = 0; j < DynamicFBA.originalDocument.getModel().getReactionCount(); j++) {
+				// Flux J_j
+				if ((this.getTimePointStep() > 0) && !Double.isNaN(this.completeNetFluxes[this.getTimePointStep()][j])) {
+					double knownFluxValue = this.completeNetFluxes[this.getTimePointStep()][j];
+
+					IloNumExpr j_j_min = cplex.numExpr();
+					if (FluxMinimizationUtils.reverseReaction.containsKey(j)) {
+						j_j_min = cplex.diff(
+								getVariables()[fluxPosition + j],
+								getVariables()[fluxPosition	+ FluxMinimizationUtils.reverseReaction.get(j)]);
+					} else {
+						j_j_min = getVariables()[fluxPosition + j];
+					}
+					cplex.addEq(j_j_min, knownFluxValue);
 				}
 			}
 		}
+		
+//		if (!knownFluxes.isEmpty()) {
+//			for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
+//				// Flux J_j
+//				if ((knownFluxes.containsKey(j)) && (this.getTimePointStep() > 0) && !Double.isNaN(this.completeNetFluxes[this.getTimePointStep()][j])) {
+//					double knownFluxValue = 1 * knownFluxes.get(j)[this.getTimePointStep()-1];
+//
+//					IloNumExpr j_j_min = cplex.numExpr();
+//					if (FluxMinimizationUtils.reverseReaction.containsKey(j)) {
+//						j_j_min = cplex.diff(
+//								getVariables()[fluxPosition + j],
+//								getVariables()[fluxPosition	+ FluxMinimizationUtils.reverseReaction.get(j)]);
+//					} else {
+//						j_j_min = getVariables()[fluxPosition + j];
+//					}
+//					cplex.addEq(j_j_min, knownFluxValue);
+//				}
+//			}
+//		}
 		
 		// Constraint flux pairs
 		if (fluxPairs != null) {
@@ -220,18 +344,18 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 				IloNumExpr netFlux = cplex.diff(getVariables()[fluxPosition + forward], getVariables()[fluxPosition + backward]);
 				double deltaConc = this.completeConcentrations[this.getTimePointStep()][species] - this.completeConcentrations[this.getTimePointStep() - 1][species];
 				
-				if(sign * deltaConc >= 0) {
-					cplex.addGe(netFlux, cplex.constant(sign * this.conversionFactor * deltaConc));
-				}
-				else {
+//				if(sign * deltaConc >= 0) {
+//					cplex.addGe(netFlux, cplex.constant(sign * this.conversionFactor * deltaConc));
+//				}
+//				else {
 					cplex.addLe(netFlux, cplex.constant(sign * this.conversionFactor * deltaConc));
-				}
+//				}
 			
 			}
 		}
 		
 		// Constraint z_m (t_i+1) >= 0
-		if (this.constraintZm == true) {
+		if (isConstraintZm()) {
 			for (int m = 0; m < speciesCount; m++) {
 				// Concentration z_m (t_i+1)
 				cplex.addGe(getVariables()[concentrationPosition + m], 0);
@@ -243,8 +367,11 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		// Use this computation of delta_t:
 		// Only if each timepoint has the same distance to its neighboring timepoint
 		double delta_t = DynamicFBA.dFBATimePoints[1] - DynamicFBA.dFBATimePoints[0];
+		if(this.getTimePointStep() > 0) {
+			delta_t = DynamicFBA.dFBATimePoints[this.getTimePointStep()] - DynamicFBA.dFBATimePoints[this.getTimePointStep()-1];
+		}
 		
-		for (int i = 0; i < getTargetVariablesLengths()[1]; i++) {
+		for (int i = 0; i < getTargetVariablesLengths()[1]; i++) { // species count
 			
 			// Concentrations 
 			double[] c_k_ti = this.completeConcentrations[this.getTimePointStep()];
@@ -260,9 +387,17 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 			} else {
 				double[] c_k_ti_1 = completeConcentrations[this.getTimePointStep() - 1];
 				if(this.usePreviousEstimations) {
-					c_k_ti_1 = previousEstimatedConcentrations;
+					for (int k = 0; k < c_k_ti_1.length; k++) {
+						double estimated = previousEstimatedConcentrations[k];
+						double given = c_k_ti_1[k];
+						// allowing precision or baseline errors of 10 % // TODO check error assumption
+						if (Double.isNaN(given) || (Math.abs(given - estimated) < Math.abs(0.10 * given))) { // less than 10 % difference to the given value, than assume given value
+							// if given is NaN or estimated fits better than given
+							c_k_ti_1[k] = estimated;
+						}
+					}
 				}
-				if (!Double.isNaN(completeConcentrations[this.getTimePointStep() - 1][i])) {
+				if (!Double.isNaN(c_k_ti_1[i])) { // changed to c_k_ti_1[i] from completeConcentrations[this.getTimePointStep() - 1][i] in case of pre estimated concentrations
 					IloNumExpr computedConcentration = cplex.numExpr();
 					IloNumExpr fNJ = cplex.numExpr();
 					
@@ -282,6 +417,7 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 					// TODO if last concentration (completeConcentrations[this.getTimePointStep()-1][n]) is NaN???
 				}
 			}
+			
 		}
 	}
 

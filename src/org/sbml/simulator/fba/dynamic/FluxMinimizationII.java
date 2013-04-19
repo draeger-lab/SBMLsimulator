@@ -26,6 +26,7 @@ import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.Species;
+import org.sbml.jsbml.util.compilers.FindUnitsCompiler;
 import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 import org.simulator.math.odes.MultiTable;
@@ -90,6 +91,11 @@ public class FluxMinimizationII extends TargetFunction {
 	protected double[][] completeConcentrations;
 		
 	/**
+	 * The array contains the complete interpolated fluxes
+	 */
+	protected double[][] completeNetFluxes;
+	
+	/**
 	 * The estimated concentrations for the previous time point.
 	 */
 	protected double[] previousEstimatedConcentrations;
@@ -104,17 +110,55 @@ public class FluxMinimizationII extends TargetFunction {
 	/**
 	 * Lower bounds for CPLEX variables saved in a double array
 	 */
-	protected double[] lowerBounds;
+	protected double[] lowerBounds = null;
 	
 	/**
 	 * Upper bounds for CPLEX variables saved in a double array
 	 */
-	protected double[] upperBounds;
+	protected double[] upperBounds = null;
+	
+	/**
+	 * flux lower bound
+	 */
+	protected double fluxLow = 0;
+	
+	/**
+	 * flux upper bound
+	 */
+	protected double fluxUp = 200;
+	
+	/**
+	 * concentration lower bound
+	 */
+	protected double concLow = 0;
+	
+	/**
+	 * concentration upper bound
+	 */
+	protected double concUp = 3000;
 	
 	/**
 	 * Constraint J_j >= 0
 	 */
 	protected boolean constraintJ0 = true;
+	
+	/**
+	 * 
+	 * @return true if constraint J_j >= 0 is enabled
+	 */
+	protected boolean isConstraintJ0() {
+		return constraintJ0;
+	}
+	
+	/**
+	 * Enable/Disable constraint J_j >= 0
+	 * 
+	 * @param b
+	 */
+	public void setConstraintJ0(boolean b) {
+		this.constraintJ0 = b;
+	}
+	
 	
 	/**
 	 * Constraint z_m (t_i+1) >= 0
@@ -123,9 +167,55 @@ public class FluxMinimizationII extends TargetFunction {
 	
 	/**
 	 * 
+	 * @return true if constraint z_m (t_i+1) >= 0 is enabled
 	 */
-	protected boolean usePreviousEstimations = true;
+	protected boolean isConstraintZm() {
+		return constraintZm;
+	}
 	
+	/**
+	 * Enable/Disable constraint z_m (t_i+1) >= 0
+	 * 
+	 * @param b
+	 */
+	public void setConstraintZm(boolean b) {
+		this.constraintZm = b;
+	}
+	
+	/**
+	 * constraint supporting non-zero fluxes
+	 */
+	protected boolean fluxDynamic = true;
+	
+	/**
+	 * 
+	 * @return true if constraint of a dynamic flux is enabled
+	 */
+	protected boolean isFluxDynamic() {
+		return fluxDynamic;
+	}
+	
+	/**
+	 * Disable/Enable constraint for supporting non-zero fluxes
+	 * 
+	 * @param b
+	 */
+	public void setFluxDynamic(boolean b) {
+		this.fluxDynamic = b;
+	}
+	
+	/**
+	 * true if previous estimation should be used
+	 */
+	protected boolean usePreviousEstimations = false;
+	
+	/**
+	 * 
+	 * @param true if previous estimation should be used
+	 */
+	public void setUsePreviousEstimations(boolean b) {
+		this.usePreviousEstimations = b;
+	}
 	/**
 	 * Set the fluxes weighting factor lambda1 (default: 1.0).
 	 * 
@@ -152,6 +242,14 @@ public class FluxMinimizationII extends TargetFunction {
 		this.completeConcentrations = concentrations;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#setInterpolatedFluxes(double[][])
+	 */
+	@Override
+	public void setInterpolatedFluxes(double[][] fluxes) {
+		this.completeNetFluxes = fluxes;
+		
+	}
 	
 	/**
 	 * contains the previous factors for reactions
@@ -198,8 +296,28 @@ public class FluxMinimizationII extends TargetFunction {
 		this.conversionFactor = conversionFactor;
 	}
 	
+	/**
+	 * true if little flux changes should be supported, but not to big changes
+	 */
+	protected boolean littleFluxChanges = true;
 	
+	/**
+	 * boolean for supporting little flux changes
+	 * @return true if little flux changes should be supported, but not to big changes
+	 */
+	public boolean isLittleFluxChanges() {
+		return littleFluxChanges;
+	}
 	
+	/**
+	 * sets the boolean for supporting little flux changes
+	 * @param littleFluxChanges
+	 */
+	public void setLittleFluxChanges(boolean littleFluxChanges) {
+		this.littleFluxChanges = littleFluxChanges;
+	}
+
+
 	/**
 	 * maps the j-th reaction of the {@param splittedDocument} to the known fluxes
 	 */
@@ -212,6 +330,21 @@ public class FluxMinimizationII extends TargetFunction {
 	public void setKnownFluxes(Map<Integer, double[]> map) {
 		knownFluxes = map;
 	}
+	
+	/**
+	 * boolean for supporting use of known fluxes in the given multitable
+	 */
+	protected boolean useKnownFluxes = true;
+	
+	/**
+	 * Disable/Enable use of known fluxes from the given multitable
+	 * @param b
+	 */
+	public void setUseKnownFluxes(boolean b) {
+		this.useKnownFluxes = b;
+	}
+	
+	protected MultiTable tempSolutionMultiTable;
 	
 	/**
 	 * Prepare the FluxMinimization by setting the:
@@ -240,24 +373,7 @@ public class FluxMinimizationII extends TargetFunction {
 	public boolean isMaxProblem() {
 		return false;
 	}
-	
-	/**
-	 * Enable/Disable constraint J_j >= 0
-	 * 
-	 * @param constraintJ0
-	 */
-	public void setConstraintJ0(boolean constraintJ0) {
-		this.constraintJ0 = constraintJ0;
-	}
-	
-	/**
-	 * Enable/Disable constraint z_m (t_i+1) >= 0
-	 * 
-	 * @param constraintZm
-	 */
-	public void setConstraintZm(boolean constraintZm) {
-		this.constraintZm = constraintZm;
-	}
+
 
 	/* (non-Javadoc)
 	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#getTargetVariablesIds()
@@ -303,29 +419,70 @@ public class FluxMinimizationII extends TargetFunction {
 	}
 	
 	/**
+	 * initializes the lower and upper bounds according the reaction and species count.
+	 * This method does not check, if the bounds are already have been set. 
+	 */
+	public void initializeBounds() {
+			int fullVariableLength = 0;
+			for (int i = 0; i < getTargetVariablesLengths().length; i++) {
+				fullVariableLength += getTargetVariablesLengths()[i];
+			}
+
+			this.lowerBounds = new double[fullVariableLength];
+			this.upperBounds = new double[fullVariableLength];
+	}
+	
+	/**
 	 * Set default bounds for each part of the target function that will be optimized.
 	 */
 	public void setDefaultBounds() {
-		int fullVariableLength = 0;
-		for (int i = 0; i < getTargetVariablesLengths().length; i++) {
-			fullVariableLength += getTargetVariablesLengths()[i];
-		}
-		
-		this.lowerBounds = new double[fullVariableLength];
-		this.upperBounds = new double[fullVariableLength];
-		
+		initializeBounds();
 		// 1. Flux value bounds
-		int fluxPosition = 0;
-		for (int i = fluxPosition; i < fluxPosition + getTargetVariablesLengths()[0]; i++) {
-			this.lowerBounds[i] = 0;
-			this.upperBounds[i] = 200;
-		}
-		
+		setFluxBounds();
 		// 2. Concentration bounds
-		int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
-		for (int i = concentrationPosition; i < concentrationPosition + getTargetVariablesLengths()[1]; i++) {
-			this.lowerBounds[i] = 0;
-			this.upperBounds[i] = 3000;
+		setConcentrationBounds();
+	}
+	
+	/**
+	 * set the lower and upper bounds of fluxes
+	 * @param fluxLow
+	 * @param fluxUp
+	 */
+	public void setFluxLowerAndUpperBounds(double fluxLow, double fluxUp) {
+		this.fluxLow = fluxLow;
+		this.fluxUp = fluxUp;
+	}
+	
+	/**
+	 * set the lower and upper bounds of concentrations
+	 * @param concLow
+	 * @param concUp
+	 */
+	public void setConcentrationLowerAndUpperBounds(double concLow, double concUp) {
+		this.concLow = concLow;
+		this.concUp = concUp;
+	}
+	
+	/**
+	 * set the default lower and upper flux bounds
+	 */
+	public void setFluxBounds() {
+		int fluxCount = getTargetVariablesLengths()[0];
+		for (int i = 0; i < fluxCount; i++) {
+			this.lowerBounds[i] = this.fluxLow;
+			this.upperBounds[i] = this.fluxUp;
+		}
+	}
+	
+	/**
+	 * set the default lower and upper concentration bounds
+	 */
+	public void setConcentrationBounds() {
+		int concentrationPosition = getTargetVariablesLengths()[0];
+		int concCount = concentrationPosition + getTargetVariablesLengths()[1];
+		for (int i = concentrationPosition; i < concCount; i++) {
+			this.lowerBounds[i] = this.concLow;
+			this.upperBounds[i] = this.concUp;
 		}
 	}
 
@@ -496,9 +653,9 @@ public class FluxMinimizationII extends TargetFunction {
 			HashMap<String, Number> fluxMap = new HashMap<String, Number>();
 			ListOf<Reaction> listOfReactions = this.splittedDocument.getModel().getListOfReactions();
 			double[] optimizedFluxVector = new double[getTargetVariablesLengths()[0]];
-			for (int i = 0; i < getTargetVariablesLengths()[0]; i++) {
-				optimizedFluxVector[i] = solution[fluxPosition + i];
-				fluxMap.put(listOfReactions.get(i).getId(), optimizedFluxVector[i]);
+			for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
+				optimizedFluxVector[j] = solution[fluxPosition + j]; // J of the formula
+				fluxMap.put(listOfReactions.get(j).getId(), optimizedFluxVector[j]);
 			}
 			System.out.println(fluxMap.toString());
 			this.optimizedSolution[1] = optimizedFluxVector; // 2nd position: flux vector
@@ -508,14 +665,37 @@ public class FluxMinimizationII extends TargetFunction {
 			HashMap<String, Number> concMap = new HashMap<String, Number>();
 			HashMap<String, Number> concMap2 = new HashMap<String, Number>();
 			ListOf<Species> listOfSpecies = this.splittedDocument.getModel().getListOfSpecies();
-			double[] optimizedConcentrations = new double[getTargetVariablesLengths()[1]];
+			double[] optimizedConcentrations = new double[getTargetVariablesLengths()[1]];  // z_m of the formula
 			for (int i = 0; i < getTargetVariablesLengths()[1]; i++) {
 				optimizedConcentrations[i] = solution[concentrationPosition + i];
 				concMap.put(listOfSpecies.get(i).getId(), optimizedConcentrations[i]);
 				concMap2.put(listOfSpecies.get(i).getId(), this.completeConcentrations[this.getTimePointStep()][i]);
 			}
 			this.optimizedSolution[0] = optimizedConcentrations; // 1st position: concentrations
+			
 			this.previousEstimatedConcentrations = optimizedConcentrations;
+			
+//			for (int i = 0; i < optimizedConcentrations.length; i++) {
+//				double sumConcChange = 0;
+//				for (int j = 0; j < optimizedFluxVector.length; j++) {
+//					sumConcChange += (factors[i] * this.N_all.get(i, j) * optimizedFluxVector[j]);
+//				}
+//				
+//				if (this.getTimePointStep() > 0) {
+//				double delta_t = DynamicFBA.dFBATimePoints[this.getTimePointStep()] - DynamicFBA.dFBATimePoints[this.getTimePointStep() - 1];
+//				this.previousEstimatedConcentrations[i] = 
+//						tempSolutionMultiTable.getValueAt(this.getTimePointStep()-1, tempSolutionMultiTable.findColumn(splittedDocument.getModel().getSpecies(i).getId()))
+//						+ (sumConcChange * delta_t);
+//				System.out.print(splittedDocument.getModel().getSpecies(i).getId() + ": " + tempSolutionMultiTable.getValueAt(this.getTimePointStep()-1, tempSolutionMultiTable.findColumn(splittedDocument.getModel().getSpecies(i).getId())) 
+//						+ " + " + sumConcChange + " * " + delta_t + " = ");
+//				System.out.print(previousEstimatedConcentrations[i] + "..." + optimizedConcentrations[i]);
+//				System.out.println();
+//				}
+////				else {
+////					this.previousEstimatedConcentrations[i] = optimizedConcentrations[i];
+////				}
+//			}
+			
 		}
 		
 		return this.optimizedSolution;
@@ -524,27 +704,29 @@ public class FluxMinimizationII extends TargetFunction {
 	/* (non-Javadoc)
 	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#saveValuesForCurrentTimePoint(org.simulator.math.odes.MultiTable)
 	 */
-	public void saveValuesForCurrentTimePoint(MultiTable solutionMultiTable) {
-		for (int block = 0; block < solutionMultiTable.getBlockCount(); block++) {
+	public void saveValuesForCurrentTimePoint(MultiTable workingSolutionMultiTable) {
+		for (int block = 0; block < workingSolutionMultiTable.getBlockCount(); block++) {
 				double[] currentSpecificSolution = optimizedSolution[block];
-				if(block == 0) {
+				if(block == 0) { // for concentration
 					for(double value: currentSpecificSolution) {
 						if(value <= 0) {
 							System.out.println();
 						}
 					}
-					solutionMultiTable.getBlock(block).setRowData(this.getTimePointStep(), currentSpecificSolution);
+					workingSolutionMultiTable.getBlock(block).setRowData(this.getTimePointStep(), currentSpecificSolution);
 				}
-				else if((block == 1) && (this.getTimePointStep() > 0)){
-					solutionMultiTable.getBlock(block).setRowData(this.getTimePointStep() - 1, currentSpecificSolution);
+				else if((block == 1) && (this.getTimePointStep() > 0)){ // for fluxes
+					workingSolutionMultiTable.getBlock(block).setRowData(this.getTimePointStep() - 1, currentSpecificSolution);
 				}
 				
-				if((block == 1) && (this.getTimePointStep() == solutionMultiTable.getRowCount() - 1)) {
+				if((block == 1) && (this.getTimePointStep() == workingSolutionMultiTable.getRowCount() - 1)) {
 					double[] nanArray = new double[optimizedSolution[1].length];
 					Arrays.fill(nanArray, Double.NaN);
-					solutionMultiTable.getBlock(block).setRowData(this.getTimePointStep(), nanArray);
+					workingSolutionMultiTable.getBlock(block).setRowData(this.getTimePointStep(), nanArray);
 				}
 		}
+		this.tempSolutionMultiTable = workingSolutionMultiTable;
 	}
+
 	
 }

@@ -142,6 +142,13 @@ public abstract class TargetFunction {
 	public abstract void setInterpolatedConcentrations(double[][] concentrations);
 	
 	/**
+	 * Set the complete interpolated fluxes.
+	 * 
+	 * @param fluxes
+	 */
+	public abstract void setInterpolatedFluxes(double[][] fluxes);
+	
+	/**
 	 * @return The identifiers of each variable vector in a String array (attend your order!)
 	 */
 	public abstract String[][] getTargetVariablesIds();

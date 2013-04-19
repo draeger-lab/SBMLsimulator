@@ -100,7 +100,7 @@ public class DynamicFBATest {
 		dfba.runDynamicFBA(fm);
 			
 		// Print solution MultiTable
-		MultiTable solution = dfba.getSolutionMultiTable();
+		MultiTable solution = dfba.getWorkingSolutionMultiTable();
 		System.out.println(solution.toString());
 		
 		(new CSVWriter()).write(solution, ',', args[4]);
