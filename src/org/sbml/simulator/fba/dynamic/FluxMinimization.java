@@ -113,7 +113,10 @@ public class FluxMinimization extends TargetFunction {
 	 * The array contains the complete interpolated concentrations
 	 */
 	private double[][] completeConcentrations;
-	
+	/**
+	 * The array contains the complete interpolated fluxes
+	 */
+	private double[][] completeFluxes;
 	/**
 	 * The array contains the read gibbs energies in unit J/mol
 	 */
@@ -723,6 +726,15 @@ public class FluxMinimization extends TargetFunction {
 				double[] currentSpecificSolution = optimizedSolution[block];
 				solutionMultiTable.getBlock(block).setRowData(this.getTimePointStep(), currentSpecificSolution);
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#setInterpolatedFluxes(double[][])
+	 */
+	@Override
+	public void setInterpolatedFluxes(double[][] fluxes) {
+		this.completeFluxes = fluxes;
+		
 	}
 	
 }

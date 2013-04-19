@@ -58,7 +58,7 @@ public class SplineCalculation {
 		double[][] data = new double[timePoints.length][table.getBlock(block).getColumnCount()];
 		MultiTable result = new MultiTable(timePoints, data, table.getBlock(block).getIdentifiers(),table.getBlock(block).getColumnNames());
 		result.setTimeName(table.getTimeName());
-		for(int col = 1; col != table.getColumnCount(); col++) {
+		for(int col = 1; col != result.getColumnCount(); col++) {
 			Column c = table.getColumn(col);
 			double[] values = new double[table.getRowCount()];
 			for(int row = 0; row!=table.getRowCount(); row++) {
@@ -78,7 +78,12 @@ public class SplineCalculation {
 						result.setValueAt(value, row, col);
 					}
 					else {
-						result.setValueAt(Math.max(value,0d), row, col);
+						if (Double.isNaN(value)) {
+							result.setValueAt(Double.NaN, row, col);
+						}
+						else {
+							result.setValueAt(Math.max(value,0d), row, col);
+						}
 					}
 					
 				} catch (InterpolationException e) {

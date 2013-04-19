@@ -61,12 +61,23 @@ public class FluxBalanceAnalysisTest {
 	 * @param args[0] the SBMLDocument-File
 	 * args[1] the Gibbs-File
 	 * args[2] the concentration-File
+	 * args[3] the system boundaries file
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
 		start = System.currentTimeMillis();
 		originalSBMLDoc = (new SBMLReader()).readSBML(args[0]);
 		logger.info("document read: " + args[0]);
+		
+		String delReactions = "lr007;r0030;r0099;re001;lr018;lr019;lr020;lr021;re002;lr014;lr024;lr025;lr026;lr027;lr028";
+		String[] toDel = delReactions.split(";");
+		for (int i = 0; i < toDel.length; i++) {
+			originalSBMLDoc.getModel().removeReaction(toDel[i]);
+		}
+		for (Reaction r: originalSBMLDoc.getModel().getListOfReactions()) {
+			System.out.println(r.getId());
+		}
+		logger.info("deleted reactions");
 
 		// read system boundaries:
 		CSVDataConverter cu0;
@@ -152,7 +163,7 @@ public class FluxBalanceAnalysisTest {
 		fba.setConstraintJ_rmaxG(true);
 		fba.setConstraintJ0(true);
 		fba.setConstraintError(true);
-		fba.setCplexIterations(40000);
+		fba.setCplexIterations(600);
 		
 		
 		
@@ -163,11 +174,11 @@ public class FluxBalanceAnalysisTest {
 //		System.out.println();
 //		System.out.println("--------steady state matrix--------");
 		for (int i = 0; i < modModel.getReactionCount(); i++){
-			System.out.print(modModel.getReaction(i) + " ");
+			System.out.print(modModel.getReaction(i).getId() + " ");
 		}
 		System.out.println();
 //		System.out.println(FluxMinimizationUtils.getSteadyStateMatrix().toString());
-		
+		System.exit(0);
 		fba.solve();
 		
 		//------------------------print stoichiometric matrix---------------
@@ -255,11 +266,11 @@ public class FluxBalanceAnalysisTest {
 //		end = System.currentTimeMillis();
 //		System.out.println((end - start) + " ms");
 //		
-		System.out.println("Error:-----------------");
-		double[] errorSolutions = fba.solutionErrors;
-		for (int i = 0; i < errorSolutions.length; i++) {
-			System.out.println(modModel.getReaction(i).getId() + "    " + errorSolutions[i]);
-		}
+//		System.out.println("Error:-----------------");
+//		double[] errorSolutions = fba.solutionErrors;
+//		for (int i = 0; i < errorSolutions.length; i++) {
+//			System.out.println(modModel.getReaction(i).getId() + "    " + errorSolutions[i]);
+//		}
 		
 //		cu0.writeComputedValuesInCSV(fluxSolution, new File("C:/Users/Meike/Desktop/fluxSolutionFBATest2.csv"));
 //		cu1.writeComputedValuesInCSV(fba.solutionConcentrations, new File("C:/Users/Meike/Desktop/concSolutionFBATest2.csv"));

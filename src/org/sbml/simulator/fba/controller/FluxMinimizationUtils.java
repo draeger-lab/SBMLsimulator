@@ -39,6 +39,9 @@ import org.sbml.jsbml.SpeciesReference;
 import org.sbml.simulator.stability.math.ConservationRelations;
 import org.sbml.simulator.stability.math.StabilityMatrix;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
+import org.simulator.math.odes.MultiTable;
+import org.simulator.math.odes.MultiTable.Block;
+import org.simulator.math.odes.MultiTable.Block.Column;
 
 
 /**
@@ -88,11 +91,19 @@ public class FluxMinimizationUtils {
 	private static SBMLDocument splittedDocument = null;
 
 	/**
+	 * contains the original {@link SBMLDocument} 
+	 */
+	private static SBMLDocument originalDocument = null;
+	
+	/**
 	 * 
 	 * @param doc
 	 * @return
 	 */
 	public static SBMLDocument getSplittedDocument(SBMLDocument doc) {
+		if (originalDocument == null) {
+			originalDocument = doc;
+		}
 		if (splittedDocument == null) {
 			splittedDocument = splitAllReversibleReactions(doc);
 		}
@@ -346,13 +357,13 @@ public class FluxMinimizationUtils {
 	/**
 	 * Gets a {@link SBMLDocument} and searches the reversible reactions. Than it creates
 	 * a new SBMLDocument and splits the reversible reactions in two
-	 * irreversible reaction to both sides.
+	 * irreversible reaction to both directions.
 	 * @param document
 	 * @return {@link SBMLDocument}
 	 */
 	public static SBMLDocument splitAllReversibleReactions(SBMLDocument document) {
 		SBMLDocument revReacDoc = document.clone();
-		//split the reversible reactions
+		//split reversible reactions
 		for (int i = 0; i < document.getModel().getReactionCount(); i++) {
 			Reaction reversibleReac = revReacDoc.getModel().getReaction(document.getModel().getReaction(i).getId());
 			if (reversibleReac.isSetReversible() && reversibleReac.isReversible()) { 
@@ -394,7 +405,6 @@ public class FluxMinimizationUtils {
 				revReacDoc.getModel().addReaction(backwardReac);
 				reversibleReac.setReversible(false);
 				reverseReaction.put(i, revReacDoc.getModel().getReactionCount() - 1);
-//				System.out.println("added: " + backwardReac.getId());
 			}
 		}
 		// return the new document
@@ -866,6 +876,28 @@ public class FluxMinimizationUtils {
 			sum += indices[column];
 		}
 		return sum;
+	}
+
+	/**
+	 * @param fullMT
+	 * @param i
+	 * @return
+	 */
+	public static Map<Integer, double[]> getKnownFluxesMap(MultiTable mt, int block) {
+		Map<Integer, double[]> knownFluxes = new HashMap<Integer, double[]>();
+		Model m = originalDocument.getModel();
+		for (int j = 0; j < m.getReactionCount(); j++) {
+			double[] values = new double[mt.getRowCount()];
+			String rId = m.getReaction(j).getId();
+			Column c = mt.getColumn(rId);
+			if (!Double.isNaN(c.getValue(0))) {
+				for (int i = 0; i != values.length; i++) {
+					values[i] = c.getValue(i);
+				}
+				knownFluxes.put(j, values);
+			}
+		}
+		return knownFluxes;
 	}
 	
 }

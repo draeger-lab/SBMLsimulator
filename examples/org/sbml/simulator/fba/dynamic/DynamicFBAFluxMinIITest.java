@@ -32,12 +32,13 @@ import org.sbml.simulator.fba.controller.CSVDataConverter;
 import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.io.CSVDataImporter;
 import org.simulator.math.odes.MultiTable;
+import org.simulator.math.odes.MultiTable.Block;
 import org.simulator.math.odes.MultiTable.Block.Column;
 
 import de.zbit.io.csv.CSVWriter;
 
 /**
- * @author Stephanie Tscherneck, Robin F&auml;hnrich
+ * @author Stephanie Tscherneck, Robin F&auml;hnrich, Roland Keller
  * @version $Rev$
  * @since 1.0
  * ${tags}
@@ -51,7 +52,7 @@ public class DynamicFBAFluxMinIITest {
 	 * Test the methods of class {@link DynamicFBA}.
 	 * args[0] = sbml document
 	 * args[1] = concentration file as multitable
-	 * args[2] = known fluxes as tab separated with headline
+	 * args[2] = known fluxes as tab separated with headline or "noFile"
 	 * args[3] = output multitable file
 	 * 
 	 * @param args
@@ -70,98 +71,103 @@ public class DynamicFBAFluxMinIITest {
 		
 		System.out.println("SBML document read and splitted");
 		
-		// Read concentration file
+		// Read multi table file
 		CSVDataImporter importer = new CSVDataImporter();
-		MultiTable concMT = importer.convert(oriDocument.getModel(), args[1]);
+		MultiTable fullMT = importer.convert(oriDocument.getModel(), args[1]);
+		fullMT.setTimeName("Time");
 		
-		System.out.println("Concentrations read");
+		System.out.println();
+		
+		
+		System.out.println("Concentrations (and Fluxes) are read");
 		
 		
 		Map<String, Integer> reactionIndices = new HashMap<String, Integer>();
+		String[] reactionIds = new String[splittedDocument.getModel().getReactionCount()];
 		for (int i = 0; i < splittedDocument.getModel().getReactionCount(); i++) {
-			reactionIndices.put(splittedDocument.getModel().getReaction(i).getId(), i);
+			String id = splittedDocument.getModel().getReaction(i).getId();
+			reactionIndices.put(id , i);
+			reactionIds[i] = id;
 		}
 		Map<String, Integer> speciesIndices = new HashMap<String, Integer>();
+		String[] speciesIds = new String[splittedDocument.getModel().getSpeciesCount()];
 		for (int i = 0; i < splittedDocument.getModel().getSpeciesCount(); i++) {
+			String id = splittedDocument.getModel().getSpecies(i).getId();
 			speciesIndices.put(splittedDocument.getModel().getSpecies(i).getId(), i);
+			speciesIds[i] = id;
 		}
 		
-		String[] trFluxes = {
-				"r2526=HC00068_e", // Serine
+//		String[] trFluxes = {
+//				"r2526=HC00068_e", // Serine
 //				"r2524=HC00048_e", // Alanine
 //				"r2078=HC00177_e", // Lactate
-				"tr002=HC00266_e", // Isocitrate
-				"r1144=HC00034_e", // Glutamate
-				"r2525=HC00067_e", // Glutamine
-				"r1027=HC01472_e",  // GCDCA
-				"r1534,r1494=HC00863_e", // GCA
-				"r1535,r1496=HC01378_e"  // TCA
-		};
+//				"tr002=HC00266_e", // Isocitrate
+//				"r1144=HC00034_e", // Glutamate
+//				"r2525=HC00067_e", // Glutamine
+//				"r1027=HC01472_e",  // GCDCA
+//				"r1534,r1494=HC00863_e", // GCA
+//				"r1535,r1496=HC01378_e"  // TCA
+//		};
 		
 		//String[] transportFluxes = transportFluxesFromExtracellConcChanges(trFluxes, reactionIndices, speciesIndices);
 		//double conversionFactor = splittedDocument.getModel().getCompartment("default").getSize();
 
 		
 		// constraint same fluxes
-		String[] sameFluxes = {
-				"+lr008-lr008_rev=+r1027-r1027_rev",
-				"+lr009-lr009_rev=+r1534-r1494",
-				"+lr010-lr010_rev=+r1535-r1496",
-				"+r1032-r1032_rev=+r0396-r0353",
-				"+r2526-r2526_rev=+r0060+r0160",
-				"+r2078-r2078_rev=+r0171_rev-r0171",
-				"+r2524-r2524_rev=+r0080-r0080_rev-r0160",
-				"+r2525-r2525_rev=+r0078-r0077"
+//		String[] sameFluxes = {
+//				"+lr008-lr008_rev=+r1027-r1027_rev",
+//				"+lr009-lr009_rev=+r1534-r1494",
+//				"+lr010-lr010_rev=+r1535-r1496",
+//				"+r1032-r1032_rev=+r0396-r0353",
+//				"+r2526-r2526_rev=+r0060+r0160",
+//				"+r2078-r2078_rev=+r0171_rev-r0171",
+//				"+r2524-r2524_rev=+r0080-r0080_rev-r0160",
+//				"+r2525-r2525_rev=+r0078-r0077"
+//				};
 
-				};
-		String[] fluxPairs = getReactionPairIndices(reactionIndices, sameFluxes);
+//		String[] fluxPairs = getReactionPairIndices(reactionIndices, sameFluxes);
 		
+		// Read known fluxes file
+//		String kf = args[2];
+//		Map<Integer, Double> knownFluxes = null;
+//		if (!kf.equalsIgnoreCase("noFile")) {
+//			knownFluxes = readKnownFluxes(kf, true, reactionIndices);
+//		}
 		
 		// Run a dynamic FBA
 		
 		// using splines
-		//DynamicFBA dfba = new DynamicFBA(oriDocument, concMT, 102);
+//		DynamicFBA dfba = new DynamicFBA(oriDocument, fullMT, 102);
 		
 		// using no splines
-		DynamicFBA dfba = new DynamicFBA(oriDocument, concMT);
+		DynamicFBA dfba = new DynamicFBA(oriDocument, fullMT);
+
+		MultiTable wmt =dfba.getDFBAStartingMultiTable();
+
 		
 		
-		// Read known fluxes file
-		MultiTable mt = concMT;
-//		Map<Integer, double[]> knownFluxes = readKnownFluxes(args[2], true,
-//			reactionIndices, mt.getTimePoints().length);
-		Map<Integer, double[]> knownFluxes = new HashMap<Integer, double[]>();
-		for (String id : mt.getBlock(0).getIdentifiers()) {
-			Reaction r = model.getReaction(id);
-			if (r != null) {
-				double[] values = new double[mt.getRowCount()];
-				Column c = mt.getColumn(id);
-				for (int i = 0; i != values.length; i++) {
-					values[i] = c.getValue(i);
-				}
-				knownFluxes.put(reactionIndices.get(id), values);
-				
-			}
-		}
+		Map<Integer, double[]> knownFluxes = FluxMinimizationUtils.getKnownFluxesMap(dfba.getDFBAStartingMultiTable(), 1);
 		
-		FluxMinimizationII fm2 = new FluxMinimizationII();
+		FluxMinimizationIIa fm2 = new FluxMinimizationIIa();
+		fm2.setFactors(previousFactors);
+		fm2.setLambda2(10000);
+		fm2.setCplexIterations(600);
 		
-//			FluxMinimizationIIa fm2 = new FluxMinimizationIIa();
-//			fm2.setFactors(previousFactors);
-//		fm2.setFluxPairs(fluxPairs);
-////		fm2.setTransportFactors(transportfactors);
-	//		fm2.setTransportFluxes(transportFluxes);
-////		fm2.setConversionFactor(conversionFactor);
-			
-//		fm2.setLambda2(1000);
-			
-			fm2.setKnownFluxes(knownFluxes);
-			dfba.runDynamicFBA(fm2);
+		fm2.setConstraintJ0(true);
+		fm2.setUsePreviousEstimations(false);
+		fm2.setLittleFluxChanges(false);
+		fm2.setConstraintZm(true);
+		fm2.setFluxDynamic(true); // TODO test it
+		fm2.setUseKnownFluxes(true);
+//		fm2.setKnownFluxes(knownFluxes);
+		fm2.setFluxLowerAndUpperBounds(0, 300);
+		fm2.setConcentrationLowerAndUpperBounds(0, 180000);
+		
+		dfba.runDynamicFBA(fm2);
 		
 		// Print solution MultiTable
-		MultiTable solution = dfba.getSolutionMultiTable();
+		MultiTable solution = dfba.getFinalMultiTable();
 		System.out.println(solution.toString());
-		
 		(new CSVWriter()).write(solution, ',', args[3]);
 		
 	}

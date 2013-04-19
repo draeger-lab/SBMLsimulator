@@ -17,21 +17,19 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
-import java.util.List;
+import ilog.concert.IloException;
+import ilog.cplex.IloCplex;
+
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLDocument;
-import org.sbml.jsbml.Species;
 import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.math.SplineCalculation;
 import org.simulator.math.odes.MultiTable;
+import org.simulator.math.odes.MultiTable.Block;
 import org.simulator.math.odes.MultiTable.Block.Column;
-
-import ilog.concert.IloException;
-import ilog.cplex.IloCplex;
 
 /**
  * 
@@ -47,21 +45,34 @@ public class DynamicFBA {
 	private static final transient Logger logger = Logger.getLogger(DynamicFBA.class.getName());
 	
 	/**
-	 * The SBML document on which the dynamic FBA performs
+	 * The original SBML document
 	 */
 	protected static SBMLDocument originalDocument;
 	
 	/**
-	 * A {@link MultiTable} with all interpolated concentration values of the
-	 * set dynamic FBA points in time
+	 * The splitted SBML document on which the dynamic FBA will be performed
 	 */
-	private MultiTable dFBAConcentrations;
+	protected static SBMLDocument splittedDocument;
 	
 	/**
-	 * A {@link MultiTable} with all solved values (flux, concentration, gibbs energy),
-	 * optimized by CPLEX, for each point in time of the dynamic flux balance analysis
+	 * The starting {@link MultiTable} with all given and then interpolated concentration and flux values.
+	 * Contains all columns according to the original {@link SBMLDocument}.
 	 */
-	private MultiTable solutionMultiTable;
+	private MultiTable dFBAStartingMultiTable;
+	
+	/**
+	 * A {@link MultiTable} with all solved values (flux, concentration, etc),
+	 * optimized by CPLEX, for each point in time of the dynamic flux balance analysis.
+	 * Contains all columns according to the splitted {@link SBMLDocument}.
+	 */
+	private MultiTable workingSolutionMultiTable;
+
+	/**
+	 * A {@link MultiTable} with all solved values,
+	 * optimized by CPLEX, for each point in time of the dynamic flux balance analysis.
+	 * Contains all columns according to the original {@link SBMLDocument}.
+	 */
+	private MultiTable finalSolutionMultiTable = null;
 	
 	/**
 	 * contains the default Time Name for the Multitable
@@ -84,8 +95,8 @@ public class DynamicFBA {
 		// Save original SBML document
 		originalDocument = document;
 
-		// Interpolate concentrations
-		this.dFBAConcentrations = calculateSplineInterpolation(table, timePointCount);		
+		// Interpolate concentrations and fluxes
+		this.dFBAStartingMultiTable = calculateSplineInterpolation(table, timePointCount);		
 	}
 	
 	 /**
@@ -98,17 +109,28 @@ public class DynamicFBA {
 	}
 	
 	/**
-	 * @return The concentrations of each point in time in a {@link MultiTable}
+	 * @return The non sparse {@link MultiTable} of each time point, 
+	 * with all given concentration and flux information according to the originalDocument
 	 */
-	public MultiTable getDFBAConcentrations() {
-		return this.dFBAConcentrations;
+	public MultiTable getDFBAStartingMultiTable() {
+		return this.dFBAStartingMultiTable;
 	}
 	
 	/**
-	 * @return The solution {@link MultiTable} for visualization
+	 * @return The temporarily solution {@link MultiTable} according to the splittedDocument
 	 */
-	public MultiTable getSolutionMultiTable() {
-		return this.solutionMultiTable;
+	public MultiTable getWorkingSolutionMultiTable() {
+		return this.workingSolutionMultiTable;
+	}
+	
+	/**
+	 * @return The final solution {@link MultiTable} for visualization according to the originalDocument
+	 */
+	public MultiTable getFinalMultiTable() {
+		if (this.finalSolutionMultiTable == null) {
+			finalizeSolutionMultiTable();
+		}
+		return this.finalSolutionMultiTable;
 	}
 	
 	/**
@@ -117,16 +139,16 @@ public class DynamicFBA {
 	 * 
 	 * @param function
 	 */
-	public void initializeSolutionMultiTable(TargetFunction function) {
-		this.solutionMultiTable = new MultiTable();
+	public void initializeWorkingSolutionMultiTable(TargetFunction function) {
+		this.workingSolutionMultiTable = new MultiTable();
 		
-		this.solutionMultiTable.setTimeName(getDefaultTimeName());
-		this.solutionMultiTable.setTimePoints(dFBATimePoints);
+		this.workingSolutionMultiTable.setTimeName(getDefaultTimeName());
+		this.workingSolutionMultiTable.setTimePoints(dFBATimePoints);
 		
 		// Add specific blocks with each specific identifiers
 		String[][] identifiers = function.getTargetVariablesIds();
 		for (int idsNr = 0; idsNr < identifiers.length; idsNr++) {
-			this.solutionMultiTable.addBlock(identifiers[idsNr]);
+			this.workingSolutionMultiTable.addBlock(identifiers[idsNr]);
 		}
 	}
 	
@@ -143,18 +165,32 @@ public class DynamicFBA {
 		function.initCplexVariables(cplex);
 		
 		// Initialize the solution MultiTable
-		initializeSolutionMultiTable(function);
+		initializeWorkingSolutionMultiTable(function);
 		
+		Model m = originalDocument.getModel();
 		// Set the complete interpolated concentrations
-		int speciesCount = originalDocument.getModel().getSpeciesCount();
+		int speciesCount = m.getSpeciesCount();
 		double[][] concentrations = new double[dFBATimePoints.length][speciesCount];
-		for (int i = 0; i < dFBATimePoints.length; i++) {
-			for (int j = 0; j < speciesCount; j++) {
-				// Remember: first column of each MultiTable contains the timePoints -> j + 1
-				concentrations[i][j] = this.dFBAConcentrations.getValueAt(i, j + 1);
+		Block conc = dFBAStartingMultiTable.getBlock(0);
+
+		int reactionCount = originalDocument.getModel().getReactionCount();
+		double[][] netFluxes = new double[dFBATimePoints.length][reactionCount];
+		Block flux = dFBAStartingMultiTable.getBlock(1);
+		
+		
+		for (int t = 0; t < dFBATimePoints.length; t++) {
+			for (int i = 0; i < speciesCount; i++) {
+				// Remember: first column of each MultiTable/block contains the timePoints -> i + 1
+				concentrations[t][i] = conc.getValueAt(t, i + 1);
+			}
+			for (int j = 0; j < reactionCount; j++) {
+				// Remember: first column of each MultiTable/block contains the timePoints -> j + 1
+				netFluxes[t][j] = flux.getValueAt(t, j + 1);
 			}
 		}
 		function.setInterpolatedConcentrations(concentrations);
+		function.setInterpolatedFluxes(netFluxes);
+		
 		
 		// Iterate over the complete points in time of the dynamic FBA
 		for (int i = 0; i < dFBATimePoints.length; i++) {
@@ -165,34 +201,59 @@ public class DynamicFBA {
 			// (Reset the CPLEX object! If not, a MultipleObjectiveException is waiting!)
 			cplex.clearModel();
 			
-			function.saveValuesForCurrentTimePoint(this.solutionMultiTable);
+			function.saveValuesForCurrentTimePoint(this.workingSolutionMultiTable);
 		}
 
 		// Stop the CPLEX stream
 		cplex.end();
 		
-		// Calculate the net fluxes according to the reverse reaction saved in the map
-		Set<String> reversibleReactions = FluxMinimizationUtils.reversibleReactions;
+		finalizeSolutionMultiTable();
 		
-		for (String currentRevReactionId: reversibleReactions) {
-			// Block 1 contains the fluxes
-			Column currentReactionCol = this.solutionMultiTable.getBlock(1).getColumn(currentRevReactionId);
-			Column currentRevReactionCol = this.solutionMultiTable.getBlock(1).getColumn(currentRevReactionId + FluxMinimizationUtils.endingForBackwardReaction);
-			
-			for (int timePoint = 0; timePoint < this.solutionMultiTable.getRowCount(); timePoint++) {
-				// Net flux = forward flux - reverse flux
-				double netFlux = currentReactionCol.getValue(timePoint) - currentRevReactionCol.getValue(timePoint);
-				
-				// Block 0 contains the concentrations
-				int block0Count = this.solutionMultiTable.getBlock(0).getColumnCount();
-				int specificColumn = block0Count + this.solutionMultiTable.getBlock(1).findColumn(currentReactionCol.getColumnName());
-				
+		
+	}
+	
+	/**
+	 * Finalizes the Solution {@link MultiTable} e.g. eliminating temporarily backward reactions of reversible reaction
+	 */
+	private void finalizeSolutionMultiTable() {
+		this.finalSolutionMultiTable = dFBAStartingMultiTable;
+		
+		Set<String> reversibleReactions = FluxMinimizationUtils.reversibleReactions;
+		Model m = originalDocument.getModel();
+
+		int speciesCount = m.getSpeciesCount();
+		for (int i = 0; i < speciesCount; i++) {
+			String currentSpeciesId = m.getSpecies(i).getId();
+			Column workingReactionCol = this.workingSolutionMultiTable.getColumn(currentSpeciesId);
+			int specificColumn = this.finalSolutionMultiTable.findColumn(currentSpeciesId);
+			for (int timePoint = 0; timePoint < this.workingSolutionMultiTable.getRowCount(); timePoint++) {
+				double concentration = workingReactionCol.getValue(timePoint);
 				// Overwrite the specific column value with the new net flux
-				this.solutionMultiTable.setValueAt(netFlux, timePoint, specificColumn+1);
+				this.finalSolutionMultiTable.setValueAt(concentration, timePoint, specificColumn);
+			}
+		}
+		
+		int reactionCount = m.getReactionCount();
+		for (int j = 0; j < reactionCount; j++) {
+			String currentReactionId = m.getReaction(j).getId();
+			Column workingReactionCol = this.workingSolutionMultiTable.getColumn(currentReactionId);
+			int specificColumn = this.finalSolutionMultiTable.findColumn(currentReactionId);
+			for (int timePoint = 0; timePoint < this.workingSolutionMultiTable.getRowCount(); timePoint++) {
+				double netFlux;
+				if (reversibleReactions.contains(m.getReaction(j).getId())) {
+					Column workingRevReactionCol = this.workingSolutionMultiTable.getColumn(currentReactionId + FluxMinimizationUtils.endingForBackwardReaction);
+					// Net flux = forward flux - reverse flux
+					netFlux = workingReactionCol.getValue(timePoint) - workingRevReactionCol.getValue(timePoint);
+				}
+				else {
+					netFlux = workingReactionCol.getValue(timePoint);
+				}
+				// Overwrite the specific column value with the new net flux
+				this.finalSolutionMultiTable.setValueAt(netFlux, timePoint, specificColumn);
 			}
 		}
 	}
-	
+
 	/**
 	 * (Use it only if each point in time has the same distance from its neighboring point in time).
 	 * 
@@ -202,17 +263,31 @@ public class DynamicFBA {
 	 */
 	public MultiTable calculateSplineInterpolation(MultiTable table, int timePointCount) {
 		// Start initialize new MultiTable
-		MultiTable fullSpeciesMultiTable = new MultiTable();
-		int speciesCount = originalDocument.getModel().getSpeciesCount();
-		fullSpeciesMultiTable.setTimeName(table.getTimeName());
-		fullSpeciesMultiTable.setTimePoints(table.getTimePoints());
-		
+//		MultiTable fullSpeciesMultiTable = new MultiTable();
 		Model m = originalDocument.getModel();
+		int speciesCount = m.getSpeciesCount();
+		int reactionCount = m.getReactionCount();
+//		fullSpeciesMultiTable.setTimeName(table.getTimeName());
+//		fullSpeciesMultiTable.setTimePoints(table.getTimePoints());
+		
+		
 		String[] speciesIds = new String[speciesCount];
 		for (int i = 0; i < speciesCount; i++) {
 			speciesIds[i] = m.getSpecies(i).getId();
 		}
-		fullSpeciesMultiTable.addBlock(speciesIds);
+		String[] reactionIds = new String[reactionCount];
+		for (int i = 0; i < reactionCount; i++) {
+			reactionIds[i] = m.getReaction(i).getId();
+		}
+		MultiTable fullMT = new MultiTable();
+		fullMT.setTimeName(table.getTimeName());
+		fullMT.setTimePoints(table.getTimePoints());
+		fullMT.addBlock(speciesIds);  // block 0
+		fullMT.addBlock(reactionIds); // block 1
+//		System.out.println(fullMT.getBlock(0).getColumnCount() + " " + fullMT.getBlock(1).getColumnCount() + " ... " + fullMT.getColumnCount()); // TODO sysout
+
+		
+//		fullSpeciesMultiTable.addBlock(speciesIds);
 		
 		for (int t = 0; t < table.getTimePoints().length; t++) {
 			double[] currentConcentrations = new double[speciesCount];
@@ -225,26 +300,38 @@ public class DynamicFBA {
 					currentConcentrations[i] = table.getValueAt(t, columnIndexMT);
 				}
 			}
-			fullSpeciesMultiTable.getBlock(0).setRowData(t, currentConcentrations);
+			fullMT.getBlock(0).setRowData(t, currentConcentrations);
+			
+			double[] currentFluxes = new double[reactionCount];
+			for (int j = 0; j < reactionCount; j++) {
+				String currentReactionId = m.getReaction(j).getId();
+				int columnIndexMT = table.getColumnIndex(currentReactionId);
+				if (columnIndexMT == -1) { // no entry in the original multi table
+					currentFluxes[j] = Double.NaN;
+				} else {
+					currentFluxes[j] = table.getValueAt(t, columnIndexMT);
+				}
+			}
+			fullMT.getBlock(1).setRowData(t, currentFluxes);
 		}
 		// Finish initialize new MultiTable
 
 		
 		// Set the dynamic FBA points in time
-		dFBATimePoints = fullSpeciesMultiTable.getTimePoints();
+		dFBATimePoints = fullMT.getTimePoints();
 		
 		// First, check if timePointCount is a valid number...
 		int givenTimePointLength = table.getTimePoints().length;
 		if (timePointCount < givenTimePointLength) {
 			logger.warning("TimePointCount (" + timePointCount + ") has to be greater than the given timePoint length (" + givenTimePointLength + ")!");
-			return fullSpeciesMultiTable;
+			return fullMT;
 		}
 		else if (timePointCount == givenTimePointLength) {
-			return fullSpeciesMultiTable;
+			return fullMT;
 		}
 		
 		// ... then interpolate
-		MultiTable fullTimePointMultiTable;
+		MultiTable fullTimePointMultiTable = null;
 		int inBetweenTimePoints = 0;
 		if (((timePointCount - 1) % (givenTimePointLength - 1)) == 0) {
 			inBetweenTimePoints = (timePointCount - givenTimePointLength) / (givenTimePointLength - 1);
@@ -254,13 +341,22 @@ public class DynamicFBA {
 			inBetweenTimePoints = (((multiplyFactor * (givenTimePointLength - 1)) + 1) - givenTimePointLength) / (givenTimePointLength - 1);
 			logger.info("TimePointCount (" + timePointCount + ") for better calculating set to: " + ((inBetweenTimePoints * (givenTimePointLength - 1)) + givenTimePointLength));
 		}
-		fullTimePointMultiTable = SplineCalculation.calculateSplineValues(fullSpeciesMultiTable, 0, inBetweenTimePoints, false);
+//		fullTimePointMultiTable = SplineCalculation.calculateSplineValues(fullSpeciesMultiTable, 0, inBetweenTimePoints, false);
 		
 		//Also interpolate the given fluxes
-		MultiTable fluxesTable = SplineCalculation.calculateSplineValues(table, 0, inBetweenTimePoints, false);
-			
-		fullTimePointMultiTable.addBlock(fluxesTable.getBlock(0).getIdentifiers());
-		fullTimePointMultiTable.getBlock(1).setData(fluxesTable.getBlock(0).getData());
+		for (int b = 0; b < fullMT.getBlockCount(); b++) {
+			MultiTable mt = SplineCalculation.calculateSplineValues(fullMT, b, inBetweenTimePoints, false);
+			if (fullTimePointMultiTable == null) {
+				
+				fullTimePointMultiTable = new MultiTable();
+				fullTimePointMultiTable.setTimePoints(mt.getTimePoints());
+			}
+			fullTimePointMultiTable.addBlock(mt.getBlock(0).getIdentifiers());
+			fullTimePointMultiTable.getBlock(b).setData(mt.getBlock(0).getData());
+		}
+//		MultiTable fluxesTable = SplineCalculation.calculateSplineValues(table, 0, inBetweenTimePoints, false);
+//		fullTimePointMultiTable.addBlock(fluxesTable.getBlock(0).getIdentifiers());
+//		fullTimePointMultiTable.getBlock(1).setData(fluxesTable.getBlock(0).getData());
 		
 		// Set the dynamic FBA points in time
 		dFBATimePoints = fullTimePointMultiTable.getTimePoints();
