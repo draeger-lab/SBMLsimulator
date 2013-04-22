@@ -120,7 +120,7 @@ public class FluxMinimizationII extends TargetFunction {
 	/**
 	 * flux lower bound
 	 */
-	protected double fluxLow = 0;
+	protected double fluxLow = -200;
 	
 	/**
 	 * flux upper bound
