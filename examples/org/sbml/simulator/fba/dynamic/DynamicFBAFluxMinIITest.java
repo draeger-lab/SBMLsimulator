@@ -157,7 +157,7 @@ public class DynamicFBAFluxMinIITest {
 		fm2.setUsePreviousEstimations(false);
 		fm2.setLittleFluxChanges(false);
 		fm2.setConstraintZm(true);
-		fm2.setFluxDynamic(true); // TODO test it
+		fm2.setFluxDynamic(false); // TODO test it
 		fm2.setUseKnownFluxes(true);
 //		fm2.setKnownFluxes(knownFluxes);
 		fm2.setFluxLowerAndUpperBounds(0, 300);
