@@ -105,7 +105,7 @@ public class FluxMinimizationII extends TargetFunction {
 	 * - the optimized fluxes in a double[]
 	 * - the optimized concentrations in a double[]
 	 */
-	private double[][] optimizedSolution;
+	protected double[][] optimizedSolution;
 	
 	/**
 	 * Lower bounds for CPLEX variables saved in a double array
@@ -344,7 +344,7 @@ public class FluxMinimizationII extends TargetFunction {
 		this.useKnownFluxes = b;
 	}
 	
-	protected MultiTable tempSolutionMultiTable;
+//	protected MultiTable workingSolutionMultiTable;
 	
 	/**
 	 * Prepare the FluxMinimization by setting the:
@@ -654,7 +654,7 @@ public class FluxMinimizationII extends TargetFunction {
 			ListOf<Reaction> listOfReactions = this.splittedDocument.getModel().getListOfReactions();
 			double[] optimizedFluxVector = new double[getTargetVariablesLengths()[0]];
 			for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
-				optimizedFluxVector[j] = solution[fluxPosition + j]; // J of the formula
+				optimizedFluxVector[j] = solution[fluxPosition + j]; // J_j of the formula
 				fluxMap.put(listOfReactions.get(j).getId(), optimizedFluxVector[j]);
 			}
 			System.out.println(fluxMap.toString());
@@ -672,32 +672,7 @@ public class FluxMinimizationII extends TargetFunction {
 				concMap2.put(listOfSpecies.get(i).getId(), this.completeConcentrations[this.getTimePointStep()][i]);
 			}
 			this.optimizedSolution[0] = optimizedConcentrations; // 1st position: concentrations
-			
-			this.previousEstimatedConcentrations = optimizedConcentrations;
-			
-//			for (int i = 0; i < optimizedConcentrations.length; i++) {
-//				double sumConcChange = 0;
-//				for (int j = 0; j < optimizedFluxVector.length; j++) {
-//					sumConcChange += (factors[i] * this.N_all.get(i, j) * optimizedFluxVector[j]);
-//				}
-//				
-//				if (this.getTimePointStep() > 0) {
-//				double delta_t = DynamicFBA.dFBATimePoints[this.getTimePointStep()] - DynamicFBA.dFBATimePoints[this.getTimePointStep() - 1];
-//				this.previousEstimatedConcentrations[i] = 
-//						tempSolutionMultiTable.getValueAt(this.getTimePointStep()-1, tempSolutionMultiTable.findColumn(splittedDocument.getModel().getSpecies(i).getId()))
-//						+ (sumConcChange * delta_t);
-//				System.out.print(splittedDocument.getModel().getSpecies(i).getId() + ": " + tempSolutionMultiTable.getValueAt(this.getTimePointStep()-1, tempSolutionMultiTable.findColumn(splittedDocument.getModel().getSpecies(i).getId())) 
-//						+ " + " + sumConcChange + " * " + delta_t + " = ");
-//				System.out.print(previousEstimatedConcentrations[i] + "..." + optimizedConcentrations[i]);
-//				System.out.println();
-//				}
-////				else {
-////					this.previousEstimatedConcentrations[i] = optimizedConcentrations[i];
-////				}
-//			}
-			
 		}
-		
 		return this.optimizedSolution;
 	}
 
@@ -705,28 +680,33 @@ public class FluxMinimizationII extends TargetFunction {
 	 * @see org.sbml.simulator.fba.dynamic.TargetFunction#saveValuesForCurrentTimePoint(org.simulator.math.odes.MultiTable)
 	 */
 	public void saveValuesForCurrentTimePoint(MultiTable workingSolutionMultiTable) {
-		for (int block = 0; block < workingSolutionMultiTable.getBlockCount(); block++) {
-				double[] currentSpecificSolution = optimizedSolution[block];
-				if(block == 0) { // for concentration
-					for(double value: currentSpecificSolution) {
-						if(value <= 0) {
-							System.out.println();
-						}
-					}
-					workingSolutionMultiTable.getBlock(block).setRowData(this.getTimePointStep(), currentSpecificSolution);
-				}
-				else if((block == 1) && (this.getTimePointStep() > 0)){ // for fluxes
-					workingSolutionMultiTable.getBlock(block).setRowData(this.getTimePointStep() - 1, currentSpecificSolution);
-				}
-				
-				if((block == 1) && (this.getTimePointStep() == workingSolutionMultiTable.getRowCount() - 1)) {
-					double[] nanArray = new double[optimizedSolution[1].length];
-					Arrays.fill(nanArray, Double.NaN);
-					workingSolutionMultiTable.getBlock(block).setRowData(this.getTimePointStep(), nanArray);
-				}
+		// for concentration
+		double[] currentSpecificSolution = optimizedSolution[0];
+		for(double value: currentSpecificSolution) {
+			if(value <= 0) {
+				System.out.println();
+			}
 		}
-		this.tempSolutionMultiTable = workingSolutionMultiTable;
+		workingSolutionMultiTable.getBlock(0).setRowData(this.getTimePointStep(), currentSpecificSolution);
+		// save previous estimated concentrations
+		this.previousEstimatedConcentrations = currentSpecificSolution;
+		
+		// for fluxes
+		double[] currentFluxSolution = optimizedSolution[1];
+		if(this.getTimePointStep() > 0){
+			workingSolutionMultiTable.getBlock(1).setRowData(this.getTimePointStep() - 1, currentFluxSolution);
+		}
+		// for the last time point
+		if(this.getTimePointStep() == workingSolutionMultiTable.getRowCount() - 1) {
+			double[] nanArray = new double[optimizedSolution[1].length];
+			Arrays.fill(nanArray, Double.NaN);
+			workingSolutionMultiTable.getBlock(1).setRowData(this.getTimePointStep(), nanArray);
+		}
+//		this.workingSolutionMultiTable = workingSolutionMultiTable;
+
 	}
+	
+	
 
 	
 }
