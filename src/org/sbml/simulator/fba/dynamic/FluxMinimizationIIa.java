@@ -142,21 +142,21 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		}
 		
 		// Constraint supporting net fluxes greater then zero
-		if (isFluxDynamic()) {
-			for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
-				IloNumExpr j_j_min = cplex.numExpr();
-				if (FluxMinimizationUtils.reverseReaction.containsKey(j)) {
-					j_j_min = cplex.diff(
-							getVariables()[fluxPosition + j],
-							getVariables()[fluxPosition	+ FluxMinimizationUtils.reverseReaction.get(j)]);
-				} else {
-					j_j_min = getVariables()[fluxPosition + j];
-				}
-				
-//				cplex.addGe(cplex.constant(cplex.getValue(j_j_min)), epsilon);
-				cplex.maximize(j_j_min);
-			}
-		}
+//		if (isFluxDynamic()) {
+//			for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
+//				IloNumExpr j_j_min = cplex.numExpr();
+//				if (FluxMinimizationUtils.reverseReaction.containsKey(j)) {
+//					j_j_min = cplex.diff(
+//							getVariables()[fluxPosition + j],
+//							getVariables()[fluxPosition	+ FluxMinimizationUtils.reverseReaction.get(j)]);
+//				} else {
+//					j_j_min = getVariables()[fluxPosition + j];
+//				}
+//				
+////				cplex.addGe(cplex.constant(cplex.getValue(j_j_min)), epsilon);
+//				cplex.maximize(j_j_min);
+//			}
+//		}
 		
 		// Constraint of using known fluxes from the given multitable
 		if (this.useKnownFluxes) {
@@ -166,13 +166,7 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 					double knownFluxValue = this.completeNetFluxes[this.getTimePointStep()][j];
 
 					IloNumExpr j_j_min = cplex.numExpr();
-					if (FluxMinimizationUtils.reverseReaction.containsKey(j)) {
-						j_j_min = cplex.diff(
-								getVariables()[fluxPosition + j],
-								getVariables()[fluxPosition	+ FluxMinimizationUtils.reverseReaction.get(j)]);
-					} else {
-						j_j_min = getVariables()[fluxPosition + j];
-					}
+					j_j_min = getVariables()[fluxPosition + j];
 					cplex.addEq(j_j_min, knownFluxValue);
 				}
 			}
