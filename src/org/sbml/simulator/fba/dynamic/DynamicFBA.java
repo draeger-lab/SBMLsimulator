@@ -73,6 +73,11 @@ public class DynamicFBA {
 	 * Contains all columns according to the original {@link SBMLDocument}.
 	 */
 	private MultiTable finalSolutionMultiTable = null;
+
+	/**
+	 * The target function
+	 */
+	private TargetFunction function;
 	
 	/**
 	 * contains the default Time Name for the Multitable
@@ -159,6 +164,8 @@ public class DynamicFBA {
 	 * @throws IloException
 	 */
 	public void runDynamicFBA(TargetFunction function) throws IloException {
+		this.function = function;
+		
 		// Initialize a new CPLEX object
 		IloCplex cplex = new IloCplex();
 		// Initialize the CPLEX variables
@@ -241,7 +248,7 @@ public class DynamicFBA {
 			int specificColumn = this.finalSolutionMultiTable.findColumn(currentReactionId);
 			for (int timePoint = 0; timePoint < this.workingSolutionMultiTable.getRowCount(); timePoint++) {
 				double netFlux;
-				if (reversibleReactions.contains(m.getReaction(j).getId())) {
+				if ((this.function instanceof FluxMinimization) && (reversibleReactions.contains(m.getReaction(j).getId()))) {
 					Column workingRevReactionCol = this.workingSolutionMultiTable.getColumn(currentReactionId + FluxMinimizationUtils.endingForBackwardReaction);
 					// Net flux = forward flux - reverse flux
 					netFlux = workingReactionCol.getValue(timePoint) - workingRevReactionCol.getValue(timePoint);

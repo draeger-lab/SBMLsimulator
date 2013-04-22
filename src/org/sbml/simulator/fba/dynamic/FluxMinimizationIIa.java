@@ -110,7 +110,7 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 	@Override
 	public void addConstraintsToTargetFunction(IloCplex cplex)
 		throws IloException {
-		int speciesCount = this.splittedDocument.getModel().getSpeciesCount();
+		int speciesCount = this.document.getModel().getSpeciesCount();
 		
 		int fluxPosition = 0;
 		int concentrationPosition = getTargetVariablesLengths()[0];
@@ -121,7 +121,9 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		// Constraint J_j >= 0
 		if (isConstraintJ0()) {
 			for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
-				cplex.addGe(getVariables()[fluxPosition + j], 0);
+				if(!document.getModel().getReaction(j).isReversible()) {
+					cplex.addGe(getVariables()[fluxPosition + j], 0);
+				}
 			}
 		}
 		
@@ -129,7 +131,7 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		if (isLittleFluxChanges()) {
 			for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
 				if (this.getTimePointStep() > 0) {
-					if (!this.splittedDocument.getModel().getReaction(j).isFast()) {
+					if (!this.document.getModel().getReaction(j).isFast()) {
 						IloNumExpr j_j_min = cplex.numExpr();
 						j_j_min = getVariables()[fluxPosition + j];
 						cplex.diff(j_j_min, cplex.constant(this.optimizedSolution[1][j]));
@@ -158,7 +160,7 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		
 		// Constraint of using known fluxes from the given multitable
 		if (this.useKnownFluxes) {
-			for (int j = 0; j < DynamicFBA.originalDocument.getModel().getReactionCount(); j++) {
+			for (int j = 0; j < document.getModel().getReactionCount(); j++) {
 				// Flux J_j
 				if ((this.getTimePointStep() > 0) && !Double.isNaN(this.completeNetFluxes[this.getTimePointStep()][j])) {
 					double knownFluxValue = this.completeNetFluxes[this.getTimePointStep()][j];
