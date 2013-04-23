@@ -41,6 +41,7 @@ import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -336,7 +337,11 @@ public class SimulationPanel extends JPanel implements
    * @return
    */
   public MultiTable getSimulationResultsTable() {
-    return (MultiTable) simTable.getModel();
+  	TableModel model = simTable.getModel();
+  	if (model instanceof MultiTable) {
+  		return (MultiTable) model;
+  	}
+  	return null;
   }
   
   /**

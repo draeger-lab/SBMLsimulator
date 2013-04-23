@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The java based ANT tool is available from         -->
+<!-- http://jakarta.apache.org/ant                     -->
+
+<project
+  name="SBMLsimulator"
+  default="zip"
+  basedir="."
+>
+
+  <description>
+    This buildfile is used to build various versions for distributing 
+    the SBMLsimulator and to ease the creation of its distribution.
+  </description>
+	
+  <!-- =================================================================== -->
+  <!-- Displays a help message                                             -->
+  <!-- =================================================================== -->
+  <target
+	name="help"
+  	description="Displays a help message"
+  >
+    <echo>
+      This is an ANT build script to build a stand-alone JAR for
+	  SBMLsimulator.
+	    	
+	  The resulting redistributable is the SIGNED jar file,
+      stored in $appJar which is currently "SBMLsimulator_v$version.jar".
+    </echo>
+  </target>
+
+  <!-- =================================================================== -->
+  <!-- Initialize the build script                                         -->
+  <!-- =================================================================== -->
+  <target 
+    name="init"
+    description="Defines some general properties that are used throughout the tasks"
+  >
+  	<echo>
+  	  PLEASE MAKE SURE ALL PATHS ARE CORRECT AND DECIDE IF YOU WANT
+  	  TO USE THE LIB-JARs OR REFERENFCED PROJETS.
+  	</echo>
+  	
+    <tstamp>
+      <format property="YEAR" pattern="yyyy"/>
+    </tstamp>
+    <tstamp/> <!-- set ${TODAY} and ${TSTAMP} -->
+    <property name="Name" value="SBMLsimulator"/>
+    <property name="version" value="1.1"/>
+
+    <echo message="-------------- ${Name} ${version}  ---------------"/>
+    <echo message="--------------    ${TODAY}   ---------------"/>
+    <echo message="--------------    ${DSTAMP} ${TSTAMP}   ---------------"/>
+    
+    <!-- For building the project -->
+    <property name="build.dir"    value="${basedir}/build"/>
+    <property name="build.src"    value="${build.dir}/src"/>
+    <property name="build.dest"   value="${build.dir}/classes"/>
+    <property name="build.number" value="${DSTAMP}-${TSTAMP}"/>
+    
+    <!-- For documentation -->
+    <property name="doc" location="${basedir}/doc/api"/>
+    
+    <!-- For compiling the project -->
+    <property name="src" location="${basedir}/src"/>
+    <property name="test" location="${basedir}/test"/>
+    <property name="resources" location="${basedir}/resources"/>
+    <property name="lib" location="${basedir}/lib"/>
+    <property name="lib-garuda" location="${lib}/garuda"/>
+    <path id="classpath">
+      <fileset dir="${lib}"     includes="**.jar, **/*.jar, **.zip"/>
+      <fileset dir="${lib-garuda}" includes="**.jar, **/*.jar, **.zip"/>
+    </path>
+    <property environment="env"/>
+    <property name="build.compiler" value="modern"/>
+    <property name="debug" value="on"/>
+    <property name="optimize" value="on"/>
+    <property name="deprecation" value="false"/>
+    <property name="verbose" value="false"/>
+
+    <!-- For packing JARs -->
+    <property name="dist" location="${basedir}/dist"/>
+    <property name="JAR_Name" value="${Name}"/>
+    <property name="dist.dir" value="${dist}/${JAR_Name}-${version}"/>
+    <property name="appJar"   value="${dist.dir}/${JAR_Name}-${version}.jar"/>
+  </target>
+
+  <!-- =================================================================== -->
+  <!-- Prepares the build directory                                        -->
+  <!-- =================================================================== -->
+  <target
+    name="prepare"
+    depends="init"
+    description="Prepares the build directory"
+  >
+    <mkdir dir="${build.dir}"/>
+    <mkdir dir="${dist}"/>
+    <echo message="Done"/>
+  </target>
+
+  <!-- =================================================================== -->
+  <!-- Prepares the source code                                            -->
+  <!-- =================================================================== -->
+  <target
+    name="prepare-src"
+    depends="prepare"
+    description="Prepares the source code"
+  >
+    <echo message="Removing existing directories"/>
+    <delete dir="${build.dest}"/>
+      
+    <echo message="Creating target directories"/>
+    <mkdir dir="${build.src}"/>
+    <mkdir dir="${build.dest}"/>
+    <mkdir dir="${build.dest}/META-INF"/>
+    <mkdir dir="${dist}"/>
+    <mkdir dir="${dist.dir}"/>
+
+    <!-- copy src files -->
+    <copy todir="${build.src}" overwrite="yes">
+    <fileset 
+      dir="${src}"
+      excludes="**/.svn*, **/*.class, **/*~, **/*.tgz, **/*.zip"
+    />
+    <fileset
+      dir="${test}"
+      excludes="**/.svn*, **/*.class, **/*~, **/*.tgz, **/*.zip"
+    />
+    <fileset 
+      dir="${resources}"
+      includes="org/**, **/*.properties, **/*.xml, **/*.png, **/*.jpg"
+      excludes="**/.svn*, **/*~, **/*.tgz, **/*.zip"/>
+    </copy>
+    
+  </target>
+    
+  <!-- =================================================================== -->
+  <!-- Extracts the current revision number of the project from SVN        -->
+  <!-- =================================================================== -->
+  <target
+    name="svnrevision"
+    depends="init"
+    description="Determines the current SVN revions number and stores it in a variable."
+  >
+    <exec executable="svnversion" outputproperty="repository.revision">
+    <arg line="-c ${basedir}"/>
+    <redirector>
+      <outputfilterchain>
+      <tokenfilter>
+        <replaceregex pattern="[0-9]+\:" replace=""/>
+        <replaceregex pattern="[PM]+" replace=""/>
+      </tokenfilter>
+      </outputfilterchain>
+      </redirector>
+    </exec>
+    
+    <echo message="Current revision of ${Name} is ${repository.revision}"/>    
+    <property name="build.name" value="Revision ${repository.revision} ${TODAY} (Build ${build.number})"/>
+
+  </target>
+    
+  <!-- =================================================================== -->
+  <!-- Compile                                                             -->
+  <!-- =================================================================== -->
+  <target
+    name="compile"
+    depends="svnrevision, prepare-src"
+    description="Compiles the source in the build directory"
+  >
+    <echo message="Compiling the entire ${Name} project"/>
+    <javac
+    classpathref="classpath"
+    compiler="${build.compiler}"
+    debug="${debug}"
+    deprecation="${deprecation}"
+    destdir="${build.dest}"
+    listfiles="yes"
+    memoryMaximumSize="512M"
+    nowarn="no"
+    optimize="${optimize}"
+    source="1.5"
+    target="1.5"
+    verbose="${verbose}"
+    >
+      <src path="${build.src}"/>
+    </javac>
+      
+    <manifest file="${build.dest}/META-INF/MANIFEST.MF">
+      <attribute name="Main-Class" value="org.sbml.simulator.SBMLsimulator"/>
+      <attribute name="Built-By" value="${user.name}"/>
+      <attribute name="SplashScreen-Image" value="org/sbml/simulator/gui/img/Splash.gif"/>
+      <section name="${Name}">
+        <attribute name="Specification-Title"    value="${Name}"/>
+        <attribute name="Specification-Version"  value="${version}"/>
+        <attribute name="Specification-Vendor"   value="Center for Bioinformatics Tuebingen (ZBIT)"/>
+        <attribute name="Implementation-Title"   value="${Name}"/>
+        <attribute name="Implementation-Version" value="Revision ${repository.revision} (Build ${build.number})"/>
+        <attribute name="Implementation-Vendor"  value="University of Tuebingen"/>
+      </section>
+    </manifest>
+    
+  </target>
+
+  <!-- =================================================================== -->
+  <!-- JAR including libs                                                  -->
+  <!-- =================================================================== -->
+  <target
+    name="jar_incl-libs"
+    depends="compile"
+    description="Creates a JAR file including all class files and all third-party libraries, but no source files."
+  >
+
+    <jar
+      jarfile="${appJar}"
+      manifest="${build.dest}/META-INF/MANIFEST.MF"
+      update="true"
+    >
+      
+      <!-- TODO: compile! Include modules, test, src... -->
+    	
+      <!-- SBMLsimulator Classes -->
+      <fileset
+        dir="${build.dest}"
+      	includes="**/*.class"
+        excludes="**/package.html, **/package-info.class"
+      />
+      <fileset 
+        dir="${build.src}"
+        includes="**.txt **/*.txt, **.xml, **/*.xml, **.properties, **/*.properties, **.cfg, **/*.cfg, **.obo, **/*.obo, **/*.html, **.html, **/*.htm, **.htm, **/*.png, **.png, **/*.gif, **.gif"
+        excludes="**.java"
+      />
+      <fileset dir="${basedir}/licenses">
+        <include name="COPYING.txt"/>
+        <!-- <include name="README.txt"/> -->
+        <include name="AUTHORS.txt"/>
+      </fileset>
+      
+      <!-- These libraries are required by most classes -->
+      <zipfileset excludes="META-INF/**" src="${lib}/commons-math-2.2.jar"/>
+      <zipfileset excludes="META-INF/**" src="${lib}/EvA2Base.jar"/>
+      <zipfileset excludes="META-INF/**" src="${lib}/jcommon-1.0.17.jar"/>
+      <zipfileset excludes="META-INF/**" src="${lib}/jfreechart-1.0.15_beta.jar"/>
+      <zipfileset excludes="META-INF/**" src="${lib}/jsbml-1.0-a1-with-dependencies.jar"/>
+      <zipfileset excludes="META-INF/**" src="${lib}/SimulationCoreLibrary_v1.3_slim.jar"/>
+      <zipfileset excludes="META-INF/**" src="${lib}/sysbio.jar"/>
+      <zipfileset excludes="META-INF/**" src="${lib-garuda}/garuda-csr.jar"/>
+      <zipfileset excludes="META-INF/**" src="${lib-garuda}/jsonic-1.2.10.jar"/>
+    </jar>
+    
+  </target>
+	
+  <!-- =================================================================== -->
+  <!-- Signs the JAR file                                                  -->
+  <!-- =================================================================== -->
+  <!-- signs the application -->
+  <target
+    name="sign"
+  	depends="jar_incl-libs"
+  	description="Signs the JAR file"
+  >
+    <!-- Having an "keystore" file is required. Generate it with the "keytool" in the dist directory. -->  	
+	<signjar alias="${Name}" jar="${appJar}" keypass="d=dpfSBMLsimulator!" keystore="${dist}/keystore" signedjar="${appJar}" storepass="d=dpfSBMLsimulator!"/>
+  </target>
+
+  <!-- =================================================================== -->
+  <!-- Creates JavaDoc                                                     -->
+  <!-- =================================================================== -->
+  <target 
+    name="javadoc"
+  	depends="init, svnrevision"
+    description="Creates Javadoc for the ${Name}">
+    
+  	<property name="doc.location" value="${doc}/version_${version}"/>
+  	<property name="icon.file.name" value="SBMLsimulator_48.png"/>
+  	
+    <mkdir dir="${doc}"/>
+    <mkdir dir="${doc.location}"/>
+  	
+    <javadoc
+      access="protected"
+      author="true"
+      breakiterator="yes"
+      classpathref="classpath"
+      destdir="${doc.location}"
+      doctitle="${Name} ${version}"
+      footer="Generated at ${TODAY}&lt;br/&gt;Version ${version} Revision ${repository.revision}"
+      header="&lt;img src=&quot;resources/${icon.file.name}&quot;/&gt;"
+      maxmemory="96m"
+      nodeprecated="false"
+      nodeprecatedlist="false"
+      noindex="false"
+      nonavbar="false"
+      notree="false"
+      overview="${src}/overview.html"
+      packagenames="org.*"
+      source="1.5"
+      sourcepath="${src}:${test}:${resources}"
+      splitindex="true"
+      stylesheetfile="${doc}/javadoc-style.css"
+      use="true"
+      version="true"
+      windowtitle="${Name} ${version}"
+    >
+    	
+      <link href="http://commons.apache.org/proper/commons-io/javadocs/api-1.4/"/>
+      <link href="http://commons.apache.org/proper/commons-math/javadocs/api-2.2/"/>
+      <link href="http://download.oracle.com/javase/6/docs/api/"/>
+      <link href="http://javasourcecode.org/html/open-source/junit/junit-4.8/"/>
+      <link href="http://jaxen.codehaus.org/apidocs/"/>
+      <link href="http://sbml.org/Special/Software/JSBML/latest-stable/build/apidocs/"/>
+      <link href="http://www.jdom.org/docs/apidocs.1.1/"/>
+      <link href="http://www.xom.nu/apidocs/"/>
+      <link href="http://www.jfree.org/jcommon/api/"/>
+      <link href="http://simulation-core.sourceforge.net/version_1.3/"/>
+      
+      <!-- For JSBML classes:
+        <tag name="sbml.deprecated" description="Deprecated in SBML since: "/>
+        <tag name="jsbml.note" description="Note"/>
+        <tag name="jsbml.warning"/>
+        <tag name="doc.note"  description="Documentation note"/>
+      -->
+            
+    </javadoc>
+  	
+  	<!--
+    This is a hack: Actually, the header doesn't allow us to place img
+    tags; but we cheat by using HTML codes to hide it :-) This copies the
+    icon to the right folder:
+  	-->
+  	<property name="icon.file.src" value="${resources}/org/sbml/simulator/gui/img/${icon.file.name}"/>
+  	<property name="icon.file.dest" value="${doc.location}/resources/${icon.file.name}"/>
+  	<echo message="Copying file ${icon.file.src} to file ${icon.file.dest}..."/>
+  	<copy file="${icon.file.src}" tofile="${icon.file.dest}"/>
+	 
+  </target>
+	
+  <!-- =================================================================== -->
+  <!-- Cleans up the workspace                                             -->
+  <!-- =================================================================== -->
+  <target 
+    name="clean"
+    depends="init"
+    description="Removes all that has been built">
+    
+    <delete includeemptydirs="true" dir="${build.dir}"/>
+  </target>
+
+  <!-- =================================================================== -->
+  <!-- Creates the files for distribution and packs everything together    -->
+  <!-- =================================================================== -->
+  <target 
+    name="zip"
+    depends="javadoc,sign"
+  	description="Creates a ZIP file containing all sources, tests, resources, libs, licenses, text files, JAR file, and api documentation."
+  >
+  	<zip
+      compress="true"
+      comment="Full distribution of ${Name}"
+      destfile="${JAR_Name}_v${version}.zip"
+      encoding="utf-8"
+      level="9"
+      update="true"
+  	>
+      <zipfileset dir="${src}"              prefix="src"       excludes="*svn*" includes="**/*.java,**/*.html"/>
+      <zipfileset dir="${test}"             prefix="test"      excludes="*svn*" includes="**/*.java"/>
+      <zipfileset dir="${resources}"        prefix="resources" excludes="*svn*" includes="**/*.java,**/*.png"/>
+      <zipfileset dir="${lib}"              prefix="lib"       excludes="*svn*" includes="**/*.jar"/>
+      <zipfileset dir="${basedir}/licenses" prefix="licenses"  excludes="*svn*"/>
+      <zipfileset dir="${basedir}" excludes="*svn*,${basedir}/files" includes="*.xml *.txt"/>
+      <zipfileset dir="${doc}/version_${version}" prefix="doc/api/" excludes="*svn*,${doc}/publications,${doc}/posters"/>
+      <zipfileset dir="${dist.dir}" prefix="dist/" includes="${appJar}"/>
+    </zip>
+  </target>
+
+  <!-- =================================================================== -->
+  <!-- Executes the application                                            -->
+  <!-- =================================================================== -->
+  <target
+  	name="run"
+  	depends="sign"
+  	description="Executes the application"
+  >
+    <java classname="org.sbml.simulator.SBMLsimulator" fork="true">
+      <classpath>
+        <pathelement location="${appJar}"/>
+      </classpath>
+    </java>
+  </target>
+
+  <!-- =================================================================== -->
+  <!-- Creates a ZIP file for Garuda                                       -->
+  <!-- =================================================================== -->
+  <target
+    name="garuda"
+  	depends="sign"
+    description="Creates a ZIP file for Garuda">
+    
+  	<property name="uuid"  value="1cfbffa0-bbcb-4ca9-aa44-bfa4815e935e"/>
+    
+  	<zip
+      compress="true"
+      comment="Garuda Gadget ${Name}"
+      destfile="${dist.dir}/${JAR_Name}_v${version}_Garuda.zip"
+      encoding="utf-8"
+      level="9"
+      update="true"
+   	>
+  	  <mappedresources>
+  		<fileset file="${dist}/gadget_config.xml"/>
+  	    <globmapper from="*" to="${uuid}/*"/>
+  	  </mappedresources>
+      <mappedresources>
+        <fileset file="${appJar}"/>
+        <globmapper from="*" to="${uuid}/*"/>
+      </mappedresources>
+  	  <mappedresources>
+  	  	<fileset file="${resources}/org/sbml/simulator/gui/img/SBMLsimulator_64.png"/>
+  	  	<globmapper from="*" to="${uuid}/icons/*"/>
+  	  </mappedresources>
+  	  <mappedresources>
+  	  	<fileset file="${resources}/org/sbml/simulator/gui/img/Screenshot_1.PNG"/>
+  	  	<globmapper from="*" to="${uuid}/snapshot/*"/>
+  	  </mappedresources>
+    </zip>
+
+  </target>
+
+</project>
