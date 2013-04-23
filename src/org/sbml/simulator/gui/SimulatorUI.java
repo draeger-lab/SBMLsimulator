@@ -30,8 +30,10 @@ import java.beans.EventHandler;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -50,12 +52,15 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+import javax.swing.SwingWorker;
 import javax.swing.UIManager;
+import javax.xml.stream.XMLStreamException;
 
 import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.SBMLDocument;
+import org.sbml.jsbml.SBMLWriter;
 import org.sbml.jsbml.Species;
 import org.sbml.optimization.EvA2GUIStarter;
 import org.sbml.optimization.problem.EstimationOptions;
@@ -68,13 +73,20 @@ import org.simulator.math.odes.DESSolver;
 import org.simulator.math.odes.MultiTable;
 
 import de.zbit.AppConf;
+import de.zbit.garuda.GarudaActions;
+import de.zbit.garuda.GarudaFileSender;
+import de.zbit.garuda.GarudaGUIfactory;
+import de.zbit.garuda.GarudaOptions;
+import de.zbit.garuda.GarudaSoftwareBackend;
 import de.zbit.gui.BaseFrame;
 import de.zbit.gui.GUIOptions;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.SerialWorker;
+import de.zbit.gui.StatusBar;
 import de.zbit.gui.actioncommand.ActionCommand;
 import de.zbit.io.OpenedFile;
 import de.zbit.io.csv.CSVOptions;
+import de.zbit.io.csv.CSVWriter;
 import de.zbit.io.filefilter.SBFileFilter;
 import de.zbit.sbml.gui.SBMLReadingTask;
 import de.zbit.util.ResourceManager;
@@ -191,6 +203,11 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	 * GUI element that lets the user run the simulation.
 	 */
 	private SimulationPanel simPanel;
+	
+	/**
+	 * Garuda backend.
+	 */
+	private GarudaSoftwareBackend garudaBackend;
 
 	/**
 	 * 
@@ -289,29 +306,117 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	 */
 	@Override
 	protected JMenuItem[] additionalEditMenuItems() {
+		List<JMenuItem> items = new ArrayList<JMenuItem>(4);
+		
 		ImageIcon icon = new ImageIcon(SimulatorUI.class.getResource("img/PLAY_16.png"));
 		// new ImageIcon(SimulatorUI.class.getResource("img/CAMERA_16.png"))
 		UIManager.put("PLAY_16", icon);
-		JMenuItem startSimulation = GUITools.createJMenuItem(
+		items.add(GUITools.createJMenuItem(
 				EventHandler.create(ActionListener.class, this, "simulate"),
-				Command.SIMULATION_START, icon, 'S');
+				Command.SIMULATION_START, icon, 'S'));
 		
 		icon = new ImageIcon(SimulatorUI.class.getResource("img/STOP_16.png"));
 		UIManager.put("STOP_16", icon);
-		JMenuItem stopSimulation = GUITools.createJMenuItem(
+		items.add(GUITools.createJMenuItem(
 			EventHandler.create(ActionListener.class, this, "stopSimulation"),
-			Command.SIMULATION_STOP, icon, false);
+			Command.SIMULATION_STOP, icon, false));
 		
 		JMenuItem optimization = GUITools.createJMenuItem(
 				EventHandler.create(ActionListener.class, this, "optimize"),
 				Command.OPTIMIZATION, UIManager.getIcon("ICON_EVA2"), 'O');
 		optimization.setEnabled(false);
-		JCheckBoxMenuItem item = GUITools.createJCheckBoxMenuItem(
-			Command.SHOW_OPTIONS, simPanel != null ? simPanel.isShowSettingsPanel()
-					: true, simPanel != null, this);
-		return new JMenuItem[] { startSimulation, stopSimulation, optimization, item };
+		items.add(optimization);
+		
+		if (!appConf.getCmdArgs().containsKey(GarudaOptions.CONNECT_TO_GARUDA)
+				|| appConf.getCmdArgs().getBoolean(GarudaOptions.CONNECT_TO_GARUDA)) {
+			items.add(GarudaGUIfactory.createGarudaMenu(EventHandler.create(ActionListener.class, this, "sentToGaruda")));
+		}
+		
+		return items.toArray(new JMenuItem[0]);
 	}
 	
+	/**
+	 * 
+	 */
+	public void sentToGaruda() {
+		if (simPanel != null) {
+			final MultiTable table = simPanel.getSimulationResultsTable();
+			String options[] = {bundle.getString("SIM_DATA_FILE"), bundle.getString("MODEL_FILE")};
+			int option = 1;
+			if (table != null) {
+				option = JOptionPane.showOptionDialog(this,
+					StringUtil.toHTML(bundle.getString("SELECT_WHAT_TO_SEND_TO_GARUDA"), 60),
+					bundle.getString("GARUDA_FILE_SELECTION"),
+					JOptionPane.OK_CANCEL_OPTION,
+					JOptionPane.QUESTION_MESSAGE,
+					null,
+					options, options[option]);
+			}
+			if (option != JOptionPane.CLOSED_OPTION) {
+				final Component parent = this;
+				final int o = option;
+				final StatusBar bar = getStatusBar();
+				new SwingWorker<Void, Void>() {
+					/* (non-Javadoc)
+					 * @see javax.swing.SwingWorker#doInBackground()
+					 */
+					@Override
+					protected Void doInBackground() throws Exception {
+						try {
+							File file = null;
+							String fileType = null;
+							switch (o) {
+								case 0:
+									fileType = "Character-separated Value";
+									String name = table.getName();
+									if (name == null) {
+										name = "tmp_sim_data";
+									}
+									file = File.createTempFile(name, ".csv");
+									file.deleteOnExit();
+									logger.fine("Writing CSV file " + file.getAbsolutePath());
+									CSVWriter writer = new CSVWriter(bar.getProgressBar());
+									writer.write(table, file);
+									getStatusBar().reset();
+									break;
+								case 1:
+									fileType = "SBML";
+									Model model = simPanel.getModel();
+									SBMLDocument doc = model.getSBMLDocument();
+									String id = model.isSetId() ? model.getId() : "tmp_model";
+									file = File.createTempFile(id, ".xml");
+									file.deleteOnExit();
+									logger.fine("Writing SBML file " + file.getAbsolutePath());
+									SBMLWriter.write(doc, file, ' ', (short) 2);
+									break;
+								default:
+									return null;
+							}
+							logger.fine("Launching Garuda sender");
+							GarudaFileSender sender = new GarudaFileSender(parent, garudaBackend, file, fileType);
+							sender.execute();
+						} catch (IOException exc) {
+							GUITools.showErrorMessage(parent, exc);
+						} catch (XMLStreamException exc) {
+							GUITools.showErrorMessage(parent, exc);
+						}
+						return null;
+					}
+				}.execute();
+			}
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see de.zbit.gui.BaseFrame#additionalViewMenuItems()
+	 */
+	@Override
+	protected JMenuItem[] additionalViewMenuItems() {
+		return new JMenuItem[] {GUITools.createJCheckBoxMenuItem(
+			Command.SHOW_OPTIONS, simPanel != null ? simPanel.isShowSettingsPanel()
+					: true, simPanel != null, this)};
+	}
+
 	/**
 	 * Cancels a running simulation.
 	 * 
@@ -360,7 +465,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 				GUITools.setEnabled(false, getJMenuBar(), toolBar,
 					BaseAction.FILE_CLOSE, BaseAction.FILE_SAVE_AS,
 					Command.SIMULATION_START, Command.SHOW_OPTIONS, Command.OPEN_DATA,
-					Command.OPTIMIZATION, Command.PRINT);
+					Command.OPTIMIZATION, Command.PRINT, GarudaActions.SENT_TO_GARUDA);
 				GUITools.setEnabled(true, getJMenuBar(), toolBar, BaseAction.FILE_OPEN);
 				repaint();
 				return true;
@@ -518,7 +623,8 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		// First the model(s):
 		if ((modelFiles != null) && (modelFiles.length > 0)) {
 			try {
-				SBMLReadingTask task1 = new SBMLReadingTask(modelFiles[0], this, EventHandler.create(PropertyChangeListener.class, this, "setSBMLDocument", "newValue"));
+				SBMLReadingTask task1 = new SBMLReadingTask(modelFiles[0], this, 
+					EventHandler.create(PropertyChangeListener.class, this, "setSBMLDocument", "newValue"));
 				worker.add(task1);
 			} catch (Exception exc) {
 				GUITools.showErrorMessage(this, exc);
@@ -665,7 +771,13 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent evt) {
-		if (evt.getPropertyName().equalsIgnoreCase("progress")) {
+		String propName = evt.getPropertyName();
+		if (propName.equals(GarudaSoftwareBackend.GARUDA_ACTIVATED)) {
+			this.garudaBackend = (GarudaSoftwareBackend) evt.getNewValue();
+			if (simPanel != null) {
+				GUITools.setEnabled(true, getJMenuBar(), getJToolBar(), GarudaActions.SENT_TO_GARUDA);
+			}
+		} else if (propName.equalsIgnoreCase("progress")) {
 			AbstractProgressBar memoryBar = this.statusBar.showProgress();
 			ProgressBarSwing progressBar = (ProgressBarSwing) memoryBar;
 			// TODO: find a better place for this
@@ -673,7 +785,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 
 			int process = (int) Math.round(((Number) evt.getNewValue()).doubleValue());
 			memoryBar.percentageChanged(process, -1, bundle.getString("COMPUTED"));
-		} else if (evt.getPropertyName().equalsIgnoreCase("done")) {
+		} else if (propName.equalsIgnoreCase("done")) {
 			GUITools.setEnabled(false, getJMenuBar(), getJToolBar(), Command.SIMULATION_STOP);
 			statusBar.showProgress().finished();
 			statusBar.hideProgress();
@@ -730,6 +842,9 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 			GUITools.setEnabled(true, getJMenuBar(), toolBar,
 					BaseAction.FILE_SAVE_AS, Command.SIMULATION_START,
 					Command.SHOW_OPTIONS, Command.OPEN_DATA);
+			if (this.garudaBackend != null) {
+				GUITools.setEnabled(true, getJMenuBar(), getJToolBar(), GarudaActions.SENT_TO_GARUDA);
+			}
 			//			setTitle(String.format("%s - %s", getApplicationName(),
 			//				modelFiles[0].getAbsolutePath()));
 			validate();

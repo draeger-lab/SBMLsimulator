@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Gadget>
+    <UUID>1cfbffa0-bbcb-4ca9-aa44-bfa4815e935e</UUID>
+    <Name>SBMLsimulator</Name>
+    <LaunchCommand>open "gadgets/1cfbffa0-bbcb-4ca9-aa44-bfa4815e935e/SBMLsimulator-1.1.jar</LaunchCommand>
+    <IconPaths>
+        <Icon32Path>icons/SBMLsimulator_64.png</Icon32Path>
+    </IconPaths>
+    <Snapshots>
+        <SnapshotPath>snapshot/Screenshot_1.PNG</SnapshotPath>
+    </Snapshots>
+    <Categories>
+        <Category>Dynamic simulation</Category>
+        <Category>Parameter estimation</Category>
+        <Category>Heuristic optimization</Category>
+        <Category>Ordinary differential equation solver</Category>
+    </Categories>
+    <Provider>University of Tuebingen,
+Center for Bioinformatics Tuebingen (ZBIT)</Provider>
+    <Description>SBMLsimulator is a fast, accurate, and easily usable program for dynamic model simulation and heuristic parameter optimization of models encoded in the Systems Biology Markup Language (SBML). In order to ensure a high reliability of this software, it has been benchmarked against the entire SBML Test Suite and all models from the BioModels.net database. It includes a large collection of nature-inspired heuristic optimization procedures for efficient model calibration. SBMLsimulator provides an intuitive Graphical User Interface (GUI) and several command-line options to be suitable for large-scale batch processing and model calibration. SBMLsimulator runs on all platforms that provide a standard Java Virtual Machine and is based on the open-source library JSBML. The simulation core library of SBMLsimulator can be obtained as a separate application programming library.</Description>
+    <LoadableKeys>
+        <InputFileFormat>
+            <FileExtension>xml</FileExtension>
+            <FileFormat>SBML</FileFormat>
+        </InputFileFormat>
+        <InputFileFormat>
+            <FileExtension>sbml</FileExtension>
+            <FileFormat>SBML</FileFormat>
+        </InputFileFormat>
+        <InputFileFormat>
+            <FileExtension>csv</FileExtension>
+            <FileFormat>Character-separated Value</FileFormat>
+        </InputFileFormat>
+        <InputFileFormat>
+            <FileExtension>txt</FileExtension>
+            <FileFormat>Character-separated Value</FileFormat>
+        </InputFileFormat>
+        <OutputFileFormat>
+            <FileExtension>xml</FileExtension>
+            <FileFormat>SBML</FileFormat>
+        </OutputFileFormat>
+        <OutputFileFormat>
+            <FileExtension>sbml</FileExtension>
+            <FileFormat>SBML</FileFormat>
+        </OutputFileFormat>
+        <OutputFileFormat>
+            <FileExtension>csv</FileExtension>
+            <FileFormat>Character-separated Value</FileFormat>
+        </OutputFileFormat>
+        <OutputFileFormat>
+            <FileExtension>txt</FileExtension>
+            <FileFormat>Character-separated Value</FileFormat>
+        </OutputFileFormat>
+    </LoadableKeys>
+    <LaunchEnv>
+        <Id>f22aa6a2-beff-4487-b838-03b8275a4361</Id>
+    </LaunchEnv>
+</Gadget>
