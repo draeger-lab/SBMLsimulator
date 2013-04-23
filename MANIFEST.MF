@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Created-By: Center for Bioinformatics Tuebingen (ZBIT)
-Main-Class: org.sbml.simulator.SBMLsimulator
-SplashScreen-Image: org/sbml/simulator/gui/img/Splash.gif
-
-Name: SBMLsimulator
-Implementation-Title: SBMLsimulator
-Implementation-Version: 1.1
-Implementation-Vendor: Center for Bioinformatics Tuebingen (ZBIT)
