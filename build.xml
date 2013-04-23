@@ -83,6 +83,10 @@
     <property name="JAR_Name" value="${Name}"/>
     <property name="dist.dir" value="${dist}/${JAR_Name}-${version}"/>
     <property name="appJar"   value="${dist.dir}/${JAR_Name}-${version}.jar"/>
+  	
+  	<!--For Garuda -->
+  	<property name="garuda.gadget" value="${dist.dir}/${JAR_Name}_v${version}_Garuda.zip"/>
+  	
   </target>
 
   <!-- =================================================================== -->
@@ -350,13 +354,13 @@
   <!-- =================================================================== -->
   <target 
     name="zip"
-    depends="javadoc,sign"
+    depends="javadoc,garuda"
   	description="Creates a ZIP file containing all sources, tests, resources, libs, licenses, text files, JAR file, and api documentation."
   >
   	<zip
       compress="true"
       comment="Full distribution of ${Name}"
-      destfile="${JAR_Name}_v${version}.zip"
+      destfile="${dist.dir}/${JAR_Name}_v${version}.zip"
       encoding="utf-8"
       level="9"
       update="true"
@@ -369,6 +373,10 @@
       <zipfileset dir="${basedir}" excludes="*svn*,${basedir}/files" includes="*.xml *.txt"/>
       <zipfileset dir="${doc}/version_${version}" prefix="doc/api/" excludes="*svn*,${doc}/publications,${doc}/posters"/>
       <zipfileset dir="${dist.dir}" prefix="dist/" includes="${appJar}"/>
+      <mappedresources>
+    	<fileset file="${garuda.gadget}"/>
+    	<globmapper from="*" to="dist/*"/>
+      </mappedresources>
     </zip>
   </target>
 
@@ -400,7 +408,7 @@
   	<zip
       compress="true"
       comment="Garuda Gadget ${Name}"
-      destfile="${dist.dir}/${JAR_Name}_v${version}_Garuda.zip"
+      destfile="${garuda.gadget}"
       encoding="utf-8"
       level="9"
       update="true"
