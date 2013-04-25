@@ -751,7 +751,6 @@ public class FluxMinimizationUtils {
 				double d = 1.0;
 				Species s = m.getSpecies(i);
 				d = 1 / (m.getCompartment(s.getCompartment()).getSize());
-//					System.out.println("r " + r + " s " + s + " size: " + (m.getCompartment(s.getCompartment()).getSize()) + " d " + d);
 				previousFactors[i] = d;
 			}
 		}		

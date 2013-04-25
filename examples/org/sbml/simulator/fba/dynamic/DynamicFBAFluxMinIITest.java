@@ -64,10 +64,9 @@ public class DynamicFBAFluxMinIITest {
 		SBMLReader reader = new SBMLReader();
 		SBMLDocument oriDocument = reader.readSBML(args[0]);
 //		oriDocument.getModel().removeReaction("degPyr");
-		SBMLDocument splittedDocument = FluxMinimizationUtils.getSplittedDocument(oriDocument);
-		model = splittedDocument.getModel();
-		double[][] transportfactors = FluxMinimizationUtils.calculateTransportFactors(splittedDocument);
-		double[] previousFactors = FluxMinimizationUtils.calculatePreviousFactors(splittedDocument);
+		model = oriDocument.getModel();
+		double[][] transportfactors = FluxMinimizationUtils.calculateTransportFactors(oriDocument);
+		double[] previousFactors = FluxMinimizationUtils.calculatePreviousFactors(oriDocument);
 		
 		System.out.println("SBML document read and splitted");
 		
@@ -83,17 +82,17 @@ public class DynamicFBAFluxMinIITest {
 		
 		
 		Map<String, Integer> reactionIndices = new HashMap<String, Integer>();
-		String[] reactionIds = new String[splittedDocument.getModel().getReactionCount()];
-		for (int i = 0; i < splittedDocument.getModel().getReactionCount(); i++) {
-			String id = splittedDocument.getModel().getReaction(i).getId();
+		String[] reactionIds = new String[oriDocument.getModel().getReactionCount()];
+		for (int i = 0; i < oriDocument.getModel().getReactionCount(); i++) {
+			String id = oriDocument.getModel().getReaction(i).getId();
 			reactionIndices.put(id , i);
 			reactionIds[i] = id;
 		}
 		Map<String, Integer> speciesIndices = new HashMap<String, Integer>();
-		String[] speciesIds = new String[splittedDocument.getModel().getSpeciesCount()];
-		for (int i = 0; i < splittedDocument.getModel().getSpeciesCount(); i++) {
-			String id = splittedDocument.getModel().getSpecies(i).getId();
-			speciesIndices.put(splittedDocument.getModel().getSpecies(i).getId(), i);
+		String[] speciesIds = new String[oriDocument.getModel().getSpeciesCount()];
+		for (int i = 0; i < oriDocument.getModel().getSpeciesCount(); i++) {
+			String id = oriDocument.getModel().getSpecies(i).getId();
+			speciesIndices.put(oriDocument.getModel().getSpecies(i).getId(), i);
 			speciesIds[i] = id;
 		}
 		
@@ -142,11 +141,13 @@ public class DynamicFBAFluxMinIITest {
 		// using no splines
 		DynamicFBA dfba = new DynamicFBA(oriDocument, fullMT);
 
-		MultiTable wmt =dfba.getDFBAStartingMultiTable();
+		MultiTable smt =dfba.getDFBAStartingMultiTable();
+		Column c = smt.getColumn(smt.findColumn("AS_c"));
+		System.out.println(c.toString());
 
 		
 		
-		Map<Integer, double[]> knownFluxes = FluxMinimizationUtils.getKnownFluxesMap(dfba.getDFBAStartingMultiTable(), 1);
+//		Map<Integer, double[]> knownFluxes = FluxMinimizationUtils.getKnownFluxesMap(dfba.getDFBAStartingMultiTable(), 1);
 		
 		FluxMinimizationIIa fm2 = new FluxMinimizationIIa();
 		fm2.setFactors(previousFactors);
@@ -160,7 +161,7 @@ public class DynamicFBAFluxMinIITest {
 		fm2.setFluxDynamic(false); // TODO test it
 		fm2.setUseKnownFluxes(true);
 //		fm2.setKnownFluxes(knownFluxes);
-		fm2.setFluxLowerAndUpperBounds(0, 300);
+		fm2.setFluxLowerAndUpperBounds(-20, 300);
 		fm2.setConcentrationLowerAndUpperBounds(0, 180000);
 		
 		dfba.runDynamicFBA(fm2);

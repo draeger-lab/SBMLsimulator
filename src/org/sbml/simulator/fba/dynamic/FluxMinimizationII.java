@@ -64,7 +64,7 @@ public class FluxMinimizationII extends TargetFunction {
 	 * contains the {@link SBMLDocument} with all reaction including transports, 
 	 * which are splitted in case of reversibility
 	 */
-	protected SBMLDocument document;
+	protected SBMLDocument originalDocument;
 	
 //	/**
 //	 * The complete internal {@link StoichiometricMatrix} N (with system
@@ -354,8 +354,8 @@ public class FluxMinimizationII extends TargetFunction {
 	 * @throws Exception
 	 */
 	protected void prepareFluxMinimizationII() throws Exception {
-			this.document = DynamicFBA.originalDocument;
-			this.N_all = FluxMinimizationUtils.getStoichiometricMatrix(document);
+			this.originalDocument = DynamicFBA.originalDocument;
+			this.N_all = FluxMinimizationUtils.getStoichiometricMatrix(originalDocument);
 	}
 
 	/* (non-Javadoc)
@@ -381,16 +381,16 @@ public class FluxMinimizationII extends TargetFunction {
 	@Override
 	public String[][] getTargetVariablesIds() {
 		// Species Ids for the concentrations block
-		ListOf<Species> listOfSpecies = this.document.getModel().getListOfSpecies();
-		int speciesCount = this.document.getModel().getSpeciesCount();
+		ListOf<Species> listOfSpecies = this.originalDocument.getModel().getListOfSpecies();
+		int speciesCount = this.originalDocument.getModel().getSpeciesCount();
 		String[] speciesIds = new String[speciesCount];
 		for (int i = 0; i < speciesCount; i++) {
 			speciesIds[i] = listOfSpecies.get(i).getId();
 		}
 
 		// Reaction Ids for the fluxes and gibbs energies block
-		ListOf<Reaction> listOfReactions = this.document.getModel().getListOfReactions();
-		int reactionCount = this.document.getModel().getReactionCount();
+		ListOf<Reaction> listOfReactions = this.originalDocument.getModel().getListOfReactions();
+		int reactionCount = this.originalDocument.getModel().getReactionCount();
 		String[] reactionIds = new String[reactionCount];
 		for (int i = 0; i < reactionCount; i++) {
 			reactionIds[i] = listOfReactions.get(i).getId();
@@ -408,8 +408,8 @@ public class FluxMinimizationII extends TargetFunction {
 	 */
 	@Override
 	public int[] getTargetVariablesLengths() {
-		int reactionCount = this.document.getModel().getReactionCount();
-		int speciesCount = this.document.getModel().getSpeciesCount();
+		int reactionCount = this.originalDocument.getModel().getReactionCount();
+		int speciesCount = this.originalDocument.getModel().getSpeciesCount();
 		
 		int[] targetVariablesLength = new int[2];
 		targetVariablesLength[0] = reactionCount; //variables for the fluxes
@@ -469,7 +469,13 @@ public class FluxMinimizationII extends TargetFunction {
 	public void setFluxBounds() {
 		int fluxCount = getTargetVariablesLengths()[0];
 		for (int i = 0; i < fluxCount; i++) {
-			this.lowerBounds[i] = this.fluxLow;
+			Reaction r = this.originalDocument.getModel().getReaction(i);
+			if (r.isSetReversible() && r.isReversible()){
+				this.lowerBounds[i] = this.fluxLow;
+			}
+			else {
+				this.lowerBounds[i] = 0;
+			}
 			this.upperBounds[i] = this.fluxUp;
 		}
 	}
@@ -554,7 +560,7 @@ public class FluxMinimizationII extends TargetFunction {
 	 */
 	@Override
 	public void addConstraintsToTargetFunction(IloCplex cplex) throws IloException {
-		int speciesCount = this.document.getModel().getSpeciesCount();
+		int speciesCount = this.originalDocument.getModel().getSpeciesCount();
 
 		int fluxPosition = 0;
 		int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
@@ -651,7 +657,7 @@ public class FluxMinimizationII extends TargetFunction {
 			// 1. Flux vector assignment
 			int fluxPosition = 0;
 			HashMap<String, Number> fluxMap = new HashMap<String, Number>();
-			ListOf<Reaction> listOfReactions = this.document.getModel().getListOfReactions();
+			ListOf<Reaction> listOfReactions = this.originalDocument.getModel().getListOfReactions();
 			double[] optimizedFluxVector = new double[getTargetVariablesLengths()[0]];
 			for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
 				optimizedFluxVector[j] = solution[fluxPosition + j]; // J_j of the formula
@@ -662,14 +668,14 @@ public class FluxMinimizationII extends TargetFunction {
 			
 			// 2. Concentration vector assignment
 			int concentrationPosition = fluxPosition + getTargetVariablesLengths()[0];
-			HashMap<String, Number> concMap = new HashMap<String, Number>();
-			HashMap<String, Number> concMap2 = new HashMap<String, Number>();
-			ListOf<Species> listOfSpecies = this.document.getModel().getListOfSpecies();
+//			HashMap<String, Number> concMap = new HashMap<String, Number>();
+//			HashMap<String, Number> concMap2 = new HashMap<String, Number>();
+//			ListOf<Species> listOfSpecies = this.document.getModel().getListOfSpecies();
 			double[] optimizedConcentrations = new double[getTargetVariablesLengths()[1]];  // z_m of the formula
 			for (int i = 0; i < getTargetVariablesLengths()[1]; i++) {
 				optimizedConcentrations[i] = solution[concentrationPosition + i];
-				concMap.put(listOfSpecies.get(i).getId(), optimizedConcentrations[i]);
-				concMap2.put(listOfSpecies.get(i).getId(), this.completeConcentrations[this.getTimePointStep()][i]);
+//				concMap.put(listOfSpecies.get(i).getId(), optimizedConcentrations[i]);
+//				concMap2.put(listOfSpecies.get(i).getId(), this.completeConcentrations[this.getTimePointStep()][i]);
 			}
 			this.optimizedSolution[0] = optimizedConcentrations; // 1st position: concentrations
 		}
