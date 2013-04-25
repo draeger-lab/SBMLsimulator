@@ -110,7 +110,7 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 	@Override
 	public void addConstraintsToTargetFunction(IloCplex cplex)
 		throws IloException {
-		int speciesCount = this.document.getModel().getSpeciesCount();
+		int speciesCount = this.originalDocument.getModel().getSpeciesCount();
 		
 		int fluxPosition = 0;
 		int concentrationPosition = getTargetVariablesLengths()[0];
@@ -121,7 +121,7 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		// Constraint J_j >= 0
 		if (isConstraintJ0()) {
 			for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
-				if(!document.getModel().getReaction(j).isReversible()) {
+				if(!originalDocument.getModel().getReaction(j).isReversible()) {
 					cplex.addGe(getVariables()[fluxPosition + j], 0);
 				}
 			}
@@ -131,7 +131,7 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		if (isLittleFluxChanges()) {
 			for (int j = 0; j < getTargetVariablesLengths()[0]; j++) {
 				if (this.getTimePointStep() > 0) {
-					if (!this.document.getModel().getReaction(j).isFast()) {
+					if (!this.originalDocument.getModel().getReaction(j).isFast()) {
 						IloNumExpr j_j_min = cplex.numExpr();
 						j_j_min = getVariables()[fluxPosition + j];
 						cplex.diff(j_j_min, cplex.constant(this.optimizedSolution[1][j]));
@@ -160,7 +160,7 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		
 		// Constraint of using known fluxes from the given multitable
 		if (this.useKnownFluxes) {
-			for (int j = 0; j < document.getModel().getReactionCount(); j++) {
+			for (int j = 0; j < originalDocument.getModel().getReactionCount(); j++) {
 				// Flux J_j
 				if ((this.getTimePointStep() > 0) && !Double.isNaN(this.completeNetFluxes[this.getTimePointStep()][j])) {
 					double knownFluxValue = this.completeNetFluxes[this.getTimePointStep()][j];
@@ -292,17 +292,15 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 			} else {
 				double[] c_k_ti_1 = completeConcentrations[this.getTimePointStep() - 1];
 				if(this.usePreviousEstimations) {
-					for (int k = 0; k < c_k_ti_1.length; k++) {
-						double estimated = previousEstimatedConcentrations[k];
-						double given = c_k_ti_1[k];
-						// allowing precision or baseline errors of 10 % // TODO check error assumption
-						if (Double.isNaN(given) || (Math.abs(given - estimated) < Math.abs(0.10 * given))) { // less than 10 % difference to the given value, than assume given value
-							// if given is NaN or estimated fits better than given
-							c_k_ti_1[k] = estimated;
-						}
+					double estimated = previousEstimatedConcentrations[i];
+					double given = c_k_ti_1[i];
+					// allowing errors of 10 % // TODO check error assumption
+					if (Double.isNaN(given) || (Math.abs(given - estimated) < Math.abs(0.10 * given))) {
+						// if given is NaN or estimated fits better than given
+						c_k_ti_1[i] = estimated;
 					}
 				}
-				if (!Double.isNaN(c_k_ti_1[i])) { // changed to c_k_ti_1[i] from completeConcentrations[this.getTimePointStep() - 1][i] in case of pre estimated concentrations
+				if (!Double.isNaN(c_k_ti_1[i])) { 
 					IloNumExpr computedConcentration = cplex.numExpr();
 					IloNumExpr fNJ = cplex.numExpr();
 					

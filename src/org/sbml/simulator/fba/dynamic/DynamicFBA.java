@@ -226,7 +226,6 @@ public class DynamicFBA {
 	private void finalizeSolutionMultiTable() {
 		this.finalSolutionMultiTable = dFBAStartingMultiTable;
 		
-		Set<String> reversibleReactions = FluxMinimizationUtils.reversibleReactions;
 		Model m = originalDocument.getModel();
 
 		int speciesCount = m.getSpeciesCount();
@@ -247,15 +246,7 @@ public class DynamicFBA {
 			Column workingReactionCol = this.workingSolutionMultiTable.getColumn(currentReactionId);
 			int specificColumn = this.finalSolutionMultiTable.findColumn(currentReactionId);
 			for (int timePoint = 0; timePoint < this.workingSolutionMultiTable.getRowCount(); timePoint++) {
-				double netFlux;
-				if ((this.function instanceof FluxMinimization) && (reversibleReactions.contains(m.getReaction(j).getId()))) {
-					Column workingRevReactionCol = this.workingSolutionMultiTable.getColumn(currentReactionId + FluxMinimizationUtils.endingForBackwardReaction);
-					// Net flux = forward flux - reverse flux
-					netFlux = workingReactionCol.getValue(timePoint) - workingRevReactionCol.getValue(timePoint);
-				}
-				else {
-					netFlux = workingReactionCol.getValue(timePoint);
-				}
+				double netFlux = workingReactionCol.getValue(timePoint);
 				// Overwrite the specific column value with the new net flux
 				this.finalSolutionMultiTable.setValueAt(netFlux, timePoint, specificColumn);
 			}
