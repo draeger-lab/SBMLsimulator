@@ -327,8 +327,8 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		optimization.setEnabled(false);
 		items.add(optimization);
 		
-		if (!appConf.getCmdArgs().containsKey(GarudaOptions.CONNECT_TO_GARUDA)
-				|| appConf.getCmdArgs().getBoolean(GarudaOptions.CONNECT_TO_GARUDA)) {
+		if (SBMLsimulator.garuda && (!appConf.getCmdArgs().containsKey(GarudaOptions.CONNECT_TO_GARUDA)
+				|| appConf.getCmdArgs().getBoolean(GarudaOptions.CONNECT_TO_GARUDA))) {
 			items.add(GarudaGUIfactory.createGarudaMenu(EventHandler.create(ActionListener.class, this, "sendToGaruda")));
 		}
 		
