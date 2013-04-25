@@ -329,7 +329,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 		
 		if (!appConf.getCmdArgs().containsKey(GarudaOptions.CONNECT_TO_GARUDA)
 				|| appConf.getCmdArgs().getBoolean(GarudaOptions.CONNECT_TO_GARUDA)) {
-			items.add(GarudaGUIfactory.createGarudaMenu(EventHandler.create(ActionListener.class, this, "sentToGaruda")));
+			items.add(GarudaGUIfactory.createGarudaMenu(EventHandler.create(ActionListener.class, this, "sendToGaruda")));
 		}
 		
 		return items.toArray(new JMenuItem[0]);
@@ -338,7 +338,7 @@ public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
 	/**
 	 * 
 	 */
-	public void sentToGaruda() {
+	public void sendToGaruda() {
 		if (simPanel != null) {
 			final MultiTable table = simPanel.getSimulationResultsTable();
 			String options[] = {bundle.getString("SIM_DATA_FILE"), bundle.getString("MODEL_FILE")};

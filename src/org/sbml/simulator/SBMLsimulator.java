@@ -384,7 +384,7 @@ public class SBMLsimulator extends Launcher {
 								icon,
 								bundle.getString("PROGRAM_DESCRIPTION"),
 								Arrays.asList(bundle.getStringArray("KEYWORDS")),
-								Arrays.asList(new String[] {folder + "Screenshot_1.png"})
+								Arrays.asList(new String[] { "snapshot/Screenshot_1.png" })
 						);
 						garudaBackend.addInputFileFormat("xml", "SBML");
 						garudaBackend.addInputFileFormat("sbml", "SBML");
