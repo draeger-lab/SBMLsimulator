@@ -182,8 +182,8 @@
     memoryMaximumSize="512M"
     nowarn="no"
     optimize="${optimize}"
-    source="1.5"
-    target="1.5"
+    source="1.6"
+    target="1.6"
     verbose="${verbose}"
     >
       <src path="${build.src}"/>
@@ -192,14 +192,15 @@
     <manifest file="${build.dest}/META-INF/MANIFEST.MF">
       <attribute name="Main-Class" value="org.sbml.simulator.SBMLsimulator"/>
       <attribute name="Built-By" value="${user.name}"/>
+      <attribute name="Built-Date" value="${TODAY}"/> 
       <attribute name="SplashScreen-Image" value="org/sbml/simulator/gui/img/Splash.gif"/>
+      <attribute name="Implementation-Vendor"  value="University of Tuebingen"/>
+      <attribute name="Implementation-Title"   value="${Name}"/>
+      <attribute name="Implementation-Version" value="Revision ${repository.revision} (Build ${build.number})"/>
       <section name="${Name}">
         <attribute name="Specification-Title"    value="${Name}"/>
         <attribute name="Specification-Version"  value="${version}"/>
         <attribute name="Specification-Vendor"   value="Center for Bioinformatics Tuebingen (ZBIT)"/>
-        <attribute name="Implementation-Title"   value="${Name}"/>
-        <attribute name="Implementation-Version" value="Revision ${repository.revision} (Build ${build.number})"/>
-        <attribute name="Implementation-Vendor"  value="University of Tuebingen"/>
       </section>
     </manifest>
     
@@ -215,8 +216,15 @@
   >
 
     <jar
+      compress="true"
+      filesetmanifest="mergewithoutmain"
+      index="true"
+      indexMetaInf="true"
       jarfile="${appJar}"
+      level="9"
       manifest="${build.dest}/META-INF/MANIFEST.MF"
+      manifestencoding="utf-8"
+      strict="warn"
       update="true"
     >
       
@@ -230,7 +238,7 @@
       />
       <fileset 
         dir="${build.src}"
-        includes="**.txt **/*.txt, **.xml, **/*.xml, **.properties, **/*.properties, **.cfg, **/*.cfg, **.obo, **/*.obo, **/*.html, **.html, **/*.htm, **.htm, **/*.png, **.png, **/*.gif, **.gif"
+        includes="**.txt, **/*.txt, **.xml, **/*.xml, **.properties, **/*.properties, **.cfg, **/*.cfg, **.obo, **/*.obo, **/*.html, **.html, **/*.htm, **.htm, **/*.png, **.png, **/*.gif, **.gif"
         excludes="**.java"
       />
       <fileset dir="${basedir}/licenses">
@@ -240,15 +248,15 @@
       </fileset>
       
       <!-- These libraries are required by most classes -->
-      <zipfileset excludes="META-INF/**" src="${lib}/commons-math-2.2.jar"/>
-      <zipfileset excludes="META-INF/**" src="${lib}/EvA2Base.jar"/>
-      <zipfileset excludes="META-INF/**" src="${lib}/jcommon-1.0.17.jar"/>
-      <zipfileset excludes="META-INF/**" src="${lib}/jfreechart-1.0.15_beta.jar"/>
-      <zipfileset excludes="META-INF/**" src="${lib}/jsbml-1.0-a1-with-dependencies.jar"/>
-      <zipfileset excludes="META-INF/**" src="${lib}/SimulationCoreLibrary_v1.3_slim.jar"/>
-      <zipfileset excludes="META-INF/**" src="${lib}/sysbio.jar"/>
-      <zipfileset excludes="META-INF/**" src="${lib-garuda}/garuda-csr.jar"/>
-      <zipfileset excludes="META-INF/**" src="${lib-garuda}/jsonic-1.2.10.jar"/>
+      <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib}/commons-math-2.2.jar"/>
+      <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib}/EvA2Base.jar"/>
+      <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib}/jcommon-1.0.17.jar"/>
+      <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib}/jfreechart-1.0.15_beta.jar"/>
+      <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib}/jsbml-1.0-a1-with-dependencies.jar"/>
+      <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib}/SimulationCoreLibrary_v1.3_slim.jar"/>
+      <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib}/sysbio.jar"/>
+      <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib-garuda}/garuda-csr.jar"/>
+      <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib-garuda}/jsonic-1.2.10.jar"/>
     </jar>
     
   </target>
@@ -256,7 +264,6 @@
   <!-- =================================================================== -->
   <!-- Signs the JAR file                                                  -->
   <!-- =================================================================== -->
-  <!-- signs the application -->
   <target
     name="sign"
   	depends="jar_incl-libs"
@@ -297,7 +304,7 @@
       notree="false"
       overview="${src}/overview.html"
       packagenames="org.*"
-      source="1.5"
+      source="1.6"
       sourcepath="${src}:${test}:${resources}"
       splitindex="true"
       stylesheetfile="${doc}/javadoc-style.css"
@@ -370,12 +377,15 @@
       <zipfileset dir="${resources}"        prefix="resources" excludes="*svn*" includes="**/*.java,**/*.png"/>
       <zipfileset dir="${lib}"              prefix="lib"       excludes="*svn*" includes="**/*.jar"/>
       <zipfileset dir="${basedir}/licenses" prefix="licenses"  excludes="*svn*"/>
-      <zipfileset dir="${basedir}" excludes="*svn*,${basedir}/files" includes="*.xml *.txt"/>
+      <zipfileset dir="${basedir}" excludes="*svn*,${basedir}/files" includes="*.xml, *.txt"/>
       <zipfileset dir="${doc}/version_${version}" prefix="doc/api/" excludes="*svn*,${doc}/publications,${doc}/posters"/>
-      <zipfileset dir="${dist.dir}" prefix="dist/" includes="${appJar}"/>
       <mappedresources>
     	<fileset file="${garuda.gadget}"/>
     	<globmapper from="*" to="dist/*"/>
+      </mappedresources>
+      <mappedresources>
+        <fileset file="${appJar}"/>
+        <globmapper from="*" to="dist/*"/>
       </mappedresources>
     </zip>
   </target>
@@ -426,7 +436,7 @@
   	  	<globmapper from="*" to="${uuid}/icons/*"/>
   	  </mappedresources>
   	  <mappedresources>
-  	  	<fileset file="${resources}/org/sbml/simulator/gui/img/Screenshot_1.PNG"/>
+  	  	<fileset file="${dist}/Screenshot_1.PNG"/>
   	  	<globmapper from="*" to="${uuid}/snapshot/*"/>
   	  </mappedresources>
     </zip>
