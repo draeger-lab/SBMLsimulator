@@ -98,6 +98,11 @@ public class SBMLsimulator extends Launcher {
 	 * The package where all ODE solvers are assumed to be located.
 	 */
 	public static final String SOLVER_PACKAGE = "org.simulator.math.odes";
+	
+	/**
+	 * 
+	 */
+	public static final boolean garuda = true;
 
 	/**
 	 * An array of all available implementations of distance functions to judge
@@ -290,7 +295,9 @@ public class SBMLsimulator extends Launcher {
 		defAndKeys.add(GUIOptions.class);
 		defAndKeys.add(PlotOptions.class);
 		defAndKeys.add(CSVOptions.class);
-		defAndKeys.add(GarudaOptions.class);
+		if (garuda) {
+		  defAndKeys.add(GarudaOptions.class);
+		}
 		return defAndKeys;
 	}
 
@@ -365,9 +372,9 @@ public class SBMLsimulator extends Launcher {
 	 */
 	public BaseFrame initGUI(AppConf appConf) {
 		final BaseFrame gui = new SimulatorUI(appConf);
-		if (getCmdLineOptions().contains(GarudaOptions.class)
+		if (garuda && (getCmdLineOptions().contains(GarudaOptions.class)
 				&& (!appConf.getCmdArgs().containsKey(GarudaOptions.CONNECT_TO_GARUDA) ||
-						appConf.getCmdArgs().getBoolean(GarudaOptions.CONNECT_TO_GARUDA))) {
+						appConf.getCmdArgs().getBoolean(GarudaOptions.CONNECT_TO_GARUDA)))) {
 			new Thread(new Runnable() {
 				/* (non-Javadoc)
 				 * @see java.lang.Runnable#run()

@@ -255,8 +255,8 @@
       <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib}/jsbml-1.0-a1-with-dependencies.jar"/>
       <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib}/SimulationCoreLibrary_v1.3_slim.jar"/>
       <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib}/sysbio.jar"/>
-      <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib-garuda}/garuda-csr.jar"/>
-      <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib-garuda}/jsonic-1.2.10.jar"/>
+      <!--<zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib-garuda}/garuda-csr.jar"/>
+      <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib-garuda}/jsonic-1.2.10.jar"/>-->
     </jar>
     
   </target>
