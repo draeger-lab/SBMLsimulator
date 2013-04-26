@@ -151,7 +151,7 @@ public class DynamicFBAFluxMinIITest {
 		
 		FluxMinimizationIIa fm2 = new FluxMinimizationIIa();
 		fm2.setFactors(previousFactors);
-		fm2.setLambda2(10000);
+		fm2.setLambda2(100000);
 		fm2.setCplexIterations(600);
 		
 		fm2.setConstraintJ0(true);
