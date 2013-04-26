@@ -176,8 +176,8 @@ public class DynamicFBA {
 		
 		Model m = originalDocument.getModel();
 		// Set the complete interpolated concentrations
-		int speciesCount = m.getSpeciesCount();
-		double[][] concentrations = new double[dFBATimePoints.length][speciesCount];
+		int speciesMTCount = dFBAStartingMultiTable.getBlock(0).getColumnCount();
+		double[][] concentrations = new double[dFBATimePoints.length][speciesMTCount];
 		Block conc = dFBAStartingMultiTable.getBlock(0);
 
 		int reactionCount = originalDocument.getModel().getReactionCount();
@@ -186,7 +186,7 @@ public class DynamicFBA {
 		
 		
 		for (int t = 0; t < dFBATimePoints.length; t++) {
-			for (int i = 0; i < speciesCount; i++) {
+			for (int i = 0; i < speciesMTCount; i++) {
 				// Remember: first column of each MultiTable/block contains the timePoints -> i + 1
 				concentrations[t][i] = conc.getValueAt(t, i + 1);
 			}
@@ -266,10 +266,25 @@ public class DynamicFBA {
 		int speciesCount = m.getSpeciesCount();
 		int reactionCount = m.getReactionCount();
 		
-		String[] speciesIds = new String[speciesCount];
+		int sCnt = 0;
+		boolean[] species = new boolean[speciesCount];
 		for (int i = 0; i < speciesCount; i++) {
-			speciesIds[i] = m.getSpecies(i).getId();
+			species[i] = false;
+			String spId = m.getSpecies(i).getId();
+			if (table.findColumn(spId) != -1) {
+				sCnt++;
+				species[i] = true;
+			}
 		}
+		String[] speciesIds = new String[sCnt];
+		int cnt = 0;
+		for (int i = 0; i < species.length; i++) {
+			if (species[i]) {
+				speciesIds[cnt] = m.getSpecies(i).getId();
+				cnt++;		
+			}
+		}
+
 		String[] reactionIds = new String[reactionCount];
 		for (int i = 0; i < reactionCount; i++) {
 			reactionIds[i] = m.getReaction(i).getId();
@@ -281,13 +296,11 @@ public class DynamicFBA {
 		fullMT.addBlock(reactionIds); // block 1
 		
 		for (int t = 0; t < table.getTimePoints().length; t++) {
-			double[] currentConcentrations = new double[speciesCount];
-			for (int i = 0; i < speciesCount; i++) {
+			double[] currentConcentrations = new double[speciesIds.length];
+			for (int i = 0; i < speciesIds.length; i++) {
 				String currentSpeciesId = m.getSpecies(i).getId();
 				int columnIndexMT = table.getColumnIndex(currentSpeciesId);
-				if (columnIndexMT == -1) { // no entry in the original multi table
-					currentConcentrations[i] = Double.NaN;
-				} else {
+				if (columnIndexMT != -1) { // no entry in the original multi table
 					currentConcentrations[i] = table.getValueAt(t, columnIndexMT);
 				}
 			}

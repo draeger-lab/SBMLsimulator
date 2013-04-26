@@ -306,8 +306,10 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 					
 					for (int j = 0; j < this.N_all.getColumnDimension(); j++) {
 						double factor = factors[i] * this.N_all.get(i, j);
-						fNJ = cplex.sum(fNJ, cplex.prod(cplex.constant(factor),
-							getVariables()[fluxPosition + j]));
+						if (factor != 0) {
+							fNJ = cplex.sum(fNJ, cplex.prod(cplex.constant(factor),
+									getVariables()[fluxPosition + j]));
+						}
 					}
 					
 					computedConcentration = cplex.sum(cplex.constant(c_k_ti_1[i]), cplex.prod(fNJ, cplex.constant(delta_t)));
