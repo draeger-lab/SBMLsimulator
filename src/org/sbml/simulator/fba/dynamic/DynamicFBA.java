@@ -20,12 +20,11 @@ package org.sbml.simulator.fba.dynamic;
 import ilog.concert.IloException;
 import ilog.cplex.IloCplex;
 
-import java.util.Set;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLDocument;
-import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.math.SplineCalculation;
 import org.simulator.math.odes.MultiTable;
 import org.simulator.math.odes.MultiTable.Block;
@@ -78,6 +77,11 @@ public class DynamicFBA {
 	 * The target function
 	 */
 	private TargetFunction function;
+
+	/**
+	 * The multi table with the given concentrations and fluxes
+	 */
+	private MultiTable originalMultiTable;
 	
 	/**
 	 * contains the default Time Name for the Multitable
@@ -97,11 +101,13 @@ public class DynamicFBA {
 	 * @param timePointCount - The number of points in time at which the dynamic FBA performs
 	 */
 	public DynamicFBA(SBMLDocument document, MultiTable table, int timePointCount) {
-		// Save original SBML document
+		// Save original SBML document and multi table
 		originalDocument = document;
-
+		this.originalMultiTable = table;
+		
 		// Interpolate concentrations and fluxes
-		this.dFBAStartingMultiTable = calculateSplineInterpolation(table, timePointCount);		
+		this.dFBAStartingMultiTable = calculateSplineInterpolation(table, timePointCount);
+		
 	}
 	
 	 /**
@@ -174,7 +180,6 @@ public class DynamicFBA {
 		// Initialize the solution MultiTable
 		initializeWorkingSolutionMultiTable(function);
 		
-		Model m = originalDocument.getModel();
 		// Set the complete interpolated concentrations
 		int speciesMTCount = dFBAStartingMultiTable.getBlock(0).getColumnCount();
 		double[][] concentrations = new double[dFBATimePoints.length][speciesMTCount];
@@ -224,19 +229,36 @@ public class DynamicFBA {
 	 * Finalizes the Solution {@link MultiTable} e.g. eliminating temporarily backward reactions of reversible reaction
 	 */
 	private void finalizeSolutionMultiTable() {
-		this.finalSolutionMultiTable = dFBAStartingMultiTable;
+		this.finalSolutionMultiTable = new MultiTable();
 		
-		Model m = originalDocument.getModel();
+		this.finalSolutionMultiTable.setTimeName(getDefaultTimeName());
+		this.finalSolutionMultiTable.setTimePoints(workingSolutionMultiTable.getTimePoints());
+		
+		ArrayList<String> speciesIdentifiers = new ArrayList<String>();
+		for(String id: originalMultiTable.getBlock(0).getIdentifiers()) {
+			if(originalDocument.getModel().getSpecies(id) != null) {
+				speciesIdentifiers.add(id);
+			}
+		}
+		this.finalSolutionMultiTable.addBlock(speciesIdentifiers.toArray(new String[speciesIdentifiers.size()]));
+		for(int i = 1; i != workingSolutionMultiTable.getBlockCount(); i++) {
+			String[] identifiers = function.getTargetVariablesIds()[i];
+			this.finalSolutionMultiTable.addBlock(identifiers);
+		}
 
+		Model m = originalDocument.getModel();
+		
 		int speciesCount = m.getSpeciesCount();
 		for (int i = 0; i < speciesCount; i++) {
 			String currentSpeciesId = m.getSpecies(i).getId();
 			Column workingReactionCol = this.workingSolutionMultiTable.getColumn(currentSpeciesId);
 			int specificColumn = this.finalSolutionMultiTable.findColumn(currentSpeciesId);
-			for (int timePoint = 0; timePoint < this.workingSolutionMultiTable.getRowCount(); timePoint++) {
-				double concentration = workingReactionCol.getValue(timePoint);
-				// Overwrite the specific column value with the new net flux
-				this.finalSolutionMultiTable.setValueAt(concentration, timePoint, specificColumn);
+			if(specificColumn != -1) {
+  			for (int timePoint = 0; timePoint < this.workingSolutionMultiTable.getRowCount(); timePoint++) {
+  				double concentration = workingReactionCol.getValue(timePoint);
+  				// Overwrite the specific column value with the new net flux
+  				this.finalSolutionMultiTable.setValueAt(concentration, timePoint, specificColumn);
+  			}
 			}
 		}
 		
@@ -266,23 +288,9 @@ public class DynamicFBA {
 		int speciesCount = m.getSpeciesCount();
 		int reactionCount = m.getReactionCount();
 		
-		int sCnt = 0;
-		boolean[] species = new boolean[speciesCount];
-		for (int i = 0; i < speciesCount; i++) {
-			species[i] = false;
-			String spId = m.getSpecies(i).getId();
-			if (table.findColumn(spId) != -1) {
-				sCnt++;
-				species[i] = true;
-			}
-		}
-		String[] speciesIds = new String[sCnt];
-		int cnt = 0;
-		for (int i = 0; i < species.length; i++) {
-			if (species[i]) {
-				speciesIds[cnt] = m.getSpecies(i).getId();
-				cnt++;		
-			}
+		String[] speciesIds = new String[speciesCount];
+		for (int i = 0; i < speciesIds.length; i++) {
+			speciesIds[i] = m.getSpecies(i).getId();	
 		}
 
 		String[] reactionIds = new String[reactionCount];
@@ -302,6 +310,9 @@ public class DynamicFBA {
 				int columnIndexMT = table.getColumnIndex(currentSpeciesId);
 				if (columnIndexMT != -1) { // no entry in the original multi table
 					currentConcentrations[i] = table.getValueAt(t, columnIndexMT);
+				}
+				else {
+					currentConcentrations[i] = Double.NaN;
 				}
 			}
 			fullMT.getBlock(0).setRowData(t, currentConcentrations);

@@ -19,7 +19,6 @@ package org.sbml.simulator.fba.dynamic;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 
 import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
