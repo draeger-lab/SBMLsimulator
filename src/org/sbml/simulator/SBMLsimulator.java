@@ -322,7 +322,7 @@ public class SBMLsimulator extends Launcher {
 	 * @see de.zbit.Launcher#getVersionNumber()
 	 */
 	public String getVersionNumber() {
-		return "1.0";
+		return "1.1";
 	}
 
 	/* (non-Javadoc)
