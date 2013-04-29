@@ -38,13 +38,10 @@ public class SplineCalculation {
 	 * @param negativeValuesPossible
 	 * @return
 	 */
-	public static MultiTable calculateSplineValues(MultiTable table, int block, int inBetweenTimePoints, boolean negativeValuesPossible) {
+	public static MultiTable calculateSplineValues(MultiTable table, int inBetweenTimePoints, boolean negativeValuesPossible) {
+		
 		SplineInterpolation sp = null;
-		try {
-			sp = new SplineInterpolation();
-		} catch (InterpolationException e) {
-			e.printStackTrace();
-		}
+		int columnStart = 1;
 		double[] timePoints = new double[table.getTimePoints().length + (table.getTimePoints().length-1) * inBetweenTimePoints];
 		int index = 0;
 		for(int i = 1; i != table.getTimePoints().length; i++) {
@@ -54,42 +51,55 @@ public class SplineCalculation {
 			}
 		}
 		timePoints[timePoints.length-1] = table.getTimePoint(table.getTimePoints().length - 1);
+	
 		
-		double[][] data = new double[timePoints.length][table.getBlock(block).getColumnCount()];
-		MultiTable result = new MultiTable(timePoints, data, table.getBlock(block).getIdentifiers(),table.getBlock(block).getColumnNames());
+		MultiTable result = new MultiTable();
+		result.setTimePoints(timePoints);
 		result.setTimeName(table.getTimeName());
-		for(int col = 1; col != result.getColumnCount(); col++) {
-			Column c = table.getColumn(col);
-			double[] values = new double[table.getRowCount()];
-			for(int row = 0; row!=table.getRowCount(); row++) {
-				values[row] = c.getValue(row);
-			}
-			
-			BasicDataSet dataset = new BasicDataSet(table.getTimePoints(),values, "Time", "Y");
-			try {
-				sp.setAbstractDataSet(dataset);
-			} catch (InterpolationException e1) {
-				e1.printStackTrace();
-			}
-			for(int row = 0; row != result.getRowCount(); row++) {
-				try {
-					double value = sp.getY(result.getTimePoint(row));
-					if(negativeValuesPossible) {
-						result.setValueAt(value, row, col);
-					}
-					else {
-						if (Double.isNaN(value)) {
-							result.setValueAt(Double.NaN, row, col);
-						}
-						else {
-							result.setValueAt(Math.max(value,0d), row, col);
-						}
-					}
-					
-				} catch (InterpolationException e) {
-					e.printStackTrace();
-				}
-			}
+		
+		for(int block = 0; block != table.getBlockCount(); block++) {
+			result.addBlock(table.getBlock(block).getIdentifiers());
+  		try {
+  			sp = new SplineInterpolation();
+  		} catch (InterpolationException e) {
+  			e.printStackTrace();
+  		}
+  			
+  		for(int col = columnStart; col != result.getColumnCount(); col++) {
+  			Column c = table.getColumn(col);
+  			double[] values = new double[table.getRowCount()];
+  			for(int row = 0; row!=table.getRowCount(); row++) {
+  				values[row] = c.getValue(row);
+  			}
+  			
+  			BasicDataSet dataset = new BasicDataSet(table.getTimePoints(),values, "Time", "Y");
+  			try {
+  				sp.setAbstractDataSet(dataset);
+  			} catch (InterpolationException e1) {
+  				e1.printStackTrace();
+  			}
+  			for(int row = 0; row != result.getRowCount(); row++) {
+  				try {
+  					double value = sp.getY(result.getTimePoint(row));
+  					if(negativeValuesPossible) {
+  						result.setValueAt(value, row, col);
+  					}
+  					else {
+  						if (Double.isNaN(value)) {
+  							result.setValueAt(Double.NaN, row, col);
+  						}
+  						else {
+  							result.setValueAt(Math.max(value,0d), row, col);
+  						}
+  					}
+  					
+  				} catch (InterpolationException e) {
+  					e.printStackTrace();
+  				}
+  			}
+  		}
+  		columnStart+= table.getBlock(0).getColumnCount();
+  		
 		}
 		return result;
 	}
@@ -101,7 +111,7 @@ public class SplineCalculation {
 	 * @return
 	 */
 	public static MultiTable calculateSplineValues(MultiTable table, int inBetweenTimePoints) {
-		return calculateSplineValues(table, 0, inBetweenTimePoints, true);
+		return calculateSplineValues(table, inBetweenTimePoints, true);
 	}
 
 }

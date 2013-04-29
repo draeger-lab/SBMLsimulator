@@ -357,22 +357,12 @@ public class DynamicFBA {
 			logger.info("TimePointCount (" + timePointCount + ") for better calculating set to: " + ((inBetweenTimePoints * (givenTimePointLength - 1)) + givenTimePointLength));
 		}
 		
-		//Also interpolate the given fluxes
-		for (int b = 0; b < fullMT.getBlockCount(); b++) {
-			MultiTable mt = SplineCalculation.calculateSplineValues(fullMT, b, inBetweenTimePoints, false);
-			if (fullTimePointMultiTable == null) {
-				
-				fullTimePointMultiTable = new MultiTable();
-				fullTimePointMultiTable.setTimePoints(mt.getTimePoints());
-			}
-			fullTimePointMultiTable.addBlock(mt.getBlock(0).getIdentifiers());
-			fullTimePointMultiTable.getBlock(b).setData(mt.getBlock(0).getData());
-		}
-		
+		MultiTable fullTimePointsMultiTable = SplineCalculation.calculateSplineValues(fullMT, inBetweenTimePoints, false);
+			
 		// Set the dynamic FBA points in time
-		dFBATimePoints = fullTimePointMultiTable.getTimePoints();
+		dFBATimePoints = fullTimePointsMultiTable.getTimePoints();
 		
-		return fullTimePointMultiTable;
+		return fullTimePointsMultiTable;
 	}
 
 	/**
