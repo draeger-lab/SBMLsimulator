@@ -136,7 +136,7 @@ public class DynamicFBAFluxMinIITest {
 		// Run a dynamic FBA
 		
 		// using splines
-//		DynamicFBA dfba = new DynamicFBA(oriDocument, fullMT, 102);
+//		DynamicFBA dfba = new DynamicFBA(oriDocument, fullMT, 22);
 		
 		// using no splines
 		DynamicFBA dfba = new DynamicFBA(oriDocument, fullMT);
@@ -155,7 +155,7 @@ public class DynamicFBAFluxMinIITest {
 		fm2.setCplexIterations(600);
 		
 		fm2.setConstraintJ0(true);
-		fm2.setUsePreviousEstimations(false);
+		fm2.setUsePreviousEstimations(true);
 		fm2.setLittleFluxChanges(false);
 		fm2.setConstraintZm(true);
 		fm2.setFluxDynamic(false); // TODO test it

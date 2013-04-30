@@ -294,9 +294,8 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 				double[] c_k_ti_1 = completeConcentrations[this.getTimePointStep() - 1];
 				if(this.usePreviousEstimations) {
 					double estimated = previousEstimatedConcentrations[i];
-					double given = c_k_ti_1[i];
 					// allowing errors of 10 % // TODO check error assumption
-					if (Double.isNaN(given) || (Math.abs(given - estimated) < Math.abs(0.10 * given))) {
+					if (Double.isNaN(c_k_ti_1[i]) && !Double.isNaN(estimated)){ // || (Math.abs(given - estimated) < Math.abs(0.10 * given))) {
 						// if given is NaN or estimated fits better than given
 						c_k_ti_1[i] = estimated;
 					}
