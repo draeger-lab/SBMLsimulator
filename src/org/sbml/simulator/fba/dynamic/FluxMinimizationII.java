@@ -663,6 +663,7 @@ public class FluxMinimizationII extends TargetFunction {
 				optimizedFluxVector[j] = solution[fluxPosition + j]; // J_j of the formula
 				fluxMap.put(listOfReactions.get(j).getId(), optimizedFluxVector[j]);
 			}
+			System.out.println("Timepoint: " + this.getTimePointStep());
 			System.out.println(fluxMap.toString());
 			this.optimizedSolution[1] = optimizedFluxVector; // 2nd position: flux vector
 			
