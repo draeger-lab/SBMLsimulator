@@ -19,6 +19,8 @@ package org.sbml.simulator.fba.dynamic;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
+
 
 import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
@@ -161,8 +163,8 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		if (this.useKnownFluxes) {
 			for (int j = 0; j < originalDocument.getModel().getReactionCount(); j++) {
 				// Flux J_j
-				if ((this.getTimePointStep() > 0) && !Double.isNaN(this.completeNetFluxes[this.getTimePointStep()][j])) {
-					double knownFluxValue = this.completeNetFluxes[this.getTimePointStep()][j];
+				if ((this.getTimePointStep() > 0) && !Double.isNaN(this.completeNetFluxes[this.getTimePointStep() - 1][j])) {
+					double knownFluxValue = this.completeNetFluxes[this.getTimePointStep() - 1][j];
 
 					IloNumExpr j_j_min = cplex.numExpr();
 					j_j_min = getVariables()[fluxPosition + j];

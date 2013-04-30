@@ -346,7 +346,6 @@ public class DynamicFBA {
 		}
 		
 		// ... then interpolate
-		MultiTable fullTimePointMultiTable = null;
 		int inBetweenTimePoints = 0;
 		if (((timePointCount - 1) % (givenTimePointLength - 1)) == 0) {
 			inBetweenTimePoints = (timePointCount - givenTimePointLength) / (givenTimePointLength - 1);
