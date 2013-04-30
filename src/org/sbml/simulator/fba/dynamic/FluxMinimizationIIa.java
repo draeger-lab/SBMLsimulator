@@ -65,31 +65,31 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		// Concentrations term
 		IloNumExpr concentrations = cplex.numExpr();
 		int concentrationPosition = fluxPosition + reactionCount;
-		double[] c_m_measured = this.completeConcentrations[this.getTimePointStep()];
+		double[] c_k_ti = this.completeConcentrations[this.getTimePointStep()];
 		
 		int speciesCount = getTargetVariablesLengths()[1];
 		for (int i = 0; i < speciesCount; i++) {
 			IloNumExpr optimizingConcentration = cplex.numExpr();
 			
-			if (!Double.isNaN(c_m_measured[i])) {
+			if (!Double.isNaN(c_k_ti[i])) {
 				// the bigger the change, the better it is (should supporting non zero concentrations)
 				double div = epsilon; 
 				// the bigger the concentration change, the more penalty it has
 				double delta_c = epsilon;
 				if(this.getTimePointStep() > 0) {
-					double c_m_measured_previous = completeConcentrations[this.getTimePointStep()-1][i];
-					if((!Double.isNaN(c_m_measured_previous)))  {
-						div+= c_m_measured_previous;
-						delta_c = (c_m_measured_previous - c_m_measured[i]) * (c_m_measured_previous - c_m_measured[i]);
+					double c_k_ti_1 = completeConcentrations[this.getTimePointStep()-1][i];
+					if((!Double.isNaN(c_k_ti_1)))  {
+						div+= c_k_ti_1;
+						delta_c = (c_k_ti_1 - c_k_ti[i]) * (c_k_ti_1 - c_k_ti[i]);
 					}
 				}
 				else {
-					div+= c_m_measured[i];
+					div+= c_k_ti[i];
 					delta_c = epsilon;
 				}
 				
 				double volume = 1/factors[i];
-				optimizingConcentration = cplex.prod(1/div, cplex.abs(cplex.diff(c_m_measured[i], getVariables()[concentrationPosition + i]))); 
+				optimizingConcentration = cplex.prod(1/div, cplex.abs(cplex.diff(c_k_ti[i], getVariables()[concentrationPosition + i]))); 
 				concentrations = cplex.sum(concentrations, cplex.prod(volume, cplex.prod(1 / delta_t, optimizingConcentration))); 
 				
 			}
