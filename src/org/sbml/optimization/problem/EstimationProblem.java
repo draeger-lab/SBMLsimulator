@@ -305,11 +305,11 @@ public class EstimationProblem extends AbstractProblemDouble implements
 					// equal weight for each reference data set
 					if (negationOfDistance) {
 						fitness[0] += -1
-								* distance.distance(solution.getBlock(0), data.getBlock(0))
+								* distance.distance(solution, data)
 								/ referenceData.length;
 					} else {
-						fitness[0] += distance.distance(solution.getBlock(0),
-							data.getBlock(0))
+						fitness[0] += distance.distance(solution,
+							data)
 								/ referenceData.length;
 					}
 				}
