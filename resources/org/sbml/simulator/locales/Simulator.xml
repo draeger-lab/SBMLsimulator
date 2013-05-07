@@ -87,6 +87,7 @@
   <entry key="QUALITY_MEASURES_TOOLTIP">Here you can specify how to evaluate the quality of a parameter set with respect to given experimental data.</entry>
   <entry key="INTEGRATION_STRATEGY">Integration strategy</entry>
   <entry key="INTEGRATION_STRATEGY_TOOLTIP">Select whether or not to apply a multiple shooting strategy.</entry>
+  <entry key="USE_EXISTING_SOLUTION">Select whether or not to use the parameters in the existing model for post-optimization.</entry>
   
   <!-- FBAOptions -->
   <entry key="ACTIVATE_CONSTRAINT_JG_LESS_THAN_0">Set the constraint J*G less than 0  on</entry>
