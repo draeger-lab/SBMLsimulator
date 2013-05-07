@@ -21,6 +21,8 @@ import java.awt.Window;
 import java.awt.event.WindowListener;
 import java.util.logging.Logger;
 
+import org.sbml.optimization.problem.EstimationProblem;
+
 import eva2.client.EvAClient;
 import eva2.gui.BeanInspector;
 import eva2.gui.GenericObjectEditor;
@@ -42,7 +44,7 @@ public class EvA2GUIStarter {
 	/**
 	 * 
 	 */
-	private EvAClient evaClient = null;
+	public EvAClient evaClient = null;
 	
 	/**
 	 * Private in order to prohibit initialization of this class.
@@ -58,7 +60,7 @@ public class EvA2GUIStarter {
 	 * @param statisticsListener
 	 * @param windowListener
 	 */
-	public static void init(InterfaceOptimizationProblem problem,
+	public static EvA2GUIStarter init(InterfaceOptimizationProblem problem,
 			final Window parentWindow,
 			InterfaceStatisticsListener statisticsListener,
 			WindowListener windowListener) {
@@ -111,6 +113,8 @@ public class EvA2GUIStarter {
 		logger.fine("adding data listener to EvA2");
 		evaBP.evaClient.getStatistics().addDataListener(statisticsListener);
 		logger.fine("EvA2 should now be ready.");
+		
+		return evaBP;
 	}
 
 	/**

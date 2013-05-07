@@ -50,6 +50,12 @@ public interface EstimationOptions extends KeyProvider {
 	 * Resource bundle
 	 */
 	static ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
+
+	/**
+	 * Decide whether the parameters in the given model should be used for post-optimization.
+	 */
+	public static Option<Boolean> USE_EXISTING_SOLUTION = new Option<Boolean>(
+			"USE_EXISTING_SOLUTION", Boolean.class, bundle, Boolean.FALSE);
 	
 	/**
 	 * The file with the values to estimate and their initial setting
@@ -191,7 +197,7 @@ public interface EstimationOptions extends KeyProvider {
 	 */
 	@SuppressWarnings("unchecked")
 	public static final OptionGroup<Boolean> INTEGRATION_STRATEGY = new OptionGroup<Boolean>(
-		"INTEGRATION_STRATEGY", bundle, EST_MULTI_SHOOT);
+		"INTEGRATION_STRATEGY", bundle, EST_MULTI_SHOOT, USE_EXISTING_SOLUTION);
 	
 	/**
 	 * This specifies the class name of the default distance function that

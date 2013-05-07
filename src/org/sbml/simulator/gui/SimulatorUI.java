@@ -676,7 +676,8 @@ PropertyChangeListener {
 									.getBoolean(EstimationOptions.EST_MULTI_SHOOT), panel
 									.getSelectedQuantityRanges());
 							simPanel.getSimulationManager().setEstimationProblem(estimationProblem);
-							EvA2GUIStarter.init(estimationProblem, ui, simPanel, wl);
+							EvA2GUIStarter evaStarter = EvA2GUIStarter.init(estimationProblem, ui, simPanel, wl);
+							simPanel.setClient(evaStarter.evaClient);
 						} catch (Throwable exc) {
 							GUITools.showErrorMessage(ui, exc);
 							setSimulationAndOptimizationEnabled(true);

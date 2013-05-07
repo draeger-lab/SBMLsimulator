@@ -48,6 +48,7 @@ import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLWriter;
+import org.sbml.optimization.EvA2GUIStarter;
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.QualityMeasurement;
@@ -78,6 +79,7 @@ import de.zbit.sbml.io.SBMLfileChangeListener;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
 import de.zbit.util.prefs.SBPreferences;
+import eva2.client.EvAClient;
 import eva2.server.go.problems.AbstractOptimizationProblem;
 import eva2.server.stat.GraphSelectionEnum;
 import eva2.server.stat.InterfaceStatisticsListener;
@@ -192,6 +194,8 @@ public class SimulationPanel extends JPanel implements
    * 
    */
 	private DynamicView dynamicGraphView;
+
+	private EvAClient evaClient;
   
   /**
    * @param model
@@ -462,21 +466,24 @@ public class SimulationPanel extends JPanel implements
 		if ((simulationDataIndex == 0) && (runBestIndex == 0)) {
 			this.notifyRunStarted(0, 1, header, null);
 		}
-		if (statObjects[simulationDataIndex] instanceof MultiTable) {
-			setSimulationData((MultiTable) statObjects[simulationDataIndex]);
-		}
-		double newValue = statDoubles[runBestIndex].doubleValue();
-		if (getSimulationToolPanel().getQualityMeasure() instanceof PearsonCorrelation) {
-			newValue = Math.abs(newValue);
-		}
-		firePropertyChange("quality", getSimulationToolPanel().getCurrentQuality(),
-			newValue);
-		double[] quantities = getSimulationManager().getEstimationProblem().getBestSolutionFound();
-		if ((quantities != null) && (quantities.length == selectedQuantityIds.length)) {
-			for (int i = 0; i < selectedQuantityIds.length; i++) {
-				visualizationPanel.updateQuantity(selectedQuantityIds[i],
-					quantities[i]);
-			}
+		else {
+  		getSimulationManager().getEstimationProblem().calculateStatisticsForGeneration();
+  		
+  		setSimulationData(getSimulationManager().getEstimationProblem().getCurrentSimulationData());
+  		
+  		double newValue = statDoubles[runBestIndex].doubleValue();
+  		if (getSimulationToolPanel().getQualityMeasure() instanceof PearsonCorrelation) {
+  			newValue = Math.abs(newValue);
+  		}
+  		firePropertyChange("quality", getSimulationToolPanel().getCurrentQuality(),
+  			newValue);
+  		double[] quantities = getSimulationManager().getEstimationProblem().getBestSolutionFound();
+  		if ((quantities != null) && (quantities.length == selectedQuantityIds.length)) {
+  			for (int i = 0; i < selectedQuantityIds.length; i++) {
+  				visualizationPanel.updateQuantity(selectedQuantityIds[i],
+  					quantities[i]);
+  			}
+  		}
 		}
   }
   
@@ -508,7 +515,10 @@ public class SimulationPanel extends JPanel implements
    */
   public void notifyRunStarted(int runNumber, int plannedMultiRuns,
     String[] header, String[] metaInfo) {
-    // Determine indices
+  	getSimulationManager().getEstimationProblem().setOptimizer(evaClient.getGOParameters().getOptimizer());
+		
+  	
+  	// Determine indices
     int i, allFound = 0;
     for (i = 0; (i < header.length) && (allFound < 3); i++) {
       if (header[i].equals(EstimationProblem.SIMULATION_DATA)) {
@@ -805,5 +815,12 @@ public class SimulationPanel extends JPanel implements
     public DynamicView getDynamicGraphView() {
         return dynamicGraphView;
     }
+
+		/**
+		 * @param evaClient
+		 */
+		public void setClient(EvAClient evaClient) {
+			this.evaClient = evaClient;
+		}
   
 }

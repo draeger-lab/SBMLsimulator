@@ -45,12 +45,17 @@ import org.simulator.sbml.SBMLinterpreter;
 import de.zbit.io.csv.CSVReader;
 import de.zbit.io.csv.CSVWriter;
 import de.zbit.util.ResourceManager;
+import de.zbit.util.prefs.SBPreferences;
 import eva2.server.go.PopulationInterface;
+import eva2.server.go.individuals.ESIndividualDoubleData;
+import eva2.server.go.individuals.InterfaceDataTypeDouble;
 import eva2.server.go.populations.Population;
 import eva2.server.go.problems.AbstractProblemDouble;
 import eva2.server.go.problems.InterfaceAdditionalPopulationInformer;
 import eva2.server.go.problems.InterfaceHasInitRange;
+import eva2.server.go.strategies.InterfaceOptimizer;
 import eva2.tools.ToolBox;
+import eva2.tools.math.RNG;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -69,12 +74,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	/**
 	 * 
 	 */
-	private MultiTable bestPerGeneration = null;
-	
-	/**
-	 * 
-	 */
-	private double bestPerGenerationDist = Double.POSITIVE_INFINITY;
+	private MultiTable currentSimulationData = null;
 
 	/**
 	 * Generated version identifier.
@@ -165,6 +165,16 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 */
 	private static final transient Logger logger = Logger.getLogger(EstimationProblem.class.getName());
 
+	/**
+	 * 
+	 */
+	public void calculateStatisticsForGeneration() {
+		ESIndividualDoubleData ind = (ESIndividualDoubleData) this.optimizer.getPopulation().getBestIndividual();
+		this.bestSolutionFound = ind.getDoublePosition();
+		this.eval(ind.getDoublePosition());
+	}
+	
+	
 	/**
 	 * 
 	 * @param solver
@@ -315,14 +325,8 @@ public class EstimationProblem extends AbstractProblemDouble implements
 				}
 				
 			}
-			if (bestPerGeneration == null || (fitness[0] < bestPerGenerationDist)) {
-				bestPerGenerationDist = fitness[0];
-				bestPerGeneration = solution;
-				bestSolutionFound = x;
-				if (solution != null) {
-					bestPerGeneration.setName(SIMULATION_DATA);
-				}
-			}
+			currentSimulationData = solution;
+			currentSimulationData.setName(SIMULATION_DATA);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -396,6 +400,11 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * avoid a multiple creation of it in the {@link #eval(double[])} method. 
 	 */
 	private MultiTable initConditions = null;
+
+	/**
+	 * Memorizes the optimizer
+	 */
+	private InterfaceOptimizer optimizer;
 	
 	/**
 	 * 
@@ -438,8 +447,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	@Override
 	public void evaluatePopulationStart(Population population) {
 		super.evaluatePopulationStart(population);
-		bestPerGeneration = null;
-		bestPerGenerationDist = Double.POSITIVE_INFINITY;
+		currentSimulationData = null;
 	}
 
 	/* (non-Javadoc)
@@ -467,7 +475,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	@Override
 	public Object[] getAdditionalDataValue(PopulationInterface pop) {
 		Object[] superVals = super.getAdditionalDataValue(pop);
-		return ToolBox.appendArrays(superVals, bestPerGeneration);
+		return ToolBox.appendArrays(superVals, currentSimulationData);
 	}
 
 	/**
@@ -549,12 +557,16 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 */
 	@Override
 	public void initPopulation(Population population) {
-		// TODO: Provide more elaborated possibilities, such as a distribution around the current solution... Not just a copy.
 		super.initPopulation(population);
-		boolean keepCurrentSolution = true;
+		SBPreferences prefs = SBPreferences.getPreferencesFor(EstimationOptions.class);
+		boolean keepCurrentSolution = false;
+		if (prefs.getBoolean(EstimationOptions.USE_EXISTING_SOLUTION)) {
+			keepCurrentSolution = true;
+		}
+		
 		if ((population.size() > 0) && keepCurrentSolution) {
-//			InterfaceDataTypeDouble individual = (InterfaceDataTypeDouble) population.getIndividual(RNG.randomInt(0, population.size()));
-//			individual.SetDoubleGenotype(getOriginalValues());
+			InterfaceDataTypeDouble individual = (InterfaceDataTypeDouble) population.getIndividual(RNG.randomInt(0, population.size()));
+			individual.SetDoubleGenotype(getOriginalValues());
 		}
 	}
 
@@ -791,6 +803,21 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		}
 		CSVWriter writer = new CSVWriter();
 		writer.write(data, header, comment, file);
+	}
+
+	/**
+	 * @param optimizer
+	 */
+	public void setOptimizer(InterfaceOptimizer optimizer) {
+		this.optimizer = optimizer;
+	}
+
+
+	/**
+	 * @return
+	 */
+	public MultiTable getCurrentSimulationData() {
+		return currentSimulationData;
 	}
 
 }
