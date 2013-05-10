@@ -18,13 +18,18 @@
 package org.sbml.simulator;
 
 import java.awt.HeadlessException;
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import jp.sbi.garuda.platform.commons.exception.NetworkException;
 
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.simulator.fba.gui.FBAOptions;
@@ -37,9 +42,15 @@ import org.simulator.math.odes.AbstractDESSolver;
 
 import de.zbit.AppConf;
 import de.zbit.Launcher;
+import de.zbit.UserInterface;
+import de.zbit.garuda.BackendNotInitializedException;
+import de.zbit.garuda.GarudaOptions;
+import de.zbit.garuda.GarudaSoftwareBackend;
 import de.zbit.gui.BaseFrame;
 import de.zbit.gui.GUIOptions;
+import de.zbit.gui.GUITools;
 import de.zbit.io.csv.CSVOptions;
+import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.SBProperties;
 
@@ -60,6 +71,11 @@ public class SBMLsimulator extends Launcher {
 	 */
 	private static final long serialVersionUID = -6519145035944241806L;
 
+	/**
+	 * Localization support.
+	 */
+	public static final transient ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
+	
 	/**
 	 * The logger for this class.
 	 */
@@ -83,6 +99,11 @@ public class SBMLsimulator extends Launcher {
 	 * The package where all ODE solvers are assumed to be located.
 	 */
 	public static final String SOLVER_PACKAGE = "org.simulator.math.odes";
+	
+	/**
+	 * 
+	 */
+	public static final boolean garuda = true;
 
 	/**
 	 * An array of all available implementations of distance functions to judge
@@ -268,6 +289,9 @@ public class SBMLsimulator extends Launcher {
 		defAndKeys.add(GUIOptions.class);
 		defAndKeys.add(PlotOptions.class);
 		defAndKeys.add(CSVOptions.class);
+		if (garuda) {
+		  defAndKeys.add(GarudaOptions.class);
+		}
 		return defAndKeys;
 	}
 
@@ -329,7 +353,7 @@ public class SBMLsimulator extends Launcher {
 	 * @see de.zbit.Launcher#getYearOfProgramRelease()
 	 */
 	public short getYearOfProgramRelease() {
-		return (short) 2012;
+		return (short) 2013;
 	}
 
 	/* (non-Javadoc)
@@ -343,7 +367,51 @@ public class SBMLsimulator extends Launcher {
 	 * @see de.zbit.Launcher#initGUI(de.zbit.AppConf)
 	 */
 	public BaseFrame initGUI(AppConf appConf) {
-		return new SimulatorUI(appConf);
+		final BaseFrame gui = new SimulatorUI(appConf);
+		if (garuda && (getCmdLineOptions().contains(GarudaOptions.class)
+				&& (!appConf.getCmdArgs().containsKey(GarudaOptions.CONNECT_TO_GARUDA) ||
+						appConf.getCmdArgs().getBoolean(GarudaOptions.CONNECT_TO_GARUDA)))) {
+			new Thread(new Runnable() {
+				/* (non-Javadoc)
+				 * @see java.lang.Runnable#run()
+				 */
+				public void run() {
+					try {
+						String localPath = SBMLsimulator.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+						String folder = new File(localPath).getParent() + "/resources/org/sbml/simulator/gui/img/";
+						String icon = folder + "SBMLsimulator_64.png";
+
+						GarudaSoftwareBackend garudaBackend = new GarudaSoftwareBackend(
+								"1cfbffa0-bbcb-4ca9-aa44-bfa4815e935e",
+								(UserInterface) gui,
+								icon,
+								bundle.getString("PROGRAM_DESCRIPTION"),
+								Arrays.asList(bundle.getStringArray("KEYWORDS")),
+								Arrays.asList(new String[] { "snapshot/Screenshot_1.png" })
+						);
+						garudaBackend.addInputFileFormat("xml", "SBML");
+						garudaBackend.addInputFileFormat("sbml", "SBML");
+						garudaBackend.addInputFileFormat("csv", "Character-separated Value");
+						garudaBackend.addInputFileFormat("txt", "Character-separated Value");
+						garudaBackend.addOutputFileFormat("xml", "SBML");
+						garudaBackend.addOutputFileFormat("sbml", "SBML");
+						garudaBackend.addOutputFileFormat("csv", "Character-separated Value");
+						garudaBackend.addOutputFileFormat("txt", "Character-separated Value");
+						garudaBackend.init();
+						garudaBackend.registedSoftwareToGaruda();
+					} catch (NetworkException exc) {
+						GUITools.showErrorMessage(gui, exc);
+					} catch (BackendNotInitializedException exc) {
+						GUITools.showErrorMessage(gui, exc);
+					} catch (Throwable exc) {
+						String message = exc.getLocalizedMessage();
+						logger.log(Level.FINE, message != null ? message : exc.getMessage(), exc);
+					}
+				}
+			}).start();
+		}
+		return gui;
 	}
+
 
 }

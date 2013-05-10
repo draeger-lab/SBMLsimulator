@@ -30,6 +30,7 @@ import java.beans.EventHandler;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,13 +51,16 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+import javax.swing.SwingWorker;
 import javax.swing.UIManager;
+import javax.xml.stream.XMLStreamException;
 
 import org.jfree.data.statistics.Statistics;
 import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.SBMLDocument;
+import org.sbml.jsbml.SBMLWriter;
 import org.sbml.jsbml.Species;
 import org.sbml.optimization.EvA2GUIStarter;
 import org.sbml.optimization.problem.EstimationOptions;
@@ -72,13 +76,20 @@ import org.simulator.math.odes.MultiTable;
 import org.simulator.math.odes.MultiTable.Block.Column;
 
 import de.zbit.AppConf;
+import de.zbit.garuda.GarudaActions;
+import de.zbit.garuda.GarudaFileSender;
+import de.zbit.garuda.GarudaGUIfactory;
+import de.zbit.garuda.GarudaOptions;
+import de.zbit.garuda.GarudaSoftwareBackend;
 import de.zbit.gui.BaseFrame;
 import de.zbit.gui.GUIOptions;
 import de.zbit.gui.GUITools;
 import de.zbit.gui.SerialWorker;
+import de.zbit.gui.StatusBar;
 import de.zbit.gui.actioncommand.ActionCommand;
 import de.zbit.io.OpenedFile;
 import de.zbit.io.csv.CSVOptions;
+import de.zbit.io.csv.CSVWriter;
 import de.zbit.io.filefilter.SBFileFilter;
 import de.zbit.sbml.gui.SBMLReadingTask;
 import de.zbit.util.ResourceManager;
@@ -200,6 +211,12 @@ PropertyChangeListener {
 	 */
 	private SimulationPanel simPanel;
 
+	/**
+	 * Garuda backend.
+	 */
+	private GarudaSoftwareBackend garudaBackend;
+
+	
 	/**
 	 * 
 	 */
@@ -325,9 +342,91 @@ PropertyChangeListener {
 		JCheckBoxMenuItem item = GUITools.createJCheckBoxMenuItem(
 				Command.SHOW_OPTIONS, simPanel != null ? simPanel.isShowSettingsPanel()
 						: true, simPanel != null, this);
-		return new JMenuItem[] { startFBA, startSimulation, stopSimulation, optimization, item };
+		JMenuItem garuda = null;
+		if (SBMLsimulator.garuda && (!appConf.getCmdArgs().containsKey(GarudaOptions.CONNECT_TO_GARUDA)
+				|| appConf.getCmdArgs().getBoolean(GarudaOptions.CONNECT_TO_GARUDA))) {
+			garuda = GarudaGUIfactory.createGarudaMenu(EventHandler.create(ActionListener.class, this, "sendToGaruda"));
+		}
+		
+		if(garuda != null) {
+			return new JMenuItem[] { startFBA, startSimulation, stopSimulation, optimization, item, garuda };
+		}
+		else {
+			return new JMenuItem[] { startFBA, startSimulation, stopSimulation, optimization, item};
+		}
 	}
 
+	/**
+	 * 
+	 */
+	public void sendToGaruda() {
+		if (simPanel != null) {
+			final MultiTable table = simPanel.getSimulationResultsTable();
+			String options[] = {bundle.getString("SIM_DATA_FILE"), bundle.getString("MODEL_FILE")};
+			int option = 1;
+			if (table != null) {
+				option = JOptionPane.showOptionDialog(this,
+					StringUtil.toHTML(bundle.getString("SELECT_WHAT_TO_SEND_TO_GARUDA"), 60),
+					bundle.getString("GARUDA_FILE_SELECTION"),
+					JOptionPane.OK_CANCEL_OPTION,
+					JOptionPane.QUESTION_MESSAGE,
+					null,
+					options, options[option]);
+			}
+			if (option != JOptionPane.CLOSED_OPTION) {
+				final Component parent = this;
+				final int o = option;
+				final StatusBar bar = getStatusBar();
+				new SwingWorker<Void, Void>() {
+					/* (non-Javadoc)
+					 * @see javax.swing.SwingWorker#doInBackground()
+					 */
+					protected Void doInBackground() throws Exception {
+						try {
+							File file = null;
+							String fileType = null;
+							switch (o) {
+								case 0:
+									fileType = "Character-separated Value";
+									String name = table.getName();
+									if (name == null) {
+										name = "tmp_sim_data";
+									}
+									file = File.createTempFile(name, ".csv");
+									file.deleteOnExit();
+									logger.fine("Writing CSV file " + file.getAbsolutePath());
+									CSVWriter writer = new CSVWriter(bar.getProgressBar());
+									writer.write(table, file);
+									getStatusBar().reset();
+									break;
+								case 1:
+									fileType = "SBML";
+									Model model = simPanel.getModel();
+									SBMLDocument doc = model.getSBMLDocument();
+									String id = model.isSetId() ? model.getId() : "tmp_model";
+									file = File.createTempFile(id, ".xml");
+									file.deleteOnExit();
+									logger.fine("Writing SBML file " + file.getAbsolutePath());
+									SBMLWriter.write(doc, file, ' ', (short) 2);
+									break;
+								default:
+									return null;
+							}
+							logger.fine("Launching Garuda sender");
+							GarudaFileSender sender = new GarudaFileSender(parent, garudaBackend, file, fileType);
+							sender.execute();
+						} catch (IOException exc) {
+							GUITools.showErrorMessage(parent, exc);
+						} catch (XMLStreamException exc) {
+							GUITools.showErrorMessage(parent, exc);
+						}
+						return null;
+					}
+				}.execute();
+			}
+		}
+	}
+	
 	/**
 	 * Cancels a running simulation.
 	 * 
@@ -376,7 +475,7 @@ PropertyChangeListener {
 				GUITools.setEnabled(false, getJMenuBar(), toolBar,
 						BaseAction.FILE_CLOSE, BaseAction.FILE_SAVE_AS,
 						Command.SIMULATION_START, Command.SHOW_OPTIONS, Command.OPEN_DATA,
-						Command.OPTIMIZATION, Command.PRINT, Command.START_FBA);
+						Command.OPTIMIZATION, Command.PRINT, Command.START_FBA, GarudaActions.SENT_TO_GARUDA);
 				GUITools.setEnabled(true, getJMenuBar(), toolBar, BaseAction.FILE_OPEN);
 				repaint();
 				return true;
@@ -697,7 +796,13 @@ PropertyChangeListener {
 	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent evt) {
-		if (evt.getPropertyName().equalsIgnoreCase("progress")) {
+		if (evt.getPropertyName().equals(GarudaSoftwareBackend.GARUDA_ACTIVATED)) {
+			this.garudaBackend = (GarudaSoftwareBackend) evt.getNewValue();
+			if (simPanel != null) {
+				GUITools.setEnabled(true, getJMenuBar(), getJToolBar(), GarudaActions.SENT_TO_GARUDA);
+			}
+		} 
+		else if (evt.getPropertyName().equalsIgnoreCase("progress")) {
 			AbstractProgressBar memoryBar = this.statusBar.showProgress();
 			ProgressBarSwing progressBar = (ProgressBarSwing) memoryBar;
 			// TODO: find a better place for this
@@ -761,6 +866,9 @@ PropertyChangeListener {
 			GUITools.setEnabled(true, getJMenuBar(), toolBar,
 				BaseAction.FILE_SAVE_AS, Command.SIMULATION_START,
 				Command.SHOW_OPTIONS, Command.OPEN_DATA, Command.START_FBA);
+			if (this.garudaBackend != null) {
+				GUITools.setEnabled(true, getJMenuBar(), getJToolBar(), GarudaActions.SENT_TO_GARUDA);
+			}
 			//			setTitle(String.format("%s - %s", getApplicationName(),
 			//				modelFiles[0].getAbsolutePath()));
 			validate();
