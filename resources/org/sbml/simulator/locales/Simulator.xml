@@ -207,6 +207,13 @@
   <entry key="SAVE">Save</entry>
   <entry key="TAB_TOOL_TIP">In this tab you can select the {0} in the model whose values are to be optimized.</entry>
   
+     
+  <!-- SBMLsimulator -->
+  
+  <entry key="PROGRAM_DESCRIPTION">SBMLsimulator is a fast, accurate, and easily usable program for dynamic model simulation and heuristic parameter optimization of models encoded in the Systems Biology Markup Language (SBML). In order to ensure a high reliability of this software, it has been benchmarked against the entire SBML Test Suite and all models from the BioModels.net database. It includes a large collection of nature-inspired heuristic optimization procedures for efficient model calibration. SBMLsimulator provides an intuitive Graphical User Interface (GUI) and several command-line options to be suitable for large-scale batch processing and model calibration. SBMLsimulator runs on all platforms that provide a standard Java Virtual Machine and is based on the open-source library JSBML. The simulation core library of SBMLsimulator can be obtained as a separate application programming library.</entry>
+  <entry key="KEYWORDS">[Dynamic simulation;Parameter estimation;Heuristic optimization;Ordinary differential equation solver]</entry>
+  
+  
   <!-- SelectionCommand -->
   
   <entry key="OPTIMIZE_ALL">Select all</entry>
@@ -334,5 +341,9 @@
   <entry key="TOO_MANY_MODEL_FILES">Too many model files</entry>
   <entry key="UNABLE_TO_OPEN_DATA">Unable to open data</entry>
   <entry key="UNSUPPORTED_FILE_TYPES">Unsupported file types</entry>
+  <entry key="SELECT_WHAT_TO_SEND_TO_GARUDA">Select if you like to send simulated data or the current model to Garuda</entry>
+  <entry key="GARUDA_FILE_SELECTION">Garuda file sender</entry>
+  <entry key="SIM_DATA_FILE">Simulation data</entry>
+  <entry key="MODEL_FILE">SBML document</entry>
   
 </properties>
