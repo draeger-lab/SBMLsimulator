@@ -24,7 +24,6 @@ import java.util.logging.Logger;
 import org.sbml.jsbml.SBMLDocument;
 
 import y.view.NodeRealizer;
-
 import de.zbit.graph.io.SBML2GraphML;
 import de.zbit.gui.ColorPalette;
 
