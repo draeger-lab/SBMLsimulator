@@ -26,7 +26,7 @@ import javax.swing.JSlider;
  */
 public class BugTestJSlider{
 	
-	public static void main(String[] args){
+	public static void main(String[] args) {
 		JFrame window = new JFrame();
 		JSlider slider = new JSlider();
 		slider.setValue(0);

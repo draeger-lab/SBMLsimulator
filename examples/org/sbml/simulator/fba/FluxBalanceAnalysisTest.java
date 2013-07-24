@@ -94,7 +94,7 @@ public class FluxBalanceAnalysisTest {
 			System.out.println("sysbound file nicht vorhanden");
 		}
 		
-		while (cu0.getSystemBoundariesArray() == null){
+		while (cu0.getSystemBoundariesArray() == null) {
 			//wait
 			System.out.print(".");
 		}
@@ -173,7 +173,7 @@ public class FluxBalanceAnalysisTest {
 
 //		System.out.println();
 //		System.out.println("--------steady state matrix--------");
-		for (int i = 0; i < modModel.getReactionCount(); i++){
+		for (int i = 0; i < modModel.getReactionCount(); i++) {
 			System.out.print(modModel.getReaction(i).getId() + " ");
 		}
 		System.out.println();
@@ -256,7 +256,7 @@ public class FluxBalanceAnalysisTest {
 //		System.out.println();
 //		System.out.println("--------species at the system boundaries----------");
 //		double[] sb = constraints.getSystemBoundaries();
-//		for (int i = 0; i < sb.length; i++){
+//		for (int i = 0; i < sb.length; i++) {
 //			if (!Double.isNaN(sb[i])) {
 //				System.out.println(originalSBMLDoc.getModel().getSpecies(i));
 //			}

@@ -175,7 +175,7 @@ public class Optimization implements PropertyChangeListener{
 	 */
 	private void performOptimization(int repetitions, int evaluations, String directory) {
 
-		for(int j = 1; j <= repetitions; j++){
+		for(int j = 1; j <= repetitions; j++) {
 
 			// Set initial values to values given in experimental data.
 			String[] quantityIds = new String[estimationProblem.getQuantities().length];

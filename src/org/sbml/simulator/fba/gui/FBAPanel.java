@@ -468,7 +468,7 @@ public class FBAPanel extends JPanel implements ActionListener, TableModelListen
 			//solve
 			try{
 			fba.solve();
-			} catch (ilog.cplex.CpxException cplexExc){
+			} catch (ilog.cplex.CpxException cplexExc) {
 				cplexExc.printStackTrace();
 				JOptionPane.showMessageDialog(this,
 						new String("Only the null vector solution found."),

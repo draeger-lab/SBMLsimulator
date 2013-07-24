@@ -326,7 +326,7 @@ public class StabilityMatrix extends Matrix {
 	public boolean allZero() {
 		for (int i = 0; i < this.getRowDimension(); i++) {
 			for (int j = 0; j < this.getColumnDimension(); j++) {
-				if (this.get(i, j) != 0d){
+				if (this.get(i, j) != 0d) {
 					return false;
 				}
 			}

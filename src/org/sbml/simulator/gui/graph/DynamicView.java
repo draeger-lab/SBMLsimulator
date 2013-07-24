@@ -231,7 +231,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
      * {@link DynamicControlPanel} on the given {@link DynamicCore}.
      * @param core
      */
-    private void activateView(DynamicCore core){
+    private void activateView(DynamicCore core) {
         //only activate if it is not activated yet
         if (visualizedCore != core) {
             /*
@@ -444,7 +444,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
         } else if (e.getPropertyName().equals("measurements")) {
             //experimental data added
             MultiTable expData = (MultiTable) e.getNewValue();
-            if (expData != null){
+            if (expData != null) {
                 final MultiTable data;
                 final DynamicView thisView = this;
                 if ((expData.getTimePoints().length < 100)
@@ -521,18 +521,18 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
      * updates all selection states of IDs saved in corresponding hashmap
      * (reactions & species)
      */
-    public void retrieveSelectionStates(){
+    public void retrieveSelectionStates() {
         //update species
-        for(String id : speciesSelectionStates.keySet()){
-            if(legend.getLegendTableModel().isSelected(id)){
+        for(String id : speciesSelectionStates.keySet()) {
+            if(legend.getLegendTableModel().isSelected(id)) {
                 speciesSelectionStates.put(id, true);
             } else {
                 speciesSelectionStates.put(id, false);
             }
         }
         //update reactions
-        for(String id : reactionsSelectionStates.keySet()){
-            if(legend.getLegendTableModel().isSelected(id)){
+        for(String id : reactionsSelectionStates.keySet()) {
+            if(legend.getLegendTableModel().isSelected(id)) {
                 reactionsSelectionStates.put(id, true);
             } else {
                 reactionsSelectionStates.put(id, false);
@@ -598,7 +598,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
         controlPanel.setSearchbarValue(timepoint);
 
         if (graphManipulator != null) {
-            for (int i = 1; i <= updateThem.getColumnCount(); i++) {
+            for (int i = 1; i < updateThem.getColumnCount(); i++) {
                 String id = updateThem.getColumnIdentifier(i);
                 if (legend.getLegendTableModel().isSelected(id)) {
                     // only display dynamic features when selected
@@ -639,7 +639,7 @@ public class DynamicView extends JSplitPane implements IDynamicGraph,
      * @return {@code true}, if data could be visualized<br>
      *         false, if data could not be visualized.
      */
-    public boolean visualizeData(String dataName){
+    public boolean visualizeData(String dataName) {
         int index = Integer.valueOf(String.valueOf(dataName.charAt(dataName.length()-1))) - 1;
         if (dataName.contains(bundle.getString("SIMULATION_DATA"))) {
             if (!simulationCores.isEmpty()) {

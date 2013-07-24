@@ -137,7 +137,7 @@ public class SEDMLCreationTest {
 		sedml.addTask(t1);
 		ListOf<Species> los =  model.getListOfSpecies();
 		// create fields for model variables
-		for (Species s:los){
+		for (Species s:los) {
 			DataGenerator dg = new DataGenerator(s.getId()+"dg", s.getId(), Libsedml.parseFormulaString(s.getId()));
 			SBMLSupport support= new SBMLSupport();
 			Variable v = new Variable(s.getId(), s.getId(), t1.getId(),support.getXPathForSpecies(s.getId()));
@@ -154,7 +154,7 @@ public class SEDMLCreationTest {
 		Plot2D plot2d = new Plot2D("plot","Basic plot");
 		sedml.addOutput(plot2d);
 		int indx=0;
-		for (DataGenerator dg: sedml.getDataGenerators()){
+		for (DataGenerator dg: sedml.getDataGenerators()) {
 			// we don't want to plot time vs time. Equality checks are based on ID
 			if(!dg.equals(time)) {
 				Curve curve = new Curve("curve"+ indx++ +"", null,false,false,time.getId(),dg.getId());

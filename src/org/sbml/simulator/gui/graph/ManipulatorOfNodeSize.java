@@ -220,7 +220,7 @@ public class ManipulatorOfNodeSize extends AGraphManipulator{
             Color color = null;
             if (legendTable != null) {
                 color = legendTable.getColorFor(id);
-            } else if (color == null){
+            } else if (color == null) {
                 //ensure that color is never null in case of wrong LegendTableModel
                 color = DEFAULT_NODE_COLOR;
             }

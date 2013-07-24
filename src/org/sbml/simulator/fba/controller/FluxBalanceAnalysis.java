@@ -231,7 +231,7 @@ public class FluxBalanceAnalysis {
 		double[] time = {0};
 		String[] idsOfReactions = new String[FluxMinimizationUtils.getExpandedDocument(constraints.originalDocument).getModel().getReactionCount()+1];
 		idsOfReactions[0] = "time";
-		for (int i = 0; i < FluxMinimizationUtils.getExpandedDocument(constraints.originalDocument).getModel().getReactionCount(); i++){
+		for (int i = 0; i < FluxMinimizationUtils.getExpandedDocument(constraints.originalDocument).getModel().getReactionCount(); i++) {
 			idsOfReactions[i+1] = FluxMinimizationUtils.getExpandedDocument(constraints.originalDocument).getModel().getReaction(i).getId();
 		}
 		double[][] fluxes = new double[1][solutionFluxVector.length];
@@ -490,7 +490,7 @@ public class FluxBalanceAnalysis {
 	 * Method to show if the fluxes add to null.
 	 * @param doc
 	 */
-	public void showIfTheFluxesAddToNull(SBMLDocument doc){
+	public void showIfTheFluxesAddToNull(SBMLDocument doc) {
 		for (int s = 0; s < doc.getModel().getSpeciesCount(); s++) {
 			double sum = 0;
 			for(int i = 0; i < solutionFluxVector.length; i++) {
@@ -556,7 +556,7 @@ public class FluxBalanceAnalysis {
 				// here the sum (c_i - c_eq)^2 is performed by cplex. To make it simpler for cplex, the binomial formula is used
 				// where cplex.square(x) = x^2
 				sum = cplex.sum(temp, cplex.square(c_i), cplex.sum(cplex.prod(c_i, ((-2) * c_eq[i])), cplex.square(cplex.constant(c_eq[i]))));
-			} else if(!Double.isNaN(c_eq[i])){
+			} else if(!Double.isNaN(c_eq[i])) {
 				sum = cplex.sum(temp, cplex.square(x[i + target_length_without_all_flux_values]),cplex.sum(cplex.prod(x[i + target_length_without_all_flux_values], ((-2) * c_eq[i])), cplex.square(cplex.constant(c_eq[i]))));
 			} else {
 				//TODO delete
@@ -640,7 +640,7 @@ public class FluxBalanceAnalysis {
 					}
 				}
 
-				if (!Double.isNaN(compGibbs[j])){
+				if (!Double.isNaN(compGibbs[j])) {
 					//there is a problem if gibbs_eq < 0 TODO: fix it
 					//6.43
 					IloNumExpr delta_G_computation = cplex.sum(cplex.prod(constraints.R, cplex.prod(constraints.T, sumConcentrations)), cplex.diff(constraints.getEquilibriumGibbsEnergies()[j],x[j+1]));

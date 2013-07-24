@@ -177,7 +177,7 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		if (fluxPairs != null) {
 			for (int j = 0; j < fluxPairs.length; j++) {
 //				System.out.println(fluxPairs[j]);
-				if (fluxPairs[j].replaceAll("[\\+\\-\\=\\d]", "").length() > 0){
+				if (fluxPairs[j].replaceAll("[\\+\\-\\=\\d]", "").length() > 0) {
 					continue;
 				}
 				String[] hEq = fluxPairs[j].split("=");
@@ -295,7 +295,7 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 				if(this.usePreviousEstimations) {
 					double estimated = previousEstimatedConcentrations[i];
 					// allowing errors of 10 % // TODO check error assumption
-					if (Double.isNaN(c_k_ti_1[i]) && !Double.isNaN(estimated)){ // || (Math.abs(given - estimated) < Math.abs(0.10 * given))) {
+					if (Double.isNaN(c_k_ti_1[i]) && !Double.isNaN(estimated)) { // || (Math.abs(given - estimated) < Math.abs(0.10 * given))) {
 						// if given is NaN or estimated fits better than given
 						c_k_ti_1[i] = estimated;
 					}

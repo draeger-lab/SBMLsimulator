@@ -227,7 +227,7 @@ public class DynamicFBAFluxMinIITest {
 				if (fluxPairs[i].contains(reverse)) {
 					continue;
 				}
-				else if (fluxPairs[i].contains(forward)){
+				else if (fluxPairs[i].contains(forward)) {
 					fluxPairs[i] = fluxPairs[i].replaceAll(entry.getKey(), entry.getValue().toString());
 				}
 			}
