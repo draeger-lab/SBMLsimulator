@@ -270,7 +270,7 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 	 * @param objects
 	 */
 	private void initSpecificTab(JPanel panel, Object[] objects) {
-		if (objects != null){
+		if (objects != null) {
 			if(objects[0] instanceof Species) {
 				concUpperBounds = new JSpinner[objects.length];
 				concLowerBounds = new JSpinner[objects.length];
@@ -424,7 +424,7 @@ public class FBASettingPanel extends JPanel implements ActionListener, ChangeLis
 	public void stateChanged(ChangeEvent evt) {
 		JSpinner source = (JSpinner) evt.getSource();
 		for (int i = 0; i < fluxLowerBounds.length; i++) {
-			if (source.equals(fluxLowerBounds[i])){
+			if (source.equals(fluxLowerBounds[i])) {
 				// the source is a lb source of fluxes
 				if (source.getValue() instanceof Integer) {
 					fba.setLbOfReactionJ((Integer) source.getValue(), i);

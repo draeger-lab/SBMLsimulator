@@ -47,7 +47,7 @@ public class CSVDataConverterTest {
 		File file = new File(args[1]);
 		cu.readGibbsFromFile(file);
 
-		while(cu.getGibbsArray() == null){
+		while(cu.getGibbsArray() == null) {
 			//wait
 		}
 		System.out.println("done reading");

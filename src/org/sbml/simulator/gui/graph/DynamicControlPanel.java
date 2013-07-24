@@ -103,7 +103,7 @@ public class DynamicControlPanel extends JPanel {
          * Returns a string array of all speed items.
          * @return
          */
-        public static String[] getAllSpeedItems(){
+        public static String[] getAllSpeedItems() {
             return new String[] { Items.FAST.getName(), Items.NORMAL.getName(),
                     Items.SLOW.getName() };
         }
@@ -129,7 +129,7 @@ public class DynamicControlPanel extends JPanel {
          * @param item
          * @param speed
          */
-        public static void setSpeed(Items item, int speed){
+        public static void setSpeed(Items item, int speed) {
             if (item == FAST) {
                 FAST_SPEED = speed;
             } else if (item == NORMAL) {
@@ -143,7 +143,7 @@ public class DynamicControlPanel extends JPanel {
 	     * Returns localized name of this Item.
 	     * @return
 	     */
-        public String getName(){
+        public String getName() {
             return bundle.getString(this.toString());
         }
         
@@ -273,7 +273,7 @@ public class DynamicControlPanel extends JPanel {
 	 * Adds an item to the data-list.
 	 * @param item
 	 */
-	public void addToDataList(String item){
+	public void addToDataList(String item) {
 	    dataCombo.addItem(item);
 	}
 		
@@ -281,7 +281,7 @@ public class DynamicControlPanel extends JPanel {
 	 * Returns the activation status of this {@link DynamicControlPanel}.
 	 * @return
 	 */
-	public boolean getPanelActivationStatus(){
+	public boolean getPanelActivationStatus() {
 	    return panelActivationStatus;
 	}
 	
@@ -289,7 +289,7 @@ public class DynamicControlPanel extends JPanel {
 	 * Returns the current selected manipulator.
 	 * @return
 	 */
-	public String getSelectedManipulator(){
+	public String getSelectedManipulator() {
 	    return manipulatorsCombo.getSelectedItem().toString();
 	}
 	
@@ -498,7 +498,7 @@ public class DynamicControlPanel extends JPanel {
 	 * Sets selected manipulator in {@link JComboBox}.
 	 * @param manipulator
 	 */
-	public void setSelectedManipulator(Manipulators manipulator){
+	public void setSelectedManipulator(Manipulators manipulator) {
 	    manipulatorsCombo.setSelectedItem(manipulator.getName());
 	}
 	
@@ -509,7 +509,7 @@ public class DynamicControlPanel extends JPanel {
      * 
      * @param dataName
      */
-	public void setSelectedVisualizationData(String dataName){
+	public void setSelectedVisualizationData(String dataName) {
 	   dataCombo.setSelectedItem(dataName); 
 	}
 	
@@ -517,7 +517,7 @@ public class DynamicControlPanel extends JPanel {
 	 * Sets selection state of nodelabels-checkbox.
 	 * @param bool
 	 */
-	public void setSelectionStateOfNodeLabels(boolean bool){
+	public void setSelectionStateOfNodeLabels(boolean bool) {
 	    nodeLabelsCB.setSelected(bool);
 	}
     
@@ -525,7 +525,7 @@ public class DynamicControlPanel extends JPanel {
      * Sets selection state of reactionlabels-checkbox.
      * @param bool
      */
-    public void setSelectionStateOfReactionLabels(boolean bool){
+    public void setSelectionStateOfReactionLabels(boolean bool) {
         reactionLabelsCB.setSelected(bool);
     }
 	
@@ -559,7 +559,7 @@ public class DynamicControlPanel extends JPanel {
 	/**
      * Enables {@link DynamicControlPanel} elements accordant to video status.
      */
-    public void setVideoStatus(){
+    public void setVideoStatus() {
         Component[] elements = { play, pause, video, graphShot,
                 searchBar, simVeloCombo, nodeLabelsCB, reactionLabelsCB,
                 manipulatorsCombo, dataCombo };

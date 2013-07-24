@@ -126,7 +126,7 @@ public class ImageGenerator {
      * width and height of the current display window.
      * @return {width, height}
      */
-    public int[] getScreenshotResolution(){
+    public int[] getScreenshotResolution() {
         //save current view
         Graph2DView originalViewPort = (Graph2DView) graph.getCurrentView();
         

@@ -49,7 +49,7 @@ public class JSliderTest extends JFrame implements IDynamicGraph{
 	
 	private MultiTable testTable = new MultiTable();
 	
-	private void generateTestTable(){
+	private void generateTestTable() {
 		double[] timepoints = {0.1,0.2,0.3,0.4,0.5};
 		testTable.setTimePoints(timepoints);
 		
@@ -60,7 +60,7 @@ public class JSliderTest extends JFrame implements IDynamicGraph{
 		testTable.getBlock(0).setData(data);
 	}
 	
-	public void init(){
+	public void init() {
 		generateTestTable();
 		core = new DynamicCore(this, testTable);
 		controller = new Controller(core);
@@ -95,7 +95,7 @@ public class JSliderTest extends JFrame implements IDynamicGraph{
 	public void updateGraph(double timePoint, MultiTable updateThem) {
 		timepoint.setText("Timepoint: " +timePoint); 
 		String dataString = "";
-		for(int i = 1; i <= updateThem.getColumnCount(); i++){
+		for(int i = 1; i <= updateThem.getColumnCount(); i++) {
 			dataString += updateThem.getColumnIdentifier(i) + ": " + updateThem.getValueAt(0, i) + " || " ; //there's just one row (timepoint to be updated)
 		}
 		dataStrings.setText(dataString);

@@ -171,7 +171,7 @@ public class FluxMinimizationUtils {
 	
 			for (int index = 0; index < systemBoundaries.length; index++) {
 				
-				if (!Double.isNaN(systemBoundaries[index])){
+				if (!Double.isNaN(systemBoundaries[index])) {
 					// get species
 					Species species = modified.getModel().getSpecies(index);
 					String speciesId = species.getId();
@@ -434,7 +434,7 @@ public class FluxMinimizationUtils {
 		// initialize the new StoichiometricMatrix (without the zero-rows)
 		StoichiometricMatrix S;
 	
-		for (int row = 0; row <N.getRowDimension(); row++){
+		for (int row = 0; row <N.getRowDimension(); row++) {
 			//flagZeros is true if this row contains only zeros
 			boolean flagZeros = true;
 			for (int col = 0; col <N.getColumnDimension(); col++) {

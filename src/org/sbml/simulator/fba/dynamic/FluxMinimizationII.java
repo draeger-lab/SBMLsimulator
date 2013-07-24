@@ -470,7 +470,7 @@ public class FluxMinimizationII extends TargetFunction {
 		int fluxCount = getTargetVariablesLengths()[0];
 		for (int i = 0; i < fluxCount; i++) {
 			Reaction r = this.originalDocument.getModel().getReaction(i);
-			if (r.isSetReversible() && r.isReversible()){
+			if (r.isSetReversible() && r.isReversible()) {
 				this.lowerBounds[i] = this.fluxLow;
 			}
 			else {
@@ -700,7 +700,7 @@ public class FluxMinimizationII extends TargetFunction {
 		
 		// for fluxes
 		double[] currentFluxSolution = optimizedSolution[1];
-		if(this.getTimePointStep() > 0){
+		if(this.getTimePointStep() > 0) {
 			workingSolutionMultiTable.getBlock(1).setRowData(this.getTimePointStep() - 1, currentFluxSolution);
 		}
 		// for the last time point

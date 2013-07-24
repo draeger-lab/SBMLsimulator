@@ -117,7 +117,7 @@ public abstract class AGraphManipulator implements IGraphManipulator{
      * @param document
      * @param core
      */
-    public AGraphManipulator(SBML2GraphML graph, SBMLDocument document, DynamicCore core){
+    public AGraphManipulator(SBML2GraphML graph, SBMLDocument document, DynamicCore core) {
         this.graph = graph;
         reactionID2reactionNode = new HashMap<String, Node>();
         id2speciesNode = new HashMap<String, Node>();
@@ -241,7 +241,7 @@ public abstract class AGraphManipulator implements IGraphManipulator{
                         // reactants
                         er.setSourceArrow(Arrow.NONE);
                         // TODO own arrow for reversible
-                        // if(document.getModel().getReaction(id).isReversible()){
+                        // if(document.getModel().getReaction(id).isReversible()) {
                         // er.setSourceArrow(Arrow.PLAIN);
                         // } else {
                         // er.setSourceArrow(Arrow.NONE);
@@ -258,7 +258,7 @@ public abstract class AGraphManipulator implements IGraphManipulator{
                         // reactants
                         er.setTargetArrow(Arrow.NONE);
                         // TODO own arrow for reversible
-                        // if(document.getModel().getReaction(id).isReversible()){
+                        // if(document.getModel().getReaction(id).isReversible()) {
                         // er.setTargetArrow(Arrow.PLAIN);
                         // } else {
                         // er.setTargetArrow(Arrow.NONE);
@@ -307,12 +307,12 @@ public abstract class AGraphManipulator implements IGraphManipulator{
      * @param id
      * @param value
      */
-    protected void labelNode(NodeRealizer nr, String id, double value){
+    protected void labelNode(NodeRealizer nr, String id, double value) {
         String name = "";
-        if(document.getModel().getSpecies(id) != null){
+        if(document.getModel().getSpecies(id) != null) {
             name = document.getModel().getSpecies(id).isSetName() ? document
                     .getModel().getSpecies(id).getName() : id;
-        }else if(document.getModel().getReaction(id) != null){
+        }else if(document.getModel().getReaction(id) != null) {
             name = document.getModel().getReaction(id).isSetName() ? document
                     .getModel().getReaction(id).getName() : id;
         }
@@ -376,7 +376,7 @@ public abstract class AGraphManipulator implements IGraphManipulator{
             // (low concentration)
             double resPercent = adjustValue(0, 0.5, 0, 1, percent);
             return linearColorInterpolation(resPercent, RGBcolor2, RGBcolor3);
-        } else if (percent > 0.5 && percent <= 1.0){
+        } else if (percent > 0.5 && percent <= 1.0) {
             //color interpolation between color1 (high concentration) and color2 (mid concentration)
             double resPercent = adjustValue(0.5, 1, 0, 1, percent);
             return linearColorInterpolation(resPercent, RGBcolor1, RGBcolor2);
@@ -408,20 +408,20 @@ public abstract class AGraphManipulator implements IGraphManipulator{
             }
         }
         //revert reactions (lines and pseudonode)
-        if(graph.getId2edge().get(id) != null){
+        if(graph.getId2edge().get(id) != null) {
             LinkedList<Edge> listOfEdges = graph.getId2edge()
                     .get(id);
-            for(Edge e : listOfEdges){
+            for(Edge e : listOfEdges) {
                 EdgeRealizer er = graph.getSimpleGraph().getRealizer(e);
                 er.setLineType(LineType.LINE_1);
                 if (document.getModel().getReaction(id).isReversible()) {
-                    if (reactionID2reactionNode.get(id) == e.target()){
+                    if (reactionID2reactionNode.get(id) == e.target()) {
                         er.setSourceArrow(Arrow.STANDARD);
                     } else {
                         er.setTargetArrow(Arrow.STANDARD);
                     }
                 } else {
-                    if (reactionID2reactionNode.get(id) == e.target()){
+                    if (reactionID2reactionNode.get(id) == e.target()) {
                         er.setSourceArrow(Arrow.NONE);
                     } else {
                         er.setTargetArrow(Arrow.STANDARD);

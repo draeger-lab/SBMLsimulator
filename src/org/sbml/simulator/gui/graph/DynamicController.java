@@ -455,13 +455,13 @@ public class DynamicController implements ChangeListener, ActionListener,
                 SBPreferences.getPreferencesFor(GraphOptions.class).put(
                         cb.getName(),
                         Items.getItem(ie.getItem().toString()).getName()); 
-            }else if (cb.getName().equals(controlPanel.MANIPULATORS_LIST)){
+            }else if (cb.getName().equals(controlPanel.MANIPULATORS_LIST)) {
                 view.setGraphManipulator(getSelectedGraphManipulator());
                 //update preferences on change
                 SBPreferences.getPreferencesFor(GraphOptions.class).put(
                         cb.getName(),
                         Manipulators.getManipulator(ie.getItem().toString()).getName());
-            }else if (cb.getName().equals(controlPanel.DATA_LIST)){
+            }else if (cb.getName().equals(controlPanel.DATA_LIST)) {
                 view.visualizeData(ie.getItem().toString());
             }
         } else if (ie.getSource() instanceof JCheckBox) {

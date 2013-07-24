@@ -36,7 +36,7 @@ public class Controller implements ChangeListener, ActionListener{
 	
 	private DynamicCore core;
 
-	public Controller(DynamicCore core){
+	public Controller(DynamicCore core) {
 		this.core = core;
 	}
 	
@@ -46,7 +46,7 @@ public class Controller implements ChangeListener, ActionListener{
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		System.out.println("TEST STATECHANGED");
-		if(core != null){
+		if(core != null) {
 			int timepoint = ((JSlider)e.getSource()).getValue();
 			core.setCurrTimepoint(timepoint);
 		}
@@ -57,11 +57,11 @@ public class Controller implements ChangeListener, ActionListener{
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if(e.getActionCommand().equals("Play")){
+		if(e.getActionCommand().equals("Play")) {
 			core.play();
-		}else if(e.getActionCommand().equals("Pause")){
+		}else if(e.getActionCommand().equals("Pause")) {
 			core.pausePlay();
-		}else if(e.getActionCommand().equals("Stop")){
+		}else if(e.getActionCommand().equals("Stop")) {
 			core.stopPlay();
 		}
 		

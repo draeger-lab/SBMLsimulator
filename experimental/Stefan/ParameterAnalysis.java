@@ -59,12 +59,12 @@ public class ParameterAnalysis {
 				modelCounter++;
 			}
 			// calculate mean, standard deviation and variation coefficient of the current parameter
-			for(int i=0;i<par.length;i++){
+			for(int i=0;i<par.length;i++) {
 				value += par[i];
 			}
 			double mean = value/par.length;
 			double sum = 0;
-			for(int i=0;i<par.length;i++){
+			for(int i=0;i<par.length;i++) {
 				sum += ((par[i] - mean)*(par[i] - mean));
 			}
 			double stddev = Math.sqrt((sum/(par.length - 1.0)));

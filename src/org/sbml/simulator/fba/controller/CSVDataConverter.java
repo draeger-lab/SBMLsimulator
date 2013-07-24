@@ -136,7 +136,7 @@ public class CSVDataConverter {
 	 * 
 	 * @return the csv-Reader
 	 */
-	public CSVDataReader getReader(){
+	public CSVDataReader getReader() {
 		return reader;
 	}
 
@@ -301,7 +301,7 @@ public class CSVDataConverter {
 //
 //			if (isGibbsFile != null && isGibbsFile) {
 //				
-//			} else if(isConcentrationFile != null && isConcentrationFile){
+//			} else if(isConcentrationFile != null && isConcentrationFile) {
 //				initializeConcentrationArray();
 //				for(int i = 0; i < values.length; i++) {
 //					if (modifiedDocument.getModel().containsSpecies(keys[i])) {
@@ -334,7 +334,7 @@ public class CSVDataConverter {
 						modifiedDocument.getModel().getReaction(helper[0]).putUserObject(KEY_GIBBS, Double.parseDouble(helper[1]));
 						int index = modifiedDocument.getModel().getListOfReactions().getIndex(modifiedDocument.getModel().getReaction(helper[0]));
 						gibbsArray[index] = Double.parseDouble(helper[1]);
-						if (modifiedDocument.getModel().containsReaction(helper[0] + FluxMinimizationUtils.endingForBackwardReaction)){
+						if (modifiedDocument.getModel().containsReaction(helper[0] + FluxMinimizationUtils.endingForBackwardReaction)) {
 //							modifiedDocument.getModel().getReaction(helper[0] + FluxMinimizationUtils.endingForBackwardReaction).putUserObject(KEY_GIBBS, "isReverse");
 							modifiedDocument.getModel().getReaction(helper[0] + FluxMinimizationUtils.endingForBackwardReaction).putUserObject(KEY_GIBBS, -Double.parseDouble(helper[1]));
 							int index2 = modifiedDocument.getModel().getListOfReactions().getIndex(modifiedDocument.getModel().getReaction(helper[0] + FluxMinimizationUtils.endingForBackwardReaction));
@@ -366,7 +366,7 @@ public class CSVDataConverter {
 		
 			if (modifiedDocument.getModel().containsSpecies(helper[0])) {
 				int index = modifiedDocument.getModel().getListOfSpecies().getIndex(modifiedDocument.getModel().getSpecies(helper[0]));
-				if (helper[1].equals("-")){
+				if (helper[1].equals("-")) {
 					systemBoundariesArray[index] = -1;
 				}
 				else if (helper[1].equals("+")) {

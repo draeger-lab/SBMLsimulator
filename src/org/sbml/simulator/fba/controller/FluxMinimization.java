@@ -259,10 +259,10 @@ public class FluxMinimization extends TargetFunction {
 		for (int i = 0; i < model.getSpeciesCount(); i++) {
 			currentSpecies = model.getSpecies(i);
 			if (currentSpecies.hasOnlySubstanceUnits()) {
-				if (currentSpecies.isSetInitialConcentration()){
+				if (currentSpecies.isSetInitialConcentration()) {
 					// multiply with the volume of the compartment
 					initialConcentrations[i] = currentSpecies.getInitialConcentration()* currentSpecies.getCompartmentInstance().getSize();
-				} else if (currentSpecies.isSetInitialAmount()){
+				} else if (currentSpecies.isSetInitialAmount()) {
 					// do nothing
 					initialConcentrations[i] = currentSpecies.getInitialAmount();
 				}
@@ -270,12 +270,12 @@ public class FluxMinimization extends TargetFunction {
 					// TODO no initialConcentration and no initialAmount isSet --> unknown
 				}
 			} else {
-				if (currentSpecies.isSetInitialConcentration()){
+				if (currentSpecies.isSetInitialConcentration()) {
 					// do nothing
 					initialConcentrations[i] = currentSpecies.getInitialConcentration();
-				} else if (currentSpecies.isSetInitialAmount()){
+				} else if (currentSpecies.isSetInitialAmount()) {
 					// divide through the volume of the compartment
-					if (currentSpecies.getCompartmentInstance().isSetSize() && currentSpecies.getCompartmentInstance().getSize() != 0){
+					if (currentSpecies.getCompartmentInstance().isSetSize() && currentSpecies.getCompartmentInstance().getSize() != 0) {
 						initialConcentrations[i] = currentSpecies.getInitialAmount() / currentSpecies.getCompartmentInstance().getSize();
 					}
 				}

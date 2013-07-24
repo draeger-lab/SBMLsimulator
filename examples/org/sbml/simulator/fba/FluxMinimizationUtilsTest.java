@@ -56,7 +56,7 @@ public class FluxMinimizationUtilsTest {
 //		try {
 //			testMatrix = FluxMinimizationUtils.SBMLDocToStoichMatrix(sbml);
 //			for (int i = 0; i < FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(sbml).getModel().getReactionCount(); i++) {
-////				if(FluxMinimizationUtils.reversibleReactions.contains(FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(sbml).getModel().getReaction(i).getId())){
+////				if(FluxMinimizationUtils.reversibleReactions.contains(FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(sbml).getModel().getReaction(i).getId())) {
 //				System.out.print(FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(sbml).getModel().getReaction(i).getId()+" ");
 ////				}
 //			}
@@ -64,7 +64,7 @@ public class FluxMinimizationUtilsTest {
 //			for(int i = 0 ; i < testMatrix.getRowDimension(); i++) {
 //				System.out.print(FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(sbml).getModel().getSpecies(i).getId() + ": ");
 //				for (int j = 0 ; j < testMatrix.getColumnDimension(); j++) {
-////					if(FluxMinimizationUtils.reversibleReactions.contains(FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(sbml).getModel().getReaction(j).getId())){
+////					if(FluxMinimizationUtils.reversibleReactions.contains(FluxMinimizationUtils.eliminateTransportsAndSplitReversibleReactions(sbml).getModel().getReaction(j).getId())) {
 //						System.out.print(testMatrix.get(i, j) + " ");
 ////					}
 //				}

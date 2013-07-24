@@ -107,7 +107,7 @@ public class ConservationRelations {
 							if (containsAll.isEmpty())
 								isSubset = true;
 						}
-						if (!isSubset){ // condition (3.8) satisfied
+						if (!isSubset) { // condition (3.8) satisfied
 							// create a new combination of rows
 							combinations.add(new int[] { i, k });
 						}
@@ -225,7 +225,7 @@ public class ConservationRelations {
 		return rows.get(i)[j];
 	}
 
-	public static double[] combine(double[] row1, double[] row2, double value1,double value2){
+	public static double[] combine(double[] row1, double[] row2, double value1,double value2) {
 		double[] ret = new double[row1.length];
 
 		for (int i = 0; i < ret.length; i++) {
