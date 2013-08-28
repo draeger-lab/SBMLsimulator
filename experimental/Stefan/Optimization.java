@@ -89,7 +89,7 @@ public class Optimization implements PropertyChangeListener{
 
 		simEndTime = 600;
 		simStepSize = 10;
-		absoluteTolerance= 1E-10;
+		absoluteTolerance= 1E-12;
 		relativeTolerance = 1E-6;
 		solver = new RosenbrockSolver();
 		solver.setStepSize(simStepSize);
@@ -271,38 +271,52 @@ public class Optimization implements PropertyChangeListener{
 		// declares how many optimization steps are performed per optimization (evaluationTerminator)
 		int fitnessEvaluations = Integer.parseInt(args[4]);
 		// data path for the storage of the optimized models
-		String directory = args[5];
+		
+		int experimentalRepetitions = Integer.parseInt(args[5]);
+		
+		int name = Integer.parseInt(args[6]);
+		
+		double averagePrecision = Double.parseDouble(args[7]);
+		double systematicErrorPercentage = Double.parseDouble(args[8]);
+		double baselinePercentage = Double.parseDouble(args[9]);
+		String directory = args[10];
 
 
-		for(double averagePrecision=0.0;averagePrecision<=0.30;averagePrecision+=0.01) {
-			for(double systematicErrorPercentage=0.0;systematicErrorPercentage<=30.0;systematicErrorPercentage+=1.0) {
-				for(double baselinePercentage=0.0;baselinePercentage<=30.0;baselinePercentage+=1.0) {
-
-					// create new dirctory for every error introduction repetition
-					File errorDirectory = new File(directory + "/Errors_" + (int)(averagePrecision*100) + "_" + (int)systematicErrorPercentage + "_" + (int)baselinePercentage);
-					errorDirectory.mkdir();
-
-					for(int i = 1; i <= repetitions; i++) {
-						averagePrecision=Math.round(averagePrecision*100)/100.0;
-						systematicErrorPercentage=Math.round(systematicErrorPercentage);
-						baselinePercentage=Math.round(baselinePercentage);
-
-						// error introduction
-						String fileName = errorDirectory.getAbsolutePath()+ "/Experimental" + i + ".csv";
-						ErrorIntroduction.introduceError(experimentalFile,fileName,modelFile,averagePrecision,systematicErrorPercentage,baselinePercentage);
-
-						modelNameWithError = "Errors_" + (int)(averagePrecision*100) + "_" + (int)systematicErrorPercentage + "_" + (int)baselinePercentage + "_Exp_" + i;
-
-						// parameter optimization for models with introduced errors
-
-						// (averagePrecision=0.0, systematicErrorPercentage=0.0) is equivalent to
-						// the optimization with the original experimental data
-						Optimization opt = new Optimization(modelFile, fileName, parameterFile);
-						opt.performOptimization(repetitions, fitnessEvaluations, errorDirectory.toString());
-
-						System.out.println();
-						System.out.println("Optimization for " + modelNameWithError + " is completed!");
-						System.out.println();}}}}
+		
+		// create new dirctory for every error introduction repetition
+			File errorDirectory = new File(directory + "/Errors_"
+					+ (int) (averagePrecision * 100) + "_"
+					+ (int) systematicErrorPercentage + "_" + (int) baselinePercentage);
+			errorDirectory.mkdir();
+			
+			for (int i = 1; i <= experimentalRepetitions; i++) {
+				averagePrecision = Math.round(averagePrecision * 100) / 100.0;
+				systematicErrorPercentage = Math.round(systematicErrorPercentage);
+				baselinePercentage = Math.round(baselinePercentage);
+				
+				// error introduction
+				String fileName = errorDirectory.getAbsolutePath() + "/Experimental"
+						+ i + ".csv";
+				ErrorIntroduction.introduceError(experimentalFile, fileName, modelFile,
+					averagePrecision, systematicErrorPercentage, baselinePercentage);
+				
+				modelNameWithError = "Errors_" + (int) (averagePrecision * 100) + "_"
+						+ (int) systematicErrorPercentage + "_" + (int) baselinePercentage
+						+ "_Exp_" + name + "_" + i;
+				
+				// parameter optimization for models with introduced errors
+				
+				// (averagePrecision=0.0, systematicErrorPercentage=0.0) is equivalent to
+				// the optimization with the original experimental data
+				Optimization opt = new Optimization(modelFile, fileName, parameterFile);
+				opt.performOptimization(repetitions, fitnessEvaluations,
+					errorDirectory.toString());
+				
+				System.out.println();
+				System.out.println("Optimization for " + modelNameWithError
+						+ " is completed!");
+				System.out.println();
+		}
 	}
 
 }

@@ -19,77 +19,80 @@ import de.zbit.io.csv.CSVWriter;
 
 public class ErrorIntroduction {
 	
-  public static void introduceError(String dataFile, String outputFile, String modelFile, double averagePrecision, double systematicErrorPercentage, double baselinePercentage)
-    throws XMLStreamException, IOException, SBMLException {
-    //read file with data
-    BufferedReader reader = new BufferedReader(new FileReader(dataFile));
-    ArrayList<double[]> data = new ArrayList<double[]>();
-    ArrayList<Double> timepoints = new ArrayList<Double>();
-    
-    try {
-      String line = null;
-      
-      line = reader.readLine();
-      String[] identifiers = line.split(",");
-      while ((line = reader.readLine()) != null) {
-        
-        String[] splits = line.split(",");
-        timepoints.add(Double.valueOf(splits[0]));
-        
-        int size = splits.length - 1;
-        if (size > 0) {
-          double[] row = new double[size];
-          data.add(row);
-          for (int i = 0; i < size; i++) {
-            Double value = Double.valueOf(splits[i + 1]);
-            if (value != null) {
-              row[i] = value;
-            } else {
-              row[i] = Double.NaN;
-            }
-          }
-        }
-      }
-      reader.close();
-      
-      if (data.size() > 0) {
-        double[][] dataMatrix = data.toArray(new double[data.size()][]);
-        double[] timepointsArray = new double[timepoints.size()];
-        
-        for (int i = 0; i != timepointsArray.length; i++) {
-          timepointsArray[i] = timepoints.get(i);
-        }
-        MultiTable table = new MultiTable(timepointsArray,
-          dataMatrix, identifiers);
-        Set<Integer> constantColumns = new HashSet<Integer>();
-        if(modelFile!=null) {
-          SBMLReader sbmlReader = new SBMLReader();
-          SBMLDocument doc=sbmlReader.readSBML(modelFile);
-          Set<String> constantSpecies = new HashSet<String>();
-          for(Species sp: doc.getModel().getListOfSpecies()) {
-            if(sp.getBoundaryCondition()) {
-              constantSpecies.add(sp.getId());
-            }
-          }
-          for(int i=0;i!=identifiers.length;i++) {
-            if(constantSpecies.contains(identifiers[i])) {
-              constantColumns.add(i);
-            }
-          }
-        }
-        
-        introduceErrorHelp(table, averagePrecision, systematicErrorPercentage, baselinePercentage, constantColumns);
-        
-        if (outputFile != null) {
-          CSVWriter writer = new CSVWriter();
-          writer.write(table, ',', outputFile);
-        }
-        
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
+	public static void introduceError(String dataFile, String outputFile,
+		String modelFile, double averagePrecision,
+		double systematicErrorPercentage, double baselinePercentage)
+		throws XMLStreamException, IOException, SBMLException {
+		//read file with data
+		BufferedReader reader = new BufferedReader(new FileReader(dataFile));
+		ArrayList<double[]> data = new ArrayList<double[]>();
+		ArrayList<Double> timepoints = new ArrayList<Double>();
+		
+		try {
+			String line = null;
+			
+			line = reader.readLine();
+			String[] identifiers = line.split(",");
+			while ((line = reader.readLine()) != null) {
+				
+				String[] splits = line.split(",");
+				timepoints.add(Double.valueOf(splits[0]));
+				
+				int size = splits.length - 1;
+				if (size > 0) {
+					double[] row = new double[size];
+					data.add(row);
+					for (int i = 0; i < size; i++) {
+						Double value = Double.valueOf(splits[i + 1]);
+						if (value != null) {
+							row[i] = value;
+						} else {
+							row[i] = Double.NaN;
+						}
+					}
+				}
+			}
+			reader.close();
+			
+			if (data.size() > 0) {
+				double[][] dataMatrix = data.toArray(new double[data.size()][]);
+				double[] timepointsArray = new double[timepoints.size()];
+				
+				for (int i = 0; i != timepointsArray.length; i++) {
+					timepointsArray[i] = timepoints.get(i);
+				}
+				MultiTable table = new MultiTable(timepointsArray, dataMatrix,
+					identifiers);
+				Set<Integer> constantColumns = new HashSet<Integer>();
+				if (modelFile != null) {
+					SBMLReader sbmlReader = new SBMLReader();
+					SBMLDocument doc = sbmlReader.readSBML(modelFile);
+					Set<String> constantSpecies = new HashSet<String>();
+					for (Species sp : doc.getModel().getListOfSpecies()) {
+						if (sp.getBoundaryCondition()) {
+							constantSpecies.add(sp.getId());
+						}
+					}
+					for (int i = 0; i != identifiers.length; i++) {
+						if (constantSpecies.contains(identifiers[i])) {
+							constantColumns.add(i);
+						}
+					}
+				}
+				
+				introduceErrorHelp(table, averagePrecision, systematicErrorPercentage,
+					baselinePercentage, constantColumns);
+				
+				if (outputFile != null) {
+					CSVWriter writer = new CSVWriter();
+					writer.write(table, ',', outputFile);
+				}
+				
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
   
   private static void introduceErrorHelp(MultiTable table, double averagePrecision, double systematicErrorPercentage, double averageBaselinePercentage, Set<Integer> constantColumns) {
     Random random = new Random();
@@ -112,36 +115,38 @@ public class ErrorIntroduction {
           * (2 * (averageBaselinePercentage / 100)) - averageBaselinePercentage / 100);
     }
     
-    for (int column = 1; column != table.getColumnCount(); column++) {
-      double[] values = new double[table.getRowCount()];
-      for(int row=0;row!=table.getRowCount();row++) {
-        values[row]=table.getValueAt(row, column);
-      }
-      double currentBaseline=baselinePercentages[column-1]*median(values);
-      for (int row = 0; row != table.getRowCount(); row++) {
-        //TODO
-        double initialConcentration=0.5;
-        double currentError = random.nextGaussian() * precisions[column-1] * initialConcentration;
-        
-        if ((constantColumns.contains(column)) && (row > 0)) {
-          table.setValueAt(table.getValueAt(0, column) + currentError, row,
-            column);
-        } else {
-          //correct data with precision values
-          table.setValueAt(table.getValueAt(row, column) + random.nextGaussian() * precisions[column - 1] * table.getValueAt(row, column), row,
-            column);
-          
-          //correct data with scaleFactors
-          table.setValueAt(table.getValueAt(row, column)
-              * scaleFactors[column - 1], row, column);
-          
-          //correct data with baselineValues
-          table.setValueAt(
-            Math.max(table.getValueAt(row, column) + currentBaseline, 0d), row,
-            column);
-        }
-      }
-    }
+		for (int column = 1; column != table.getColumnCount(); column++) {
+			double[] values = new double[table.getRowCount()];
+			for (int row = 0; row != table.getRowCount(); row++) {
+				values[row] = table.getValueAt(row, column);
+			}
+			double currentBaseline = baselinePercentages[column - 1] * median(values);
+			for (int row = 0; row != table.getRowCount(); row++) {
+				double initialConcentration = median(values);
+				double currentError = random.nextGaussian() * precisions[column - 1]
+						* initialConcentration;
+				
+				if ((constantColumns.contains(column)) && (row > 0)) {
+					table.setValueAt(table.getValueAt(0, column) + currentError, row,
+						column);
+				} else {
+					//correct data with precision values
+					table.setValueAt(
+						table.getValueAt(row, column) + random.nextGaussian()
+								* precisions[column - 1] * table.getValueAt(row, column), row,
+						column);
+					
+					//correct data with scaleFactors
+					table.setValueAt(table.getValueAt(row, column)
+							* scaleFactors[column - 1], row, column);
+					
+					//correct data with baselineValues
+					table.setValueAt(
+						Math.max(table.getValueAt(row, column) + currentBaseline, 0d), row,
+						column);
+				}
+			}
+		}
     
   }
   
@@ -161,18 +166,18 @@ public class ErrorIntroduction {
     }
   }
   
-//Precondition: Array must be sorted
-  public static double median(double[] m) {
-    Arrays.sort(m, 0, m.length);  
-    int middle = m.length/2;  // subscript of middle element
-      if (m.length%2 == 1) {
-          // Odd number of elements -- return the middle one.
-          return m[middle];
-      } else {
-         // Even number -- return average of middle two
-         // Must cast the numbers to double before dividing.
-         return (m[middle-1] + m[middle]) / 2.0;
-      }
-  }//end method median
-  
+	//Precondition: Array must be sorted
+	public static double median(double[] m) {
+		Arrays.sort(m, 0, m.length);
+		int middle = m.length / 2; // subscript of middle element
+		if (m.length % 2 == 1) {
+			// Odd number of elements -- return the middle one.
+			return m[middle];
+		} else {
+			// Even number -- return average of middle two
+			// Must cast the numbers to double before dividing.
+			return (m[middle - 1] + m[middle]) / 2.0;
+		}
+	}//end method median
+
 }
