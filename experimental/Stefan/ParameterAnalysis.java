@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -10,10 +11,12 @@ import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
 import org.sbml.jsbml.Symbol;
+import org.sbml.jsbml.util.Maths;
 
 
 import de.zbit.io.csv.CSVReader;
 import de.zbit.io.filefilter.SBFileFilter;
+import de.zbit.math.MathUtils;
 
 /**
  * This class analyzes the values of the parameters for multiple optimization runs
@@ -28,13 +31,11 @@ public class ParameterAnalysis {
 	 * @param models
 	 * @param parameters
 	 */
-	public static void parameterAnalysis(Model originalModel, List<Model> models, List<Symbol> parameters) {
-
+	public static double[][] parameterAnalysis(Model originalModel, List<Model> models, List<Double> fitnesses, List<Symbol> parameters) {
+		double[][] result = new double[parameters.size()][];
+		int index = 0;
 		for(Symbol s: parameters) {
-	
-			double value = 0;
-			int modelCounter = 0;
-			double[] par = new double[models.size()];
+			
 			
 			// the value of the parameter in the original model without errors
 			double originalValue = Double.NaN;
@@ -45,19 +46,43 @@ public class ParameterAnalysis {
 			else {
 				originalValue = originalModel.getSpecies(s.getId()).getValue();
 			}
+			result[index] = new double[2];
 			
+			double[] fitnessClone = new double[fitnesses.size()];
+			int counter = 0;
+			for(double fitness: fitnesses) {
+				fitnessClone[counter] = fitness;
+				counter++;
+			}
 			
+			Arrays.sort(fitnessClone);
+			
+			int numberToConsider = Math.min(fitnesses.size(), 10);
+			double limit = fitnessClone[numberToConsider-1];
+			double[] par = new double[numberToConsider];
+			
+			int modelCounter = 0;
+			int arrayIndex = 0;
 			for(Model m: models) {
-				
-				Parameter p2 = m.getParameter(s.getId());
-				if(p2 != null) {
-					par[modelCounter] = p2.getValue();
-				}
-				else {
-					par[modelCounter] = originalModel.getSpecies(s.getId()).getValue();
+				if(fitnesses.get(modelCounter) <= limit) {
+					Parameter p2 = m.getParameter(s.getId());
+					if(p2 != null) {
+						par[arrayIndex] = p2.getValue();
+					}
+					else {
+						par[arrayIndex] = originalModel.getSpecies(s.getId()).getValue();
+					}
+					arrayIndex++;
 				}
 				modelCounter++;
 			}
+		double median = MathUtils.median(par);
+			double stddev = MathUtils.standardDeviation(par);
+			double varCoeff = (stddev/median)*100;
+			if(Double.isInfinite(varCoeff)) {
+				varCoeff = (stddev/MathUtils.mean(par));
+			}
+			double value = 0;
 			// calculate mean, standard deviation and variation coefficient of the current parameter
 			for(int i=0;i<par.length;i++) {
 				value += par[i];
@@ -67,19 +92,23 @@ public class ParameterAnalysis {
 			for(int i=0;i<par.length;i++) {
 				sum += ((par[i] - mean)*(par[i] - mean));
 			}
-			double stddev = Math.sqrt((sum/(par.length - 1.0)));
-			double varCoeff = (stddev/mean)*100;
-				
+			
 			System.out.println();
 			System.out.println("Parameter: " + s.getId());
-			System.out.println();
+			for(double parameter: par) {
+				//System.out.println(parameter);
+			}
 			System.out.println("Value in original model: " + originalValue);
-			System.out.println("Mean: " + mean);
+			System.out.println("Mean: " + median);
 			System.out.println("Standarddeviation: " + stddev);
 			System.out.println("Variation coefficient: " + varCoeff + "%");
 			System.out.println();
+			result[index][0] = median;
+			result[index][1] = varCoeff;
 			
+			index++; 
 		}
+		return result;
 
 	}
 
@@ -91,10 +120,12 @@ public class ParameterAnalysis {
 
 		File[] modelFiles = f.listFiles();
 		List<Model> models = new LinkedList<Model>();
+		List<Double> fitnesses = new LinkedList<Double>();
 		for(File modelFile: modelFiles) {
 			if(SBFileFilter.isSBMLFile(modelFile)) {
 				SBMLDocument doc = SBMLReader.read(modelFile);
 				models.add(doc.getModel());
+				fitnesses.add(Double.parseDouble(modelFile.getAbsolutePath().replaceAll(".*Fitness_", "").replace(".xml", "")));
 			}
 		}
 		String parameterFilePath = args[2];
@@ -106,7 +137,9 @@ public class ParameterAnalysis {
 			parameters.add(new Parameter(data[row][0]));
 		}
 
-		parameterAnalysis(m, models, parameters);
+		parameterAnalysis(m, models, fitnesses, parameters);
+		
+		
 	}
 	
 }
