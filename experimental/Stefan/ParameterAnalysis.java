@@ -64,7 +64,21 @@ public class ParameterAnalysis {
 			int modelCounter = 0;
 			int arrayIndex = 0;
 			for(Model m: models) {
-				if(fitnesses.get(modelCounter) <= limit) {
+				if(fitnesses.get(modelCounter) < limit) {
+					Parameter p2 = m.getParameter(s.getId());
+					if(p2 != null) {
+						par[arrayIndex] = p2.getValue();
+					}
+					else {
+						par[arrayIndex] = m.getSpecies(s.getId()).getValue();
+					}
+					arrayIndex++;
+				}
+				modelCounter++;
+			}
+			modelCounter = 0;
+			for(Model m: models) {
+				if(fitnesses.get(modelCounter) == limit) {
 					Parameter p2 = m.getParameter(s.getId());
 					if(p2 != null) {
 						par[arrayIndex] = p2.getValue();
@@ -72,7 +86,10 @@ public class ParameterAnalysis {
 					else {
 						par[arrayIndex] = originalModel.getSpecies(s.getId()).getValue();
 					}
-					arrayIndex++;
+					arrayIndex++; 
+					if(arrayIndex >= numberToConsider) {
+						break;
+					}
 				}
 				modelCounter++;
 			}
