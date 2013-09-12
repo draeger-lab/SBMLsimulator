@@ -60,8 +60,27 @@ public class DynamicControlPanel extends JPanel {
 	 * @author Fabian Schwarzkopf
 	 * @version $Rev$
 	 */
-	public enum Buttons implements ActionCommand{
-		PLAY, PAUSE, STOP, TOVIDEO, GRAPHSHOT;
+	public enum Buttons implements ActionCommand {
+		/**
+		 * 
+		 */
+		PLAY,
+		/**
+		 * 
+		 */
+		PAUSE,
+		/**
+		 * 
+		 */
+		STOP,
+		/**
+		 * 
+		 */
+		TO_VIDEO,
+		/**
+		 * 
+		 */
+		GRAPHSHOT;
 
 		/* (non-Javadoc)
 		 * @see de.zbit.gui.actioncommand.ActionCommand#getName()
@@ -86,7 +105,18 @@ public class DynamicControlPanel extends JPanel {
 	 * @version $Rev$
 	 */
 	public enum Items {
-	    FAST, NORMAL, SLOW;
+		/**
+		 * 
+		 */
+	    FAST,
+	    /**
+	     * 
+	     */
+	    NORMAL,
+	    /**
+	     * 
+	     */
+	    SLOW;
 	    
 	    /**
 	     * Play speeds.
@@ -114,11 +144,12 @@ public class DynamicControlPanel extends JPanel {
          * @return
          */
         public static Items getItem(String item) {
-            if (item.equals(bundle.getString("FAST"))) {
+        	assert item != null;
+            if (item.equals(bundle.getString(FAST.toString()))) {
                 return FAST;
-            } else if (item.equals(bundle.getString("NORMAL"))) {
+            } else if (item.equals(bundle.getString(NORMAL.toString()))) {
                 return NORMAL;
-            } else if (item.equals(bundle.getString("SLOW"))) {
+            } else if (item.equals(bundle.getString(SLOW.toString()))) {
                 return SLOW;
             }
             return NORMAL;
@@ -364,7 +395,7 @@ public class DynamicControlPanel extends JPanel {
 		play = GUITools.createButton(playIcon, controller, Buttons.PLAY, Buttons.PLAY.getToolTip());
 		pause = GUITools.createButton(pauseIcon, controller, Buttons.PAUSE, Buttons.PAUSE.getToolTip());
 		stop = GUITools.createButton(stopIcon, controller, Buttons.STOP, Buttons.STOP.getToolTip());
-		video = GUITools.createButton(toVideoIcon, controller, Buttons.TOVIDEO, Buttons.TOVIDEO.getToolTip());
+		video = GUITools.createButton(toVideoIcon, controller, Buttons.TO_VIDEO, Buttons.TO_VIDEO.getToolTip());
 		graphShot = GUITools.createButton(toImageIcon, controller, Buttons.GRAPHSHOT, Buttons.GRAPHSHOT.getToolTip());
 		
 		//init speedcontrol
@@ -378,7 +409,12 @@ public class DynamicControlPanel extends JPanel {
 		simVeloCombo.addItemListener(controller);	
 		simVeloSpin = new JSpinner();
 		simVeloSpin.setToolTipText(bundle.getString("SIMULATIONSPEED_SPINNER_TOOLTIP"));
-	    setSimVeloCombo(Items.getItem(prefs.getString(GraphOptions.SIM_SPEED_CHOOSER)));
+//		FIXME prefs are not loaded correctly
+//	  String pref = prefs.getString(GraphOptions.SIM_SPEED_CHOOSER);
+//	  assert pref != null;
+//		Items item = Items.getItem(pref);
+//		assert item != null;
+//		setSimVeloCombo(item);
 		
 	    //init visualizer control
 		manipulatorsCombo = new JComboBox(Manipulators.getAllManipulators());

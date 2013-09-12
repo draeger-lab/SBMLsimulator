@@ -17,13 +17,15 @@
  */
 package org.sbml.simulator.gui.graph;
 
-import de.zbit.graph.gui.TranslatorSBMLgraphPanel;
+import org.sbml.jsbml.Reaction;
+
+import y.base.Node;
+import y.view.Graph2DView;
 
 /**
  * This interface gathers all methods to change the visualization of a displayed
- * graph on a {@link TranslatorSBMLgraphPanel}. Therefore every class that
- * manipulates the graph should implement this interface and override the
- * methods.
+ * graph on a {@link Graph2DView}. Therefore every class that manipulates the
+ * graph should implement this interface and override the methods.
  * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
@@ -39,7 +41,7 @@ public interface IGraphManipulator {
     public void dynamicChangeOfNode(String id, double value, boolean labels);
     
     /**
-     * Changes the visualization of a given reaction.
+     * Changes the visualization of a given {@link Reaction}.
      * @param id
      * @param value
      */
@@ -49,6 +51,14 @@ public interface IGraphManipulator {
      * Reverts the changes for the given id.
      * @param id
      */
-    public void revertChanges(String id);    
+    public void revertChanges(String id);
+    
+    /**
+     * un/hide given id/node
+     * @param id
+     * @param node
+     * @param b
+     */
+    public void hide(String id, Node node, boolean b);
    
 }

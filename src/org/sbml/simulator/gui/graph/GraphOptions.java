@@ -37,7 +37,7 @@ import de.zbit.util.prefs.Range;
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
-public interface GraphOptions extends KeyProvider{
+public interface GraphOptions extends KeyProvider {
     /**
      * The bundle for the user's current language.
      */
@@ -81,7 +81,7 @@ public interface GraphOptions extends KeyProvider{
      */
     public static final Option<Double> MIN_NODE_SIZE = new Option<Double>(
             "MIN_NODE_SIZE", Double.class, bundle, new Range<Double>(
-                    Double.class, "{(0, 1E3]}"), Double.valueOf(8d));
+                    Double.class, "{(0, 1E3]}"), Double.valueOf(15d));
     
     /**
      * In case of dynamic node size change, it defines the maximum node size.

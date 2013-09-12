@@ -54,12 +54,12 @@ public class ImageGenerator {
     private boolean wholeGraph;
     
     /**
-     * Fixpoint for video.
+     * Fix point for video.
      */
     private Point viewPoint;
     
     /**
-     * Fixpoint for video.
+     * Fix point for video.
      */
     private double zoomLevel;
     
@@ -76,14 +76,16 @@ public class ImageGenerator {
         this.wholeGraph = wholeGraph;
     }
 
-    /**
-     * This function determines the fixpoints to generate videos. The fixpoints
-     * are either determined on the whole graph or on the current view. It
-     * ensures that graph elements will stay on their location even if the
-     * graphsize changes during visualization (e. g. nodes getting
-     * bigger/smaller).
-     * @param width of the output resolution
-     */
+	/**
+	 * This function determines the fix points to generate videos. The fix
+	 * points are either determined on the whole graph or on the current view.
+	 * It ensures that graph elements will stay on their location even if the
+	 * graph size changes during visualization (e. g. nodes getting
+	 * bigger/smaller).
+	 * 
+	 * @param width
+	 *            of the output resolution
+	 */
     public void determineFixPoints(int width) {
         //save current view
         Graph2DView originalViewPort = (Graph2DView) graph.getCurrentView();
@@ -158,11 +160,12 @@ public class ImageGenerator {
 
     /**
      * This method returns an {@link BufferedImage} of the given size. To
-     * achieve higher resolutions than the actual graphsize, the graph gets
-     * scaled to the given size in a dedicated view to take the screenshot.<br>
-     * In order to generate videos as sequence of images, fixpoints should
+     * achieve higher resolutions than the actual graph size, the graph gets
+     * scaled to the given size in a dedicated view to take the screen shot.
+     * <p>
+     * In order to generate videos as sequence of images, fix points should
      * initially be determined first with determineFixpoints(). Then each
-     * picture will be taken from the same point of view and zoomlevel. This
+     * picture will be taken from the same point of view and zoom level. This
      * means there will be no elements changing their position due to changing
      * their size while a dynamic simulation. Especially important if the whole
      * graph is pictured, because than the bounding box will vary if the

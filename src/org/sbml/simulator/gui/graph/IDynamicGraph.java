@@ -22,8 +22,9 @@ import java.awt.image.BufferedImage;
 import org.simulator.math.odes.MultiTable;
 
 /**
- * Interface to ensure any {@link DynamicCore} observer provides the necessary methods
- * and eventually identifies the implementing class as a view in MVC-pattern.
+ * Interface to ensure any {@link DynamicCore} observer provides the necessary
+ * methods and eventually identifies the implementing class as a view in
+ * MVC-pattern.
  * 
  * @author Fabian Schwarzkopf
  * @version $Rev$
@@ -31,7 +32,7 @@ import org.simulator.math.odes.MultiTable;
 public interface IDynamicGraph {
 
     /**
-	 * Method envoked by related {@link DynamicCore} when playthread is done.
+	 * Method invoked by related {@link DynamicCore} when play thread is done.
 	 */
 	public void donePlay();
 	
@@ -45,7 +46,7 @@ public interface IDynamicGraph {
 	public BufferedImage takeGraphshot(int width, int height);
 	
 	/**
-     * Method envoked by related {@link DynamicCore} when timepoint changes.
+     * Method invoked by related {@link DynamicCore} when time point changes.
      * @param timepoint
      * @param updateThem
      */
