@@ -21,11 +21,13 @@ import java.awt.Color;
 import java.text.MessageFormat;
 import java.util.logging.Logger;
 
+import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
 
+import y.base.Node;
 import y.view.NodeRealizer;
-import de.zbit.graph.io.SBML2GraphML;
 import de.zbit.gui.ColorPalette;
+import de.zbit.sbml.layout.y.ILayoutGraph;
 
 
 /**
@@ -35,7 +37,7 @@ import de.zbit.gui.ColorPalette;
  * @author Fabian Schwarzkopf
  * @version $Rev$
  */
-public class ManipulatorOfNodeColor extends AGraphManipulator{
+public class ManipulatorOfNodeColor extends AGraphManipulator {
     
     /**
      * A {@link Logger} for this class.
@@ -67,7 +69,7 @@ public class ManipulatorOfNodeColor extends AGraphManipulator{
     /**
      * Constructs node-color manipulator with default gradient camine red (high)
      * -> white (mid) -> gold (low) and default node size and default reactions
-     * linewidths.
+     * line widths.
      * Concentration changes absolute per default.
      * 
      * @param graph
@@ -76,7 +78,7 @@ public class ManipulatorOfNodeColor extends AGraphManipulator{
      * @param selectedSpecies
      * @param selectedReactions
      */
-    public ManipulatorOfNodeColor(SBML2GraphML graph, SBMLDocument document, DynamicCore core,
+    public ManipulatorOfNodeColor(ILayoutGraph graph, SBMLDocument document, DynamicCore core,
             String[] selectedSpecies,
             String[] selectedReactions) {
         
@@ -102,7 +104,7 @@ public class ManipulatorOfNodeColor extends AGraphManipulator{
     /**
      * Constructs node-color manipulator with the given RGB colors as color1
      * (high) -> color2 (mid) -> color3 (low) and a constant node size.
-     * Reactions line widths as given. Concentration changes as user given.
+     * {@link Reaction}s line widths as given. Concentration changes as user given.
      * 
      * @param graph
      * @param document
@@ -117,7 +119,7 @@ public class ManipulatorOfNodeColor extends AGraphManipulator{
      * @param reactionsMinLineWidth
      * @param reactionsMaxLineWidth
      */
-    public ManipulatorOfNodeColor(SBML2GraphML graph, SBMLDocument document,
+    public ManipulatorOfNodeColor(ILayoutGraph graph, SBMLDocument document,
             DynamicCore core, String[] selectedSpecies,
             String[] selectedReactions, boolean relativeConcentrations,
             double nodeSize, Color color1, Color color2, Color color3,
@@ -156,8 +158,9 @@ public class ManipulatorOfNodeColor extends AGraphManipulator{
     @Override
     public void dynamicChangeOfNode(String id, double value, boolean labels) {
         if (id2speciesNode.get(id) != null) {
-            NodeRealizer nr = graph.getSimpleGraph()
-                    .getRealizer(graph.getId2node().get(id));
+        	for (Node node : graph.getSpeciesId2nodes().get(id)) {
+        		hide(id, node, false);
+        		NodeRealizer nr = graph.getGraph2D().getRealizer(node);
             
             // init visualization style
             double ratio = nr.getHeight() / nr.getWidth(); //keep ratio in case of elliptic nodes
@@ -177,7 +180,6 @@ public class ManipulatorOfNodeColor extends AGraphManipulator{
                 minValue = minMaxOfSelectedSpecies[0];
                 maxValue = minMaxOfSelectedSpecies[1];
             }
-            
             // compute adjusting
             double percent = adjustValue(minValue, maxValue, 0, 1, value);
             int[] RGBinterpolated = linearColorInterpolationForThree(percent,
@@ -202,8 +204,9 @@ public class ManipulatorOfNodeColor extends AGraphManipulator{
                 nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
             }
             
-            // update view
-            graph.getSimpleGraph().updateViews();
         }
+        	// update view
+        	graph.getGraph2D().updateViews();
+      }
     }
 }

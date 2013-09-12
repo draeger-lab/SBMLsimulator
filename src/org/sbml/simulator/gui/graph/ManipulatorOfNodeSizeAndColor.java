@@ -23,9 +23,10 @@ import java.util.logging.Logger;
 
 import org.sbml.jsbml.SBMLDocument;
 
+import y.base.Node;
 import y.view.NodeRealizer;
-import de.zbit.graph.io.SBML2GraphML;
 import de.zbit.gui.ColorPalette;
+import de.zbit.sbml.layout.y.ILayoutGraph;
 
 
 /**
@@ -75,7 +76,7 @@ public class ManipulatorOfNodeSizeAndColor extends AGraphManipulator {
      * @param selectedSpecies
      * @param selectedReactions
      */
-    public ManipulatorOfNodeSizeAndColor(SBML2GraphML graph, SBMLDocument document,
+    public ManipulatorOfNodeSizeAndColor(ILayoutGraph graph, SBMLDocument document,
             DynamicCore core, String[] selectedSpecies,
             String[] selectedReactions) {
         
@@ -121,7 +122,7 @@ public class ManipulatorOfNodeSizeAndColor extends AGraphManipulator {
      * @param reactionsMinLinewidth
      * @param reactionsMaxLineWidth
      */
-    public ManipulatorOfNodeSizeAndColor(SBML2GraphML graph,
+    public ManipulatorOfNodeSizeAndColor(ILayoutGraph graph,
             SBMLDocument document, DynamicCore core, String[] selectedSpecies,
             String[] selectedReactions, double minNodeSize, double maxNodeSize,
             Color color1, Color color2, Color color3,
@@ -166,6 +167,8 @@ public class ManipulatorOfNodeSizeAndColor extends AGraphManipulator {
             double size = adjustValue(minMaxOfSelectedSpecies[0],
                     minMaxOfSelectedSpecies[1], minNodeSize, maxNodeSize, value);
             
+            boolean invisible = isInvisible(value);
+            
             // compute adjusting of node color (relative)
             double percent = adjustValue(id2minMaxData.get(id)[0],
                     id2minMaxData.get(id)[1], 0, 1, value);
@@ -177,26 +180,32 @@ public class ManipulatorOfNodeSizeAndColor extends AGraphManipulator {
                                     RGBinterpolated[0], RGBinterpolated[1],
                                     RGBinterpolated[2] }));
             
-            // visualize
-            NodeRealizer nr = graph.getSimpleGraph()
-                    .getRealizer(graph.getId2node().get(id));
-            double ratio = nr.getHeight() / nr.getWidth(); // keep ratio in case of elliptic nodes
-            nr.setSize(size, size*ratio);
-            nr.setFillColor(new Color(RGBinterpolated[0], RGBinterpolated[1], RGBinterpolated[2]));
-            
-            /*
-             * Label Node with ID and real value at this timepoint. Last label will
-             * be treated as dynamic label
-             */
-            if (labels) {
-                labelNode(nr, id, value);
-            } else if (nr.labelCount() > 1) {
-                // labels switched off, therefore remove them, if there are any
-                nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
+            for (Node node : graph.getSpeciesId2nodes().get(id)) {
+							if (invisible) {
+								hide(id, node, true);
+							}
+							else {
+								hide(id, node, false);
+								// visualize
+								NodeRealizer nr = graph.getGraph2D().getRealizer(node);
+								double ratio = nr.getHeight() / nr.getWidth(); // keep ratio in case of elliptic nodes
+								nr.setSize(size, size * ratio);
+								nr.setFillColor(new Color(RGBinterpolated[0], RGBinterpolated[1],
+									RGBinterpolated[2]));
+								/*
+								 * Label Node with ID and real value at this timepoint. Last label will
+								 * be treated as dynamic label
+								 */
+								if (labels) {
+									labelNode(nr, id, value);
+								} else if (nr.labelCount() > 1) {
+									// labels switched off, therefore remove them, if there are any
+									nr.removeLabel(nr.getLabel(nr.labelCount() - 1));
+								}
+							}
             }
-            
             // update view
-            graph.getSimpleGraph().updateViews();
+            graph.getGraph2D().updateViews();
         }
     }
 

@@ -17,8 +17,8 @@
   <entry key="PAUSE_TOOLTIP">Pausiert die dynamische Visualisierung.</entry>
   <entry key="STOP">Stop</entry>
   <entry key="STOP_TOOLTIP">Stoppt die dynamische Visualisierung oder bricht die Videoerzeugung ab.</entry>
-  <entry key="TOVIDEO">Video</entry>
-  <entry key="TOVIDEO_TOOLTIP">Speichert die dynamische Visualisierung als Video. Die Auflösung kann über den Auflösungsmultiplikator in den Optionen angepasst werden und die Videogeschwindigkeit ist annähernd dieselbe, wie die eingestellte Simulationsgeschwindigkeit.</entry>
+  <entry key="TO_VIDEO">Video</entry>
+  <entry key="TO_VIDEO_TOOLTIP">Speichert die dynamische Visualisierung als Video. Die Auflösung kann über den Auflösungsmultiplikator in den Optionen angepasst werden und die Videogeschwindigkeit ist annähernd dieselbe, wie die eingestellte Simulationsgeschwindigkeit.</entry>
   <entry key="GRAPHSHOT">Bild</entry>
   <entry key="GRAPHSHOT_TOOLTIP">Speichert das aktuelle Netzwerk als Bilddatei. Die Auflösung kann über den Auflösungsmultiplikator in den Optionen angepasst werden.</entry>   
   <entry key="NODELABELS">Knotenbeschriftung</entry>

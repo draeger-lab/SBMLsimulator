@@ -700,7 +700,7 @@ public class SimulationPanel extends JPanel implements
 			JFileChooser.FILES_ONLY, SBFileFilter.createJPEGFileFilter());
 		if (f != null) {
 			try {
-				Graph2D graph = dynamicGraphView.getGraph().getSimpleGraph();
+				Graph2D graph = dynamicGraphView.getGraph().getGraph2D();
 				new Graph2Dwriter(Graph2Dwriter.writeableFileExtensions.jpeg).writeToFile(graph,f.toString());
 				return f;
 			} catch (Exception exc) {

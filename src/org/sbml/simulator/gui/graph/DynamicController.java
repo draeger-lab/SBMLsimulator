@@ -65,7 +65,7 @@ import de.zbit.util.prefs.SBPreferences;
  */
 public class DynamicController implements ChangeListener, ActionListener,
         ItemListener, TableModelListener, PreferenceChangeListener {
-    
+
     /**
      * A {@link Logger} for this class.
      */
@@ -102,226 +102,265 @@ public class DynamicController implements ChangeListener, ActionListener,
         this.view = view;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+    /* (non-Javadoc)
+     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (core != null) {
-            SBPreferences prefs = SBPreferences
-                    .getPreferencesFor(GraphOptions.class);
-            if (e.getSource() instanceof JButton) {
-                if (e.getActionCommand().equals("PLAY")) {
-                    controlPanel.setPlayStatus();
-                    core.setPlayspeed(controlPanel.getSimulationSpeed());
-                    core.play();
-                } else if (e.getActionCommand().equals("PAUSE")) {
-                    core.pausePlay();
-                    controlPanel.setPauseStatus();
-                } else if (e.getActionCommand().equals("STOP")) {
-                    core.stopPlay();
-                    controlPanel.setStopStatus();
-                } else if (e.getActionCommand().equals("TOVIDEO")) {
-                    /*
-                     * Resolution has to be even and can't be user chosen,
-                     * otherwise video image will get stretched. Therefore just
-                     * a resolution multiplier to get higher resolutions. Using
-                     * Graphsize as base for video resolution ensures that the
-                     * black margin in video is at minimum.
-                     */
-                    ImageGenerator imggen = new ImageGenerator(view.getGraph().getSimpleGraph(), prefs
-                            .getBoolean(GraphOptions.VIDEO_DISPLAY_WINDOW));
+    	if (core != null) {
+    		if ((e.getSource() instanceof JButton) && (e.getActionCommand() != null)) {
+    			DynamicControlPanel.Buttons command = DynamicControlPanel.Buttons.valueOf(e.getActionCommand());
+    			switch (command) {
+    			case PLAY:
+    				play();
+    				break;
+    			case PAUSE:
+    				pause();
+    				break;
+    			case STOP:
+    				stop();
+    				break;
+    			case TO_VIDEO:
+    				toVideo();
+    				break;
+    			case  GRAPHSHOT:
+    				graphShot();
+    				break;
+    			default:
+    				break;
+    			}
+    		}
+    	} else if (e.getSource() instanceof JCheckBox) {
+    		// labels switched on/off
+    		view.updateGraph();
+    	}
+    }
+    
+    /**
+     * 
+     */
+    private void stop() {
+    	core.stopPlay();
+		controlPanel.setStopStatus();
+	}
 
-                    // determine raw graph size
-                    int[] size  = imggen.getScreenshotResolution();
-                    int width = size[0];
-                    int height = size[1];
+	/**
+     * 
+     */
+    private void pause() {
+    	core.pausePlay();
+		controlPanel.setPauseStatus();
+	}
 
-                    // determine output resolution
-                    if (prefs
-                            .getBoolean(GraphOptions.VIDEO_FORCE_RESOLUTION_MULTIPLIER) || width < 1000 || height < 1000) {
-                        int resolutionMultiplier = (int) prefs
-                                .getDouble(GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
-                        /*
-                         * if resolution multiplier is forced by the user or if
-                         * resolution is too small than scale it
-                         */
-                        width *= resolutionMultiplier;
-                        height *= resolutionMultiplier;
-                    }
-                    
-                    //determine fixpoint to prevent pixel jumping
-                    imggen.determineFixPoints(width); 
-                    
-                    //assign image generator
-                    view.setImgGenerator(imggen);
+	/**
+     * 
+     */
+    private void play() {
+    	controlPanel.setPlayStatus();
+		core.setPlayspeed(controlPanel.getSimulationSpeed());
+		core.play();
+	}
 
-                    // even resolution
-                    width = (width % 2) == 1 ? width - 1 : width;
-                    height = (height % 2) == 1 ? height - 1 : height;
-                    logger.fine("Video out resolution = " + width + "x"
-                            + height);
-                    
-                    int captureStepSize = (int) prefs
-                            .getDouble(GraphOptions.VIDEO_IMAGE_STEPSIZE);
-                    
-                    /*
-                     * Determine the time (in miliseconds) which each frame will
-                     * be visible in the video by the actual playspeed in the
-                     * simulator. Because of the time it takes to draw one
-                     * timestep (~3ms or something), the actual time of each
-                     * frame has to be longer than the actual playspeed, such
-                     * that the output video length and therefore the speed of
-                     * the video itself is as close as the experienced speed in
-                     * the simulator. Depending on the chosen numbers of images
-                     * which will be skipped between each frame, the frametime
-                     * need to be multiplied by this.
-                     */
-                    int timestamp = (controlPanel.getSimulationSpeed() + 3) * captureStepSize;
-                    
-                    //warning if computation could take very long
-                    int numScreenshots = (core.getTimepoints().length-1) / captureStepSize;
-                    if (width > 2500 || height > 2500 || numScreenshots > 150) {
-                        GUITools.showMessage(
-                                MessageFormat.format(
-                                        bundle.getString("VIDEO_LONG_COMPUTATION_TIME"),
-                                        new Object[] { width, height,
-                                                numScreenshots }), bundle
-                                        .getString("INFO_COMP"));
-                    }
-                    
-                    /*
-                     * Videofilefilter
-                     */
-                    FileFilter videoFiles = new FileFilter() {
-                        
-                        @Override
-                        public String getDescription() {
-                            return bundle.getString("VIDEO_FILEFILTER");
-                        }
-                        
-                        @Override
-                        public boolean accept(File f) {
-                            String fileName = f.getName().toLowerCase();
-                            if (fileName.endsWith(".mov")
-                                    || fileName.endsWith(".avi")
-                                    || fileName.endsWith(".mp4")
-                                    || fileName.endsWith(".mpg")
-                                    || fileName.endsWith(".wmv")
-                                    || fileName.endsWith(".flv")) {
-                                return true;
-                            }
-                            return false;
-                        }
-                    };
-                    
-                    File destinationFile = GUITools.saveFileDialog(view,
-                            System.getProperty("user.home"), true, false,
-                            JFileChooser.FILES_ONLY, videoFiles);
-                    
-                    if (destinationFile != null) {
-                        controlPanel.setVideoStatus();
-                        controlPanel.setStatusString("["
-                                + MessageFormat.format(
-                                        bundle.getString("GENERATE_VIDEO"),
-                                        new Object[] { width, height }) + "]");
-                        // ensure dividers don't get moved
-                        view.setEnabled(false);
-                        view.setEnableLegend(false);
+	/**
+     * 
+     */
+    private void toVideo() {
+    	SBPreferences prefs = SBPreferences.getPreferencesFor(GraphOptions.class);
+    	/*
+         * Resolution has to be even and can't be user chosen,
+         * otherwise video image will get stretched. Therefore just
+         * a resolution multiplier to get higher resolutions. Using
+         * Graph size as base for video resolution ensures that the
+         * black margin in video is at minimum.
+         */
+		boolean displayWindow = prefs.getBoolean(GraphOptions.VIDEO_DISPLAY_WINDOW);
+        ImageGenerator imggen = new ImageGenerator(view.getGraph().getGraph2D(), displayWindow);
 
-                        // catch errors due to videoencoding
-                        try {
-                            core.generateVideo(view, width, height, timestamp,
-                                    captureStepSize,
-                                    destinationFile.getAbsolutePath());
-                            
-                            // view gets automatically enabled if its
-                            // successful.
-                        } catch (UnsupportedOperationException uoe) {
-                            GUITools.showErrorMessage(
-                                    view,
-                                    bundle.getString("VIDEO_CODEC_NOT_FOUND")
-                                            + "\n >> "
-                                            + destinationFile.getName());
-                            controlPanel.setStopStatus();
-                            view.setEnabled(true);
-                            view.setEnableLegend(true);
-                            controlPanel.setStatusString(null);
-                        } catch (IllegalArgumentException iae) {
-                            GUITools.showErrorMessage(
-                                    view,
-                                    bundle.getString("VIDEO_CODEC_NOT_FOUND")
-                                            + "\n >> "
-                                            + destinationFile.getName());
-                            controlPanel.setStopStatus();
-                            view.setEnabled(true);
-                            view.setEnableLegend(true);
-                            controlPanel.setStatusString(null);
-                        }
-                    }
-                } else if (e.getActionCommand().equals("GRAPHSHOT")) {
-                	SBPreferences guiPrefs = SBPreferences
-                			.getPreferencesFor(GUIOptions.class);
-                	
-                    int resolutionMultiplier = (int) prefs
-                            .getDouble(GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
-                    
-                    
-                    ImageGenerator imggen = new ImageGenerator(view.getGraph().getSimpleGraph(), prefs
-                            .getBoolean(GraphOptions.VIDEO_DISPLAY_WINDOW));
-                    
-                    //assign image generator
-                    view.setImgGenerator(imggen);
-                    
-                    // determine raw graph size
-                    int[] size  = imggen.getScreenshotResolution();
-                    int width = size[0] * resolutionMultiplier;
-                    int height = size[1] * resolutionMultiplier;
+        // determine raw graph size
+        int[] size  = imggen.getScreenshotResolution();
+        int width = size[0];
+        int height = size[1];
 
-                    File destinationFile = GUITools.saveFileDialog(view,
-                            guiPrefs.get(GUIOptions.SAVE_DIR), false, false,
-                            JFileChooser.FILES_ONLY,
-                            SBFileFilter.createPNGFileFilter());
+        // determine output resolution
+        if (prefs.getBoolean(GraphOptions.VIDEO_FORCE_RESOLUTION_MULTIPLIER) || (width < 1000) || (height < 1000)) {
+            int resolutionMultiplier = (int) prefs.getDouble(GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
+            /*
+             * if resolution multiplier is forced by the user or if
+             * resolution is too small than scale it
+             */
+            width *= resolutionMultiplier;
+            height *= resolutionMultiplier;
+        }
+        
+        //determine fixpoint to prevent pixel jumping
+        imggen.determineFixPoints(width); 
+        
+        //assign image generator
+        view.setImgGenerator(imggen);
 
-                    if (destinationFile != null) {
-
-                        // add extenion if missing
-                        if (!destinationFile.getName().toLowerCase()
-                                .endsWith(".png")) {
-                            destinationFile = new File(
-                                    destinationFile.getAbsolutePath() + ".png");
-                        }
-                        
-                        try {
-                            if (!destinationFile.getName().toLowerCase()
-                                    .endsWith(".png")) {
-                                destinationFile = new File(
-                                        destinationFile.getAbsolutePath()
-                                                + ".png");
-                            }
-                            ImageIO.write(view.takeGraphshot(width, height),
-                                    "png", destinationFile);
-                            guiPrefs.put(GUIOptions.SAVE_DIR,
-                                    destinationFile.getParent());
-                            guiPrefs.flush();
-                            logger.info(bundle.getString("SCREENSHOT_DONE"));
-                        } catch (IOException ioe) {
-                            logger.warning(bundle
-                                    .getString("COULD_NOT_WRITE_SCREENSHOT"));
-                        } catch (BackingStoreException exc) {
-                            logger.warning(exc.getLocalizedMessage());
-                        }
-                    }
+        // even resolution
+        width = (width % 2) == 1 ? width - 1 : width;
+        height = (height % 2) == 1 ? height - 1 : height;
+        logger.fine("Video out resolution = " + width + "x"
+                + height);
+        
+        int captureStepSize = (int) prefs
+                .getDouble(GraphOptions.VIDEO_IMAGE_STEPSIZE);
+        
+        /*
+         * Determine the time (in miliseconds) which each frame will
+         * be visible in the video by the actual playspeed in the
+         * simulator. Because of the time it takes to draw one
+         * timestep (~3ms or something), the actual time of each
+         * frame has to be longer than the actual playspeed, such
+         * that the output video length and therefore the speed of
+         * the video itself is as close as the experienced speed in
+         * the simulator. Depending on the chosen numbers of images
+         * which will be skipped between each frame, the frametime
+         * need to be multiplied by this.
+         */
+        int timestamp = (controlPanel.getSimulationSpeed() + 3) * captureStepSize;
+        
+        //warning if computation could take very long
+        int numScreenshots = (core.getTimepoints().length-1) / captureStepSize;
+        if ((width > 2500) || (height > 2500) || (numScreenshots > 150)) {
+            GUITools.showMessage(
+                    MessageFormat.format(
+                            bundle.getString("VIDEO_LONG_COMPUTATION_TIME"),
+                            new Object[] { width, height,
+                                    numScreenshots }), bundle
+                            .getString("INFO_COMP"));
+        }
+        
+        /*
+         * Videofilefilter
+         */
+        FileFilter videoFiles = new FileFilter() {
+            
+            @Override
+            public String getDescription() {
+                return bundle.getString("VIDEO_FILEFILTER");
+            }
+            
+            @Override
+            public boolean accept(File f) {
+                String fileName = f.getName().toLowerCase();
+                if (fileName.endsWith(".mov")
+                        || fileName.endsWith(".avi")
+                        || fileName.endsWith(".mp4")
+                        || fileName.endsWith(".mpg")
+                        || fileName.endsWith(".wmv")
+                        || fileName.endsWith(".flv")) {
+                    return true;
                 }
-            } else if (e.getSource() instanceof JCheckBox) {
-                // labels switched on/off
-                view.updateGraph();
+                return false;
+            }
+        };
+        
+        File destinationFile = GUITools.saveFileDialog(view,
+                System.getProperty("user.home"), true, false,
+                JFileChooser.FILES_ONLY, videoFiles);
+        
+        if (destinationFile != null) {
+            controlPanel.setVideoStatus();
+            controlPanel.setStatusString("["
+                    + MessageFormat.format(
+                            bundle.getString("GENERATE_VIDEO"),
+                            new Object[] { width, height }) + "]");
+            // ensure dividers don't get moved
+            view.setEnabled(false);
+            view.setEnableLegend(false);
+
+            // catch errors due to videoencoding
+            try {
+                core.generateVideo(view, width, height, timestamp,
+                        captureStepSize,
+                        destinationFile.getAbsolutePath());
+                
+                // view gets automatically enabled if its
+                // successful.
+            } catch (UnsupportedOperationException uoe) {
+                GUITools.showErrorMessage(
+                        view,
+                        bundle.getString("VIDEO_CODEC_NOT_FOUND")
+                                + "\n >> "
+                                + destinationFile.getName());
+                controlPanel.setStopStatus();
+                view.setEnabled(true);
+                view.setEnableLegend(true);
+                controlPanel.setStatusString(null);
+            } catch (IllegalArgumentException iae) {
+                GUITools.showErrorMessage(
+                        view,
+                        bundle.getString("VIDEO_CODEC_NOT_FOUND")
+                                + "\n >> "
+                                + destinationFile.getName());
+                controlPanel.setStopStatus();
+                view.setEnabled(true);
+                view.setEnableLegend(true);
+                controlPanel.setStatusString(null);
             }
         }
-    }
+	}
+
+	/**
+     * 
+     */
+    private void graphShot() {
+    	SBPreferences prefs = SBPreferences.getPreferencesFor(GraphOptions.class);
+    	SBPreferences guiPrefs = SBPreferences
+    			.getPreferencesFor(GUIOptions.class);
+    	
+        int resolutionMultiplier = (int) prefs
+                .getDouble(GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
+        
+        
+        ImageGenerator imggen = new ImageGenerator(view.getGraph().getGraph2D(), prefs
+                .getBoolean(GraphOptions.VIDEO_DISPLAY_WINDOW));
+        
+        //assign image generator
+        view.setImgGenerator(imggen);
+        
+        // determine raw graph size
+        int[] size  = imggen.getScreenshotResolution();
+        int width = size[0] * resolutionMultiplier;
+        int height = size[1] * resolutionMultiplier;
+
+        File destinationFile = GUITools.saveFileDialog(view,
+                guiPrefs.get(GUIOptions.SAVE_DIR), false, false,
+                JFileChooser.FILES_ONLY,
+                SBFileFilter.createPNGFileFilter());
+
+        if (destinationFile != null) {
+
+            // add extenion if missing
+            if (!destinationFile.getName().toLowerCase()
+                    .endsWith(".png")) {
+                destinationFile = new File(
+                        destinationFile.getAbsolutePath() + ".png");
+            }
+            
+            try {
+                if (!destinationFile.getName().toLowerCase()
+                        .endsWith(".png")) {
+                    destinationFile = new File(
+                            destinationFile.getAbsolutePath()
+                                    + ".png");
+                }
+                ImageIO.write(view.takeGraphshot(width, height),
+                        "png", destinationFile);
+                guiPrefs.put(GUIOptions.SAVE_DIR,
+                        destinationFile.getParent());
+                guiPrefs.flush();
+                logger.info(bundle.getString("SCREENSHOT_DONE"));
+            } catch (IOException ioe) {
+                logger.warning(bundle
+                        .getString("COULD_NOT_WRITE_SCREENSHOT"));
+            } catch (BackingStoreException exc) {
+                logger.warning(exc.getLocalizedMessage());
+            }
+        }
+	}
 
     /**
      * Returns user selected {@link IGraphManipulator} with selected options. If
@@ -437,11 +476,8 @@ public class DynamicController implements ChangeListener, ActionListener,
         return null; // do nothing if core isn't set yet.
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
+    /* (non-Javadoc)
+     * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
      */
     @Override
     public void itemStateChanged(ItemEvent ie) {
@@ -455,13 +491,13 @@ public class DynamicController implements ChangeListener, ActionListener,
                 SBPreferences.getPreferencesFor(GraphOptions.class).put(
                         cb.getName(),
                         Items.getItem(ie.getItem().toString()).getName()); 
-            }else if (cb.getName().equals(controlPanel.MANIPULATORS_LIST)) {
+            } else if (cb.getName().equals(controlPanel.MANIPULATORS_LIST)){
                 view.setGraphManipulator(getSelectedGraphManipulator());
                 //update preferences on change
                 SBPreferences.getPreferencesFor(GraphOptions.class).put(
                         cb.getName(),
                         Manipulators.getManipulator(ie.getItem().toString()).getName());
-            }else if (cb.getName().equals(controlPanel.DATA_LIST)) {
+            } else if (cb.getName().equals(controlPanel.DATA_LIST)){
                 view.visualizeData(ie.getItem().toString());
             }
         } else if (ie.getSource() instanceof JCheckBox) {
@@ -483,12 +519,8 @@ public class DynamicController implements ChangeListener, ActionListener,
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * java.util.prefs.PreferenceChangeListener#preferenceChange(java.util.prefs
-     * .PreferenceChangeEvent)
+    /* (non-Javadoc)
+     * @see java.util.prefs.PreferenceChangeListener#preferenceChange(java.util.prefs.PreferenceChangeEvent)
      */
     @Override
     public void preferenceChange(PreferenceChangeEvent evt) {
@@ -601,12 +633,8 @@ public class DynamicController implements ChangeListener, ActionListener,
         this.core = core;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent
-     * )
+    /* (non-Javadoc)
+     * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
      */
     @Override
     public void stateChanged(ChangeEvent e) {
@@ -618,11 +646,8 @@ public class DynamicController implements ChangeListener, ActionListener,
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.swing.event.TableModelListener#tableChanged(javax.swing.event.
-     * TableModelEvent)
+    /* (non-Javadoc)
+     * @see javax.swing.event.TableModelListener#tableChanged(javax.swing.event.TableModelEvent)
      */
     @Override
     public void tableChanged(TableModelEvent e) {
