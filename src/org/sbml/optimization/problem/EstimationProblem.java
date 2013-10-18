@@ -752,7 +752,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 						QuantityRange range = new QuantityRange(quantity, true,
 							Double.valueOf(data[i][1]), Double.valueOf(data[i][2]),
 							Double.valueOf(data[i][3]), Double.valueOf(data[i][4]));
-						if ((data[i].length >= 7) && (data[i][5] != null)) {
+						if ((data[i].length >= 7) && (data[i][5] != null) && (!data[i][5].equals(""))) {
 							range.setInitialGaussianValue(Double.valueOf(data[i][5]));
 							range.setGaussianStandardDeviation(Double.valueOf(data[i][6]));
 						}
