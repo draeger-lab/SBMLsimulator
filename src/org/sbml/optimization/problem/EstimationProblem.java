@@ -326,7 +326,9 @@ public class EstimationProblem extends AbstractProblemDouble implements
 				
 			}
 			currentSimulationData = solution;
-			currentSimulationData.setName(SIMULATION_DATA);
+			if(solution != null) {
+				currentSimulationData.setName(SIMULATION_DATA);
+			}
 			
 		} catch (Exception e) {
 			e.printStackTrace();
