@@ -109,10 +109,22 @@ public class ErrorIntroduction {
     
     for (int i = 0; i != precisions.length; i++) {
       precisions[i] = (random.nextDouble() + 0.5) * averagePrecision;
-      scaleFactors[i] = (random.nextDouble()
-          * (2 * (systematicErrorPercentage / 100)) + 1 - systematicErrorPercentage / 100);
-      baselinePercentages[i] = (random.nextDouble()
-          * (2 * (averageBaselinePercentage / 100)) - averageBaselinePercentage / 100);
+      double scaleDiff = (random.nextDouble() + 0.5) * systematicErrorPercentage / 100;
+      boolean add = random.nextBoolean();
+      if(add) {
+    	  scaleFactors[i] = 1 + scaleDiff;
+      }
+      else {
+    	  scaleFactors[i] = 1 - scaleDiff;
+      }
+      double baselineDiff = (random.nextDouble() + 0.5) * averageBaselinePercentage / 100;
+      add = random.nextBoolean();
+      if(add) {
+    	  baselinePercentages[i] = baselineDiff;
+      }
+      else {
+    	  baselinePercentages[i] = - baselineDiff;
+      }
     }
     
 		for (int column = 1; column != table.getColumnCount(); column++) {
@@ -125,26 +137,21 @@ public class ErrorIntroduction {
 				double initialConcentration = median(values);
 				double currentError = random.nextGaussian() * precisions[column - 1]
 						* initialConcentration;
-				
-				if ((constantColumns.contains(column)) && (row > 0)) {
-					table.setValueAt(table.getValueAt(0, column) + currentError, row,
-						column);
-				} else {
-					//correct data with precision values
-					table.setValueAt(
+
+				// correct data with precision values
+				table.setValueAt(
 						table.getValueAt(row, column) + random.nextGaussian()
-								* precisions[column - 1] * table.getValueAt(row, column), row,
-						column);
-					
-					//correct data with scaleFactors
-					table.setValueAt(table.getValueAt(row, column)
-							* scaleFactors[column - 1], row, column);
-					
-					//correct data with baselineValues
-					table.setValueAt(
-						Math.max(table.getValueAt(row, column) + currentBaseline, 0d), row,
-						column);
-				}
+								* precisions[column - 1]
+								* table.getValueAt(row, column), row, column);
+
+				// correct data with scaleFactors
+				table.setValueAt(table.getValueAt(row, column)
+						* scaleFactors[column - 1], row, column);
+
+				// correct data with baselineValues
+				table.setValueAt(
+						Math.max(table.getValueAt(row, column)
+								+ currentBaseline, 0d), row, column);
 			}
 		}
     
