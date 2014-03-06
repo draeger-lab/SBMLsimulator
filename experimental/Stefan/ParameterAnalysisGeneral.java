@@ -28,9 +28,9 @@ public class ParameterAnalysisGeneral {
 		String[][] data = reader.getData();
 		List<Symbol> parameters = new LinkedList<Symbol>();
 		
-		int[] errorValues = new int[] { 0, 5, 10, 15, 20, 25, 30 };
-		int[] baselineErrorValues = new int[] { 0, 10, 20, 30 };
-		
+//		int[] errorValues = new int[] { 0, 5, 10, 15, 20, 25, 30 };
+//		int[] errorValues = new int[] { 0, 10, 20, 30 };
+		int[] errorValues = new int[] { 0};
 		Map<String, double[][][]> medians = new HashMap<String, double[][][]>();
 		Map<String, double[][][]> stddevs = new HashMap<String, double[][][]>();
 		for (int row = 0; row != data.length; row++) {
@@ -39,37 +39,47 @@ public class ParameterAnalysisGeneral {
 			medians
 					.put(
 						p.getId(),
-						new double[errorValues.length][errorValues.length][baselineErrorValues.length]);
+						new double[errorValues.length][errorValues.length][errorValues.length]);
 			stddevs
 					.put(
 						p.getId(),
-						new double[errorValues.length][errorValues.length][baselineErrorValues.length]);
+						new double[errorValues.length][errorValues.length][errorValues.length]);
 		}
 		
 		for (int i = 0; i != errorValues.length; i++) {
 			for (int j = 0; j != errorValues.length; j++) {
-				for (int k = 0; k != baselineErrorValues.length; k++) {
+				for (int k = 0; k != errorValues.length; k++) {
 					int precision = errorValues[i];
 					int systematicError = errorValues[j];
-					int baselineError = baselineErrorValues[k];
+					int baselineError = errorValues[k];
 					File folder = new File(args[1] + "/Errors_" + precision + "_"
 							+ systematicError + "_" + baselineError);
 					File[] modelFiles = folder.listFiles();
-					List<Model> models = new LinkedList<Model>();
-					List<Double> fitnesses = new LinkedList<Double>();
 					if (modelFiles == null) {
 						System.out.println();
 					}
+					Map<Model,Double> modelMap = new HashMap<Model,Double>();
+					Map<Integer,List<Model>> numberMap = new HashMap<Integer,List<Model>>();
 					for (File modelFile : modelFiles) {
 						if (SBFileFilter.isSBMLFile(modelFile)) {
 							SBMLDocument doc = SBMLReader.read(modelFile);
+							double fitness = Double.parseDouble(modelFile.getAbsolutePath()
+									.replaceAll(".*Fitness_", "").replace(".xml", ""));
+							int number = Integer.parseInt(modelFile.getAbsolutePath()
+								.replaceAll(".*Exp_", "").replaceAll("_1_Rep_.*", ""));
+							modelMap.put(doc.getModel(), fitness);
+							List<Model> models = numberMap.get(number);
+							if(models == null) {
+								models = new LinkedList<Model>();
+							}
 							models.add(doc.getModel());
-							fitnesses.add(Double.parseDouble(modelFile.getAbsolutePath()
-									.replaceAll(".*Fitness_", "").replace(".xml", "")));
+							numberMap.put(number, models);
+							
 						}
 					}
+					System.out.println(precision + " " + systematicError + " " + baselineError);
 					double[][] currentResult = ParameterAnalysis.parameterAnalysis(m,
-						models, fitnesses, parameters);
+						modelMap, parameters, numberMap);
 					for (int l = 0; l != currentResult.length; l++) {
 						double[][][] resultTableMedians = medians.get(parameters.get(l)
 								.getId());
@@ -97,7 +107,7 @@ public class ParameterAnalysisGeneral {
 				}
 				
 				writer.write(objectsMedians, new File(args[1] + "/medians_"
-						+ baselineErrorValues[num] + "_" + p.getId() + ".csv"));
+						+ errorValues[num] + "_" + p.getId() + ".csv"));
 				
 				Object[][] objectsStdDev = new Object[resultStdDev.length][resultStdDev[0].length];
 				
@@ -108,7 +118,7 @@ public class ParameterAnalysisGeneral {
 				}
 				
 				writer.write(objectsStdDev, new File(args[1] + "/stddev_"
-						+ baselineErrorValues[num] + "_" + p.getId() + ".csv"));
+						+ errorValues[num] + "_" + p.getId() + ".csv"));
 			}
 		}
 		

@@ -1,8 +1,11 @@
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -12,6 +15,7 @@ import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
 import org.sbml.jsbml.Symbol;
 import org.sbml.jsbml.util.Maths;
+
 
 
 import de.zbit.io.csv.CSVReader;
@@ -31,8 +35,142 @@ public class ParameterAnalysis {
 	 * @param models
 	 * @param parameters
 	 */
-	public static double[][] parameterAnalysis(Model originalModel, List<Model> models, List<Double> fitnesses, List<Symbol> parameters) {
+	public static double[][] parameterAnalysis(Model originalModel, Map<Model, Double> modelMap, List<Symbol> parameters, Map<Integer,List<Model>> numbers) {
 		double[][] result = new double[parameters.size()][];
+		
+		double percentageToConsider = 0.5;
+		int repetitions = 10;
+		int numberToConsider = (int) (repetitions * percentageToConsider);
+		
+		List<Model> models = new LinkedList<Model>();
+		Map<Symbol, Double> maxStdDevMap = new HashMap<Symbol,Double>();
+		Map<Symbol, Double> maxMedianDevMap = new HashMap<Symbol,Double>();
+		
+		for(int experimentNumber: numbers.keySet()) {
+			List<Model>  modelsForExperiment = numbers.get(experimentNumber);
+			List<Model>  modelsForExperimentAdded = new LinkedList<Model>();
+			double[] fitnesses = new double[modelsForExperiment.size()];
+					
+			for(int i=0; i!=modelsForExperiment.size(); i++) {
+				fitnesses[i] = modelMap.get(modelsForExperiment.get(i));
+			}
+			Arrays.sort(fitnesses);
+			double limit = fitnesses[Math.min(numberToConsider-1, modelsForExperiment.size()-1)];
+			if(modelsForExperiment.size() != 10) {
+				System.out.println();
+			}
+			
+			int added = 0;
+			int modelCounter = 0;
+			for(Model m: modelsForExperiment) {
+				if(modelMap.get(m) < limit) {
+					models.add(m);
+					modelsForExperimentAdded.add(m);
+					added++;
+				}
+				modelCounter++;
+			}
+			modelCounter = 0;
+			for(Model m: models) {
+				if(modelMap.get(m) == limit) {
+					models.add(m);
+					modelsForExperimentAdded.add(m);
+					added++; 
+					if(added >= numberToConsider) {
+						break;
+					}
+				}
+				modelCounter++;
+			}
+			
+			
+			for(Symbol s: parameters) {
+				
+				
+				// the value of the parameter in the original model without errors
+				double originalValue = Double.NaN;
+				Parameter p = originalModel.getParameter(s.getId());
+				if(p != null) {
+					originalValue = p.getValue();
+				}
+				else {
+					originalValue = originalModel.getSpecies(s.getId()).getValue();
+				}
+				
+				
+				
+				
+				double[] par = new double[modelsForExperimentAdded.size()];
+				modelCounter = 0;
+				for(Model m: modelsForExperimentAdded) {
+					Parameter p2 = m.getParameter(s.getId());
+					if(p2 != null) {
+						par[modelCounter] = p2.getValue();
+					}
+					else {
+							par[modelCounter] = m.getSpecies(s.getId()).getValue();
+					}
+					modelCounter++;
+				}
+				
+			double median = MathUtils.median(par);
+			double stddev = MathUtils.standardDeviation(par);
+			double varCoeff = (stddev/median)*100;
+			if(Double.isInfinite(varCoeff)) {
+				varCoeff = stddev * 100;
+			}
+			if(Double.isNaN(varCoeff)) {
+				varCoeff = 0d;
+			}
+			
+				System.out.println(experimentNumber);
+				System.out.println("Parameter: " + s.getId());
+				for(double parameter: par) {
+					//System.out.println(parameter);
+				}
+				System.out.println("Value in original model: " + originalValue);
+				System.out.println("Mean: " + median);
+				System.out.println("Standarddeviation: " + stddev);
+				System.out.println("Variation coefficient: " + varCoeff + "%");
+				System.out.println("Median deviation: " + (Math.abs(median - originalValue)/median)*100);
+				System.out.println();
+				
+				Double currentStdDevMaxValue = maxStdDevMap.get(s);
+				if(currentStdDevMaxValue != null) {
+					currentStdDevMaxValue = Math.max(currentStdDevMaxValue, varCoeff);
+				}
+				else {
+					currentStdDevMaxValue =varCoeff;
+				}
+				maxStdDevMap.put(s, currentStdDevMaxValue);
+				
+				
+				
+				Double currentMedianDevMaxValue = maxMedianDevMap.get(s);
+				if(currentMedianDevMaxValue != null) {
+					if(median != 0) {
+						currentMedianDevMaxValue = Math.max(currentMedianDevMaxValue, Math.abs((median - originalValue)/median)*100);
+					}
+					else {
+						currentMedianDevMaxValue = Math.max(currentMedianDevMaxValue, 100d);
+					}
+				}
+				else {
+					if(median != 0) {
+						currentMedianDevMaxValue = Math.abs((median - originalValue)/median)*100;
+					}
+					else {
+						currentMedianDevMaxValue = 100d;
+					}
+				}
+				maxMedianDevMap.put(s, currentMedianDevMaxValue);
+				
+			}
+		}
+		
+		
+		
+		
 		int index = 0;
 		for(Symbol s: parameters) {
 			
@@ -48,51 +186,23 @@ public class ParameterAnalysis {
 			}
 			result[index] = new double[2];
 			
-			double[] fitnessClone = new double[fitnesses.size()];
-			int counter = 0;
-			for(double fitness: fitnesses) {
-				fitnessClone[counter] = fitness;
-				counter++;
-			}
 			
-			Arrays.sort(fitnessClone);
 			
-			int numberToConsider = Math.min(fitnesses.size(), 10);
-			double limit = fitnessClone[numberToConsider-1];
-			double[] par = new double[numberToConsider];
+			
+			double[] par = new double[models.size()];
 			
 			int modelCounter = 0;
-			int arrayIndex = 0;
 			for(Model m: models) {
-				if(fitnesses.get(modelCounter) < limit) {
-					Parameter p2 = m.getParameter(s.getId());
-					if(p2 != null) {
-						par[arrayIndex] = p2.getValue();
-					}
-					else {
-						par[arrayIndex] = m.getSpecies(s.getId()).getValue();
-					}
-					arrayIndex++;
+				Parameter p2 = m.getParameter(s.getId());
+				if(p2 != null) {
+					par[modelCounter] = p2.getValue();
+				}
+				else {
+						par[modelCounter] = m.getSpecies(s.getId()).getValue();
 				}
 				modelCounter++;
 			}
-			modelCounter = 0;
-			for(Model m: models) {
-				if(fitnesses.get(modelCounter) == limit) {
-					Parameter p2 = m.getParameter(s.getId());
-					if(p2 != null) {
-						par[arrayIndex] = p2.getValue();
-					}
-					else {
-						par[arrayIndex] = originalModel.getSpecies(s.getId()).getValue();
-					}
-					arrayIndex++; 
-					if(arrayIndex >= numberToConsider) {
-						break;
-					}
-				}
-				modelCounter++;
-			}
+			
 		double median = MathUtils.median(par);
 			double stddev = MathUtils.standardDeviation(par);
 			double varCoeff = (stddev/median)*100;
@@ -111,17 +221,21 @@ public class ParameterAnalysis {
 			}
 			
 			System.out.println();
-			System.out.println("Parameter: " + s.getId());
+//			System.out.println("Parameter: " + s.getId());
 			for(double parameter: par) {
 				//System.out.println(parameter);
 			}
-			System.out.println("Value in original model: " + originalValue);
-			System.out.println("Mean: " + median);
-			System.out.println("Standarddeviation: " + stddev);
-			System.out.println("Variation coefficient: " + varCoeff + "%");
-			System.out.println();
-			result[index][0] = median;
-			result[index][1] = varCoeff;
+//			System.out.println("Value in original model: " + originalValue);
+//			System.out.println("Mean: " + median);
+//			System.out.println("Standarddeviation: " + stddev);
+//			System.out.println("Variation coefficient: " + varCoeff + "%");
+//			System.out.println();
+//			result[index][0] = median;
+//			result[index][1] = varCoeff;
+			
+			
+			result[index][0] = maxMedianDevMap.get(s);
+			result[index][1] = maxStdDevMap.get(s);
 			
 			index++; 
 		}
@@ -136,13 +250,24 @@ public class ParameterAnalysis {
 		File f = new File(args[1]);
 
 		File[] modelFiles = f.listFiles();
-		List<Model> models = new LinkedList<Model>();
-		List<Double> fitnesses = new LinkedList<Double>();
-		for(File modelFile: modelFiles) {
-			if(SBFileFilter.isSBMLFile(modelFile)) {
+		Map<Model,Double> modelMap = new HashMap<Model,Double>();
+		Map<Integer,List<Model>> numberMap = new HashMap<Integer,List<Model>>();
+		
+		for (File modelFile : modelFiles) {
+			if (SBFileFilter.isSBMLFile(modelFile)) {
 				SBMLDocument doc = SBMLReader.read(modelFile);
+				double fitness = Double.parseDouble(modelFile.getAbsolutePath()
+						.replaceAll(".*Fitness_", "").replace(".xml", ""));
+				int number = Integer.parseInt(modelFile.getAbsolutePath()
+					.replaceAll(".*Experiment_", "").replace("1_Rep.*", ""));
+				modelMap.put(doc.getModel(), fitness);
+				List<Model> models = numberMap.get(number);
+				if(models == null) {
+					models = new LinkedList<Model>();
+				}
 				models.add(doc.getModel());
-				fitnesses.add(Double.parseDouble(modelFile.getAbsolutePath().replaceAll(".*Fitness_", "").replace(".xml", "")));
+				numberMap.put(number, models);
+				
 			}
 		}
 		String parameterFilePath = args[2];
@@ -154,7 +279,7 @@ public class ParameterAnalysis {
 			parameters.add(new Parameter(data[row][0]));
 		}
 
-		parameterAnalysis(m, models, fitnesses, parameters);
+		parameterAnalysis(m, modelMap, parameters, numberMap);
 		
 		
 	}
