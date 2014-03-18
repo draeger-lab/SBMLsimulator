@@ -1,0 +1,235 @@
+<?xml version="1.0"?>
+<!--
+ * $Id$
+ * $URL$
+ *
+ * This file is part of SBMLsimulator, a Java-based simulator for models
+ * of biochemical processes encoded in the modeling language SBML.
+ *
+ * Copyright (C) 2007-2014 by the University of Tuebingen, Germany.
+ *
+ * This library is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation. A copy of the license
+ * agreement is provided in the file named "LICENSE.txt" included with
+ * this software distribution and also available online as
+ * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
+ *
+ *
+ * Author:  Andreas Dräger
+ * Version: $Rev$
+-->
+
+<project
+  name="SBMLsimulator"
+  default ="minimal_sysbio"
+  basedir="."
+>
+
+  <target
+    name="init"
+    description="Initialization target"
+  >
+    <tstamp>
+      <format property="YEAR" pattern="yyyy"/>
+    </tstamp>
+
+    <property name="Name" value="SBMLsimulator"/>
+    <property name="version" value="2.0"/>
+    <property name="api.version" value="2.0 alpha"/>
+
+    <property name="year" value="${YEAR}"/>
+
+    <echo message="----------- ${Name} ${version} [${year}] ------------"/>
+    <echo message="-----------     ${TODAY}       ------------"/>
+    <echo message="-----------     ${DSTAMP} ${TSTAMP}       ------------"/>
+
+    <property environment="env"/>
+    <property name="build.compiler" value="modern"/>
+    <property name="debug" value="on"/>
+    <property name="optimize" value="on"/>
+    <property name="deprecation" value="false"/>
+    <property name="verbose" value="false"/>
+  	
+    <property name="build.number" value="${DSTAMP}-${TSTAMP}"/>
+    <property name="build.name" value="${version} (build ${build.number})"/>
+
+    <property name="src" value="${basedir}/src"/>
+    <property name="classes" location="${basedir}/bin"/>
+    <property name="test" value="${basedir}/test"/>
+    <property name="build.dir" value="${basedir}/build"/>
+    <property name="build.src" value="${basedir}/build/src"/>
+    <property name="build.dest" value="${basedir}/build/classes"/>
+    <property name="doc" value="${basedir}/doc/api"/>
+    <property name="lib" value="${basedir}/lib"/>
+    <property name="dist" value="${basedir}/dist"/>
+    <property name="dist.dir" value="${dist}/${Name}-${version}"/>
+    <property name="resources" value="${basedir}/resources"/>
+  	
+  	<property name="UUID" value="1cfbffa0-bbcb-4ca9-aa44-bfa4815e935e"/>
+  	  	
+    <property name="jar.name" value="${Name}_v${version}"/>
+    <property name="appJar"   value="${dist.dir}/${jar.name}_incl-libs.jar"/>
+
+    <filter token="year"    value="${year}"/>
+    <filter token="version" value="${version}"/>
+    <filter token="date"    value="${TODAY}"/>
+    <filter token="log"     value="true"/>
+    <filter token="verbose" value="true"/>
+  	
+    <!-- add everything needed to the classpath -->
+    <!-- adjust the settings to your local environment -->
+    <path id="classpath">
+      <fileset dir="${lib}"         includes="*.jar, *.zip"/>
+      <fileset dir="${lib}/garuda"  includes="*.jar, *.zip"/>
+    </path>
+	<path id="sourcepath">
+	  <fileset dir="${src}"/>
+	  <fileset dir="${test}"/>
+	  <fileset dir="${resources}"/>
+    </path>
+
+  	<!--For Garuda -->
+  	<property name="garuda.gadget" value="${dist.dir}/${jar.name}_Garuda.zip"/>
+  	
+  </target>
+
+  <!-- =================================================================== -->
+  <!-- Creates a minimal SysBio JAR                                        -->
+  <!-- =================================================================== -->
+  <target
+    name="minimal_sysbio"
+  	depends="init"
+    description="Build a minimal version of SysBio for SBMLsimulator"
+  >
+    <!-- The relative path of the SysBio project -->
+    <property name="sysbio.dir" value="${basedir}/../SysBio"/>
+    <property name="sysbio.lib" value="${sysbio.dir}/lib"/>
+    <path id="sysbio.classpath">
+      <fileset dir="${sysbio.lib}" includes="**.jar, **/*.jar, **.zip"/>
+    </path>
+    <path id="sysbio.sourcepath">
+      <fileset dir="${sysbio.dir}/src"/>
+      <fileset dir="${sysbio.dir}/test"/>
+      <fileset dir="${sysbio.dir}/resources"/>
+      <fileset dir="${sysbio.dir}/examples"/>
+    </path>
+    
+  	<echo message="Determining the revision number of SysBio"/>
+    <exec executable="svn" outputproperty="svninfo.xml">
+      <arg line="info --xml"/>
+    </exec>
+    <xmlproperty collapseAttributes="true">
+      <propertyresource name="svninfo.xml"/>
+    </xmlproperty>
+	<property name="sysbio.revision" value="${info.entry.revision}"/>
+
+    <echo message="Deleting all previous versions of SysBio JAR files"/>
+    <delete verbose="true">
+      <fileset dir="${lib}">
+        <include name="SysBio**.jar"/>
+      </fileset>
+    </delete>
+
+    <echo message="Compile the entire SysBio project"/>
+    <delete dir="${sysbio.dir}/bin"/>
+    <mkdir dir="${sysbio.dir}/bin"/>
+    <javac
+      classpathref="sysbio.classpath"
+      compiler="${build.compiler}"
+      debug="${debug}"
+      deprecation="${deprecation}"
+      destdir="${sysbio.dir}/bin"
+      listfiles="yes"
+      memoryMaximumSize="512M"
+      nowarn="no"
+      optimize="${optimize}"
+      source="1.6"
+      srcdir="${sysbio.dir}/src"
+      sourcepathref="sysbio.sourcepath"
+      target="1.6"
+      verbose="${verbose}"
+    />
+    <!-- <copy todir="${sysbio.dir}/bin"/> -->
+
+    <echo message="Packing a minimal JAR file containing only parts required for SBMLsimulator"/>
+    <jar
+      compress="true"
+      filesetmanifest="mergewithoutmain"
+      index="true"
+      indexMetaInf="true"
+  	  jarfile="${lib}/sysbio.jar"
+      level="9"
+      manifestencoding="utf-8"
+      strict="warn"
+      update="true"
+    >
+      <manifest>
+        <attribute name="Built-By" value="${user.name}"/>
+        <section name="SysBio">
+          <attribute name="Specification-Title"    value="SysBio"/>
+          <attribute name="Specification-Version"  value="Revision ${sysbio.revision}"/>
+          <attribute name="Specification-Vendor"   value="Center for Bioinformatics Tuebingen (ZBIT)"/>
+          <attribute name="Implementation-Title"   value="SysBio"/>
+          <attribute name="Implementation-Version" value="Revision ${sysbio.revision} ${TODAY} (Build ${DSTAMP}-${TSTAMP})"/>
+          <attribute name="Implementation-Vendor"  value="University of Tuebingen"/>
+        </section>
+      </manifest>
+      <zipfileset dir="${sysbio.dir}" prefix="META-INF/">
+        <include name="licenses/COPYING.txt"/>
+        <include name="licenses/lib-licenses/*.txt"/>
+        <include name="licenses/lib-licenses/*.html"/>
+        <include name="licenses/AUTHORS.txt"/>
+      </zipfileset>
+      <fileset dir="${sysbio.dir}/bin" excludes="**/.svn*, **/package-info.class">
+        <include name="de/zbit/**.class"/>
+        <include name="de/zbit/collection/**.class"/>
+        <include name="de/zbit/garuda/**.class"/>
+      	<include name="de/zbit/graph/gui/**.class"/>
+      	<include name="de/zbit/graph/io/**.class"/>
+      	<include name="de/zbit/graph/sbgn/**.class"/>
+        <include name="de/zbit/gui/**.class"/>
+        <include name="de/zbit/gui/csv/**.class"/>
+        <include name="de/zbit/gui/actioncommand/**.class"/>
+        <include name="de/zbit/gui/layout/**.class"/>
+        <exclude name="de/zbit/gui/layout/SpringUtilities.class"/>
+        <exclude name="de/zbit/gui/layout/VerticalLayout.class"/>
+        <include name="de/zbit/gui/panels/**.class"/>
+        <include name="de/zbit/gui/prefs/**.class"/>
+        <include name="de/zbit/gui/table/**.class"/>
+        <include name="de/zbit/gui/table/renderer/**.class"/>
+        <include name="de/zbit/gui/wizard/**.class"/>
+        <include name="de/zbit/gui/**.class"/>
+        <include name="de/zbit/io/**"/>
+      	<include name="de/zbit/io/fileformat/**.class"/>
+      	<include name="de/zbit/locales/**.class"/>
+        <include name="de/zbit/math/**.class"/>
+        <include name="de/zbit/resources/**.class"/>
+        <include name="de/zbit/sbml/**.class"/>
+        <include name="de/zbit/sbml/gui/**.class"/>
+        <include name="de/zbit/sbml/io/**.class"/>
+        <include name="de/zbit/sbml/layout/**.class"/>
+        <include name="de/zbit/sbml/layout/y/**.class"/>
+        <include name="de/zbit/sbml/util/**.class"/>
+        <include name="de/zbit/text/**.class"/>
+        <include name="de/zbit/util/**.class"/>
+      	<include name="de/zbit/util/argparser/**.class"/>
+        <include name="de/zbit/util/logging/**.class"/>
+        <include name="de/zbit/util/objectwrapper/**.class"/>
+        <include name="de/zbit/util/prefs/**.class"/>
+        <include name="de/zbit/util/progressbar/**"/>
+        <include name="de/zbit/util/**.class"/>
+      </fileset>
+      <fileset dir="${sysbio.dir}/resources" excludes="**/.svn*, package-info.*">
+        <include name="de/zbit/garuda/img/**.png"/>
+        <include name="de/zbit/garuda/locales/**.xml"/>
+        <include name="de/zbit/gui/img/**.png"/>
+        <include name="de/zbit/locales/**.xml"/>
+        <include name="de/zbit/sbml/locales/**.xml"/>
+      </fileset>
+      <zipfileset excludes="META-INF/*" src="${sysbio.dir}/lib/sysbio-osx-support.jar"/>
+    </jar>
+
+  </target>
+	
+</project>
