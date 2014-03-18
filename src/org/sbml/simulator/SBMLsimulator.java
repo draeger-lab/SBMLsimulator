@@ -18,12 +18,10 @@
 package org.sbml.simulator;
 
 import java.awt.HeadlessException;
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -42,8 +40,6 @@ import org.simulator.math.odes.AbstractDESSolver;
 
 import de.zbit.AppConf;
 import de.zbit.Launcher;
-import de.zbit.UserInterface;
-import de.zbit.garuda.BackendNotInitializedException;
 import de.zbit.garuda.GarudaOptions;
 import de.zbit.garuda.GarudaSoftwareBackend;
 import de.zbit.gui.BaseFrame;
@@ -75,19 +71,19 @@ public class SBMLsimulator extends Launcher {
 	 * Localization support.
 	 */
 	public static final transient ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
-	
+
 	/**
 	 * The logger for this class.
 	 */
 	public static final transient Logger logger = Logger
 			.getLogger(SBMLsimulator.class.getName());
 
-//	/**
-//	 * The possible location of this class in a jar file if used in plug-in
-//	 * mode.
-//	 */
-//	public static final String JAR_LOCATION = "plugin"
-//			+ StringUtil.fileSeparator();
+	//	/**
+	//	 * The possible location of this class in a jar file if used in plug-in
+	//	 * mode.
+	//	 */
+	//	public static final String JAR_LOCATION = "plugin"
+	//			+ StringUtil.fileSeparator();
 
 	/**
 	 * The package where all mathematical functions, in particular distance
@@ -99,7 +95,7 @@ public class SBMLsimulator extends Launcher {
 	 * The package where all ODE solvers are assumed to be located.
 	 */
 	public static final String SOLVER_PACKAGE = "org.simulator.math.odes";
-	
+
 	/**
 	 * 
 	 */
@@ -110,12 +106,12 @@ public class SBMLsimulator extends Launcher {
 	 * the quality of a simulation based on parameter and initial value settings.
 	 */
 	private static final Class<QualityMeasure> AVAILABLE_QUALITY_MEASURES[];
-	
+
 	/**
 	 * An array of all available ordinary differential equation solvers.
 	 */
 	private static final Class<AbstractDESSolver> AVAILABLE_SOLVERS[];
-	
+
 	static {
 		int i;
 		//	AVAILABLE_QUALITY_MEASURES = Reflect.getAllClassesInPackage(MATH_PACKAGE,
@@ -128,7 +124,7 @@ public class SBMLsimulator extends Launcher {
 				"org.simulator.math.RelativeEuclideanDistance",
 				"org.simulator.math.RelativeManhattanDistance",
 				"org.simulator.math.RelativeSquaredError",
-				"org.simulator.math.Relative_N_Metric" };
+		"org.simulator.math.Relative_N_Metric" };
 		AVAILABLE_QUALITY_MEASURES = new Class[classes.length];
 		for (i = 0; i < classes.length; i++) {
 			try {
@@ -137,10 +133,10 @@ public class SBMLsimulator extends Launcher {
 				logger.severe(exc.getLocalizedMessage());
 			}
 		}
-		
+
 		// AVAILABLE_SOLVERS = Reflect.getAllClassesInPackage(SOLVER_PACKAGE, true,
 		//   true, AbstractDESSolver.class, JAR_LOCATION, true);
-		classes = new String[] { 
+		classes = new String[] {
 				"org.simulator.math.odes.AdamsBashforthSolver",
 				"org.simulator.math.odes.AdamsMoultonSolver",
 				"org.simulator.math.odes.DormandPrince54Solver",
@@ -149,7 +145,7 @@ public class SBMLsimulator extends Launcher {
 				"org.simulator.math.odes.GraggBulirschStoerSolver",
 				"org.simulator.math.odes.HighamHall54Solver",
 				"org.simulator.math.odes.RosenbrockSolver",
-				"org.simulator.math.odes.RungeKutta_EventSolver" };
+		"org.simulator.math.odes.RungeKutta_EventSolver" };
 		AVAILABLE_SOLVERS = new Class[classes.length];
 		for (i = 0; i < classes.length; i++) {
 			try {
@@ -229,8 +225,8 @@ public class SBMLsimulator extends Launcher {
 	/**
 	 * 
 	 * @param args
-	 * @throws IOException 
-	 * @throws HeadlessException 
+	 * @throws IOException
+	 * @throws HeadlessException
 	 */
 	public static void main(String args[]) {
 		new SBMLsimulator(args);
@@ -247,6 +243,7 @@ public class SBMLsimulator extends Launcher {
 	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#commandLineMode(de.zbit.AppConf)
 	 */
+	@Override
 	public void commandLineMode(AppConf appConf) {
 		String openFile = null;
 		SBProperties props = appConf.getCmdArgs();
@@ -261,7 +258,7 @@ public class SBMLsimulator extends Launcher {
 
 		if (openFile != null) {
 			CommandLineManager commandLineManager = new CommandLineManager(openFile,
-				timeSeriesFile, appConf);
+					timeSeriesFile, appConf);
 			commandLineManager.run();
 		} else {
 			logger.fine(String.format(
@@ -274,6 +271,7 @@ public class SBMLsimulator extends Launcher {
 	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#getAppName()
 	 */
+	@Override
 	public String getAppName() {
 		return getClass().getSimpleName();
 	}
@@ -281,6 +279,7 @@ public class SBMLsimulator extends Launcher {
 	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#getCmdLineOptions()
 	 */
+	@Override
 	public List<Class<? extends KeyProvider>> getCmdLineOptions() {
 		List<Class<? extends KeyProvider>> defAndKeys = new ArrayList<Class<? extends KeyProvider>>(6);
 		defAndKeys.add(SimulatorIOOptions.class);
@@ -290,7 +289,7 @@ public class SBMLsimulator extends Launcher {
 		defAndKeys.add(PlotOptions.class);
 		defAndKeys.add(CSVOptions.class);
 		if (garuda) {
-		  defAndKeys.add(GarudaOptions.class);
+			defAndKeys.add(GarudaOptions.class);
 		}
 		return defAndKeys;
 	}
@@ -298,6 +297,7 @@ public class SBMLsimulator extends Launcher {
 	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#getInteractiveOptions()
 	 */
+	@Override
 	public List<Class<? extends KeyProvider>> getInteractiveOptions() {
 		List<Class<? extends KeyProvider>> defAndKeys = new ArrayList<Class<? extends KeyProvider>>(5);
 		defAndKeys.add(SimulationOptions.class);
@@ -319,6 +319,7 @@ public class SBMLsimulator extends Launcher {
 	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#getURLlicenseFile()
 	 */
+	@Override
 	public URL getURLlicenseFile() {
 		URL url = null;
 		try {
@@ -332,6 +333,7 @@ public class SBMLsimulator extends Launcher {
 	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#getURLOnlineUpdate()
 	 */
+	@Override
 	public URL getURLOnlineUpdate() {
 		URL url = null;
 		try {
@@ -345,6 +347,7 @@ public class SBMLsimulator extends Launcher {
 	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#getVersionNumber()
 	 */
+	@Override
 	public String getVersionNumber() {
 		return "2.0";
 	}
@@ -352,6 +355,7 @@ public class SBMLsimulator extends Launcher {
 	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#getYearOfProgramRelease()
 	 */
+	@Override
 	public short getYearOfProgramRelease() {
 		return (short) 2013;
 	}
@@ -359,6 +363,7 @@ public class SBMLsimulator extends Launcher {
 	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#getYearWhenProjectWasStarted()
 	 */
+	@Override
 	public short getYearWhenProjectWasStarted() {
 		return 2007;
 	}
@@ -366,6 +371,7 @@ public class SBMLsimulator extends Launcher {
 	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#initGUI(de.zbit.AppConf)
 	 */
+	@Override
 	public BaseFrame initGUI(AppConf appConf) {
 		final BaseFrame gui = new SimulatorUI(appConf);
 		if (garuda && (getCmdLineOptions().contains(GarudaOptions.class)
@@ -375,33 +381,13 @@ public class SBMLsimulator extends Launcher {
 				/* (non-Javadoc)
 				 * @see java.lang.Runnable#run()
 				 */
+				@Override
 				public void run() {
 					try {
-						String localPath = SBMLsimulator.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-						String folder = new File(localPath).getParent() + "/resources/org/sbml/simulator/gui/img/";
-						String icon = folder + "SBMLsimulator_64.png";
-
 						GarudaSoftwareBackend garudaBackend = new GarudaSoftwareBackend(
-								"1cfbffa0-bbcb-4ca9-aa44-bfa4815e935e",
-								(UserInterface) gui,
-								icon,
-								bundle.getString("PROGRAM_DESCRIPTION"),
-								Arrays.asList(bundle.getStringArray("KEYWORDS")),
-								Arrays.asList(new String[] { "snapshot/Screenshot_1.png" })
-						);
-						garudaBackend.addInputFileFormat("xml", "SBML");
-						garudaBackend.addInputFileFormat("sbml", "SBML");
-						garudaBackend.addInputFileFormat("csv", "Character-separated Value");
-						garudaBackend.addInputFileFormat("txt", "Character-separated Value");
-						garudaBackend.addOutputFileFormat("xml", "SBML");
-						garudaBackend.addOutputFileFormat("sbml", "SBML");
-						garudaBackend.addOutputFileFormat("csv", "Character-separated Value");
-						garudaBackend.addOutputFileFormat("txt", "Character-separated Value");
+								"1cfbffa0-bbcb-4ca9-aa44-bfa4815e935e", gui);
 						garudaBackend.init();
-						garudaBackend.registedSoftwareToGaruda();
 					} catch (NetworkException exc) {
-						GUITools.showErrorMessage(gui, exc);
-					} catch (BackendNotInitializedException exc) {
 						GUITools.showErrorMessage(gui, exc);
 					} catch (Throwable exc) {
 						String message = exc.getLocalizedMessage();
@@ -412,6 +398,5 @@ public class SBMLsimulator extends Launcher {
 		}
 		return gui;
 	}
-
 
 }
