@@ -1,6 +1,5 @@
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -14,9 +13,6 @@ import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
 import org.sbml.jsbml.Symbol;
-import org.sbml.jsbml.util.Maths;
-
-
 
 import de.zbit.io.csv.CSVReader;
 import de.zbit.io.filefilter.SBFileFilter;

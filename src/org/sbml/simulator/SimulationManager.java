@@ -45,53 +45,53 @@ import eva2.tools.math.Mathematics;
  * @since 1.0
  */
 public class SimulationManager implements PropertyChangeListener {
-	
+
 	/**
 	 * A {@link Logger} for this class.
 	 */
 	private static final transient Logger logger = Logger.getLogger(SimulationManager.class.getName());
-  
-  /**
-   * The distance values to the experimental data sets.
-   */
-  private double[] distanceValues;
-  
-  /**
-   * The mean distance value over all experimental data sets.
-   */
-  private double meanDistanceValue;
-  
-  /**
-   * The PropertyChangeSupport class for the event handling.
-   */
-  private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-  
-  /**
-   * The quality measurement for current simulation.
-   */
-  private QualityMeasurement qualityMeasurement;
-  
-  /**
-   * The simulation configuration for current simulation.
-   */
-  private SimulationConfiguration simulationConfiguration;
-  
-  /**
-   * The worker for the simulation.
-   */
-  private SimulationWorker simworker;
-  
-  /**
-   * The solution computed as a result of a simulation.
-   */
-  private MultiTable solution;
-  
-  /**
-   * The problem to estimate parameters for.
-   */
-  private EstimationProblem estimationProblem;
-  
-  /**
+
+	/**
+	 * The distance values to the experimental data sets.
+	 */
+	private double[] distanceValues;
+
+	/**
+	 * The mean distance value over all experimental data sets.
+	 */
+	private double meanDistanceValue;
+
+	/**
+	 * The PropertyChangeSupport class for the event handling.
+	 */
+	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+
+	/**
+	 * The quality measurement for current simulation.
+	 */
+	private QualityMeasurement qualityMeasurement;
+
+	/**
+	 * The simulation configuration for current simulation.
+	 */
+	private SimulationConfiguration simulationConfiguration;
+
+	/**
+	 * The worker for the simulation.
+	 */
+	private SimulationWorker simworker;
+
+	/**
+	 * The solution computed as a result of a simulation.
+	 */
+	private MultiTable solution;
+
+	/**
+	 * The problem to estimate parameters for.
+	 */
+	private EstimationProblem estimationProblem;
+
+	/**
 	 * @return the estimationProblem
 	 */
 	public EstimationProblem getEstimationProblem() {
@@ -106,70 +106,70 @@ public class SimulationManager implements PropertyChangeListener {
 	}
 
 	/**
-   * Creates a new simulation manager with the given simulation configuration
-   * and quality measurement.
-   * 
-   * @param qualityMeasurement
-   * @param simlationConfiguration
-   */
-  public SimulationManager(QualityMeasurement qualityMeasurement,
-    SimulationConfiguration simlationConfiguration) {
-    this.qualityMeasurement = qualityMeasurement;
-    this.simulationConfiguration = simlationConfiguration;
-    this.meanDistanceValue = Double.NaN;
-  }
-  
-  /**
-   * Copy constructor.
-   * 
-   * @param simulationManager
-   */
-  public SimulationManager(SimulationManager simulationManager) {
-		this(simulationManager.getQualityMeasurement(), simulationManager.getSimulationConfiguration());
-		this.distanceValues = simulationManager.getDistanceValues();
-		this.meanDistanceValue = simulationManager.getMeanDistanceValue();
+	 * Creates a new simulation manager with the given simulation configuration
+	 * and quality measurement.
+	 * 
+	 * @param qualityMeasurement
+	 * @param simlationConfiguration
+	 */
+	public SimulationManager(QualityMeasurement qualityMeasurement,
+			SimulationConfiguration simlationConfiguration) {
+		this.qualityMeasurement = qualityMeasurement;
+		simulationConfiguration = simlationConfiguration;
+		meanDistanceValue = Double.NaN;
 	}
 
 	/**
-   * Adds a PropertyChangeListener to the list of listeners.
-   * 
-   * @param listener
-   */
-  public void addPropertyChangeListener(PropertyChangeListener listener) {
-    this.pcs.addPropertyChangeListener(listener);
-  }
-  
-  /* (non-Javadoc)
+	 * Copy constructor.
+	 * 
+	 * @param simulationManager
+	 */
+	public SimulationManager(SimulationManager simulationManager) {
+		this(simulationManager.getQualityMeasurement(), simulationManager.getSimulationConfiguration());
+		distanceValues = simulationManager.getDistanceValues();
+		meanDistanceValue = simulationManager.getMeanDistanceValue();
+	}
+
+	/**
+	 * Adds a PropertyChangeListener to the list of listeners.
+	 * 
+	 * @param listener
+	 */
+	public void addPropertyChangeListener(PropertyChangeListener listener) {
+		pcs.addPropertyChangeListener(listener);
+	}
+
+	/* (non-Javadoc)
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
 	protected Object clone() throws CloneNotSupportedException {
 		return new SimulationManager(this);
 	}
-  
-  /**
-   * Computes the model quality with the values stored in the quality
-   * measurement class.
-   * 
-   * @throws SBMLException
-   * @throws IntegrationException
-   * @throws ModelOverdeterminedException
-   */
-  public void computeModelQuality() throws SBMLException, DerivativeException,
-    ModelOverdeterminedException {
-    
-    distanceValues = new double[qualityMeasurement.getMeasurements().size()];
-    meanDistanceValue = 0d;
-    
-    if ((solution != null) && (qualityMeasurement.getMeasurements().size() > 0)) {
-      for (int i = 0; i != qualityMeasurement.getMeasurements().size(); i++) {
-        distanceValues[i] = qualityMeasurement.getDistance().distance(solution, qualityMeasurement.getMeasurements().get(i));
-      }
-      meanDistanceValue = Mathematics.mean(distanceValues);
-    }
-  }
-  
-  /* (non-Javadoc)
+
+	/**
+	 * Computes the model quality with the values stored in the quality
+	 * measurement class.
+	 * 
+	 * @throws SBMLException
+	 * @throws IntegrationException
+	 * @throws ModelOverdeterminedException
+	 */
+	public void computeModelQuality() throws SBMLException, DerivativeException,
+	ModelOverdeterminedException {
+
+		distanceValues = new double[qualityMeasurement.getMeasurements().size()];
+		meanDistanceValue = 0d;
+
+		if ((solution != null) && (qualityMeasurement.getMeasurements().size() > 0)) {
+			for (int i = 0; i != qualityMeasurement.getMeasurements().size(); i++) {
+				distanceValues[i] = qualityMeasurement.getDistance().distance(solution, qualityMeasurement.getMeasurements().get(i));
+			}
+			meanDistanceValue = Mathematics.mean(distanceValues);
+		}
+	}
+
+	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -178,7 +178,7 @@ public class SimulationManager implements PropertyChangeListener {
 		if (super.equals(object)) {
 			return true;
 		}
-		// Check if the given object is of identical class and not null: 
+		// Check if the given object is of identical class and not null:
 		if ((object == null) || (!getClass().equals(object.getClass()))) {
 			return false;
 		}
@@ -195,40 +195,40 @@ public class SimulationManager implements PropertyChangeListener {
 					.isSetSimulationConfiguration();
 			if (equal && isSetSimulationConfiguration()) {
 				equal &= getSimulationConfiguration().equals(
-					manager.getSimulationConfiguration());
+						manager.getSimulationConfiguration());
 			}
 			return equal;
 		}
 		return false;
 	}
-  
-  /**
-   * @return the distanceValues
-   */
-  public double[] getDistanceValues() {
-    return distanceValues;
-  }
-  
-  /**
-   * @return the meanDistanceValue
-   */
-  public double getMeanDistanceValue() {
-    return meanDistanceValue;
-  }
-  
-  /**
-   * @return the qualityMeasurement
-   */
-  public QualityMeasurement getQualityMeasurement() {
-    return qualityMeasurement;
-  }
-  
-  /**
-   * @return the simlationConfiguration
-   */
-  public SimulationConfiguration getSimulationConfiguration() {
-    return simulationConfiguration;
-  }
+
+	/**
+	 * @return the distanceValues
+	 */
+	public double[] getDistanceValues() {
+		return distanceValues;
+	}
+
+	/**
+	 * @return the meanDistanceValue
+	 */
+	public double getMeanDistanceValue() {
+		return meanDistanceValue;
+	}
+
+	/**
+	 * @return the qualityMeasurement
+	 */
+	public QualityMeasurement getQualityMeasurement() {
+		return qualityMeasurement;
+	}
+
+	/**
+	 * @return the simlationConfiguration
+	 */
+	public SimulationConfiguration getSimulationConfiguration() {
+		return simulationConfiguration;
+	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
@@ -266,64 +266,65 @@ public class SimulationManager implements PropertyChangeListener {
 	}
 
 	/* (non-Javadoc)
-   * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-   */
-  public void propertyChange(PropertyChangeEvent evt) {
-    if (evt.getPropertyName().equals("progress")) {
-      pcs.firePropertyChange(evt);
+	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+	 */
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		if (evt.getPropertyName().equals("progress")) {
+			pcs.firePropertyChange(evt);
 		} else if (evt.getPropertyName().equals("done") && (simworker != null)
 				&& !simworker.isCancelled()) {
-      try {
-      	solution = simworker.get();
-        computeModelQuality();
-      } catch (Exception e) {
-        logger.log(Level.WARNING, e.getLocalizedMessage());
-      }
-    }
-    pcs.firePropertyChange(evt);
-  }
+			try {
+				solution = simworker.get();
+				computeModelQuality();
+			} catch (Exception e) {
+				logger.log(Level.WARNING, e.getLocalizedMessage());
+			}
+		}
+		pcs.firePropertyChange(evt);
+	}
 
 	/**
-   * Removes a PropertyChangeListener from the list of listeners.
-   * 
-   * @param listener
-   */
-  public void removePropertyChangeListener(PropertyChangeListener listener) {
-    pcs.removePropertyChangeListener(listener);
-  }
+	 * Removes a PropertyChangeListener from the list of listeners.
+	 * 
+	 * @param listener
+	 */
+	public void removePropertyChangeListener(PropertyChangeListener listener) {
+		pcs.removePropertyChangeListener(listener);
+	}
 
 	/**
-   * Performs a simulation with the values stored in the simulation
-   * configuration class.
-   * 
-   * @throws Exception
-   */
-  public void simulate() throws Exception {
-    simworker = new SimulationWorker(simulationConfiguration);
-    simworker.addPropertyChangeListener(this);
-    simworker.execute();
-  }
-  
-  /**
-   * Performs a simulation with the values stored in the simulation
-   * configuration class.
-   * 
-   * @throws Exception
-   */
+	 * Performs a simulation with the values stored in the simulation
+	 * configuration class.
+	 * 
+	 * @throws Exception
+	 */
+	public void simulate() throws Exception {
+		simworker = new SimulationWorker(simulationConfiguration);
+		simworker.addPropertyChangeListener(this);
+		simworker.execute();
+	}
+
+	/**
+	 * Performs a simulation with the values stored in the simulation
+	 * configuration class.
+	 * 
+	 * @throws Exception
+	 */
 	public void simulateWithoutGUI(double defaultCompartmentValue, double defaultSpeciesValue, double defaultParameterValue) throws Exception {
 		// TODO: The purpose of the SimulationManager is to be independent from any GUI!
 		SBMLinterpreter interpreter = new SBMLinterpreter(
-			simulationConfiguration.getModel(), defaultCompartmentValue, defaultSpeciesValue, defaultParameterValue);
+				simulationConfiguration.getModel(), defaultCompartmentValue, defaultSpeciesValue, defaultParameterValue);
 		solution = SimulationWorker.solveByStepSize(
-			simulationConfiguration.getSolver(), interpreter,
-			interpreter.getInitialValues(), simulationConfiguration.getStart(),
-			simulationConfiguration.getEnd(), simulationConfiguration.getStepSize(),
-			simulationConfiguration.isIncludeReactions(),
-			simulationConfiguration.getAbsTol(), simulationConfiguration.getRelTol());
+				simulationConfiguration.getSolver(), interpreter,
+				interpreter.getInitialValues(), simulationConfiguration.getStart(),
+				simulationConfiguration.getEnd(), simulationConfiguration.getStepSize(),
+				simulationConfiguration.isIncludeReactions(),
+				simulationConfiguration.getAbsTol(), simulationConfiguration.getRelTol());
 		pcs.firePropertyChange("done", null, solution);
 	}
-  
-  /**
+
+	/**
 	 * 
 	 * @return
 	 */
@@ -359,5 +360,5 @@ public class SimulationManager implements PropertyChangeListener {
 		sb.append("]]");
 		return sb.toString();
 	}
-  
+
 }

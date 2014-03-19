@@ -40,7 +40,6 @@ import org.sbml.simulator.stability.math.ConservationRelations;
 import org.sbml.simulator.stability.math.StabilityMatrix;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;
 import org.simulator.math.odes.MultiTable;
-import org.simulator.math.odes.MultiTable.Block;
 import org.simulator.math.odes.MultiTable.Block.Column;
 
 

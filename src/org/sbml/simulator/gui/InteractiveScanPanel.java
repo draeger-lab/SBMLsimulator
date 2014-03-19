@@ -80,13 +80,13 @@ import de.zbit.util.prefs.SBPreferences;
  * @since 1.0
  */
 public class InteractiveScanPanel extends JPanel implements ActionListener,
-    ChangeListener, TreeNodeChangeListener {
-	
-	/**
-	 * Supports localization of the application.
-	 */
-	private static final ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
-  
+ChangeListener, TreeNodeChangeListener {
+
+  /**
+   * Supports localization of the application.
+   */
+  private static final ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
+
   /**
    * @author Andreas Dr&auml;ger
    * @date 2010-09-17
@@ -100,36 +100,38 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     /* (non-Javadoc)
      * @see de.zbit.gui.ActionCommand#getName()
      */
-		public String getName() {
-			return bundle.getString(toString());
-		}
+    @Override
+    public String getName() {
+      return bundle.getString(toString());
+    }
 
-		/* (non-Javadoc)
-		 * @see de.zbit.gui.ActionCommand#getToolTip()
-		 */
-		public String getToolTip() {
-			return bundle.getString(toString() + "_TOOLTIP");
-		}
-    
+    /* (non-Javadoc)
+     * @see de.zbit.gui.ActionCommand#getToolTip()
+     */
+    @Override
+    public String getToolTip() {
+      return bundle.getString(toString() + "_TOOLTIP");
+    }
+
   }
-  
+
   /**
    * Generated serial version identifier.
    */
   private static final long serialVersionUID = -8244482994475574724L;
   /**
-	 * 
-	 */
+   * 
+   */
   private JSpinner spinQuantity[];
   /**
-	 * 
-	 */
+   * 
+   */
   private List<ChangeListener> listOfChangeListeners;
   /**
    * Default values
    */
   private double defaultCompartmentValue, defaultParameterValue,
-      defaultSpeciesValue;
+  defaultSpeciesValue;
   /**
    * Backup of the original values
    */
@@ -139,12 +141,12 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
    */
   private QuantityWithUnit quantities[];
   /**
-	 * 
-	 */
+   * 
+   */
   private boolean hasLocalParameters;
   /**
-	 * 
-	 */
+   * 
+   */
   private JButton buttonReset;
   /**
    * Allows for fast access to all quantities by storing the index in the array
@@ -152,17 +154,23 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
    */
   private Map<String, Integer> quantitiesHash;
   /**
-	 * 
-	 */
+   * 
+   */
   private JTabbedPane tab;
   /**
-	 * 
-	 */
+   * 
+   */
   private double paramStepSize, minValue, maxCompartmentValue, maxParameterValue,
-      maxSpeciesValue;
-  
+  maxSpeciesValue;
+
   /**
    * 
+   * @param model
+   * @param minValue
+   * @param maxCompartmentValue
+   * @param maxSpeciesValue
+   * @param maxParameterValue
+   * @param paramStepSize
    */
   public InteractiveScanPanel(Model model, double minValue, double maxCompartmentValue,
     double maxSpeciesValue, double maxParameterValue, double paramStepSize) {
@@ -173,20 +181,20 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     this.maxCompartmentValue = maxCompartmentValue;
     this.maxParameterValue = maxParameterValue;
     this.maxSpeciesValue = maxSpeciesValue;
-    this.listOfChangeListeners = new LinkedList<ChangeListener>();
+    listOfChangeListeners = new LinkedList<ChangeListener>();
     // create layout
     tab = new JTabbedPane();
     init(model);
-    
+
     JPanel foot = new JPanel();
     buttonReset = GUITools.createJButton(this, Command.RESET);
     buttonReset.setEnabled(false);
     foot.add(buttonReset);
-    
+
     add(tab, BorderLayout.CENTER);
     add(foot, BorderLayout.SOUTH);
   }
-  
+
   /**
    * @param model
    */
@@ -194,34 +202,34 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     if (model != null) {
       int offset = 0;
       // initialize fields
-      this.spinQuantity = new JSpinner[model.getQuantityWithUnitCount()];
-      this.originalValues = new double[spinQuantity.length];
-      this.quantities = new QuantityWithUnit[originalValues.length];
-      this.quantitiesHash = new HashMap<String, Integer>();
-      this.hasLocalParameters = false;
-      this.tab.add(
+      spinQuantity = new JSpinner[model.getQuantityWithUnitCount()];
+      originalValues = new double[spinQuantity.length];
+      quantities = new QuantityWithUnit[originalValues.length];
+      quantitiesHash = new HashMap<String, Integer>();
+      hasLocalParameters = false;
+      tab.add(
         bundle.getString("COMPARTMENTS"),
-        interactiveScanScrollPane(model.getListOfCompartments(),
-          minValue, maxCompartmentValue, paramStepSize, offset));
+        interactiveScanScrollPane(model.getListOfCompartments(), minValue,
+          maxCompartmentValue, paramStepSize, offset));
       offset += model.getCompartmentCount();
       tab.setEnabledAt(0, model.getCompartmentCount() > 0);
-      
+
       tab.add(
         bundle.getString("SPECIES"),
         interactiveScanScrollPane(model.getListOfSpecies(), minValue,
-        	maxParameterValue, paramStepSize, offset));
+          maxParameterValue, paramStepSize, offset));
       offset += model.getSpeciesCount();
       tab.setEnabledAt(1, model.getSpeciesCount() > 0);
-      
+
       tab.add(
         bundle.getString("GLOBAL_PARAMETERS"),
         interactiveScanScrollPane(model.getListOfParameters(), minValue,
-        	maxSpeciesValue, paramStepSize, offset));
+          maxSpeciesValue, paramStepSize, offset));
       tab.setEnabledAt(2, model.getParameterCount() > 0);
-      
+
       tab.add(
         bundle.getString("LOCAL_PARAMETERS"),
-        new JScrollPane(interactiveScanLocalParameters(maxParameterValue, minValue, 
+        new JScrollPane(interactiveScanLocalParameters(maxParameterValue, minValue,
           paramStepSize, model.getSymbolCount(), model.getListOfReactions())));
       tab.setEnabledAt(3, hasLocalParameters);
       for (int i = tab.getTabCount() - 1; i >= 0; i--) {
@@ -231,10 +239,11 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
       }
     }
   }
-  
+
   /* (non-Javadoc)
    * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
    */
+  @Override
   public void actionPerformed(ActionEvent e) {
     if ((e.getActionCommand() != null)
         && (e.getActionCommand().equals(Command.RESET.toString()))) {
@@ -244,7 +253,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
       }
     }
   }
-  
+
   /**
    * @param cl
    * @return
@@ -252,7 +261,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
   public boolean addChangeListener(ChangeListener cl) {
     return listOfChangeListeners.add(cl);
   }
-  
+
   /**
    * Checks whether or not to enable the button to reset the values for each
    * {@link JSpinner}.
@@ -265,7 +274,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     }
     buttonReset.setEnabled(!allEqual);
   }
-  
+
   /**
    * @param id
    */
@@ -277,14 +286,14 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
       quantities[i].setValue(newVal);
     }
   }
-  
+
   /**
    * @return
    */
   public int getNumQuantities() {
     return quantities.length;
   }
-  
+
   /**
    * @return
    */
@@ -298,19 +307,21 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
       Double.valueOf(defaultParameterValue));
     return p;
   }
-  
+
   /**
+   * 
    * @param maxParameterValue
    * @param paramStepSize
+   * @param minValue
    * @param offset
    * @param listOfReactions
    * @return
    */
-  private JPanel interactiveScanLocalParameters(double maxParameterValue, double minValue, 
+  private JPanel interactiveScanLocalParameters(double maxParameterValue, double minValue,
     double paramStepSize, int offset, ListOf<Reaction> listOfReactions) {
     JPanel parameterPanel = new JPanel();
     parameterPanel
-        .setLayout(new BoxLayout(parameterPanel, BoxLayout.PAGE_AXIS));
+    .setLayout(new BoxLayout(parameterPanel, BoxLayout.PAGE_AXIS));
     for (Reaction r : listOfReactions) {
       if (r.isSetKineticLaw() && r.getKineticLaw().getLocalParameterCount() > 0) {
         hasLocalParameters = true;
@@ -323,9 +334,11 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
     }
     return parameterPanel;
   }
-  
+
   /**
+   * 
    * @param list
+   * @param minValue
    * @param maxValue
    * @param stepSize
    * @param offset
@@ -334,9 +347,9 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
   private JScrollPane interactiveScanScrollPane(
     ListOf<? extends QuantityWithUnit> list, double minValue, double maxValue, double stepSize,
     int offset) {
-		return new JScrollPane(interactiveScanTable(list, minValue, maxValue, stepSize, offset));
+    return new JScrollPane(interactiveScanTable(list, minValue, maxValue, stepSize, offset));
   }
-  
+
   /**
    * 
    * @param list
@@ -359,19 +372,19 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
       value = p.getValue();
       if (!p.isSetValue()) {
         if (p instanceof Compartment) {
-        	name = "NAME_PARTS_COMPARTMENT";
+          name = "NAME_PARTS_COMPARTMENT";
           if (((Compartment) p).getSpatialDimensions() > 0) {
             value = defaultCompartmentValue;
             p.setValue(value);
             nans.add(p.isSetName() ? p.getName() : p.getId());
           }
         } else if (p instanceof Species) {
-        	name = "NAME_PARTS_SPECIES";
+          name = "NAME_PARTS_SPECIES";
           value = defaultSpeciesValue;
           p.setValue(value);
           nans.add(p.isSetName() ? p.getName() : p.getId());
         } else if (p instanceof Parameter) {
-        	name = "NAME_PARTS_PARAMETER";
+          name = "NAME_PARTS_PARAMETER";
           value = defaultParameterValue;
           p.setValue(value);
           nans.add(p.isSetName() ? p.getName() : p.getId());
@@ -385,39 +398,39 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
       quantities[index].addTreeNodeChangeListener(this);
       list.addTreeNodeChangeListener(this);
       quantitiesHash.put(p.getId(), Integer.valueOf(index));
-      
+
       spinQuantity[index].setName(p.getId());
       spinQuantity[index].addChangeListener(this);
       lh.add(new JLabel(StringUtil.toHTML(p.toString(), 40)), 0, i, 1, 1, 0d, 0d);
       lh.add(spinQuantity[index], 2, i, 1, 1, 0, 0);
-			UnitDefinition ud = p.getDerivedUnitDefinition();
-			if (ud != null) {
-				lh.add(new JLabel(StringUtil.toHTML(HTMLFormula.toHTML(ud))), 4, i, 1,
-					1, 0d, 0d);
-			}
+      UnitDefinition ud = p.getDerivedUnitDefinition();
+      if (ud != null) {
+        lh.add(new JLabel(StringUtil.toHTML(HTMLFormula.toHTML(ud))), 4, i, 1,
+          1, 0d, 0d);
+      }
     }
     lh.add(new JPanel(), 1, 0, 1, 1, 0d, 0d);
     lh.add(new JPanel(), 3, 0, 1, 1, 0d, 0d);
-		if (nans.size() > 0) {
-			MessageFormat form = new MessageFormat(bundle.getString("REPLACEMENT_OF_UNDEFINED_VALUES"));
-			double[] limits = { 1, 2 };
-			String[] valuePart = bundle.getString("VALUE_PARTS").split(";");
-			String[] namePart = bundle.getString(name).split(";");
-			String[] hasBeen = bundle.getString("HAS_BEEN_PARTS").split(";");
-			form.setFormatByArgumentIndex(0, new ChoiceFormat(limits, valuePart));
-			form.setFormatByArgumentIndex(1, new ChoiceFormat(limits, namePart));
-			form.setFormatByArgumentIndex(2, new ChoiceFormat(limits, hasBeen));
-			Integer count = Integer.valueOf(nans.size());
-			GUITools.showListMessage(
-				this,
-				StringUtil.toHTML(
-					form.format(new Object[] { count, count, count, Double.valueOf(value) }), 80),
-				bundle.getString("REPLACING_UNDEFINED_VALUES"), nans);
-		}
+    if (nans.size() > 0) {
+      MessageFormat form = new MessageFormat(bundle.getString("REPLACEMENT_OF_UNDEFINED_VALUES"));
+      double[] limits = { 1, 2 };
+      String[] valuePart = bundle.getString("VALUE_PARTS").split(";");
+      String[] namePart = bundle.getString(name).split(";");
+      String[] hasBeen = bundle.getString("HAS_BEEN_PARTS").split(";");
+      form.setFormatByArgumentIndex(0, new ChoiceFormat(limits, valuePart));
+      form.setFormatByArgumentIndex(1, new ChoiceFormat(limits, namePart));
+      form.setFormatByArgumentIndex(2, new ChoiceFormat(limits, hasBeen));
+      Integer count = Integer.valueOf(nans.size());
+      GUITools.showListMessage(
+        this,
+        StringUtil.toHTML(
+          form.format(new Object[] { count, count, count, Double.valueOf(value) }), 80),
+          bundle.getString("REPLACING_UNDEFINED_VALUES"), nans);
+    }
     panel.setOpaque(true);
     return panel;
   }
-  
+
   /**
    * @param cl
    * @return
@@ -425,31 +438,32 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
   public boolean removeChangeListener(ChangeListener cl) {
     return listOfChangeListeners.remove(cl);
   }
-  
+
   /* (non-Javadoc)
    * @see org.sbml.jsbml.util.TreeNodeChangeListener#nodeAdded(javax.swing.tree.TreeNode)
    */
+  @Override
   public void nodeAdded(TreeNode node) {
     if (node instanceof SBase) {
-    	SBase sb = (SBase) node;
+      SBase sb = (SBase) node;
       tab.removeAll();
       init(sb.getModel());
     }
   }
-  
+
   /* (non-Javadoc)
    * @see org.sbml.jsbml.util.TreeNodeChangeListener#nodeRemoved(org.sbml.jsbml.util.TreeNodeRemovedEvent)
    */
-  //@Override
+  @Override
   public void nodeRemoved(TreeNodeRemovedEvent evt) {
-  	TreeNode node = evt.getSource();
+    TreeNode node = evt.getSource();
     if (node instanceof SBase) {
-    	SBase sb = (SBase) node;
+      SBase sb = (SBase) node;
       tab.removeAll();
       init(sb.getModel());
     }
   }
-  
+
   /**
    * Disables or enables user interaction on this element.
    * 
@@ -465,21 +479,22 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
       buttonReset.setEnabled(enabled);
     }
   }
-  
+
   /**
    * @param properties
    */
-	public void loadPreferences() {
-		SBPreferences prefs = SBPreferences.getPreferencesFor(SimulationOptions.class);
-		defaultCompartmentValue = prefs.getDouble(SimulationOptions.DEFAULT_INIT_COMPARTMENT_SIZE);
-		defaultSpeciesValue = prefs.getDouble(SimulationOptions.DEFAULT_INIT_SPECIES_VALUE);
-		defaultParameterValue = prefs.getDouble(SimulationOptions.DEFAULT_INIT_PARAMETER_VALUE);
-		updateUI();
-	}
-  
+  public void loadPreferences() {
+    SBPreferences prefs = SBPreferences.getPreferencesFor(SimulationOptions.class);
+    defaultCompartmentValue = prefs.getDouble(SimulationOptions.DEFAULT_INIT_COMPARTMENT_SIZE);
+    defaultSpeciesValue = prefs.getDouble(SimulationOptions.DEFAULT_INIT_SPECIES_VALUE);
+    defaultParameterValue = prefs.getDouble(SimulationOptions.DEFAULT_INIT_PARAMETER_VALUE);
+    updateUI();
+  }
+
   /* (non-Javadoc)
    * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
    */
+  @Override
   public void stateChanged(ChangeEvent e) {
     if (e.getSource() instanceof JSpinner) {
       String id = ((JSpinner) e.getSource()).getName();
@@ -493,17 +508,18 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
       cl.stateChanged(e);
     }
   }
-  
+
   /* (non-Javadoc)
    * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
    */
+  @Override
   public void propertyChange(PropertyChangeEvent evt) {
     if (evt.getSource() instanceof QuantityWithUnit) {
       QuantityWithUnit q = (QuantityWithUnit) evt.getSource();
       updateQuantitySpinner(q.getId());
     }
   }
-  
+
   /**
    * @param index
    */
@@ -515,7 +531,7 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
       }
     }
   }
-  
+
   /**
    * Updates the value for the spinner corresponding to the
    * {@link QuantityWithUnit} with the given identifier only.
@@ -529,16 +545,16 @@ public class InteractiveScanPanel extends JPanel implements ActionListener,
       updateQuantitySpinner(key.intValue());
     }
   }
-  
+
   /**
    * @param id
    * @param value
    */
   public void updateQuantity(String id, double value) {
-  	Integer key = quantitiesHash.get(id);
+    Integer key = quantitiesHash.get(id);
     if (key != null) {
       quantities[key.intValue()].setValue(value);
     }
   }
-  
+
 }

@@ -21,9 +21,6 @@ import java.io.IOException;
 
 import javax.xml.stream.XMLStreamException;
 
-import org.sbml.jsbml.SBMLDocument;
-import org.sbml.jsbml.SBMLReader;
-import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.stability.math.ConservationRelations;
 import org.sbml.simulator.stability.math.StabilityMatrix;
 import org.sbml.simulator.stability.math.StoichiometricMatrix;

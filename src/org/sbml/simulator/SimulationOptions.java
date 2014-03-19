@@ -19,7 +19,6 @@ package org.sbml.simulator;
 
 import java.util.ResourceBundle;
 
-import org.simulator.math.odes.AbstractDESSolver;
 import org.simulator.math.odes.RungeKutta_EventSolver;
 
 import de.zbit.util.ResourceManager;

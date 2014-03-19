@@ -21,8 +21,6 @@ import java.awt.Window;
 import java.awt.event.WindowListener;
 import java.util.logging.Logger;
 
-import org.sbml.optimization.problem.EstimationProblem;
-
 import eva2.client.EvAClient;
 import eva2.gui.BeanInspector;
 import eva2.gui.GenericObjectEditor;

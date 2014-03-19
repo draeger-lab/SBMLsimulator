@@ -6,7 +6,7 @@
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
  *
- * Copyright (C) 2007-2012 by the University of Tuebingen, Germany.
+ * Copyright (C) 2007-2013 by the University of Tuebingen, Germany.
  *
  * This library is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -26,8 +26,8 @@
         <description>SBMLsimulator - a versatile and efficient simulator and parameter estimator for biological models.</description>
         <description kind="short">SBMLsimulator</description>
         <homepage href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator"/>
-        <!-- <icon href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/img/SBMLsimulator_48.png"/> -->
-        <!-- <icon kind="shortcut" href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/img/SBMLsimulator_16.png" width="16" height="16"/> -->
+        <icon href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/img/SBMLsimulator_48.png"/>
+        <icon kind="shortcut" href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/img/SBMLsimulator_16.png" width="16" height="16"/>
         <icon kind="splash" href="http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/img/Splash.gif"/>
         <offline-allowed/>
     </information>
@@ -37,7 +37,7 @@
     <resources>
       <!-- Application Resources -->
       <j2se version="1.6+" initial-heap-size="64m" max-heap-size="256m" java-vm-args="-splash:org/sbml/simulator/gui/img/Splash.gif" href="http://java.sun.com/products/autodl/j2se"/>
-      <jar href="SBMLsimulator-1.0-rc2.jar" main="true"/>
+      <jar href="SBMLsimulator-latest.jar" main="true"/>
     </resources>
     <application-desc name="SBMLsimulator" main-class="org.sbml.simulator.SBMLsimulator" width="640" height="480"/>
     <update check="background"/>

@@ -30,8 +30,6 @@ import org.simulator.math.odes.AbstractDESSolver;
 import org.simulator.math.odes.MultiTable;
 import org.simulator.math.odes.RosenbrockSolver;
 
-import de.zbit.io.csv.CSVReader;
-
 import eva2.server.go.individuals.AbstractEAIndividual;
 import eva2.server.go.individuals.ESIndividualDoubleData;
 import eva2.server.go.operators.terminators.EvaluationTerminator;

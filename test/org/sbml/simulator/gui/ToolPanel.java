@@ -17,25 +17,14 @@
  */
 package org.sbml.simulator.gui;
 
-import java.awt.Color;
 import java.awt.HeadlessException;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.io.IOException;
 
-import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import org.sbml.simulator.SimulationOptions;
 
-import de.zbit.gui.prefs.PreferencesPanel;
 import de.zbit.gui.prefs.PreferencesPanelForKeyProvider;
-import de.zbit.util.prefs.SBPreferences;
 
 /**
  * @author Andreas Dr&auml;ger

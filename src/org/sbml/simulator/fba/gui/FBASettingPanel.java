@@ -31,10 +31,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
-
 import org.sbml.jsbml.Species;
 import org.sbml.simulator.fba.controller.FluxBalanceAnalysis;
 import org.sbml.simulator.gui.InteractiveScanPanel.Command;

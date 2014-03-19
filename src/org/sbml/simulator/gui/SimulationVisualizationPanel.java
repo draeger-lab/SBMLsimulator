@@ -338,8 +338,7 @@ public class SimulationVisualizationPanel extends JSplitPane implements
 		interactiveScanPanel = new InteractiveScanPanel(model, minValue,
 				maxCompartmentValue, maxSpeciesValue, maxParameterValue,
 				paramStepSize);
-		interactiveScanPanel
-				.setBorder(BorderFactory.createLoweredBevelBorder());
+		interactiveScanPanel.setBorder(BorderFactory.createLoweredBevelBorder());
 		legendPanel = new LegendPanel(model, includeReactions);
     legendPanel.addTableModelListener(this);
     legendPanel.setBorder(BorderFactory.createLoweredBevelBorder());

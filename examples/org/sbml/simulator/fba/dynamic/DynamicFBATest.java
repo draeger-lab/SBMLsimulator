@@ -19,7 +19,6 @@
 package org.sbml.simulator.fba.dynamic;
 
 import java.util.Arrays;
-import java.util.HashMap;
 
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
