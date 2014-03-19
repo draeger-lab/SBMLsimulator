@@ -20,8 +20,6 @@ package org.sbml.optimization.problem;
 import java.util.ResourceBundle;
 
 import org.sbml.simulator.SBMLsimulator;
-import org.simulator.math.EuclideanDistance;
-import org.simulator.math.ManhattanDistance;
 import org.simulator.math.N_Metric;
 import org.simulator.math.RelativeEuclideanDistance;
 import org.simulator.math.RelativeManhattanDistance;

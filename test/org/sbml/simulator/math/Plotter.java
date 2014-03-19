@@ -27,9 +27,7 @@ import javax.imageio.ImageIO;
 import org.simulator.math.odes.MultiTable;
 import org.simulator.math.odes.MultiTable.Block.Column;
 
-
 import de.zbit.gui.GUITools;
-
 import eva2.gui.Plot;
 
 /**

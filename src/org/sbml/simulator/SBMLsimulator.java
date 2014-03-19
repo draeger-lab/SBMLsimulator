@@ -21,6 +21,7 @@ import java.awt.HeadlessException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -240,6 +241,13 @@ public class SBMLsimulator extends Launcher {
 		super(args);
 	}
 
+	/**
+	 * 
+	 */
+	public SBMLsimulator() {
+		super();
+	}
+
 	/* (non-Javadoc)
 	 * @see de.zbit.Launcher#commandLineMode(de.zbit.AppConf)
 	 */
@@ -261,7 +269,7 @@ public class SBMLsimulator extends Launcher {
 					timeSeriesFile, appConf);
 			commandLineManager.run();
 		} else {
-			logger.fine(String.format(
+			logger.fine(MessageFormat.format(
 					getResources().getString("INCOMPLETE_CMD_ARG_LIST"),
 					getAppName(), getVersionNumber()));
 
@@ -357,7 +365,7 @@ public class SBMLsimulator extends Launcher {
 	 */
 	@Override
 	public short getYearOfProgramRelease() {
-		return (short) 2013;
+		return (short) 2014;
 	}
 
 	/* (non-Javadoc)

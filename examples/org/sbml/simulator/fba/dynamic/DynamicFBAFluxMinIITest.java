@@ -25,14 +25,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.sbml.jsbml.Model;
-import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
-import org.sbml.simulator.fba.controller.CSVDataConverter;
 import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 import org.sbml.simulator.io.CSVDataImporter;
 import org.simulator.math.odes.MultiTable;
-import org.simulator.math.odes.MultiTable.Block;
 import org.simulator.math.odes.MultiTable.Block.Column;
 
 import de.zbit.io.csv.CSVWriter;

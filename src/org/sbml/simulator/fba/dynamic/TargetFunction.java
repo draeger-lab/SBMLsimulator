@@ -17,15 +17,14 @@
  */
 package org.sbml.simulator.fba.dynamic;
 
-import java.util.logging.Logger;
-
-import org.simulator.math.odes.MultiTable;
-
-
 import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
 import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
+
+import java.util.logging.Logger;
+
+import org.simulator.math.odes.MultiTable;
 
 /**
  * 

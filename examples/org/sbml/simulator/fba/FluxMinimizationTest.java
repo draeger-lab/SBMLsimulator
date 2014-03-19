@@ -18,12 +18,14 @@
 package org.sbml.simulator.fba;
 
 import java.io.File;
+import java.io.IOException;
+
+import javax.xml.stream.XMLStreamException;
 
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLReader;
 import org.sbml.simulator.fba.controller.CSVDataConverter;
 import org.sbml.simulator.fba.controller.FluxMinimization;
-import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
 
 /**
  * @author Meike Aichele

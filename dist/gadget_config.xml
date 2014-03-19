@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+ * $Id$
+ * $URL$
+ *
+ *******************************************************************************
+ *
+ * This file is part of SBMLsimulator, a Java-based simulator for models
+ * of biochemical processes encoded in the modeling language SBML.
+ *
+ * Copyright (C) 2007-2014 by the University of Tuebingen, Germany.
+ *
+ * This library is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation. A copy of the license
+ * agreement is provided in the file named "LICENSE.txt" included with
+ * this software distribution and also available online as
+ * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
+ *
+ *******************************************************************************
+ *
+ * Version: $Rev$
+-->
+<Gadget>
+  <UUID>[GADGET_UUID]</UUID>
+  <Name>[GADGET_NAME]</Name>
+  <LaunchCommand>cmd /c start javaw.exe -jar "gadgets/[GADGET_UUID]/[JAR_NAME]"</LaunchCommand>
+  <LaunchCommandWin>cmd /c start javaw.exe -jar "gadgets/[GADGET_UUID]/[JAR_NAME]"</LaunchCommandWin>
+  <LaunchCommandMac>open "gadgets/[GADGET_UUID]/[JAR_NAME]"</LaunchCommandMac>
+  <LaunchCommandLinux>java -jar "gadgets/[GADGET_UUID]/[JAR_NAME]"</LaunchCommandLinux>
+  <IconPaths>
+    <Icon32Path>icons/SBMLsimulator_64.png</Icon32Path>
+  </IconPaths>
+  <Snapshots>
+    <SnapshotPath>snapshot/Screenshot_1.PNG</SnapshotPath>
+    <SnapshotPath>snapshot/Screenshot_2.PNG</SnapshotPath>
+    <SnapshotPath>snapshot/Screenshot_3.PNG</SnapshotPath>
+  </Snapshots>
+  <Categories>
+    <Category>Dynamic simulation</Category>
+    <Category>Parameter estimation</Category>
+    <Category>Heuristic optimization</Category>
+    <Category>Ordinary differential equation solver</Category>
+  </Categories>
+  <Provider>University of Tuebingen</Provider>
+  <Description>SBMLsimulator is a fast, accurate, and easily usable program for dynamic model simulation and heuristic parameter optimization of models encoded in the Systems Biology Markup Language (SBML). In order to ensure a high reliability of this software, its internal numerical solver engine, the Systems Biology Simulation Core Library, has been benchmarked against the entire SBML Test Suite and all models from the BioModels database. It includes a large collection of nature-inspired heuristic optimization procedures for efficient model calibration. SBMLsimulator provides an intuitive Graphical User Interface (GUI) and several command-line options to be suitable for large-scale batch processing and model calibration. SBMLsimulator runs on all platforms that provide a standard Java Virtual Machine and is based on the open-source library JSBML. The simulation core library of SBMLsimulator can be obtained as a separate application programming library.</Description>
+  <LoadableKeys>
+    <InputFileFormat>
+      <FileExtension>xml</FileExtension>
+      <FileFormat>SBML</FileFormat>
+    </InputFileFormat>
+    <InputFileFormat>
+      <FileExtension>sbml</FileExtension>
+      <FileFormat>SBML</FileFormat>
+    </InputFileFormat>
+    <InputFileFormat>
+      <FileExtension>csv</FileExtension>
+      <FileFormat>Character-separated Value</FileFormat>
+    </InputFileFormat>
+    <InputFileFormat>
+      <FileExtension>txt</FileExtension>
+      <FileFormat>Character-separated Value</FileFormat>
+    </InputFileFormat>
+    <OutputFileFormat>
+      <FileExtension>xml</FileExtension>
+      <FileFormat>SBML</FileFormat>
+    </OutputFileFormat>
+    <OutputFileFormat>
+      <FileExtension>sbml</FileExtension>
+      <FileFormat>SBML</FileFormat>
+    </OutputFileFormat>
+    <OutputFileFormat>
+      <FileExtension>csv</FileExtension>
+      <FileFormat>Character-separated Value</FileFormat>
+    </OutputFileFormat>
+    <OutputFileFormat>
+      <FileExtension>txt</FileExtension>
+      <FileFormat>Character-separated Value</FileFormat>
+    </OutputFileFormat>
+  </LoadableKeys>
+  <LaunchEnv>
+    <Id>f22aa6a2-beff-4487-b838-03b8275a4361</Id>
+  </LaunchEnv>
+</Gadget>

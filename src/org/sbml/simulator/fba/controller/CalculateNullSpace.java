@@ -17,12 +17,12 @@
  */
 package org.sbml.simulator.fba.controller;
 
-import org.sbml.simulator.stability.math.StoichiometricMatrix;
-
 import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
 import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
+
+import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
 /**
  * @author Stephanie Tscherneck
