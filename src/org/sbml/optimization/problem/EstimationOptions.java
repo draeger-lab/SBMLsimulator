@@ -20,13 +20,13 @@ package org.sbml.optimization.problem;
 import java.util.ResourceBundle;
 
 import org.sbml.simulator.SBMLsimulator;
-import org.sbml.simulator.math.EuclideanDistance;
-import org.sbml.simulator.math.ManhattanDistance;
-import org.sbml.simulator.math.N_Metric;
-import org.sbml.simulator.math.RelativeEuclideanDistance;
-import org.sbml.simulator.math.RelativeManhattanDistance;
-import org.sbml.simulator.math.RelativeSquaredError;
-import org.sbml.simulator.math.Relative_N_Metric;
+import org.simulator.math.EuclideanDistance;
+import org.simulator.math.ManhattanDistance;
+import org.simulator.math.N_Metric;
+import org.simulator.math.RelativeEuclideanDistance;
+import org.simulator.math.RelativeManhattanDistance;
+import org.simulator.math.RelativeSquaredError;
+import org.simulator.math.Relative_N_Metric;
 
 import de.zbit.util.ResourceManager;
 import de.zbit.util.objectwrapper.ValuePairUncomparable;
@@ -50,6 +50,18 @@ public interface EstimationOptions extends KeyProvider {
 	 * Resource bundle
 	 */
 	static ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
+
+	/**
+	 * Decide whether the parameters in the given model should be used for post-optimization.
+	 */
+	public static Option<Boolean> USE_EXISTING_SOLUTION = new Option<Boolean>(
+			"USE_EXISTING_SOLUTION", Boolean.class, bundle, Boolean.FALSE);
+	
+	/**
+	 * The file with the values to estimate and their initial setting
+	 */
+	public static final Option<String> EST_TARGETS = new Option<String>(
+		"EST_TARGETS", String.class, bundle, null);
 	
 	/**
 	 * Decide whether or not by default all compartments in a model should be
@@ -57,13 +69,6 @@ public interface EstimationOptions extends KeyProvider {
 	 */
 	public static final Option<Boolean> EST_ALL_COMPARTMENTS = new Option<Boolean>(
 		"EST_ALL_COMPARTMENTS", Boolean.class, bundle, Boolean.FALSE);
-	
-	/**
-	 * Estimates the values for all those quantities in the model whose values are
-	 * either undefined or set to 'Not a Number' (NaN).
-	 */
-	public static final Option<Boolean> EST_ALL_UNDEFINED_QUANTITIES = new Option<Boolean>(
-			"EST_ALL_UNDEFINED_QUANTITIES", Boolean.class, bundle, Boolean.FALSE);
 	
 	/**
 	 * Decide whether or not by default all global parameters in a model should be
@@ -85,6 +90,13 @@ public interface EstimationOptions extends KeyProvider {
 	 */
 	public static final Option<Boolean> EST_ALL_SPECIES = new Option<Boolean>(
 		"EST_ALL_SPECIES", Boolean.class, bundle, Boolean.FALSE);
+	
+	/**
+	 * Estimates the values for all those quantities in the model whose values are
+	 * either undefined or set to 'Not a Number' (NaN).
+	 */
+	public static final Option<Boolean> EST_ALL_UNDEFINED_QUANTITIES = new Option<Boolean>(
+			"EST_ALL_UNDEFINED_QUANTITIES", Boolean.class, bundle, Boolean.FALSE);
 	
 	/**
 	 * The maximal value of the initialization range in a parameter estimation
@@ -128,13 +140,49 @@ public interface EstimationOptions extends KeyProvider {
 		"EST_MULTI_SHOOT", Boolean.class, bundle, Boolean.TRUE);
 	
 	/**
+	 * If this is selected, splines will be calculated from given experimental data
+	 * and the parameter estimation procedure will fit the system to the splines instead
+	 * of the original values. The advantage of this procedure is that the amount of available
+	 * data is increased due to this form of interpolation, also ensuring that the shape of
+	 * the resulting curves comes close to what could be expected. The disadvantage is that
+	 * the influence of potential outliers on the overall fitness is increased. 
+	 */
+	public static final Option<Boolean> FIT_TO_SPLINES = new Option<Boolean>(
+		"FIT_TO_SPLINES", Boolean.class, bundle, Boolean.FALSE);
+
+	/**
+	 * Range that is used to decide whether or not spline fitting is enabled.
+	 */
+	public static final ValuePairUncomparable<Option<Boolean>, Range<Boolean>> SPLINE_FITTING_SELECTED = new ValuePairUncomparable<Option<Boolean>, Range<Boolean>>(
+		FIT_TO_SPLINES, new Range<Boolean>(Boolean.class, Boolean.TRUE));
+
+	/**
+	 * This defines the number of additional spline sampling points between the
+	 * measurement data. If you select zero, only the real sampling points will be
+	 * used.
+	 */
+	@SuppressWarnings("unchecked")
+	public static final Option<Integer> NUMBER_OF_SPLINE_SAMPLES = new Option<Integer>(
+		"NUMBER_OF_SPLINE_SAMPLES", Integer.class, bundle, Integer.valueOf(50),
+		SPLINE_FITTING_SELECTED);
+
+	/**
+	 * These options allow you to estimate parameters with respect to spline
+	 * interpolation values between given measurement data and to configure how to
+	 * calculate these splines.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static final OptionGroup SPLINE_FITTING = new OptionGroup(
+		"SPLINE_FITTING", bundle, FIT_TO_SPLINES, NUMBER_OF_SPLINE_SAMPLES);
+	
+	/**
    * 
    */
 	@SuppressWarnings("unchecked")
 	public static final OptionGroup<Boolean> OPTIMIZATION_TARGETS = new OptionGroup<Boolean>(
-			"OPTIMIZATION_TARGETS", bundle, EST_ALL_COMPARTMENTS,
-			EST_ALL_GLOBAL_PARAMETERS, EST_ALL_LOCAL_PARAMETERS,
-			EST_ALL_SPECIES, EST_ALL_UNDEFINED_QUANTITIES);
+		"OPTIMIZATION_TARGETS", bundle, EST_ALL_COMPARTMENTS,
+		EST_ALL_GLOBAL_PARAMETERS, EST_ALL_LOCAL_PARAMETERS, EST_ALL_SPECIES,
+		EST_ALL_UNDEFINED_QUANTITIES);
 	
 	/**
 	 * 
@@ -149,7 +197,7 @@ public interface EstimationOptions extends KeyProvider {
 	 */
 	@SuppressWarnings("unchecked")
 	public static final OptionGroup<Boolean> INTEGRATION_STRATEGY = new OptionGroup<Boolean>(
-		"INTEGRATION_STRATEGY", bundle, EST_MULTI_SHOOT);
+		"INTEGRATION_STRATEGY", bundle, EST_MULTI_SHOOT, USE_EXISTING_SOLUTION);
 	
 	/**
 	 * This specifies the class name of the default distance function that

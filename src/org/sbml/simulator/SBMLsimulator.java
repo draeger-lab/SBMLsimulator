@@ -34,7 +34,7 @@ import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.simulator.gui.SimulatorUI;
 import org.sbml.simulator.gui.plot.PlotOptions;
 import org.sbml.simulator.io.SimulatorIOOptions;
-import org.sbml.simulator.math.QualityMeasure;
+import org.simulator.math.QualityMeasure;
 import org.simulator.math.odes.AbstractDESSolver;
 
 import de.zbit.AppConf;

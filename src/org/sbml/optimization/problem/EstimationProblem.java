@@ -17,6 +17,8 @@
  */
 package org.sbml.optimization.problem;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,25 +27,35 @@ import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 import org.apache.commons.math.ode.DerivativeException;
+import org.sbml.jsbml.KineticLaw;
+import org.sbml.jsbml.LocalParameter;
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Quantity;
+import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLException;
 import org.sbml.jsbml.validator.ModelOverdeterminedException;
 import org.sbml.optimization.QuantityRange;
-import org.sbml.simulator.math.PearsonCorrelation;
-import org.sbml.simulator.math.QualityMeasure;
+import org.simulator.math.PearsonCorrelation;
+import org.simulator.math.QualityMeasure;
 import org.simulator.math.odes.AbstractDESSolver;
 import org.simulator.math.odes.DESSolver;
 import org.simulator.math.odes.MultiTable;
 import org.simulator.sbml.SBMLinterpreter;
 
+import de.zbit.io.csv.CSVReader;
+import de.zbit.io.csv.CSVWriter;
 import de.zbit.util.ResourceManager;
+import de.zbit.util.prefs.SBPreferences;
 import eva2.server.go.PopulationInterface;
+import eva2.server.go.individuals.ESIndividualDoubleData;
+import eva2.server.go.individuals.InterfaceDataTypeDouble;
 import eva2.server.go.populations.Population;
 import eva2.server.go.problems.AbstractProblemDouble;
 import eva2.server.go.problems.InterfaceAdditionalPopulationInformer;
 import eva2.server.go.problems.InterfaceHasInitRange;
+import eva2.server.go.strategies.InterfaceOptimizer;
 import eva2.tools.ToolBox;
+import eva2.tools.math.RNG;
 
 /**
  * @author Andreas Dr&auml;ger
@@ -54,17 +66,15 @@ import eva2.tools.ToolBox;
 public class EstimationProblem extends AbstractProblemDouble implements
 		InterfaceAdditionalPopulationInformer, InterfaceHasInitRange {
 	
+	/**
+	 * 
+	 */
 	private static final ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
 	
 	/**
 	 * 
 	 */
-	private MultiTable bestPerGeneration = null;
-	
-	/**
-	 * 
-	 */
-	private double bestPerGenerationDist = Double.POSITIVE_INFINITY;
+	private MultiTable currentSimulationData = null;
 
 	/**
 	 * Generated version identifier.
@@ -106,6 +116,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	public double[] getBestSolutionFound() {
 		return bestSolutionFound;
 	}
+
 	/**
 	 * 
 	 */
@@ -134,7 +145,6 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 */
 	private boolean multishoot;
 
-
 	/**
 	 * 
 	 */
@@ -155,6 +165,16 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 */
 	private static final transient Logger logger = Logger.getLogger(EstimationProblem.class.getName());
 
+	/**
+	 * 
+	 */
+	public void calculateStatisticsForGeneration() {
+		ESIndividualDoubleData ind = (ESIndividualDoubleData) this.optimizer.getPopulation().getBestIndividual();
+		this.bestSolutionFound = ind.getDoublePosition();
+		this.eval(ind.getDoublePosition());
+	}
+	
+	
 	/**
 	 * 
 	 * @param solver
@@ -239,20 +259,6 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see eva2.server.go.problems.AbstractProblemDouble#initPopulation(eva2.server.go.populations.Population)
-	 */
-	@Override
-	public void initPopulation(Population population) {
-		// TODO: Provide more elaborated possibilities, such as a distribution around the current solution... Not just a copy.
-		super.initPopulation(population);
-		boolean keepCurrentSolution = true;
-		if ((population.size() > 0) && keepCurrentSolution) {
-//			InterfaceDataTypeDouble individual = (InterfaceDataTypeDouble) population.getIndividual(RNG.randomInt(0, population.size()));
-//			individual.SetDoubleGenotype(getOriginalValues());
-		}
-	}
-
 	/**
 	 * Checks whether or not the given model contains all of the given
 	 * quantities.
@@ -281,27 +287,26 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * @see eva2.server.go.problems.AbstractProblemDouble#eval(double[])
 	 */
 	public double[] eval(double[] x) {
-	  
-	  for (int i = 0; i < x.length; i++) {
+		
+		for (int i = 0; i < x.length; i++) {
 			quantityRanges[i].getQuantity().setValue(x[i]);
 		}
 		
-	  try {
+		try {
 			interpreter.init(false);
-
+			
 			double[] initialValues = interpreter.getInitialValues();
 			MultiTable solution = null;
 			try {
 				if (multishoot) {
-					solution = solver.solve(interpreter, getInitialConditions()
-							.getBlock(0), initialValues);
+					solution = solver.solve(interpreter,
+						getInitialConditions().getBlock(0), initialValues);
 				} else {
-					solution = solver.solve(interpreter, initialValues,
-							getTimePoints());
+					solution = solver.solve(interpreter, initialValues, getTimePoints());
 				}
 			} catch (DerivativeException e) {
 			}
-
+			
 			fitness[0] = 0d;
 			for (MultiTable data : referenceData) {
 				if (solution == null) {
@@ -310,26 +315,21 @@ public class EstimationProblem extends AbstractProblemDouble implements
 					// equal weight for each reference data set
 					if (negationOfDistance) {
 						fitness[0] += -1
-								* distance.distance(solution.getBlock(0),
-										data.getBlock(0))
+								* distance.distance(solution, data)
 								/ referenceData.length;
 					} else {
-						fitness[0] += distance.distance(solution.getBlock(0),
-								data.getBlock(0)) / referenceData.length;
+						fitness[0] += distance.distance(solution,
+							data)
+								/ referenceData.length;
 					}
 				}
-
+				
 			}
-			if (bestPerGeneration == null
-					|| (fitness[0] < bestPerGenerationDist)) {
-				bestPerGenerationDist = fitness[0];
-				bestPerGeneration = solution;
-				bestSolutionFound = x;
-				if (solution != null) {
-					bestPerGeneration.setName(SIMULATION_DATA);
-				}
+			currentSimulationData = solution;
+			if(solution != null) {
+				currentSimulationData.setName(SIMULATION_DATA);
 			}
-
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			fitness[0] = Double.POSITIVE_INFINITY;
@@ -402,6 +402,11 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * avoid a multiple creation of it in the {@link #eval(double[])} method. 
 	 */
 	private MultiTable initConditions = null;
+
+	/**
+	 * Memorizes the optimizer
+	 */
+	private InterfaceOptimizer optimizer;
 	
 	/**
 	 * 
@@ -444,8 +449,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	@Override
 	public void evaluatePopulationStart(Population population) {
 		super.evaluatePopulationStart(population);
-		bestPerGeneration = null;
-		bestPerGenerationDist = Double.POSITIVE_INFINITY;
+		currentSimulationData = null;
 	}
 
 	/* (non-Javadoc)
@@ -473,7 +477,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	@Override
 	public Object[] getAdditionalDataValue(PopulationInterface pop) {
 		Object[] superVals = super.getAdditionalDataValue(pop);
-		return ToolBox.appendArrays(superVals, bestPerGeneration);
+		return ToolBox.appendArrays(superVals, currentSimulationData);
 	}
 
 	/**
@@ -548,6 +552,24 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	@Override
 	public double getRangeUpperBound(int dim) {
 		return quantityRanges[dim].getMaximum();
+	}
+	
+	/* (non-Javadoc)
+	 * @see eva2.server.go.problems.AbstractProblemDouble#initPopulation(eva2.server.go.populations.Population)
+	 */
+	@Override
+	public void initPopulation(Population population) {
+		super.initPopulation(population);
+		SBPreferences prefs = SBPreferences.getPreferencesFor(EstimationOptions.class);
+		boolean keepCurrentSolution = false;
+		if (prefs.getBoolean(EstimationOptions.USE_EXISTING_SOLUTION)) {
+			keepCurrentSolution = true;
+		}
+		
+		if ((population.size() > 0) && keepCurrentSolution) {
+			InterfaceDataTypeDouble individual = (InterfaceDataTypeDouble) population.getIndividual(RNG.randomInt(0, population.size()));
+			individual.SetDoubleGenotype(getOriginalValues());
+		}
 	}
 
 	/**
@@ -687,6 +709,117 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 */
 	public void unsetReferenceData() {
 		referenceData = null;
+	}
+	
+	/**
+	 * 
+	 * @param file
+	 * @param model
+	 * @return
+	 * @throws IOException
+	 */
+	public static QuantityRange[] readQuantityRangesFromFile(File file, Model model) throws IOException {
+		return readQuantityRangesFromFile(file.getAbsolutePath(), model);
+	}
+	
+	/**
+	 * 
+	 * @param file
+	 * @return
+	 * @throws IOException
+	 */
+	public static QuantityRange[] readQuantityRangesFromFile(String file, Model model) throws IOException {
+		CSVReader reader = new CSVReader(file);
+		String[][] data = reader.read();
+		
+		List<QuantityRange> ranges = new ArrayList<QuantityRange>();
+		for (int i = 0; i != data.length; i++) {
+			if (data[i].length >= 5) {
+				String id = data[i][0];
+				Quantity quantity = null;
+				if (!id.contains(":")) {
+					quantity = model.findQuantity(id);
+				} else {
+					String[] splits = id.split(":");
+					Reaction reaction = model.getReaction(splits[0]);
+					if (reaction != null) {
+						KineticLaw kl = reaction.getKineticLaw();
+						if (kl != null) {
+							quantity = kl.getLocalParameter(splits[1]);
+						}
+					}
+				}
+				if (quantity != null) {
+					try {
+						QuantityRange range = new QuantityRange(quantity, true,
+							Double.valueOf(data[i][1]), Double.valueOf(data[i][2]),
+							Double.valueOf(data[i][3]), Double.valueOf(data[i][4]));
+						if ((data[i].length >= 7) && (data[i][5] != null) && (!data[i][5].equals(""))) {
+							range.setInitialGaussianValue(Double.valueOf(data[i][5]));
+							range.setGaussianStandardDeviation(Double.valueOf(data[i][6]));
+						}
+						ranges.add(range);
+						
+					} catch (Exception e) {
+						//TODO message
+					}
+				}
+			}
+		}
+		return ranges.toArray(new QuantityRange[ranges.size()]);
+	}
+	
+	/**
+	 * 
+	 * @param file
+	 * @throws IOException
+	 */
+	public static void saveQuantityRanges(File file, QuantityRange[] ranges) throws IOException {
+    String comment = "In this file the parameters to estimate are given with their id, the initial minimum and maximum values and the minimum and maximum values for the estimation.\n"
+    		+ "If the initial gaussian value and the standard deviation are set, the initial value is determined from a gaussian distribution based on these values.\n";
+		String[] header = {"id", "initMin", "initMax", "minValue", "maxValue", "[initialGaussianValue]", "[gaussianStandardDeviation]"};
+		String[][] data = new String[ranges.length][];
+		for(int i=0; i!=ranges.length; i++) {
+			data[i] = new String[7];
+			Quantity q = ranges[i].getQuantity();
+			if(q instanceof LocalParameter) {
+				Reaction r = (Reaction)((LocalParameter)q).getParent().getParent().getParent();
+				data[i][0] = r.getId() + ":" + q.getId();
+			}
+			else {
+				data[i][0] = q.getId();
+			}
+			data[i][1] = String.valueOf(ranges[i].getInitialMinimum());
+			data[i][2] = String.valueOf(ranges[i].getInitialMaximum());
+			data[i][3] = String.valueOf(ranges[i].getMinimum());
+			data[i][4] = String.valueOf(ranges[i].getMaximum());
+			
+			if(ranges[i].isGaussianInitialization()) {
+				data[i][5] = String.valueOf(ranges[i].getInitialGaussianValue());
+				data[i][6] = String.valueOf(ranges[i].getGaussianStandardDeviation());
+			}
+			else {
+				data[i][5] = null;
+				data[i][6] = null;
+			}
+		}
+		CSVWriter writer = new CSVWriter();
+		writer.write(data, header, comment, file);
+	}
+
+	/**
+	 * @param optimizer
+	 */
+	public void setOptimizer(InterfaceOptimizer optimizer) {
+		this.optimizer = optimizer;
+	}
+
+
+	/**
+	 * @return
+	 */
+	public MultiTable getCurrentSimulationData() {
+		return currentSimulationData;
 	}
 
 }

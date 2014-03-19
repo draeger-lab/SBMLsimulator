@@ -58,7 +58,7 @@ public class EvA2GUIStarter {
 	 * @param statisticsListener
 	 * @param windowListener
 	 */
-	public static void init(InterfaceOptimizationProblem problem,
+	public static EvA2GUIStarter init(InterfaceOptimizationProblem problem,
 			final Window parentWindow,
 			InterfaceStatisticsListener statisticsListener,
 			WindowListener windowListener) {
@@ -111,6 +111,8 @@ public class EvA2GUIStarter {
 		logger.fine("adding data listener to EvA2");
 		evaBP.evaClient.getStatistics().addDataListener(statisticsListener);
 		logger.fine("EvA2 should now be ready.");
+		
+		return evaBP;
 	}
 
 	/**

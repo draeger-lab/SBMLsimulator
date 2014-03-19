@@ -43,9 +43,9 @@ import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.io.CSVDataImporter;
 import org.sbml.simulator.io.SimulatorIOOptions;
-import org.sbml.simulator.math.N_Metric;
-import org.sbml.simulator.math.QualityMeasure;
-import org.sbml.simulator.math.Relative_N_Metric;
+import org.simulator.math.N_Metric;
+import org.simulator.math.QualityMeasure;
+import org.simulator.math.Relative_N_Metric;
 import org.simulator.math.odes.AbstractDESSolver;
 import org.simulator.math.odes.MultiTable;
 
