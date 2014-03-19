@@ -70,7 +70,51 @@ public class QuantityRange implements Cloneable, Serializable {
 	 * 
 	 */
 	private Boolean selected;
+
+	/**
+	 * 
+	 */
+	private double initialGaussianValue;
 	
+	/**
+	 * 
+	 */
+	private boolean gaussianInitialization;
+	
+	/**
+	 * @return the gaussianInitialization
+	 */
+	public boolean isGaussianInitialization() {
+		return gaussianInitialization;
+	}
+
+	/**
+	 * 
+	 */
+	private double gaussianStandardDeviation;
+	
+	/**
+	 * @return the gaussianStandardDeviation
+	 */
+	public double getGaussianStandardDeviation() {
+		return gaussianStandardDeviation;
+	}
+
+	/**
+	 * @param gaussianStandardDeviation the gaussianStandardDeviation to set
+	 */
+	public void setGaussianStandardDeviation(double gaussianStandardDeviation) {
+		this.gaussianStandardDeviation = gaussianStandardDeviation;
+		this.gaussianInitialization = true;
+	}
+
+	/**
+	 * @return the initialGaussianValue
+	 */
+	public double getInitialGaussianValue() {
+		return initialGaussianValue;
+	}
+
 	/**
 	 * @param q
 	 * @param check
@@ -87,6 +131,26 @@ public class QuantityRange implements Cloneable, Serializable {
 		this.initMax = Double.valueOf(initMax);
 		this.minimum = Double.valueOf(min);
 		this.maximum = Double.valueOf(max);
+		this.gaussianInitialization = false;
+	}
+	
+	/**
+	 * 
+	 * @param q
+	 * @param selected
+	 * @param initMin
+	 * @param initMax
+	 * @param min
+	 * @param max
+	 * @param initialGaussianValue
+	 * @param gaussianStandardDeviation
+	 */
+	public QuantityRange(Quantity q, boolean selected, double initMin,
+		double initMax, double min, double max, double initialGaussianValue, double gaussianStandardDeviation) {
+		this(q, selected, initMin, initMax, min, max);
+		this.initialGaussianValue = initialGaussianValue;
+		this.gaussianStandardDeviation = gaussianStandardDeviation;
+		this.gaussianInitialization = true;
 	}
 	
 	/* (non-Javadoc)
@@ -94,9 +158,16 @@ public class QuantityRange implements Cloneable, Serializable {
 	 */
 	@Override
 	protected QuantityRange clone() {
-		return new QuantityRange((Quantity) quantity.clone(),
+		if(this.gaussianInitialization) {
+			return new QuantityRange((Quantity) quantity.clone(),
 			selected.booleanValue(), initMin.doubleValue(), initMax.doubleValue(),
-			minimum.doubleValue(), maximum.doubleValue());
+			minimum.doubleValue(), maximum.doubleValue(), initialGaussianValue, gaussianStandardDeviation);
+		}
+		else {
+			return new QuantityRange((Quantity) quantity.clone(),
+				selected.booleanValue(), initMin.doubleValue(), initMax.doubleValue(),
+				minimum.doubleValue(), maximum.doubleValue());
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -272,6 +343,15 @@ public class QuantityRange implements Cloneable, Serializable {
 			Boolean.valueOf(isSelected()), ": initRange(", getInitialMinimum(),
 			", ", getInitialMaximum(), "), absolutRange(", getMinimum(), ", ",
 			getMaximum(), ")]").toString();
+	}
+
+	/**
+	 * 
+	 * @param initialGaussianValue
+	 */
+	public void setInitialGaussianValue(double initialGaussianValue) {
+		this.initialGaussianValue = initialGaussianValue;
+		this.gaussianInitialization = true;
 	}
 
 }
