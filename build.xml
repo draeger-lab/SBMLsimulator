@@ -1,4 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * $Id$
+ * $URL$
+ *
+ * This file is part of SBMLsimulator, a Java-based simulator for models
+ * of biochemical processes encoded in the modeling language SBML.
+ *
+ * Copyright (C) 2007-2014 by the University of Tuebingen, Germany.
+ *
+ * This library is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation. A copy of the license
+ * agreement is provided in the file named "LICENSE.txt" included with
+ * this software distribution and also available online as
+ * http://www.gnu.org/licenses/lgpl-3.0-standalone.html.
+ *
+ * Version: $Rev$
+-->
+
 <!-- The java based ANT tool is available from         -->
 <!-- http://jakarta.apache.org/ant                     -->
 
@@ -25,7 +44,7 @@
 	  SBMLsimulator.
 	    	
 	  The resulting redistributable is the SIGNED jar file,
-      stored in $appJar which is currently "SBMLsimulator_v$version.jar".
+      stored in ${appJar} which is currently "SBMLsimulator_v$version.jar".
     </echo>
   </target>
 
@@ -85,6 +104,7 @@
     <property name="appJar"   value="${dist.dir}/${JAR_Name}-${version}.jar"/>
   	
   	<!--For Garuda -->
+  	<property name="UUID" value="1cfbffa0-bbcb-4ca9-aa44-bfa4815e935e"/>
   	<property name="garuda.gadget" value="${dist.dir}/${JAR_Name}_v${version}_Garuda.zip"/>
   	
   </target>
@@ -146,17 +166,13 @@
     depends="init"
     description="Determines the current SVN revions number and stores it in a variable."
   >
-    <exec executable="svnversion" outputproperty="repository.revision">
-    <arg line="-c ${basedir}"/>
-    <redirector>
-      <outputfilterchain>
-      <tokenfilter>
-        <replaceregex pattern="[0-9]+\:" replace=""/>
-        <replaceregex pattern="[PM]+" replace=""/>
-      </tokenfilter>
-      </outputfilterchain>
-      </redirector>
-    </exec>
+  	<exec executable="svn" outputproperty="svninfo.xml">
+  	  <arg line="info --xml"/>
+  	</exec>
+  	<xmlproperty collapseAttributes="true">
+  	  <propertyresource name="svninfo.xml"/>
+  	</xmlproperty>
+    <property name="repository.revision" value="${info.entry.revision}"/>
     
     <echo message="Current revision of ${Name} is ${repository.revision}"/>    
     <property name="build.name" value="Revision ${repository.revision} ${TODAY} (Build ${build.number})"/>
@@ -173,18 +189,19 @@
   >
     <echo message="Compiling the entire ${Name} project"/>
     <javac
-    classpathref="classpath"
-    compiler="${build.compiler}"
-    debug="${debug}"
-    deprecation="${deprecation}"
-    destdir="${build.dest}"
-    listfiles="yes"
-    memoryMaximumSize="512M"
-    nowarn="no"
-    optimize="${optimize}"
-    source="1.6"
-    target="1.6"
-    verbose="${verbose}"
+      classpathref="classpath"
+      compiler="${build.compiler}"
+      debug="${debug}"
+      deprecation="${deprecation}"
+      destdir="${build.dest}"
+      fork="true"
+      listfiles="yes"
+      memoryMaximumSize="512M"
+      nowarn="no"
+      optimize="${optimize}"
+      source="1.6"
+      target="1.6"
+      verbose="${verbose}"
     >
       <src path="${build.src}"/>
     </javac>
@@ -234,29 +251,31 @@
       <fileset
         dir="${build.dest}"
       	includes="**/*.class"
-        excludes="**/package.html, **/package-info.class"
+        excludes="**/package.html, **/package-info.class, overview.html"
       />
       <fileset 
         dir="${build.src}"
         includes="**.txt, **/*.txt, **.xml, **/*.xml, **.properties, **/*.properties, **.cfg, **/*.cfg, **.obo, **/*.obo, **/*.html, **.html, **/*.htm, **.htm, **/*.png, **.png, **/*.gif, **.gif"
-        excludes="**.java"
+        excludes="**.java, overview.html"
       />
-      <fileset dir="${basedir}/licenses">
+      <zipfileset dir="${basedir}/licenses" prefix="META-INF/">
         <include name="COPYING.txt"/>
         <!-- <include name="README.txt"/> -->
         <include name="AUTHORS.txt"/>
-      </fileset>
+      	<include name="lib-licenses/**"/>
+      </zipfileset>
       
       <!-- These libraries are required by most classes -->
       <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib}/commons-math-2.2.jar"/>
-      <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib}/EvA2Base.jar"/>
+      <zipfileset excludes="META-INF/**, **.html, **.txt, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib}/EvA2Base.jar"/>
       <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib}/jcommon-1.0.17.jar"/>
       <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib}/jfreechart-1.0.15_beta.jar"/>
-      <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib}/jsbml-1.0-a1-with-dependencies.jar"/>
-      <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib}/SimulationCoreLibrary_v1.3_slim.jar"/>
+      <zipfileset excludes="META-INF/INDEX.LIST META-INF/MANIFEST.MF, COPYING.txt, package.html, package-info.class, licenses/**, overview.html, AUTHORS.txt" src="${lib}/jsbml-1.0-incl-libs.jar"/>
+      <zipfileset excludes="META-INF/**, README.txt, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib}/SimulationCoreLibrary_v1.4_slim.jar"/>
       <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib}/sysbio.jar"/>
-      <!--<zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib-garuda}/garuda-csr.jar"/>
-      <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib-garuda}/jsonic-1.2.10.jar"/>-->
+      <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib-garuda}/garuda-csr.jar"/>
+      <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib-garuda}/jsonic-1.2.10.jar"/>
+      <zipfileset excludes="META-INF/**, COPYING.txt, licenses/COPYING.txt, overview.html, AUTHORS.txt" src="${lib-garuda}/GarudaBackend.jar"/>
     </jar>
     
   </target>
@@ -295,7 +314,7 @@
       destdir="${doc.location}"
       doctitle="${Name} ${version}"
       footer="Generated at ${TODAY}&lt;br/&gt;Version ${version} Revision ${repository.revision}"
-      header="&lt;img src=&quot;resources/${icon.file.name}&quot;/&gt;"
+      header="&lt;img src=&quot;resources/${icon.file.name}&quot; title=&quot;SBMLsimulator&quot; alt=&quot;SBMLsimulator&quot;/&gt;"
       maxmemory="96m"
       nodeprecated="false"
       nodeprecatedlist="false"
@@ -322,7 +341,7 @@
       <link href="http://www.jdom.org/docs/apidocs.1.1/"/>
       <link href="http://www.xom.nu/apidocs/"/>
       <link href="http://www.jfree.org/jcommon/api/"/>
-      <link href="http://simulation-core.sourceforge.net/version_1.3/"/>
+      <link href="http://simulation-core.sourceforge.net/version_1.4/"/>
       
       <!-- For JSBML classes:
         <tag name="sbml.deprecated" description="Deprecated in SBML since: "/>
@@ -354,6 +373,146 @@
     description="Removes all that has been built">
     
     <delete includeemptydirs="true" dir="${build.dir}"/>
+  </target>
+
+
+  <!-- =================================================================== -->
+  <!-- Creates a minimal SysBio JAR                                        -->
+  <!-- =================================================================== -->
+  <target
+    name="minimal_sysbio"
+  	depends="init"
+    description="Build a minimal version of SysBio for SBMLsimulator"
+  >
+    <!-- The relative path of the SysBio project -->
+    <property name="sysbio.dir" value="${basedir}/../SysBio"/>
+    <property name="sysbio.lib" value="${sysbio.dir}/lib"/>
+    <path id="sysbio.classpath">
+      <fileset dir="${sysbio.lib}" includes="**.jar, **/*.jar, **.zip"/>
+    </path>
+    <path id="sysbio.sourcepath">
+      <fileset dir="${sysbio.dir}/src"/>
+      <fileset dir="${sysbio.dir}/test"/>
+      <fileset dir="${sysbio.dir}/resources"/>
+      <fileset dir="${sysbio.dir}/examples"/>
+    </path>
+    
+  	<echo message="Determining the revision number of SysBio"/>
+    <exec executable="svn" outputproperty="svninfo.xml">
+      <arg line="info --xml"/>
+    </exec>
+    <xmlproperty collapseAttributes="true">
+      <propertyresource name="svninfo.xml"/>
+    </xmlproperty>
+		<property name="sysbio.revision" value="${info.entry.revision}"/>
+
+    <echo message="Deleting all previous versions of SysBio JAR files"/>
+    <delete verbose="true">
+      <fileset dir="${lib}">
+        <include name="SysBio**.jar"/>
+      </fileset>
+    </delete>
+
+    <echo message="Compile the entire SysBio project"/>
+    <delete dir="${sysbio.dir}/bin"/>
+    <mkdir dir="${sysbio.dir}/bin"/>
+    <javac
+      classpathref="sysbio.classpath"
+      compiler="${build.compiler}"
+      debug="${debug}"
+      deprecation="${deprecation}"
+      destdir="${sysbio.dir}/bin"
+      fork="true"
+      listfiles="yes"
+      memoryMaximumSize="512M"
+      nowarn="no"
+      optimize="${optimize}"
+      source="1.6"
+      srcdir="${sysbio.dir}/src"
+      sourcepathref="sysbio.sourcepath"
+      target="1.6"
+      verbose="${verbose}"
+    />
+    <!-- <copy todir="${sysbio.dir}/bin"/> -->
+
+    <echo message="Packing a minimal JAR file containing only parts required for SBMLsimulator"/>
+    <jar
+      compress="true"
+      filesetmanifest="mergewithoutmain"
+      index="true"
+      indexMetaInf="true"
+    jarfile="${lib}/sysbio.jar"
+      level="9"
+      manifestencoding="utf-8"
+      strict="warn"
+      update="true"
+    >
+      <manifest>
+        <attribute name="Built-By" value="${user.name}"/>
+        <section name="SysBio">
+          <attribute name="Specification-Title"    value="SysBio"/>
+          <attribute name="Specification-Version"  value="Revision ${sysbio.revision}"/>
+          <attribute name="Specification-Vendor"   value="Center for Bioinformatics Tuebingen (ZBIT)"/>
+          <attribute name="Implementation-Title"   value="SysBio"/>
+          <attribute name="Implementation-Version" value="Revision ${sysbio.revision} ${TODAY} (Build ${DSTAMP}-${TSTAMP})"/>
+          <attribute name="Implementation-Vendor"  value="University of Tuebingen"/>
+        </section>
+      </manifest>
+      <zipfileset dir="${sysbio.dir}" prefix="META-INF/">
+        <include name="licenses/COPYING.txt"/>
+        <include name="licenses/lib-licenses/*.txt"/>
+        <include name="licenses/lib-licenses/*.html"/>
+        <include name="licenses/AUTHORS.txt"/>
+      </zipfileset>
+      <fileset dir="${sysbio.dir}/bin" excludes="**/.svn*, **/package-info.class">
+        <include name="de/zbit/**.class"/>
+        <include name="de/zbit/collection/**.class"/>
+        <include name="de/zbit/garuda/**.class"/>
+      	<exclude name="de/zbit/graph/gui/**.class"/>
+      	<exclude name="de/zbit/graph/io/**.class"/>
+      	<exclude name="de/zbit/graph/sbgn/**.class"/>
+        <include name="de/zbit/gui/**.class"/>
+        <include name="de/zbit/gui/csv/**.class"/>
+        <include name="de/zbit/gui/actioncommand/**.class"/>
+        <include name="de/zbit/gui/layout/**.class"/>
+        <exclude name="de/zbit/gui/layout/SpringUtilities.class"/>
+        <exclude name="de/zbit/gui/layout/VerticalLayout.class"/>
+        <include name="de/zbit/gui/panels/**.class"/>
+        <include name="de/zbit/gui/prefs/**.class"/>
+        <include name="de/zbit/gui/table/**.class"/>
+        <include name="de/zbit/gui/table/renderer/**.class"/>
+        <include name="de/zbit/gui/wizard/**.class"/>
+        <include name="de/zbit/gui/**.class"/>
+        <include name="de/zbit/io/**"/>
+      	<include name="de/zbit/io/fileformat/**.class"/>
+      	<include name="de/zbit/locales/**.class"/>
+        <include name="de/zbit/math/**.class"/>
+        <include name="de/zbit/resources/**.class"/>
+        <include name="de/zbit/sbml/**.class"/>
+        <include name="de/zbit/sbml/gui/**.class"/>
+        <include name="de/zbit/sbml/io/**.class"/>
+        <exclude name="de/zbit/sbml/layout/**.class"/>
+        <exclude name="de/zbit/sbml/layout/y/**.class"/>
+        <include name="de/zbit/sbml/util/**.class"/>
+        <include name="de/zbit/text/**.class"/>
+        <include name="de/zbit/util/**.class"/>
+      	<include name="de/zbit/util/argparser/**.class"/>
+        <include name="de/zbit/util/logging/**.class"/>
+        <include name="de/zbit/util/objectwrapper/**.class"/>
+        <include name="de/zbit/util/prefs/**.class"/>
+        <include name="de/zbit/util/progressbar/**"/>
+        <include name="de/zbit/util/**.class"/>
+      </fileset>
+      <fileset dir="${sysbio.dir}/resources" excludes="**/.svn*, package-info.*">
+        <include name="de/zbit/garuda/img/**.png"/>
+        <include name="de/zbit/garuda/locales/**.xml"/>
+        <include name="de/zbit/gui/img/**.png"/>
+        <include name="de/zbit/locales/**.xml"/>
+        <include name="de/zbit/sbml/locales/**.xml"/>
+      </fileset>
+      <zipfileset excludes="META-INF/*" src="${sysbio.dir}/lib/sysbio-osx-support.jar"/>
+    </jar>
+
   </target>
 
   <!-- =================================================================== -->
@@ -413,8 +572,54 @@
   	depends="sign"
     description="Creates a ZIP file for Garuda">
     
-  	<property name="uuid"  value="1cfbffa0-bbcb-4ca9-aa44-bfa4815e935e"/>
+  	<property name="uuid"           value="${UUID}"/>
+  	<property name="gadget.config"  value="gadget_config.xml"/>
     
+  	<!-- Launch command is platform dependent -> Determine command for platform -->
+    <!-- Windows: cmd /c start javaw.exe -jar gadgets/[GADGET_UUID]/[JAR_NAME] -->
+    <!-- Linux:   java -jar gadgets/[GADGET_UUID]/[JAR_NAME] -->
+    <!-- Mac OS:  open gadgets/[GADGET_UUID]/[JAR_NAME] -->
+    <condition property="jar.executor" value="open">
+      <os family="mac"/>
+    </condition>
+    <condition property="jar.executor" value="cmd /c start javaw.exe -jar">
+      <os family="windows"/>
+    </condition>
+    <condition property="jar.executor" value="java -jar">
+      <and>
+  	    <os family="unix"/>
+      	<not>
+      	  <os family="mac"/>
+      	</not>
+      </and>
+    </condition>
+
+    <copy file="${dist}/${gadget.config}" todir="${dist.dir}/" verbose="${verbose}"/>
+    <property name="sbmlsimulator.config" value="${dist.dir}/${gadget.config}"/>
+    
+    <echo message="Updating Garuda gadget configuration..."/>
+    <replace
+      file="${sbmlsimulator.config}"
+      token="[LAUNCH_COMMAND]"
+      value="${jar.executor}"
+    />
+    <replace
+      file="${sbmlsimulator.config}"
+      token="[GADGET_UUID]"
+      value="${uuid}"
+    />
+    <replace
+      file="${sbmlsimulator.config}"
+      token="[GADGET_NAME]"
+      value="${Name}"
+    />
+    <replace
+      file="${sbmlsimulator.config}"
+      token="[JAR_NAME]"
+      value="${JAR_Name}-${version}.jar"
+    />
+    
+    <echo message="Generating ZIP archive for Garuda..."/>
   	<zip
       compress="true"
       comment="Garuda Gadget ${Name}"
@@ -424,23 +629,24 @@
       update="true"
    	>
   	  <mappedresources>
-  		<fileset file="${dist}/gadget_config.xml"/>
-  	    <globmapper from="*" to="${uuid}/*"/>
+  		<fileset file="${sbmlsimulator.config}"/>
+        <globmapper from="*" to="${uuid}/*"/>
   	  </mappedresources>
       <mappedresources>
         <fileset file="${appJar}"/>
         <globmapper from="*" to="${uuid}/*"/>
       </mappedresources>
   	  <mappedresources>
-  	  	<fileset file="${resources}/org/sbml/simulator/gui/img/SBMLsimulator_64.png"/>
-  	  	<globmapper from="*" to="${uuid}/icons/*"/>
+        <fileset file="${resources}/org/sbml/simulator/gui/img/SBMLsimulator_64.png"/>
+        <globmapper from="*" to="${uuid}/icons/*"/>
   	  </mappedresources>
-  	  <mappedresources>
-  	  	<fileset file="${dist}/Screenshot_1.PNG"/>
-  	  	<globmapper from="*" to="${uuid}/snapshot/*"/>
-  	  </mappedresources>
+      <zipfileset dir="${dist}/" prefix="${uuid}/snapshot/">
+        <include name="Screenshot_*.PNG"/>
+      </zipfileset>
     </zip>
-
+  	
+  	<delete file="${sbmlsimulator.config}" verbose="${verbose}"/>
+  	
   </target>
 
 </project>

@@ -1,11 +1,13 @@
+% File-encoding: UTF8
                            ---------------------
                            SBMLsimulator Authors
                            ---------------------
 
                            -- Core developers --
 
-         Andreas Dräger, University of Tuebingen, Germany,
-           andreas.draeger@uni-tuebingen.de
+         Andreas Dräger,  University of California, San Diego, United States,
+           University of Tuebingen, Germany,
+           andraeger@eng.ucsd.edu
          Roland Keller, University of Tuebingen, Germany,
            roland.keller@uni-tuebingen.de
          Alexander Dörr, University of Tuebingen, Germany,
