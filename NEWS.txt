@@ -5,3 +5,24 @@ Version 1.0 (2012-03-01)
 ======================================================================
 
 First release.
+
+  
+======================================================================
+Version 1.1 (xxxx-xx-xx)
+======================================================================
+
+ * New features:
+   
+   - The estimation targets and their ranges can now be saved into a file and loaded again.
+   
+   - Spline interpolation can now be used before optimization.
+   
+   - The new version of the Systems Biology Simulation Core Library has been integrated.
+   
+   - GARUDA functionality has been added.
+   
+   
+ * Bug fixes:
+
+   - Some errors in the Command Line Mode have been corrected.
+ 
