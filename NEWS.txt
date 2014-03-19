@@ -1,28 +1,29 @@
      SBMLsimulator NEWS -- History of user-visible changes
 
 ======================================================================
-Version 1.0 (2012-03-01)
-======================================================================
-
-First release.
-
-  
-======================================================================
 Version 1.1 (xxxx-xx-xx)
 ======================================================================
 
  * New features:
    
-   - The estimation targets and their ranges can now be saved into a file and loaded again.
+   - The estimation targets and their ranges can now be saved into a
+     file and loaded again.
    
    - Spline interpolation can now be used before optimization.
    
-   - The new version of the Systems Biology Simulation Core Library has been integrated.
+   - The program has been updated and is now based on the new version
+     1.4 of the Systems Biology Simulation Core Library and JSBML
+     version 1.0β1.
    
-   - GARUDA functionality has been added.
+   - Support for GARUDA has been added.
    
    
  * Bug fixes:
 
-   - Some errors in the Command Line Mode have been corrected.
+   - Some errors in the command line mode have been corrected.
  
+======================================================================
+Version 1.0 (2012-03-01)
+======================================================================
+
+First release.
