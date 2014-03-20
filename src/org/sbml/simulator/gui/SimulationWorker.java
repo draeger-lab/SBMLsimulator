@@ -40,7 +40,8 @@ import de.zbit.util.ResourceManager;
 import de.zbit.util.Timer;
 
 /**
- * Performs a dynamic simulation in background.
+ * Performs a dynamic simulation in background and notifies listeners about
+ * the result.
  * 
  * @author Andreas Dr&auml;ger
  * @author Philip Stevens
@@ -51,16 +52,16 @@ import de.zbit.util.Timer;
  */
 public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implements PropertyChangeListener {
 
-	/**
+  /**
    * The {@link ResourceBundle} for localization.
    */
   private static final transient ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
-  
+
   /**
-	 * A {@link Logger} for this class
-	 */
+   * A {@link Logger} for this class
+   */
   private static final transient Logger logger = Logger.getLogger(SimulationWorker.class.getName());
-  
+
   /**
    * 
    * @param solver
@@ -78,15 +79,15 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
    */
   public static MultiTable solveByStepSize(DESSolver solver, DESystem system, double[] initialValues, double timeStart,
     double timeEnd, double stepSize, boolean includeReactions, double absTol, double relTol)
-      throws SBMLException,
-      DerivativeException {
-    
+        throws SBMLException,
+        DerivativeException {
+
     solver.setStepSize(stepSize);
     solver.setIncludeIntermediates(includeReactions);
     if (solver instanceof AdaptiveStepsizeIntegrator) {
-    	AdaptiveStepsizeIntegrator integrator = (AdaptiveStepsizeIntegrator) solver;
-    	integrator.setAbsTol(absTol);
-    	integrator.setRelTol(relTol);
+      AdaptiveStepsizeIntegrator integrator = (AdaptiveStepsizeIntegrator) solver;
+      integrator.setAbsTol(absTol);
+      integrator.setRelTol(relTol);
     }
     MultiTable solution = solver.solve(system, initialValues, timeStart, timeEnd);
 
@@ -100,13 +101,13 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
    * The configuration for the simulation.
    */
   private SimulationConfiguration configuration;
-  
+
   /**
    * The solution of the simulation
    */
   private MultiTable solution;
-  
-  
+
+
   /**
    * 
    * @param solver
@@ -115,79 +116,81 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
    * @param timeEnd
    * @param stepSize
    * @param includeReactions
-   * @throws Exception 
+   * @throws Exception
    */
   public SimulationWorker(SimulationConfiguration configuration) throws Exception {
     this.configuration = configuration;
-    this.timer = new Timer();
+    timer = new Timer();
   }
-  
+
   /**
    * 
    */
   private Timer timer;
   private Thread computationThread;
-  
+
   /* (non-Javadoc)
    * @see javax.swing.SwingWorker#doInBackground()
    */
+  @Override
   protected MultiTable doInBackground() throws ModelOverdeterminedException{
-  	timer.reset();
-    
+    timer.reset();
+
     try {
-    	computationThread = Thread.currentThread();
-    	SBMLinterpreter interpreter = new SBMLinterpreter(configuration.getModel());
-    	DESSolver solver = configuration.getSolver().clone();
-    	solver.addPropertyChangeListener(this);
-			solution = solveByStepSize(solver,
-				interpreter, interpreter.getInitialValues(), configuration.getStart(),
-				configuration.getEnd(), configuration.getStepSize(),
-				configuration.isIncludeReactions(), configuration.getAbsTol(),
-				configuration.getRelTol());   
-    	return solution;
+      computationThread = Thread.currentThread();
+      SBMLinterpreter interpreter = new SBMLinterpreter(configuration.getModel());
+      DESSolver solver = configuration.getSolver().clone();
+      solver.addPropertyChangeListener(this);
+      solution = solveByStepSize(solver,
+        interpreter, interpreter.getInitialValues(), configuration.getStart(),
+        configuration.getEnd(), configuration.getStepSize(),
+        configuration.isIncludeReactions(), configuration.getAbsTol(),
+        configuration.getRelTol());
+      return solution;
     } catch (DerivativeException exc) {
-    	logger.warning(exc.getLocalizedMessage());
-    	return null;
+      logger.warning(exc.getLocalizedMessage());
+      return null;
     }
   }
-  
+
   /* (non-Javadoc)
    * @see javax.swing.SwingWorker#done()
    */
   @Override
   protected void done() {
-		double time = timer.getAndReset(false);
-  	if (isCancelled()) {
-			if ((computationThread != null) && computationThread.isAlive()
-					&& !computationThread.isInterrupted()) {
-				logger.fine("Thread was not yet interrupted!");
-				computationThread.interrupt();
-			}
-			logger.info(MessageFormat.format(bundle.getString("SIMULATION_CANCELED"), time));
-			firePropertyChange("done", null, null);
-		} else {
-			MultiTable result = null;
-			String logMessage = null;
-			try {
-				result = get();
-				firePropertyChange("done", null, result);
-			} catch (InterruptedException exc) {
-				logMessage = exc.getLocalizedMessage();
-			} catch (ExecutionException exc) {
-				logMessage = exc.getLocalizedMessage();
-			}
-			configuration.getSolver().removePropertyChangeListener(this);
-			if (logMessage != null) {
-				logger.warning(logMessage);
-			} else if (result != null) {
-				logger.info(MessageFormat.format(bundle.getString("SIMULATION_TIME"), time));
-			}
-		}
+    double time = timer.getAndReset(false);
+    if (isCancelled()) {
+      if ((computationThread != null) && computationThread.isAlive()
+          && !computationThread.isInterrupted()) {
+        logger.fine("Thread was not yet interrupted!");
+        computationThread.interrupt();
+      }
+      logger.info(MessageFormat.format(bundle.getString("SIMULATION_CANCELED"), time));
+      firePropertyChange("done", null, null);
+    } else {
+      MultiTable result = null;
+      String logMessage = null;
+      try {
+        result = get();
+        firePropertyChange("done", null, result);
+      } catch (InterruptedException exc) {
+        logMessage = exc.getLocalizedMessage();
+      } catch (ExecutionException exc) {
+        logMessage = exc.getLocalizedMessage();
+      }
+      configuration.getSolver().removePropertyChangeListener(this);
+      if (logMessage != null) {
+        logger.warning(logMessage);
+      } else if (result != null) {
+        logger.info(MessageFormat.format(bundle.getString("SIMULATION_TIME"), time));
+      }
+    }
   }
-  
+
   /* (non-Javadoc)
    * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
    */
+  @Override
   public void propertyChange(PropertyChangeEvent evt) {
     getPropertyChangeSupport().firePropertyChange(evt);
   }

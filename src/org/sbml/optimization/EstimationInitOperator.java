@@ -23,65 +23,80 @@ import eva2.server.go.problems.InterfaceOptimizationProblem;
 import eva2.tools.math.RNG;
 
 /**
+ * A helper class for the initialization of {@link AbstractEAIndividual}s
+ * from <a href="http://www.cogsys.cs.uni-tuebingen.de/software/EvA2/">EvA2</a>.
+ * An individual represents a point in the search space of an optimization
+ * problem, i.e., a potential solution of a model calibration. In addition,
+ * an individual may also have a genotype and a phenotype as well as a
+ * collection of strategy parameters associated. In many cases the genotype
+ * equals the phenotype. However, it is a common strategy to use an encoding and
+ * decoding function to inter-convert between different representations of a
+ * solution. The strategy parameters can be self-adaptive as part of the
+ * optimization. For details, please see the documentation about
+ * <a href="http://www.cogsys.cs.uni-tuebingen.de/software/EvA2/">EvA2</a> as
+ * well as multiple publications about evolutionary algorithms.
+ * 
  * @author Roland Keller
  * @version $Rev$
  */
 public class EstimationInitOperator implements InterfaceInitialization {
-	
-	/*
-	 * 
-	 */
-	private QuantityRange[] ranges;
 
-	/*
-	 * (non-Javadoc)
-	 * @see eva2.server.go.operators.initialization.InterfaceInitialization#initialize(eva2.server.go.individuals.AbstractEAIndividual, eva2.server.go.problems.InterfaceOptimizationProblem)
-	 */
-	public void initialize(AbstractEAIndividual indy,
-		InterfaceOptimizationProblem problem) {
-		double[] data = ((ESIndividualDoubleData)indy).getDoubleData();
-		for (int i = 0; i < data.length; i++) {
+  /*
+   * 
+   */
+  private QuantityRange[] ranges;
+
+  /*
+   * (non-Javadoc)
+   * @see eva2.server.go.operators.initialization.InterfaceInitialization#initialize(eva2.server.go.individuals.AbstractEAIndividual, eva2.server.go.problems.InterfaceOptimizationProblem)
+   */
+  @Override
+  public void initialize(AbstractEAIndividual indy,
+    InterfaceOptimizationProblem problem) {
+    double[] data = ((ESIndividualDoubleData)indy).getDoubleData();
+    for (int i = 0; i < data.length; i++) {
       if(ranges[i].isGaussianInitialization() && (ranges[i].getInitialMinimum() <= ranges[i].getInitialGaussianValue()) && (ranges[i].getInitialMaximum() >= ranges[i].getInitialGaussianValue())) {
-      	double stdDev = (ranges[i].getGaussianStandardDeviation() / 100) * ranges[i].getInitialGaussianValue();
-      	if(stdDev == 0) {
-      		stdDev = ranges[i].getGaussianStandardDeviation();
-      	}
-      	data[i] = RNG.gaussianDouble(stdDev) + ranges[i].getInitialGaussianValue();
-      	
-      	if(data[i] < ranges[i].getInitialMinimum()) {
-      		data[i] = ranges[i].getInitialMinimum();
-      	}
-      	if(data[i] > ranges[i].getInitialMaximum()) {
-      		data[i] = ranges[i].getInitialMaximum();
-      	}
+        double stdDev = (ranges[i].getGaussianStandardDeviation() / 100) * ranges[i].getInitialGaussianValue();
+        if(stdDev == 0) {
+          stdDev = ranges[i].getGaussianStandardDeviation();
+        }
+        data[i] = RNG.gaussianDouble(stdDev) + ranges[i].getInitialGaussianValue();
+
+        if(data[i] < ranges[i].getInitialMinimum()) {
+          data[i] = ranges[i].getInitialMinimum();
+        }
+        if(data[i] > ranges[i].getInitialMaximum()) {
+          data[i] = ranges[i].getInitialMaximum();
+        }
       }
       else {
-      	data[i] = RNG.randomDouble(ranges[i].getInitialMinimum(), ranges[i].getInitialMaximum());
+        data[i] = RNG.randomDouble(ranges[i].getInitialMinimum(), ranges[i].getInitialMaximum());
       }
-		}
-	}
-	
-	/**
-	 * 
-	 */
-	public InterfaceInitialization clone() {
-		return new EstimationInitOperator(ranges);
-	}
-	
-	/**
-	 * 
-	 * @param ranges
-	 */
-	public EstimationInitOperator(QuantityRange[] ranges) {
-		this.ranges = ranges;
-	}
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public String getName() {
-		return "Initialization for parameter estimation of models";
-	}
-	
+    }
+  }
+
+  /**
+   * 
+   */
+  @Override
+  public InterfaceInitialization clone() {
+    return new EstimationInitOperator(ranges);
+  }
+
+  /**
+   * 
+   * @param ranges
+   */
+  public EstimationInitOperator(QuantityRange[] ranges) {
+    this.ranges = ranges;
+  }
+
+  /**
+   * 
+   * @return
+   */
+  public String getName() {
+    return "Initialization for parameter estimation of models";
+  }
+
 }

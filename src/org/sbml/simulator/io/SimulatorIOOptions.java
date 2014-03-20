@@ -28,6 +28,9 @@ import de.zbit.util.prefs.OptionGroup;
 import de.zbit.util.prefs.Range;
 
 /**
+ * A collection of options and user preferences for reading files, including
+ * model files (SBML) and experimental or simulation data.
+ * 
  * @author Andreas Dr&auml;ger
  * @date 2010-10-22
  * @version $Rev$
@@ -35,56 +38,56 @@ import de.zbit.util.prefs.Range;
  */
 public interface SimulatorIOOptions extends KeyProvider {
 
-	/**
+  /**
    * 
    */
-	public static final ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
-	
-	/**
-	 * SBML input file.
-	 */
-	public static final Option<File> SBML_INPUT_FILE = new Option<File>(
-			"SBML_INPUT_FILE", File.class, bundle, new Range<File>(File.class,
-					SBFileFilter.createSBMLFileFilter()), new File(
-					System.getProperty("user.dir")));
-	
-	/**
-	 * SBML output file.
-	 */
-	public static final Option<File> SBML_OUTPUT_FILE = new Option<File>(
-			"SBML_OUTPUT_FILE", File.class, bundle, new Range<File>(File.class,
-					SBFileFilter.createSBMLFileFilter()), new File(
-					System.getProperty("user.dir")));
+  public static final ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
 
-	/**
-	 * Output of a simulation.
-	 */
-	public static final Option<File> SIMULATION_OUTPUT_FILE = new Option<File>(
-			"SIMULATION_OUTPUT_FILE", File.class, bundle, new Range<File>(File.class,
-					SBFileFilter.createCSVFileFilter()), new File(
-					System.getProperty("user.home")));
-	
-	/**
-	 * Path to a file with a time series of species/compartment/parameter
-	 * values.
-	 */
-	public static final Option<File> TIME_SERIES_FILE = new Option<File>(
-			"TIME_SERIES_FILE", File.class, bundle, new Range<File>(File.class,
-					SBFileFilter.createCSVFileFilter()), new File(
-					System.getProperty("user.home")));
+  /**
+   * SBML input file.
+   */
+  public static final Option<File> SBML_INPUT_FILE = new Option<File>(
+      "SBML_INPUT_FILE", File.class, bundle, new Range<File>(File.class,
+          SBFileFilter.createSBMLFileFilter()), new File(
+            System.getProperty("user.dir")));
 
-	/**
-	 * Select input files for simulation.
-	 */
-	@SuppressWarnings("unchecked")
-	public final static OptionGroup<File> INPUT_FILES = new OptionGroup<File>(
-			"INPUT_FILES", bundle, SBML_INPUT_FILE, TIME_SERIES_FILE);
-	
-	/**
-	 * Select output files for the results of simulation and parameter estimation.
-	 */
-	@SuppressWarnings("unchecked")
-	public final static OptionGroup<File> OUTPUT_FILES = new OptionGroup<File>(
-		"OUTPUT_FILES", bundle, SBML_OUTPUT_FILE, SIMULATION_OUTPUT_FILE);
-	
+  /**
+   * SBML output file.
+   */
+  public static final Option<File> SBML_OUTPUT_FILE = new Option<File>(
+      "SBML_OUTPUT_FILE", File.class, bundle, new Range<File>(File.class,
+          SBFileFilter.createSBMLFileFilter()), new File(
+            System.getProperty("user.dir")));
+
+  /**
+   * Output of a simulation.
+   */
+  public static final Option<File> SIMULATION_OUTPUT_FILE = new Option<File>(
+      "SIMULATION_OUTPUT_FILE", File.class, bundle, new Range<File>(File.class,
+          SBFileFilter.createCSVFileFilter()), new File(
+            System.getProperty("user.home")));
+
+  /**
+   * Path to a file with a time series of species/compartment/parameter
+   * values.
+   */
+  public static final Option<File> TIME_SERIES_FILE = new Option<File>(
+      "TIME_SERIES_FILE", File.class, bundle, new Range<File>(File.class,
+          SBFileFilter.createCSVFileFilter()), new File(
+            System.getProperty("user.home")));
+
+  /**
+   * Select input files for simulation.
+   */
+  @SuppressWarnings("unchecked")
+  public final static OptionGroup<File> INPUT_FILES = new OptionGroup<File>(
+      "INPUT_FILES", bundle, SBML_INPUT_FILE, TIME_SERIES_FILE);
+
+  /**
+   * Select output files for the results of simulation and parameter estimation.
+   */
+  @SuppressWarnings("unchecked")
+  public final static OptionGroup<File> OUTPUT_FILES = new OptionGroup<File>(
+      "OUTPUT_FILES", bundle, SBML_OUTPUT_FILE, SIMULATION_OUTPUT_FILE);
+
 }

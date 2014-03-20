@@ -17,11 +17,11 @@
  */
 
 /**
- * This package contains all customized tables and renderers for 
- * table entries that are used in the SBMLsimulator.
+ * This package contains all customized tables and renderers for table entries
+ * that are used in the SBMLsimulator.
  *
- * @author
+ * @author Andreas Dr&auml;ger
  * @version $Rev$
- * @since
+ * @since 1.0
  */
 package org.sbml.simulator.gui.table;

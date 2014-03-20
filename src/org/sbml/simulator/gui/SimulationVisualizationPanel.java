@@ -52,294 +52,302 @@ import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
 
 /**
+ * This GUI component is a specialized split pane that contains a {@link Plot}
+ * on its right-hand side and another split pane on the left-hand side
+ * consisting of a legend of model components with colors, initial values, and
+ * units ({@link LegendPanel}), as well as an {@link InteractiveScanPanel}. In
+ * this way, this component displays all relevant information about the results
+ * of a simulation to the user.
+ * 
  * @author Andreas Dr&auml;ger
  * @date 2010-09-20
  * @version $Rev$
  * @since 1.0
  */
 public class SimulationVisualizationPanel extends JSplitPane implements
-		PreferenceChangeListener, TableModelListener {
+PreferenceChangeListener, TableModelListener {
 
-	/**
-	 * For localization support.
-	 */
-	private static final transient ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
+  /**
+   * For localization support.
+   */
+  private static final transient ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
 
-	/**
-	 * Generated serial version identifier.
-	 */
-	private static final long serialVersionUID = 2102296020675377066L;
-	/**
-	 *  Experimental results.
-	 */
-	private List<MultiTable> experimentData;
-	/**
-	 * Switches inclusion of reactions in the plot on or off.
-	 */
-	private boolean includeReactions;
-	/**
-	 * 
-	 */
-	private InteractiveScanPanel interactiveScanPanel;
-	
-	/**
-	 * 
-	 */
-	private LegendPanel legendPanel;
-	
-	/**
-	 * The step size for the spinner in the interactive parameter scan. and the
-	 * maximal value for {@link JSpinner}s.
-	 */
-	private double maxSpinVal = 1E10d, paramStepSize = 0.01d;
-	
-	/**
-	 * The maximal allowable values.
-	 */
-	private double minValue = -maxSpinVal, maxCompartmentValue = maxSpinVal,
-			maxParameterValue = maxSpinVal, maxSpeciesValue = maxSpinVal;
+  /**
+   * Generated serial version identifier.
+   */
+  private static final long serialVersionUID = 2102296020675377066L;
+  /**
+   *  Experimental results.
+   */
+  private List<MultiTable> experimentData;
+  /**
+   * Switches inclusion of reactions in the plot on or off.
+   */
+  private boolean includeReactions;
+  /**
+   * 
+   */
+  private InteractiveScanPanel interactiveScanPanel;
 
-	/**
-	 * Plot area
-	 */
-	private Plot plot;
-	/**
-	 * Results of a dynamic simulation.
-	 */
-	private MultiTable simData;
+  /**
+   * 
+   */
+  private LegendPanel legendPanel;
 
-	/**
-	 * 
-	 */
-	public SimulationVisualizationPanel() {
-		super(HORIZONTAL_SPLIT, true);
-		includeReactions = true;
-	}
-	
-	/**
-	 * A {@link Logger} for this class.
-	 */
-	private static final transient Logger logger = Logger.getLogger(SimulationVisualizationPanel.class.getName());
+  /**
+   * The step size for the spinner in the interactive parameter scan. and the
+   * maximal value for {@link JSpinner}s.
+   */
+  private double maxSpinVal = 1E10d, paramStepSize = 0.01d;
 
-	/**
-	 * @param data
-	 *            the experimentData to set
-	 */
-	public void addExperimentData(MultiTable data) {
-		// deselect non available elements in the legend and select those that
-		// are present in the data
-		if (data != null) {
-			boolean plot = false;
-			if (experimentData == null) {
-				experimentData = new LinkedList<MultiTable>();
-				plot = true;
-			}
-			plot |= experimentData.add(data);
-			if (plot) {
-				plot();
-			}
-			selectLegendItems(data);
-		}
-	}
+  /**
+   * The maximal allowable values.
+   */
+  private double minValue = -maxSpinVal, maxCompartmentValue = maxSpinVal,
+      maxParameterValue = maxSpinVal, maxSpeciesValue = maxSpinVal;
 
-	private void selectLegendItems(MultiTable data) {
-		LegendTableModel legend = legendPanel.getLegendTableModel();
-		String id;
-		int columnIndex;
-		boolean selected;
-		for (int i = 0; i < legend.getRowCount(); i++) {
-			id = legend.getId(i);
-			columnIndex = data.getColumnIndex(id);
-			selected = columnIndex > -1;
-			if (selected) {
-				String name = legend.getNameFor(id);
-				logger.fine(String.format("Set %s = %s selected = %b", id, name, selected));
-				legend.setSelected(i, selected);
-			}
-		}
-	}
+  /**
+   * Plot area
+   */
+  private Plot plot;
+  /**
+   * Results of a dynamic simulation.
+   */
+  private MultiTable simData;
 
-	/**
-	 * @return the experimentData
-	 */
-	public List<MultiTable> getExperimentData() {
-		return experimentData;
-	}
+  /**
+   * 
+   */
+  public SimulationVisualizationPanel() {
+    super(HORIZONTAL_SPLIT, true);
+    includeReactions = true;
+  }
 
-	/**
-	 * @return
-	 */
-	public boolean getIncludeReactions() {
-		return includeReactions;
-	}
+  /**
+   * A {@link Logger} for this class.
+   */
+  private static final transient Logger logger = Logger.getLogger(SimulationVisualizationPanel.class.getName());
 
-	/**
-	 * @return
-	 */
-	public Plot getPlot() {
-		return plot;
-	}
+  /**
+   * @param data
+   *            the experimentData to set
+   */
+  public void addExperimentData(MultiTable data) {
+    // deselect non available elements in the legend and select those that
+    // are present in the data
+    if (data != null) {
+      boolean plot = false;
+      if (experimentData == null) {
+        experimentData = new LinkedList<MultiTable>();
+        plot = true;
+      }
+      plot |= experimentData.add(data);
+      if (plot) {
+        plot();
+      }
+      selectLegendItems(data);
+    }
+  }
 
-	/**
-	 * @return
-	 */
-	public Properties getProperties() {
-		Properties p = new Properties();
-		/*
-		 * General settings
-		 */
-		p.putAll(interactiveScanPanel.getProperties());
+  private void selectLegendItems(MultiTable data) {
+    LegendTableModel legend = legendPanel.getLegendTableModel();
+    String id;
+    int columnIndex;
+    boolean selected;
+    for (int i = 0; i < legend.getRowCount(); i++) {
+      id = legend.getId(i);
+      columnIndex = data.getColumnIndex(id);
+      selected = columnIndex > -1;
+      if (selected) {
+        String name = legend.getNameFor(id);
+        logger.fine(String.format("Set %s = %s selected = %b", id, name, selected));
+        legend.setSelected(i, selected);
+      }
+    }
+  }
 
-		return p;
-	}
+  /**
+   * @return the experimentData
+   */
+  public List<MultiTable> getExperimentData() {
+    return experimentData;
+  }
 
-	/**
-	 * @return the simData
-	 */
-	public MultiTable getSimulationData() {
-		return simData;
-	}
+  /**
+   * @return
+   */
+  public boolean getIncludeReactions() {
+    return includeReactions;
+  }
 
-	/**
-	 * @param properties
-	 */
-	public void loadPreferences() {
-		if (interactiveScanPanel != null) {
-			interactiveScanPanel.loadPreferences();
-		}
-		maxSpinVal = 2000;
-		paramStepSize = .1d;
-		maxCompartmentValue = maxSpeciesValue =  maxParameterValue = 1E8;
-		minValue = -maxParameterValue;
-		updateUI();
-	}
+  /**
+   * @return
+   */
+  public Plot getPlot() {
+    return plot;
+  }
 
-	/**
-	 * 
-	 */
-	public void plot() {
-		if ((simData != null) && (simData.getRowCount() > 0)) {
-			plot(Arrays.asList(new MultiTable[] {simData}), true, true);
-		}
-		if ((experimentData != null) && (experimentData.size() > 0)) {
-			plot(experimentData, false, simData == null);
-		}
-	}
+  /**
+   * @return
+   */
+  public Properties getProperties() {
+    Properties p = new Properties();
+    /*
+     * General settings
+     */
+    p.putAll(interactiveScanPanel.getProperties());
 
-	/**
-	 * Plots the given data set with respect to the selected columns in the
-	 * legend.
-	 * 
-	 * @param data
-	 * @param connected
-	 * @param clearFirst
-	 *            if true, everything already plotted will be removed before
-	 *            plotting.
-	 */
-	private void plot(List<MultiTable> data, boolean connected, boolean clearFirst) {
-		if (data.size() > 0) {
-			MetaDataset d;
-			if (data.size() == 1) {
-				d = new XYDatasetAdapter(data.get(0));
-			} else {
-				d = new BoxPlotDataset(data);
-			}
-			
-			String id;
-			int seriesCount = d.getSeriesCount();
-			Color plotColors[] = new Color[seriesCount];
-			String infos[] = new String[seriesCount];
-			LegendTableModel tableModel = legendPanel.getLegendTableModel();
-			for (int i = 0; i < seriesCount; i++) {
-				id = d.getSeriesIdentifier(i);
-				if (tableModel.isSelected(id)) {
-					plotColors[i] = tableModel.getColorFor(id);
-					infos[i] = HTMLtools.createTooltip(tableModel.getSBase(i));
-				} else {
-					plotColors[i] = null;
-					infos[i] = null;
-				}
-			}
-			if (clearFirst) {
-				plot.clearAll();
-			}
-			plot.plot(d, connected, plotColors, infos);
-		}
-	}
+    return p;
+  }
 
-	/* (non-Javadoc)
-	 * @see java.util.prefs.PreferenceChangeListener#preferenceChange(java.util.prefs.PreferenceChangeEvent)
-	 */
-	public void preferenceChange(PreferenceChangeEvent evt) {
-		plot.preferenceChange(evt);
-	}
-	
-	/**
-	 * 
-	 */
-	public void removeExperimentData(int index) {
-		if (experimentData != null) {
-			experimentData.remove(index);
-			LegendTableModel legend = legendPanel.getLegendTableModel();
-			for (int i = 0; i < legend.getRowCount(); i++) {
-				if (legend.isSelected(i)) {
-					boolean selected = false;
-					for (int j = 0; (j < experimentData.size()) && !selected; j++) {
-						if (experimentData.get(j).getColumn(legend.getId(i)) != null) {
-							selected = true;
-						}
-					}
-					legend.setSelected(i, selected);
-				}
-			}
-		}
-	}
+  /**
+   * @return the simData
+   */
+  public MultiTable getSimulationData() {
+    return simData;
+  }
 
-	/**
-	 * @param includeReactions
-	 */
-	public void setIncludeReactions(boolean includeReactions) {
-		this.includeReactions = includeReactions;
-	}
+  /**
+   * @param properties
+   */
+  public void loadPreferences() {
+    if (interactiveScanPanel != null) {
+      interactiveScanPanel.loadPreferences();
+    }
+    maxSpinVal = 2000;
+    paramStepSize = .1d;
+    maxCompartmentValue = maxSpeciesValue =  maxParameterValue = 1E8;
+    minValue = -maxParameterValue;
+    updateUI();
+  }
 
-	/**
-	 * @param enabled
-	 */
-	public void setInteractiveScanEnabled(boolean enabled) {
-		interactiveScanPanel.setAllEnabled(enabled);
-	}
+  /**
+   * 
+   */
+  public void plot() {
+    if ((simData != null) && (simData.getRowCount() > 0)) {
+      plot(Arrays.asList(new MultiTable[] {simData}), true, true);
+    }
+    if ((experimentData != null) && (experimentData.size() > 0)) {
+      plot(experimentData, false, simData == null);
+    }
+  }
 
-	/**
-	 * @param model
-	 */
-	public void setModel(Model model) {
-		if (leftComponent != null) {
-			remove(leftComponent);
-		}
-		if (rightComponent != null) {
-			remove(rightComponent);
-		}
-		UnitDefinition timeUnits = model.getTimeUnitsInstance();
-		if (timeUnits == null) {
-			timeUnits = new UnitDefinition(model.getLevel(), model.getVersion());
-		}
-		String title = model.isSetName() ? model.getName() : model.getId();
-		plot = new Plot(title, MessageFormat.format(bundle.getString("X_AXIS_LABEL"),
-			UnitDefinition.printUnits(timeUnits, true).replace('*', '\u00B7')),
-			bundle.getString("Y_AXIS_LABEL"));
-		plot.setBorder(BorderFactory.createLoweredBevelBorder());
-		// get rid of this pop-up menu.
-		// TODO: maybe we can make use of this later.
-		// MouseListener listeners[] = plot.getMouseListeners();
-		// for (int i = listeners.length - 1; i >= 0; i--) {
-		// plot.removeMouseListener(listeners[i]);
-		// }
-		//
-		interactiveScanPanel = new InteractiveScanPanel(model, minValue,
-				maxCompartmentValue, maxSpeciesValue, maxParameterValue,
-				paramStepSize);
-		interactiveScanPanel.setBorder(BorderFactory.createLoweredBevelBorder());
-		legendPanel = new LegendPanel(model, includeReactions);
+  /**
+   * Plots the given data set with respect to the selected columns in the
+   * legend.
+   * 
+   * @param data
+   * @param connected
+   * @param clearFirst
+   *            if true, everything already plotted will be removed before
+   *            plotting.
+   */
+  private void plot(List<MultiTable> data, boolean connected, boolean clearFirst) {
+    if (data.size() > 0) {
+      MetaDataset d;
+      if (data.size() == 1) {
+        d = new XYDatasetAdapter(data.get(0));
+      } else {
+        d = new BoxPlotDataset(data);
+      }
+
+      String id;
+      int seriesCount = d.getSeriesCount();
+      Color plotColors[] = new Color[seriesCount];
+      String infos[] = new String[seriesCount];
+      LegendTableModel tableModel = legendPanel.getLegendTableModel();
+      for (int i = 0; i < seriesCount; i++) {
+        id = d.getSeriesIdentifier(i);
+        if (tableModel.isSelected(id)) {
+          plotColors[i] = tableModel.getColorFor(id);
+          infos[i] = HTMLtools.createTooltip(tableModel.getSBase(i));
+        } else {
+          plotColors[i] = null;
+          infos[i] = null;
+        }
+      }
+      if (clearFirst) {
+        plot.clearAll();
+      }
+      plot.plot(d, connected, plotColors, infos);
+    }
+  }
+
+  /* (non-Javadoc)
+   * @see java.util.prefs.PreferenceChangeListener#preferenceChange(java.util.prefs.PreferenceChangeEvent)
+   */
+  @Override
+  public void preferenceChange(PreferenceChangeEvent evt) {
+    plot.preferenceChange(evt);
+  }
+
+  /**
+   * 
+   */
+  public void removeExperimentData(int index) {
+    if (experimentData != null) {
+      experimentData.remove(index);
+      LegendTableModel legend = legendPanel.getLegendTableModel();
+      for (int i = 0; i < legend.getRowCount(); i++) {
+        if (legend.isSelected(i)) {
+          boolean selected = false;
+          for (int j = 0; (j < experimentData.size()) && !selected; j++) {
+            if (experimentData.get(j).getColumn(legend.getId(i)) != null) {
+              selected = true;
+            }
+          }
+          legend.setSelected(i, selected);
+        }
+      }
+    }
+  }
+
+  /**
+   * @param includeReactions
+   */
+  public void setIncludeReactions(boolean includeReactions) {
+    this.includeReactions = includeReactions;
+  }
+
+  /**
+   * @param enabled
+   */
+  public void setInteractiveScanEnabled(boolean enabled) {
+    interactiveScanPanel.setAllEnabled(enabled);
+  }
+
+  /**
+   * @param model
+   */
+  public void setModel(Model model) {
+    if (leftComponent != null) {
+      remove(leftComponent);
+    }
+    if (rightComponent != null) {
+      remove(rightComponent);
+    }
+    UnitDefinition timeUnits = model.getTimeUnitsInstance();
+    if (timeUnits == null) {
+      timeUnits = new UnitDefinition(model.getLevel(), model.getVersion());
+    }
+    String title = model.isSetName() ? model.getName() : model.getId();
+    plot = new Plot(title, MessageFormat.format(bundle.getString("X_AXIS_LABEL"),
+      UnitDefinition.printUnits(timeUnits, true).replace('*', '\u00B7')),
+      bundle.getString("Y_AXIS_LABEL"));
+    plot.setBorder(BorderFactory.createLoweredBevelBorder());
+    // get rid of this pop-up menu.
+    // TODO: maybe we can make use of this later.
+    // MouseListener listeners[] = plot.getMouseListeners();
+    // for (int i = listeners.length - 1; i >= 0; i--) {
+    // plot.removeMouseListener(listeners[i]);
+    // }
+    //
+    interactiveScanPanel = new InteractiveScanPanel(model, minValue,
+      maxCompartmentValue, maxSpeciesValue, maxParameterValue,
+      paramStepSize);
+    interactiveScanPanel.setBorder(BorderFactory.createLoweredBevelBorder());
+    legendPanel = new LegendPanel(model, includeReactions);
     legendPanel.addTableModelListener(this);
     legendPanel.setBorder(BorderFactory.createLoweredBevelBorder());
     JSplitPane topDown = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true,
@@ -348,101 +356,102 @@ public class SimulationVisualizationPanel extends JSplitPane implements
     setLeftComponent(topDown);
     setRightComponent(plot);
     setDividerLocation(topDown.getDividerLocation() + 200);
-	}
+  }
 
-	/**
-	 * @param button
-	 */
-	void setPlotToLogScale(AbstractButton button) {
-		if (button.isSelected() && !plot.checkLoggable()) {
-			button.setSelected(false);
-			button.setEnabled(false);
-			JOptionPane.showMessageDialog(this, StringUtil.toHTML(
-				bundle.getString("NO_LOGARITHMIC_SCALE_POSSIBLE"), 40), bundle
-					.getString("WARNING"), JOptionPane.WARNING_MESSAGE);
-		}
-		plot.toggleLog(button.isSelected());
-	}
+  /**
+   * @param button
+   */
+  void setPlotToLogScale(AbstractButton button) {
+    if (button.isSelected() && !plot.checkLoggable()) {
+      button.setSelected(false);
+      button.setEnabled(false);
+      JOptionPane.showMessageDialog(this, StringUtil.toHTML(
+        bundle.getString("NO_LOGARITHMIC_SCALE_POSSIBLE"), 40), bundle
+        .getString("WARNING"), JOptionPane.WARNING_MESSAGE);
+    }
+    plot.toggleLog(button.isSelected());
+  }
 
-	/**
-	 * Runs over the legend and sets all variables corresponding to the given
-	 * identifiers as selected. All others will be unselected.
-	 * 
-	 * @param identifiers
-	 *            The identifiers of the variables to be selected and to occur
-	 *            in the plot.
-	 */
-	public void setSelectedQuantities(String... identifiers) {
-		legendPanel.getLegendTableModel().setSelectedVariables(identifiers);
-	}
+  /**
+   * Runs over the legend and sets all variables corresponding to the given
+   * identifiers as selected. All others will be unselected.
+   * 
+   * @param identifiers
+   *            The identifiers of the variables to be selected and to occur
+   *            in the plot.
+   */
+  public void setSelectedQuantities(String... identifiers) {
+    legendPanel.getLegendTableModel().setSelectedVariables(identifiers);
+  }
 
-	/**
-	 * @param simData
-	 *            the simData to set
-	 */
-	public void setSimulationData(MultiTable simData) {
-		if (this.simData != null) {
-			this.simData.removeTableModelListener(this);
-		}
-		this.simData = simData;
-		this.simData.addTableModelListener(this);
-		//selectLegendItems(simData);
-		plot();
-	}
+  /**
+   * @param simData
+   *            the simData to set
+   */
+  public void setSimulationData(MultiTable simData) {
+    if (this.simData != null) {
+      this.simData.removeTableModelListener(this);
+    }
+    this.simData = simData;
+    this.simData.addTableModelListener(this);
+    //selectLegendItems(simData);
+    plot();
+  }
 
-	/* (non-Javadoc)
-	 * @seejavax.swing.event.TableModelListener#tableChanged(javax.swing.event.TableModelEvent)
-	 */
-	public void tableChanged(TableModelEvent e) {
-		if (e.getSource() instanceof LegendTableModel) {
-			if (((e.getColumn() == LegendTableModel.getColumnPlot()) || (e
-					.getColumn() == LegendTableModel.getColumnColor()))
-					&& (e.getType() == TableModelEvent.UPDATE)) {
-				LegendTableModel legend = (LegendTableModel) e.getSource();
-				List<SeriesInfo> items = new LinkedList<SeriesInfo>();
-				String id, name, tooltip;
-				Color color;
-				NamedSBaseWithDerivedUnit nsb;
-				SeriesInfo info;
-				for (int i = e.getFirstRow(); i <= e.getLastRow(); i++) {
-					boolean selected = ((Boolean) legend.getValueAt(i, LegendTableModel.getColumnPlot())).booleanValue();
-					nsb = (NamedSBaseWithDerivedUnit) legend.getValueAt(i, LegendTableModel.getNamedSBaseColumn());
-					id = nsb.getId();
-					name = nsb.isSetName() ? nsb.getName() : null;
-					tooltip = HTMLtools.createTooltip(nsb);
-					color = selected ? (Color) legend.getValueAt(i, LegendTableModel.getColumnColor()) : null;
-					info = new SeriesInfo(id, name, tooltip, color);
-					items.add(info);
-				}
-				plot.setSeriesVisible(items);
-			}
-		} else if (e.getSource() instanceof MultiTable) {
-			setSimulationData((MultiTable) e.getSource());
-		}
-	}
+  /* (non-Javadoc)
+   * @seejavax.swing.event.TableModelListener#tableChanged(javax.swing.event.TableModelEvent)
+   */
+  @Override
+  public void tableChanged(TableModelEvent e) {
+    if (e.getSource() instanceof LegendTableModel) {
+      if (((e.getColumn() == LegendTableModel.getColumnPlot()) || (e
+          .getColumn() == LegendTableModel.getColumnColor()))
+          && (e.getType() == TableModelEvent.UPDATE)) {
+        LegendTableModel legend = (LegendTableModel) e.getSource();
+        List<SeriesInfo> items = new LinkedList<SeriesInfo>();
+        String id, name, tooltip;
+        Color color;
+        NamedSBaseWithDerivedUnit nsb;
+        SeriesInfo info;
+        for (int i = e.getFirstRow(); i <= e.getLastRow(); i++) {
+          boolean selected = ((Boolean) legend.getValueAt(i, LegendTableModel.getColumnPlot())).booleanValue();
+          nsb = (NamedSBaseWithDerivedUnit) legend.getValueAt(i, LegendTableModel.getNamedSBaseColumn());
+          id = nsb.getId();
+          name = nsb.isSetName() ? nsb.getName() : null;
+          tooltip = HTMLtools.createTooltip(nsb);
+          color = selected ? (Color) legend.getValueAt(i, LegendTableModel.getColumnColor()) : null;
+          info = new SeriesInfo(id, name, tooltip, color);
+          items.add(info);
+        }
+        plot.setSeriesVisible(items);
+      }
+    } else if (e.getSource() instanceof MultiTable) {
+      setSimulationData((MultiTable) e.getSource());
+    }
+  }
 
-	/**
-	 * 
-	 */
-	public void unsetSimulationData() {
-		setSimulationData(null);
-	}
+  /**
+   * 
+   */
+  public void unsetSimulationData() {
+    setSimulationData(null);
+  }
 
-	/**
-	 * @param id
-	 * @param value
-	 */
-	public void updateQuantity(String id, double value) {
-		interactiveScanPanel.updateQuantity(id, value);
-	}
+  /**
+   * @param id
+   * @param value
+   */
+  public void updateQuantity(String id, double value) {
+    interactiveScanPanel.updateQuantity(id, value);
+  }
 
-	/**
-	 * 
-	 */
-	public void print() {
-		if (plot != null) {
-			plot.createChartPrintJob();
-		}
-	}
+  /**
+   * 
+   */
+  public void print() {
+    if (plot != null) {
+      plot.createChartPrintJob();
+    }
+  }
 
 }

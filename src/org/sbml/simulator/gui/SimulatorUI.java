@@ -103,7 +103,9 @@ import eva2.client.EvAClient;
 import eva2.tools.BasicResourceLoader;
 
 /**
- * Graphical user interface for {@link SBMLsimulator}.
+ * The main graphical user interface for {@link SBMLsimulator}. This window
+ * provides all functions of the program through its menu bar and organizes the
+ * display of model and experimental data.
  * 
  * @author Andreas Dr&auml;ger
  * @author Philip Stevens

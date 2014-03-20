@@ -17,13 +17,10 @@
  */
 
 /**
- * The base package of SBMLsimulator contains all necessary classes to
- * initialize, launch, and execute SBMLsimulator.
+ * Longer user messages that are displayed by the graphical user interface can
+ * be found in this package. These are stored as web pages in HTML format.
  * 
- * @author Roland Keller
- * @author Andreas Dr&quml;ger
- * @author Alexander D&ouml;rr
  * @version $Rev$
  * @since 1.0
  */
-package org.sbml.simulator;
+package org.sbml.simulator.gui.html;

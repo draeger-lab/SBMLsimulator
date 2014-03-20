@@ -17,13 +17,11 @@
  */
 
 /**
- * The base package of SBMLsimulator contains all necessary classes to
- * initialize, launch, and execute SBMLsimulator.
+ * SBMLsimualtor supports multiple languages. Translations of the user messages
+ * used by the graphical or the command line user interface are all gathered
+ * in this package.
  * 
- * @author Roland Keller
- * @author Andreas Dr&quml;ger
- * @author Alexander D&ouml;rr
  * @version $Rev$
  * @since 1.0
  */
-package org.sbml.simulator;
+package org.sbml.simulator.locales;

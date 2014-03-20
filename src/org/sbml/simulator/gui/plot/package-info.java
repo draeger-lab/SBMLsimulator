@@ -17,10 +17,11 @@
  */
 
 /**
- * This package contains classes that are useful to draw simulation results in a plot.
+ * This package contains classes that are useful to draw simulation results in a
+ * plot.
  * 
- * @author
+ * @author Andreas Dr&auml;ger
  * @version $Rev$
- * @since
+ * @since 1.0
  */
 package org.sbml.simulator.gui.plot;

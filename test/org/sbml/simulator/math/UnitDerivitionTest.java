@@ -15,7 +15,6 @@
  * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  * ---------------------------------------------------------------------
  */
-
 package org.sbml.simulator.math;
 
 import java.io.File;
@@ -30,18 +29,19 @@ import org.sbml.jsbml.Species;
 import org.sbml.jsbml.UnitDefinition;
 
 /**
+ * A small test program to evaluate units in a given SBML file (file name).
+ * 
  * @author Andreas Dr&auml;ger
  * @version $Rev$
  * @since 1.0
  */
-
 public class UnitDerivitionTest {
-  
+
   /**
    * @param args
-   * @throws IOException 
-   * @throws XMLStreamException 
-   * @throws SBMLException 
+   * @throws IOException
+   * @throws XMLStreamException
+   * @throws SBMLException
    */
   public static void main(String[] args) throws XMLStreamException, IOException, SBMLException {
     SBMLDocument doc = SBMLReader.read(new File(args[0]));
@@ -50,5 +50,5 @@ public class UnitDerivitionTest {
       System.out.printf("%s\t%s\t%s\n", s, UnitDefinition.printUnits(ud, true), ud);
     }
   }
-  
+
 }

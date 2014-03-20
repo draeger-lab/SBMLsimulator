@@ -27,29 +27,32 @@ import org.sbml.simulator.SimulationOptions;
 import de.zbit.gui.prefs.PreferencesPanelForKeyProvider;
 
 /**
+ * A test class for the display of a simple graphical user interface that
+ * provides settings for user preferences about simulation options.
+ * 
  * @author Andreas Dr&auml;ger
  * @version $Rev$
  * @date 07.12.2011
  */
 public class ToolPanel extends PreferencesPanelForKeyProvider {
 
-	/**
-	 * Generated serial version identifier.
-	 */
-	private static final long serialVersionUID = 732384672242621355L;
-	
-	public ToolPanel() throws IOException {
-		super(SimulationOptions.class);
-	}
-	
-	/**
-	 * 
-	 * @param args
-	 * @throws IOException 
-	 * @throws HeadlessException 
-	 */
-	public static void main(String args[]) throws HeadlessException, IOException {
-		JOptionPane.showMessageDialog(null, new ToolPanel());
-	}
+  /**
+   * Generated serial version identifier.
+   */
+  private static final long serialVersionUID = 732384672242621355L;
+
+  public ToolPanel() throws IOException {
+    super(SimulationOptions.class);
+  }
+
+  /**
+   * 
+   * @param args
+   * @throws IOException
+   * @throws HeadlessException
+   */
+  public static void main(String args[]) throws HeadlessException, IOException {
+    JOptionPane.showMessageDialog(null, new ToolPanel());
+  }
 
 }
