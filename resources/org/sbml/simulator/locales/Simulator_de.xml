@@ -46,6 +46,8 @@
   <!-- EstimationOptions -->
     
   <entry key="EstimationOptions">Schätzverfahren</entry>
+  <entry key="EST_TARGETS">Datei mit zu optimierenden Parametern</entry>
+  <entry key="EST_TARGETS_TOOLTIP">Die Datei mit den Größen, deren Werte geschätzt werden sollen, sowie deren Anfangseinstellung.</entry>
   <entry key="EST_ALL_COMPARTMENTS">Kompartimentgrößen</entry>
   <entry key="EST_ALL_COMPARTMENTS_TOOLTIP">Entscheiden Sie, ob alle Kompartimente zur die Schätzung ihrer jeweiligen Kompartimentgrößen des Modells ausgewählt sein sollen.</entry>
   <entry key="EST_ALL_GLOBAL_PARAMETERS">Werte globaler Parameter</entry>
@@ -66,6 +68,12 @@
   <entry key="EST_MIN_VALUE_TOOLTIP">Der minimal mögliche Wert, der während einer Optimierung von einer zu schätzenden Größe angenommen werden darf, also nach der Initialisierungsphase.</entry>
   <entry key="EST_MULTI_SHOOT">Verwende multiple Anfangswerte</entry>
   <entry key="EST_MULTI_SHOOT_TOOLTIP">Legen Sie fest, ob die Modellkalibrierung mittels eines multiplen Anfangswertproblem durchgeführt werden soll. Dies sollte der voreingestellte Wert sein. Andernfalls sollte eine einmalige Initialiserung des Systems mit nur einem Anfangswert. Multiple Anfangswerte bedeuten, dass an jedem Messpunkt ein neuer Anfangswert angenommen und von dort die gewöhnliche Differentialgleichung erneut gelöst wird, wohingegen im Fall eines einzelnen Anfangswertes versucht wird, das Differentialgleichungssystem komplett vom ersten Zeitpunkt an zu lösen. Dabei kann der Raum der möglichen Qualitätsfunktionen der Optimierung deutlich stärkere Unstetigkeiten enthalten, sodass eine Optimierung erschwert wird.</entry>
+  <entry key="FIT_TO_SPLINES">Passe das System Spline-Interpolation an.</entry>
+  <entry key="FIT_TO_SPLINES_TOOLTIP">Ist diese Option gewählt, so werden Splines auf den experimentellen Daten berechnet und die Parameterschätzung wird versuchen, das System an diese Splines anzupassen, anstelle der Originalwerte. Der Vorteil dieser Vorgehensweise besteht darin, dass die Zahl der verfügbaren Datenpunkte durch die Interpolation erhöht wird und dass auch die Form der resultierenden Kurven dem näher kommt, was von der Anpassung erwartet wird. Der Nachteil besteht darin, dass potentielle Ausreißer die Qualität der Anpassung noch stärker beeinflussen können.</entry>
+  <entry key="NUMBER_OF_SPLINE_SAMPLES">Größe der Spline-Stichprobe</entry>
+  <entry key="NUMBER_OF_SPLINE_SAMPLES_TOOLTIP">Diese Option definiert die Anzahl zusätzlicher Spline-Stichprobenelemente zwischen den experimentellen Daten. Falls Sie null einstellen, so werden lediglich die echten Messdaten verwendet.</entry>
+  <entry key="SPLINE_FITTING">Spline-Approximation</entry>
+  <entry key="SPLINE_FITTING_TOOLTIP">Diese Einstellungen ermöglichen Ihnen, die Parameter dadurch zu schätzen, dass eine Anpassung des Systems an Spline-Interpolationen zwischen den gegebenen Messdaten vorgenommen wird. Sie können auch einstellen, wie diese Splines berechnet werden sollen.</entry>
   <entry key="OPTIMIZATION_TARGETS">Voreingestellte Optimierungsziele</entry>
   <entry key="OPTIMIZATION_TARGETS_TOOLTIP">Wählen Sie die voreingestellten Optimierungsziele aus.</entry>
   <entry key="OPTIMIZATION_RANGES">Wertebereiche aller Optimierungsziele</entry>
@@ -80,7 +88,8 @@
   <entry key="QUALITY_MEASURES_TOOLTIP">Mit dieser Option können Sie festlegen, wie die Qualität eines Parametersets bezüglich gegebener experimenteller Daten ermittelt werden soll.</entry>
   <entry key="INTEGRATION_STRATEGY">Integrationsstrategie</entry>
   <entry key="INTEGRATION_STRATEGY_TOOLTIP">Wählen Sie, ob das Differentialgleichungssystem nur ein einziges Mal, oder wiederholt initialisiert werden soll.</entry>
-  <entry key="USE_EXISTING_SOLUTION">Wählen Sie, ob die Parameter des Modells für eine Nachoptimierung verwendet werden sollen.</entry>
+  <entry key="USE_EXISTING_SOLUTION">Benutze existierende Lösung</entry>
+  <entry key="USE_EXISTING_SOLUTION_TOOLTIP">Wählen Sie, ob die Parameter des Modells für eine Nachoptimierung verwendet werden sollen.</entry>
   
  
   <!-- EstimationProblem -->

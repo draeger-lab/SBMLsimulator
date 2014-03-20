@@ -44,9 +44,10 @@
   <entry key="TIME">Time</entry>
    
   <!-- EstimationOptions -->
-    
+  
   <entry key="EstimationOptions">Estimation Options</entry>
   <entry key="EST_TARGETS">File with parameters to optimize</entry>
+  <entry key="EST_TARGETS_TOOLTIP">The file with the values to estimate and their initial setting</entry>
   <entry key="EST_ALL_COMPARTMENTS">Compartment sizes</entry>
   <entry key="EST_ALL_COMPARTMENTS_TOOLTIP">Decide whether or not by default all compartments in a model should be considered the target of an optimization, i.e., value estimation.</entry>
   <entry key="EST_ALL_GLOBAL_PARAMETERS">Global parameter values</entry>
@@ -87,10 +88,11 @@
   <entry key="QUALITY_MEASURES_TOOLTIP">Here you can specify how to evaluate the quality of a parameter set with respect to given experimental data.</entry>
   <entry key="INTEGRATION_STRATEGY">Integration strategy</entry>
   <entry key="INTEGRATION_STRATEGY_TOOLTIP">Select whether or not to apply a multiple shooting strategy.</entry>
-  <entry key="USE_EXISTING_SOLUTION">Select whether or not to use the parameters in the existing model for post-optimization.</entry>
+  <entry key="USE_EXISTING_SOLUTION">Use existing solution</entry>
+  <entry key="USE_EXISTING_SOLUTION_TOOLTIP">Select whether or not to use the parameters in the existing model for post-optimization.</entry>
   
   <!-- FBAOptions -->
-  <entry key="ACTIVATE_CONSTRAINT_JG_LESS_THAN_0">Set the constraint J*G less than 0  on</entry>
+  <entry key="ACTIVATE_CONSTRAINT_JG_LESS_THAN_0">Set the constraint J*G less than 0 on</entry>
   <entry key="ACTIVATE_CONSTRAINT_J_R_MAX_G_LESS_THAN_0">Set the constraint |J| - r_max*|G| less than 0 on</entry>
   <entry key="ACTIVATE_CONSTRAINT_J_GREATER_THAN_0">Set the constraint J greater than 0 on</entry>
   <entry key="ACTIVATE_CONSTRAINT_ERROR">Set the constraint to compute the error on</entry>

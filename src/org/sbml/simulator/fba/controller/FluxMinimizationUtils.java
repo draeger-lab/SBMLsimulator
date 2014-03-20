@@ -1,6 +1,6 @@
 /*
  * $Id:  FluxVector.java 16:25:58 Meike Aichele$
- * $URL: FluxVector.java $
+ * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
