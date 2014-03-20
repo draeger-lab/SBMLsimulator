@@ -46,6 +46,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -206,12 +207,18 @@ PropertyChangeListener {
     BasicResourceLoader rl = BasicResourceLoader.instance();
     byte[] bytes = rl.getBytesFromResourceLocation(EvAInfo.iconLocation, true);
     UIManager.put("ICON_EVA2", new ImageIcon(Toolkit.getDefaultToolkit().createImage(bytes)));
+    UIManager.put("SBMLsimulatorWatermark", new ImageIcon(Toolkit.getDefaultToolkit().createImage(SimulatorUI.class.getResource("img/SBMLsimulatorWatermark.png"))));
   }
 
   /**
    * GUI element that lets the user run the simulation.
    */
   private SimulationPanel simPanel;
+
+  /**
+   * The water-mark that is displayed when no file is opened in SBMLsimulator.
+   */
+  private JLabel watermark;
 
   /**
    * Garuda backend.
@@ -481,6 +488,7 @@ PropertyChangeListener {
         removePreferenceChangeListener(simPanel.getSimulationToolPanel());
         if (GUITools.contains(getContentPane(), simPanel)) {
           getContentPane().remove(simPanel);
+          getContentPane().add(watermark, BorderLayout.CENTER);
         }
         simPanel = null;
         setTitle(getApplicationName());
@@ -534,6 +542,8 @@ PropertyChangeListener {
   @Override
   protected Component createMainComponent() {
     simPanel = null;
+    watermark = new JLabel(UIManager.getIcon("SBMLsimulatorWatermark"));
+    getContentPane().add(watermark, BorderLayout.CENTER);
     return simPanel;
   }
 
@@ -902,6 +912,7 @@ PropertyChangeListener {
 
       Model model = doc.getModel();
       simPanel = new SimulationPanel(model);
+      getContentPane().remove(watermark);
       getContentPane().add(simPanel, BorderLayout.CENTER);
       addPreferenceChangeListener(simPanel);
 
