@@ -20,25 +20,30 @@ package org.sbml.simulator.gui.plot;
 import org.jfree.data.xy.XYDataset;
 
 /**
+ * With the help of this interface an abstraction layer between the
+ * {@link XYDataset} from the underlying plot library and the
+ * {@link org.simulator.math.odes.MultiTable} from the simulation core library
+ * is created.
+ * 
  * @author Andreas Dr&auml;ger
  * @version $Rev$
  * @since 1.0
  */
 public interface MetaDataset extends XYDataset {
-	
-	/**
-	 * Returns the identifier of the given series.
-	 * 
-	 * @param series
-	 * @return
-	 */
-	public String getSeriesIdentifier(int series);
-	
-	/**
-	 * 
-	 * @param identifier
-	 * @return
-	 */
-	public int getSeriesIndex(String identifier);
-	
+
+  /**
+   * Returns the identifier of the given series.
+   * 
+   * @param series
+   * @return
+   */
+  public String getSeriesIdentifier(int series);
+
+  /**
+   * 
+   * @param identifier
+   * @return
+   */
+  public int getSeriesIndex(String identifier);
+
 }

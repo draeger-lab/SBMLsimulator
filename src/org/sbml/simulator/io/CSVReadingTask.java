@@ -35,74 +35,77 @@ import de.zbit.io.csv.CSVOptions;
 import de.zbit.util.prefs.SBPreferences;
 
 /**
+ * A background job for reading character-separated values from a file.
+ * 
  * @author Andreas Dr&auml;ger
  * @version $Rev$
  * @since 1.0
  */
 public class CSVReadingTask extends SwingWorker<SortedMap<String, MultiTable>, Void> {
-	
-	private SimulatorUI simulator;
-	private File[] files;
-	private CSVDataImporter importer;
-	private File openDir = null;
-	private SortedMap<String, MultiTable> resultMap;
 
-	/**
-	 * 
-	 * @param ui
-	 * @param dataFiles
-	 */
-	public CSVReadingTask(SimulatorUI ui, File... dataFiles) {
-		super();
-		this.simulator = ui;
-		this.files = dataFiles;
-		this.importer = new CSVDataImporter();
-		this.resultMap = new TreeMap<String, MultiTable>();
-	}
-	
-	/* (non-Javadoc)
-	 * @see javax.swing.SwingWorker#doInBackground()
-	 */
-	protected SortedMap<String, MultiTable> doInBackground() throws Exception {
-		Model model = simulator.getModel();
-		if (model != null) {
-			for (File dataFile : files) {
-				try {
-					MultiTable data = importer.convert(model, dataFile.getAbsolutePath(), simulator);
-					if (data != null) {
-						resultMap.put(FileTools.trimExtension(dataFile.getName()), data);
-						if (openDir == null) {
-							openDir = dataFile.getParentFile();
-						}
-					}
-				} catch (Exception exc) {
-					GUITools.showErrorMessage(simulator, exc);
-				}
-			}
-		}
-		return resultMap;
-	}
-	
-	/**
-	 * A {@link Logger} for this class.
-	 */
-	private static transient final Logger logger = Logger.getLogger(CSVReadingTask.class.getName());
+  private SimulatorUI simulator;
+  private File[] files;
+  private CSVDataImporter importer;
+  private File openDir = null;
+  private SortedMap<String, MultiTable> resultMap;
 
-	/* (non-Javadoc)
-	 * @see javax.swing.SwingWorker#done()
-	 */
-	@Override
-	protected void done() {
-		if (openDir != null) {
-			SBPreferences prefs = SBPreferences.getPreferencesFor(SimulatorUI.class);
-			prefs.put(CSVOptions.CSV_FILES_OPEN_DIR, openDir);
-			try {
-				prefs.flush();
-			} catch (BackingStoreException exc) {
-				logger.fine(exc.getLocalizedMessage());
-			}
-		}
-		firePropertyChange("done", null, resultMap);
-	}
-	
+  /**
+   * 
+   * @param ui
+   * @param dataFiles
+   */
+  public CSVReadingTask(SimulatorUI ui, File... dataFiles) {
+    super();
+    simulator = ui;
+    files = dataFiles;
+    importer = new CSVDataImporter();
+    resultMap = new TreeMap<String, MultiTable>();
+  }
+
+  /* (non-Javadoc)
+   * @see javax.swing.SwingWorker#doInBackground()
+   */
+  @Override
+  protected SortedMap<String, MultiTable> doInBackground() throws Exception {
+    Model model = simulator.getModel();
+    if (model != null) {
+      for (File dataFile : files) {
+        try {
+          MultiTable data = importer.convert(model, dataFile.getAbsolutePath(), simulator);
+          if (data != null) {
+            resultMap.put(FileTools.trimExtension(dataFile.getName()), data);
+            if (openDir == null) {
+              openDir = dataFile.getParentFile();
+            }
+          }
+        } catch (Exception exc) {
+          GUITools.showErrorMessage(simulator, exc);
+        }
+      }
+    }
+    return resultMap;
+  }
+
+  /**
+   * A {@link Logger} for this class.
+   */
+  private static transient final Logger logger = Logger.getLogger(CSVReadingTask.class.getName());
+
+  /* (non-Javadoc)
+   * @see javax.swing.SwingWorker#done()
+   */
+  @Override
+  protected void done() {
+    if (openDir != null) {
+      SBPreferences prefs = SBPreferences.getPreferencesFor(SimulatorUI.class);
+      prefs.put(CSVOptions.CSV_FILES_OPEN_DIR, openDir);
+      try {
+        prefs.flush();
+      } catch (BackingStoreException exc) {
+        logger.fine(exc.getLocalizedMessage());
+      }
+    }
+    firePropertyChange("done", null, resultMap);
+  }
+
 }

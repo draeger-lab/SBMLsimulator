@@ -24,45 +24,47 @@ import org.jfree.data.xy.XYDataset;
 
 import de.zbit.util.ResourceManager;
 
-
-
 /**
+ * This class is responsible for the display of tooltips inside of a box plot.
+ * The tooltips inform about mean, median, min, max, as well as the two
+ * quartils Q1 and Q3.
+ * 
  * @author Andreas Dr&auml;ger
  * @version $Rev$
  * @since 1.0
  */
 public class BoxAndWhiskerXYToolTipGenerator extends
-		org.jfree.chart.labels.BoxAndWhiskerXYToolTipGenerator {
-	
+org.jfree.chart.labels.BoxAndWhiskerXYToolTipGenerator {
+
   /**
-	 * Generated serial version identifier.
-	 */
-	private static final long serialVersionUID = -8559133032127605483L;
-	
-	/**
-	 * 
-	 */
-	private String formatString;
-	
-	/**
-	 * 
-	 */
-	public BoxAndWhiskerXYToolTipGenerator() {
-		super();
-		ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
-		formatString = String.format(
-			"{0}: {1} %s: {2} %s: {3} %s: {4} %s: {5} %s: {6} %s: {7}",
-			bundle.getString("MEAN"), bundle.getString("MEDIAN"),
-			bundle.getString("MIN"), bundle.getString("MAX"), bundle.getString("Q1"),
-			bundle.getString("Q3"));
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.jfree.chart.labels.AbstractXYItemLabelGenerator#generateLabelString(org.jfree.data.xy.XYDataset, int, int)
-	 */
-	@Override
-	public String generateLabelString(XYDataset dataset, int series, int item) {
-		return MessageFormat.format(this.formatString, createItemArray(dataset, series, item));
-	}
-	
+   * Generated serial version identifier.
+   */
+  private static final long serialVersionUID = -8559133032127605483L;
+
+  /**
+   * 
+   */
+  private String formatString;
+
+  /**
+   * 
+   */
+  public BoxAndWhiskerXYToolTipGenerator() {
+    super();
+    ResourceBundle bundle = ResourceManager.getBundle("org.sbml.simulator.locales.Simulator");
+    formatString = String.format(
+      "{0}: {1} %s: {2} %s: {3} %s: {4} %s: {5} %s: {6} %s: {7}",
+      bundle.getString("MEAN"), bundle.getString("MEDIAN"),
+      bundle.getString("MIN"), bundle.getString("MAX"), bundle.getString("Q1"),
+      bundle.getString("Q3"));
+  }
+
+  /* (non-Javadoc)
+   * @see org.jfree.chart.labels.AbstractXYItemLabelGenerator#generateLabelString(org.jfree.data.xy.XYDataset, int, int)
+   */
+  @Override
+  public String generateLabelString(XYDataset dataset, int series, int item) {
+    return MessageFormat.format(formatString, createItemArray(dataset, series, item));
+  }
+
 }

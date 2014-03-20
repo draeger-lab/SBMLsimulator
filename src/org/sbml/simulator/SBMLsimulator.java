@@ -52,7 +52,8 @@ import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.SBProperties;
 
 /**
- * Start program for {@link SBMLsimulator}.
+ * The start program for {@link SBMLsimulator}, which can initialize the
+ * graphical user interface or, alternatively, the command-line interface.
  * 
  * @author Andreas Dr&auml;ger
  * @author Roland Keller

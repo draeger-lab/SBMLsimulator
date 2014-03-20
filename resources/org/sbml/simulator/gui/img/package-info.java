@@ -17,13 +17,10 @@
  */
 
 /**
- * The base package of SBMLsimulator contains all necessary classes to
- * initialize, launch, and execute SBMLsimulator.
+ * All icons that are used by the graphical user interface are collected in this
+ * package.
  * 
- * @author Roland Keller
- * @author Andreas Dr&quml;ger
- * @author Alexander D&ouml;rr
  * @version $Rev$
  * @since 1.0
  */
-package org.sbml.simulator;
+package org.sbml.simulator.gui.img;

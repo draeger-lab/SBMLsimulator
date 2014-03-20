@@ -27,86 +27,86 @@ import java.awt.Paint;
  * @since 1.0
  */
 public class SeriesInfo {
-	
-	private String id;
-	private String name;
-	private String tooltip;
-	private Paint paint;
-	
-	public SeriesInfo() {
-		super();
-	}
-	
-	/**
-	 * 
-	 * @param id
-	 * @param name
-	 * @param tooltip
-	 * @param paint
-	 * @param connected
-	 */
-	public SeriesInfo(String id, String name, String tooltip, Paint paint) {
-		this();
-		this.id = id;
-		this.name = name;
-		this.tooltip = tooltip;
-		this.paint = paint;
-	}
 
-	/**
-	 * @return the id
-	 */
-	public String getId() {
-		return id;
-	}
+  private String id;
+  private String name;
+  private String tooltip;
+  private Paint paint;
 
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(String id) {
-		this.id = id;
-	}
+  public SeriesInfo() {
+    super();
+  }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+  /**
+   * 
+   * @param id
+   * @param name
+   * @param tooltip
+   * @param paint
+   * @param connected
+   */
+  public SeriesInfo(String id, String name, String tooltip, Paint paint) {
+    this();
+    this.id = id;
+    this.name = name;
+    this.tooltip = tooltip;
+    this.paint = paint;
+  }
 
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+  /**
+   * @return the id
+   */
+  public String getId() {
+    return id;
+  }
 
-	/**
-	 * @return the tooltip
-	 */
-	public String getTooltip() {
-		return tooltip;
-	}
+  /**
+   * @param id the id to set
+   */
+  public void setId(String id) {
+    this.id = id;
+  }
 
-	/**
-	 * @param tooltip the tooltip to set
-	 */
-	public void setTooltip(String tooltip) {
-		this.tooltip = tooltip;
-	}
+  /**
+   * @return the name
+   */
+  public String getName() {
+    return name;
+  }
 
-	/**
-	 * @return the paint
-	 */
-	public Paint getPaint() {
-		return paint;
-	}
+  /**
+   * @param name the name to set
+   */
+  public void setName(String name) {
+    this.name = name;
+  }
 
-	/**
-	 * @param paint the paint to set
-	 */
-	public void setPaint(Paint paint) {
-		this.paint = paint;
-	}
-	
+  /**
+   * @return the tooltip
+   */
+  public String getTooltip() {
+    return tooltip;
+  }
+
+  /**
+   * @param tooltip the tooltip to set
+   */
+  public void setTooltip(String tooltip) {
+    this.tooltip = tooltip;
+  }
+
+  /**
+   * @return the paint
+   */
+  public Paint getPaint() {
+    return paint;
+  }
+
+  /**
+   * @param paint the paint to set
+   */
+  public void setPaint(Paint paint) {
+    this.paint = paint;
+  }
+
 }

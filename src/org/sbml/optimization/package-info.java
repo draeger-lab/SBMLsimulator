@@ -17,9 +17,12 @@
  */
 
 /**
+ * The classes in this package connect SBMLsimulator to EvA2, the Java&trade;
+ * framework for the nature-inspired heuristic optimization procedures.
  * 
- * @author
+ * @author Marcel Kronfeld
+ * @author Andreas Dr&auml;ger
  * @version $Rev$
- * @since
+ * @since 1.0
  */
 package org.sbml.optimization;

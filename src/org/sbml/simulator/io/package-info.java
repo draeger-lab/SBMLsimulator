@@ -17,9 +17,13 @@
  */
 
 /**
+ * All parser and writers for file formats other than SBML that are necessary
+ * for SBMLsimulator can be found in this package together with options and
+ * user preferences that define their behavior.
  * 
- * @author
+ * @author Andreas Dr&auml;ger
+ * @author Roland Keller
  * @version $Rev$
- * @since
+ * @since 1.0
  */
 package org.sbml.simulator.io;

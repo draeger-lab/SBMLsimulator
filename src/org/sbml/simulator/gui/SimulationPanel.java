@@ -85,6 +85,11 @@ import eva2.server.stat.GraphSelectionEnum;
 import eva2.server.stat.InterfaceStatisticsListener;
 
 /**
+ * This is the main panel in the graphical user interface, in which the entire
+ * content of the simulation is displayed to the user. It includes the plot
+ * area ({@link Plot}), the legend overview ({@link LegendPanel}), the
+ * simulation tool panel ({@link SimulationToolPanel}).
+ * 
  * @author Andreas Dr&auml;ger
  * @author Clemens Wrzodek
  * @date 2010-04-06

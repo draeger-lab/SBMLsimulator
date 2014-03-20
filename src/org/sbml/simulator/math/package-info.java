@@ -17,9 +17,11 @@
  */
 
 /**
+ * Sophisticated mathematical functions and procedures are collected in this
+ * package.
  * 
- * @author
+ * @author Roland Keller
  * @version $Rev$
- * @since
+ * @since 1.0
  */
 package org.sbml.simulator.math;

@@ -17,9 +17,12 @@
  */
 
 /**
+ * The graphical user interface of SBMLsimulator is defined by the classes in
+ * this package.
  * 
- * @author
+ * @author Andreas Dr&auml;ger
+ * @author Alexander D&ouml;rr
  * @version $Rev$
- * @since
+ * @since 1.0
  */
 package org.sbml.simulator.gui;

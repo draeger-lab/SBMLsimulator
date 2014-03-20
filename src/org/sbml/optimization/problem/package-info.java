@@ -17,9 +17,14 @@
  */
 
 /**
+ * Optimization criteria and the process of model calibration are defined in
+ * this package. Furthermore, you can find several options and user preferences
+ * here that influence the performance and execution of optimization procedures
+ * with respect to model calibration and optimization.
  * 
- * @author
+ * @author Andreas Dr&auml;ger
+ * @author Marcel Kronfeld
  * @version $Rev$
- * @since
+ * @since 1.0
  */
 package org.sbml.optimization.problem;
