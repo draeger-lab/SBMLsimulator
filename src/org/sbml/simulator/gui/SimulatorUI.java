@@ -195,7 +195,7 @@ PropertyChangeListener {
   private static final long serialVersionUID = -5289766427756813972L;
 
   static {
-    int[] resolutions = new int[] { 16, 32, 48, 128, 256 };
+    int[] resolutions = new int[] { 16, 32, 48, 96, 128, 256 };
     String path;
     for (int resulution : resolutions) {
       path = "SBMLsimulator_" + resulution + ".png";
@@ -491,7 +491,7 @@ PropertyChangeListener {
           getContentPane().add(watermark, BorderLayout.CENTER);
         }
         simPanel = null;
-        setTitle(getApplicationName());
+        setTitle(getProgramNameAndVersion());
         if (onlyClosing) {
           GUITools.swapAccelerator(getJMenuBar(), BaseAction.FILE_OPEN,
             Command.OPEN_DATA);
@@ -721,7 +721,7 @@ PropertyChangeListener {
     final QuantitySelectionPanel panel = new QuantitySelectionPanel(model);
     if (JOptionPane.showConfirmDialog(this, panel,
       bundle.getString("SELECT_QUANTITIES_FOR_OPTIMIZATION"), JOptionPane.OK_CANCEL_OPTION,
-      JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
+      JOptionPane.QUESTION_MESSAGE, UIManager.getIcon("SBMLsimulator_96")) == JOptionPane.OK_OPTION) {
       try {
         String[] selectedQuantityIds = panel.getSelectedQuantityIds();
         simPanel.notifyQuantitiesSelected(selectedQuantityIds);

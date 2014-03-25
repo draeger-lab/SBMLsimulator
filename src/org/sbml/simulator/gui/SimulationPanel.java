@@ -17,6 +17,8 @@
  */
 package org.sbml.simulator.gui;
 
+import static de.zbit.util.Utils.getMessage;
+
 import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -594,7 +596,7 @@ BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceCha
               .getCurrentQuality(), simulationManager.getMeanDistanceValue());
           }
         } catch (Exception exc) {
-          logger.warning(exc.getLocalizedMessage());
+          logger.warning(getMessage(exc));
         }
       }
       firePropertyChanged(evt);
@@ -684,7 +686,7 @@ BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceCha
             prefs.flush();
           } catch (BackingStoreException exc) {
             // Ignore this exception because the user doesn't have a chance to do anything here.
-            logger.fine(exc.getLocalizedMessage());
+            logger.fine(getMessage(exc));
           }
         }
       } else {

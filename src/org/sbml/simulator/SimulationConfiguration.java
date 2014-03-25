@@ -17,6 +17,8 @@
  */
 package org.sbml.simulator;
 
+import static de.zbit.util.Utils.getMessage;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.logging.Logger;
@@ -39,42 +41,42 @@ import de.zbit.util.prefs.SBPreferences;
  * @since 1.0
  */
 public class SimulationConfiguration implements PropertyChangeListener, PreferenceChangeListener {
-  
+
   /**
    * A {@link Logger} for this class.
    */
   private static final transient Logger logger = Logger.getLogger(SimulationConfiguration.class.getName());
 
-	/**
+  /**
    * The end time for the current simulation.
    */
   private double end;
 
-	/**
+  /**
    * Include reactions in the output or not.
    */
   private boolean includeReactions;
 
-	/**
+  /**
    * The model for the current simulation.
    */
   private Model model;
 
-	/**
+  /**
    * The solver for the current simulation.
    */
   private DESSolver solver;
 
-	/**
+  /**
    * The start time for the current simulation.
    */
   private double start;
 
-	/**
+  /**
    * The step size, absolute and relative tolerance for the current simulation.
    */
   private double stepSize, absTol, relTol;
-    
+
   /**
    * Creates a new simulation configuration for the simulation of the given
    * {@link Model}.
@@ -83,15 +85,15 @@ public class SimulationConfiguration implements PropertyChangeListener, Preferen
    */
   public SimulationConfiguration(Model model) {
     this.model = model;
-    this.start = 0d;
-    this.end = 0d;
-    this.stepSize = 0d;
-    this.includeReactions = true;
-    this.absTol = Double.NaN;
-    this.relTol = Double.NaN;
-    this.solver = null;
+    start = 0d;
+    end = 0d;
+    stepSize = 0d;
+    includeReactions = true;
+    absTol = Double.NaN;
+    relTol = Double.NaN;
+    solver = null;
   }
-  
+
   /**
    * Convenient constructor that creates a fully specified
    * {@link SimulationConfiguration} for the given {@link Model} including all
@@ -108,305 +110,307 @@ public class SimulationConfiguration implements PropertyChangeListener, Preferen
     double timeStart, double timeEnd, double stepSize, boolean includeReactions, double absTol, double relTol) {
     this(model);
     this.solver = solver;
-    this.start = timeStart;
-    this.end = timeEnd;
+    start = timeStart;
+    end = timeEnd;
     this.stepSize = stepSize;
     this.includeReactions = includeReactions;
     this.absTol = absTol;
     this.relTol = relTol;
   }
-  
+
   /**
    * Copy constructor.
    * 
    * @param sc
    */
-	public SimulationConfiguration(SimulationConfiguration sc) {
-		this(sc.getModel(), sc.getSolver(), sc.getStart(), sc.getEnd(), sc
-				.getStepSize(), sc.isIncludeReactions(), sc.getAbsTol(), sc.getRelTol());
-	}
-  
+  public SimulationConfiguration(SimulationConfiguration sc) {
+    this(sc.getModel(), sc.getSolver(), sc.getStart(), sc.getEnd(), sc
+      .getStepSize(), sc.isIncludeReactions(), sc.getAbsTol(), sc.getRelTol());
+  }
+
   /* (non-Javadoc)
-	 * @see java.lang.Object#clone()
-	 */
-	@Override
-	protected Object clone() throws CloneNotSupportedException {
-		return new SimulationConfiguration(this);
-	}
-  
+   * @see java.lang.Object#clone()
+   */
+  @Override
+  protected Object clone() throws CloneNotSupportedException {
+    return new SimulationConfiguration(this);
+  }
+
   /* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		// Check if the given object is a pointer to precisely the same object:
-		if (super.equals(obj)) { 
-			return true; 
-		}
-		// Check if the given object is of identical class and not null: 
-		if ((obj == null) || (!getClass().equals(obj.getClass()))) { 
-			return false; 
-		}
-		if (obj instanceof SimulationConfiguration) {
-		  SimulationConfiguration conf = (SimulationConfiguration) obj;
-		  boolean equal = true;
-		  equal &= start == conf.getStart();
-		  equal &= end == conf.getEnd();
-		  equal &= includeReactions && conf.isIncludeReactions();
-		  equal &= stepSize == conf.getStepSize();
-		  equal &= isSetModel() == conf.isSetModel();
-		  if (equal && isSetModel()) {
-		  	equal &= model.equals(conf.getModel());
-		  }
-		  equal &= isSetSolver() == conf.isSetSolver();
-		  if (equal && isSetSolver()) {
-		  	equal &= solver.equals(conf.getSolver());
-		  	
-		  	if(equal && (solver instanceof AdaptiveStepsizeIntegrator)) {
-		  		equal &= absTol == conf.getAbsTol();
-		  		equal &= relTol == conf.getRelTol();
-		  	}
-		  }
-		  return equal;
-		}
-		return false;
-	}
-  
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    // Check if the given object is a pointer to precisely the same object:
+    if (super.equals(obj)) {
+      return true;
+    }
+    // Check if the given object is of identical class and not null:
+    if ((obj == null) || (!getClass().equals(obj.getClass()))) {
+      return false;
+    }
+    if (obj instanceof SimulationConfiguration) {
+      SimulationConfiguration conf = (SimulationConfiguration) obj;
+      boolean equal = true;
+      equal &= start == conf.getStart();
+      equal &= end == conf.getEnd();
+      equal &= includeReactions && conf.isIncludeReactions();
+      equal &= stepSize == conf.getStepSize();
+      equal &= isSetModel() == conf.isSetModel();
+      if (equal && isSetModel()) {
+        equal &= model.equals(conf.getModel());
+      }
+      equal &= isSetSolver() == conf.isSetSolver();
+      if (equal && isSetSolver()) {
+        equal &= solver.equals(conf.getSolver());
+
+        if(equal && (solver instanceof AdaptiveStepsizeIntegrator)) {
+          equal &= absTol == conf.getAbsTol();
+          equal &= relTol == conf.getRelTol();
+        }
+      }
+      return equal;
+    }
+    return false;
+  }
+
   /**
-	 * 
-	 * @return
-	 */
-	public double getAbsTol() {
-		return absTol;
-	}
-  
+   * 
+   * @return
+   */
+  public double getAbsTol() {
+    return absTol;
+  }
+
   /**
    * @return the end
    */
   public double getEnd() {
     return end;
   }
-  
+
   /**
    * @return the model
    */
   public Model getModel() {
     return model;
   }
-  
-  /**
-	 * 
-	 * @return
-	 */
-	public double getRelTol() {
-		return relTol;
-	}
 
-	/**
+  /**
+   * 
+   * @return
+   */
+  public double getRelTol() {
+    return relTol;
+  }
+
+  /**
    * @return the solver
    */
   public DESSolver getSolver() {
     return solver;
   }
-  
+
   /**
    * @return the start
    */
   public double getStart() {
     return start;
   }
-  
+
   /**
    * @return the stepSize
    */
   public double getStepSize() {
     return stepSize;
   }
-  
+
   /* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 919;
-		int hashCode = getClass().getName().hashCode();
-		hashCode += prime * Double.valueOf(start).hashCode();
-		hashCode += prime * Double.valueOf(end).hashCode();
-		hashCode += prime * Boolean.valueOf(includeReactions).hashCode();
-		hashCode += prime * Double.valueOf(stepSize).hashCode();
-		if (isSetModel()) {
-			hashCode += prime * model.hashCode();
-		}
-		if (isSetSolver()) {
-			hashCode += prime * solver.hashCode();
-		}
-		return hashCode;
-	}
-  
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    final int prime = 919;
+    int hashCode = getClass().getName().hashCode();
+    hashCode += prime * Double.valueOf(start).hashCode();
+    hashCode += prime * Double.valueOf(end).hashCode();
+    hashCode += prime * Boolean.valueOf(includeReactions).hashCode();
+    hashCode += prime * Double.valueOf(stepSize).hashCode();
+    if (isSetModel()) {
+      hashCode += prime * model.hashCode();
+    }
+    if (isSetSolver()) {
+      hashCode += prime * solver.hashCode();
+    }
+    return hashCode;
+  }
+
   /**
    * @return the includeReactions
    */
   public boolean isIncludeReactions() {
     return includeReactions;
   }
-    
-  /**
-	 * 
-	 * @return
-	 */
-	public boolean isSetModel() {
-		return model != null;
-	}
-  
-  /**
-	 * 
-	 * @return
-	 */
-	public boolean isSetSolver() {
-		return solver != null;
-	}
 
-	/* (non-Javadoc)
+  /**
+   * 
+   * @return
+   */
+  public boolean isSetModel() {
+    return model != null;
+  }
+
+  /**
+   * 
+   * @return
+   */
+  public boolean isSetSolver() {
+    return solver != null;
+  }
+
+  /* (non-Javadoc)
    * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
    */
+  @Override
   public void propertyChange(PropertyChangeEvent evt) {
-		String property = evt.getPropertyName();
-		SBPreferences prefs = SBPreferences.getPreferencesFor(SimulationOptions.class);
-		boolean change = false;
-		logger.fine(evt.getPropertyName() + "\t" + evt.getNewValue());
+    String property = evt.getPropertyName();
+    SBPreferences prefs = SBPreferences.getPreferencesFor(SimulationOptions.class);
+    boolean change = false;
+    logger.fine(evt.getPropertyName() + "\t" + evt.getNewValue());
 
-		if (property.equals("model")) {
-			
-			model = (Model) evt.getNewValue();
-			
-		} else if (SimulationOptions.ODE_SOLVER.toString().equals(property)) {
-			
-			solver = (AbstractDESSolver) evt.getNewValue();
-			prefs.put(SimulationOptions.ODE_SOLVER, solver.getClass().getName());
-			change = true;
-			
-		} else if (SimulationOptions.SIM_START_TIME.toString().equals(property)) {
-			
-			start = ((Number) evt.getNewValue()).doubleValue();
-			prefs.put(SimulationOptions.SIM_START_TIME, start);
-			change = true;
-			
-		} else if (SimulationOptions.SIM_END_TIME.toString().equals(property)) {
-			
-			end = ((Number) evt.getNewValue()).doubleValue();
-			prefs.put(SimulationOptions.SIM_END_TIME, end);
-			change = true;
-			
-		} else if (SimulationOptions.SIM_STEP_SIZE.toString().equals(property)) {
-			
-			stepSize = ((Number) evt.getNewValue()).doubleValue();
-			prefs.put(SimulationOptions.SIM_STEP_SIZE, stepSize);
-			change = true;
-			
-		} else if (property.equals("includeReactions")) {
-			
-			includeReactions = ((Boolean) evt.getNewValue()).booleanValue();
-			
-		} else if (property.equals(SimulationOptions.ABS_TOL.toString())) {
-			
-			absTol = ((Double) evt.getNewValue()).doubleValue();
-			prefs.put(SimulationOptions.ABS_TOL, absTol);
-			change = true;
-			
-		} else if (property.equals(SimulationOptions.REL_TOL.toString())) {
-			
-			relTol = ((Double) evt.getNewValue()).doubleValue();
-			prefs.put(SimulationOptions.REL_TOL, relTol);
-			change = true;
-			
-		}
-		
-		if (change) {
-			try {
-				prefs.flush();
-			} catch (BackingStoreException exc) {
-				logger.warning(exc.getLocalizedMessage());
-			}
-		}
-	}
+    if (property.equals("model")) {
 
-	/**
-	 * 
-	 * @param absTol
-	 */
-	public void setAbsTol(double absTol) {
-		this.absTol = absTol;
-	}
+      model = (Model) evt.getNewValue();
 
-	/**
-	 * 
-	 * @param relTol
-	 */
-	public void setRelTol(double relTol) {
-		this.relTol = relTol;
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(getClass().getSimpleName());
-		sb.append('[');
-		sb.append("start=");
-		sb.append(start);
-		sb.append(",end=");
-		sb.append(end);
-		sb.append(",stepSize=");
-		sb.append(stepSize);
-		sb.append(",solver=");
-		sb.append(solver.toString());
-		sb.append(",includeReactions=");
-		sb.append(includeReactions);
-		sb.append(",model=");
-		sb.append(model);
-		sb.append(']');
-		return sb.toString();
-	}
+    } else if (SimulationOptions.ODE_SOLVER.toString().equals(property)) {
 
-	/* (non-Javadoc)
-	 * @see java.util.prefs.PreferenceChangeListener#preferenceChange(java.util.prefs.PreferenceChangeEvent)
-	 */
-	public void preferenceChange(PreferenceChangeEvent evt) {
-		String property = evt.getKey();
-		logger.fine(property + "=" + evt.getNewValue());
+      solver = (AbstractDESSolver) evt.getNewValue();
+      prefs.put(SimulationOptions.ODE_SOLVER, solver.getClass().getName());
+      change = true;
 
-		if (SimulationOptions.ODE_SOLVER.toString().equals(property)) {
-			try {
-				solver = (DESSolver) Class.forName(evt.getNewValue()).newInstance();
-			} catch (InstantiationException exc) {
-				logger.warning(exc.getLocalizedMessage());
-			} catch (IllegalAccessException exc) {
-				logger.warning(exc.getLocalizedMessage());
-			} catch (ClassNotFoundException exc) {
-				logger.warning(exc.getLocalizedMessage());
-			}
-			
-		} else if (SimulationOptions.SIM_START_TIME.toString().equals(property)) {
-			start = Double.parseDouble(evt.getNewValue());
-			
-		} else if (SimulationOptions.SIM_END_TIME.toString().equals(property)) {
-			end = Double.parseDouble(evt.getNewValue());
-			
-		} else if (SimulationOptions.SIM_STEP_SIZE.toString().equals(property)) {
-			stepSize = Double.parseDouble(evt.getNewValue());
-			
-		} else if (property.equals("includeReactions")) {
-			includeReactions = Boolean.parseBoolean(evt.getNewValue());
-			
-		} else if (property.equals(SimulationOptions.ABS_TOL.toString())) {
-			absTol = Double.parseDouble(evt.getNewValue());
-			
-		} else if (property.equals(SimulationOptions.REL_TOL.toString())) {
-			relTol = Double.parseDouble(evt.getNewValue());
-			
-		}
-	}
-  
+    } else if (SimulationOptions.SIM_START_TIME.toString().equals(property)) {
+
+      start = ((Number) evt.getNewValue()).doubleValue();
+      prefs.put(SimulationOptions.SIM_START_TIME, start);
+      change = true;
+
+    } else if (SimulationOptions.SIM_END_TIME.toString().equals(property)) {
+
+      end = ((Number) evt.getNewValue()).doubleValue();
+      prefs.put(SimulationOptions.SIM_END_TIME, end);
+      change = true;
+
+    } else if (SimulationOptions.SIM_STEP_SIZE.toString().equals(property)) {
+
+      stepSize = ((Number) evt.getNewValue()).doubleValue();
+      prefs.put(SimulationOptions.SIM_STEP_SIZE, stepSize);
+      change = true;
+
+    } else if (property.equals("includeReactions")) {
+
+      includeReactions = ((Boolean) evt.getNewValue()).booleanValue();
+
+    } else if (property.equals(SimulationOptions.ABS_TOL.toString())) {
+
+      absTol = ((Double) evt.getNewValue()).doubleValue();
+      prefs.put(SimulationOptions.ABS_TOL, absTol);
+      change = true;
+
+    } else if (property.equals(SimulationOptions.REL_TOL.toString())) {
+
+      relTol = ((Double) evt.getNewValue()).doubleValue();
+      prefs.put(SimulationOptions.REL_TOL, relTol);
+      change = true;
+
+    }
+
+    if (change) {
+      try {
+        prefs.flush();
+      } catch (BackingStoreException exc) {
+        logger.warning(getMessage(exc));
+      }
+    }
+  }
+
+  /**
+   * 
+   * @param absTol
+   */
+  public void setAbsTol(double absTol) {
+    this.absTol = absTol;
+  }
+
+  /**
+   * 
+   * @param relTol
+   */
+  public void setRelTol(double relTol) {
+    this.relTol = relTol;
+  }
+
+  /* (non-Javadoc)
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append(getClass().getSimpleName());
+    sb.append('[');
+    sb.append("start=");
+    sb.append(start);
+    sb.append(",end=");
+    sb.append(end);
+    sb.append(",stepSize=");
+    sb.append(stepSize);
+    sb.append(",solver=");
+    sb.append(solver.toString());
+    sb.append(",includeReactions=");
+    sb.append(includeReactions);
+    sb.append(",model=");
+    sb.append(model);
+    sb.append(']');
+    return sb.toString();
+  }
+
+  /* (non-Javadoc)
+   * @see java.util.prefs.PreferenceChangeListener#preferenceChange(java.util.prefs.PreferenceChangeEvent)
+   */
+  @Override
+  public void preferenceChange(PreferenceChangeEvent evt) {
+    String property = evt.getKey();
+    logger.fine(property + "=" + evt.getNewValue());
+
+    if (SimulationOptions.ODE_SOLVER.toString().equals(property)) {
+      try {
+        solver = (DESSolver) Class.forName(evt.getNewValue()).newInstance();
+      } catch (InstantiationException exc) {
+        logger.warning(getMessage(exc));
+      } catch (IllegalAccessException exc) {
+        logger.warning(getMessage(exc));
+      } catch (ClassNotFoundException exc) {
+        logger.warning(getMessage(exc));
+      }
+
+    } else if (SimulationOptions.SIM_START_TIME.toString().equals(property)) {
+      start = Double.parseDouble(evt.getNewValue());
+
+    } else if (SimulationOptions.SIM_END_TIME.toString().equals(property)) {
+      end = Double.parseDouble(evt.getNewValue());
+
+    } else if (SimulationOptions.SIM_STEP_SIZE.toString().equals(property)) {
+      stepSize = Double.parseDouble(evt.getNewValue());
+
+    } else if (property.equals("includeReactions")) {
+      includeReactions = Boolean.parseBoolean(evt.getNewValue());
+
+    } else if (property.equals(SimulationOptions.ABS_TOL.toString())) {
+      absTol = Double.parseDouble(evt.getNewValue());
+
+    } else if (property.equals(SimulationOptions.REL_TOL.toString())) {
+      relTol = Double.parseDouble(evt.getNewValue());
+
+    }
+  }
+
 }
