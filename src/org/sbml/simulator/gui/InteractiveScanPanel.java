@@ -409,8 +409,11 @@ ChangeListener, TreeNodeChangeListener {
           1, 0d, 0d);
       }
     }
-    lh.add(new JPanel(), 1, 0, 1, 1, 0d, 0d);
-    lh.add(new JPanel(), 3, 0, 1, 1, 0d, 0d);
+    JPanel p1 = new JPanel(), p2 = new JPanel();
+    p1.setOpaque(false);
+    p2.setOpaque(false);
+    lh.add(p1, 1, 0, 1, 1, 0d, 0d);
+    lh.add(p2, 3, 0, 1, 1, 0d, 0d);
     if (nans.size() > 0) {
       MessageFormat form = new MessageFormat(bundle.getString("REPLACEMENT_OF_UNDEFINED_VALUES"));
       double[] limits = { 1, 2 };
