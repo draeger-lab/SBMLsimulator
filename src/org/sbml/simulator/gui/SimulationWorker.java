@@ -17,6 +17,8 @@
  */
 package org.sbml.simulator.gui;
 
+import static de.zbit.util.Utils.getMessage;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.MessageFormat;
@@ -148,7 +150,7 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
         configuration.getRelTol());
       return solution;
     } catch (DerivativeException exc) {
-      logger.warning(exc.getLocalizedMessage());
+      logger.warning(getMessage(exc));
       return null;
     }
   }
@@ -174,9 +176,9 @@ public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implem
         result = get();
         firePropertyChange("done", null, result);
       } catch (InterruptedException exc) {
-        logMessage = exc.getLocalizedMessage();
+        logMessage = getMessage(exc);
       } catch (ExecutionException exc) {
-        logMessage = exc.getLocalizedMessage();
+        logMessage = getMessage(exc);
       }
       configuration.getSolver().removePropertyChangeListener(this);
       if (logMessage != null) {

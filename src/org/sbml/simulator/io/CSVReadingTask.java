@@ -17,6 +17,8 @@
  */
 package org.sbml.simulator.io;
 
+import static de.zbit.util.Utils.getMessage;
+
 import java.io.File;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -102,7 +104,7 @@ public class CSVReadingTask extends SwingWorker<SortedMap<String, MultiTable>, V
       try {
         prefs.flush();
       } catch (BackingStoreException exc) {
-        logger.fine(exc.getLocalizedMessage());
+        logger.fine(getMessage(exc));
       }
     }
     firePropertyChange("done", null, resultMap);

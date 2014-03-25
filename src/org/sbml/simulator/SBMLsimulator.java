@@ -17,6 +17,8 @@
  */
 package org.sbml.simulator;
 
+import static de.zbit.util.Utils.getMessage;
+
 import java.awt.HeadlessException;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -133,7 +135,7 @@ public class SBMLsimulator extends Launcher {
       try {
         AVAILABLE_QUALITY_MEASURES[i] = (Class<QualityMeasure>) Class.forName(classes[i]);
       } catch (ClassNotFoundException exc) {
-        logger.severe(exc.getLocalizedMessage());
+        logger.severe(getMessage(exc));
       }
     }
 
@@ -155,7 +157,7 @@ public class SBMLsimulator extends Launcher {
       try {
         AVAILABLE_SOLVERS[i] = (Class<AbstractDESSolver>) Class.forName(classes[i]);
       } catch (ClassNotFoundException exc) {
-        logger.severe(exc.getLocalizedMessage());
+        logger.severe(getMessage(exc));
       }
     }
   }
@@ -336,7 +338,7 @@ public class SBMLsimulator extends Launcher {
     try {
       url = new URL("http://www.gnu.org/licenses/lgpl-3.0-standalone.html");
     } catch (MalformedURLException exc) {
-      logger.log(Level.FINER, exc.getLocalizedMessage(), exc);
+      logger.log(Level.FINER, getMessage(exc), exc);
     }
     return url;
   }
@@ -350,7 +352,7 @@ public class SBMLsimulator extends Launcher {
     try {
       url = new URL("http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/downloads/");
     } catch (MalformedURLException exc) {
-      logger.log(Level.FINER, exc.getLocalizedMessage(), exc);
+      logger.log(Level.FINER, getMessage(exc), exc);
     }
     return url;
   }
@@ -401,8 +403,7 @@ public class SBMLsimulator extends Launcher {
           } catch (NetworkException exc) {
             GUITools.showErrorMessage(gui, exc);
           } catch (Throwable exc) {
-            String message = exc.getLocalizedMessage();
-            logger.log(Level.FINE, message != null ? message : exc.getMessage(), exc);
+            logger.log(Level.FINE, getMessage(exc), exc);
           }
         }
       }).start();

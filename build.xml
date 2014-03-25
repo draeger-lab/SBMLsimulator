@@ -228,6 +228,7 @@
         <include name="de/zbit/sbml/locales/**.xml"/>
       </fileset>
       <zipfileset excludes="META-INF/*" src="${sysbio.dir}/lib/sysbio-osx-support.jar"/>
+      <zipfileset excludes="META-INF/*" src="${sysbio.dir}/lib/quaqua.jar"/>
     </jar>
 
   </target>
