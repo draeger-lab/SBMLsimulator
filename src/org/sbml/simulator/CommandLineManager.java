@@ -489,38 +489,39 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
    * @param timeSeriesFile
    * @param props
    */
-  private void performOptimization() {
-    //Set initial values to values given in experimental data.
-    String[] quantityIds = new String[estimationProblem.getQuantities().length];
-    for (int i = 0; i < estimationProblem.getQuantities().length; i++) {
-      quantityIds[i] = estimationProblem.getQuantities()[i].getId();
-    }
-    MultiTable reference = estimationProblem.getReferenceData()[0];
-    for (int col = 0; col < reference.getColumnCount(); col++) {
-      String id = reference.getColumnIdentifier(col);
-      if (Arrays.binarySearch(quantityIds, id) < 0) {
-        double value = reference.getValueAt(0, col)
-            .doubleValue();
-        if (!Double.isNaN(value)) {
-          Species sp = estimationProblem.getModel().getSpecies(id);
-          if (sp != null) {
-            sp.setValue(value);
-            continue;
-          }
-          Compartment c = estimationProblem.getModel().getCompartment(id);
-          if (c != null) {
-            c.setValue(value);
-            continue;
-          }
-          Parameter p = estimationProblem.getModel().getParameter(id);
-          if (p != null) {
-            p.setValue(value);
-            continue;
-          }
-
-        }
-      }
-    }
+	private void performOptimization() {
+		//Set initial values to values given in experimental data.
+		String[] quantityIds = new String[estimationProblem.getQuantities().length];
+		for (int i = 0; i < estimationProblem.getQuantities().length; i++) {
+			quantityIds[i] = estimationProblem.getQuantities()[i].getId();
+		}
+		MultiTable reference = estimationProblem.getReferenceData()[0];
+		if (reference.getTimePoints()[0] == 0d) {
+			for (int col = 0; col < reference.getColumnCount(); col++) {
+				String id = reference.getColumnIdentifier(col);
+				if (Arrays.binarySearch(quantityIds, id) < 0) {
+					double value = reference.getValueAt(0, col).doubleValue();
+					if (!Double.isNaN(value)) {
+						Species sp = estimationProblem.getModel().getSpecies(id);
+						if (sp != null) {
+							sp.setValue(value);
+							continue;
+						}
+						Compartment c = estimationProblem.getModel().getCompartment(id);
+						if (c != null) {
+							c.setValue(value);
+							continue;
+						}
+						Parameter p = estimationProblem.getModel().getParameter(id);
+						if (p != null) {
+							p.setValue(value);
+							continue;
+						}
+						
+					}
+				}
+			}
+		}
 
 
     GOParameters goParams = new GOParameters(); // Instance for the general
