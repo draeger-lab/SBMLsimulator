@@ -35,7 +35,7 @@ public class ParameterAnalysis {
 		double[][] result = new double[parameters.size()][];
 		
 		double percentageToConsider = 0.5;
-		int repetitions = 10;
+		int repetitions = 20;
 		int numberToConsider = (int) (repetitions * percentageToConsider);
 		
 		List<Model> models = new LinkedList<Model>();
@@ -128,7 +128,7 @@ public class ParameterAnalysis {
 				System.out.println("Mean: " + median);
 				System.out.println("Standarddeviation: " + stddev);
 				System.out.println("Variation coefficient: " + varCoeff + "%");
-				System.out.println("Median deviation: " + (Math.abs(median - originalValue)/median)*100);
+				System.out.println("Median deviation: " + (Math.abs(median - originalValue)/originalValue)*100);
 				System.out.println();
 				
 				Double currentStdDevMaxValue = maxStdDevMap.get(s);
@@ -145,7 +145,7 @@ public class ParameterAnalysis {
 				Double currentMedianDevMaxValue = maxMedianDevMap.get(s);
 				if(currentMedianDevMaxValue != null) {
 					if(median != 0) {
-						currentMedianDevMaxValue = Math.max(currentMedianDevMaxValue, Math.abs((median - originalValue)/median)*100);
+						currentMedianDevMaxValue = Math.max(currentMedianDevMaxValue, Math.abs((median - originalValue)/originalValue)*100);
 					}
 					else {
 						currentMedianDevMaxValue = Math.max(currentMedianDevMaxValue, 100d);
@@ -153,7 +153,7 @@ public class ParameterAnalysis {
 				}
 				else {
 					if(median != 0) {
-						currentMedianDevMaxValue = Math.abs((median - originalValue)/median)*100;
+						currentMedianDevMaxValue = Math.abs((median - originalValue)/originalValue)*100;
 					}
 					else {
 						currentMedianDevMaxValue = 100d;
