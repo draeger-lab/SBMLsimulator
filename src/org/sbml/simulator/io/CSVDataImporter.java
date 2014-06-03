@@ -119,7 +119,7 @@ public class CSVDataImporter {
     
     int i, j, timeColumn;
     if ((parent == null) || CSVImporterV2.showDialog(parent, converter)) {
-      CSVReader reader = converter.getCSVReader();
+      CSVReader reader = converter.getApprovedCSVReader();
       String stringData[][] = reader.getData();
       data.setTimeName(reader.getHeader()[0]);
       timeColumn = reader.getColumn(data.getTimeName());
@@ -131,23 +131,26 @@ public class CSVDataImporter {
         data.setTimePoints(timePoints);
         // exclude time column
         
-        String newHead[] = new String[(int) Math.max(0,
-          reader.getHeader().length - 1)];
-        
-        if ((model != null) && (newHead.length > expectedHeader.length) && (parent != null)) {
+        if ((model != null) && (reader.getHeader().length > expectedHeader.length) && (parent != null)) {
           JOptionPane.showMessageDialog(parent, StringUtil.toHTML(bundle
               .getString("ADDITIONAL_COLUMNS_ARE_IGNORED_TOOLTIP"), 40), bundle
               .getString("ADDITIONAL_COLUMNS_ARE_IGNORED"),
             JOptionPane.INFORMATION_MESSAGE);
         }
         Map<String, Integer> nameToColumn = new HashMap<String, Integer>();
+        
+        List<String> newHeadList = new ArrayList<String>();
         i = 0;
-        for (String head : reader.getHeader()) {
-          if (!head.equalsIgnoreCase(data.getTimeName())) {
-            newHead[i++] = head.trim();
-            nameToColumn.put(newHead[i-1], reader.getColumnSensitive(head));
+        for (ExpectedColumn col: cols) {
+          String colName = ((String)col.getName());
+          if (!(colName.equalsIgnoreCase(data.getTimeName())) && (col.getAssignedColumns().size() > 0)) {
+            newHeadList.add(colName);
+            nameToColumn.put(colName, col.getAssignedColumns().get(0));
           }
         }
+        
+        
+        String newHead[] = newHeadList.toArray(new String[newHeadList.size()]);
         data.addBlock(newHead); // alphabetically sorted
         
         double dataBlock[][] = data.getBlock(0).getData();
