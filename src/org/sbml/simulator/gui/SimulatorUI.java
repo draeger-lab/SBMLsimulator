@@ -21,6 +21,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
@@ -52,6 +53,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.xml.stream.XMLStreamException;
@@ -68,6 +70,7 @@ import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.optimization.problem.EstimationProblem;
 import org.sbml.simulator.SBMLsimulator;
 import org.sbml.simulator.fba.gui.FBAPanel;
+import org.sbml.simulator.io.CSVReadingTask;
 import org.sbml.simulator.io.SimulatorIOOptions;
 import org.sbml.simulator.math.SplineCalculation;
 import org.simulator.math.odes.AdaptiveStepsizeIntegrator;
@@ -519,6 +522,8 @@ PropertyChangeListener {
         "openFileAndLogHistory"), Command.OPEN_DATA);
     openData.setEnabled(false);
     fileMenu.remove(openFile);
+    openFile = GUITools.createJMenuItem(EventHandler.create(ActionListener.class, this,
+				"openFile"), BaseAction.FILE_OPEN);
     JMenu openMenu = GUITools.createJMenu(bundle.getString("OPEN"), bundle.getString("OPEN_TOOLTIP"), openFile, openData);
     openMenu.addActionListener(EventHandler.create(ActionListener.class, this, "openFileAndLogHistory"));
     openMenu.setIcon(openFile.getIcon());
@@ -614,6 +619,17 @@ PropertyChangeListener {
   public File[] open(File... files) {
     return openFileAndLogHistory(files);
   }
+  
+  /**
+	 * 
+	 */
+	public File[] openFile() {
+		SBPreferences prefs = SBPreferences.getPreferencesFor(getClass());
+		File[] modelFiles = GUITools.openFileDialog(this,
+				prefs.get(GUIOptions.OPEN_DIR).toString(), false, false,
+				JFileChooser.FILES_ONLY, SBFileFilter.createSBMLFileFilterList());
+		return openFile(modelFiles);
+	}
 
   /* (non-Javadoc)
    * @see de.zbit.gui.BaseFrame#openFile(java.io.File[])
@@ -665,20 +681,42 @@ PropertyChangeListener {
 
     // First the model(s):
     if ((modelFiles != null) && (modelFiles.length > 0)) {
-      try {
-        SBMLReadingTask task1 = new SBMLReadingTask(modelFiles[0], this, EventHandler.create(PropertyChangeListener.class, this, "setSBMLDocument", "newValue"));
-        worker.add(task1);
-      } catch (Exception exc) {
-        GUITools.showErrorMessage(this, exc);
-      }
-
-      if (modelFiles.length > 1) {
-        GUITools.showListMessage(this, bundle
-          .getString("CAN_ONLY_OPEN_ONE_MODEL_AT_A_TIME"), bundle
-          .getString("TOO_MANY_MODEL_FILES"), Arrays.asList(modelFiles)
-          .subList(1, modelFiles.length));
-      }
+    	if(getModel() == null) {
+				try {
+					SBMLReadingTask task1 = new SBMLReadingTask(modelFiles[0], this,
+							EventHandler.create(PropertyChangeListener.class, this, "setSBMLDocument", "newValue"));
+					worker.add(task1);
+				} catch (Exception exc) {
+					GUITools.showErrorMessage(this, exc);
+				}
+	
+				if (modelFiles.length > 1) {
+					for(int i = 1; i != modelFiles.length; i++) {
+						new SBMLsimulator(new String[]{"--gui=TRUE","--sbml-input-file=" + modelFiles[i].getAbsolutePath()});
+					}
+//					GUITools.showListMessage(this, bundle
+//							.getString("CAN_ONLY_OPEN_ONE_MODEL_AT_A_TIME"), bundle
+//							.getString("TOO_MANY_MODEL_FILES"), Arrays.asList(modelFiles)
+//							.subList(1, modelFiles.length));
+				}
+			}
+    	else {
+    		for(int i = 0; i != modelFiles.length; i++) {
+					new SBMLsimulator(new String[]{"--gui=TRUE","--sbml-input-file=" + modelFiles[i].getAbsolutePath()});
+				}
+    	}
     }
+    if ((dataFiles != null) && (dataFiles.length > 0)) {
+			// Second: the data
+			CSVReadingTask task2 = new CSVReadingTask(this, dataFiles);
+			task2.addPropertyChangeListener(EventHandler.create(PropertyChangeListener.class, this, "addExperimentalData", "newValue"));
+			worker.add(task2);
+		}
+
+		worker.execute();
+
+		// setStatusBarToMemoryUsage();
+		validate();
     return modelFiles;
   }
 
@@ -923,8 +961,8 @@ PropertyChangeListener {
       getContentPane().add(simPanel, BorderLayout.CENTER);
       addPreferenceChangeListener(simPanel);
 
-      GUITools.swapAccelerator(getJMenuBar(), BaseAction.FILE_OPEN ,Command.OPEN_DATA);
-      GUITools.setEnabled(false, getJMenuBar(), BaseAction.FILE_OPEN);
+//      GUITools.swapAccelerator(getJMenuBar(), BaseAction.FILE_OPEN ,Command.OPEN_DATA);
+//      GUITools.setEnabled(false, getJMenuBar(), BaseAction.FILE_OPEN);
       GUITools.setEnabled(true, getJMenuBar(), toolBar,
         BaseAction.FILE_SAVE_AS, Command.SIMULATION_START,
         Command.SHOW_OPTIONS, Command.OPEN_DATA, Command.START_FBA);
