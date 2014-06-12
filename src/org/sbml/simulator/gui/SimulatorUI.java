@@ -680,32 +680,24 @@ PropertyChangeListener {
     SerialWorker worker = new SerialWorker();
 
     // First the model(s):
-    if ((modelFiles != null) && (modelFiles.length > 0)) {
-    	if(getModel() == null) {
-				try {
-					SBMLReadingTask task1 = new SBMLReadingTask(modelFiles[0], this,
-							EventHandler.create(PropertyChangeListener.class, this, "setSBMLDocument", "newValue"));
-					worker.add(task1);
-				} catch (Exception exc) {
-					GUITools.showErrorMessage(this, exc);
-				}
-	
-				if (modelFiles.length > 1) {
-					for(int i = 1; i != modelFiles.length; i++) {
-						new SBMLsimulator(new String[]{"--gui=TRUE","--sbml-input-file=" + modelFiles[i].getAbsolutePath()});
-					}
-//					GUITools.showListMessage(this, bundle
-//							.getString("CAN_ONLY_OPEN_ONE_MODEL_AT_A_TIME"), bundle
-//							.getString("TOO_MANY_MODEL_FILES"), Arrays.asList(modelFiles)
-//							.subList(1, modelFiles.length));
-				}
+		if ((modelFiles != null) && (modelFiles.length > 0)) {
+			try {
+				SBMLReadingTask task1 = new SBMLReadingTask(modelFiles[0], this,
+					EventHandler.create(PropertyChangeListener.class, this,
+						"setSBMLDocument", "newValue"));
+				worker.add(task1);
+			} catch (Exception exc) {
+				GUITools.showErrorMessage(this, exc);
 			}
-    	else {
-    		for(int i = 0; i != modelFiles.length; i++) {
-					new SBMLsimulator(new String[]{"--gui=TRUE","--sbml-input-file=" + modelFiles[i].getAbsolutePath()});
-				}
-    	}
-    }
+			
+			if (modelFiles.length > 1) {
+				GUITools.showListMessage(this, bundle
+						.getString("CAN_ONLY_OPEN_ONE_MODEL_AT_A_TIME"), bundle
+						.getString("TOO_MANY_MODEL_FILES"), Arrays.asList(modelFiles)
+						.subList(1, modelFiles.length));
+			}
+			
+		}
     if ((dataFiles != null) && (dataFiles.length > 0)) {
 			// Second: the data
 			CSVReadingTask task2 = new CSVReadingTask(this, dataFiles);
