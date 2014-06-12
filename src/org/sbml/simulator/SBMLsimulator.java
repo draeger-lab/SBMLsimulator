@@ -94,12 +94,7 @@ public class SBMLsimulator extends Launcher {
    * functions, are located.
    */
   public static final String MATH_PACKAGE = "org.sbml.simulator.math";
-
-  /**
-   * The number of active SBMLsimulator windows;
-   */
-  public static int numberOfOpenSimulators = 0;
-  
+ 
   /**
    * The package where all ODE solvers are assumed to be located.
    */
@@ -165,20 +160,6 @@ public class SBMLsimulator extends Launcher {
         logger.severe(getMessage(exc));
       }
     }
-  }
-
- /*
-  * (non-Javadoc)
-  * @see de.zbit.Launcher#exit(java.awt.Window)
-  */
-  public void exit(java.awt.Window window) {
-    numberOfOpenSimulators--;
-  	if(numberOfOpenSimulators>= 1) {
-  		exit(window, false);
-  	}
-  	else {
-  		exit(window, true);
-  	}
   }
   
   
@@ -406,8 +387,7 @@ public class SBMLsimulator extends Launcher {
    */
   @Override
   public BaseFrame initGUI(AppConf appConf) {
-  	numberOfOpenSimulators++;
-    final BaseFrame gui = new SimulatorUI(appConf);
+  	final BaseFrame gui = new SimulatorUI(appConf);
     if (garuda && (getCmdLineOptions().contains(GarudaOptions.class)
         && (!appConf.getCmdArgs().containsKey(GarudaOptions.CONNECT_TO_GARUDA) ||
             appConf.getCmdArgs().getBoolean(GarudaOptions.CONNECT_TO_GARUDA)))) {
