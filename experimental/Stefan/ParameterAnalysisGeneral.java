@@ -29,10 +29,10 @@ public class ParameterAnalysisGeneral {
 		CSVReader reader = new CSVReader(parameterFilePath);
 		String[][] data = reader.getData();
 		List<Symbol> parameters = new LinkedList<Symbol>();
-		boolean replicates = true;
+		boolean replicates = false;
 		
 //		int[] errorValues = new int[] { 0, 5, 10, 15, 20, 25, 30 };
-		int[] errorValues = new int[] { 0, 5, 10, 20};
+		int[] errorValues = new int[] { 0, 5};
 //		int[] errorValues = new int[] { 0};
 		Map<String, double[][][]> medians = new HashMap<String, double[][][]>();
 		Map<String, double[][][]> stddevs = new HashMap<String, double[][][]>();
@@ -75,7 +75,7 @@ public class ParameterAnalysisGeneral {
 							double fitness = Double.parseDouble(modelFile.getAbsolutePath()
 									.replaceAll(".*Fitness_", "").replace(".xml", ""));
 							int number = Integer.parseInt(modelFile.getAbsolutePath()
-								.replaceAll(".*Exp_", "").replaceAll("_1_Rep_.*", ""));
+								.replaceAll(".*Exp_", "").replaceAll("_1_Rep_.*", "").replaceAll(".*_", ""));
 							if(replicates && (modelFile.getAbsolutePath().contains("["))) {
 								modelMap.put(doc.getModel(), fitness);
 								List<Model> models = numberMap.get(number);
@@ -125,10 +125,14 @@ public class ParameterAnalysisGeneral {
 						objectsMedians[i][j] = new Double(resultMedians[i][j][num]);
 					}
 				}
-				
-				writer.write(objectsMedians, new File(args[1] + "/medians_"
-						+ errorValues[num] + "_" + p.getId() + ".csv"));
-				
+				if(replicates) {
+					writer.write(objectsMedians, new File(args[1] + "/medians_"
+						+ errorValues[num] + "_" + p.getId() + "_rep.csv"));
+				}
+				else {
+					writer.write(objectsMedians, new File(args[1] + "/medians_"
+							+ errorValues[num] + "_" + p.getId() + ".csv"));
+				}
 				Object[][] objectsStdDev = new Object[resultStdDev.length][resultStdDev[0].length];
 				
 				for (int i = 0; i != resultStdDev.length; i++) {
@@ -137,8 +141,14 @@ public class ParameterAnalysisGeneral {
 					}
 				}
 				
-				writer.write(objectsStdDev, new File(args[1] + "/stddev_"
-						+ errorValues[num] + "_" + p.getId() + ".csv"));
+				if(replicates) {
+					writer.write(objectsStdDev, new File(args[1] + "/stddev_"
+						+ errorValues[num] + "_" + p.getId() + "_rep.csv"));
+				}
+				else {
+					writer.write(objectsStdDev, new File(args[1] + "/stddev_"
+							+ errorValues[num] + "_" + p.getId() + ".csv"));
+				}
 			}
 		}
 		
