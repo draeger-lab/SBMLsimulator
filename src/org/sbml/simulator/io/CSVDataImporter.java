@@ -143,9 +143,19 @@ public class CSVDataImporter {
         i = 0;
         for (ExpectedColumn col: cols) {
           String colName = ((String)col.getName());
-          if (!(colName.equalsIgnoreCase(data.getTimeName())) && (col.getAssignedColumns().size() > 0)) {
-            newHeadList.add(colName);
-            nameToColumn.put(colName, col.getAssignedColumns().get(0));
+          if (!(colName.equalsIgnoreCase(data.getTimeName()))) {
+        	  if((parent != null) && (col.getAssignedColumns().size() > 0)) {
+        		  newHeadList.add(colName);
+        		  nameToColumn.put(colName, col.getAssignedColumns().get(0));
+        	  }
+        	  else if(parent == null) {
+        		 int colNumber = reader.getColumnSensitive(colName);
+        		 if(colNumber != -1) {
+        			 nameToColumn.put(colName, colNumber);
+        			 newHeadList.add(colName);
+        		 }
+        		  
+        	  }
           }
         }
         
