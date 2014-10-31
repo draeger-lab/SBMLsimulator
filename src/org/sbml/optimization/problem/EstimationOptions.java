@@ -59,7 +59,7 @@ public interface EstimationOptions extends KeyProvider {
 	 * The file with the values to estimate and their initial setting
 	 */
 	public static final Option<String> EST_TARGETS = new Option<String>(
-		"EST_TARGETS", String.class, bundle, null);
+		"EST_TARGETS", String.class, bundle, (String)null);
 	
 	/**
 	 * Decide whether or not by default all compartments in a model should be
