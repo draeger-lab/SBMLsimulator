@@ -58,6 +58,7 @@ import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.xml.stream.XMLStreamException;
 
+import eva2.gui.Main;
 import org.jfree.data.statistics.Statistics;
 import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.Model;
@@ -103,7 +104,7 @@ import de.zbit.util.prefs.SBProperties;
 import de.zbit.util.progressbar.AbstractProgressBar;
 import de.zbit.util.progressbar.gui.ProgressBarSwing;
 import eva2.EvAInfo;
-import eva2.client.EvAClient;
+import eva2.gui.Main;
 import eva2.tools.BasicResourceLoader;
 
 /**
@@ -209,7 +210,10 @@ PropertyChangeListener {
     }
     BasicResourceLoader rl = BasicResourceLoader.instance();
     byte[] bytes = rl.getBytesFromResourceLocation(EvAInfo.iconLocation, true);
-    UIManager.put("ICON_EVA2", new ImageIcon(Toolkit.getDefaultToolkit().createImage(bytes)));
+    Image evaImage = Toolkit.getDefaultToolkit().createImage(bytes);
+    evaImage = evaImage.getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+    ImageIcon evaIcon = new ImageIcon(evaImage);
+    UIManager.put("ICON_EVA2", evaIcon);
     UIManager.put("SBMLsimulatorWatermark", new ImageIcon(Toolkit.getDefaultToolkit().createImage(SimulatorUI.class.getResource("img/SBMLsimulatorWatermark.png"))));
   }
 
@@ -614,7 +618,7 @@ PropertyChangeListener {
   }
 
   /**
-   * @param file
+   * @param files
    */
   public File[] open(File... files) {
     return openFileAndLogHistory(files);
@@ -722,7 +726,7 @@ PropertyChangeListener {
     if (evaClient instanceof JFrame) {
       JFrame frame = (JFrame) evaClient;
       if ((frame.getName() != null) && !frame.isVisible()
-          && (frame.getName().equals(EvAClient.class.getSimpleName()))) {
+          && (frame.getName().equals(Main.class.getSimpleName()))) {
         setSimulationAndOptimizationEnabled(true);
       }
     }

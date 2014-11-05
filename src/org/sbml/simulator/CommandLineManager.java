@@ -59,11 +59,11 @@ import de.zbit.io.csv.CSVOptions;
 import de.zbit.io.csv.CSVWriter;
 import de.zbit.util.prefs.SBPreferences;
 import de.zbit.util.prefs.SBProperties;
-import eva2.server.go.individuals.ESIndividualDoubleData;
-import eva2.server.go.operators.terminators.EvaluationTerminator;
-import eva2.server.go.strategies.DifferentialEvolution;
-import eva2.server.go.strategies.InterfaceOptimizer;
-import eva2.server.modules.GOParameters;
+import eva2.optimization.individuals.ESIndividualDoubleData;
+import eva2.optimization.operator.terminators.EvaluationTerminator;
+import eva2.optimization.strategies.DifferentialEvolution;
+import eva2.optimization.strategies.InterfaceOptimizer;
+import eva2.optimization.modules.OptimizationParameters;
 
 /**
  * This class handles the execution of SBMLsimulator from the command line.
@@ -484,10 +484,7 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
   }
 
   /**
-   * 
-   * @param openFile
-   * @param timeSeriesFile
-   * @param props
+   *
    */
 	private void performOptimization() {
 		//Set initial values to values given in experimental data.
@@ -524,7 +521,7 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
 		}
 
 
-    GOParameters goParams = new GOParameters(); // Instance for the general
+    OptimizationParameters goParams = new OptimizationParameters(); // Instance for the general
     // Genetic Optimization
     // parameterization
 
@@ -534,7 +531,7 @@ public class CommandLineManager implements PropertyChangeListener, Runnable {
     goParams.setTerminator(new EvaluationTerminator(100000));
 
     InterfaceOptimizer optimizer = goParams.getOptimizer();
-    optimizer.init();
+    optimizer.initialize();
     while (!goParams.getTerminator().isTerminated(optimizer.getPopulation()))  {
       optimizer.optimize();
     }

@@ -81,10 +81,10 @@ import de.zbit.sbml.io.SBMLfileChangeListener;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
 import de.zbit.util.prefs.SBPreferences;
-import eva2.client.EvAClient;
-import eva2.server.go.problems.AbstractOptimizationProblem;
-import eva2.server.stat.GraphSelectionEnum;
-import eva2.server.stat.InterfaceStatisticsListener;
+import eva2.gui.Main;
+import eva2.problems.AbstractOptimizationProblem;
+import eva2.optimization.statistics.GraphSelectionEnum;
+import eva2.optimization.statistics.InterfaceStatisticsListener;
 
 /**
  * This is the main panel in the graphical user interface, in which the entire
@@ -202,7 +202,7 @@ BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceCha
    */
   private DynamicView dynamicGraphView;
 
-  private EvAClient evaClient;
+  private Main evaClient;
 
   /**
    * @param model
@@ -398,8 +398,6 @@ BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceCha
 
   /***
    * Initializes the graphics components of this panel.
-   * 
-   * @param properties
    */
   private void init() {
     setLayout(new BorderLayout());
@@ -542,7 +540,7 @@ BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceCha
   @Override
   public void notifyRunStarted(int runNumber, int plannedMultiRuns,
     String[] header, String[] metaInfo) {
-    getSimulationManager().getEstimationProblem().setOptimizer(evaClient.getGOParameters().getOptimizer());
+    getSimulationManager().getEstimationProblem().setOptimizer(evaClient.getOptimizationParameters().getOptimizer());
 
 
     // Determine indices
@@ -852,7 +850,7 @@ BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceCha
   /**
    * @param evaClient
    */
-  public void setClient(EvAClient evaClient) {
+  public void setClient(Main evaClient) {
     this.evaClient = evaClient;
   }
 
