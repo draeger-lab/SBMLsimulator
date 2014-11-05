@@ -46,14 +46,14 @@ import de.zbit.io.csv.CSVReader;
 import de.zbit.io.csv.CSVWriter;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.SBPreferences;
-import eva2.server.go.PopulationInterface;
-import eva2.server.go.individuals.ESIndividualDoubleData;
-import eva2.server.go.individuals.InterfaceDataTypeDouble;
-import eva2.server.go.populations.Population;
-import eva2.server.go.problems.AbstractProblemDouble;
-import eva2.server.go.problems.InterfaceAdditionalPopulationInformer;
-import eva2.server.go.problems.InterfaceHasInitRange;
-import eva2.server.go.strategies.InterfaceOptimizer;
+import eva2.optimization.population.PopulationInterface;
+import eva2.optimization.individuals.ESIndividualDoubleData;
+import eva2.optimization.individuals.InterfaceDataTypeDouble;
+import eva2.optimization.population.Population;
+import eva2.problems.AbstractProblemDouble;
+import eva2.problems.InterfaceAdditionalPopulationInformer;
+import eva2.problems.InterfaceHasInitRange;
+import eva2.optimization.strategies.InterfaceOptimizer;
 import eva2.tools.ToolBox;
 import eva2.tools.math.RNG;
 
@@ -171,7 +171,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	public void calculateStatisticsForGeneration() {
 		ESIndividualDoubleData ind = (ESIndividualDoubleData) this.optimizer.getPopulation().getBestIndividual();
 		this.bestSolutionFound = ind.getDoublePosition();
-		this.eval(ind.getDoublePosition());
+		this.evaluate(ind.getDoublePosition());
 	}
 	
 	
@@ -263,7 +263,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * Checks whether or not the given model contains all of the given
 	 * quantities.
 	 * 
-	 * @param quantities
+	 * @param quantityRange
 	 * @return
 	 */
 	private boolean check(QuantityRange... quantityRange) {
@@ -286,7 +286,8 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	/* (non-Javadoc)
 	 * @see eva2.server.go.problems.AbstractProblemDouble#eval(double[])
 	 */
-	public double[] eval(double[] x) {
+    @Override
+	public double[] evaluate(double[] x) {
 		
 		for (int i = 0; i < x.length; i++) {
 			quantityRanges[i].getQuantity().setValue(x[i]);
@@ -399,7 +400,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	
 	/**
 	 * Memorizes the merged initial conditions for multiple data sets in order to 
-	 * avoid a multiple creation of it in the {@link #eval(double[])} method. 
+	 * avoid a multiple creation of it in the {@link #evaluate(double[])} method.
 	 */
 	private MultiTable initConditions = null;
 
@@ -502,7 +503,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	/* (non-Javadoc)
 	 * @see eva2.server.go.problems.InterfaceHasInitRange#getInitRange()
 	 */
-	public double[][] getInitRange() {
+	public double[][] getInitializationRange() {
 		return initRanges;
 	}
 
@@ -569,8 +570,8 @@ public class EstimationProblem extends AbstractProblemDouble implements
 	 * @see eva2.server.go.problems.AbstractProblemDouble#initPopulation(eva2.server.go.populations.Population)
 	 */
 	@Override
-	public void initPopulation(Population population) {
-		super.initPopulation(population);
+	public void initializePopulation(Population population) {
+		super.initializePopulation(population);
 		SBPreferences prefs = SBPreferences.getPreferencesFor(EstimationOptions.class);
 		boolean keepCurrentSolution = false;
 		if (prefs.getBoolean(EstimationOptions.USE_EXISTING_SOLUTION)) {
@@ -579,7 +580,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 		
 		if ((population.size() > 0) && keepCurrentSolution) {
 			InterfaceDataTypeDouble individual = (InterfaceDataTypeDouble) population.getIndividual(RNG.randomInt(0, population.size()));
-			individual.SetDoubleGenotype(getOriginalValues());
+			individual.setDoubleGenotype(getOriginalValues());
 		}
 	}
 
@@ -663,7 +664,7 @@ public class EstimationProblem extends AbstractProblemDouble implements
 
 	/**
 	 * 
-	 * @param quantityRanges
+	 * @param quantRange
 	 */
 	public void setQuantityRanges(QuantityRange... quantRange) {
 		if (check(quantRange)) {

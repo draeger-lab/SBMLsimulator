@@ -17,18 +17,18 @@
  */
 package org.sbml.optimization;
 
-import java.awt.Window;
+import eva2.gui.BeanInspector;
+import eva2.gui.Main;
+import eva2.gui.editor.GenericObjectEditor;
+import eva2.optimization.modules.OptimizationParameters;
+import eva2.optimization.operator.terminators.EvaluationTerminator;
+import eva2.optimization.statistics.InterfaceStatisticsListener;
+import eva2.optimization.strategies.DifferentialEvolution;
+import eva2.problems.InterfaceOptimizationProblem;
+
+import java.awt.*;
 import java.awt.event.WindowListener;
 import java.util.logging.Logger;
-
-import eva2.client.EvAClient;
-import eva2.gui.BeanInspector;
-import eva2.gui.GenericObjectEditor;
-import eva2.server.go.operators.terminators.EvaluationTerminator;
-import eva2.server.go.problems.InterfaceOptimizationProblem;
-import eva2.server.go.strategies.DifferentialEvolution;
-import eva2.server.modules.GOParameters;
-import eva2.server.stat.InterfaceStatisticsListener;
 
 /**
  * This class launches the graphical user interface of
@@ -50,7 +50,7 @@ public class EvA2GUIStarter {
   /**
    * 
    */
-  public EvAClient evaClient = null;
+  public Main evaClient = null;
 
   /**
    * Private in order to prohibit initialization of this class.
@@ -72,7 +72,7 @@ public class EvA2GUIStarter {
     WindowListener windowListener) {
     EvA2GUIStarter evaBP = new EvA2GUIStarter();
     logger.fine("created EvA2 GUI starter");
-    GOParameters goParams = new GOParameters(); // Instance for the general
+    OptimizationParameters optimizationParameters = new OptimizationParameters(); // Instance for the general
     logger.fine("created GO parameters");
     // Genetic Optimization
     // parameterization
@@ -80,23 +80,25 @@ public class EvA2GUIStarter {
     //		goParams.setOptimizer(new ParticleSwarmOptimization(50, 2.05, 2.05,
     //				PSOTopologyEnum.grid, 2));
     DifferentialEvolution optimizer = new DifferentialEvolution();
-    goParams.setOptimizer(optimizer);
-    goParams.setTerminator(new EvaluationTerminator(3000));
+    optimizationParameters.setOptimizer(optimizer);
+    optimizationParameters.setTerminator(new EvaluationTerminator(3000));
     logger.fine("created optimizer Differential Evolution");
 
     // set the initial EvA problem here
-    goParams.setProblem(problem);
+    optimizationParameters.setProblem(problem);
+    optimizer.setProblem(problem);
     logger.fine("Set problem");
 
     // hide some properties which should not be shown
     logger.fine("hiding unnecessary GUI options");
-    GenericObjectEditor.setHideProperty(goParams.getClass(), "problem", true);
-    GenericObjectEditor.setHideProperty(goParams.getClass(), "postProcessParams", true);
+    GenericObjectEditor.setHideProperty(optimizationParameters.getClass(), "problem", true);
+
+    GenericObjectEditor.setHideProperty(optimizationParameters.getClass(), "postProcessParams", true);
     // public EvAClient(final String hostName, final Window parent, final
     // String paramsFile, final InterfaceGOParameters goParams, final
     // boolean autorun, final boolean noSplash, final boolean noGui) {
     logger.fine("launching the actual EvA Client");
-    evaBP.evaClient = new EvAClient(null, parentWindow, null, goParams, false, true, false); // initializes GUI in the background
+    evaBP.evaClient = new Main(parentWindow, null, optimizationParameters, false, true, false); // initializes GUI in the background
     // important: wait for GUI initialization before accessing any internal
     // settings:
     logger.fine("waiting for EvA Client to get ready");

@@ -16,10 +16,10 @@
  */
 package org.sbml.optimization;
 
-import eva2.server.go.individuals.AbstractEAIndividual;
-import eva2.server.go.individuals.ESIndividualDoubleData;
-import eva2.server.go.operators.initialization.InterfaceInitialization;
-import eva2.server.go.problems.InterfaceOptimizationProblem;
+import eva2.optimization.individuals.AbstractEAIndividual;
+import eva2.optimization.individuals.ESIndividualDoubleData;
+import eva2.optimization.operator.initialization.InterfaceInitialization;
+import eva2.problems.InterfaceOptimizationProblem;
 import eva2.tools.math.RNG;
 
 /**
