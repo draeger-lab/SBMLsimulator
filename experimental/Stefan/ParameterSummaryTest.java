@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -21,7 +22,7 @@ import de.zbit.io.csv.CSVWriter;
 import de.zbit.io.filefilter.SBFileFilter;
 import de.zbit.math.MathUtils;
 
-public class ParameterSummary {
+public class ParameterSummaryTest {
 	
 	public static void main(String args[]) throws XMLStreamException, IOException {
 		SBMLReader sbmlReader = new SBMLReader();
@@ -35,9 +36,8 @@ public class ParameterSummary {
 			Parameter p = new Parameter(data[row][0]);
 			parameters.add(p);
 		}
-		boolean replicates = false;
 		
-		int[] precisionValues = new int[] {0,5,10,15,20};
+		int[] precisionValues = new int[] {0};
 		int[] systematicValues = new int[] {0};
 		int[] baselineValues = new int[] {0};
 		
@@ -54,12 +54,7 @@ public class ParameterSummary {
 							+ systematicError + "_" + baselineError);
 					File[] modelFiles = folder.listFiles();
 					
-					if (modelFiles == null) {
-						System.out.println();
-					}
-					
 					Map<Model, Double> modelMap = new HashMap<Model, Double>();
-					Map<Integer, List<Model>> numberMap = new HashMap<Integer, List<Model>>();
 					File modelFile;
 					for (int n = 0; n != modelFiles.length; n++) {
 						modelFile = modelFiles[n];
@@ -70,22 +65,13 @@ public class ParameterSummary {
 							stream.close();
 							double fitness = Double.parseDouble(modelFile.getAbsolutePath()
 									.replaceAll(".*Fitness_", "").replace(".xml", ""));
-							int number = Integer.parseInt(modelFile.getAbsolutePath()
-									.replaceAll(".*Exp_", "").replaceAll("_1_Rep_.*", "")
-									.replaceAll(".*_", ""));
 							modelMap.put(doc.getModel(), fitness);
-								List<Model> models = numberMap.get(number);
-								if (models == null) {
-									models = new LinkedList<Model>();
-								}
-								models.add(doc.getModel());
-								numberMap.put(number, models);
 							
 						}
 					}
 					System.out.println(precision + " " + systematicError + " "
 							+ baselineError);
-					parameterSummary(m, modelMap, parameters, numberMap, parameterValues);
+					parameterSummary(m, modelMap, parameters, parameterValues);
 					Object[][] objectsResult = new Object[parameterValues.get(parameters
 							.get(0).getId()).length + 1][parameters.size()];
 					
@@ -99,15 +85,9 @@ public class ParameterSummary {
 					}
 					
 					CSVWriter writer = new CSVWriter();
-					if (replicates) {
-						writer.write(objectsResult, new File(args[1] + "/values_"
-								+ precision + "_" + systematicError + "_" + baselineError
-								+ "_rep.csv"));
-					} else {
-						writer.write(objectsResult, new File(args[1] + "/values_"
+					writer.write(objectsResult, new File(args[1] + "/values_"
 								+ precision + "_" + systematicError + "_" + baselineError
 								+ ".csv"));
-					}
 					
 				}
 			}
@@ -117,67 +97,46 @@ public class ParameterSummary {
 	
 	private static void parameterSummary(Model originalModel,
 		Map<Model, Double> modelMap, List<Symbol> parameters,
-		Map<Integer, List<Model>> numbers, Map<String, double[]> parameterValues) {
+		Map<String, double[]> parameterValues) {
 		
-		double percentageToConsider = 0.5;
-		int repetitions = 20;
-		int numberToConsider = (int) (repetitions * percentageToConsider);
-		
+		int numberToConsider = 50;
 		List<Model> models = new LinkedList<Model>();
+		for(Model m: modelMap.keySet()) {
+			models.add(m);
+		}
 		
-		for (int experimentNumber : numbers.keySet()) {
-			List<Model> modelsForExperiment = numbers.get(experimentNumber);
-			List<Model> modelsForExperimentAdded = new LinkedList<Model>();
-			double[] fitnesses = new double[modelsForExperiment.size()];
+		List<Model> modelsAdded = new LinkedList<Model>();
+
+		double[] fitnesses = new double[models.size()];
 			
-			for (int i = 0; i != modelsForExperiment.size(); i++) {
-				fitnesses[i] = modelMap.get(modelsForExperiment.get(i));
+			for (int i = 0; i != models.size(); i++) {
+				fitnesses[i] = modelMap.get(models.get(i));
 			}
 			Arrays.sort(fitnesses);
 			double limit = fitnesses[Math.min(numberToConsider - 1,
-				modelsForExperiment.size() - 1)];
+				models.size() - 1)];
 			int added = 0;
-			int modelCounter = 0;
-			double bestFitness = modelMap.get(modelsForExperiment.get(0));
-			Model bestModel = modelsForExperiment.get(0);
-			for (Model m : modelsForExperiment) {
-				if (modelMap.get(m) <= limit) {
-					models.add(m);
-					modelsForExperimentAdded.add(m);
+			for (Model m : models) {
+				if (modelMap.get(m) < limit) {
+					modelsAdded.add(m);
 					added++;
 				}
-				if (modelMap.get(m) <= bestFitness) {
-					bestModel = m;
-					bestFitness = modelMap.get(m);
-				}
-				modelCounter++;
 			}
-			modelCounter = 0;
 			for (Model m : models) {
 				if (modelMap.get(m) == limit) {
-					modelsForExperimentAdded.add(m);
+					modelsAdded.add(m);
 					added++;
 					if (added >= numberToConsider) {
 						break;
 					}
 				}
-				modelCounter++;
 			}
 			
 			for (Symbol s : parameters) {
 				
-				// the value of the parameter in the original model without errors
-				double originalValue = Double.NaN;
-				Parameter p = originalModel.getParameter(s.getId());
-				if (p != null) {
-					originalValue = p.getValue();
-				} else {
-					originalValue = originalModel.getSpecies(s.getId()).getValue();
-				}
-				
-				double[] par = new double[modelsForExperimentAdded.size()];
-				modelCounter = 0;
-				for (Model m : modelsForExperimentAdded) {
+				double[] par = new double[numberToConsider];
+				int modelCounter = 0;
+				for (Model m : modelsAdded) {
 					Parameter p2 = m.getParameter(s.getId());
 					if (p2 != null) {
 						par[modelCounter] = p2.getValue();
@@ -187,30 +146,10 @@ public class ParameterSummary {
 					modelCounter++;
 				}
 				
-				double[] values = parameterValues.get(s.getId());
 				
-				if (values == null) {
-					values = new double[numbers.keySet().size()];
-				}
-				double median = MathUtils.median(par);
-				Parameter p2 = bestModel.getParameter(s.getId());
-				if (p2 != null) {
-					values[experimentNumber - 1] = p2.getValue();
-				} else {
-					values[experimentNumber - 1] = bestModel.getSpecies(s.getId()).getValue();
-				}
 					
 //				values[experimentNumber - 1] = bestModel.get;
-				parameterValues.put(s.getId(), values);
-				double stddev = MathUtils.standardDeviation(par);
-				double varCoeff = (stddev / median) * 100;
-				if (Double.isInfinite(varCoeff)) {
-					varCoeff = stddev * 100;
-				}
-				if (Double.isNaN(varCoeff)) {
-					varCoeff = 0d;
-				}
-			}
+				parameterValues.put(s.getId(), par);
 		}
 	}
 	
