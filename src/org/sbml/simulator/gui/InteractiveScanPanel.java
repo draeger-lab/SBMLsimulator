@@ -45,8 +45,8 @@ import javax.swing.tree.TreeNode;
 
 import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.ListOf;
-import org.sbml.jsbml.LocalParameter;
 import org.sbml.jsbml.Model;
+import org.sbml.jsbml.NamedSBase;
 import org.sbml.jsbml.Parameter;
 import org.sbml.jsbml.QuantityWithUnit;
 import org.sbml.jsbml.Reaction;
@@ -401,7 +401,7 @@ ChangeListener, TreeNodeChangeListener {
 
       spinQuantity[index].setName(p.getId());
       spinQuantity[index].addChangeListener(this);
-      lh.add(new JLabel(StringUtil.toHTML(p.toString(), 40)), 0, i, 1, 1, 0d, 0d);
+      lh.add(new JLabel(StringUtil.toHTML(print(p), 40)), 0, i, 1, 1, 0d, 0d);
       lh.add(spinQuantity[index], 2, i, 1, 1, 0, 0);
       UnitDefinition ud = p.getDerivedUnitDefinition();
       if (ud != null) {
@@ -428,10 +428,25 @@ ChangeListener, TreeNodeChangeListener {
         this,
         StringUtil.toHTML(
           form.format(new Object[] { count, count, count, Double.valueOf(value) }), 80),
-          bundle.getString("REPLACING_UNDEFINED_VALUES"), nans);
+        bundle.getString("REPLACING_UNDEFINED_VALUES"), nans);
     }
     panel.setOpaque(true);
     return panel;
+  }
+
+  /**
+   * 
+   * @param nsb
+   * @return
+   */
+  private String print(NamedSBase nsb) {
+    if (nsb.isSetName()) {
+      return nsb.getName();
+    }
+    if (nsb.isSetId()) {
+      return nsb.getId();
+    }
+    return nsb.getElementName();
   }
 
   /**

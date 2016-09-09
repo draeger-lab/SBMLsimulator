@@ -19,8 +19,6 @@ package org.sbml.simulator;
 
 import static de.zbit.util.Utils.getMessage;
 
-import java.awt.HeadlessException;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.MessageFormat;
@@ -29,8 +27,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import jp.sbi.garuda.platform.commons.exception.NetworkException;
 
 import org.sbml.optimization.problem.EstimationOptions;
 import org.sbml.simulator.fba.gui.FBAOptions;
@@ -45,9 +41,9 @@ import de.zbit.AppConf;
 import de.zbit.Launcher;
 import de.zbit.garuda.GarudaOptions;
 import de.zbit.garuda.GarudaSoftwareBackend;
+import de.zbit.graph.sbgn.DrawingOptions;
 import de.zbit.gui.BaseFrame;
 import de.zbit.gui.GUIOptions;
-import de.zbit.gui.GUITools;
 import de.zbit.io.csv.CSVOptions;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.KeyProvider;
@@ -94,7 +90,7 @@ public class SBMLsimulator extends Launcher {
    * functions, are located.
    */
   public static final String MATH_PACKAGE = "org.sbml.simulator.math";
- 
+
   /**
    * The package where all ODE solvers are assumed to be located.
    */
@@ -161,8 +157,8 @@ public class SBMLsimulator extends Launcher {
       }
     }
   }
-  
-  
+
+
   /**
    * 
    * @return
@@ -317,6 +313,7 @@ public class SBMLsimulator extends Launcher {
     defAndKeys.add(SimulationOptions.class);
     defAndKeys.add(EstimationOptions.class);
     defAndKeys.add(PlotOptions.class);
+    defAndKeys.add(DrawingOptions.class);
     defAndKeys.add(GraphOptions.class);
     defAndKeys.add(FBAOptions.class);
     return defAndKeys;
@@ -387,7 +384,7 @@ public class SBMLsimulator extends Launcher {
    */
   @Override
   public BaseFrame initGUI(AppConf appConf) {
-  	final BaseFrame gui = new SimulatorUI(appConf);
+    final BaseFrame gui = new SimulatorUI(appConf);
     if (garuda && (getCmdLineOptions().contains(GarudaOptions.class)
         && (!appConf.getCmdArgs().containsKey(GarudaOptions.CONNECT_TO_GARUDA) ||
             appConf.getCmdArgs().getBoolean(GarudaOptions.CONNECT_TO_GARUDA)))) {
@@ -401,8 +398,6 @@ public class SBMLsimulator extends Launcher {
             GarudaSoftwareBackend garudaBackend = new GarudaSoftwareBackend(
               "1cfbffa0-bbcb-4ca9-aa44-bfa4815e935e", gui);
             garudaBackend.init();
-          } catch (NetworkException exc) {
-            GUITools.showErrorMessage(gui, exc);
           } catch (Throwable exc) {
             logger.log(Level.FINE, getMessage(exc), exc);
           }

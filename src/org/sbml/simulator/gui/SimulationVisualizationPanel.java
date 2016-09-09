@@ -31,7 +31,6 @@ import java.util.prefs.PreferenceChangeListener;
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
-import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;

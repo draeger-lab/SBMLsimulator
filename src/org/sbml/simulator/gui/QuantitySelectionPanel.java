@@ -40,7 +40,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
-import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -712,7 +711,10 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
           return null;
         }
         Quantity q = (Quantity) getValueAt(rowIndex, 1);
-        String name = q.toString();
+        String name = q.isSetName() ? q.getName() : q.getId();
+        if (name.isEmpty()) {
+          name = q.getElementName();
+        }
         String className = q.getElementName();
         switch (realColumnIndex) {
         case 0:

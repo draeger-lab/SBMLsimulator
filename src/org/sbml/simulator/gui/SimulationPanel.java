@@ -48,7 +48,6 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.sbml.jsbml.Model;
-import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLWriter;
 import org.sbml.optimization.problem.EstimationOptions;
@@ -65,7 +64,6 @@ import org.simulator.math.QualityMeasure;
 import org.simulator.math.odes.DESSolver;
 import org.simulator.math.odes.MultiTable;
 
-import y.view.Graph2D;
 import de.zbit.graph.io.Graph2Dwriter;
 import de.zbit.gui.BaseFrameTab;
 import de.zbit.gui.GUIOptions;
@@ -82,9 +80,10 @@ import de.zbit.util.ResourceManager;
 import de.zbit.util.StringUtil;
 import de.zbit.util.prefs.SBPreferences;
 import eva2.gui.Main;
-import eva2.problems.AbstractOptimizationProblem;
 import eva2.optimization.statistics.GraphSelectionEnum;
 import eva2.optimization.statistics.InterfaceStatisticsListener;
+import eva2.problems.AbstractOptimizationProblem;
+import y.view.Graph2D;
 
 /**
  * This is the main panel in the graphical user interface, in which the entire
@@ -731,7 +730,7 @@ BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceCha
     if (f != null) {
       try {
         Graph2D graph = dynamicGraphView.getGraph().getGraph2D();
-        new Graph2Dwriter(Graph2Dwriter.writeableFileExtensions.jpeg).writeToFile(graph,f.toString());
+        new Graph2Dwriter(Graph2Dwriter.WriteableFileExtensions.jpeg).writeToFile(graph,f.toString());
         return f;
       } catch (Exception exc) {
         GUITools.showErrorMessage(this, exc);
