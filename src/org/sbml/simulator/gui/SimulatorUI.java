@@ -21,7 +21,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Image;
 import java.awt.Toolkit;
-import java.awt.Window;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
@@ -41,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.SortedMap;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
@@ -53,12 +53,10 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.xml.stream.XMLStreamException;
 
-import eva2.gui.Main;
 import org.jfree.data.statistics.Statistics;
 import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.Model;
@@ -527,7 +525,7 @@ PropertyChangeListener {
     openData.setEnabled(false);
     fileMenu.remove(openFile);
     openFile = GUITools.createJMenuItem(EventHandler.create(ActionListener.class, this,
-				"openFile"), BaseAction.FILE_OPEN);
+        "openFile"), BaseAction.FILE_OPEN);
     JMenu openMenu = GUITools.createJMenu(bundle.getString("OPEN"), bundle.getString("OPEN_TOOLTIP"), openFile, openData);
     openMenu.addActionListener(EventHandler.create(ActionListener.class, this, "openFileAndLogHistory"));
     openMenu.setIcon(openFile.getIcon());
@@ -623,17 +621,17 @@ PropertyChangeListener {
   public File[] open(File... files) {
     return openFileAndLogHistory(files);
   }
-  
+
   /**
-	 * 
-	 */
-	public File[] openFile() {
-		SBPreferences prefs = SBPreferences.getPreferencesFor(getClass());
-		File[] modelFiles = GUITools.openFileDialog(this,
-				prefs.get(GUIOptions.OPEN_DIR).toString(), false, false,
-				JFileChooser.FILES_ONLY, SBFileFilter.createSBMLFileFilterList());
-		return openFile(modelFiles);
-	}
+   * 
+   */
+  public File[] openFile() {
+    SBPreferences prefs = SBPreferences.getPreferencesFor(getClass());
+    File[] modelFiles = GUITools.openFileDialog(this,
+      prefs.get(GUIOptions.OPEN_DIR).toString(), false, false,
+      JFileChooser.FILES_ONLY, SBFileFilter.createSBMLFileFilterList());
+    return openFile(modelFiles);
+  }
 
   /* (non-Javadoc)
    * @see de.zbit.gui.BaseFrame#openFile(java.io.File[])
@@ -684,35 +682,35 @@ PropertyChangeListener {
     SerialWorker worker = new SerialWorker();
 
     // First the model(s):
-		if ((modelFiles != null) && (modelFiles.length > 0)) {
-			try {
-				SBMLReadingTask task1 = new SBMLReadingTask(modelFiles[0], this,
-					EventHandler.create(PropertyChangeListener.class, this,
-						"setSBMLDocument", "newValue"));
-				worker.add(task1);
-			} catch (Exception exc) {
-				GUITools.showErrorMessage(this, exc);
-			}
-			
-			if (modelFiles.length > 1) {
-				GUITools.showListMessage(this, bundle
-						.getString("CAN_ONLY_OPEN_ONE_MODEL_AT_A_TIME"), bundle
-						.getString("TOO_MANY_MODEL_FILES"), Arrays.asList(modelFiles)
-						.subList(1, modelFiles.length));
-			}
-			
-		}
+    if ((modelFiles != null) && (modelFiles.length > 0)) {
+      try {
+        SBMLReadingTask task1 = new SBMLReadingTask(modelFiles[0], this,
+          EventHandler.create(PropertyChangeListener.class, this,
+            "setSBMLDocument", "newValue"));
+        worker.add(task1);
+      } catch (Exception exc) {
+        GUITools.showErrorMessage(this, exc);
+      }
+
+      if (modelFiles.length > 1) {
+        GUITools.showListMessage(this, bundle
+          .getString("CAN_ONLY_OPEN_ONE_MODEL_AT_A_TIME"), bundle
+          .getString("TOO_MANY_MODEL_FILES"), Arrays.asList(modelFiles)
+          .subList(1, modelFiles.length));
+      }
+
+    }
     if ((dataFiles != null) && (dataFiles.length > 0)) {
-			// Second: the data
-			CSVReadingTask task2 = new CSVReadingTask(this, dataFiles);
-			task2.addPropertyChangeListener(EventHandler.create(PropertyChangeListener.class, this, "addExperimentalData", "newValue"));
-			worker.add(task2);
-		}
+      // Second: the data
+      CSVReadingTask task2 = new CSVReadingTask(this, dataFiles);
+      task2.addPropertyChangeListener(EventHandler.create(PropertyChangeListener.class, this, "addExperimentalData", "newValue"));
+      worker.add(task2);
+    }
 
-		worker.execute();
+    worker.execute();
 
-		// setStatusBarToMemoryUsage();
-		validate();
+    // setStatusBarToMemoryUsage();
+    validate();
     return modelFiles;
   }
 
@@ -736,155 +734,155 @@ PropertyChangeListener {
   /**
    * Launches the optimization.
    */
-	public void optimize() {
-		if (simPanel == null) { return; }
-		URL baseDir = getClass().getClassLoader().getResource("");
-		//		if (baseDir == null) {
-		//			GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.OPTIMIZATION);
-		//			JOptionPane.showMessageDialog(this,
-		//					StringUtil.toHTMLToolTip(bundle.getString("CANNOT_LAUNCH_EVA2")),
-		//					bundle.getString("ERROR_MESSAGE"), JOptionPane.ERROR_MESSAGE);
-		//			return;
-		//		}
-		setSimulationAndOptimizationEnabled(false);
-		SBMLDocument doc1 = simPanel.getModel().getSBMLDocument();
-		SBMLDocument doc2 = doc1.clone();
-		final Model model = doc2.getModel();
-		final QuantitySelectionPanel panel = new QuantitySelectionPanel(model);
-		if (JOptionPane.showConfirmDialog(this, panel,
-			bundle.getString("SELECT_QUANTITIES_FOR_OPTIMIZATION"),
-			JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE,
-			UIManager.getIcon("SBMLsimulator_96")) == JOptionPane.OK_OPTION) {
-			try {
-				String[] selectedQuantityIds = panel.getSelectedQuantityIds();
-				simPanel.notifyQuantitiesSelected(selectedQuantityIds);
-				final WindowListener wl = EventHandler.create(WindowListener.class,
-					this, "optimizationFinished", "source", "windowClosed");
-				final SimulatorUI ui = this;
-				List<MultiTable> references = simPanel.getExperimentalData();
-				if (references.get(0).getTimePoints()[0] == 0d) {
-					for (int col = 0; col < references.get(0).getColumnCount(); col++) {
-						String id = references.get(0).getColumnIdentifier(col);
-						if (Arrays.binarySearch(selectedQuantityIds, id) < 0) {
-							List<Double> values = new LinkedList<Double>();
-							for (int table = 0; table != references.size(); table++) {
-								MultiTable mt = references.get(table);
-								Column column = mt.getColumn(id);
-								if (column != null) {
-									values.add(((Double) column.getValue(0)).doubleValue());
-								}
-								
-							}
-							double value = Statistics.calculateMedian(values);
-							if (!Double.isNaN(value)) {
-								Species sp = model.getSpecies(id);
-								if (sp != null) {
-									sp.setValue(value);
-									simPanel.getVisualizationPanel().updateQuantity(id, value);
-									continue;
-								}
-								Compartment c = model.getCompartment(id);
-								if (c != null) {
-									c.setValue(value);
-									simPanel.getVisualizationPanel().updateQuantity(id, value);
-									continue;
-								}
-								Parameter p = model.getParameter(id);
-								if (p != null) {
-									p.setValue(value);
-									simPanel.getVisualizationPanel().updateQuantity(id, value);
-									continue;
-								}
-								
-							}
-						}
-					}
-				}
-				final List<MultiTable> experimentalData = simPanel
-						.getExperimentalData();
-				SBPreferences prefs = SBPreferences
-						.getPreferencesFor(EstimationOptions.class);
-				if (prefs.getBoolean(EstimationOptions.FIT_TO_SPLINES)) {
-					for (int i = experimentalData.size() - 1; i >= 0; i--) {
-						experimentalData.set(i, SplineCalculation.calculateSplineValues(
-							experimentalData.get(i),
-							prefs.getInt(EstimationOptions.NUMBER_OF_SPLINE_SAMPLES)));
-					}
-				}
-				
-				MultiTable reference = simPanel.getExperimentalData(0);
-				for (int col = 0; col < reference.getColumnCount(); col++) {
-					String id = reference.getColumnIdentifier(col);
-					if (Arrays.binarySearch(selectedQuantityIds, id) < 0) {
-						double value = reference.getValueAt(0, col).doubleValue();
-						if (!Double.isNaN(value)) {
-							Species sp = model.getSpecies(id);
-							if (sp != null) {
-								sp.setValue(value);
-								simPanel.getVisualizationPanel().updateQuantity(id, value);
-								continue;
-							}
-							Compartment c = model.getCompartment(id);
-							if (c != null) {
-								c.setValue(value);
-								simPanel.getVisualizationPanel().updateQuantity(id, value);
-								continue;
-							}
-							Parameter p = model.getParameter(id);
-							if (p != null) {
-								p.setValue(value);
-								simPanel.getVisualizationPanel().updateQuantity(id, value);
-								continue;
-							}
-							
-						}
-					}
-				}
-				
-				new Thread(new Runnable() {
-					/*
-					 * (non-Javadoc)
-					 * 
-					 * @see java.lang.Runnable#run()
-					 */
-					@Override
-					public void run() {
-						// TODO: implement org.sbml.optimization.OptimizationWorker to do this job
-						try {
-							SBPreferences prefs = SBPreferences
-									.getPreferencesFor(EstimationOptions.class);
-							simPanel.refreshStepSize();
-							DESSolver solver = simPanel.getSolver();
-							if (solver instanceof AdaptiveStepsizeIntegrator) {
-								AdaptiveStepsizeIntegrator integrator = (AdaptiveStepsizeIntegrator) solver;
-								integrator.setAbsTol(simPanel.getSimulationManager()
-										.getSimulationConfiguration().getAbsTol());
-								integrator.setRelTol(simPanel.getSimulationManager()
-										.getSimulationConfiguration().getRelTol());
-							}
-							EstimationProblem estimationProblem = new EstimationProblem(
-								solver, simPanel.getDistance(), model, experimentalData, prefs
-										.getBoolean(EstimationOptions.EST_MULTI_SHOOT), panel
-										.getSelectedQuantityRanges());
-							simPanel.getSimulationManager().setEstimationProblem(
-								estimationProblem);
-							EvA2GUIStarter evaStarter = EvA2GUIStarter.init(
-								estimationProblem, ui, simPanel, wl);
-							simPanel.setClient(evaStarter.evaClient);
-						} catch (Throwable exc) {
-							GUITools.showErrorMessage(ui, exc);
-							setSimulationAndOptimizationEnabled(true);
-						}
-					}
-				}).start();
-			} catch (Throwable exc) {
-				GUITools.showErrorMessage(this, exc);
-				setSimulationAndOptimizationEnabled(true);
-			}
-		} else {
-			setSimulationAndOptimizationEnabled(true);
-		}
-	}
+  public void optimize() {
+    if (simPanel == null) { return; }
+    URL baseDir = getClass().getClassLoader().getResource("");
+    //		if (baseDir == null) {
+    //			GUITools.setEnabled(false, getJMenuBar(), toolBar, Command.OPTIMIZATION);
+    //			JOptionPane.showMessageDialog(this,
+    //					StringUtil.toHTMLToolTip(bundle.getString("CANNOT_LAUNCH_EVA2")),
+    //					bundle.getString("ERROR_MESSAGE"), JOptionPane.ERROR_MESSAGE);
+    //			return;
+    //		}
+    setSimulationAndOptimizationEnabled(false);
+    SBMLDocument doc1 = simPanel.getModel().getSBMLDocument();
+    SBMLDocument doc2 = doc1.clone();
+    final Model model = doc2.getModel();
+    final QuantitySelectionPanel panel = new QuantitySelectionPanel(model);
+    if (JOptionPane.showConfirmDialog(this, panel,
+      bundle.getString("SELECT_QUANTITIES_FOR_OPTIMIZATION"),
+      JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE,
+      UIManager.getIcon("SBMLsimulator_96")) == JOptionPane.OK_OPTION) {
+      try {
+        String[] selectedQuantityIds = panel.getSelectedQuantityIds();
+        simPanel.notifyQuantitiesSelected(selectedQuantityIds);
+        final WindowListener wl = EventHandler.create(WindowListener.class,
+          this, "optimizationFinished", "source", "windowClosed");
+        final SimulatorUI ui = this;
+        List<MultiTable> references = simPanel.getExperimentalData();
+        if (references.get(0).getTimePoints()[0] == 0d) {
+          for (int col = 0; col < references.get(0).getColumnCount(); col++) {
+            String id = references.get(0).getColumnIdentifier(col);
+            if (Arrays.binarySearch(selectedQuantityIds, id) < 0) {
+              List<Double> values = new LinkedList<Double>();
+              for (int table = 0; table != references.size(); table++) {
+                MultiTable mt = references.get(table);
+                Column column = mt.getColumn(id);
+                if (column != null) {
+                  values.add(((Double) column.getValue(0)).doubleValue());
+                }
+
+              }
+              double value = Statistics.calculateMedian(values);
+              if (!Double.isNaN(value)) {
+                Species sp = model.getSpecies(id);
+                if (sp != null) {
+                  sp.setValue(value);
+                  simPanel.getVisualizationPanel().updateQuantity(id, value);
+                  continue;
+                }
+                Compartment c = model.getCompartment(id);
+                if (c != null) {
+                  c.setValue(value);
+                  simPanel.getVisualizationPanel().updateQuantity(id, value);
+                  continue;
+                }
+                Parameter p = model.getParameter(id);
+                if (p != null) {
+                  p.setValue(value);
+                  simPanel.getVisualizationPanel().updateQuantity(id, value);
+                  continue;
+                }
+
+              }
+            }
+          }
+        }
+        final List<MultiTable> experimentalData = simPanel
+            .getExperimentalData();
+        SBPreferences prefs = SBPreferences
+            .getPreferencesFor(EstimationOptions.class);
+        if (prefs.getBoolean(EstimationOptions.FIT_TO_SPLINES)) {
+          for (int i = experimentalData.size() - 1; i >= 0; i--) {
+            experimentalData.set(i, SplineCalculation.calculateSplineValues(
+              experimentalData.get(i),
+              prefs.getInt(EstimationOptions.NUMBER_OF_SPLINE_SAMPLES)));
+          }
+        }
+
+        MultiTable reference = simPanel.getExperimentalData(0);
+        for (int col = 0; col < reference.getColumnCount(); col++) {
+          String id = reference.getColumnIdentifier(col);
+          if (Arrays.binarySearch(selectedQuantityIds, id) < 0) {
+            double value = reference.getValueAt(0, col).doubleValue();
+            if (!Double.isNaN(value)) {
+              Species sp = model.getSpecies(id);
+              if (sp != null) {
+                sp.setValue(value);
+                simPanel.getVisualizationPanel().updateQuantity(id, value);
+                continue;
+              }
+              Compartment c = model.getCompartment(id);
+              if (c != null) {
+                c.setValue(value);
+                simPanel.getVisualizationPanel().updateQuantity(id, value);
+                continue;
+              }
+              Parameter p = model.getParameter(id);
+              if (p != null) {
+                p.setValue(value);
+                simPanel.getVisualizationPanel().updateQuantity(id, value);
+                continue;
+              }
+
+            }
+          }
+        }
+
+        new Thread(new Runnable() {
+          /*
+           * (non-Javadoc)
+           * 
+           * @see java.lang.Runnable#run()
+           */
+          @Override
+          public void run() {
+            // TODO: implement org.sbml.optimization.OptimizationWorker to do this job
+            try {
+              SBPreferences prefs = SBPreferences
+                  .getPreferencesFor(EstimationOptions.class);
+              simPanel.refreshStepSize();
+              DESSolver solver = simPanel.getSolver();
+              if (solver instanceof AdaptiveStepsizeIntegrator) {
+                AdaptiveStepsizeIntegrator integrator = (AdaptiveStepsizeIntegrator) solver;
+                integrator.setAbsTol(simPanel.getSimulationManager()
+                  .getSimulationConfiguration().getAbsTol());
+                integrator.setRelTol(simPanel.getSimulationManager()
+                  .getSimulationConfiguration().getRelTol());
+              }
+              EstimationProblem estimationProblem = new EstimationProblem(
+                solver, simPanel.getDistance(), model, experimentalData, prefs
+                .getBoolean(EstimationOptions.EST_MULTI_SHOOT), panel
+                .getSelectedQuantityRanges());
+              simPanel.getSimulationManager().setEstimationProblem(
+                estimationProblem);
+              EvA2GUIStarter evaStarter = EvA2GUIStarter.init(
+                estimationProblem, ui, simPanel, wl);
+              simPanel.setClient(evaStarter.evaClient);
+            } catch (Throwable exc) {
+              GUITools.showErrorMessage(ui, exc);
+              setSimulationAndOptimizationEnabled(true);
+            }
+          }
+        }).start();
+      } catch (Throwable exc) {
+        GUITools.showErrorMessage(this, exc);
+        setSimulationAndOptimizationEnabled(true);
+      }
+    } else {
+      setSimulationAndOptimizationEnabled(true);
+    }
+  }
 
   /* (non-Javadoc)
    * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
@@ -944,30 +942,57 @@ PropertyChangeListener {
         return;
       }
     }
-    SBMLDocument doc = (SBMLDocument) obj;
+    final SBMLDocument doc = (SBMLDocument) obj;
     if ((doc != null) && (doc.isSetModel())) {
 
       if ((simPanel != null) && !closeFile(false)) {
         return;
       }
 
-      Model model = doc.getModel();
-      simPanel = new SimulationPanel(model);
-      getContentPane().remove(watermark);
-      getContentPane().add(simPanel, BorderLayout.CENTER);
-      addPreferenceChangeListener(simPanel);
+      final Component parent = this;
+      GUITools.setEnabled(false, getJMenuBar(),  toolBar, BaseAction.FILE_OPEN,
+        BaseAction.FILE_OPEN_RECENT, BaseAction.FILE_CLOSE, Command.OPEN_DATA);
+      SwingWorker<SimulationPanel, Void> guiWorker = new SwingWorker<SimulationPanel, Void>() {
 
-//      GUITools.swapAccelerator(getJMenuBar(), BaseAction.FILE_OPEN ,Command.OPEN_DATA);
-//      GUITools.setEnabled(false, getJMenuBar(), BaseAction.FILE_OPEN);
-      GUITools.setEnabled(true, getJMenuBar(), toolBar,
-        BaseAction.FILE_SAVE_AS, Command.SIMULATION_START,
-        Command.SHOW_OPTIONS, Command.OPEN_DATA, Command.START_FBA);
-      if (garudaBackend != null) {
-        GUITools.setEnabled(true, getJMenuBar(), getJToolBar(), GarudaActions.SENT_TO_GARUDA);
-      }
-      //			setTitle(String.format("%s - %s", getApplicationName(),
-      //				modelFiles[0].getAbsolutePath()));
-      validate();
+        @Override
+        protected SimulationPanel doInBackground() throws Exception {
+          return new SimulationPanel(doc.getModel());
+        }
+
+        /* (non-Javadoc)
+         * @see javax.swing.SwingWorker#done()
+         */
+        @Override
+        protected void done() {
+          try {
+            simPanel = get();
+            getContentPane().remove(watermark);
+            getContentPane().add(simPanel, BorderLayout.CENTER);
+            addPreferenceChangeListener(simPanel);
+
+            //      GUITools.swapAccelerator(getJMenuBar(), BaseAction.FILE_OPEN ,Command.OPEN_DATA);
+            //      GUITools.setEnabled(false, getJMenuBar(), BaseAction.FILE_OPEN);
+            GUITools.setEnabled(true, getJMenuBar(), toolBar,
+              BaseAction.FILE_OPEN, BaseAction.FILE_OPEN_RECENT,
+              BaseAction.FILE_SAVE_AS, BaseAction.FILE_CLOSE,
+              Command.SIMULATION_START, Command.SHOW_OPTIONS, Command.OPEN_DATA,
+              Command.START_FBA);
+            if (garudaBackend != null) {
+              GUITools.setEnabled(true, getJMenuBar(), getJToolBar(), GarudaActions.SENT_TO_GARUDA);
+            }
+            //      setTitle(String.format("%s - %s", getApplicationName(),
+            //        modelFiles[0].getAbsolutePath()));
+            validate();
+          } catch (InterruptedException exc) {
+            GUITools.showErrorMessage(parent, exc);
+          } catch (ExecutionException exc) {
+            GUITools.showErrorMessage(parent, exc);
+          }
+        }
+
+      };
+      guiWorker.execute();
+
 
     } else {
       // TODO

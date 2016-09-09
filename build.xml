@@ -6,7 +6,7 @@
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
  *
- * Copyright (C) 2007-2014 by the University of Tuebingen, Germany.
+ * Copyright (C) 2007-2016 by the University of Tuebingen, Germany.
  *
  * This library is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -106,7 +106,13 @@
     <property name="sysbio.dir" value="${basedir}/../SysBio"/>
     <property name="sysbio.lib" value="${sysbio.dir}/lib"/>
     <path id="sysbio.classpath">
-      <fileset dir="${sysbio.lib}" includes="**.jar, **/*.jar, **.zip"/>
+      <fileset dir="${sysbio.lib}"
+      	includes="**.jar, **/*.jar, **.zip"
+      	excludes="Java5/**, jsbml-old/**"
+      />
+      <fileset dir="${basedir}/../jsbml/core/lib"
+        includes="**.jar"
+      />
     </path>
     <path id="sysbio.sourcepath">
       <fileset dir="${sysbio.dir}/src"/>
@@ -116,13 +122,13 @@
     </path>
     
   	<echo message="Determining the revision number of SysBio"/>
-    <exec executable="svn" outputproperty="svninfo.xml">
-      <arg line="info --xml"/>
+    <!--<exec executable="svn" outputproperty="svninfo.xml">
+      <arg line="info MINUSMINUSxml"/>
     </exec>
     <xmlproperty collapseAttributes="true">
       <propertyresource name="svninfo.xml"/>
-    </xmlproperty>
-	<property name="sysbio.revision" value="${info.entry.revision}"/>
+    </xmlproperty>-->
+	<property name="sysbio.revision" value="1396"/> <!--${info.entry.revision}"/-->
 
     <echo message="Deleting all previous versions of SysBio JAR files"/>
     <delete verbose="true">
@@ -149,7 +155,13 @@
       sourcepathref="sysbio.sourcepath"
       target="1.6"
       verbose="${verbose}"
-    />
+    >
+      <!-- 
+        Force javac to link agains rt.jar! Works also in MAVEN with fork = true!
+        See http://stackoverflow.com/questions/4065401/using-internal-sun-classes-with-javac
+      -->
+      <compilerarg value="-XDignore.symbol.file"/>
+    </javac>
     <!-- <copy todir="${sysbio.dir}/bin"/> -->
 
     <echo message="Packing a minimal JAR file containing only parts required for SBMLsimulator"/>
@@ -185,8 +197,11 @@
         <include name="de/zbit/**.class"/>
         <include name="de/zbit/collection/**.class"/>
         <include name="de/zbit/garuda/**.class"/>
+      	<include name="de/zbit/graph/**.class"/>
       	<include name="de/zbit/graph/gui/**.class"/>
+      	<exclude name="de/zbit/graph/gui/Translator*.class"/>
       	<include name="de/zbit/graph/io/**.class"/>
+      	<include name="de/zbit/graph/io/def/**.class"/>
       	<include name="de/zbit/graph/sbgn/**.class"/>
         <include name="de/zbit/gui/**.class"/>
         <include name="de/zbit/gui/csv/**.class"/>
@@ -223,14 +238,183 @@
       <fileset dir="${sysbio.dir}/resources" excludes="**/.svn*, package-info.*">
         <include name="de/zbit/garuda/img/**.png"/>
         <include name="de/zbit/garuda/locales/**.xml"/>
+      	<include name="de/zbit/graph/locales/**.xml"/>
         <include name="de/zbit/gui/img/**.png"/>
+      	<include name="de/zbit/io/**.txt"/>
         <include name="de/zbit/locales/**.xml"/>
         <include name="de/zbit/sbml/locales/**.xml"/>
       </fileset>
       <zipfileset excludes="META-INF/*" src="${sysbio.dir}/lib/sysbio-osx-support.jar"/>
-      <zipfileset excludes="META-INF/*" src="${sysbio.dir}/lib/quaqua.jar"/>
+      <zipfileset excludes="META-INF/*" src="${sysbio.dir}/lib/argparser.jar"/>
+      <zipfileset excludes="META-INF/*" src="${sysbio.dir}/lib/graph/y.jar"/>
     </jar>
 
   </target>
+  
+    <!-- =================================================================== -->
+    <!-- Build a minimal version of JSBML for SBMLsimulator                  -->
+    <!-- =================================================================== -->
+    <target
+      name="minimal_jsbml"
+      depends="init"
+      description="Build a minimal version of JSBML for SBMLsimulator"
+    >
+      <echo message="Defining basic properties of the JSBML project"/>
+      <property name="jsbml.dir" value="${basedir}/../JSBML"/>
+      <property name="jsbml.name" value="JSBML"/>
+      <property name="jsbml.version" value="1.2"/>
+      
+      <echo message="Determining the revision number of JSBML"/>
+      <property name="jsbml.revision" value="2288"/>
+
+      <echo message="Compiling the entire JSBML project for revision ${jsbml.revision}"/>
+      <delete dir="${jsbml.dir}/bin"/>
+      <mkdir dir="${jsbml.dir}/bin"/>
+      
+      <path id="jsbml.classpath">
+        <fileset dir="${jsbml.dir}/core/lib" includes="**.jar, **/*.jar, **.zip"/>
+        <fileset dir="${jsbml.dir}/modules/tidy/lib" includes="**.jar, **/*.jar, **.zip"/>
+      </path>
+
+      <!-- Compile JSBML including core and all extension packages -->
+      <javac
+        classpathref="jsbml.classpath"
+        compiler="${build.compiler}"
+        debug="${debug}"
+        deprecation="${deprecation}"
+        destdir="${jsbml.dir}/bin"
+        fork="true"
+        includeantruntime="false"
+        listfiles="yes"
+        memoryMaximumSize="512M"
+        nowarn="no"
+        optimize="${optimize}"
+        source="1.8"
+        target="1.8"
+        verbose="${verbose}"
+      >
+        <!-- Source -->
+        <src path="${jsbml.dir}/core/src"/>
+        <src path="${jsbml.dir}/extensions/arrays/src"/>
+        <src path="${jsbml.dir}/extensions/comp/src"/>
+        <src path="${jsbml.dir}/extensions/distrib/src"/>
+        <src path="${jsbml.dir}/extensions/dyn/src"/>
+        <src path="${jsbml.dir}/extensions/fbc/src"/>
+        <src path="${jsbml.dir}/extensions/groups/src"/>
+        <src path="${jsbml.dir}/extensions/layout/src"/>
+        <src path="${jsbml.dir}/extensions/multi/src"/>
+        <src path="${jsbml.dir}/extensions/qual/src"/>
+        <src path="${jsbml.dir}/extensions/render/src"/>
+        <src path="${jsbml.dir}/extensions/req/src"/>
+        <src path="${jsbml.dir}/extensions/spatial/src"/>
+        
+        <!-- Resources -->
+        <src path="${jsbml.dir}/core/resources"/>
+        <src path="${jsbml.dir}/extensions/arrays/resources"/>
+        <src path="${jsbml.dir}/extensions/comp/resources"/>
+        <src path="${jsbml.dir}/extensions/distrib/resources"/>
+        <src path="${jsbml.dir}/extensions/dyn/resources"/>
+        <src path="${jsbml.dir}/extensions/fbc/resources"/>
+        <src path="${jsbml.dir}/extensions/groups/resources"/>
+        <src path="${jsbml.dir}/extensions/layout/resources"/>
+        <src path="${jsbml.dir}/extensions/multi/resources"/>
+        <src path="${jsbml.dir}/extensions/qual/resources"/>
+        <src path="${jsbml.dir}/extensions/render/resources"/>
+        <src path="${jsbml.dir}/extensions/req/resources"/>
+        <src path="${jsbml.dir}/extensions/spatial/resources"/>
+        
+        <!-- Modules -->
+        <src path="${jsbml.dir}/modules/tidy/src"/>
+
+      </javac>
+      
+      <echo message="Packing a minimal JAR file containing only parts required for SBMLsimulator"/>
+      <property name="vendor" value="The JSBML Team"/>
+      
+      <jar
+        compress="true"
+        filesetmanifest="mergewithoutmain"
+        index="true"
+        indexMetaInf="true"
+        jarfile="${lib}/jsbml-${jsbml.version}-incl-libs.jar"
+        level="9"
+        manifestencoding="utf-8"
+        strict="warn"
+        update="true"
+      >
+
+        <manifest>
+           <attribute name="Built-By" value="${user.name}"/>
+           <attribute name="Built-Date" value="${TODAY}"/>
+           <attribute name="Bundle-Name"            value="${jsbml.name}"/>
+           <attribute name="Bundle-Version"         value="${version}"/>
+           <attribute name="Bundle-Vendor"          value="${vendor}"/>
+           <attribute name="Bundle-RequiredExecutionEnvironment" value="JavaSE-1.6"/>
+           <attribute name="Created-By"             value="${vendor}"/>
+           <section name="${jsbml.name}">
+            <attribute name="Specification-Title"    value="${jsbml.name}"/>
+            <attribute name="Specification-Version"  value="${jsbml.version}"/>
+             <attribute name="Specification-Vendor"   value="${vendor}"/>
+            <attribute name="Implementation-Title"   value="${jsbml.name}"/>
+             <attribute name="Implementation-Version" value="Revision ${jsbml.revision} (Build ${DSTAMP}-${TSTAMP})"/>
+             <attribute name="Implementation-Vendor"  value="${vendor}"/>
+            <attribute name="Implementation-URL"     value="http://sbml.org/Software/JSBML/"/>
+          </section>
+        </manifest>
+        
+        <fileset
+          dir="${jsbml.dir}/bin"
+          includes="META-INF/**"
+        />
+        
+        <!-- Licenses -->
+        <fileset dir="${jsbml.dir}/core">
+          <include name="licenses/COPYING.txt"/>
+          <include name="licenses/COPYING.html"/>
+          <include name="licenses/lib-licenses/*.txt"/>
+          <include name="licenses/lib-licenses/*.html"/>
+          <include name="licenses/JSBML-AUTHORS.txt"/>
+        </fileset>
+        <!-- Binaries -->
+        <fileset
+          dir="${jsbml.dir}/bin"
+        includes="**.class **/*.class"
+        excludes="**/.svn*, **/package-info.class"
+        />
+        <!-- Resources -->
+        <fileset dir="${jsbml.dir}/core/resources" includes="**.txt, **/*.txt, **.xml, **/*.xml, **.properties, **/*.properties, **.cfg, **/*.cfg, **.obo, **/*.obo"/>
+        <fileset dir="${jsbml.dir}/extensions/arrays/resources" includes="**.txt, **/*.txt, **.xml, **/*.xml, **.properties, **/*.properties, **.cfg, **/*.cfg, **.obo, **/*.obo"/>
+        <fileset dir="${jsbml.dir}/extensions/comp/resources" includes="**.txt, **/*.txt, **.xml, **/*.xml, **.properties, **/*.properties, **.cfg, **/*.cfg, **.obo, **/*.obo"/>
+        <fileset dir="${jsbml.dir}/extensions/dyn/resources" includes="**.txt, **/*.txt, **.xml, **/*.xml, **.properties, **/*.properties, **.cfg, **/*.cfg, **.obo, **/*.obo"/>
+        <fileset dir="${jsbml.dir}/extensions/fbc/resources" includes="**.txt, **/*.txt, **.xml, **/*.xml, **.properties, **/*.properties, **.cfg, **/*.cfg, **.obo, **/*.obo"/>
+        <fileset dir="${jsbml.dir}/extensions/groups/resources" includes="**.txt, **/*.txt, **.xml, **/*.xml, **.properties, **/*.properties, **.cfg, **/*.cfg, **.obo, **/*.obo"/>
+        <fileset dir="${jsbml.dir}/extensions/layout/resources" includes="**.txt, **/*.txt, **.xml, **/*.xml, **.properties, **/*.properties, **.cfg, **/*.cfg, **.obo, **/*.obo"/>
+        <fileset dir="${jsbml.dir}/extensions/multi/resources" includes="**.txt, **/*.txt, **.xml, **/*.xml, **.properties, **/*.properties, **.cfg, **/*.cfg, **.obo, **/*.obo"/>
+        <fileset dir="${jsbml.dir}/extensions/qual/resources" includes="**.txt, **/*.txt, **.xml, **/*.xml, **.properties, **/*.properties, **.cfg, **/*.cfg, **.obo, **/*.obo"/>
+        <fileset dir="${jsbml.dir}/extensions/render/resources" includes="**.txt, **/*.txt, **.xml, **/*.xml, **.properties, **/*.properties, **.cfg, **/*.cfg, **.obo, **/*.obo"/>
+        <fileset dir="${jsbml.dir}/extensions/req/resources" includes="**.txt, **/*.txt, **.xml, **/*.xml, **.properties, **/*.properties, **.cfg, **/*.cfg, **.obo, **/*.obo"/>
+        <fileset dir="${jsbml.dir}/extensions/spatial/resources" includes="**.txt, **/*.txt, **.xml, **/*.xml, **.properties, **/*.properties, **.cfg, **/*.cfg, **.obo, **/*.obo"/>
+        <!-- 3rd party libraries -->
+        <zipfileset excludes="META-INF/**, **/package-info.class, **/package.html, **/*.java readme.txt LICENSE" src="${jsbml.dir}/core/lib/biojava-ontology-4.0.0.jar"/>
+        <zipfileset excludes="META-INF/**, **/package-info.class, **/package.html, **/*.java" src="${jsbml.dir}/core/lib/jigsaw-dateParser.jar"/>
+      	<zipfileset excludes="META-INF/**, **/package-info.class, **/package.html, **/*.java" src="${jsbml.dir}/core/lib/json-simple-1.1.1.jar"/>
+        <zipfileset excludes="META-INF/**, **/package-info.class, **/package.html, **/*.java" src="${jsbml.dir}/core/lib/log4j-1.2-api-2.3.jar"/>
+      	<zipfileset excludes="META-INF/**, **/package-info.class, **/package.html, **/*.java" src="${jsbml.dir}/core/lib/log4j-api-2.3.jar"/>
+      	<zipfileset excludes="META-INF/**, **/package-info.class, **/package.html, **/*.java" src="${jsbml.dir}/core/lib/log4j-core-2.3.jar"/>
+      	<zipfileset excludes="META-INF/**, **/package-info.class, **/package.html, **/*.java" src="${jsbml.dir}/core/lib/log4j-slf4j-impl-2.3.jar"/>
+      	<zipfileset excludes="META-INF/**, **/package-info.class, **/package.html, **/*.java" src="${jsbml.dir}/core/lib/slf4j-api-1.7.21.jar"/>
+        <zipfileset excludes="META-INF/**, **/package-info.class, **/package.html, **/*.java" src="${jsbml.dir}/core/lib/spi-full-0.2.4.jar"/>
+        <zipfileset excludes="META-INF/**, **/package-info.class, **/package.html, **/*.java" src="${jsbml.dir}/core/lib/stax2-api-3.1.4.jar"/>
+        <zipfileset excludes="META-INF/**, **/package-info.class, **/package.html, **/*.java" src="${jsbml.dir}/core/lib/staxmate-2.3.0.jar"/>
+        <zipfileset excludes="META-INF/**, **/package-info.class, **/package.html, **/*.java" src="${jsbml.dir}/core/lib/woodstox-core-5.0.1.jar"/>
+      	<zipfileset excludes="META-INF/**, **/package-info.class, **/package.html, **/*.java" src="${jsbml.dir}/core/lib/xpp3_min-1.1.4c.jar"/>
+        <zipfileset excludes="META-INF/**, **/package-info.class, **/package.html, **/*.java" src="${jsbml.dir}/core/lib/xstream-1.3.1.jar"/>
+        <zipfileset excludes="META-INF/**, **/package-info.class, **/package.html, **/*.java" src="${jsbml.dir}/modules/tidy/lib/jtidy-r938.jar"/>
+      </jar>
+      
+      <!-- Remove temporary file again: -->
+      <delete file="${jsbml.dir}/core/licenses/JSBML-AUTHORS.txt"/>
+      
+    </target>
 	
 </project>

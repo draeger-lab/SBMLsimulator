@@ -180,7 +180,7 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
       selectedCount++;
     }
     data[rowIndex][colorCol] = ColorPalette.indexToColor(rowIndex);
-    data[rowIndex][nsbCol] = nsb;
+    data[rowIndex][nsbCol] = nsb.isSetName() ? nsb.getName() : nsb.getId();
     data[rowIndex][valueCol] = (nsb instanceof Quantity) ? ((Quantity) nsb).getValue() : Double.NaN;
     id2Row.put(nsb.getId(), Integer.valueOf(rowIndex));
   }
@@ -331,7 +331,7 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
    */
   private void init() {
     int dim = model.getCompartmentCount() + model.getSpeciesCount()
-        + model.getParameterCount();
+    + model.getParameterCount();
     if (includeReactions) {
       dim += model.getReactionCount();
     }
