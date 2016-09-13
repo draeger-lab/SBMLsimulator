@@ -5,7 +5,7 @@
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
  *
- * Copyright (C) 2007-2014 by the University of Tuebingen, Germany.
+ * Copyright (C) 2007-2016 by the University of Tuebingen, Germany.
  *
  * This library is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -180,7 +180,7 @@ public class LegendTableModel extends AbstractTableModel implements PropertyChan
       selectedCount++;
     }
     data[rowIndex][colorCol] = ColorPalette.indexToColor(rowIndex);
-    data[rowIndex][nsbCol] = nsb.isSetName() ? nsb.getName() : nsb.getId();
+    data[rowIndex][nsbCol] = nsb;
     data[rowIndex][valueCol] = (nsb instanceof Quantity) ? ((Quantity) nsb).getValue() : Double.NaN;
     id2Row.put(nsb.getId(), Integer.valueOf(rowIndex));
   }

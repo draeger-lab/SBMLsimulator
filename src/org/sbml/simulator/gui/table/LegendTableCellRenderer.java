@@ -5,7 +5,7 @@
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
  *
- * Copyright (C) 2007-2014 by the University of Tuebingen, Germany.
+ * Copyright (C) 2007-2016 by the University of Tuebingen, Germany.
  *
  * This library is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -129,7 +129,14 @@ public class LegendTableCellRenderer extends JLabel implements TableCellRenderer
             }
           }
         }
-        setText(value.toString());
+        NamedSBase nsb = (NamedSBase) value;
+        if (nsb.isSetName()) {
+          setText(nsb.getName());
+        } else if (nsb.isSetId()) {
+          setText(nsb.getId());
+        } else {
+          setText(nsb.getElementName());
+        }
       } else if (value instanceof Double) {
         if (Double.isNaN(((Double) value).doubleValue())) {
           setText(" - ");

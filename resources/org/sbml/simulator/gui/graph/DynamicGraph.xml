@@ -70,7 +70,7 @@
   
   <!-- GraphOptions -->
 
-  <entry key="GraphOptions">Network</entry>
+  <entry key="GraphOptions">Network dynamics</entry>
   <entry key="MIN_NODE_SIZE">Minimum node size</entry>
   <entry key="MIN_NODE_SIZE_TOOLTIP">In case of dynamic change of node size, this determines the minimum node size.</entry>
   <entry key="MAX_NODE_SIZE">Maximum node size</entry>
