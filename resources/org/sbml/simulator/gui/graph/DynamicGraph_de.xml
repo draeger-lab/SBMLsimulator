@@ -70,7 +70,7 @@
   
   <!-- GraphOptions -->
 
-  <entry key="GraphOptions">Netzwerk</entry>
+  <entry key="GraphOptions">Netzwerk-Dynamik</entry>
   <entry key="MIN_NODE_SIZE">Minimale Knotengröße</entry>
   <entry key="MIN_NODE_SIZE_TOOLTIP">Bei dynamischer Änderung der Knotengröße, definiert dies die minimale Knotengröße.</entry>
   <entry key="MAX_NODE_SIZE">Maximale Knotengröße</entry>
