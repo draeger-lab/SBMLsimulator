@@ -315,7 +315,7 @@ public class SBMLsimulator extends Launcher {
     defAndKeys.add(PlotOptions.class);
     defAndKeys.add(DrawingOptions.class);
     defAndKeys.add(GraphOptions.class);
-    defAndKeys.add(FBAOptions.class);
+    //TODO: not for this version! defAndKeys.add(FBAOptions.class);
     return defAndKeys;
   }
 

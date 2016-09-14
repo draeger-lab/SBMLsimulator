@@ -1,0 +1,523 @@
+<!-- ANT build script for yfiles obfuscation           -->
+<!-- The java based ANT tool is available from         -->
+<!-- http://jakarta.apache.org/ant                     -->
+           	
+<project name="SBMLsimulator" default="sign" basedir=".">
+
+  <target name="help">
+    <echo>
+      This is an ANT build script to build a stand-alone JAR for
+	    SBMLsimulator.
+	    	
+	    The resulting redistributable is the SIGNED jar file,
+    	stored in $appJar which is currently "SBMLsimulator.jar".
+    </echo>
+  </target>
+
+  <!-- define some properties that are used throughout the tasks -->
+  <target name="init">
+  	<echo>
+  	  PLESE MAKE SURE ALL PATHS ARE CORRECT AND DECIDE IF YOU WANT
+  	  TO USE THE LIB-JARs OR REFERENCED PROJECTS.
+  	</echo>
+    <!-- the base directory of the SBMLsimulator repository -->
+    <property name="base" location=".."/>
+  	
+  	<tstamp>
+  	  <format property="YEAR" pattern="yyyy"/>
+    </tstamp>
+  	
+  	<property name="Name" value="SBMLsimulator"/>
+    <property name="year" value="${YEAR}"/>
+  	<property name="version" value="2.0a"/>
+  	<property name="repository.revision" value="1159"/>
+
+    <echo message="----------- ${Name} ${version} [${year}] ------------"/>
+    <echo message="-----------     ${TODAY}       ------------"/>
+    <echo message="-----------     ${DSTAMP} ${TSTAMP}       ------------"/>
+  	
+    <!-- the path to the SBMLsimulator binaries -->
+    <property name="classes" location="${base}/bin"/>
+    
+    <!-- the unobfuscated application jar file -->
+    <property name="appJarRaw" value="SBMLsimulator_unobfuscated.jar"/>
+  	
+    <!-- the unsigned application jar file -->
+    <property name="appJarObf" value="SBMLsimulator_unsigned.jar"/>
+
+    <!-- the FINAL obfuscated signed application jar file -->
+    <property name="appJar" value="SBMLsimulator.jar"/>
+
+  	
+    <!-- the yGuard jar file containing the obfuscation task -->
+    <property name="yGuardJar" value="yguard.jar"/>
+    
+    <!-- the log file geenrated by the obfuscation task -->
+    <property name="obfuscationLog" value="obfuscation-log.xml"/>
+  	
+    <!-- For compiling the project -->
+    <property name="src" location="${base}/src"/>
+    <property name="test" location="${base}/test"/>
+    <property name="resources" location="${base}/resources"/>
+  	<property name="build.compiler" value="modern"/>
+  	<property name="debug" value="on"/>
+  	<property name="optimize" value="on"/>
+  	<property name="deprecation" value="false"/>
+  	<property name="verbose" value="true"/>
+  	<path id="sourcepath">
+      <fileset dir="${src}"/>
+      <fileset dir="${resources}"/>
+    </path>
+  	
+  	<property name="build.number"           value="${DSTAMP}-${TSTAMP}"/>
+    <property name="build.name"             value="${version} (build ${build.number})"/>
+  	
+    <property name="classes"                location="${base}/bin"/>
+    <!--<property name="test"                   value="${base}/test"/>-->
+    <property name="build.dir"              value="${basedir}/build"/>
+    <property name="build.src"              value="${basedir}/build/src"/>
+    <property name="build.dest"             value="${basedir}/build/classes"/>
+    <property name="doc"                    value="${basedir}/doc/api"/>
+    <property name="lib"                    value="${base}/lib"/>
+    <property name="dist"                   value="${basedir}/dist"/>
+    <property name="dist.dir"               value="${dist}/${Name}-${version}"/>
+  	<property name="UUID"                   value="58f78f8d-a676-333a-b2e3-7ea6265d5ab7"/>
+  	<property name="garuda.gadget"          value="${dist.dir}/${JAR_Name}_v${version}_Garuda.zip"/>
+  	<property name="vendor"                 value="Center for Bioinformatics Tuebingen (ZBIT)"/>
+  	
+  	<property name="jar.exclude" value="META-INF/*.SF, META-INF/LICENSE*, META-INF/NOTICE*, META-INF/INDEX.LIST, META-INF/DEPENDENCIES, **/package.html, **/package-info.class, overview.html, *.txt"/>
+  	
+  	<path id="classpath">
+      <fileset dir="${lib}"         includes="**.jar, **/*.jar, **.zip"/>
+      <fileset dir="${lib}/garuda/" includes="**.jar, **/*.jar, **.zip"/>
+      <fileset dir="${lib}/video/"  includes="**.jar, **/*.jar, **.zip"/>
+    </path>
+  	
+    <!-- =================================== -->
+    <!-- PATHS TO REFERENCED PROJETS -->
+    
+    <!-- the path to SYSBIO -->
+    <property name="SysBioPath" location="${base}/../SysBio" />
+    <!-- the path to JSBML -->
+    <property name="JSBMLPath" location="${base}/../jsbml" />
+    <!-- the path to SBML2LaTeX -->
+    <property name="SBML2LaTeXPath" location="${base}/../SBML2LaTeX" />
+    <!-- the path to SBMLsimulatorCore -->
+    <property name="SBMLsimulatorCorePath" location="${base}/../SBSCL" />
+    <!-- =================================== -->
+  	
+  </target>
+
+  <!-- =================================================================== -->
+  <!-- Prepares the build directory                                        -->
+  <!-- =================================================================== -->
+  <target
+    name="prepare"
+    depends="init"
+    description="Prepares the build directory"
+  >
+    <mkdir dir="${build.dir}"/>
+    <mkdir dir="${dist}"/>
+    <echo message="Done"/>
+  </target>
+	
+  <!-- =================================================================== -->
+  <!-- Prepares the source code                                            -->
+  <!-- =================================================================== -->
+  <target
+    name="prepare-src"
+    depends="prepare"
+    description="Prepares the source code"
+  >
+    <echo message="Removing existing directories"/>
+    <delete dir="${build.dest}"/>
+	      
+    <echo message="Creating target directories"/>
+    <mkdir dir="${build.src}"/>
+    <mkdir dir="${build.dest}"/>
+    <mkdir dir="${build.dest}/META-INF"/>
+    <mkdir dir="${dist}"/>
+    <mkdir dir="${dist.dir}"/>
+
+    <!-- copy src files -->
+    <copy todir="${build.src}" overwrite="yes">
+      <fileset 
+        dir="${src}"
+        excludes="**/.svn*, **/*.class, **/*~, **/*.tgz, **/*.zip"
+      />
+      <!--<fileset
+        dir="${test}"
+        excludes="**/.svn*, **/*.class, **/*~, **/*.tgz, **/*.zip"
+      />-->
+      <fileset 
+        dir="${resources}"
+        includes="org/**, **/*.properties, **/*.xml, **/*.png, **/*.jpg"
+        excludes="**/.svn*, **/*~, **/*.tgz, **/*.zip"/>
+    </copy>
+
+  </target>
+
+  <!-- =================================================================== -->
+  <!-- Compile                                                             -->
+  <!-- =================================================================== -->
+  <target
+	name="compile"
+	depends="prepare-src">
+    <echo message="Compiling the entire SBMLsimulator project"/>
+    <javac
+      classpathref="classpath"
+      compiler="${build.compiler}"
+      debug="${debug}"
+      deprecation="${deprecation}"
+      destdir="${build.dest}"
+      fork="true"
+      listfiles="yes"
+      memoryMaximumSize="512M"
+      nowarn="no"
+      optimize="${optimize}"
+      source="1.8"
+      sourcepathref="sourcepath"
+      target="1.8"
+      verbose="${verbose}"
+    >
+  	  <!-- Source -->
+      <src path="${src}"/>
+      <!-- Test -->
+      <!--<src path="${test}"/>-->
+      <!-- Resources -->
+  	  <src path="${resources}"/>
+    </javac>
+  	
+  	<manifest file="${build.dest}/META-INF/MANIFEST.MF">
+      <attribute name="Main-Class"             value="org.sbml.simulator.SBMLsimulator"/>
+      <attribute name="SplashScreen-Image"     value="org/sbml/simulator/gui/img/Splash.gif"/>
+      <attribute name="Built-By"               value="${user.name}"/>
+      <attribute name="Built-Date"             value="${TODAY}"/>
+      <section name="${Name}">
+        <attribute name="Implementation-Title"   value="${Name}"/>
+        <attribute name="Implementation-Vendor"  value="University of Tuebingen"/>
+        <attribute name="Implementation-Version" value="Revision ${repository.revision} (Build ${build.number})"/>
+        <attribute name="Implementation-URL"     value="http://www.cogsys.cs.uni-tuebingen.de/software/${Name}/"/>
+        <attribute name="Specification-Title"    value="${Name}"/>
+        <attribute name="Specification-Version"  value="${api.version}"/>
+        <attribute name="Specification-Vendor"   value="${vendor}"/>
+      </section>
+      <attribute name="Bundle-Name"            value="${Name}"/> 
+      <attribute name="Bundle-SymbolicName"    value="${UUID}"/>
+      <attribute name="Bundle-Revision"        value="${repository.revision}"/>
+      <attribute name="Bundle-Vendor"          value="${vendor}"/>
+      <attribute name="Bundle-RequiredExecutionEnvironment" value="JavaSE-1.6"/>
+      <attribute name="Bundle-Version"         value="${version}"/>
+    </manifest>
+  	
+    <copy todir="${build.dest}/META-INF/" verbose="${verbose}">
+      <fileset dir="${base}/licenses"/>
+    </copy>
+  	
+  </target>
+
+  <!-- puts the application specific classes into application.jar. -->
+  <target name="jar" depends="compile">
+    <delete file="${appJarRaw}"/>
+    <jar
+      compress="true"
+      duplicate="preserve"
+      filesetmanifest="mergewithoutmain"
+      index="false"
+      jarfile="${appJarRaw}"
+      manifest="${build.dest}/META-INF/MANIFEST.MF"
+    >
+      
+      <!-- SBMLsimulator Classes -->
+      <fileset dir="${classes}">
+        <exclude name="**/package.html"/>
+      	<exclude name="**/package-info.class"/>
+      	<exclude name="overview.html"/>
+      </fileset>
+      
+      <!-- All libs without projects at the ZBIT -->
+      <zipfileset excludes="${jar.exclude}" src="${base}/lib/commons-math-2.2.jar"/>
+      <zipfileset excludes="${jar.exclude}" src="${base}/lib/jcommon-1.0.23.jar"/>
+      <zipfileset excludes="${jar.exclude}" src="${base}/lib/jfreechart-1.0.15_beta.jar"/>
+      <zipfileset excludes="${jar.exclude}" src="${base}/lib/sbscl-1.5.jar"/>
+      <zipfileset excludes="${jar.exclude}" src="${base}/lib/video/xuggle-xuggler-5.4.jar"/>
+      <zipfileset excludes="${jar.exclude}" src="${base}/lib/garuda/GarudaBackend.jar"/>
+      <zipfileset excludes="${jar.exclude}" src="${base}/lib/garuda/jsonic-1.2.10.jar"/>
+      <zipfileset excludes="${jar.exclude}" src="${base}/lib/garuda/swingx-core-1.6.2-2.jar"/>
+      <zipfileset excludes="${jar.exclude}" src="${base}/lib/sysbio.jar"/>
+      <!--<zipfileset excludes="${jar.exclude}" src="${SysBioPath}/lib/commons-discovery.jar"/>-->
+      <!--<zipfileset excludes="${jar.exclude}" src="${SysBioPath}/lib/commons-logging.jar"/>-->
+      <!--<zipfileset excludes="${jar.exclude}" src="${SysBioPath}/lib/jaxrpc.jar"/>-->
+      <!--<zipfileset excludes="${jar.exclude}" src="${SysBioPath}/lib/wsdl4j.jar"/>-->
+      <!--<zipfileset excludes="${jar.exclude}" src="${SysBioPath}/lib/axis.jar"/>-->
+      <zipfileset excludes="${jar.exclude}" src="${SysBioPath}/lib/quaqua-filechooser-only.jar"/>
+
+      <!-- =================================== -->
+      <!-- All libs WITH projects at the ZBIT -->
+      <!-- Every single one of them could be replaced by including the project itself, instead of the jar -->
+      
+      <!--<fileset dir="${SysBioPath}/bin">
+        <exclude name="de/zbit/resources/**/*"/>
+        <exclude name="de/zbit/mapper/**/*"/>
+        <exclude name="**/package.html"/>
+        <exclude name="overview.html"/>
+      </fileset>-->
+    
+      <!-- <zipfileset excludes="${jar.exclude}" src="${SysBioPath}/lib/keggapi.jar"/> -->
+      <!-- <zipfileset excludes="${jar.exclude}" src="${SysBioPath}/lib/Java5/saaj.jar"/>-->
+      <!-- <zipfileset excludes="${jar.exclude}" src="${SysBioPath}/lib/WSDbfetch.jar"/>-->
+      <!--<zipfileset excludes="${jar.exclude}" src="${SysBioPath}/lib/commons-cli-1.1.jar"/>-->
+      <!--<zipfileset excludes="${jar.exclude}" src="${SysBioPath}/lib/sysbio-osx-support.jar"/>-->
+      <!--<zipfileset excludes="${jar.exclude}" src="${SysBioPath}/lib/graph/y.jar"/>-->
+    	
+      <!--<zipfileset excludes="${jar.exclude}" src="${base}/lib/SBMLsimulatorCore.jar"/>-->
+      <!--<fileset dir="${SBMLsimulatorCorePath}/target/classes/">
+        <exclude name="**/package.html"/>
+      	<exclude name="**/package-info.class"/>
+        <exclude name="overview.html"/>
+      </fileset>-->
+      
+      <!-- <zipfileset excludes="${jar.exclude}" src="${base}/lib/SBML2LaTeX-0.9.9_slim.jar"/> -->
+      <!--<fileset dir="${JSBMLPath}/bin">
+        <exclude name="log4j.properties"/>--> <!-- log4j.properties is in SBML2Latex *and* jSBML -->
+        <!--<exclude name="**/package.html"/>
+      	<exclude name="**/package-info.class"/>
+        <exclude name="overview.html"/>
+      </fileset>-->
+      <!--<zipfileset excludes="${jar.exclude}" src="${base}/lib/jsbml-1.2-incl-libs.jar"/>-->
+      <!--<zipfileset excludes="${jar.exclude}" src="${base}/lib/EvA2.jar"/>-->
+      <!-- =================================== -->
+      
+    </jar>
+  </target>
+
+
+  <!-- obfuscates y.jar and adjusts application.jar accordingly. -->
+  <!-- Generates the jar files yObf.jar and applicationObf.jar.  -->
+  <target
+  	name="obfuscate"
+  	depends="jar"
+  	description="obfuscates y.jar and adjusts application.jar accordingly. Generates the jar files yObf.jar and applicationObf.jar."
+  >	
+  	<property name="shrinkLog" value="${basedir}/shrink.log"/>
+  	
+    <taskdef name="yguard" classname="com.yworks.yguard.YGuardTask" classpath="${yGuardJar}"/>
+    <yguard>
+
+      <!-- obfuscate yFiles for public deployment -->
+      <!-- adjust your application accordingly to work with the obfuscated yFiles jar  -->
+      <inoutpair in="${appJarRaw}" out="${appJarObf}"/>
+    	
+      <externalclasses>
+        <pathelement location="${base}/lib/EvA2.jar"/>
+      	<pathelement location="${base}/lib/jsbml-1.2-incl-libs.jar"/>
+      	<pathelement location="${base}/lib/garuda-csr.jar"/>
+      	<pathelement location="${base}/lib/log4j-1.2-api-2.3.jar"/>
+      	<pathelement location="${base}/lib/log4j-api-2.3.jar"/>
+      	<pathelement location="${base}/lib/log4j-core-2.3.jar"/>
+      	<pathelement location="${base}/lib/log4j-slf4j-impl-2.3.jar"/>
+      </externalclasses>
+    	
+
+      <!-- [OPTIONALLY] Keep the line number table and the source file attributes
+                 of the public part of the "application" -->
+      <attribute name="LineNumberTable,LocalVariableTable,SourceFile">
+        <patternset>
+          <include name="assets.**"/>
+          <include name="ch.**.*"/>
+          <include name="com.**.*"/>
+          <include name="cz.**.*"/>
+          <include name="de.zbit.**"/>
+          <include name="edu.**.*"/>
+          <!--<include name="eva2.**"/>
+          <include name="EvA2*"/>
+          <include name="ilog.**"/>-->
+          <include name="javax.**.*"/>
+          <include name="javassist.**"/>
+          <include name="jp.sbi.**.*"/>
+          <include name="net.**.*"/>
+          <!--<include name="nmi.**"/>-->
+          <include name="org.**.*"/>
+          <include name="scpsolver.**"/>
+        </patternset>
+      </attribute>
+    	
+      <shrink logfile="${shrinkLog}">
+        <keep>
+          <class classes="protected" methods="protected" fields="protected">
+            <patternset>
+              <include name="assets.**"/>
+              <include name="ch.**.*"/>
+              <include name="com.**.*"/>
+              <include name="cz.**.*"/>
+              <include name="de.zbit.**"/>
+              <include name="edu.**.*"/>
+              <!--<include name="eva2.**"/>
+              <include name="EvA2*"/>
+              <include name="ilog.**"/>-->
+              <include name="javax.**.*"/>
+              <include name="javassist.**"/>
+              <include name="jp.sbi.**.*"/>
+              <include name="net.**.*"/>
+              <!--<include name="nmi.**"/>-->
+              <include name="org.**.*"/>
+              <include name="scpsolver.**"/>
+            </patternset>
+          </class>
+        </keep>
+      </shrink>
+
+      <rename logfile="${obfuscationLog}" replaceClassNameStrings="true" mainclass="${main}">
+        <!-- conservemanifest="true" -->
+        <!-- use some unique package prefix for obfuscated classes to avoid name clashes -->
+        <property name="obfuscation-prefix" value="layout"/>
+
+        <keep>
+          <package>
+            <patternset>
+              <include name="assets.**"/>
+              <include name="ch.**.*"/>
+              <include name="com.**.*"/>
+              <include name="cz.**.*"/>
+              <include name="de.zbit.**"/>
+              <include name="edu.**.*"/>
+              <!--<include name="eva2.**"/>
+              <include name="EvA2*"/>
+              <include name="ilog.**"/>-->
+              <include name="javax.**.*"/>
+              <include name="javassist.**"/>
+              <include name="jp.sbi.**.*"/>
+              <include name="net.**.*"/>
+              <!--<include name="nmi.**"/>-->
+              <include name="org.**.*"/>
+              <include name="scpsolver.**"/>
+            </patternset>
+          </package>
+
+          <!-- Keep all method, field, and class names of the "application"             -->
+          <!-- This could be adjusted to your needs if you don't want to let            -->
+          <!-- your whole application unobfuscated.                                     -->
+          <!-- In that case simply add some more "exclude" statements as depicted below -->
+          <class classes="private" methods="private" fields="private">
+            <patternset>
+              <!-- Do not obfuscate anything, by default -->
+              <include name="**.*"/>
+
+              <!-- Obfuscate all classes that make use of y.jar -->
+              <!-- We can NOT obfuscate de.zbit.graph.**.*, because there are some resources (labels) in there -->
+              <exclude name="de.zbit.graph.GraphTools"/>
+              <exclude name="de.zbit.graph.PartialElementsMarkers"/>
+              <exclude name="de.zbit.graph.RestrictedEditMode"/>
+              <exclude name="de.zbit.graph.RestrictedEditModeV2"/>
+              
+              <exclude name="de.zbit.graph.gui.LayoutGraphPanel"/>
+            	
+              <exclude name="de.zbit.graph.gui.options.*"/>
+            
+              <exclude name="de.zbit.graph.io.*"/>
+
+              <exclude name="de.zbit.graph.io.def.GenericDataMap"/>
+              <exclude name="de.zbit.graph.io.def.SBGNVisualizationProperties"/>
+
+              <exclude name="de.zbit.graph.sbgn.ArbitraryShapeNodeRealizer"/>
+              <exclude name="de.zbit.graph.sbgn.AssociationNodeRealizer"/>
+              <exclude name="de.zbit.graph.sbgn.CloneMarker"/>
+              <exclude name="de.zbit.graph.sbgn.CompartmentGroupNode"/>
+              <exclude name="de.zbit.graph.sbgn.CompartmentRealizer"/>
+              <exclude name="de.zbit.graph.sbgn.CompartmentShape"/>
+              <exclude name="de.zbit.graph.sbgn.CompartmentGroupNode"/>
+              <exclude name="de.zbit.graph.sbgn.ComplexNode"/>
+              <exclude name="de.zbit.graph.sbgn.DissociationNodeRealizer"/>
+              <exclude name="de.zbit.graph.sbgn.EmptySetNode"/>
+              <exclude name="de.zbit.graph.sbgn.LabeledCloneMarker"/>
+              <exclude name="de.zbit.graph.sbgn.NucleicAcidFeatureNode"/>
+              <exclude name="de.zbit.graph.sbgn.OmittedProcessNodeRealizer"/>
+              <exclude name="de.zbit.graph.sbgn.PerturbingAgentNode"/>
+              <exclude name="de.zbit.graph.sbgn.ProcessNodeRealizer"/>
+              <exclude name="de.zbit.graph.sbgn.ReactionNodeRealizer"/>
+              <exclude name="de.zbit.graph.sbgn.ShapeNodeRealizerSupportingCloneMarker"/>
+              <exclude name="de.zbit.graph.sbgn.SimpleCloneMarker"/>
+              <exclude name="de.zbit.graph.sbgn.UncertainProcessNodeRealizer"/>
+
+              <exclude name="de.zbit.sbml.y"/>
+            
+              <exclude name="org.sbml.simulator.gui.graph.AGraphManipulator"/>
+              <exclude name="org.sbml.simulator.gui.graph.DynamicController"/>
+              <exclude name="org.sbml.simulator.gui.graph.DynamicControlPanel"/>
+              <exclude name="org.sbml.simulator.gui.graph.DynamicCore"/>
+              <exclude name="org.sbml.simulator.gui.graph.DynamicView"/>
+              <exclude name="org.sbml.simulator.gui.graph.IDynamicGraph"/>
+              <exclude name="org.sbml.simulator.gui.graph.IGraphManipulator"/>
+              <exclude name="org.sbml.simulator.gui.graph.ImageGenerator"/>
+              <exclude name="org.sbml.simulator.gui.graph.ManipulatorOfNodeColor"/>
+              <exclude name="org.sbml.simulator.gui.graph.ManipulatorOfNodeColorAndSize"/>
+              <exclude name="org.sbml.simulator.gui.graph.ManipulatorOfNodeSize"/>
+              <exclude name="org.sbml.simulator.gui.graph.ManipulatorOfNodeSizeAndColor"/>
+              	
+              <!-- Obfuscate the included y.jar -->
+              <exclude name="y.**.*"/>
+            </patternset>
+          </class>
+        </keep>
+
+        <!-- make sure that the .properties files are renamed according to their               -->
+        <!-- corresponding class files, yFiles needs this to function properly when obfuscated -->
+        <adjust replaceName="true">
+          <include name="y/**/*.properties"/>
+        </adjust>
+      </rename>
+    </yguard>
+  	
+  	<!-- Include the external library EvA2 that causes issues during obfuscation because of internal Google library. -->
+  	<jar
+  	  compress="true"
+  	  destfile="tmp_${appJarObf}"
+  	  filesetmanifest="mergewithoutmain"
+  	  index="true"
+  	  indexMetaInf="true"
+  	  manifest="${build.dest}/META-INF/MANIFEST.MF"
+  	  manifestencoding="utf-8"
+  	  level="9"
+  	  strict="warn"
+  	  update="true"
+  	>
+  	  <!-- index="true" indexMetaInf="true" -->
+  	  <zipfileset excludes="${jar.exclude}, tidy.gif, gpl-3.0.txt, jsc.jar, lgpl-3.0.txt, XPP3_1.1.4c_MIN_VERSION" src="${appJarObf}"/>
+  	  <zipfileset excludes="${jar.exclude}" src="${base}/lib/EvA2.jar"/>
+  	  <zipfileset excludes="${jar.exclude}" src="${base}/lib/jsbml-1.2-incl-libs.jar"/>
+  	  <zipfileset excludes="${jar.exclude}" src="${base}/lib/garuda/garuda-csr.jar"/>
+  	  <zipfileset excludes="${jar.exclude}" src="${JSBMLPath}/core/lib/log4j-1.2-api-2.3.jar"/>
+  	  <zipfileset excludes="${jar.exclude}" src="${JSBMLPath}/core/lib/log4j-api-2.3.jar"/>
+  	  <zipfileset excludes="${jar.exclude}" src="${JSBMLPath}/core/lib/log4j-core-2.3.jar"/>
+      <zipfileset excludes="${jar.exclude}" src="${JSBMLPath}/core/lib/log4j-slf4j-impl-2.3.jar"/>
+  	</jar>
+  	<move file="tmp_${appJarObf}" tofile="${appJarObf}" verbose="true"/>
+  </target>
+
+  <!-- signs the application -->
+  <target name="sign" depends="obfuscate">
+  	<delete file="${appJar}"/>
+    <!-- Having an "keystore" file is required. Generate it with the "keytool" in the current directory. -->  	
+	  <signjar alias="SBMLsimulator" jar="${appJarObf}" keypass="d=dpfSBMLsimulator!" keystore="keystore" signedjar="${appJar}" storepass="d=dpfSBMLsimulator!"/>
+  </target>
+
+	
+  <!-- executes the application -->
+  <target name="run" depends="sign">
+    <java classname="org.sbml.simulator.SBMLsimulator" fork="true">
+      <classpath>
+        <pathelement location="${appJar}"/>
+      </classpath>
+    </java>
+  </target>
+
+  <!-- Removes all that has been built -->
+  <target name="clean" depends="init">
+  	<delete file="${appJarRaw}"/>
+  	<delete file="${appJarObf}"/>
+    <delete file="${appJar}"/>
+  	<delete includeemptydirs="true" dir="${build.dir}"/>
+    <delete includeemptydirs="true" dir="${classes}"/>
+  </target>
+
+</project>
