@@ -13,6 +13,11 @@ model calibration. SBMLsimulator runs on all platforms that provide a standard J
 Machine and is based on the open-source library JSBML. The integrated Systems Biology
 Simulation Core Library can be obtained as a separate application programming library.
 
+## Users' Guide
+
+For mor information, see the Users' Guide at
+http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/
+
 ## Please cite
 1. Alexander Dörr, Roland Keller, Andreas Zell, and Andreas Dräger. SBMLsimulator: a 
    Java tool for model simulation and parameter estimation in systems biology. Computation,
