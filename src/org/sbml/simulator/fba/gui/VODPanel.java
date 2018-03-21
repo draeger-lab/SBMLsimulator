@@ -38,7 +38,7 @@ import org.sbml.jsbml.SBMLDocument;
 /**
  * This class represents a panel for the Visualization Of Datasets (VOD)
  * of the computed datasets of fba.
- * 
+ *
  * @author Meike Aichele
  * @version $Rev$
  * @date 07.05.2012
@@ -46,128 +46,128 @@ import org.sbml.jsbml.SBMLDocument;
  */
 public class VODPanel extends JPanel implements ActionListener{
 
-	/**
-	 * Contains the computed values for the concentrations
-	 */
-	private double[] concentrations;
+  /**
+   * Contains the computed values for the concentrations
+   */
+  private double[] concentrations;
 
-	/**
-	 * Contains the computed values for the fluxes
-	 */
-	private double[] fluxes;
-	
-	/**
-	 * Contains the plot
-	 */
-	private JPanel plot;
+  /**
+   * Contains the computed values for the fluxes
+   */
+  private double[] fluxes;
 
-	private SBMLDocument modDoc;
+  /**
+   * Contains the plot
+   */
+  private JPanel plot;
 
-
-	/**
-	 * default serial version
-	 */
-	private static final long serialVersionUID = 1L;
+  private SBMLDocument modDoc;
 
 
-	/**
-	 * Default constructor
-	 */
-	public VODPanel() {
-		plot = new JPanel(new BorderLayout());
-	}
+  /**
+   * default serial version
+   */
+  private static final long serialVersionUID = 1L;
 
-	/*
-	 * (non-Javadoc)
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO: make button pressed answer
-	
-	}
 
-	/**
-	 * Sets the conditions of the plot (name, axes, etc.)
-	 * @param dataset
-	 * @return
-	 */
-	private static JFreeChart createChart(SlidingCategoryDataset dataset) {
-		JFreeChart jfreechart = ChartFactory.createBarChart("Steady-State Fluxes", "Reaction", "Value", dataset, false);
-		CategoryPlot cplot = (CategoryPlot) jfreechart.getPlot();
-	
-		CategoryAxis domainAxis = cplot.getDomainAxis();
-		domainAxis.setMaximumCategoryLabelWidthRatio(0.8f);
-		domainAxis.setLowerMargin(0.02);
-		domainAxis.setUpperMargin(0.02);
-	
-		// disable bar outlines...
-		BarRenderer renderer = (BarRenderer) cplot.getRenderer();
-		renderer.setDrawBarOutline(false);
-	
-		// set up gradient paints for series...
-		GradientPaint gp0 = new GradientPaint(0.0f, 0.0f, Color.blue,
-				0.0f, 0.0f, new Color(0, 0, 64));
-		renderer.setSeriesPaint(0, gp0);
-	
-		return jfreechart;
-	}
+  /**
+   * Default constructor
+   */
+  public VODPanel() {
+    plot = new JPanel(new BorderLayout());
+  }
 
-	/**
-	 * @return the concentrations
-	 */
-	public double[] getConcentrations() {
-		return concentrations;
-	}
+  /*
+   * (non-Javadoc)
+   * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+   */
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    // TODO: make button pressed answer
 
-	/**
-	 * @return the fluxes
-	 */
-	public double[] getFluxes() {
-		return fluxes;
-	}
+  }
 
-	/**
-	 * Sets the bar-plot 
-	 */
-	public void init() {
-		DefaultCategoryDataset underlying = new DefaultCategoryDataset();
-		for (int i = 0; i < fluxes.length; i++) {
-			underlying.setValue(fluxes[i], "", modDoc.getModel().getReaction(i).getId());
-		}
-		SlidingCategoryDataset scd = new SlidingCategoryDataset(underlying, 0, fluxes.length);
+  /**
+   * Sets the conditions of the plot (name, axes, etc.)
+   * @param dataset
+   * @return
+   */
+  private static JFreeChart createChart(SlidingCategoryDataset dataset) {
+    JFreeChart jfreechart = ChartFactory.createBarChart("Steady-State Fluxes", "Reaction", "Value", dataset, false);
+    CategoryPlot cplot = (CategoryPlot) jfreechart.getPlot();
 
-		JFreeChart jfreechart = createChart(scd);
-		org.jfree.chart.ChartPanel chartpanel = new org.jfree.chart.ChartPanel(jfreechart);
+    CategoryAxis domainAxis = cplot.getDomainAxis();
+    domainAxis.setMaximumCategoryLabelWidthRatio(0.8f);
+    domainAxis.setLowerMargin(0.02);
+    domainAxis.setUpperMargin(0.02);
 
-		plot.add(chartpanel, BorderLayout.CENTER);
-		this.add(plot, BorderLayout.CENTER);
-//		JPanel changePlotPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		//		JButton switchButton = new JButton("Change to dynamic View");
-		//		switchButton.addActionListener(this);
-		//		changePlotPanel.add(switchButton, BorderLayout.EAST);
-		//		
-//		add(changePlotPanel, BorderLayout.SOUTH);
-		setVisible(true);
-	}
+    // disable bar outlines...
+    BarRenderer renderer = (BarRenderer) cplot.getRenderer();
+    renderer.setDrawBarOutline(false);
 
-	/**
-	 * @param concentrations the concentrations to set
-	 */
-	public void setConcentrations(double[] concentrations) {
-		this.concentrations = concentrations;
-	}
+    // set up gradient paints for series...
+    GradientPaint gp0 = new GradientPaint(0.0f, 0.0f, Color.blue,
+      0.0f, 0.0f, new Color(0, 0, 64));
+    renderer.setSeriesPaint(0, gp0);
 
-	/**
-	 * @param fluxes the fluxes to set
-	 */
-	public void setFluxes(double[] fluxes) {
-		this.fluxes = fluxes;
-	}
+    return jfreechart;
+  }
 
-	public void setDocument(SBMLDocument expandedDocument) {
-		modDoc = expandedDocument;
-	}
+  /**
+   * @return the concentrations
+   */
+  public double[] getConcentrations() {
+    return concentrations;
+  }
+
+  /**
+   * @return the fluxes
+   */
+  public double[] getFluxes() {
+    return fluxes;
+  }
+
+  /**
+   * Sets the bar-plot
+   */
+  public void init() {
+    DefaultCategoryDataset underlying = new DefaultCategoryDataset();
+    for (int i = 0; i < fluxes.length; i++) {
+      underlying.setValue(fluxes[i], "", modDoc.getModel().getReaction(i).getId());
+    }
+    SlidingCategoryDataset scd = new SlidingCategoryDataset(underlying, 0, fluxes.length);
+
+    JFreeChart jfreechart = createChart(scd);
+    org.jfree.chart.ChartPanel chartpanel = new org.jfree.chart.ChartPanel(jfreechart);
+
+    plot.add(chartpanel, BorderLayout.CENTER);
+    this.add(plot, BorderLayout.CENTER);
+    //		JPanel changePlotPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+    //		JButton switchButton = new JButton("Change to dynamic View");
+    //		switchButton.addActionListener(this);
+    //		changePlotPanel.add(switchButton, BorderLayout.EAST);
+    //
+    //		add(changePlotPanel, BorderLayout.SOUTH);
+    setVisible(true);
+  }
+
+  /**
+   * @param concentrations the concentrations to set
+   */
+  public void setConcentrations(double[] concentrations) {
+    this.concentrations = concentrations;
+  }
+
+  /**
+   * @param fluxes the fluxes to set
+   */
+  public void setFluxes(double[] fluxes) {
+    this.fluxes = fluxes;
+  }
+
+  public void setDocument(SBMLDocument expandedDocument) {
+    modDoc = expandedDocument;
+  }
 
 
 }
