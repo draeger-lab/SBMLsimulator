@@ -1,5 +1,6 @@
 # SBMLsimulator
 <img align="right" src="resources/org/sbml/simulator/gui/img/SBMLsimulator_64.png"/>
+
 **An efficient Java™ solver implementation for SBML**
 
 [![License (GPL version 3)](https://img.shields.io/badge/license-LGPLv3.0-blue.svg?style=plastic)](http://opensource.org/licenses/LGPL-3.0)
