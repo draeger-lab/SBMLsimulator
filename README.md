@@ -9,7 +9,7 @@
 
 *Authors:* [Andreas Dräger](https://github.com/draeger/), [Roland Keller](https://github.com/RolandKeller5), [Meike Aichele](https://github.com/MeikeAi), [Robin Fähnrich](https://github.com/robin-f/), Stephanie Hoffmann, [Fabian Schwarzkopf](https://github.com/fskpf/), [Alexander Dörr](https://github.com/a-doerr/), [Max Zwiessele](https://github.com/mzwiessele), Marcel Kronfeld, Philip Stevens, [Clemens Wrzodek](https://github.com/Clemens82/), [Fabian Becker](https://github.com/halfdan/), Stefan Fischer
 
-*Contributors to predecessor projects:* Sandra Saliger, Simon Schäfer, Dieudonné Motsou Wouamba, Hannes Borch
+*Contributors to predecessor projects:* Sandra Saliger, [Simon Schäfer](https://github.com/shsshs), Dieudonné Motsou Wouamba, Hannes Borch
 ___________________________________________________________________________________________________________
 
 ## Short description
