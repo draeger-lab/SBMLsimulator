@@ -6,3 +6,5 @@ cplex*.jar
 libquaqua64.dylib
 libquaqua64.jnilib
 .settings
+.DS_Store
+Statistics.ser
