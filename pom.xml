@@ -1,0 +1,211 @@
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.sbml</groupId>
+	<artifactId>SBMLsimulator</artifactId>
+	<packaging>jar</packaging>
+
+	<!-- =================================================================== -->
+	<!-- General project information -->
+	<!-- =================================================================== -->
+
+	<name>${project.artifactId}</name>
+	<version>1.2</version>
+	<url>https://github.com/draeger-lab/SBMLsimulator</url>
+	<inceptionYear>2010</inceptionYear>
+	<description>An efficient Java™ solver implementation for SBML </description>
+
+	<properties>
+		<jdk.version>1.8</jdk.version>
+		<maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
+		<year>${maven.build.timestamp}</year><!-- This property is used for filtering 
+			the variable ${year} in some resource files -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.license.url>https://opensource.org/licenses/GPL-3.0</project.license.url>
+		<sysbio.version>1403</sysbio.version> <!-- SVN revision -->
+		<quaqua.version>9</quaqua.version>
+		<organization.name>University of Tuebingen, Germany</organization.name>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<simulator.version>${project.version}</simulator.version>
+		<simulator.basedir>${basedir}</simulator.basedir> <!-- will be reset on each sub-pom to be the directory of the pom -->
+		<simulator.build.javac.source>1.7</simulator.build.javac.source>
+		<simulator.build.javac.target>1.7</simulator.build.javac.target>
+		<maven.test.skip>true</maven.test.skip>
+		<maven.test.failure.ignore>true</maven.test.failure.ignore>
+		<simulator.uuid>1cfbffa0-bbcb-4ca9-aa44-bfa4815e935e</simulator.uuid>
+	</properties>
+
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url>https://github.com/draeger-lab/SBMLsimulator/issues</url>
+	</issueManagement>
+
+	<developers>
+		<developer>
+			<email>draeger@informatik.uni-tuebingen.de</email>
+			<name>Andreas Dräger</name>
+			<url>https://github.com/draeger/</url>
+			<id>draeger</id>
+		</developer>
+	</developers>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<!-- NOTE: We don't need a groupId specification because the group is 
+					org.apache.maven.plugins ...which is assumed by default. -->
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.1.1</version>
+				<executions>
+					<!-- the garude zip file -->
+					<execution>
+						<id>garuda-zip</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<finalName>simulator-${project.version}_Garuda</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+							<descriptors>
+								<descriptor>src/main/assembly/garuda_zip.xml</descriptor>
+							</descriptors>
+							<target>${simulator.build.javac.target}</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<repositories>
+		<!-- Adding repository to download latest jlibSBML -->
+		<repository>
+			<id>JSBML-SNAPSHOT</id>
+			<name>The JSBML Snapshot repository</name>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+		</repository>
+		<!-- Local libraries are an in-project repository -->
+		<!-- Add the dependencies and put them in -->
+		<!-- ${project.basedir}/lib/groupId/artifactId/version/ -->
+		<repository>
+			<id>libs</id>
+			<url>file://${project.basedir}\lib</url>
+		</repository>
+
+	</repositories>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>org.sbml</groupId>
+			<artifactId>jsbml</artifactId>
+			<version>1.4</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/net.arnx/jsonic -->
+		<dependency>
+			<groupId>net.arnx</groupId>
+			<artifactId>jsonic</artifactId>
+			<version>1.2.10</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.swinglabs</groupId>
+			<artifactId>swingx-core</artifactId>
+			<version>1.6.2-2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>jp.sbi</groupId>
+			<artifactId>garuda</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+		<!-- mvn install:install-file -Dfile=${project.basedir}\lib\garuda\GarudaBackend.jar 
+			-DgroupId=de.zbit -DartifactId=GarudaBackend -Dversion=1.0 -Dpackaging=jar -->
+		<dependency>
+			<groupId>de.zbit</groupId>
+			<artifactId>GarudaBackend</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+		<!-- mvn install:install-file -Dfile=${project.basedir}\lib\video\xuggle-xuggler-5.4.jar 
+			-DgroupId=org.xuggle -DartifactId=xuggle-xuggler -Dversion=5.4 -Dpackaging=jar -->
+		<dependency>
+			<groupId>xuggle</groupId>
+			<artifactId>xuggle-xuggler</artifactId>
+			<version>5.4</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.6.4</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math</artifactId>
+			<version>2.2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/de.openea/eva2 -->
+		<dependency>
+			<groupId>de.openea</groupId>
+			<artifactId>eva2</artifactId>
+			<version>2.2.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.jfree/jcommon -->
+		<dependency>
+			<groupId>org.jfree</groupId>
+			<artifactId>jcommon</artifactId>
+			<version>1.0.23</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.jfree/jfreechart -->
+		<dependency>
+			<groupId>org.jfree</groupId>
+			<artifactId>jfreechart</artifactId>
+			<version>1.0.15</version>
+		</dependency>
+
+		<!-- mvn install:install-file -Dfile=${project.basedir}\lib\quaqua-filechooser-only.jar 
+			-DgroupId=ch.randelshofer -DartifactId=quaqua-filechooser-only -Dversion=8.0 
+			-Dpackaging=jar -->
+		<dependency>
+			<groupId>ch.randelshofer</groupId>
+			<artifactId>quaqua-filechooser-only</artifactId>
+			<version>8.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>jp.sbi</groupId>
+			<artifactId>garuda</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>de.zbit</groupId>
+			<artifactId>GarudaBackend</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+	</dependencies>
+</project>

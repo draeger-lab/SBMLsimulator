@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+  <comment>
+	   This configuration describes the names of buttons and menu
+	   items in base graphical user interfaces. To change the configuration
+	   note that the key is the same as the enum type in BaseFrame.BaseAction
+	   and the given value consists of the actual short name and - separated
+	   by a semicolon ";" the corresponding tool tip.
+  </comment>
+  
+  <!-- DynamicControlPanel -->
+  
+  <entry key="PLAY">Play</entry>
+  <entry key="PLAY_TOOLTIP">Start the dynamic visualization.</entry>
+  <entry key="PAUSE">Pause</entry>
+  <entry key="PAUSE_TOOLTIP">Pause the dynamic visualization.</entry>
+  <entry key="STOP">Stop</entry>
+  <entry key="STOP_TOOLTIP">Stop the dynamic visualization or abort video generating.</entry>
+  <entry key="TO_VIDEO">Video</entry>
+  <entry key="TO_VIDEO_TOOLTIP">Save the dynamic visualization as a video. Resolution can be adjusted with resolution multiplier in options and the resulting speed of the video itself will be approximately the same as the chosen simulation speed.</entry>
+  <entry key="GRAPHSHOT">Image</entry>
+  <entry key="GRAPHSHOT_TOOLTIP">Take a screenshot of the whole graph. Resolution can be adjusted with resolution multiplier in options.</entry>  
+  <entry key="NODELABELS">Nodelabels</entry>
+  <entry key="NODELABELS_TOOLTIP">Switch for node labels.</entry>
+  <entry key="REACTIONLABELS">Reactionlabels</entry>
+  <entry key="REACTIONLABELS_TOOLTIP">Switch for reaction labels.</entry>
+  <entry key="FAST">Fast</entry>
+  <entry key="NORMAL">Normal</entry>
+  <entry key="SLOW">Slow</entry>
+  <entry key="FALSE_INPUT">Input not a positive integer.</entry>
+  <entry key="TIMEPOINT">Timepoint</entry>
+  <entry key="SIMULATIONSPEED">Simulationspeed</entry>
+  <entry key="SIMULATIONSPEED_SPINNER_TOOLTIP">Displays the current simulation speed as value. Changeable in Options/Network.</entry>
+  <entry key="NODESIZE">Node size</entry>
+  <entry key="NODECOLOR">Node color</entry>
+  <entry key="NODESIZE_AND_COLOR">Abs.size/rel.color</entry>
+  <entry key="NODECOLOR_AND_SIZE">Rel.size/abs.color</entry>
+  <entry key="GROUP_VISUALIZATION">Visualization</entry> 
+  <entry key="VISUALIZATION_TOOLTIP">Chose visualization style and data for the dynamic visualization.</entry>
+  <entry key="SEARCHBAR_TOOLTIP">Choose time point of visualization.</entry>
+  <entry key="GENERATE_VIDEO">Generate video with {0}x{1} pixel.</entry>
+  <entry key="SCREENSHOT_DONE">Picture sucessfully saved.</entry>
+  
+  <!-- DynamicController -->
+  
+  <entry key="VIDEO_FILEFILTER">Videofiles (*.mov, *.avi, *.mp4, *.mpg, *.wmv, *.flv)</entry>
+  
+  <!-- DynamicView -->
+  
+  <entry key="SIMULATION_DATA">Simulation data</entry> 
+  <entry key="EXPERIMENTAL_DATA">Experimental data</entry>
+  <entry key="FLUXBALANCE_DATA">Fluxbalance data</entry>      
+  
+  <!-- DynamicCore -->
+  
+  <entry key="PROCESSING_IMAGE">Processing image {0} of {1}</entry>
+  <entry key="VIDEOENCODING_DONE">Videoencoding successful.</entry>
+  <entry key="VIDEOENCODING_CANCELED">Videoencoding canceled.</entry>
+  
+  <!-- Error Messages -->
+  
+  <entry key="VIDEO_CODEC_NOT_FOUND">Couldn't guess video codec. Given file ending/format correct?</entry>
+  <entry key="COULD_NOT_WRITE_SCREENSHOT">Couldn't write screenshot file.</entry>
+  <entry key="EXC_MIN_MAX_NODE_SIZE">Maximum node size has to be greater than minimum node size. Changing to default values.</entry>
+  <entry key="EXC_MIN_MAX_LINE_WIDTH">Maximum line width has to be greater than minimum line width. Changing to default values.</entry>
+  <entry key="VIDEO_LONG_COMPUTATION_TIME">Attention! Video generation could take some time and high processor workload with the chosen settings ({0}x{1} and {2} pictures).</entry>
+  <entry key="INFO_COMP">Information</entry>
+  <entry key="VIDEOENCODING_ERROR">Error or abort while video encoding. In case of error try again.</entry>
+  
+  <!-- GraphOptions -->
+
+  <entry key="GraphOptions">Network dynamics</entry>
+  <entry key="MIN_NODE_SIZE">Minimum node size</entry>
+  <entry key="MIN_NODE_SIZE_TOOLTIP">In case of dynamic change of node size, this determines the minimum node size.</entry>
+  <entry key="MAX_NODE_SIZE">Maximum node size</entry>
+  <entry key="MAX_NODE_SIZE_TOOLTIP">In case of dynamic change of node size, this determines the maximum node size.</entry>
+  <entry key="USE_UNIFORM_NODE_COLOR">Uniform node color</entry>
+  <entry key="USE_UNIFORM_NODE_COLOR_TOOLTIP">Enable/Disable uniform node colors instead of node colors given in legend.</entry>
+  <entry key="UNIFORM_NODE_COLOR">Color for uniform node color</entry>
+  <entry key="UNIFORM_NODE_COLOR_TOOLTIP">Sets the color for uniform node color.</entry>
+  <entry key="GROUP_NODESIZE">Dynamic change of node size</entry>
+  <entry key="GROUP_NODESIZE_TOOLTIP">Options for the dynamic change of node size.</entry>
+  <entry key="GROUP_NODECOLOR">Dynamic change of node color</entry>
+  <entry key="GROUP_NODECOLOR_TOOLTIP">Options for the dynamic change of node color.</entry>
+  <entry key="GROUP_REACTION">Dynamical change of reactions</entry>
+  <entry key="GROUP_REACTION_TOOLTIP">Options for the dynamic change of reactions.</entry>
+  <entry key="COLOR1">High concentration</entry>
+  <entry key="COLOR1_TOOLTIP">In case of dynamic change of node color, this determines the color for high concentration.</entry>
+  <entry key="COLOR2">Middle concentration</entry>
+  <entry key="COLOR2_TOOLTIP">In case of dynamic change of node color, this determines the color for middle concentration.</entry>
+  <entry key="COLOR3">Low concentration</entry>
+  <entry key="COLOR3_TOOLTIP">In case of dynamic change of node color, this determines the color for low concentration.</entry>  
+  <entry key="MIN_LINE_WIDTH">Minimum line width</entry>
+  <entry key="MIN_LINE_WIDTH_TOOLTIP">Determines the minimum line width of dynamic reaction visualization.</entry> 
+  <entry key="MAX_LINE_WIDTH">Maximum line width</entry>
+  <entry key="MAX_LINE_WIDTH_TOOLTIP">Determines the maximum line width of dynamic reaction visualization.</entry>
+  <entry key="SHOW_NODE_LABELS">Concentrations</entry>
+  <entry key="SHOW_NODE_LABELS_TOOLTIP">Shows/hides concentrations of species.</entry>
+  <entry key="SHOW_REACTION_LABELS">Reaction rates</entry>
+  <entry key="SHOW_REACTION_LABELS_TOOLTIP">Shows/hides reaction rates.</entry>
+  <entry key="GRAPH_LABELS">Labeling</entry>
+  <entry key="GRAPH_LABELS_TOOLTIP">Enables/Disables labels.</entry>
+  <entry key="COLOR_NODE_SIZE">Constant node size</entry>
+  <entry key="COLOR_NODE_SIZE_TOOLTIP">Determines the constant node size in case of dynamic change of node color.</entry>
+  <entry key="SIM_SPEED_FAST">Fast play speed</entry>
+  <entry key="SIM_SPEED_FAST_TOOLTIP">Chose time in miliseconds for how long the current timepoint will be shown.</entry>
+  <entry key="SIM_SPEED_NORMAL">Normal play speed</entry>
+  <entry key="SIM_SPEED_NORMAL_TOOLTIP">Chose time in miliseconds for how long the current timepoint will be shown.</entry>  
+  <entry key="SIM_SPEED_SLOW">Slow play speed</entry>
+  <entry key="SIM_SPEED_SLOW_TOOLTIP">Chose time in miliseconds for how long the current timepoint will be shown.</entry>
+  <entry key="SIM_SPEED_CHOOSER">Choose play speed</entry>
+  <entry key="SIM_SPEED_CHOOSER_TOOLTIP">This options determines the play speed.</entry>  
+  <entry key="GROUP_SIM_SPEED">Play speed</entry>
+  <entry key="GROUP_SIM_SPEED_TOOLTIP">These settings control the play speed. The smaller the value, the faster the play speed.</entry>
+  <entry key="VISUALIZATION_STYLE">Visualization style</entry>
+  <entry key="VISUALIZATION_STYLE_TOOLTIP">This options determines the visualization style.</entry>  
+  <entry key="VISUALIZATION_DATA">Data for visualization</entry>
+  <entry key="VISUALIZATION_DATA_TOOLTIP">Choose the data to visualize.</entry>  
+  <entry key="DATA_NOT_AVAILABLE">Chosen data set for visualization is not available by now.</entry>
+  <entry key="GROUP_VIDEO_ENCODING">Video encoding / Screenshot settings</entry>
+  <entry key="GROUP_VIDEO_ENCODING_TOOLTIP">These settings control video encoding and screenshot settings.</entry>
+  <entry key="VIDEO_IMAGE_STEPSIZE">Skipped timepoints</entry>
+  <entry key="VIDEO_IMAGE_STEPSIZE_TOOLTIP">Choose how many timepoints are skipped to produce the video. The less timepoints are skipped, the smoother the output video will get.</entry>    
+  <entry key="VIDEO_RESOLUTION_MULTIPLIER">Resolution multiplier</entry>
+  <entry key="VIDEO_RESOLUTION_MULTIPLIER_TOOLTIP">The higher this multiplier, the better the resolution but the higher the outcoming file size and compution time. It is only used if the output resolution would be too small to generate a sharp video.</entry>
+  <entry key="RELATIVE_CONCENTRATION_CHANGES">Relative concentration change</entry>
+  <entry key="RELATIVE_CONCENTRATION_CHANGES_TOOLTIP">By enabling this option, concentration change will be relative. This means each species has its own min/max value with which the changes in visualization are computed, as far as this option is supported by the chosen visualization style.</entry>
+  <entry key="INTERPOLATE_EXP_DATA">Interpolate experimental data</entry>
+  <entry key="INTERPOLATE_EXP_DATA_TOOLTIP">Enable/disable interpolation of experimental data, if there are less than 100 timepoints.</entry>
+  <entry key="VIDEO_FORCE_RESOLUTION_MULTIPLIER">Force resolution multiplier</entry>
+  <entry key="VIDEO_FORCE_RESOLUTION_MULTIPLIER_TOOLTIP">By enabling this option you can force to use the resolution multiplier even if the video output resolution would be big enough.</entry>
+  <entry key="VIDEO_DISPLAY_WINDOW">Picture whole graph</entry>
+  <entry key="VIDEO_DISPLAY_WINDOW_TOOLTIP">Choose if the whole graph should be pictured in videos and screenshots or just the current display window.</entry>
+  
+</properties>

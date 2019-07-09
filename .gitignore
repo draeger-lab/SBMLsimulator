@@ -6,3 +6,4 @@ cplex*.jar
 libquaqua64.dylib
 libquaqua64.jnilib
 .settings
+/target/
