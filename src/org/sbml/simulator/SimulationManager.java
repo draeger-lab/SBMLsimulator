@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -41,7 +39,6 @@ import eva2.tools.math.Mathematics;
  * for a simulation including the solution and the distance values if computed.
  * 
  * @author Alexander D&ouml;rr
- * @version $Rev$
  * @since 1.0
  */
 public class SimulationManager implements PropertyChangeListener {

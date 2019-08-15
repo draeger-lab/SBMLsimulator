@@ -1,6 +1,4 @@
 /*
- * $Id:  TargetFunction.java 16:08:51 Meike Aichele$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -19,7 +17,6 @@ package org.sbml.simulator.fba.controller;
 
 /**
  * @author Meike Aichele
- * @version $Rev$
  * @date 07.05.2012
  * @since 1.0
  */

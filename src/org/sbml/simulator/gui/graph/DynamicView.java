@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -58,7 +56,6 @@ import de.zbit.util.prefs.SBPreferences;
  * of associated {@link DynamicCore}.
  * 
  * @author Fabian Schwarzkopf
- * @version $Rev$
  */
 public class DynamicView extends JSplitPane implements IDynamicGraph,
 PropertyChangeListener {
@@ -67,10 +64,9 @@ PropertyChangeListener {
    * Stores all available {@link IGraphManipulator}s.
    * 
    * @author Fabian Schwarzkopf
-   * @version $Rev$
    */
   public enum Manipulators {
-    NODESIZE, NODECOLOR, NODESIZE_AND_COLOR, NODECOLOR_AND_SIZE;
+    NODESIZE, NODECOLOR, NODESIZE_AND_COLOR, NODECOLOR_AND_SIZE, FILL_LEVEL;
 
     /**
      * Returns a string array of all manipulators.
@@ -79,7 +75,7 @@ PropertyChangeListener {
      */
     public static String[] getAllManipulators() {
       return new String[] { NODESIZE.getName(), NODECOLOR.getName(),
-        NODESIZE_AND_COLOR.getName(), NODECOLOR_AND_SIZE.getName() };
+        NODESIZE_AND_COLOR.getName(), NODECOLOR_AND_SIZE.getName(), FILL_LEVEL.getName() };
     }
 
     /**
@@ -96,6 +92,8 @@ PropertyChangeListener {
         return NODESIZE_AND_COLOR;
       } else if (manipulatorName.equals(bundle.getString("NODECOLOR_AND_SIZE"))) {
         return NODECOLOR_AND_SIZE;
+      } else if (manipulatorName.equals(bundle.getString("FILL_LEVEL"))) {
+        return FILL_LEVEL;
       }
       return null;
     }
@@ -374,7 +372,9 @@ PropertyChangeListener {
    */
   @Override
   public void donePlay() {
-    controlPanel.setStopStatus();
+    if(!GraphOptions.CYCLE_SIMULATION.getValue(SBPreferences.getPreferencesFor(GraphOptions.class))) {		  
+      controlPanel.setStopStatus();
+    }
     setEnabled(true); //ensure that view is enabled
     setEnableLegend(true);
     controlPanel.setStatusString(null); //no displayed status
@@ -652,6 +652,8 @@ PropertyChangeListener {
   public void updateGraph(double timepoint, MultiTable updateThem) {
     // update JSlider (in case of "play")
     controlPanel.setSearchbarValue(timepoint);
+    // to update the cursor in the concentration Graph
+    controller.setNewTimepoint(timepoint);
 
     if (graphManipulator != null) {
       for (int i = 1; i < updateThem.getColumnCount(); i++) {

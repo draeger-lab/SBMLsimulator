@@ -1,6 +1,4 @@
 /*
- * $Id$ $URL:
- * FluxMinimizationIIa.java $
  * --------------------------------------------------------------------- This
  * file is part of SBMLsimulator, a Java-based simulator for models of
  * biochemical processes encoded in the modeling language SBML.
@@ -25,7 +23,6 @@ import java.util.regex.Pattern;
 
 /**
  * @author Roland Keller
- * @version $Rev$
  */
 public class FluxMinimizationIIa extends FluxMinimizationII {
 	
@@ -323,6 +320,5 @@ public class FluxMinimizationIIa extends FluxMinimizationII {
 		}
 	}
 
-	
 	
 }

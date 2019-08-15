@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -76,7 +74,6 @@ import de.zbit.util.prefs.SBPreferences;
  * 
  * @author Andreas Dr&auml;ger
  * @date 2010-09-17
- * @version $Rev$
  * @since 1.0
  */
 public class InteractiveScanPanel extends JPanel implements ActionListener,

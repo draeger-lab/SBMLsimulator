@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -21,7 +19,6 @@
  * used by the graphical or the command line user interface are all gathered
  * in this package.
  * 
- * @version $Rev$
  * @since 1.0
  */
 package org.sbml.simulator.locales;

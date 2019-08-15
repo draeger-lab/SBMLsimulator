@@ -1,6 +1,4 @@
 /*
- * $Id:  FluxMinimization.java 16:15:22 Meike Aichele$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -28,10 +26,9 @@ import eva2.tools.math.Jama.Matrix;
 /**
  * Computes and contains all components you need for a flux minimization target function for FBA (flux balance analysis),
  * like the error, the flux vector, the concentrations (in steady-state and at the beginning) and the gibbs energies
- * for the reactions in the model. 
+ * for the reactions in the model.
  * 
  * @author Meike Aichele
- * @version $Rev$
  * @date 07.05.2012
  * @since 1.0
  */

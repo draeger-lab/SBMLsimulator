@@ -21,10 +21,14 @@
   <entry key="TO_VIDEO_TOOLTIP">Speichert die dynamische Visualisierung als Video. Die Auflösung kann über den Auflösungsmultiplikator in den Optionen angepasst werden und die Videogeschwindigkeit ist annähernd dieselbe, wie die eingestellte Simulationsgeschwindigkeit.</entry>
   <entry key="GRAPHSHOT">Bild</entry>
   <entry key="GRAPHSHOT_TOOLTIP">Speichert das aktuelle Netzwerk als Bilddatei. Die Auflösung kann über den Auflösungsmultiplikator in den Optionen angepasst werden.</entry>   
+  <entry key="CONCENTRATIONGRAPH">Graph der metabolischen Konzentrationen</entry>
+  <entry key="CONCENTRATIONGRAPH_TOOLTIP">Zeigt einen Graph mit allen metabolischen Konzentrationen insgesamt und zum aktuellen Zeitpunkt</entry>
   <entry key="NODELABELS">Knotenbeschriftung</entry>
   <entry key="NODELABELS_TOOLTIP">Blendet die Konzentrationen ein/aus.</entry>
   <entry key="REACTIONLABELS">Reaktionenbeschriftung</entry>
   <entry key="REACTIONLABELS_TOOLTIP">Blendet die Reaktionsgeschwindigkeiten ein/aus.</entry>
+  <entry key="CYCLE_SIMULATION">Loopsimulation</entry>
+  <entry key="CYCLE_SIMULATION_TOOLTIP">Simulation wird immer wieder von vorne gestartet</entry>
   <entry key="FAST">Schnell</entry>
   <entry key="NORMAL">Normal</entry>
   <entry key="SLOW">Langsam</entry>
@@ -36,11 +40,18 @@
   <entry key="NODECOLOR">Knotenfarbe</entry>
   <entry key="NODESIZE_AND_COLOR">Abs.Größe/rel.Farbe</entry>
   <entry key="NODECOLOR_AND_SIZE">Rel.Größe/abs.Farbe</entry>
+  <entry key="FILL_LEVEL">Rel.Füllstände/abs.Farbe</entry>
   <entry key="GROUP_VISUALIZATION">Visualisierung</entry>
   <entry key="VISUALIZATION_TOOLTIP">Wählen Sie die Art der dynamischen Visualisierung und die zu visualisierenden Daten aus.</entry>
   <entry key="SEARCHBAR_TOOLTIP">Stellen Sie den Zeitpunkt der Visualisierung ein.</entry>
   <entry key="GENERATE_VIDEO">Erzeuge Video mit {0}x{1} Pixel.</entry>
   <entry key="SCREENSHOT_DONE">Bild erfolgreich gespeichert.</entry>
+  
+  <!--  ConcentrationGraphUI  -->
+  
+  <entry key="CONCENTRATION_GRAPH_TITLE">Konzentrationsübersicht</entry>
+  <entry key="X_AXIS">Zeit</entry>
+  <entry key="Y_AXIS">Konzentrationen</entry>
   
   <!-- DynamicController -->
   
@@ -77,6 +88,8 @@
   <entry key="MAX_NODE_SIZE_TOOLTIP">Bei dynamischer Änderung der Knotengröße, definiert dies die maximale Knotengröße.</entry>
   <entry key="USE_UNIFORM_NODE_COLOR">Einheitliche Knotenfarbe</entry>
   <entry key="USE_UNIFORM_NODE_COLOR_TOOLTIP">Einheitliche Knotenfarbe, anstatt den Farben in der Legende.</entry>
+  <entry key="CHOOSE_OWN_NODE_COLORS">Konzentrationsfarben selbst wählen</entry>
+  <entry key="CHOOSE_OWN_NODE_COLORS_TOOLTIP">Alle Farben für die Konzentrationen selbst wählen</entry>
   <entry key="UNIFORM_NODE_COLOR">Knotenfarbe</entry>
   <entry key="UNIFORM_NODE_COLOR_TOOLTIP">Farbeinstellung für die einheitliche Knotenfarbe.</entry>
   <entry key="GROUP_NODESIZE">Dynamische Änderung der Knotengröße</entry>
@@ -132,5 +145,17 @@
   <entry key="VIDEO_FORCE_RESOLUTION_MULTIPLIER_TOOLTIP">Mit dieser Option kann der Auflösungsmultiplikator erzwungen werden auch wenn die Videoauflösung groß genug wäre.</entry>
   <entry key="VIDEO_DISPLAY_WINDOW">Komplettes Netzwerk abbilden</entry>
   <entry key="VIDEO_DISPLAY_WINDOW_TOOLTIP">Wählen Sie, ob das komplette Netzwerk auf Bildern und Videos dargestellt werden soll oder nur die aktuelle Ansicht.</entry>
+  <entry key="CAMERA_WAY_FILE">Kameraanimation</entry>
+  <entry key="CAMERA_WAY_FILE_TOOLTIP">Füge Datei für Kameraanimation hinzu</entry>
+  <entry key="SHOW_CAMERA_ANIMATION">Kameraanimation</entry>
+  <entry key="SHOW_CAMERA_ANIMATION_TOOLTIP">Zeigt die geladene Kameraanimation bei Simulationsstart in gewählter Geschwindigkeit</entry>
+  <entry key="NO_CAMERA_ANIMATION">Ohne</entry>
+  <entry key="NO_CAMERA_ANIMATION_TOOLTIP">Es wird keine Kameraanimation gezeigt</entry>
+    
+  <!-- Rearrange the cycles nicely -->
+  
+  <entry key="FILE_WITH_REACTIONNODES">Datei mit Reaktionsknoten</entry>
+  <entry key="FILE_WITH_SPECIES">Datei mit Metaboliten</entry>
+  <entry key="RADIUS_OF_CIRCLE">Radius des Kreises</entry>
   
 </properties>

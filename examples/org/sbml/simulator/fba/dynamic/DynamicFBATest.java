@@ -1,10 +1,6 @@
 /*
- * $Id$URL:
- * https://rarepos.cs.uni-tuebingen
- * .de/svn-path/SBMLsimulator/trunk/examples/org/
- * sbml/simulator/fba/dynamic/DynamicFBATest.java $
- * --------------------------------------------------------------------- This
- * file is part of SBMLsimulator, a Java-based simulator for models of
+ * --------------------------------------------------------------------- 
+ * This file is part of SBMLsimulator, a Java-based simulator for models of
  * biochemical processes encoded in the modeling language SBML.
  * 
  * Copyright (C) 2007-2016 by the University of Tuebingen, Germany.
@@ -33,7 +29,6 @@ import de.zbit.io.csv.CSVWriter;
  * Test a dynamic flux balance analysis.
  * 
  * @author Robin F&auml;hnrich
- * @version $Rev$
  * @since 1.0
  */
 public class DynamicFBATest {

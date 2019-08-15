@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -49,7 +47,6 @@ import de.zbit.util.Timer;
  * @author Philip Stevens
  * @author Max Zwie&szlig;ele
  * @date 2010-09-17
- * @version $Rev$
  * @since 1.0
  */
 public class SimulationWorker extends SwingWorker<MultiTable, MultiTable> implements PropertyChangeListener {

@@ -1,6 +1,4 @@
 /*
- * $Id: StabilityMatrix.java 338 2012-02-17 07:03:11Z draeger $
- * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/SBMLsimulator/branches/Andreas/src/org/sbml/simulator/math/StabilityMatrix.java $
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -31,7 +29,6 @@ import eva2.tools.math.Jama.Matrix;
  * 
  * @author Alexander D&ouml;rr
  * @date 2009-12-18
- * @version $Rev: 338 $
  * @since 1.0
  */
 public class StabilityMatrix extends Matrix {

@@ -1,6 +1,4 @@
 /*
- * $Id: StoichiometricMatrix.java 338 2012-02-17 07:03:11Z draeger $
- * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/SBMLsimulator/branches/Andreas/src/org/sbml/simulator/math/StoichiometricMatrix.java $
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -30,10 +28,9 @@ import eva2.tools.math.Jama.Matrix;
 
 /**
  * This Class represents a m x n stoichiometric matrix
- * 
+ *
  * @author Alexander D&ouml;rr
  * @date 2010-12-23
- * @version $Rev: 338 $
  * @since 1.0
  */
 public class StoichiometricMatrix extends StabilityMatrix {
@@ -437,7 +434,7 @@ public class StoichiometricMatrix extends StabilityMatrix {
 	 * array notation, where e.g. 0 stands for the first row in the matrix.
 	 * Their sequence corresponds the order of the appearance in the
 	 * conservation relations.
-	 * 
+	 *
 	 * @return
 	 */
 	public List<Integer> getLinearDependent() {

@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -26,7 +24,6 @@ import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
 /**
  * @author Stephanie Tscherneck
- * @version $Rev$
  */
 public class CalculateNullSpace {
 

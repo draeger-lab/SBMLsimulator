@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -83,7 +81,6 @@ import de.zbit.util.prefs.SBPreferences;
  * 
  * @author Andreas Dr&auml;ger
  * @date 2010-09-08
- * @version $Rev$
  * @since 1.0
  */
 public class QuantitySelectionPanel extends JPanel implements ActionListener {
@@ -92,7 +89,6 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
    * A helpful class to filter the content of a {@link TableModel}.
    * 
    * @author Andreas Dr&auml;ger
-   * @version $Rev$
    * @since 1.0
    */
   private class DocumentFilterListener<M extends TableModel> extends AbstractDocumentFilterListener<M> {
@@ -121,7 +117,6 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
    * A wrapper for {@link QuantityRange} to an {@link AbstractTableModel}.
    * 
    * @author Andreas Dr&auml;ger
-   * @version $Rev$
    * @since 1.0
    */
   private class QuantityRangeModel extends AbstractTableModel {
@@ -356,7 +351,6 @@ public class QuantitySelectionPanel extends JPanel implements ActionListener {
   /**
    * @author Andreas Dr&auml;ger
    * @date 2010-09-08
-   * @version $Rev$
    * @since 1.0
    */
   public static enum SelectionCommand implements ActionCommand {

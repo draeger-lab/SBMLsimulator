@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -19,6 +17,8 @@ package org.sbml.simulator;
 
 import static de.zbit.util.Utils.getMessage;
 
+import java.awt.HeadlessException;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.MessageFormat;
@@ -29,7 +29,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.sbml.optimization.problem.EstimationOptions;
-import org.sbml.simulator.fba.gui.FBAOptions;
 import org.sbml.simulator.gui.SimulatorUI;
 import org.sbml.simulator.gui.graph.GraphOptions;
 import org.sbml.simulator.gui.plot.PlotOptions;
@@ -56,7 +55,6 @@ import de.zbit.util.prefs.SBProperties;
  * @author Andreas Dr&auml;ger
  * @author Roland Keller
  * @date 2010-09-01
- * @version $Rev$
  * @since 1.0
  */
 @SuppressWarnings("unchecked")

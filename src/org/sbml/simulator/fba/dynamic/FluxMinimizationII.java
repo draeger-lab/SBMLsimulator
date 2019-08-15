@@ -1,6 +1,4 @@
 /*
- * $Id:  FluxMinimizationII.java 00:24:09 faehnrich$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -41,7 +39,6 @@ import org.simulator.math.odes.MultiTable;
  * lambda_2 * Sum_k^m [c_k(t_i+1) -(c_k(t_i) + N*J*delta_t)])
  * 
  * @author Robin F&auml;hnrich
- * @version $Rev$
  * @since 1.0
  */
 public class FluxMinimizationII extends TargetFunction {
@@ -711,7 +708,5 @@ public class FluxMinimizationII extends TargetFunction {
 
 	}
 	
-	
-
 	
 }

@@ -1,6 +1,4 @@
 /*
- * $Id:  ChartPanel.java 16:42:12 Meike Aichele$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -31,7 +29,6 @@ import org.sbml.simulator.fba.controller.FluxMinimizationUtils;
  * of fba is shown.
  * 
  * @author Meike Aichele
- * @version $Rev$
  * @date 07.05.2012
  * @since 1.0
  */

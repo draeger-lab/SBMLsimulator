@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$ 
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -28,37 +26,49 @@ import y.view.Graph2DView;
  * graph should implement this interface and override the methods.
  * 
  * @author Fabian Schwarzkopf
- * @version $Rev$
  */
 public interface IGraphManipulator {
 
-    /**
-     * Changes the visualization of a given node.
-     * @param id
-     * @param value
-     * @param labels
-     */
-    public void dynamicChangeOfNode(String id, double value, boolean labels);
-    
-    /**
-     * Changes the visualization of a given {@link Reaction}.
-     * @param id
-     * @param value
-     */
-    public void dynamicChangeOfReaction(String id, double value, boolean labels);
-    
-    /**
-     * Reverts the changes for the given id.
-     * @param id
-     */
-    public void revertChanges(String id);
-    
-    /**
-     * un/hide given id/node
-     * @param id
-     * @param node
-     * @param b
-     */
-    public void hide(String id, Node node, boolean b);
-   
+  /**
+   * Changes the visualization of a given node.
+   * @param id
+   * @param value
+   * @param labels
+   */
+  public void dynamicChangeOfNode(String id, double value, boolean labels);
+
+  /**
+   * Changes the visualization of a given {@link Reaction}.
+   * @param id
+   * @param value
+   */
+  public void dynamicChangeOfReaction(String id, double value, boolean labels);
+
+  /**
+   * Reverts the changes for the given id.
+   * @param id
+   */
+  public void revertChanges(String id);
+
+  /**
+   * un/hide given id/node
+   * @param id
+   * @param node
+   * @param b
+   */
+  public void hide(String id, Node node, boolean b);
+
+  /**
+   * sets new min and max node sizes if they were changed
+   * @param minNodeSize
+   * @param maxNodeSize
+   */
+  public void setNewMinMaxNodeSize(double minNodeSize, double maxNodeSize);
+
+  /**
+   * resets the adding factor for the node sizes 
+   * @param newSize
+   */
+  public void setAddSizeForOverview(int newSize);
+
 }

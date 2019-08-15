@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -27,7 +25,6 @@ import de.zbit.util.ResourceManager;
  * A test class to try some functions of Java's {@link ChoiceFormat}.
  * 
  * @author Andreas Dr&auml;ger
- * @version $Rev$
  * @since 1.0
  */
 public class ChoiceFormatTest {

@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -30,7 +28,6 @@ import de.zbit.util.ResourceManager;
  * quartils Q1 and Q3.
  * 
  * @author Andreas Dr&auml;ger
- * @version $Rev$
  * @since 1.0
  */
 public class BoxAndWhiskerXYToolTipGenerator extends

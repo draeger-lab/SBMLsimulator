@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -29,7 +27,7 @@ import org.simulator.math.odes.MultiTable;
 import org.simulator.math.odes.RosenbrockSolver;
 import org.simulator.sbml.SBMLinterpreter;
 
-import eva2.gui.Plot;
+import eva2.gui.plot.Plot;
 
 /**
  * A test program that graphically displays a plot for an SBML model that is
@@ -37,7 +35,6 @@ import eva2.gui.Plot;
  * and draws the result in the plot.
  * 
  * @author Andreas Dr&auml;ger
- * @version $Rev$
  * @since 1.0
  */
 public class SimulationTest {

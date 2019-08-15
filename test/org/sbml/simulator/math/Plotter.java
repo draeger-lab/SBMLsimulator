@@ -1,6 +1,4 @@
 /*
- * $Id:  Plotter.java 14:26:05 keller$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -27,7 +25,7 @@ import org.simulator.math.odes.MultiTable;
 import org.simulator.math.odes.MultiTable.Block.Column;
 
 import de.zbit.gui.GUITools;
-import eva2.gui.Plot;
+import eva2.gui.plot.Plot;
 
 /**
 A runnable that generates a plot for a given simulation result and
@@ -35,7 +33,6 @@ A runnable that generates a plot for a given simulation result and
  * 
  * @author Andreas Dr&auml;ger
  * @author Roland Keller
- * @version $Rev$
  * @since 1.0
  */
 public class Plotter implements Runnable {

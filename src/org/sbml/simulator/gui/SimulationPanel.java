@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -48,6 +46,7 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.sbml.jsbml.Model;
+import org.sbml.jsbml.Quantity;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLWriter;
 import org.sbml.optimization.problem.EstimationOptions;
@@ -90,11 +89,10 @@ import y.view.Graph2D;
  * content of the simulation is displayed to the user. It includes the plot
  * area ({@link Plot}), the legend overview ({@link LegendPanel}), the
  * simulation tool panel ({@link SimulationToolPanel}).
- * 
+ *
  * @author Andreas Dr&auml;ger
  * @author Clemens Wrzodek
  * @date 2010-04-06
- * @version $Rev$
  * @since 1.0
  */
 public class SimulationPanel extends JPanel implements
@@ -115,32 +113,32 @@ BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceCha
   private static final long serialVersionUID = -7278034514446047207L;
 
   /**
-   * 
+   *
    */
   private static final int TAB_FBA_INDEX = 5;
 
   /**
-   * 
+   *
    */
   private static final int TAB_EXPERIMENT_INDEX = 2;
 
   /**
-   * 
+   *
    */
   private static final int TAB_IN_SILICO_DATA_INDEX = 1;
 
   /**
-   * 
+   *
    */
   private static final int TAB_MODEL_VIEW_INDEX = 3;
 
   /**
-   * 
+   *
    */
   private static final int TAB_GRAPH_VIEW_INDEX = 4;
 
   /**
-   * 
+   *
    */
   private static final int TAB_SIMULATION_INDEX = 0;
 
@@ -150,7 +148,7 @@ BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceCha
   private MultipleTableView<MultiTable> dataTableView;
 
   /**
-   * 
+   *
    */
   private List<PropertyChangeListener> listeners;
 
@@ -182,7 +180,7 @@ BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceCha
   private SimulationManager simulationManager;
 
   /**
-   * 
+   *
    */
   private JToolBar simulationToolPanel;
 
@@ -192,12 +190,12 @@ BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceCha
   private JTabbedPane tabbedPane;
 
   /**
-   * 
+   *
    */
   private SimulationVisualizationPanel visualizationPanel;
 
   /**
-   * 
+   *
    */
   private DynamicView dynamicGraphView;
 
@@ -246,7 +244,7 @@ BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceCha
   }
 
   /**
-   * 
+   *
    * @param title
    * @param data
    */
@@ -269,7 +267,7 @@ BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceCha
     }
   }
   /**
-   * 
+   *
    */
   public void closeAllExperimentalData() {
     for (int i = dataTableView.getTableCount() - 1; i >= 0; i--) {
@@ -278,7 +276,7 @@ BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceCha
   }
 
   /**
-   * 
+   *
    * @param index
    */
   public void closeExpermentalData(int index) {
@@ -320,7 +318,7 @@ BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceCha
   }
 
   /**
-   * 
+   *
    * @return
    */
   public List<MultiTable> getExperimentalData() {
@@ -335,7 +333,7 @@ BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceCha
   }
 
   /**
-   * 
+   *
    * @return
    */
   public int getExperimentalDataCount() {
@@ -601,7 +599,7 @@ BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceCha
   }
 
   /**
-   * 
+   *
    */
   public void refreshStepSize() {
     getSolver().setStepSize(simulationManager.getSimulationConfiguration().getStepSize());
@@ -617,7 +615,7 @@ BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceCha
   }
 
   /**
-   * 
+   *
    * @param saveDir
    * @return
    */
@@ -638,7 +636,7 @@ BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceCha
   }
 
   /**
-   * 
+   *
    * @param saveDir
    * @return
    */
@@ -666,7 +664,7 @@ BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceCha
   }
 
   /**
-   * 
+   *
    */
   private File saveTable(MultiTable tableModel, String noDataAvailableMessage) {
     try {
@@ -791,7 +789,7 @@ BaseFrameTab, InterfaceStatisticsListener, PropertyChangeListener, PreferenceCha
 
   /**
    * Conducts the simulation.
-   * 
+   *
    * @throws Exception
    */
   public void simulate() throws Exception {

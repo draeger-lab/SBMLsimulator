@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -59,7 +57,6 @@ import de.zbit.util.prefs.SBPreferences;
  * 
  * @author Alexander D&ouml;rr
  * @author Andreas Dr&auml;ger
- * @version $Rev$
  * @since 1.0
  */
 public class QualityMeasurement implements PropertyChangeListener {

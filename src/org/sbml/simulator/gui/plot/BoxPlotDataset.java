@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -35,7 +33,6 @@ import org.simulator.math.odes.MultiTable;
  * the data content in form of box plots.
  * 
  * @author Andreas Dr&auml;ger
- * @version $Rev$
  * @since 1.0
  */
 public class BoxPlotDataset extends AbstractXYDataset implements
@@ -44,7 +41,6 @@ BoxAndWhiskerXYDataset, MetaDataset {
   /**
    * 
    * @author Andreas Dr&auml;ger
-   * @version $Rev$
    * @since 1.0
    */
   private class Item {
@@ -98,7 +94,6 @@ BoxAndWhiskerXYDataset, MetaDataset {
   /**
    * 
    * @author Andreas Dr&auml;ger
-   * @version $Rev$
    * @since 1.0
    */
   private class Series extends TreeMap<Double, Item> implements Comparable<Series> {

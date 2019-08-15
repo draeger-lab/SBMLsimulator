@@ -1,6 +1,4 @@
 /*
- * $Id:  VODPanel.java 16:43:13 Meike Aichele$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -38,9 +36,8 @@ import org.sbml.jsbml.SBMLDocument;
 /**
  * This class represents a panel for the Visualization Of Datasets (VOD)
  * of the computed datasets of fba.
- *
+ * 
  * @author Meike Aichele
- * @version $Rev$
  * @date 07.05.2012
  * @since 1.0
  */
@@ -128,7 +125,7 @@ public class VODPanel extends JPanel implements ActionListener{
   }
 
   /**
-   * Sets the bar-plot
+   * Sets the bar-plot 
    */
   public void init() {
     DefaultCategoryDataset underlying = new DefaultCategoryDataset();
@@ -146,7 +143,7 @@ public class VODPanel extends JPanel implements ActionListener{
     //		JButton switchButton = new JButton("Change to dynamic View");
     //		switchButton.addActionListener(this);
     //		changePlotPanel.add(switchButton, BorderLayout.EAST);
-    //
+    //		
     //		add(changePlotPanel, BorderLayout.SOUTH);
     setVisible(true);
   }
@@ -168,6 +165,5 @@ public class VODPanel extends JPanel implements ActionListener{
   public void setDocument(SBMLDocument expandedDocument) {
     modDoc = expandedDocument;
   }
-
 
 }

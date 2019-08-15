@@ -1,6 +1,4 @@
 /*
- * $Id:  FluxMinimizationUtilsTest.java 17:35:33 Meike Aichele$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -27,7 +25,6 @@ import org.sbml.simulator.stability.math.StoichiometricMatrix;
 
 /**
  * @author Meike Aichele
- * @version $Rev$
  * @date 13.06.2012
  * @since 1.0
  */

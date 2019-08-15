@@ -1,6 +1,4 @@
 /*
- * $Id:  EstimationOptions.java 16:12:42 draeger$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of Simulation Core Library, a Java-based library for
  * of biochemical processes encoded in the modeling language SBML.
@@ -38,7 +36,6 @@ import de.zbit.util.prefs.Range;
  * process.
  * 
  * @author Andreas Dr&auml;ger
- * @version $Rev$
  * @since 1.0
  * @date 2011-03-23
  */

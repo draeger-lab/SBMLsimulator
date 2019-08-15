@@ -1,6 +1,4 @@
 /*
- * $Id:  PlotOptions.java 17:29:23 draeger$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -32,7 +30,6 @@ import de.zbit.util.prefs.Range;
  * A collection of options and user preferences for the plot of results.
  * 
  * @author Andreas Dr&auml;ger
- * @version $Rev$
  * @since 1.0
  * @date 2011-03-23
  */

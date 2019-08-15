@@ -1,6 +1,4 @@
 /*
- * $Id:  ContraintsUtilsTest.java 18:43:52 Meike Aichele$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -25,7 +23,6 @@ import org.sbml.simulator.fba.controller.CSVDataConverter;
 
 /**
  * @author Meike Aichele
- * @version $Rev$
  * @date 13.06.2012
  * @since 1.0
  */

@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$ 
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -29,7 +27,6 @@ import org.simulator.math.odes.MultiTable;
 
 /**
  * @author Fabian Schwarzkopf
- * @version $Rev$
  */
 public class JSliderTest extends JFrame implements IDynamicGraph{
 	private static final long serialVersionUID = -7669702948757945505L;

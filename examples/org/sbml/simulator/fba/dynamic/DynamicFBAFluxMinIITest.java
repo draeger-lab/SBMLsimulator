@@ -1,6 +1,4 @@
 /*
- * $$Id${file_name} ${time} ${user}$$
- * $$URL${file_name} $$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -35,8 +33,9 @@ import org.simulator.math.odes.MultiTable.Block.Column;
 import de.zbit.io.csv.CSVWriter;
 
 /**
- * @author Stephanie Tscherneck, Robin F&auml;hnrich, Roland Keller
- * @version $Rev$
+ * @author Stephanie Tscherneck
+ * @author Robin F&auml;hnrich
+ * @author Roland Keller
  * @since 1.0
  * ${tags}
  */

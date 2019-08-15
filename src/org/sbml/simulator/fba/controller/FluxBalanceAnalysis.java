@@ -1,6 +1,4 @@
 /*
- * $Id:  FluxBalanceAnalysis.java 16:07:08 Meike Aichele$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -37,7 +35,6 @@ import org.simulator.math.odes.MultiTable;
  * It also contains a MultiTable for the visualization of the computed fluxes.
  * 
  * @author Meike Aichele
- * @version $Rev$
  * @date 07.05.2012
  * @since 1.0
  */

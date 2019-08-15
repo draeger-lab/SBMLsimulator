@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -50,7 +48,6 @@ import de.zbit.util.objectwrapper.ValuePair;
  * 
  * @author Andreas Dr&auml;ger
  * @date 2010-04-07
- * @version $Rev$
  * @since 1.0
  */
 public class LegendTableModel extends AbstractTableModel implements PropertyChangeListener {

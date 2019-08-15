@@ -21,10 +21,14 @@
   <entry key="TO_VIDEO_TOOLTIP">Save the dynamic visualization as a video. Resolution can be adjusted with resolution multiplier in options and the resulting speed of the video itself will be approximately the same as the chosen simulation speed.</entry>
   <entry key="GRAPHSHOT">Image</entry>
   <entry key="GRAPHSHOT_TOOLTIP">Take a screenshot of the whole graph. Resolution can be adjusted with resolution multiplier in options.</entry>  
+  <entry key="CONCENTRATIONGRAPH">Graph of metabolic concentration</entry>
+  <entry key="CONCENTRATIONGRAPH_TOOLTIP">Shows a graph with all metabolic concentrations over time and the current one.</entry>
   <entry key="NODELABELS">Nodelabels</entry>
   <entry key="NODELABELS_TOOLTIP">Switch for node labels.</entry>
   <entry key="REACTIONLABELS">Reactionlabels</entry>
   <entry key="REACTIONLABELS_TOOLTIP">Switch for reaction labels.</entry>
+  <entry key="CYCLE_SIMULATION">Loopsimulation</entry>
+  <entry key="CYCLE_SIMULATION_TOOLTIP">Simulation restarts over and over again</entry>
   <entry key="FAST">Fast</entry>
   <entry key="NORMAL">Normal</entry>
   <entry key="SLOW">Slow</entry>
@@ -36,11 +40,18 @@
   <entry key="NODECOLOR">Node color</entry>
   <entry key="NODESIZE_AND_COLOR">Abs.size/rel.color</entry>
   <entry key="NODECOLOR_AND_SIZE">Rel.size/abs.color</entry>
+  <entry key="FILL_LEVEL">Rel.Filling level/abs.color</entry>
   <entry key="GROUP_VISUALIZATION">Visualization</entry> 
   <entry key="VISUALIZATION_TOOLTIP">Chose visualization style and data for the dynamic visualization.</entry>
   <entry key="SEARCHBAR_TOOLTIP">Choose time point of visualization.</entry>
   <entry key="GENERATE_VIDEO">Generate video with {0}x{1} pixel.</entry>
   <entry key="SCREENSHOT_DONE">Picture sucessfully saved.</entry>
+  
+  <!--  ConcentrationGraphUI  -->
+  
+  <entry key="CONCENTRATION_GRAPH_TITLE">Concentration</entry>
+  <entry key="X_AXIS">Time</entry>
+  <entry key="Y_AXIS">Concentration</entry>
   
   <!-- DynamicController -->
   
@@ -79,6 +90,8 @@
   <entry key="USE_UNIFORM_NODE_COLOR_TOOLTIP">Enable/Disable uniform node colors instead of node colors given in legend.</entry>
   <entry key="UNIFORM_NODE_COLOR">Color for uniform node color</entry>
   <entry key="UNIFORM_NODE_COLOR_TOOLTIP">Sets the color for uniform node color.</entry>
+  <entry key="CHOOSE_OWN_NODE_COLORS">Choose concentration colors</entry>
+  <entry key="CHOOSE_OWN_NODE_COLORS_TOOLTIP">Choose colors of the concentrations on your own</entry>
   <entry key="GROUP_NODESIZE">Dynamic change of node size</entry>
   <entry key="GROUP_NODESIZE_TOOLTIP">Options for the dynamic change of node size.</entry>
   <entry key="GROUP_NODECOLOR">Dynamic change of node color</entry>
@@ -132,5 +145,16 @@
   <entry key="VIDEO_FORCE_RESOLUTION_MULTIPLIER_TOOLTIP">By enabling this option you can force to use the resolution multiplier even if the video output resolution would be big enough.</entry>
   <entry key="VIDEO_DISPLAY_WINDOW">Picture whole graph</entry>
   <entry key="VIDEO_DISPLAY_WINDOW_TOOLTIP">Choose if the whole graph should be pictured in videos and screenshots or just the current display window.</entry>
+  <entry key="CAMERA_WAY_FILE">Camera animation</entry>
+  <entry key="CAMERA_WAY_FILE_TOOLTIP">Add file for camera animation</entry>
+  <entry key="SHOW_CAMERA_ANIMATION">Camera animation</entry>
+  <entry key="SHOW_CAMERA_ANIMATION_TOOLTIP">Shows the added camera animation in chosen speed, if play or video is pressed</entry>
+  <entry key="NO_CAMERA_ANIMATION">Without</entry>
+  <entry key="NO_CAMERA_ANIMATION_TOOLTIP">No camera animation is shown</entry>
+  
+  <!-- Rearrange the cycles nicely -->
+  <entry key="FILE_WITH_REACTIONNODES">File with reactionglyphs</entry>
+  <entry key="FILE_WITH_SPECIES">File with speciesglyphs</entry>
+  <entry key="RADIUS_OF_CIRCLE">Radius of circle</entry>
   
 </properties>

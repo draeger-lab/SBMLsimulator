@@ -1,6 +1,4 @@
 /*
- * $Id:  FluxVector.java 16:25:58 Meike Aichele$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -48,7 +46,6 @@ import org.simulator.math.odes.MultiTable.Block.Column;
  * It also contains a method to compute the Error array for FluxMinimization.
  * 
  * @author Meike Aichele
- * @version $Rev$
  * @date 07.05.2012
  * @since 1.0
  */

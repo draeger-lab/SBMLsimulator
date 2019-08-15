@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -31,7 +29,6 @@ import de.zbit.gui.prefs.PreferencesPanelForKeyProvider;
  * provides settings for user preferences about simulation options.
  * 
  * @author Andreas Dr&auml;ger
- * @version $Rev$
  * @date 07.12.2011
  */
 public class ToolPanel extends PreferencesPanelForKeyProvider {

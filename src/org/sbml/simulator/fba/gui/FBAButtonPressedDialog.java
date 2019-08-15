@@ -1,6 +1,4 @@
 /*
- * $Id:  FBAButtonPressedDialog.java 19:44:04 Meike Aichele$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -37,196 +35,196 @@ import javax.swing.JTextField;
  * Creates a dialog window where the user is requested to load a concentration and a Gibbs file
  * for flux balance analysis.
  * @author Meike Aichele
- * @version $Rev$
+ * @version $Rev: 1159 $
  * @date 12.07.2012
  * @since 1.0
  */
 public class FBAButtonPressedDialog extends JDialog implements ActionListener{
 
-	/**
-	 * Cancel button to exit the dialog without loading a file
-	 */
-	private JButton buttonCancel;
+  /**
+   * Cancel button to exit the dialog without loading a file
+   */
+  private JButton buttonCancel;
 
-	/**
-	 * button which opens a file chooser to choose a file
-	 */
-	private JButton buttonConcentrationsFile;
+  /**
+   * button which opens a file chooser to choose a file
+   */
+  private JButton buttonConcentrationsFile;
 
-	/**
-	 * button which opens a file chooser to choose a file
-	 */
-	private JButton buttonEnergieDatei;
+  /**
+   * button which opens a file chooser to choose a file
+   */
+  private JButton buttonEnergieDatei;
 
-	/**
-	 * OK button which closes the dialog, when files are loaded
-	 */
-	private JButton buttonOk;
+  /**
+   * OK button which closes the dialog, when files are loaded
+   */
+  private JButton buttonOk;
 
-	/**
-	 * the incoming concentration file
-	 */
-	private File concentrationFile;
+  /**
+   * the incoming concentration file
+   */
+  private File concentrationFile;
 
-	/**
-	 * the incoming Gibbs energie file
-	 */
-	private File energieFile;
+  /**
+   * the incoming Gibbs energie file
+   */
+  private File energieFile;
 
-	/**
-	 * boolean that is true if files were loaded
-	 */
-	private boolean hasFiles;
+  /**
+   * boolean that is true if files were loaded
+   */
+  private boolean hasFiles;
 
-	/**
-	 * default serial version
-	 */
-	private static final long serialVersionUID = 1L;
+  /**
+   * default serial version
+   */
+  private static final long serialVersionUID = 1L;
 
 
 
-	/**
-	 * field to write in the concentration file path
-	 */
-	private JTextField textFieldConcentrationsFile;
+  /**
+   * field to write in the concentration file path
+   */
+  private JTextField textFieldConcentrationsFile;
 
-	/**
-	 * field to write in the Gibbs energie file path
-	 */
-	private JTextField textFieldEnergieFile;
+  /**
+   * field to write in the Gibbs energie file path
+   */
+  private JTextField textFieldEnergieFile;
 
-	/**
-	 * Creates a new dialog to load the files for flux balance analysis.
-	 * @param windowAncestor
-	 * @param documentModal
-	 */
-	public FBAButtonPressedDialog(Window windowAncestor,
-			ModalityType documentModal) {
-		super(windowAncestor, documentModal);
-		initialize();
-		hasFiles = false;
-	}
+  /**
+   * Creates a new dialog to load the files for flux balance analysis.
+   * @param windowAncestor
+   * @param documentModal
+   */
+  public FBAButtonPressedDialog(Window windowAncestor,
+    ModalityType documentModal) {
+    super(windowAncestor, documentModal);
+    initialize();
+    hasFiles = false;
+  }
 
-	/*
-	 * (non-Javadoc)
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	public void actionPerformed(ActionEvent e) {
-		JFileChooser filechooser = new JFileChooser();
-		filechooser.setMultiSelectionEnabled(false);
-		filechooser.setDialogType(JFileChooser.OPEN_DIALOG);
-		filechooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-	
-		if (e.getSource().equals(buttonEnergieDatei)) {
-			if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-				energieFile = filechooser.getSelectedFile();
-				textFieldEnergieFile.setText(energieFile.getPath());
-			} else {
-				energieFile = null;
-				textFieldEnergieFile.setText("");
-			}
-			checkOk();
-		}
-		if (e.getSource().equals(buttonConcentrationsFile)) {
-			if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-				concentrationFile = filechooser.getSelectedFile();
-				textFieldConcentrationsFile.setText(concentrationFile.getPath());
-			} else {
-				concentrationFile = null;
-				textFieldConcentrationsFile.setText("");
-			}
-			checkOk();
-		}
-		if (e.getSource().equals(buttonCancel)) {
-			dispose();
-		}
-		if (e.getSource().equals(buttonOk)) {
-			hasFiles = true;
-			dispose();
-		}
-	}
+  /*
+   * (non-Javadoc)
+   * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+   */
+  public void actionPerformed(ActionEvent e) {
+    JFileChooser filechooser = new JFileChooser();
+    filechooser.setMultiSelectionEnabled(false);
+    filechooser.setDialogType(JFileChooser.OPEN_DIALOG);
+    filechooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-	/**
-	 * Sets the ok-button enabled if there is no file entered
-	 */
-	private void checkOk() {
-		if (energieFile != null || concentrationFile != null) {
-			buttonOk.setEnabled(true);
-		} else {
-			buttonOk.setEnabled(false);
-		}
-	}
+    if (e.getSource().equals(buttonEnergieDatei)) {
+      if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+        energieFile = filechooser.getSelectedFile();
+        textFieldEnergieFile.setText(energieFile.getPath());
+      } else {
+        energieFile = null;
+        textFieldEnergieFile.setText("");
+      }
+      checkOk();
+    }
+    if (e.getSource().equals(buttonConcentrationsFile)) {
+      if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+        concentrationFile = filechooser.getSelectedFile();
+        textFieldConcentrationsFile.setText(concentrationFile.getPath());
+      } else {
+        concentrationFile = null;
+        textFieldConcentrationsFile.setText("");
+      }
+      checkOk();
+    }
+    if (e.getSource().equals(buttonCancel)) {
+      dispose();
+    }
+    if (e.getSource().equals(buttonOk)) {
+      hasFiles = true;
+      dispose();
+    }
+  }
 
-	/**
-	 * 
-	 * @return the incoming concentration file
-	 */
-	public File getConcentrationFile() {
-		return concentrationFile;
-	}
+  /**
+   * Sets the ok-button enabled if there is no file entered
+   */
+  private void checkOk() {
+    if (energieFile != null || concentrationFile != null) {
+      buttonOk.setEnabled(true);
+    } else {
+      buttonOk.setEnabled(false);
+    }
+  }
 
-	/**
-	 * @return the incoming Gibbs energie file
-	 */
-	public File getEnergieFile() {
-		return energieFile;
-	}
+  /**
+   * 
+   * @return the incoming concentration file
+   */
+  public File getConcentrationFile() {
+    return concentrationFile;
+  }
 
-	/**
-	 * @return hasFiles
-	 */
-	public boolean hasFiles() {
-		return hasFiles;
-	}
+  /**
+   * @return the incoming Gibbs energie file
+   */
+  public File getEnergieFile() {
+    return energieFile;
+  }
 
-	/**
-	 * Create the Buttons and Fields in the dialog
-	 */
-	private void initialize() {
-		setTitle("Please load the files to compute flux balance analysis");
-		setSize(new Dimension(500, 300));
-		setLayout(new BorderLayout());
+  /**
+   * @return hasFiles
+   */
+  public boolean hasFiles() {
+    return hasFiles;
+  }
 
-		JPanel container = new JPanel(new GridLayout(3, 1));
+  /**
+   * Create the Buttons and Fields in the dialog
+   */
+  private void initialize() {
+    setTitle("Please load the files to compute flux balance analysis");
+    setSize(new Dimension(500, 300));
+    setLayout(new BorderLayout());
 
-		/*
-		 * fields and buttons for the gibbs file
-		 */
-		JPanel panelEnergieFile = new JPanel(new BorderLayout());
-		panelEnergieFile.setBorder(BorderFactory.createTitledBorder("Gibbs energie file: "));
-		textFieldEnergieFile = new JTextField();
-		buttonEnergieDatei = new JButton("...");
-		buttonEnergieDatei.addActionListener(this);
-		panelEnergieFile.add(textFieldEnergieFile, BorderLayout.CENTER);
-		panelEnergieFile.add(buttonEnergieDatei, BorderLayout.EAST);
-		container.add(panelEnergieFile);
+    JPanel container = new JPanel(new GridLayout(3, 1));
 
-		/*
-		 * fields and buttons for the concentrations file
-		 */
-		JPanel panelConcFile = new JPanel(new BorderLayout());
-		panelConcFile.setBorder(BorderFactory.createTitledBorder("Concentrations file:"));
-		textFieldConcentrationsFile = new JTextField();
-		buttonConcentrationsFile = new JButton("...");
-		buttonConcentrationsFile.addActionListener(this);
-		panelConcFile.add(textFieldConcentrationsFile, BorderLayout.CENTER);
-		panelConcFile.add(buttonConcentrationsFile, BorderLayout.EAST);
-		container.add(panelConcFile);
+    /*
+     * fields and buttons for the gibbs file
+     */
+    JPanel panelEnergieFile = new JPanel(new BorderLayout());
+    panelEnergieFile.setBorder(BorderFactory.createTitledBorder("Gibbs energie file: "));
+    textFieldEnergieFile = new JTextField();
+    buttonEnergieDatei = new JButton("...");
+    buttonEnergieDatei.addActionListener(this);
+    panelEnergieFile.add(textFieldEnergieFile, BorderLayout.CENTER);
+    panelEnergieFile.add(buttonEnergieDatei, BorderLayout.EAST);
+    container.add(panelEnergieFile);
 
-		/*
-		 * ok and cancel buttons
-		 */
-		JPanel panelButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		buttonOk = new JButton("Ok");
-		buttonOk.setEnabled(false);
-		buttonOk.addActionListener(this);
-		buttonCancel = new JButton("Cancel");
-		buttonCancel.addActionListener(this);
-		panelButtons.add(buttonOk, BorderLayout.WEST);
-		panelButtons.add(buttonCancel, BorderLayout.EAST);
-		add(panelButtons, BorderLayout.SOUTH);
+    /*
+     * fields and buttons for the concentrations file
+     */
+    JPanel panelConcFile = new JPanel(new BorderLayout());
+    panelConcFile.setBorder(BorderFactory.createTitledBorder("Concentrations file:"));
+    textFieldConcentrationsFile = new JTextField();
+    buttonConcentrationsFile = new JButton("...");
+    buttonConcentrationsFile.addActionListener(this);
+    panelConcFile.add(textFieldConcentrationsFile, BorderLayout.CENTER);
+    panelConcFile.add(buttonConcentrationsFile, BorderLayout.EAST);
+    container.add(panelConcFile);
 
-		add(container, BorderLayout.NORTH);
-		setSize(new Dimension(450, 200));
-	}
+    /*
+     * ok and cancel buttons
+     */
+    JPanel panelButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+    buttonOk = new JButton("Ok");
+    buttonOk.setEnabled(false);
+    buttonOk.addActionListener(this);
+    buttonCancel = new JButton("Cancel");
+    buttonCancel.addActionListener(this);
+    panelButtons.add(buttonOk, BorderLayout.WEST);
+    panelButtons.add(buttonCancel, BorderLayout.EAST);
+    add(panelButtons, BorderLayout.SOUTH);
+
+    add(container, BorderLayout.NORTH);
+    setSize(new Dimension(450, 200));
+  }
 }

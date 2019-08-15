@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -109,12 +107,11 @@ import eva2.tools.BasicResourceLoader;
  * The main graphical user interface for {@link SBMLsimulator}. This window
  * provides all functions of the program through its menu bar and organizes the
  * display of model and experimental data.
- *
+ * 
  * @author Andreas Dr&auml;ger
  * @author Philip Stevens
  * @author Max Zwie&szlig;ele
  * @date 2010-04-15
- * @version $Rev$
  * @since 1.0
  */
 public class SimulatorUI extends BaseFrame implements CSVOptions, ItemListener,
@@ -122,7 +119,7 @@ PropertyChangeListener {
 
   /**
    * Commands that can be understood by this dialog.
-   *
+   * 
    * @author Andreas Dr&auml;ger
    */
   public static enum Command implements ActionCommand {
@@ -231,14 +228,14 @@ PropertyChangeListener {
   private GarudaSoftwareBackend garudaBackend;
 
   /**
-   *
+   * 
    */
   public SimulatorUI() {
     this((AppConf) null);
   }
 
   /**
-   *
+   * 
    * @param appConf
    */
   public SimulatorUI(AppConf appConf) {
@@ -266,7 +263,7 @@ PropertyChangeListener {
   }
 
   /**
-   *
+   * 
    * @param obj
    */
   @SuppressWarnings("unchecked")
@@ -281,7 +278,7 @@ PropertyChangeListener {
 
 
   /**
-   *
+   * 
    * @param title
    * @param data
    */
@@ -373,7 +370,7 @@ PropertyChangeListener {
   }
 
   /**
-   *
+   * 
    */
   public void sendToGaruda() {
     if (simPanel != null) {
@@ -456,7 +453,7 @@ PropertyChangeListener {
 
   /**
    * Cancels a running simulation.
-   *
+   * 
    * @return
    */
   public boolean stopSimulation() {
@@ -477,9 +474,9 @@ PropertyChangeListener {
   }
 
   /**
-   *
+   * 
    * @param onlyClosing whether or not this method is called with the purpose to open another model right afterwards.
-   *
+   * 
    * @return
    */
   private boolean closeFile(boolean onlyClosing) {
@@ -566,7 +563,7 @@ PropertyChangeListener {
   }
 
   /**
-   *
+   * 
    * @return
    */
   public Model getModel() {
@@ -623,13 +620,14 @@ PropertyChangeListener {
   }
 
   /**
-   *
+   * 
    */
   public File[] openFile() {
     SBPreferences prefs = SBPreferences.getPreferencesFor(getClass());
     File[] modelFiles = GUITools.openFileDialog(this,
       prefs.get(GUIOptions.OPEN_DIR).toString(), false, false,
       JFileChooser.FILES_ONLY, SBFileFilter.createSBMLFileFilterList());
+   
     return openFile(modelFiles);
   }
 
@@ -640,6 +638,7 @@ PropertyChangeListener {
   protected File[] openFile(File... files) {
     File[] modelFiles = null;
     File[] dataFiles = null;
+
 
     /*
      * Investigate the given files or let the user open a model and some data:
@@ -688,6 +687,7 @@ PropertyChangeListener {
           EventHandler.create(PropertyChangeListener.class, this,
             "setSBMLDocument", "newValue"));
         worker.add(task1);
+                
       } catch (Exception exc) {
         GUITools.showErrorMessage(this, exc);
       }
@@ -717,14 +717,14 @@ PropertyChangeListener {
 
   /**
    * Called when the EvA2 client is closing.
-   *
+   * 
    * @param evaClient
    */
   public void optimizationFinished(Object evaClient) {
     if (evaClient instanceof JFrame) {
       JFrame frame = (JFrame) evaClient;
       if ((frame.getName() != null) && !frame.isVisible()
-          && ((frame.getName().equals(Main.class.getSimpleName())) || (frame.getName().startsWith("frame")))) {
+          && (frame.getName().equals(Main.class.getSimpleName()))) {
         setSimulationAndOptimizationEnabled(true);
       }
     }
@@ -842,7 +842,7 @@ PropertyChangeListener {
         new Thread(new Runnable() {
           /*
            * (non-Javadoc)
-           *
+           * 
            * @see java.lang.Runnable#run()
            */
           @Override
@@ -925,7 +925,7 @@ PropertyChangeListener {
   }
 
   /**
-   *
+   * 
    * @param obj must be an instance of {@link SBMLDocument}.
    */
   @SuppressWarnings("unchecked")
@@ -1016,7 +1016,7 @@ PropertyChangeListener {
   /**
    * Small helper method that enables or disables all buttons and user
    * interfaces to launch optimization or simulation.
-   *
+   * 
    * @param enabled
    */
   private void setSimulationAndOptimizationEnabled(boolean enabled) {
@@ -1027,7 +1027,7 @@ PropertyChangeListener {
   }
 
   /**
-   *
+   * 
    */
   public void simulate() {
     try {

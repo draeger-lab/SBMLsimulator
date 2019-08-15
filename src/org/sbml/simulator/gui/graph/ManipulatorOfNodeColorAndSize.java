@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$ 
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -23,10 +21,9 @@ import java.util.logging.Logger;
 
 import org.sbml.jsbml.SBMLDocument;
 
+import de.zbit.sbml.layout.y.ILayoutGraph;
 import y.base.Node;
 import y.view.NodeRealizer;
-import de.zbit.gui.ColorPalette;
-import de.zbit.sbml.layout.y.ILayoutGraph;
 
 
 /**
@@ -36,7 +33,6 @@ import de.zbit.sbml.layout.y.ILayoutGraph;
  * concentration changes.
  * 
  * @author Fabian Schwarzkopf
- * @version $Rev$
  */
 public class ManipulatorOfNodeColorAndSize extends AGraphManipulator{
 
@@ -48,8 +44,13 @@ public class ManipulatorOfNodeColorAndSize extends AGraphManipulator{
 	/**
 	 * Minimum and maximum Node Size with default initialization.
 	 */
-	private double minNodeSize = DEFAULT_MIN_NODE_SIZE,
+	private static double minNodeSize = DEFAULT_MIN_NODE_SIZE,
 			maxNodeSize = DEFAULT_MAX_NODE_SIZE;
+	
+	/**
+	 * if camera animation is active and overview is shown node size is different
+	 */
+	private static double addSizeForOverview;
 
 	/**
 	 * Field for the first color (high concentration), second color (mid
@@ -79,21 +80,27 @@ public class ManipulatorOfNodeColorAndSize extends AGraphManipulator{
 	 */
 	public ManipulatorOfNodeColorAndSize(ILayoutGraph graph, SBMLDocument document,
 			DynamicCore core, String[] selectedSpecies,
-			String[] selectedReactions) {
+			String[] selectedReactions, double minNodeSize, double maxNodeSize, double addSizeForOverview, Color color2) {
 
 		super(graph, document, core, selectedReactions, DEFAULT_MIN_LINEWIDTH,
 				DEFAULT_MAX_LINEWIDTH);
+		
+		this.addSizeForOverview = addSizeForOverview;
 
 		REVERT_NODE_SIZE = DEFAULT_MIN_NODE_SIZE;
+		if (minNodeSize < maxNodeSize) {
+			this.minNodeSize = minNodeSize;
+			this.maxNodeSize = maxNodeSize;
+		}
+		
+		Color[] maxMin = calculateColorsFromDefault(color2);
 
-		// default colors
-		RGBcolor1 = new int[] { ColorPalette.CAMINE_RED.getRed(),
-				ColorPalette.CAMINE_RED.getGreen(),
-				ColorPalette.CAMINE_RED.getBlue() };
-		RGBcolor2 = new int[]{255, 255, 255}; //white
-		RGBcolor3 = new int[]{ ColorPalette.GOLD.getRed(),
-				ColorPalette.GOLD.getGreen(),
-				ColorPalette.GOLD.getBlue() };
+		// max
+        RGBcolor1 = new int[] { maxMin[0].getRed(), maxMin[0].getGreen(), maxMin[0].getBlue() };
+        // middle
+		RGBcolor2 = new int[] { color2.getRed(), color2.getGreen(), color2.getBlue() };
+		// min
+		RGBcolor3 = new int[]{ maxMin[1].getRed(), maxMin[1].getGreen(), maxMin[1].getBlue() };
 
 		/*
 		 * Store min/max once to save computation time for absolute part
@@ -125,12 +132,14 @@ public class ManipulatorOfNodeColorAndSize extends AGraphManipulator{
 	 */
 	public ManipulatorOfNodeColorAndSize(ILayoutGraph graph,
 			SBMLDocument document, DynamicCore core, String[] selectedSpecies,
-			String[] selectedReactions, double minNodeSize, double maxNodeSize,
+			String[] selectedReactions, double minNodeSize, double maxNodeSize, double addSizeForOverview,
 			Color color1, Color color2, Color color3,
 			float reactionsMinLineWidth, float reactionsMaxLineWidth) {
 
 		// no use of this() because of other super constructor
 		super(graph, document, core, selectedReactions, reactionsMinLineWidth, reactionsMaxLineWidth);
+		
+		this.addSizeForOverview = addSizeForOverview;
 
 		// gather settings
 		if (minNodeSize < maxNodeSize) {
@@ -163,11 +172,17 @@ public class ManipulatorOfNodeColorAndSize extends AGraphManipulator{
 	@Override
 	public void dynamicChangeOfNode(String id, double value, boolean labels) {
 		if (id2speciesNode.get(id) != null) {
+			
+			double addSize = 0;
+			if(DynamicCore.cameraAnimation && DynamicCore.playAgain) {
+				addSize = addSizeForOverview;
+			} 
+			
 			// compute adusting of node size (relative)
 			double x1 = id2minMaxData.get(id)[0];
 			double x2 = id2minMaxData.get(id)[1];
-			double y1 = minNodeSize;
-			double y2 = maxNodeSize;
+			double y1 = minNodeSize+addSize;
+			double y2 = maxNodeSize+addSize;
 			double size = adjustValue(x1, x2, y1, y2, value);
 			boolean invisible = isInvisible(value);
 			// compute adjusting of node color (absolute)
@@ -187,7 +202,16 @@ public class ManipulatorOfNodeColorAndSize extends AGraphManipulator{
 				} else {
 					hide(id, node, false);
 					// visualize
-					NodeRealizer nr = graph.getGraph2D().getRealizer(node);
+					
+					NodeRealizer nr;
+	        		if(!node2Realizer.containsKey(node)) {
+	        			nr = graph.getGraph2D().getRealizer(node);
+	        			node2Realizer.put(node, nr);
+	        		} else {
+	        			nr = node2Realizer.get(node);
+	        			graph.getGraph2D().setRealizer(node, nr);        			
+	        		}
+					
 					double ratio = nr.getHeight() / nr.getWidth(); // keep ratio in case of elliptic nodes
 					nr.setSize(size, size * ratio);
 					nr.setFillColor(new Color(RGBinterpolated[0], RGBinterpolated[1],
@@ -207,6 +231,29 @@ public class ManipulatorOfNodeColorAndSize extends AGraphManipulator{
 			// update view
 			graph.getGraph2D().updateViews();
 		}
+	}
+	
+	/**
+	 * sets new min and max node sizes if they were changed
+	 * @param minNodeSize
+	 * @param maxNodeSize
+	 */
+	public void setNewMinMaxNodeSize(double minNodeSize, double maxNodeSize) {
+		if(this.minNodeSize != minNodeSize) {
+			this.minNodeSize = minNodeSize;
+		}
+		if(this.maxNodeSize != maxNodeSize) {
+			this.maxNodeSize = maxNodeSize;
+		}
+	}
+	
+	/**
+	 * resets the adding factor for the node sizes 
+	 * @param newSize
+	 */
+	@Override
+	public void setAddSizeForOverview(int newSize) {
+		addSizeForOverview = newSize;
 	}
 
 }

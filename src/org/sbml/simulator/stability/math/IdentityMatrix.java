@@ -1,6 +1,4 @@
 /*
- * $Id: IdentityMatrix.java 338 2012-02-17 07:03:11Z draeger $
- * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/SBMLsimulator/branches/Andreas/src/org/sbml/simulator/math/IdentityMatrix.java $
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -21,7 +19,6 @@ package org.sbml.simulator.stability.math;
  * This Class represents a m x m identity matrix
  * 
  * @author Alexander D&ouml;rr
- * @version $Rev: 338 $
  * @since 1.0
  */
 public class IdentityMatrix extends StabilityMatrix {

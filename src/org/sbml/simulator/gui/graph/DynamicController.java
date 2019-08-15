@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -27,6 +25,7 @@ import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
@@ -39,19 +38,23 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JSlider;
+import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileFilter;
 
+import org.sbml.simulator.gui.LegendPanel;
 import org.sbml.simulator.gui.graph.DynamicControlPanel.Items;
 import org.sbml.simulator.gui.graph.DynamicView.Manipulators;
 import org.sbml.simulator.gui.table.LegendTableModel;
+import org.simulator.math.odes.MultiTable;
 
 import de.zbit.gui.GUIOptions;
 import de.zbit.gui.GUITools;
 import de.zbit.io.filefilter.SBFileFilter;
+import de.zbit.sbml.layout.y.YImageTools;
 import de.zbit.util.ResourceManager;
 import de.zbit.util.prefs.KeyProvider;
 import de.zbit.util.prefs.Option;
@@ -63,7 +66,6 @@ import de.zbit.util.prefs.SBPreferences;
  * control panel.
  * 
  * @author Fabian Schwarzkopf
- * @version $Rev$
  */
 public class DynamicController implements ChangeListener, ActionListener,
 ItemListener, TableModelListener, PreferenceChangeListener {
@@ -93,6 +95,16 @@ ItemListener, TableModelListener, PreferenceChangeListener {
    * Pointer to asociated {@link DynamicView}.
    */
   private DynamicView view;
+
+  /**
+   * Pointer to associated {@link CameraAnimationView}
+   */
+  private CameraAnimationView camView;
+
+  /**
+   * opens new window with all metabolic concentrations
+   */
+  private ConcentrationGraphUI graphWindow;
 
   /**
    * Constructs a new {@link DynamicController} with the corresponding
@@ -128,6 +140,9 @@ ItemListener, TableModelListener, PreferenceChangeListener {
         case  GRAPHSHOT:
           graphShot();
           break;
+        case CONCENTRATIONGRAPH:
+          concentrationGraph();
+          break;
         default:
           break;
         }
@@ -142,8 +157,16 @@ ItemListener, TableModelListener, PreferenceChangeListener {
    * 
    */
   private void stop() {
+    if(!controlPanel.getCameraAnimationMode().equals(bundle.getString("NO_CAMERA_ANIMATION"))) {
+      if(camView == null && core.cameraWay != null) {
+        camView = (CameraAnimationView) core.cameraWay;				
+      }
+      camView.setCounterBack();
+    }
+
     core.stopPlay();
-    controlPanel.setStopStatus();
+    controlPanel.setStopStatus();			
+    setNewTimepoint(0);
   }
 
   /**
@@ -158,6 +181,16 @@ ItemListener, TableModelListener, PreferenceChangeListener {
    * 
    */
   private void play() {
+    if(!controlPanel.getCameraAnimationMode().equals(bundle.getString("NO_CAMERA_ANIMATION"))) {
+      if(camView == null && core.cameraWay != null) {
+        camView = (CameraAnimationView) core.getAnotherObserver();				
+      }
+      camView.checkForNewFile();
+      //camView.showOverviewAnimation();
+    }
+
+    setNewMinMaxNodeSize();
+
     controlPanel.setPlayStatus();
     core.setPlayspeed(controlPanel.getSimulationSpeed());
     core.play();
@@ -185,13 +218,15 @@ ItemListener, TableModelListener, PreferenceChangeListener {
 
     // determine output resolution
     if (prefs.getBoolean(GraphOptions.VIDEO_FORCE_RESOLUTION_MULTIPLIER) || (width < 1000) || (height < 1000)) {
-      int resolutionMultiplier = (int) prefs.getDouble(GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
+      double resolutionMultiplier = prefs.getDouble(GraphOptions.VIDEO_RESOLUTION_MULTIPLIER);
       /*
        * if resolution multiplier is forced by the user or if
        * resolution is too small than scale it
        */
       width *= resolutionMultiplier;
       height *= resolutionMultiplier;
+      width = Math.round(width);
+      height = Math.round(height);
     }
 
     //determine fixpoint to prevent pixel jumping
@@ -224,14 +259,19 @@ ItemListener, TableModelListener, PreferenceChangeListener {
     int timestamp = (controlPanel.getSimulationSpeed() + 3) * captureStepSize;
 
     //warning if computation could take very long
-    int numScreenshots = (core.getTimepoints().length-1) / captureStepSize;
+    int	numScreenshots = (core.getTimepoints().length-1) / captureStepSize;
+
+    if(core.cameraAnimation) {
+      numScreenshots *= 2;
+    }
+
     if ((width > 2500) || (height > 2500) || (numScreenshots > 150)) {
       GUITools.showMessage(
         MessageFormat.format(
           bundle.getString("VIDEO_LONG_COMPUTATION_TIME"),
           new Object[] { width, height,
             numScreenshots }), bundle
-            .getString("INFO_COMP"));
+        .getString("INFO_COMP"));
     }
 
     /*
@@ -325,43 +365,100 @@ ItemListener, TableModelListener, PreferenceChangeListener {
 
     // determine raw graph size
     int[] size  = imggen.getScreenshotResolution();
-    int width = size[0] * resolutionMultiplier;
-    int height = size[1] * resolutionMultiplier;
+    final int width = size[0] * resolutionMultiplier;
+    final int height = size[1] * resolutionMultiplier;
+
+    SBFileFilter svgFilter = SBFileFilter.createSVGFileFilter();
+    SBFileFilter pngFilter = SBFileFilter.createPNGFileFilter();
 
     File destinationFile = GUITools.saveFileDialog(view,
       guiPrefs.get(GUIOptions.SAVE_DIR), false, false,
       JFileChooser.FILES_ONLY,
-      SBFileFilter.createPNGFileFilter());
+      pngFilter, svgFilter);
 
     if (destinationFile != null) {
+      SBFileFilter filter;
+      if (svgFilter.accept(destinationFile)) {
+        filter = svgFilter;
+      } else {
+        filter = pngFilter;
+      }
 
-      // add extenion if missing
-      if (!destinationFile.getName().toLowerCase()
-          .endsWith(".png")) {
+      // add extension if missing
+      String fileNameLC = destinationFile.getName().toLowerCase();
+      if (!fileNameLC.endsWith('.' + filter.getExtension())) {
         destinationFile = new File(
-          destinationFile.getAbsolutePath() + ".png");
+          destinationFile.getAbsolutePath() + '.' + filter.getExtension());
       }
 
       try {
-        if (!destinationFile.getName().toLowerCase()
-            .endsWith(".png")) {
+        if (!fileNameLC.endsWith('.' + filter.getExtension())) {
           destinationFile = new File(
-            destinationFile.getAbsolutePath()
-            + ".png");
+            destinationFile.getAbsolutePath() + '.' + pngFilter.getExtension());
         }
-        ImageIO.write(view.takeGraphshot(width, height),
-          "png", destinationFile);
-        guiPrefs.put(GUIOptions.SAVE_DIR,
-          destinationFile.getParent());
+        if (filter == pngFilter) {
+          ImageIO.write(view.takeGraphshot(width, height),
+            pngFilter.getExtension(), destinationFile);
+        } else {
+          final String outFilePath = destinationFile.getAbsolutePath();
+          new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+              YImageTools.writeSVGImage(view.getSBMLDocument().getModel(), view.getGraph().getGraph2D(), outFilePath, width, height);
+              return null;
+            }
+          }.execute();
+        }
+        guiPrefs.put(GUIOptions.SAVE_DIR, destinationFile.getParent());
         guiPrefs.flush();
         logger.info(bundle.getString("SCREENSHOT_DONE"));
       } catch (IOException ioe) {
-        logger.warning(bundle
-          .getString("COULD_NOT_WRITE_SCREENSHOT"));
+        logger.warning(bundle.getString("COULD_NOT_WRITE_SCREENSHOT"));
       } catch (BackingStoreException exc) {
         logger.warning(getMessage(exc));
       }
     }
+  }
+
+  /**
+   * Opens window with the dynamic graph of metabolic concentrations
+   */
+  public void concentrationGraph() {
+    Map<String, double[]> minMaxValues = core.getId2minMaxData();
+    Object[] helpIds = (Object[]) minMaxValues.keySet().toArray();
+    String[] ids = new String[helpIds.length];
+    for(int i = 0; i < helpIds.length; i++) {
+      ids[i] = (String) helpIds[i];
+    }
+    double[] minMax = core.getMinMaxOfIDsForConcentrationGraph(ids);
+    double maxTime = core.getMaxTime();
+
+    MultiTable data = core.getData();
+    LegendPanel legend = view.getLegendPanel();
+
+    graphWindow  = new ConcentrationGraphUI(data, legend, minMax, maxTime);
+  }
+
+  /**
+   * Sets a new timepoint for the cursor
+   * @param timepoint
+   */
+  public void setNewTimepoint(double timepoint) {
+    if(graphWindow != null) {
+      graphWindow.setTimepoint(timepoint);		  
+    }
+  }
+
+  /**
+   * checks if min max node size was changed and sets new node sizes
+   */
+  public void setNewMinMaxNodeSize() {
+    IGraphManipulator currentManipulator = getSelectedGraphManipulator();
+    String m = currentManipulator.toString();
+    //if(currentManipulator.toString().equals(""))
+    currentManipulator.setNewMinMaxNodeSize(SBPreferences.getPreferencesFor(GraphOptions.class).
+      getDouble(GraphOptions.MIN_NODE_SIZE), SBPreferences.getPreferencesFor(GraphOptions.class).
+      getDouble(GraphOptions.MAX_NODE_SIZE));
   }
 
   /**
@@ -394,6 +491,15 @@ ItemListener, TableModelListener, PreferenceChangeListener {
         double maxNodeSize = prefs
             .getDouble(GraphOptions.MAX_NODE_SIZE);
 
+        double addSizeForOverview = 0;
+        if(!controlPanel.getCameraAnimationMode().equals(Items.NO_CAMERA_ANIMATION.getName()) 
+            && core.getAnotherObserver() != null) {
+          if(camView == null) {
+            camView = (CameraAnimationView) core.getAnotherObserver();
+          }
+          addSizeForOverview = camView.overviewSize;
+        } 
+
         if (prefs.getBoolean(GraphOptions.USE_UNIFORM_NODE_COLOR)) {
           return new ManipulatorOfNodeSize(
             view.getGraph(),
@@ -401,80 +507,166 @@ ItemListener, TableModelListener, PreferenceChangeListener {
             core,
             Option.parseOrCast(Color.class,
               prefs.get(GraphOptions.UNIFORM_NODE_COLOR)),
-              view.getSelectedSpecies(), view
-              .getSelectedReactions(), minNodeSize,
-              maxNodeSize, relativeConcentrations,
-              reactionsMinLineWidth, reactionsMaxLineWidth);
+            view.getSelectedSpecies(), view
+            .getSelectedReactions(), minNodeSize,
+            maxNodeSize, addSizeForOverview, true,
+            reactionsMinLineWidth, reactionsMaxLineWidth);
         } else {
           return new ManipulatorOfNodeSize(view.getGraph(),
             view.getSBMLDocument(), core, view.getLegendPanel()
             .getLegendTableModel(),
             view.getSelectedSpecies(),
             view.getSelectedReactions(), minNodeSize,
-            maxNodeSize, relativeConcentrations,
+            maxNodeSize, addSizeForOverview, true,
             reactionsMinLineWidth, reactionsMaxLineWidth);
         }
       } else if (controlPanel.getSelectedManipulator().equals(Manipulators.NODECOLOR.getName())) {
 
-        // get current options
-        Color color1 = Option.parseOrCast(Color.class,
-          prefs.get(GraphOptions.COLOR1));
+        // this is needed for if and else case
         Color color2 = Option.parseOrCast(Color.class,
           prefs.get(GraphOptions.COLOR2));
-        Color color3 = Option.parseOrCast(Color.class,
-          prefs.get(GraphOptions.COLOR3));
+
         double nodeSize = prefs.getDouble(GraphOptions.COLOR_NODE_SIZE);
 
-        return new ManipulatorOfNodeColor(view.getGraph(),
-          view.getSBMLDocument(), core,
-          view.getSelectedSpecies(), view.getSelectedReactions(),
-          relativeConcentrations, nodeSize, color1, color2,
-          color3, reactionsMinLineWidth, reactionsMaxLineWidth);
+        double addSizeForOverview = 0;
+        if(!controlPanel.getCameraAnimationMode().equals(Items.NO_CAMERA_ANIMATION.getName()) 
+            && core.getAnotherObserver() != null) {
+          if(camView == null) {
+            camView = (CameraAnimationView) core.getAnotherObserver();
+          }
+          addSizeForOverview = camView.overviewSize;
+        }  
+
+        if (prefs.getBoolean(GraphOptions.CHOOSE_OWN_NODE_COLORS)) {
+          // get current options
+          Color color1 = Option.parseOrCast(Color.class,
+            prefs.get(GraphOptions.COLOR1));
+          Color color3 = Option.parseOrCast(Color.class,
+            prefs.get(GraphOptions.COLOR3));
+
+          return new ManipulatorOfNodeColor(view.getGraph(),
+            view.getSBMLDocument(), core,
+            view.getSelectedSpecies(), view.getSelectedReactions(),
+            relativeConcentrations, nodeSize, addSizeForOverview, color1, color2,
+            color3, reactionsMinLineWidth, reactionsMaxLineWidth);
+        } else {		
+          return new ManipulatorOfNodeColor(view.getGraph(),
+            view.getSBMLDocument(), core,
+            view.getSelectedSpecies(), view.getSelectedReactions(),
+            true, nodeSize, addSizeForOverview, color2, reactionsMinLineWidth, 
+            reactionsMaxLineWidth);
+        }
       } else if (controlPanel.getSelectedManipulator().equals(Manipulators.NODESIZE_AND_COLOR.getName())) {
 
-        // get current options
-        Color color1 = Option.parseOrCast(Color.class,
-          prefs.get(GraphOptions.COLOR1));
-        Color color2 = Option.parseOrCast(Color.class,
-          prefs.get(GraphOptions.COLOR2));
-        Color color3 = Option.parseOrCast(Color.class,
-          prefs.get(GraphOptions.COLOR3));
         double minNodeSize = prefs
             .getDouble(GraphOptions.MIN_NODE_SIZE);
         double maxNodeSize = prefs
             .getDouble(GraphOptions.MAX_NODE_SIZE);
 
-        return new ManipulatorOfNodeSizeAndColor(view.getGraph(),
-          view.getSBMLDocument(), core,
-          view.getSelectedSpecies(), view.getSelectedReactions(),
-          minNodeSize, maxNodeSize, color1, color2, color3,
-          reactionsMinLineWidth, reactionsMaxLineWidth);
+        double addSizeForOverview = 0;
+        if(!controlPanel.getCameraAnimationMode().equals(Items.NO_CAMERA_ANIMATION.getName()) 
+            && core.getAnotherObserver() != null) {
+          if(camView == null) {
+            camView = (CameraAnimationView) core.getAnotherObserver();
+          }
+          addSizeForOverview = camView.overviewSize;
+        }  
+
+        // get current options
+        Color color2 = Option.parseOrCast(Color.class,
+          prefs.get(GraphOptions.COLOR2));
+
+        if (prefs.getBoolean(GraphOptions.CHOOSE_OWN_NODE_COLORS)) {
+          Color color1 = Option.parseOrCast(Color.class,
+            prefs.get(GraphOptions.COLOR1));
+          Color color3 = Option.parseOrCast(Color.class,
+            prefs.get(GraphOptions.COLOR3));        	
+
+          return new ManipulatorOfNodeSizeAndColor(view.getGraph(),
+            view.getSBMLDocument(), core,
+            view.getSelectedSpecies(), view.getSelectedReactions(),
+            minNodeSize, maxNodeSize, addSizeForOverview, color1, color2, color3,
+            reactionsMinLineWidth, reactionsMaxLineWidth);
+        } else {
+          return new ManipulatorOfNodeSizeAndColor(view.getGraph(),
+            view.getSBMLDocument(), core, view.getSelectedSpecies(), view.getSelectedReactions(), 
+            minNodeSize, maxNodeSize, addSizeForOverview, color2);
+        }
       } else if (controlPanel.getSelectedManipulator().equals(Manipulators.NODECOLOR_AND_SIZE.getName())) {
 
-        // get current options
-        Color color1 = Option.parseOrCast(Color.class,
-          prefs.get(GraphOptions.COLOR1));
-        Color color2 = Option.parseOrCast(Color.class,
-          prefs.get(GraphOptions.COLOR2));
-        Color color3 = Option.parseOrCast(Color.class,
-          prefs.get(GraphOptions.COLOR3));
         double minNodeSize = prefs
             .getDouble(GraphOptions.MIN_NODE_SIZE);
         double maxNodeSize = prefs
             .getDouble(GraphOptions.MAX_NODE_SIZE);
 
-        return new ManipulatorOfNodeColorAndSize(view.getGraph(),
-          view.getSBMLDocument(), core,
-          view.getSelectedSpecies(), view.getSelectedReactions(),
-          minNodeSize, maxNodeSize, color1, color2, color3,
-          reactionsMinLineWidth, reactionsMaxLineWidth);
+        double addSizeForOverview = 0;
+        if(!controlPanel.getCameraAnimationMode().equals(Items.NO_CAMERA_ANIMATION.getName()) 
+            && core.getAnotherObserver() != null) {
+          if(camView == null) {
+            camView = (CameraAnimationView) core.getAnotherObserver();
+          }
+          addSizeForOverview = camView.overviewSize;
+        }  
+
+        // get current options
+        Color color2 = Option.parseOrCast(Color.class,
+          prefs.get(GraphOptions.COLOR2));
+
+        if (prefs.getBoolean(GraphOptions.CHOOSE_OWN_NODE_COLORS)) { 	
+          Color color1 = Option.parseOrCast(Color.class,
+            prefs.get(GraphOptions.COLOR1));
+          Color color3 = Option.parseOrCast(Color.class,
+            prefs.get(GraphOptions.COLOR3));
+
+          return new ManipulatorOfNodeColorAndSize(view.getGraph(),
+            view.getSBMLDocument(), core,
+            view.getSelectedSpecies(), view.getSelectedReactions(),
+            minNodeSize, maxNodeSize, addSizeForOverview, color1, color2, color3,
+            reactionsMinLineWidth, reactionsMaxLineWidth);
+        } else {
+          return new ManipulatorOfNodeColorAndSize(view.getGraph(),
+            view.getSBMLDocument(), core,
+            view.getSelectedSpecies(), view.getSelectedReactions(), minNodeSize,
+            maxNodeSize, addSizeForOverview, color2);
+        }
+      } else if (controlPanel.getSelectedManipulator().equals(Manipulators.FILL_LEVEL.getName())) {
+
+        // get current options
+        Color color2 = Option.parseOrCast(Color.class,
+          prefs.get(GraphOptions.COLOR2));
+
+        double nodeSize = prefs.getDouble(GraphOptions.COLOR_NODE_SIZE);
+
+        double addSizeForOverview = 0;
+        if(!controlPanel.getCameraAnimationMode().equals(Items.NO_CAMERA_ANIMATION.getName()) 
+            && core.getAnotherObserver() != null) {
+          if(camView == null) {
+            camView = (CameraAnimationView) core.getAnotherObserver();
+          }
+          addSizeForOverview = camView.overviewSize;
+        }  
+
+        if (prefs.getBoolean(GraphOptions.CHOOSE_OWN_NODE_COLORS)) {
+          Color color1 = Option.parseOrCast(Color.class,
+            prefs.get(GraphOptions.COLOR1));
+          Color color3 = Option.parseOrCast(Color.class,
+            prefs.get(GraphOptions.COLOR3));
+
+          return new ManipulatorOfFillLevel(view.getGraph(), view.getSBMLDocument(), core,
+            view.getSelectedSpecies(), nodeSize, addSizeForOverview, color1, color2, color3);
+        } else {    		  
+          return new ManipulatorOfFillLevel(view.getGraph(), view.getSBMLDocument(), core,
+            view.getSelectedSpecies(), nodeSize, addSizeForOverview, color2);
+        }
       }
 
       // in any other case return nodesize manipulator per default.
       return new ManipulatorOfNodeSize(view.getGraph(),
         view.getSBMLDocument(), core, view.getSelectedSpecies(),
         view.getSelectedReactions());
+
     }
+
     return null; // do nothing if core isn't set yet.
   }
 
@@ -497,11 +689,38 @@ ItemListener, TableModelListener, PreferenceChangeListener {
         view.setGraphManipulator(getSelectedGraphManipulator());
         //update preferences on change
         SBPreferences.getPreferencesFor(GraphOptions.class).put(
-          cb.getName(),
-          Manipulators.getManipulator(ie.getItem().toString()).getName());
+          cb.getName(), Manipulators.getManipulator(ie.getItem().toString()).getName());
       } else if (cb.getName().equals(controlPanel.DATA_LIST)){
         view.visualizeData(ie.getItem().toString());
-      }
+      } else if(cb.getName().equals(GraphOptions.SHOW_CAMERA_ANIMATION.toString())) {
+        controlPanel.setCameraAnimationCombo(Items.getItem(ie.getItem().toString()));
+        SBPreferences.getPreferencesFor(GraphOptions.class).put(cb.getName(),
+          Items.getItem(ie.getItem().toString()).getName());
+        if(!ie.getItem().equals(Items.NO_CAMERA_ANIMATION.getName())) {
+          if(camView == null) {							
+            if (core.getAnotherObserver() == null) {
+              camView = new CameraAnimationView();
+              camView.setGraph(view.getGraph().getGraph2D());
+              core.setAnotherObserver(camView);
+            } else {							
+              camView = (CameraAnimationView) core.getAnotherObserver();
+            }
+          }
+          camView.checkForNewFile();
+          camView.setDefaultPosition(view.getGraph().getGraph2D());
+          camView.showOverviewAnimation();
+          IGraphManipulator currentManipulator = getSelectedGraphManipulator();
+          currentManipulator.setAddSizeForOverview(camView.overviewSize);
+          core.cameraAnimation = !controlPanel.getCameraAnimationMode().equals(Items.NO_CAMERA_ANIMATION.getName());
+          core.playAgain = core.cameraAnimation;
+        } else {
+          IGraphManipulator currentManipulator = getSelectedGraphManipulator();
+          currentManipulator.setAddSizeForOverview(0);
+          camView.resetCameraAnimation();
+          core.cameraAnimation = !controlPanel.getCameraAnimationMode().equals(Items.NO_CAMERA_ANIMATION.getName());
+          core.playAgain = core.cameraAnimation;
+        }
+      } 
     } else if (ie.getSource() instanceof JCheckBox) {
       JCheckBox cb = (JCheckBox) ie.getSource();
       if (cb.getName() != null) {
@@ -517,8 +736,11 @@ ItemListener, TableModelListener, PreferenceChangeListener {
             logger.fine(getMessage(exc));
           }
         }
+        if(name.equals("CYCLE_SIMULATION") && !cb.isSelected()) {
+          core.setCycle(false);
+        }
       }
-    }
+    } 
   }
 
   /* (non-Javadoc)
@@ -540,7 +762,9 @@ ItemListener, TableModelListener, PreferenceChangeListener {
         || evt.getKey().equals("COLOR1")
         || evt.getKey().equals("COLOR2")
         || evt.getKey().equals("COLOR3")
-        || evt.getKey().equals("COLOR_NODE_SIZE")) {
+        || evt.getKey().equals("COLOR_NODE_SIZE")
+        || evt.getKey().equals("CYCLE_SIMULATION")
+        || evt.getKey().equals("SHOW_CAMERA_ANIMATION")) {
 
       //ensure correct user inputs
       if (prefs.getDouble(GraphOptions.MAX_NODE_SIZE) <= prefs
@@ -607,6 +831,11 @@ ItemListener, TableModelListener, PreferenceChangeListener {
     if (evt.getKey().equals("SIM_SPEED_CHOOSER")) {
       controlPanel.setSimVeloCombo(Items.getItem(prefs
         .getString(GraphOptions.SIM_SPEED_CHOOSER)));
+    }
+
+    if(evt.getKey().equals("SHOW_CAMERA_ANIMATION")) {
+      controlPanel.setCameraAnimationCombo(Items.getItem(prefs
+        .getString(GraphOptions.SHOW_CAMERA_ANIMATION)));
     }
 
     if (evt.getKey().equals("VISUALIZATION_STYLE")) {

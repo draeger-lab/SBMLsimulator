@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -26,7 +24,6 @@ import org.simulator.math.odes.MultiTable;
  * @author Max Zwie&szlig;ele
  * @author Philip Stevens
  * @author Andreas Dr&auml;ger
- * @version $Rev$
  * @since 1.0
  */
 public class XYDatasetAdapter extends AbstractXYDataset implements MetaDataset {

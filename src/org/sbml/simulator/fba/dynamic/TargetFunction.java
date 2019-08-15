@@ -1,6 +1,4 @@
 /*
- * $Id:  TargetFunction.java 11:31:26 faehnrich$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -29,7 +27,6 @@ import org.simulator.math.odes.MultiTable;
 /**
  * 
  * @author Robin F&auml;hnrich
- * @version $Rev$
  * @since 1.0
  */
 public abstract class TargetFunction {

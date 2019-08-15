@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -60,7 +58,6 @@ import de.zbit.util.StringUtil;
  * 
  * @author Andreas Dr&auml;ger
  * @date 2010-09-20
- * @version $Rev$
  * @since 1.0
  */
 public class SimulationVisualizationPanel extends JSplitPane implements
@@ -266,7 +263,7 @@ PreferenceChangeListener, TableModelListener {
           infos[i] = null;
         }
       }
-      if (clearFirst) {
+      if (clearFirst && plot != null) {
         plot.clearAll();
       }
       plot.plot(d, connected, plotColors, infos);
@@ -396,6 +393,20 @@ PreferenceChangeListener, TableModelListener {
     //selectLegendItems(simData);
     plot();
   }
+  
+  /**
+   * 
+   */
+  public void setLegendPanel (LegendPanel legend) {
+    legendPanel = legend;  
+  }
+
+  /**
+   * 
+   */
+  public void setPlot(Plot plot) {
+    this.plot = plot;
+  }
 
   /* (non-Javadoc)
    * @seejavax.swing.event.TableModelListener#tableChanged(javax.swing.event.TableModelEvent)
@@ -427,6 +438,7 @@ PreferenceChangeListener, TableModelListener {
     } else if (e.getSource() instanceof MultiTable) {
       setSimulationData((MultiTable) e.getSource());
     }
+  
   }
 
   /**

@@ -1,6 +1,4 @@
 /*
- * $Id:  SimulationOptions.java 17:03:54 draeger$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -33,7 +31,6 @@ import de.zbit.util.prefs.Range;
  * systems biology models.
  * 
  * @author Andreas Dr&auml;ger
- * @version $Rev$
  * @since 1.0
  * @date 2011-03-23
  */

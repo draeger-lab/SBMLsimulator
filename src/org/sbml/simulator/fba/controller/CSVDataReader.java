@@ -1,6 +1,4 @@
 /*
- * $Id:  CSVDataReader.java 16:16:00 Meike Aichele$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -31,7 +29,6 @@ import de.zbit.io.csv.CSVReader;
  * Reads the CSV-files in background.
  * 
  * @author Meike Aichele
- * @version $Rev$
  * @date 04.06.2012
  * @since 1.0
  */

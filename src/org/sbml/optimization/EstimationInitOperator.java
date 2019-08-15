@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models of biochemical processes encoded in the modeling language SBML.
  *
@@ -37,7 +35,6 @@ import eva2.tools.math.RNG;
  * well as multiple publications about evolutionary algorithms.
  * 
  * @author Roland Keller
- * @version $Rev$
  */
 public class EstimationInitOperator implements InterfaceInitialization {
 

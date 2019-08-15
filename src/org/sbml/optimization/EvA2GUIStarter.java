@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -42,7 +40,6 @@ import java.util.logging.Logger;
  * 
  * @author Marcel Kronfeld
  * @date 2010-09-01
- * @version $Rev$
  * @since 1.0
  */
 public class EvA2GUIStarter {

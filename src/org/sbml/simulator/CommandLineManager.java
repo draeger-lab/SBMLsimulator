@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -69,7 +67,6 @@ import eva2.optimization.modules.OptimizationParameters;
  * This class handles the execution of SBMLsimulator from the command line.
  * 
  * @author Alexander D&ouml;rr
- * @version $Rev$
  * @since 1.0
  */
 public class CommandLineManager implements PropertyChangeListener, Runnable {

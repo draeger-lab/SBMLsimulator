@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$ 
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -27,29 +25,28 @@ import org.simulator.math.odes.MultiTable;
  * MVC-pattern.
  * 
  * @author Fabian Schwarzkopf
- * @version $Rev$
  */
 public interface IDynamicGraph {
 
-    /**
-	 * Method invoked by related {@link DynamicCore} when play thread is done.
-	 */
-	public void donePlay();
-	
-	/**
-     * Return a {@link BufferedImage} with given resolution of currently
-     * displayed Graph.
-     * @param width
-     * @param height
-     * @return
-     */
-	public BufferedImage takeGraphshot(int width, int height);
-	
-	/**
-     * Method invoked by related {@link DynamicCore} when time point changes.
-     * @param timepoint
-     * @param updateThem
-     */
-	public void updateGraph(double timepoint, MultiTable updateThem);
-	
+  /**
+   * Method invoked by related {@link DynamicCore} when play thread is done.
+   */
+  public void donePlay();
+
+  /**
+   * Return a {@link BufferedImage} with given resolution of currently
+   * displayed Graph.
+   * @param width
+   * @param height
+   * @return
+   */
+  public BufferedImage takeGraphshot(int width, int height);
+
+  /**
+   * Method invoked by related {@link DynamicCore} when time point changes.
+   * @param timepoint
+   * @param updateThem
+   */
+  public void updateGraph(double timepoint, MultiTable updateThem);
+
 }

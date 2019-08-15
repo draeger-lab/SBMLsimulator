@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -30,7 +28,6 @@ import eva2.tools.math.interpolation.SplineInterpolation;
  * data.
  * 
  * @author Roland Keller
- * @version $Rev$
  * @since 1.2
  */
 public class SplineCalculation {

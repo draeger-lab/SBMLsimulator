@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$ 
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -22,7 +20,6 @@ import javax.swing.JSlider;
 
 /**
  * @author Fabian Schwarzkopf
- * @version $Rev$
  */
 public class BugTestJSlider{
 	
@@ -39,6 +36,5 @@ public class BugTestJSlider{
 		window.setSize(200, 100);
 		window.setVisible(true);
 	}
-	
 
 }

@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -68,7 +66,6 @@ import de.zbit.util.prefs.SBPreferences;
  * 
  * @author Andreas Dr&auml;ger
  * @date 2010-09-16
- * @version $Rev$
  * @since 1.0
  */
 public class SimulationToolPanel extends JPanel implements ItemListener,
@@ -450,7 +447,9 @@ ChangeListener, PreferenceChangeListener, PropertyChangeListener {
     } else {
       logger.fine(key + "=" + evt.getNewValue());
       for (PreferenceChangeListener listener : listOfPreferenceChangeListeners) {
-        listener.preferenceChange(evt);
+        if(listener != null) {
+          listener.preferenceChange(evt);
+        }
       }
     }
 

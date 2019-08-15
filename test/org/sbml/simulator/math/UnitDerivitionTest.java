@@ -1,6 +1,4 @@
 /*
- * $Id:  UnitDerivitionTest.java 10:56:10 draeger$
- * $URL$
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -32,7 +30,6 @@ import org.sbml.jsbml.UnitDefinition;
  * A small test program to evaluate units in a given SBML file (file name).
  * 
  * @author Andreas Dr&auml;ger
- * @version $Rev$
  * @since 1.0
  */
 public class UnitDerivitionTest {

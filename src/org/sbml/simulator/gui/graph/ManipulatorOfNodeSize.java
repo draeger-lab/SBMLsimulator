@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $URL$ 
  * ---------------------------------------------------------------------
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
@@ -33,9 +31,8 @@ import de.zbit.sbml.layout.y.ILayoutGraph;
  * nodes and width of given reactions.
  * 
  * @author Fabian Schwarzkopf
- * @version $Rev$
  */
-public class ManipulatorOfNodeSize extends AGraphManipulator{   
+public class ManipulatorOfNodeSize extends AGraphManipulator{
 
 	/**
 	 * A {@link Logger} for this class.
@@ -61,8 +58,13 @@ public class ManipulatorOfNodeSize extends AGraphManipulator{
 	/**
 	 * Minimum and maximum Node Size with default initialization.
 	 */
-	private double minNodeSize = DEFAULT_MIN_NODE_SIZE,
+	private static double minNodeSize = DEFAULT_MIN_NODE_SIZE,
 			maxNodeSize = DEFAULT_MAX_NODE_SIZE;
+	
+	/**
+	 * if camera animation is active and overview is shown node size is different
+	 */
+	private static double addSizeForOverview;
 
 	/**
 	 * Concentration changes relativ or absolute? Per default false.
@@ -89,13 +91,15 @@ public class ManipulatorOfNodeSize extends AGraphManipulator{
 	 */
 	public ManipulatorOfNodeSize(ILayoutGraph isbmlLayoutGraph, SBMLDocument document,
 			DynamicCore core, Color uniformNodeColor, String[] selectedSpecies,
-			String[] selectedReactions, double minNodeSize, double maxNodeSize,
+			String[] selectedReactions, double minNodeSize, double maxNodeSize, double addSizeForOverview,
 			boolean relativeConcentrations, float reactionsMinLineWidth,
 			float reactionsMaxLineWidth) {
 
 		// no use of this() because of other super constructor
 		super(isbmlLayoutGraph, document, core, selectedReactions, reactionsMinLineWidth,
 				reactionsMaxLineWidth);
+		
+		this.addSizeForOverview = addSizeForOverview;
 
 		if (minNodeSize < maxNodeSize) {
 			this.minNodeSize = minNodeSize;
@@ -134,12 +138,14 @@ public class ManipulatorOfNodeSize extends AGraphManipulator{
 	public ManipulatorOfNodeSize(ILayoutGraph graph, SBMLDocument document,
 			DynamicCore core, LegendTableModel legendTableModel,
 			String[] selectedSpecies, String[] selectedReactions,
-			double minNodeSize, double maxNodeSize,
+			double minNodeSize, double maxNodeSize, double addSizeForOverview,
 			boolean relativeConcentrations, float reactionsMinLinewidth,
 			float reactionsMaxLineWidth) {
 
 		super(graph, document, core, selectedReactions, reactionsMinLinewidth,
 				reactionsMaxLineWidth);
+		
+		this.addSizeForOverview = addSizeForOverview;
 
 		this.legendTable = legendTableModel;
 		if (minNodeSize < maxNodeSize) {
@@ -204,10 +210,16 @@ public class ManipulatorOfNodeSize extends AGraphManipulator{
 				minValue = minMaxOfSelectedSpecies[0];
 				maxValue = minMaxOfSelectedSpecies[1];
 			}
+			
+			double addSize = 0;
+			if(DynamicCore.cameraAnimation && DynamicCore.playAgain) {
+				addSize = addSizeForOverview;
+			} 
 
 			// compute adusting
-			double size = adjustValue(minValue, maxValue, minNodeSize,
-					maxNodeSize, value);
+			double size = adjustValue(minValue, maxValue, minNodeSize+addSize,
+					maxNodeSize+addSize, value);
+
 			boolean invisible = isInvisible(value);
 			logger.finer(MessageFormat.format(
 					"Species {0}: value={1}, results in node size={2}",
@@ -220,7 +232,16 @@ public class ManipulatorOfNodeSize extends AGraphManipulator{
 				else {
 					hide(id, node, false);
 					// visualize
-					NodeRealizer nr = graph.getGraph2D().getRealizer(node);
+					
+					NodeRealizer nr;
+	        		if(!node2Realizer.containsKey(node)) {
+	        			nr = graph.getGraph2D().getRealizer(node);
+	        			node2Realizer.put(node, nr);
+	        		} else {
+	        			nr = node2Realizer.get(node);
+	        			graph.getGraph2D().setRealizer(node, nr);        			
+	        		}
+	        		
 					double ratio = nr.getHeight() / nr.getWidth(); //keep ratio in case of elliptic nodes
 					nr.setSize(size, size * ratio);
 					//use standard color if no legendTableModel is provided
@@ -247,6 +268,29 @@ public class ManipulatorOfNodeSize extends AGraphManipulator{
 			// update view
 			graph.getGraph2D().updateViews();
 		}
+	}
+	
+	/**
+	 * sets new min and max node sizes if they were changed
+	 * @param minNodeSize
+	 * @param maxNodeSize
+	 */
+	public void setNewMinMaxNodeSize(double minNodeSize, double maxNodeSize) {
+		if(this.minNodeSize != minNodeSize) {
+			this.minNodeSize = minNodeSize;
+		}
+		if(this.maxNodeSize != maxNodeSize) {
+			this.maxNodeSize = maxNodeSize;
+		}
+	}
+	
+	/**
+	 * resets the adding factor for the node sizes 
+	 * @param newSize
+	 */
+	@Override
+	public void setAddSizeForOverview(int newSize) {
+		addSizeForOverview = newSize;
 	}
 
 }
