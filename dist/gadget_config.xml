@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
- * $Id$
- * $URL$
- *
  *******************************************************************************
  *
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
  *
- * Copyright (C) 2007-2016 by the University of Tuebingen, Germany.
+ * Copyright (C) 2007-2019 by the University of Tübingen, Germany.
  *
  * This library is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -18,8 +15,6 @@
  * <http://www.gnu.org/licenses/lgpl-3.0-standalone.html>.
  *
  *******************************************************************************
- *
- * Version: $Rev$
 -->
 <Gadget>
   <UUID>[GADGET_UUID]</UUID>
@@ -32,9 +27,9 @@
     <Icon32Path>icons/SBMLsimulator_64.png</Icon32Path>
   </IconPaths>
   <Snapshots>
-    <SnapshotPath>snapshot/Screenshot_1.PNG</SnapshotPath>
-    <SnapshotPath>snapshot/Screenshot_2.PNG</SnapshotPath>
-    <SnapshotPath>snapshot/Screenshot_3.PNG</SnapshotPath>
+    <SnapshotPath>snapshot/Screenshot_1.png</SnapshotPath>
+    <!--<SnapshotPath>snapshot/Screenshot_2.png</SnapshotPath>
+    <SnapshotPath>snapshot/Screenshot_3.png</SnapshotPath>-->
   </Snapshots>
   <Categories>
     <Category>Dynamic simulation</Category>
@@ -42,7 +37,7 @@
     <Category>Heuristic optimization</Category>
     <Category>Ordinary differential equation solver</Category>
   </Categories>
-  <Provider>University of Tuebingen</Provider>
+  <Provider>University of Tübingen</Provider>
   <Description>SBMLsimulator is a fast, accurate, and easily usable program for dynamic model simulation and heuristic parameter optimization of models encoded in the Systems Biology Markup Language (SBML). In order to ensure a high reliability of this software, its internal numerical solver engine, the Systems Biology Simulation Core Library, has been benchmarked against the entire SBML Test Suite and all models from the BioModels database. It includes a large collection of nature-inspired heuristic optimization procedures for efficient model calibration. SBMLsimulator provides an intuitive Graphical User Interface (GUI) and several command-line options to be suitable for large-scale batch processing and model calibration. SBMLsimulator runs on all platforms that provide a standard Java Virtual Machine and is based on the open-source library JSBML. The simulation core library of SBMLsimulator can be obtained as a separate application programming library.</Description>
   <LoadableKeys>
     <InputFileFormat>

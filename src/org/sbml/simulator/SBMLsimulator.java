@@ -51,7 +51,7 @@ import de.zbit.util.prefs.SBProperties;
 /**
  * The start program for {@link SBMLsimulator}, which can initialize the
  * graphical user interface or, alternatively, the command-line interface.
- * 
+ *
  * @author Andreas Dr&auml;ger
  * @author Roland Keller
  * @date 2010-09-01
@@ -95,7 +95,7 @@ public class SBMLsimulator extends Launcher {
   public static final String SOLVER_PACKAGE = "org.simulator.math.odes";
 
   /**
-   * 
+   *
    */
   public static final boolean garuda = true;
 
@@ -158,7 +158,7 @@ public class SBMLsimulator extends Launcher {
 
 
   /**
-   * 
+   *
    * @return
    */
   @SuppressWarnings("rawtypes")
@@ -199,7 +199,7 @@ public class SBMLsimulator extends Launcher {
   }
 
   /**
-   * 
+   *
    * @return
    */
   @SuppressWarnings("rawtypes")
@@ -216,7 +216,7 @@ public class SBMLsimulator extends Launcher {
   }
 
   /**
-   * 
+   *
    * @return
    */
   public static Class<AbstractDESSolver>[] getAvailableSolvers() {
@@ -224,7 +224,7 @@ public class SBMLsimulator extends Launcher {
   }
 
   /**
-   * 
+   *
    * @param args
    * @throws IOException
    * @throws HeadlessException
@@ -234,7 +234,7 @@ public class SBMLsimulator extends Launcher {
   }
 
   /**
-   * 
+   *
    * @param args
    */
   public SBMLsimulator(String[] args) {
@@ -242,7 +242,7 @@ public class SBMLsimulator extends Launcher {
   }
 
   /**
-   * 
+   *
    */
   public SBMLsimulator() {
     super();
@@ -366,7 +366,7 @@ public class SBMLsimulator extends Launcher {
    */
   @Override
   public short getYearOfProgramRelease() {
-    return (short) 2016;
+    return (short) 2019;
   }
 
   /* (non-Javadoc)

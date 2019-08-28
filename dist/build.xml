@@ -29,32 +29,13 @@
   	
   	<property name="Name" value="SBMLsimulator"/>
     <property name="year" value="${YEAR}"/>
-  	<property name="version" value="2.0a"/>
+  	<property name="version" value="2.0"/>
   	<property name="repository.revision" value="1159"/>
 
     <echo message="----------- ${Name} ${version} [${year}] ------------"/>
     <echo message="-----------     ${TODAY}       ------------"/>
     <echo message="-----------     ${DSTAMP} ${TSTAMP}       ------------"/>
-  	
-    <!-- the path to the SBMLsimulator binaries -->
-    <property name="classes" location="${base}/bin"/>
     
-    <!-- the unobfuscated application jar file -->
-    <property name="appJarRaw" value="SBMLsimulator_unobfuscated.jar"/>
-  	
-    <!-- the unsigned application jar file -->
-    <property name="appJarObf" value="SBMLsimulator_unsigned.jar"/>
-
-    <!-- the FINAL obfuscated signed application jar file -->
-    <property name="appJar" value="SBMLsimulator.jar"/>
-
-  	
-    <!-- the yGuard jar file containing the obfuscation task -->
-    <property name="yGuardJar" value="yguard.jar"/>
-    
-    <!-- the log file geenrated by the obfuscation task -->
-    <property name="obfuscationLog" value="obfuscation-log.xml"/>
-  	
     <!-- For compiling the project -->
     <property name="src" location="${base}/src"/>
     <property name="test" location="${base}/test"/>
@@ -72,18 +53,16 @@
   	<property name="build.number"           value="${DSTAMP}-${TSTAMP}"/>
     <property name="build.name"             value="${version} (build ${build.number})"/>
   	
-    <property name="classes"                location="${base}/bin"/>
     <!--<property name="test"                   value="${base}/test"/>-->
     <property name="build.dir"              value="${basedir}/build"/>
     <property name="build.src"              value="${basedir}/build/src"/>
     <property name="build.dest"             value="${basedir}/build/classes"/>
     <property name="doc"                    value="${basedir}/doc/api"/>
     <property name="lib"                    value="${base}/lib"/>
-    <property name="dist"                   value="${basedir}/dist"/>
+    <property name="dist"                   value="${base}/dist"/>
     <property name="dist.dir"               value="${dist}/${Name}-${version}"/>
   	<property name="UUID"                   value="58f78f8d-a676-333a-b2e3-7ea6265d5ab7"/>
-  	<property name="garuda.gadget"          value="${dist.dir}/${JAR_Name}_v${version}_Garuda.zip"/>
-  	<property name="vendor"                 value="Center for Bioinformatics Tuebingen (ZBIT)"/>
+  	<property name="vendor"                 value="Institute for Biomedical Informatics (IBMI)"/>
   	
   	<property name="jar.exclude" value="META-INF/*.SF, META-INF/LICENSE*, META-INF/NOTICE*, META-INF/INDEX.LIST, META-INF/DEPENDENCIES, **/package.html, **/package-info.class, overview.html, *.txt"/>
   	
@@ -98,7 +77,7 @@
     
     <!-- the path to SYSBIO -->
     <property name="SysBioPath" location="${base}/../SysBio" />
-    <!-- the path to JSBML -->
+    <!-- the path to  -->
     <property name="JSBMLPath" location="${base}/../jsbml" />
     <!-- the path to SBML2LaTeX -->
     <property name="SBML2LaTeXPath" location="${base}/../SBML2LaTeX" />
@@ -106,11 +85,30 @@
     <property name="SBMLsimulatorCorePath" location="${base}/../SBSCL" />
     <!-- =================================== -->
   	
+  	<property name="JAR_Name" value="SBMLsimulator_v${version}"/>
+  	
+  	<!-- the unobfuscated application jar file -->
+    <property name="appJarRaw" value="${JAR_Name}_unobfuscated.jar"/>
+  	  	
+    <!-- the unsigned application jar file -->
+    <property name="appJarObf" value="${JAR_Name}_unsigned.jar"/>
+
+    <!-- the FINAL obfuscated signed application jar file -->
+    <property name="appJar" value="${dist.dir}/${JAR_Name}.jar"/>
+  	  	
+    <!-- the yGuard jar file containing the obfuscation task -->
+    <property name="yGuardJar" value="yguard.jar"/>
+  	    
+  	<!-- the log file geenrated by the obfuscation task -->
+    <property name="obfuscationLog" value="obfuscation-log.xml"/>
+
+  	
   </target>
 
   <!-- =================================================================== -->
   <!-- Prepares the build directory                                        -->
   <!-- =================================================================== -->
+  
   <target
     name="prepare"
     depends="init"
@@ -124,6 +122,7 @@
   <!-- =================================================================== -->
   <!-- Prepares the source code                                            -->
   <!-- =================================================================== -->
+
   <target
     name="prepare-src"
     depends="prepare"
@@ -160,11 +159,14 @@
   <!-- =================================================================== -->
   <!-- Compile                                                             -->
   <!-- =================================================================== -->
+
   <target
 	name="compile"
 	depends="prepare-src">
+  	
     <echo message="Compiling the entire SBMLsimulator project"/>
-    <javac
+    
+  	<javac
       classpathref="classpath"
       compiler="${build.compiler}"
       debug="${debug}"
@@ -188,6 +190,8 @@
   	  <src path="${resources}"/>
     </javac>
   	
+  	<echo message="Writing Manifest file"/>
+  	
   	<manifest file="${build.dest}/META-INF/MANIFEST.MF">
       <attribute name="Main-Class"             value="org.sbml.simulator.SBMLsimulator"/>
       <attribute name="SplashScreen-Image"     value="org/sbml/simulator/gui/img/Splash.gif"/>
@@ -197,27 +201,40 @@
         <attribute name="Implementation-Title"   value="${Name}"/>
         <attribute name="Implementation-Vendor"  value="University of Tuebingen"/>
         <attribute name="Implementation-Version" value="Revision ${repository.revision} (Build ${build.number})"/>
-        <attribute name="Implementation-URL"     value="http://www.cogsys.cs.uni-tuebingen.de/software/${Name}/"/>
+        <attribute name="Implementation-URL"     value="http://csb.informatik.uni-tuebingen.de/software#${Name}/"/>
         <attribute name="Specification-Title"    value="${Name}"/>
         <attribute name="Specification-Version"  value="${api.version}"/>
         <attribute name="Specification-Vendor"   value="${vendor}"/>
       </section>
-      <attribute name="Bundle-Name"            value="${Name}"/> 
+      <!--<attribute name="Bundle-Name"            value="${Name}"/> 
       <attribute name="Bundle-SymbolicName"    value="${UUID}"/>
       <attribute name="Bundle-Revision"        value="${repository.revision}"/>
       <attribute name="Bundle-Vendor"          value="${vendor}"/>
       <attribute name="Bundle-RequiredExecutionEnvironment" value="JavaSE-1.6"/>
-      <attribute name="Bundle-Version"         value="${version}"/>
+      <attribute name="Bundle-Version"         value="${version}"/>-->
     </manifest>
+  	
+  	<echo message="Coyping files to target folder"/>
   	
     <copy todir="${build.dest}/META-INF/" verbose="${verbose}">
       <fileset dir="${base}/licenses"/>
     </copy>
   	
+  	<!-- copy resource files -->
+  	<copy todir="${build.dest}" overwrite="yes">
+  	  <fileset 
+  	    dir="${resources}"
+  	    includes="org/**, **/*.properties, **/*.xml, **/*.png, **/*.jpg"
+  	    excludes="**/.svn*, **/*~, **/*.tgz, **/*.zip"/>
+    </copy>
+  	
   </target>
 
   <!-- puts the application specific classes into application.jar. -->
-  <target name="jar" depends="compile">
+  <target
+    name="jar"
+    depends="compile">
+  	
     <delete file="${appJarRaw}"/>
     <jar
       compress="true"
@@ -229,7 +246,7 @@
     >
       
       <!-- SBMLsimulator Classes -->
-      <fileset dir="${classes}">
+      <fileset dir="${build.dest}">
         <exclude name="**/package.html"/>
       	<exclude name="**/package-info.class"/>
       	<exclude name="overview.html"/>
@@ -310,12 +327,12 @@
     	
       <externalclasses>
         <pathelement location="${base}/lib/EvA2.jar"/>
-      	<pathelement location="${base}/lib/jsbml-1.2-incl-libs.jar"/>
+      	<pathelement location="${base}/lib/jsbml-1.5a-incl-libs.jar"/>
       	<pathelement location="${base}/lib/garuda-csr.jar"/>
-      	<pathelement location="${base}/lib/log4j-1.2-api-2.3.jar"/>
-      	<pathelement location="${base}/lib/log4j-api-2.3.jar"/>
-      	<pathelement location="${base}/lib/log4j-core-2.3.jar"/>
-      	<pathelement location="${base}/lib/log4j-slf4j-impl-2.3.jar"/>
+      	<pathelement location="${JSBMLPath}/core/lib/log4j-1.2-api-2.3.jar"/>
+      	<pathelement location="${JSBMLPath}/core/lib/log4j-api-2.3.jar"/>
+      	<pathelement location="${JSBMLPath}/core/lib/log4j-core-2.3.jar"/>
+      	<pathelement location="${JSBMLPath}/core/lib/log4j-slf4j-impl-2.3.jar"/>
       </externalclasses>
     	
 
@@ -484,7 +501,7 @@
   	  <!-- index="true" indexMetaInf="true" -->
   	  <zipfileset excludes="${jar.exclude}, tidy.gif, gpl-3.0.txt, jsc.jar, lgpl-3.0.txt, XPP3_1.1.4c_MIN_VERSION" src="${appJarObf}"/>
   	  <zipfileset excludes="${jar.exclude}" src="${base}/lib/EvA2.jar"/>
-  	  <zipfileset excludes="${jar.exclude}" src="${base}/lib/jsbml-1.2-incl-libs.jar"/>
+  	  <zipfileset excludes="${jar.exclude}" src="${base}/lib/jsbml-1.5a-incl-libs.jar"/>
   	  <zipfileset excludes="${jar.exclude}" src="${base}/lib/garuda/garuda-csr.jar"/>
   	  <zipfileset excludes="${jar.exclude}" src="${JSBMLPath}/core/lib/log4j-1.2-api-2.3.jar"/>
   	  <zipfileset excludes="${jar.exclude}" src="${JSBMLPath}/core/lib/log4j-api-2.3.jar"/>
@@ -497,8 +514,9 @@
   <!-- signs the application -->
   <target name="sign" depends="obfuscate">
   	<delete file="${appJar}"/>
-    <!-- Having an "keystore" file is required. Generate it with the "keytool" in the current directory. -->  	
-	  <signjar alias="SBMLsimulator" jar="${appJarObf}" keypass="d=dpfSBMLsimulator!" keystore="keystore" signedjar="${appJar}" storepass="d=dpfSBMLsimulator!"/>
+    <!-- Having an "keystore" file is required. Generate it with the "keytool" in the current directory. -->
+  	<!-- keytool -genkey -alias <alias name> -keystore <key file> (http://docs.oracle.com/javase/6/docs/technotes/tools/solaris/keytool.html) -->
+	<signjar alias="SBMLsimulator" jar="${appJarObf}" keystore="keystore" signedjar="${appJar}" tsaurl="http://timestamp.digicert.com" />
   </target>
 
 	
@@ -511,13 +529,100 @@
     </java>
   </target>
 
+	
+  <!-- =================================================================== -->
+  <!-- Creates a ZIP file for Garuda                                       -->
+  <!-- =================================================================== -->
+
+  <target
+    name="garuda"
+    depends="sign"
+    description="Creates a ZIP file for Garuda">
+	
+    <property name="garuda.gadget"  value="${dist.dir}/${JAR_Name}_Garuda.zip"/>
+    <property name="gadget.config"  value="gadget_config.xml"/>
+	  	
+    <!-- Launch command is platform dependent -> Determine command for platform -->
+    <!-- Windows: cmd /c start javaw.exe -jar gadgets/[GADGET_UUID]/[JAR_NAME] -->
+    <!-- Linux:   java -jar gadgets/[GADGET_UUID]/[JAR_NAME] -->
+    <!-- Mac OS:  open gadgets/[GADGET_UUID]/[JAR_NAME] -->
+    <condition property="jar.executor" value="open">
+      <os family="mac"/>
+    </condition>
+    <condition property="jar.executor" value="cmd /c start javaw.exe -jar">
+      <os family="windows"/>
+    </condition>
+    <condition property="jar.executor" value="java -jar">
+      <and>
+        <os family="unix"/>
+        <not>
+          <os family="mac"/>
+        </not>
+      </and>
+    </condition>
+	  	
+    <copy file="${dist}/${gadget.config}" todir="${dist.dir}/" verbose="${verbose}"/>
+    <property name="sbmlsimlator.config" value="${dist.dir}/${gadget.config}"/>
+	  	
+    <echo message="Updating Garuda gadget configuration..."/>
+    <replace
+      file="${sbmlsimlator.config}"
+      token="[LAUNCH_COMMAND]"
+      value="${jar.executor}"
+    />
+    <replace
+      file="${sbmlsimlator.config}"
+      token="[GADGET_UUID]"
+      value="${UUID}"
+    />
+    <replace
+      file="${sbmlsimlator.config}"
+      token="[GADGET_NAME]"
+      value="${Name}"
+    />
+    <replace
+      file="${sbmlsimlator.config}"
+      token="[JAR_NAME]"
+      value="${JAR_Name}.jar"
+    />
+	  	
+    <echo message="Generating ZIP archive for Garuda..."/>
+    <zip
+      compress="true"
+      comment="Garuda Gadget ${Name}"
+      destfile="${garuda.gadget}"
+      encoding="utf-8"
+      level="9"
+      update="true"
+    >
+      <mappedresources>
+        <fileset file="${sbmlsimlator.config}"/>
+        <globmapper from="*" to="${UUID}/*"/>
+      </mappedresources>
+      <mappedresources>
+        <fileset file="${appJar}"/>
+        <globmapper from="*" to="${UUID}/*"/>
+      </mappedresources>
+      <mappedresources>
+        <fileset file="${resources}/org/sbml/simulator/gui/img/${Name}_64.png"/>
+        <globmapper from="*" to="${UUID}/icons/*"/>
+      </mappedresources>
+      <zipfileset dir="${dist}/" prefix="${UUID}/snapshot/">
+        <include name="Screenshot_*.png"/>
+      </zipfileset>
+    </zip>
+	  	
+  	<delete file="${sbmlsimlator.config}" verbose="${verbose}"/>
+
+  </target>
+
   <!-- Removes all that has been built -->
   <target name="clean" depends="init">
   	<delete file="${appJarRaw}"/>
   	<delete file="${appJarObf}"/>
     <delete file="${appJar}"/>
   	<delete includeemptydirs="true" dir="${build.dir}"/>
-    <delete includeemptydirs="true" dir="${classes}"/>
+    <delete includeemptydirs="true" dir="${build.dest}"/>
   </target>
-
+	
 </project>
