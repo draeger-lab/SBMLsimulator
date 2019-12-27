@@ -1,30 +1,15 @@
-The program SBMLsimulator has been developed in the context of the Virtual
-Liver project to simulate models of metabolic, gene regulatory, and signal
-transduction processes in individual cells or ensembles of cells. It thus can
-be used at the compartmental, cellular or multicellular level. The program
-reads biological models encoded in SBML files (Systems Biology Markup Language)
-and efficiently calculates the evolution of all model components, such as
-(cellular) species or compartment sizes, influences of external parameters, or
-events. To this end, SBMLsimulator interprets the model as an ordinary
-differential equation system. The user can choose among nine different solvers
-for the numerical integration of the system.
+SBMLsimulator is a fast, accurate, and intuitive program for dynamic simulation and heuristic parameter optimization of models encoded in the \SBML.
+In order to ensure a high reliability of this software, its internal simulation library had been
+benchmarked against the entire \SBMLTestSuite and all models from the \BioModels database.
+SBMLsimulator includes the large collection of nature-inspired heuristic optimization procedures for efficient model calibration from the framework \EvA.
+SBMLsimulator provides an easily usable \GUI and several command-line options to be suitable for large-scale batch processing and model calibration.
+SBMLsimulator runs on all platforms that provide a standard \JVM for a desktop environment.
+The open-source program is based on the open-source libraries \JSBML and \SBSCL, both of which can be obtained separately and used via their \API.
 
-In many cases, biological models contain quantities with uncertain values.
-These values must be estimated by calibrating the model with respect to given
-experimental data. To facilitate this complicated procedure, SBMLsimulator
-comes with the optimization toolbox EvA2 that provides a large collection of
-nature inspired heuristic optimization procedures, e.g., evolution strategies,
-genetic algorithms, differential evolution, or particle swarm optimization.
+Version 2.0 of SBMLsimulator comes with a variety of additional features for the visualization of biological networks in the form of \SBGN Process Diagrams (PD) powered by the yFiles library for graph drawing.
+Upon loading \SBML files, SBMLsimulator either draws the layout of the biological network as given in the file, or (if the \SBML file does not contain any graph layout information), it automatically generates \SBGN-style diagrams.
+In either case, the network can be accessed in the graph view.
+Simulation results as well as loaded experimental data from \CSV files can be mapped to the networks to display the data in the context of biological networks.
+SBMLsimulator can generate animations for time-series data that can then be exported to various movie file formats or as snapshot images for selected time points.
 
-A further important aspect of the program is its simple and self-explanatory
-graphical user interface. For large-scale computation, all functions can also
-be used in a command-line mode. SMBLsimulator is completely written in Javaª
-and uses the JSMBL package for its internal data structures. It has been tested
-on Windows 7, Linux (Ubuntu 10.04 LTS), and MacOS 10.6.8 Snow Leopard with JDK
-1.6. SBMLsimulator can be downloaded and used as a stand-alone program, or
-launched as a Javaª Web Start program. The computational core of the program
-can be obtained separately.
-
-In summary, SBMLsimulator has been developed as a convenient program for
-efficient numerical simulation and large-scale model calibration of biological
-models.
+For a more intuitive description of the features described in this users' guide, a series of video tutorials is available at \href{https://youtube.com/c/systemsbiology/}{\faYoutube/c/systemsbiology/}.

@@ -15,16 +15,28 @@
 ]{scrreprt}
 
 \usepackage{UT}
+\usepackage{wrapfig}
+\usepackage[warn]{textcomp}
+\usepackage{cleveref}
+\usepackage{upgreek}
+\usepackage{nicefrac}
+\usepackage{menukeys} % typesets paths and menu access, keyboard characters.
+\usepackage{xspace}
+\usepackage{tocloft} % nice table of contents additions
+\usepackage{fontawesome}
+\usepackage[binary-units=true]{siunitx}
 
 % booktabs is for toprule, bottomrule, etc. in tables.
 \usepackage{booktabs}
 \usepackage{multirow}
-\usepackage{array}   %stellt den Befehl \newcolumntype bereit
-\usepackage{hyperref} % Links im dokument
+\usepackage{array}   % adds the command \newcolumntype
 %\usepackage[utf8]{inputenc} %unicode support
+\usepackage{longtable}
+
+\usepackage[printonlyused,withpage]{acronym}
+\usepackage{makeidx}
 
 \hypersetup{
-              bookmarks={true},
               bookmarksopen={true},
               bookmarksopenlevel={0},
               bookmarksnumbered={true},
@@ -32,13 +44,11 @@
               colorlinks={false},
               pdfpagemode={UseOutlines},
               pdftitle={SBMLsimulator},
-              pdfauthor={Andreas Dr\"ager} {Roland Keller} {Alexander D\"orr}
-              {Stephanie Tscherneck} {Ute Hofmann} {Clemens Wrzodek} {Akira
-              Funahashi} {Akito Tabira} {Benjamin Kandel} {Marcus Klein} {Maria
-              Thomas} {Nicolas Rodriguez} {Nicolas Le Nov\'ere} {Ulrich M.
-              Zanger} {Andreas Zell}, 
-              pdfsubject={User's Guide}, pdfkeywords={Key word 1} {Key word 1} {...} {Key word n}
-              pdftex, pdffitwindow={true},
+              pdfauthor= {Andreas Dr\"ager},
+              pdfsubject={User's Guide},
+              pdfkeywords={SBML} {simulator} {simulate} {systems} {biology}
+              pdftex,
+              pdffitwindow={true},
               pdfstartview={FitV},
               pdfnewwindow={false},
               pdfdisplaydoctitle={true},
@@ -48,77 +58,82 @@
               urlcolor={blue}
 }
 
+\graphicspath{{img/}{../../resources/org/sbml/simulator/gui/img/}{../logo/}}
+\input{tex/macros}
+
 %HYPHENATION
 \hyphenation{
+J-SB-ML
 }
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Gestaltung der Titelseite     %
+% The title page                %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newcolumntype{C}[1]{>{\centering\arraybackslash}m{#1}}
-\newcolumntype{L}[1]{>{\centering\arraybackslash}p{#1}}
-
-\titlehead{\centering\includegraphics[width=0.75\textwidth]{img/UT_WBMW_mathnat_4C}}
-\subject{User's Guide}
-\title{
-\centering
-\begin{tabular}{rl}
-\includegraphics[width=.2\columnwidth]{../logo/Logo.pdf} &
-SBMLsimulator
-\end{tabular}
-}
-\subtitle{An efficient Java\TTra solver implementation for SBML}
-
-
-\author{Andreas Dr\"ager\thanks{Corresponding author:
-\href{mailto:andreas.draeger@uni-tuebingen.de}{andreas.draeger@uni-tuebingen.de}}\and%
-Roland Keller\and%
-Alexander D\"orr\and%
-Stephanie Tscherneck\and%
-Ute Hofmann\and%
-Clemens Wrzodek\and%
-Akira Funahashi\and%
-Akito Tabira\and%
-Benjamin Kandel\and%
-Marcus Klein\and%
-Maria Thomas\and%
-Nicolas Rodriguez\and%
-Nicolas Le Nov\'ere\and%
-Ulrich M. Zanger\and%
-Andreas Zell}
+\titlehead{\centering\includegraphics[width=0.75\textwidth]{img/UT_WBMW_mathnat_4C}\\
+\noindent\makebox[\linewidth]{\color{gold}\rule{\textwidth}{1pt}}}
+\subject{Users' Guide}
+\title{%\centering
+\begin{tabular}{C{2.8cm}L{5cm}}
+\includegraphics[width=.15\columnwidth]{Logo.pdf}&SBMLsimulator \\
+\end{tabular}}
+\subtitle{A graphical user interface for efficiently simulating and visualizing computational models in biology}
+\author{Andreas Dr\"ager$^{1,2,3,}$\thanks{\centering Corresponding author: \href{mailto:draeger@informatik.uni-tuebingen.de}{draeger@informatik.uni-tuebingen.de}}}
 \date{\today}
-\publishers{Center for Bioinformatics Tuebingen (ZBIT)}
+\publishers{
+Institutional affiliations:\\
+\begin{normalsize}
+\begin{enumerate}
+  \item[$^1$] Computational Systems Biology of Infection and Antimicrobial-Resistant Pathogens, Institute for Biomedical Informatics (IBMI), University of T\"ubingen, 72076 T\"ubingen, Germany
+  \item[$^2$] Department of Computer Science, University of T\"ubingen, 72076 T\"ubingen, Germany
+  \item[$^3$] German Center for Infection Research (DZIF), partner site T\"ubingen, Germany
+\end{enumerate}
+\end{normalsize}}
 
-\usepackage{pdflscape}
+\makeatletter
+\newcommand\mytoc{%
+    \tableofcontents
+    \section*{Figures}%
+    \@starttoc{lof}%
+    \smallskip %\bigskip
+    \section*{Tables}%
+    \@starttoc{lot}
+    \smallskip %\bigskip
+    \section*{Listings}%
+    \@starttoc{lol}
+}
+\makeatother
+\makeindex
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Beginn des Dokumentes         %
+% Begin of the document         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
-
-
+%
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Titelei                       %
+% Tites                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\pagenumbering{roman}		% kleine lateinische Seitenzahlen
+%
+\pagenumbering{roman}		% lower-case latin page numbers
 \maketitle
 \begin{abstract}
 \input{tex/00_abstract}
 \end{abstract}
-
+%
 \setcounter{tocdepth}{1}
-\tableofcontents		% Inhaltsverzeichnis
+%\tableofcontents		% We make a custom table of contents
+\mytoc
 % \listoffigures
 % \listoftables
-
-\cleardoublepage		% Erzeugt neue Leerseite. Muss ggf. auskommentiert werden.
-\pagenumbering{arabic}		% Ab hier mit arabischen Zahlen numerieren
+%
+\cleardoublepage		% Creates an extra blank page, possibly comment out this.
+\pagenumbering{arabic}		% Arabic page numbers from here
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Beginn der eigentlichen Arbeit%
+% Contents                      %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -127,10 +142,13 @@ Andreas Zell}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Das Literaturverzeichnis      %
+% Appendix                      %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+\appendix
+\input{tex/acknowledgements.tex}
+\input{tex/Release_Notes.tex}
+\input{tex/abbreviations.tex}
 \bibliographystyle{natbib}
 \bibliography{tex/literature}
-
+\printindex
 \end{document}

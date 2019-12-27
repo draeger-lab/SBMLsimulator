@@ -1,0 +1,92 @@
+\chapter{Release notes}
+
+\section{Version 1.0}
+
+This is the first release from March 1\textsuperscript{st} 2012.
+
+\section{Version 1.1}
+
+This version was released at April 25\textsuperscript{th} 2013.
+
+\subsection{New features}
+Includes version~1.3 of the \SBSCL \citep{Keller2013}.
+
+\subsection{Bug fixes}
+All issues related to the simulation of \SBML files that were fixed in the \SBSCL.
+
+
+\section{Version 1.2}
+
+This third release was announced at April 24\textsuperscript{th} 2014.
+
+\subsection{New features}
+\begin{dinglist}{52}
+\item The estimation targets and their ranges can now be saved into a
+      file and loaded again.
+\item Spline interpolation can now be used before optimization.   
+\item The program has been updated and is now based on the new version~1.4
+      of the \SBSCL and \JSBML version~1.0$\upbeta$1.
+\item Support for \Garuda has been added.   
+\item Improved support for \MacOSX
+\item Program update to \Java version~1.6
+\end{dinglist}
+
+\subsection{Bug fixes}
+\begin{dinglist}{54}
+\item Some errors in the command line mode have been corrected.
+\item There was an error in optimization when time point 0 is not given.
+\end{dinglist}
+
+\section{Version 1.2.1}
+
+This is a minor bug-fix release from July 18\textsuperscript{th} 2014.
+
+\subsection{New features}
+
+\begin{dinglist}{52}
+\item Now a new model can be selected to be opened without closing the current model.
+      The active model can still be saved before being closed.
+\end{dinglist}
+
+
+\subsection{Bug fixes}
+\begin{dinglist}{54}
+\item There was an error in the data importer:
+      columns were not correctly skipped, if chosen by the user.
+\end{dinglist}
+
+
+
+\section{Version 2.0}
+
+\subsection{New features}
+
+\begin{dinglist}{52}
+\item Support for SBML files up to the latest release of Level~2 Version~5 \citep{Hucka2015} and Level~3 Version~2 \citep{Hucka2019} thanks to the updated JSBML library \citep{Draeger2011, Rodriguez2015}: The graphical user interface was extended to support new model components, including various SBML extension packages, such as Groups \citep{Hucka2016groups}, Layout \citep[][see further description below]{Gauges2015}, Flux Balance Constraints \citep{Olivier2015}, etc.
+\item Improved simulation capabilities using release~1.5 of the simulation backend SBSCL \citep{Keller2013}.
+\item \Garuda \citep{Ghosh2011} support: SBMLsimulator~2.0 comes with a Garuda archive file and can, therefore, be directly used from the Garuda workbench.
+\item Support for model displays as SBGN Process Diagrams \citep{Rougny2019} using yFiles\footnote{\url{https://yworks.com}} for Java\texttrademark:
+  \begin{itemize}
+  \item If a model contains a diagram \citep[in the format of the SBML Layout Extension][]{Gauges2015}, SBMLsimulator~2.0 can now display this layout in an interactive map.
+  \item SBMLsimulator automatically generates a map representation for models without graphical information.
+  \item In either case, the new tab \menu{Graph} can be clicked to access the model's display.
+  \end{itemize}
+\item Mapping of experimental or simulation data to an interactive map: The model display (be it defined in the model or automatically generated) takes simulation data (the result of a numerical calculation) or loaded experimental data and maps it to the nodes and arrows.
+  \begin{itemize}
+  \item Several different ways of data mapping have been implemented and are accessible from the graphical user interface: node size, node color, absolute size and relative color, relative size and absolute color values, relative filling levels with absolute color gradients. Further details are described in the article by \citet{Buchweitz2018}.
+  \item An export function allows users to save the display as an image, \eg for publication or analysis in scalable vector format (\SVG) or as a portable network graphics file (\PNG).
+  \item Time-series data can be visualized as a dynamically animated video that can be played in several speeds.
+  While the video is playing, users can zoom and pan on the map and analyze areas of interest. 
+  To this end, the animation can play in an ongoing loop. Optionally, the exact values of fluxes and concentrations can be displayed directly on the graph.
+  \item An animated sliding camera window can automatically move the viewport through the graph while the animation is playing. To this end, users can define coordinates in a simple text file format.
+  The user can also adjust the speed of the sliding window.
+  \item Optionally, a diagram with a moving red line can be displayed while the animation is running to indicate where in the diagram the animation is.
+  \item An export function saves the generated animations to a variety of standard video file formats, including \MOV, \AVI, \MPG, \WMV, \FLV.
+  \end{itemize}
+\end{dinglist}
+
+\subsection{Bug fixes}
+
+\begin{dinglist}{54}
+\item The application has generally become more stable and sophisticated, thanks to updated third-party apps and minor improvements.
+\end{dinglist}

@@ -1,0 +1,92 @@
+% Some helper macros, used later below:
+
+\newcolumntype{C}                   [1]{>{\centering\arraybackslash}m{#1}}
+\newcolumntype{L}                   [1]{>{\centering\arraybackslash}p{#1}}
+
+\newcommand{\plainIndexed}          [1]{#1\index{#1}\xspace}
+\newcommand{\codeIndexed}           [1]{\texttt{#1}\index{#1@\texttt{#1}}\xspace}
+\newcommand{\codeSubindexed}        [2]{\texttt{#1}\index{#2@\texttt{#2}!\texttt{#1}@\texttt{#1}}\xspace}
+
+\renewmenumacro{\menu}              [>]{roundedmenus}
+\renewmenumacro{\keys}              [+]{shadowedroundedkeys}
+\renewmenumacro{\directory}         [/]{pathswithfolder}
+%\changemenucolor{gray}{txt}{named}{blue}
+%\changemenucolor{gray}{br}{named}{gold}
+\newcommand{\file}                  [1]{\texttt{#1}}
+\newcommand{\wrapfigspace}          {-10pt}
+
+\newcommand{\TODO}                  [1]{#1}%\textcolor{red}{#1}}
+\newcommand{\numero}                {\textnumero\xspace}%N\raisebox{.25em}{\relsize{-2}\underline{o}}\xspace}
+
+\newcommand{\watchAtYoutube}[1]{\begin{center}\textcolor{darkblue}{\ding{43} \textsf{Watch this example online at} \href{https://youtu.be/#1}{\faYoutube/\texttt{#1}}.}\end{center}}
+
+% A
+\newcommand{\API}                   {\ac{API}\index{\acfi{API}}\xspace}
+\newcommand{\AVI}                   {\ac{AVI}\index{\acfi{AVI}}\xspace}
+
+% B
+\newcommand{\BiGG}                  {\acs{BiGG} Models Database\index{BiGG Models Database}\xspace}
+\newcommand{\BioModels}             {BioModels Database\index{BioModels Database}\xspace}
+
+% C
+\newcommand{\CSV}                   {\ac{CSV}\index{\acfi{CSV}}\xspace}
+
+% E
+\newcommand{\English}               {English\index{Language pack!English}\xspace}
+\newcommand{\EvA}                   {EvA2\index{EvA2}\xspace}
+\newcommand{\Excel}                 {Microsoft Excel\index{Excel}\xspace}
+\newcommand{\eg}                    {e.g.,\xspace}
+
+% F
+\newcommand{\FLV}                   {\acf{FLV}\index{\acfi{FLV}}\xspace}
+
+% G
+\newcommand{\GUI}                   {\acf{GUI}\index{\acfi{GUI}}\xspace}
+\newcommand{\Garuda}                {Garuda\index{Garuda}\xspace}
+\newcommand{\German}                {German\index{Language pack!German}\xspace}
+
+% I
+\newcommand{\ie}                    {i.e.,\xspace}
+
+% J
+\newcommand{\Java}                  {Java\texttrademark\index{Java\texttrademark}\xspace}
+\newcommand{\JavaWebStart}          {\Java Web Start\index{Java\texttrademark{} Web Start}\xspace}
+\newcommand{\JAR}                   {\ac{JAR} file\index{\acfi{JAR}}\xspace}
+\newcommand{\JDK}                   {\acf{JDK}\index{\acfi{JDK}}\xspace}
+\newcommand{\JVM}                   {\acf{JVM}\index{\acfi{JVM}}\xspace}
+\newcommand{\JSBML}                 {JSBML\index{JSBML}\xspace}
+\newcommand{\JSON}                  {\acf{JSON}\index{\acfi{JSON}}\xspace}
+
+% L
+\newcommand{\Linux}                 {Linux\index{Operating System!Linux}\xspace}
+
+% M
+\newcommand{\MacOSX}                {Mac~OS~X\index{Operating System!Mac OS X}\xspace}
+\newcommand{\MOV}                   {\ac{MOV}\index{\acfi{MOV}}\xspace}
+\newcommand{\MPG}                   {\ac{MPG}\index{\acfi{MPG}}\xspace}
+
+% N
+\newcommand{\NaN}                   {\ac{NaN}\index{\acfi{NaN}}\xspace}
+
+% O
+\newcommand{\ODE}                   {\acf{ODE}\index{\acfi{ODE}}\xspace}
+\newcommand{\OS}                    {operating system\index{Operating System}\xspace}
+
+% P
+\newcommand{\PDF}                   {\acf{PDF}\index{\acfi{PDF}}\xspace}
+\newcommand{\PNG}                   {\acf{PNG}\index{\acfi{PNG}}\xspace}
+
+% R
+\newcommand{\RAM}                   {\acf{RAM}\index{\acfi{RAM}}\xspace}
+\newcommand{\RSE}                   {\acf{RSE}\index{\acfi{RSE}}\xspace}
+
+% S
+\newcommand{\SBGN}                  {\ac{SBGN}\index{SBGN}\xspace}
+\newcommand{\SBML}                  {\ac{SBML}\index{SBML}\xspace}
+\newcommand{\SBMLTestSuite}         {SBML Test Suite\index{SBML Test Suite}\xspace}
+\newcommand{\SBSCL}                 {\acf{SBSCL}\index{\acfi{SBSCL}}\xspace}
+\newcommand{\SVG}                   {\acf{SVG}\index{\acfi{SVG}}\xspace}
+
+% W
+\newcommand{\Windows}               {Microsoft Windows\index{Operating System!MS Windows}\xspace}
+\newcommand{\WMV}                   {\ac{WMV}\index{\acfi{WMV}}\xspace}

@@ -31,19 +31,19 @@
                                         % rotate text.
 
 % Some color in the document
-\RequirePackage{color}
+\RequirePackage[table]{xcolor}
 
 % Source code and pseudo code
 \RequirePackage{listings}    % Source code listing support
 \RequirePackage{algorithm}
 \RequirePackage{algorithmic} % Algorithmen im Pseudo-Code,
 
-\RequirePackage[unicode, breaklinks]{hyperref}
+\RequirePackage{hyperref} % [unicode, breaklinks]
 \RequirePackage[htt]{hyphenat}
 
 % some nice colors
 \definecolor{royalblue}{cmyk}{.93, .79, 0, 0}
-\definecolor{lightblue}{cmyk}{.10, .017, 0, 0}
+\definecolor{lightsilver}{cmyk}{.10, .017, 0, 0}
 \definecolor{forrestgreen}{cmyk}{.76, 0, .76, .45}
 \definecolor{darkred}{rgb}{.7,0,0}
 \definecolor{winered}{cmyk}{0,1,0.331,0.502}
@@ -52,6 +52,10 @@
 % Corporate design colors of university of tuebingen.
 \definecolor{caminered}{rgb}{.545098039, .141176471, .250980392}
 \definecolor{gold}{rgb}{.576470588, .458823529, .298039216}
+\definecolor{blue}{rgb}{0, 0.4117647, 0.6666667}
+\definecolor{darkblue}{rgb}{0.254902, 0.3529412, 0.5490196}
+\definecolor{lightblue}{rgb}{0.3137255, 0.6666667, 0.7843137}
+\definecolor{anthracite}{rgb}{0.2509804, 0.2509804, 0.2509804}
 
 % Style definitions
 
@@ -71,27 +75,27 @@
 \lstset{basicstyle=\small\ttfamily, stringstyle=\ttfamily, keywordstyle=\bf\ttfamily}
 
 \newcommand{\changefont}[3]{
-\fontfamily{#1} \fontseries{#2} \fontshape{#3} \selectfont} %Zum Ändern von Schriftarten  {\changefont{pcr}{m}{n}{}}
+\fontfamily{#1} \fontseries{#2} \fontshape{#3} \selectfont} %Zum ï¿½ndern von Schriftarten  {\changefont{pcr}{m}{n}{}}
 \usepackage { nonf loat }
 
-\newenvironment{packed_enum}{
-\begin{enumerate}
-  \setlength{\itemsep}{1pt}
-  \setlength{\parskip}{0pt}
-  \setlength{\parsep}{0pt}
-}{\end{enumerate}}
-\newenvironment{packed_desc}{
-\begin{description}
-  \setlength{\itemsep}{1pt}
-  \setlength{\parskip}{0pt}
-  \setlength{\parsep}{0pt}
-}{\end{description}}
-\newenvironment{packed_item}{
-\begin{itemize}
-  \setlength{\itemsep}{1pt}
-  \setlength{\parskip}{0pt}
-  \setlength{\parsep}{0pt}
-}{\end{itemize}}
+%\newenvironment{packed_enum}{
+%\begin{enumerate}
+%  \setlength{\itemsep}{1pt}
+%  \setlength{\parskip}{0pt}
+%  \setlength{\parsep}{0pt}
+%}{\end{enumerate}}
+%\newenvironment{packed_desc}{
+%\begin{description}
+%  \setlength{\itemsep}{1pt}
+%  \setlength{\parskip}{0pt}
+%  \setlength{\parsep}{0pt}
+%}{\end{description}}
+%\newenvironment{packed_item}{
+%\begin{itemize}
+%  \setlength{\itemsep}{1pt}
+%  \setlength{\parskip}{0pt}
+%  \setlength{\parsep}{0pt}
+%}{\end{itemize}}
 \def\TReg{\textsuperscript{\tiny{\textregistered}}\,}
 \def\TCop{\textsuperscript{\textcopyright}\,}
 \def\TTra{\textsuperscript{\texttrademark}\,}
@@ -150,3 +154,53 @@ listOfProducts, listOfParameters, listOfModifiers, modifierSpeciesReference,
 }
 
 %\publishers{\includegraphics[width=100pt]{logo/JSBML_shaddow.pdf}}
+
+
+\usepackage{tikz}
+\usetikzlibrary{shadows,calc}
+
+% code adapted from http://tex.stackexchange.com/a/11483/3954
+
+% some parameters for customization
+\def\shadowshift{3pt,-3pt}
+\def\shadowradius{6pt}
+
+\colorlet{innercolor}{black!60}
+\colorlet{outercolor}{gray!05}
+
+% this draws a shadow under a rectangle node
+\newcommand\drawshadow[1]{
+    \begin{pgfonlayer}{shadow}
+        \shade[outercolor,inner color=innercolor,outer color=outercolor] ($(#1.south west)+(\shadowshift)+(\shadowradius/2,\shadowradius/2)$) circle (\shadowradius);
+        \shade[outercolor,inner color=innercolor,outer color=outercolor] ($(#1.north west)+(\shadowshift)+(\shadowradius/2,-\shadowradius/2)$) circle (\shadowradius);
+        \shade[outercolor,inner color=innercolor,outer color=outercolor] ($(#1.south east)+(\shadowshift)+(-\shadowradius/2,\shadowradius/2)$) circle (\shadowradius);
+        \shade[outercolor,inner color=innercolor,outer color=outercolor] ($(#1.north east)+(\shadowshift)+(-\shadowradius/2,-\shadowradius/2)$) circle (\shadowradius);
+        \shade[top color=innercolor,bottom color=outercolor] ($(#1.south west)+(\shadowshift)+(\shadowradius/2,-\shadowradius/2)$) rectangle ($(#1.south east)+(\shadowshift)+(-\shadowradius/2,\shadowradius/2)$);
+        \shade[left color=innercolor,right color=outercolor] ($(#1.south east)+(\shadowshift)+(-\shadowradius/2,\shadowradius/2)$) rectangle ($(#1.north east)+(\shadowshift)+(\shadowradius/2,-\shadowradius/2)$);
+        \shade[bottom color=innercolor,top color=outercolor] ($(#1.north west)+(\shadowshift)+(\shadowradius/2,-\shadowradius/2)$) rectangle ($(#1.north east)+(\shadowshift)+(-\shadowradius/2,\shadowradius/2)$);
+        \shade[outercolor,right color=innercolor,left color=outercolor] ($(#1.south west)+(\shadowshift)+(-\shadowradius/2,\shadowradius/2)$) rectangle ($(#1.north west)+(\shadowshift)+(\shadowradius/2,-\shadowradius/2)$);
+        \filldraw ($(#1.south west)+(\shadowshift)+(\shadowradius/2,\shadowradius/2)$) rectangle ($(#1.north east)+(\shadowshift)-(\shadowradius/2,\shadowradius/2)$);
+    \end{pgfonlayer}
+}
+
+% create a shadow layer, so that we don't need to worry about overdrawing other things
+\pgfdeclarelayer{shadow} 
+\pgfsetlayers{shadow,main}
+
+\newsavebox\mybox
+\newlength\mylen
+
+\newcommand\shadowimage[2][]{%
+\setbox0=\hbox{\includegraphics[#1]{#2}}
+\setlength\mylen{\wd0}
+\ifnum\mylen<\ht0
+\setlength\mylen{\ht0}
+\fi
+\divide \mylen by 120
+\def\shadowshift{\mylen,-\mylen}
+\def\shadowradius{\the\dimexpr\mylen+\mylen+\mylen\relax}
+\begin{tikzpicture}
+\node[anchor=south west,inner sep=0] (image) at (0,0) {\includegraphics[#1]{#2}};
+\drawshadow{image}
+\end{tikzpicture}}
+
