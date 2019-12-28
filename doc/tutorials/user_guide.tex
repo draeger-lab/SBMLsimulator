@@ -15,6 +15,9 @@
 ]{scrreprt}
 
 \usepackage{UT}
+\PassOptionsToPackage{sort}{natbib}
+\newcommand*{\doi}[1]{\href{http://dx.doi.org/#1}{doi: #1}} % Fix to get clickable doi-references
+
 \usepackage{wrapfig}
 \usepackage[warn]{textcomp}
 \usepackage{cleveref}
@@ -148,7 +151,7 @@ Institutional affiliations:\\
 \input{tex/acknowledgements.tex}
 \input{tex/Release_Notes.tex}
 \input{tex/abbreviations.tex}
-\bibliographystyle{natbib}
+\bibliographystyle{plainnat}%unsrtnat}%natbib}
 \bibliography{tex/literature}
 \printindex
 \end{document}

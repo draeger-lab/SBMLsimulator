@@ -83,7 +83,7 @@
   <entry key="QUALITY_DEFAULT_VALUE">Default quality value</entry>
   <entry key="QUALITY_DEFAULT_VALUE_TOOLTIP">The default return value of a quality function that can be used if for some reason a quality cannot be computed. For example, this might avoid a division by zero.</entry>
   <entry key="QUALITY_N_METRIC_ROOT">N-metric root exponent</entry>
-  <entry key="QUALITY_N_METRIC_ROOT_TOOLTIP">The root parameter in the distance function for n-metrics: in case of the n-norm this is at the same time also the exponent. For instance, the Eulidean distance has a root value of two, whereas the Manhattan norm has a root of one. In the RSE, the default root is also two, but this value may be changed.</entry>
+  <entry key="QUALITY_N_METRIC_ROOT_TOOLTIP">The root parameter in the distance function for n-metrics: in case of the n-norm this is at the same time also the exponent. For instance, the Euclidean distance has a root value of two, whereas the Manhattan norm has a root of one. In the RSE, the default root is also two, but this value may be changed.</entry>
   <entry key="QUALITY_MEASURES">Quality function</entry>
   <entry key="QUALITY_MEASURES_TOOLTIP">Here you can specify how to evaluate the quality of a parameter set with respect to given experimental data.</entry>
   <entry key="INTEGRATION_STRATEGY">Integration strategy</entry>

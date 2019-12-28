@@ -1,17 +1,29 @@
-% 01_Introduction
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 01_Introduction                %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \chapter{Introduction}
 
-%\TODO{Write some text. Write some Introduction for your application.}
+SBMLsimulator \citep{Doerr2014a} is a easily usable, portable, and powerful simulation, visualization, and parameter optimization engine for biochemical network models in \SBML format \citep{M.Hucka03012003}.
 
-SBMLsimulator \citep{Doerr2014a} is a easily usable, portable, and powerful simulation and parameter optimization engine for biochemical network models in \SBML format \citep{M.Hucka03012003}.
+\SBML is a file format that stores systems biology models in a structured way.
+The main idea behind \SBML is that a model should always yield identical results, no matter which software was used to build the model.
+SBMLsimulator got its name from this file format.
+
 SBMLsimulator uses the \SBSCL \citep{Keller2013}, which is based on \JSBML \citep{Draeger2011, Rodriguez2015}, as its computational core and combines its functions with \EvA \citep{Kron10EvA2}, a \Java framework for nature-inspired heuristic optimization procedures.
 In this context, optimization means the estimation of model parameters, \ie the calibration of a model with respect to given experimental data \citep{Draeger2009a}.
 
-Since version 2.0, SBMLsimulator comes with a comprehensive visualization implementation. 
+As the name suggests, SBMLsimulator was initially developed to provide an intuitive graphical user interface for loading \SBML models, running simulations, and plotting the results.
+With version 2.0, its capabilities greatly expanded: SBMLsimulator comes with a comprehensive visualization implementation. 
 This feature makes it possible to dynamically visualize experimental and simulated data in the context of biological networks in form of \SBGN process diagrams \citep{Rougny2019}.
+
+Just like \SBML that has been developed for encoding models of biological systems in a structured way, \SBGN brought important design principles to the models.
+The aim of \SBGN is that biological networks can be drawn in a standardized fashion, thereby removing any potential ambiguity.
 
 This document is intended to guide you through the function and use of SBMLsimulator.
 We will start by explaining how to install and launch the program, and how to use its more advanced features.
+
+Now, we briefly discuss the main features of SBMLsimulator, before the next chapter gets us started by installing the program on your computer.
 
 \section{Main program features}
 
@@ -40,11 +52,17 @@ transduction models in terms of an \ODE systems and solve those with numerical i
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 02_Installation                %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Installation}
-SBMLsimulator comes as a \JAR.
-You can download it from \href{https://github.com/draeger-lab/SBMLsimulator/releases/}{\faGithub/draeger-lab/SBMLsimulator/releases/}.
-It can run out-of-the-box on all systems where a \JVM is installed and does not require any further installations.
 
+\chapter{Installation}
+
+To obtain a copy of SBMLsimulator, we open a web browser and navigate to the Github page of the Dräger research group at \github{draeger-lab/} and go to \href{https://github.com/draeger-lab/SBMLsimulator/}{SBMLsimulator}. When we click on ``\href{https://github.com/draeger-lab/SBMLsimulator/releases/}{releases},'' we can find the latest release on top, currently SBMLsimulator 2.0.
+\watchAtYoutube{Eu4uSPmNXVI}
+
+SBMLsimulator comes in two different versions: As a stand-alone \JAR file or as a gadget for users of the \Garuda platform that is available from \href{http://garuda-alliance.org}{\texttt{garuda-alliance.org}}.
+Once we embed the correct version of SBMLsimulator in our \Garuda installation folder, we can launch the application from the \Garuda dashboard or from any other \Garuda-enabled software.
+
+Let us download the \JAR file and launch the application with a double click within our downloads folder.
+To run SBMLsimulator, we need to have the \JVM installed on our computer, which Oracle provides for personal or commercial use\footnote{\url{https://www.java.com}}, or its open-source pendant\footnote{\url{https://openjdk.java.net}\label{fn:jvmldl}} for all other purposes.
 
 \section{Requirements}
 \subsection{Software}
@@ -53,14 +71,14 @@ SBMLsimulator is entirely written in \Java and runs on any \OS
 where a suitable \JVM is installed (\JDK version 8 or newer).
 It has been successfully tested on \Windows~7 to \Windows~10, \Linux (Ubuntu 10.04 LTS and OpenSuSE Tumbleweed version \TODO{XXX}), and \MacOSX versions 10.6.8 (Snow Leopard) to 10.16.2 (Catalina).
 See, for example, the \Java SE download
-page\footnote{\url{https://openjdk.java.net}\label{fn:jvmldl}}.
-If you encounter any issues with your \OS, the \vref{ch:faq} might provide answers to you.
-To report problems or bugs, it is recommended to use the project's issue tracker at \href{https://github.com/draeger-lab/SBMLsimulator/issues/}{\faGithub/draeger-lab/SBMLsimulator/issues/}.
+page\footref{fn:jvmldl}.
+If you encounter any issues with your \OS, the \cref{ch:faq} might provide answers to you.
+To report problems or bugs, it is recommended to use the project's issue tracker at \github{draeger-lab/SBMLsimulator/issues/}.
 
 
 \subsection{Hardware}
 
-With at least \SI{1}{\giga\byte} main memory, you should be able to perform most tasks
+With at least \SI{1}{\giga\byte} main memory, we should be able to perform most tasks
 without any problem.
 SBMLsimulator runs without an active internet connection.
 
@@ -71,62 +89,87 @@ SBMLsimulator runs without an active internet connection.
 \vspace{\wrapfigspace}
 \includegraphics[width=.8cm]{jar_icon}
 \end{wrapfigure}
-If you downloaded a ZIP-file, you need to unzip it before starting the application.
-In the most simple case, you can launch SBMLsimulator by double-clicking at the \Java application icon (see image next to this text).
-You can also start the application on all \OS by typing
+If we downloaded a ZIP-file, we need to unzip it before starting the application.
+In the most simple case, we can launch SBMLsimulator by double-clicking at the \Java application icon (see image next to this text).
+SBMLsimulator can run out-of-the-box on all systems where a \JVM is installed and does not require any further installations.
+When launching the application, opens with a splash screen indicating the version number.
+
+We can also start the application on all desktop \OS by typing the following on the command prompt:
 \begin{lstlisting}[language=bash,numbers=none]
   java -jar -Xms128m -Xmx1024m SBMLsimulator_v<version.number>.jar
 \end{lstlisting}
-on your command prompt. Please note that you might have to change
-\texttt{SBMLsimulator.jar} for the real name of the \JAR, \eg
-\texttt{SBMLsimulator\_v2.0.jar}. In this example, a minimum of \SI{128}{\mega\byte} and a maximum of \SI{1024}{\mega\byte} of memory will be available for the program.
+Please note that we might have to change
+\texttt{<version.number>} to the actual name of the \JAR we downloaded, \eg \texttt{SBMLsimulator\_v2.0.jar}.
+In this example, we pass arguments to the \JVM to make a minimum of \SI{128}{\mega\byte} and a maximum of \SI{1024}{\mega\byte} of memory available to the program.
 In most cases, SBMLsimulator needs more than \SI{128}{\mega\byte} of memory, so it might be convenient to create a shortcut and start the application with as much memory as available.
-If you have \SI{2}{\giga\byte} of \RAM, for example, you might want to start the application with the following command:
-\begin{lstlisting}[language=bash,numbers=none]
+If we have \SI{2}{\giga\byte} of \RAM, for example, we might want to start the application with the command shown in \cref{lst:launch}.
+\begin{lstlisting}[language=bash,numbers=none,captionpos=t,float=b,caption={Launching SBMLsimulator from the command-line with additional memory},label={lst:launch}]
   java -Xms128m -Xmx1400M -jar SBMLsimulator_v<version.number>.jar
 \end{lstlisting}
+This small example already indicates that launching the program from the command-line has some advantages compared to double-clicking the icon, namely that we can pass so-called ``command-line arguments'' not only to the \JVM, but also directly to the program.
+These allow us, for instance, to directly open a specific model file when launching the application or customize many other settings.
+SBMLsimulator shows us an overview of all available command-line options when adding \texttt{-?} to the start command (see \cref{chap:CMD} for details).
 
-To simplify matters, you could create a start-scripts to run the application with as much memory as possible.
-How much memory is actually needed strongly depends on the size of your input datasets.
+To simplify matters, we could create a start-scripts to run the application with as much memory as possible.
+How much memory is actually needed strongly depends on the size of our input datasets.
 
 SBMLsimulator is a bi-lingual program, which has been translated to \German in addition to its \English user interface.
-When launching the program, it uses English, unless your \OS has a \German environment.
-You can select the language of the program by passing the parameter \texttt{-Duser.language=en} to the \JVM upon the start of the program if you like to have an \English user interface, or \texttt{de} for the \German interface.
+When launching the program, it uses English, unless our \OS has a \German environment.
+We can select the language of the program by passing the parameter \texttt{-Duser.language=en} to the \JVM upon the start of the program if we like to have an \English user interface, or \texttt{de} for the \German interface.
 
+Now that we got SBMLsimulator installed and running on our computer, we will explore its use in the following chapters.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 03_Getting_Started             %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{How to get started}
 
-To demonstrate the use of SBMLsimulator, we use the model by \citet{Bucher2011}.
-You can download this model from \BioModels \citep{Novere2006a} under accession \numero \href{https://identifiers.org/biomodels.db/BIOMD0000000328}{328}. 
+In this chapter, we will discuss selected features of the software SBMLsimulator.
+First, we will start by explaining where to find systems biology models, how to load them into the application, and how to run a simulation.
+\watchAtYoutube{CVzp\_XtIaHU}
+We will then discuss a more advanced feature, namely the calibration of model parameters with respect to experimental data.
 
-\TODO{There are also many other published models available from this website.
-All published models that have been curated by the team of model curators are listed at the website of \BioModels\footnote{\url{http://www.ebi.ac.uk/biomodels-main/publmodels}}.
-If you like to download a model, click on the respective ID, which brings you to a page containing a description of the model and a button ``Download SBML.'' 
-Position the cursor at this button and then you see the possible \SBML levels (abbreviated with L) and versions (abbreviated with V) to download.
-If you click on the respective combination of level and version, the desired \SBML file will be downloaded.}
+\section{Obtaining an example model}
 
-\TODO{Alternatively, you can also create an \SBML model yourself. To this end, dedicated software solutions like CellDesigner \citep{Funahashi2003} can be used.
-For downloading CellDesigner please go to the project's website\footnote{\url{http://www.celldesigner.org}}.}
+Several online repositories exist that house systems biology models.
+Let us explore how we can get the dynamic model of human hepatocytes that \citeauthor{Bucher2011} published in \citeyear{Bucher2011} in \emph{BMC Systems Biology} from an online database in \SBML format.
+We open a web browser and enter \href{http://www.ebi.ac.uk/biomodels/}{\texttt{biomodels.net}} in the address bar, which redirects us to \BioModels \citep{Malik-Sheriff2019} hosted at the European Bioinformatics Institute, or EBI.
 
-%\TODO{citation for the demonstration of the capabilities of SBMLsimulator.}
+Since we are interested in a specific model, we can simply enter some keywords in the search field, such as ``Bucher hepatocytes'' and click at the magnifying glass.
+And here is the result with model identifier \numero \href{https://identifiers.org/biomodels.db/BIOMD0000000328}{328}.
+The tab ``Files'' provides several downloads to us, of which the model file in \SBML format is most interesting to us for now, which is listed at the top.
+Note that \SBML files can have various file extensions.
+Most common are \texttt{.sbml} or, as it is here, \texttt{.xml}.
+One click and we should have the model in our \directory{Downloads} folder.
 
-In order to perform model simulations, you first need to load an \SBML model. 
-If you additionally want to compare the simulation results to experimental data or run a parameter estimation, it is required to also load the experimental data into SBMLsimulator.
+Many other published models available from the \BioModels website\footnote{\url{http://www.ebi.ac.uk/biomodels-main/publmodels}} have been curated by a team of experts.
+If we like to download a model, click the respective \ac{Id}, which brings us to a page containing a description of the model and a button ``Download SBML.'' 
+We position the cursor at this button and then we see the possible \SBML levels and versions to download.
+If we click on the respective combination of level and version, the desired \SBML file will be downloaded.
+
+Alternatively, we can also create an \SBML model ourself.
+To this end, dedicated software solutions, such as \CellDesigner \citep{Funahashi2008} can be used.
+For downloading CellDesigner please go to the project's website\footnote{\url{http://www.celldesigner.org}}.
+
+\section{Loading, exploring, and simulating a kinetic model}
+
+In order to perform model simulations, we first need to load an \SBML model. 
+If we additionally want to compare the simulation results to experimental data or run a parameter estimation, it is required to also load the experimental data into SBMLsimulator.
 In our example, we generate artificial data from the example model.
-You can obtain artificial data, too, by running a simulation with SBMLsimulator and exporting the numerical solution to a \CSV file.
+We can obtain artificial data, too, by running a simulation with SBMLsimulator and exporting the numerical solution to a \CSV file.
 This procedure is explained in detail below.
 
-\section{Open a model file}
+\subsection{Open a model file}
 \begin{wrapfigure}{O}{16px}
 \vspace{\wrapfigspace}
 \includegraphics[width=16px]{folder_64}
 \end{wrapfigure}
-You can simply drag \& drop the model file (an \SBML document) into the application or select \menu{File > Open > Open model}  to load a model (see \vref{fig:openModel}).
+We can simply drag \& drop the model file (an \SBML document) into the application or select \menu{File > Open > Open model}  to load a model (see \cref{fig:openModel}).
 Another option would be to click at the folder icon in the tool-bar, which is displayed next to this text.
-The tool-bar contains the icon that is displayed next to this text.
-Depending on your \OS, you can also use the key stroke combinations \keys{\cmd + O} (\MacOSX) or \keys{\ctrlwin + O} (\Linux and \Windows).
+Depending on our \OS, we can also use the key stroke combinations \keys{\cmd + O} (\MacOSX) or \keys{\ctrlwin + O} (\Linux and \Windows).
 SBMLsimulator memorizes up to ten previously opened \SBML documents in the menu under \menu{File > Recent files}, where the most recently used file will appear at the top most position.
-You can also use the keystroke combinations \keys{\Altmac} or \keys{\Altwin + 0} to \keys{9} (\OS-dependent).
+To open one of the ten previously loaded models, we can also use the keystroke combinations \keys{\Altmac} or \keys{\Altwin + 0} to \keys{9} (\OS-dependent).
 
 \begin{figure}[t]
 \centering
@@ -143,28 +186,49 @@ The window lets the user choose the simulation settings (bottom), the parameter 
 The plot section is on the right.}
 \label{fig:modelOpened}
 \end{figure}
-Now, the model is loaded and the window in \vref{fig:modelOpened} appears.
-The right part of the window is for plotting simulation results and experimental data points (if experimental data has been loaded).
-In the bottom part of the window you can determine simulation preferences like the solver or the number of simulation steps and the quality function for comparing experimental data (if present) to simulation results.
-In the center left part of the window the compartment values, the initial values of species, and parameter values in the model can be changed. \TODO{After typing a new value in, it is necessary to either press the return key \keys{\return}, or the tabulator key \keys{\tab}. Otherwise the changes cannot take effect.}
-The upper left part is for choosing the quantities that should appear in the plot.
 
-\section{Simulate a model}
+\subsection{Graphically exploring a model}
+
+Now, the model is loaded and the window's appearance changes as \cref{fig:modelOpened} shows:
+\begin{dinglist}{226}
+  \item The right part of the window is for plotting simulation results and experimental data points (if experimental data has been loaded).
+In the bottom part of the window we can determine simulation preferences like the solver or the number of simulation steps and the quality function for comparing experimental data (if present) to simulation results.
+  \item In the center left part of the window the compartment values, the initial values of the reactive species, and parameter values in the model can be changed.
+  Please note that after typing a new value in, the change only takes effect after we either press the return key \keys{\return} or the tabulator key \keys{\tab}.
+  \item The upper left part is for choosing the quantities that should appear in the plot.
+\end{dinglist}
+The user interface of SBMLsimulator comprises several tabs.
+In the \menu{Model} tab, we can explore the structure of the model in a tree view, including all of its components, such as compartments, species, parameters, or reactions.
+\Cref{sec:ModelTree} discusses the content of this tab in detail.
+The \menu{Graph} tab visually displays the model, which looks like this.
+In case of the example model by \citeauthor{Bucher2011}, the authors did not embed any layout information into their model and SBMLsimulator has hence to automatically generate a display following the \SBGN guidelines.
+
+\subsection{Simulate a model}
 \begin{wrapfigure}{O}{16px}
 \vspace{\wrapfigspace}
 \includegraphics[width=16px]{PLAY_64}
 \end{wrapfigure}
-You can now select the simulations results of which elements should be plotted by clicking at the individual check boxes for model components of interest.
-The buttons \keys{Select} and \keys{Deselect} give you the choice to visualize or remove an entire group of elements from the plot, such as all species or all fluxes.
-For instance, select to plot all species values (see \vref{fig:selectSpecies}).
-Selecting model components is necessary, because SBMLsimulator does not know which model components you like to display in the plot.
-Then you have to click on the simulation button (\vref{fig:startSimulation}).
-The simulation results can then be displayed in the plot section (\vref{fig:simulationResults}).
+Next, let us run a simulation.
+At the bottom is a control panel where we can adjust how the simulation should be performed, for instance with 300 steps.
+We can also select the solver that calculates the result for us.
+SBMLsimulator offers a large variety of integration routines for this purpose.
+The default solver, ``Rosenbrock,'' is the most precise method and solves the broadest range of models, but in many cases.
+However, its high preciseness comes at the cost of a generally higher run time compared to the other solvers.
+\Cref{tab:solvers} lists all solvers that SBMLsimulator provides together with a short description and a reference for more information.
+By clicking the run button at the top (which is displayed next to this text), the calculation starts.
 
-\TODO{SBMLsimulator offers a large variety of integration routines. 
-The solver, which should work best for all models, is the Rosenbrock solver. 
-However, its high preciseness comes at the cost of a running time longer than that of the other solvers. 
-\Cref{tab:solvers} lists all solvers provided by SBMLsimulator together with a short description and a reference for more information.}
+Once the computation has finished, we can see all selected model components in the plot area.
+If we like, we can change some parameters of the model in the panel to the left.
+On the left panel in the \menu{Simulation} tab, we can select which model components to plot, for instance, all reactive species.
+There we can now select the simulations results of which elements should be plotted by clicking at the individual check boxes for model components of interest.
+The buttons \keys{Select} and \keys{Deselect} give us the choice to visualize or remove an entire group of elements from the plot, such as all species or all fluxes.
+For instance, select to plot all species values (see \cref{fig:selectSpecies}).
+Selecting model components is necessary, because SBMLsimulator does not know which model components we like to display in the plot.
+Then we need to click on the simulation button (\cref{fig:startSimulation}).
+The simulation results can then be displayed in the plot section (\cref{fig:simulationResults}).
+
+This view also gives us the opportunity to play with the initial values or parameters in the model.
+For instance, we might be interested in setting a new value for some Michaelis parameter ($K_M$ value), and see how the results of the simulation change after rerunning the model.
 
 \begin{wrapfigure}{O}{16px}
 \vspace{\wrapfigspace}
@@ -191,7 +255,7 @@ By clicking on the simulation button, the simulation of the model is started.}
 The simulation results are plotted in the right part of the window.}
 \label{fig:simulationResults}
 \end{figure}
-If in some cases a simulation run consumes too much time, you can always interrupt it by clicking at the stop button in the tool-bar (see image at the side of this text), which is activated whenever you launch a simulation.
+If in some cases a simulation run consumes too much time, we can always interrupt it by clicking at the stop button in the tool-bar (see image at the side of this text), which is activated whenever we launch a simulation.
 \rowcolors{2}{white}{lightsilver}
 \begin{longtable}{p{3cm}p{8.6cm}p{1.9cm}}
 \hiderowcolors
@@ -256,6 +320,7 @@ It is fast, but imprecise for many models, as it does not contain a step-size ad
 
 
 \section{Explore the tree structure of the model}
+\label{sec:ModelTree}
 \begin{wrapfigure}{O}{16px}
 %\vspace{-4ex}%\wrapfigspace}
 %\begin{minipage}[t][20px][c]{25px}
@@ -263,12 +328,11 @@ It is fast, but imprecise for many models, as it does not contain a step-size ad
 \includegraphics[width=16px]{search_64}%}
 %\end{minipage}
 \end{wrapfigure}
-Choose the tab \menu{Model} and you see \SBML document in a tree structure that you can explore
-(\vref{fig:modelTree}).
+Choose the tab \menu{Model} and we see the \SBML document in a tree structure that we can explore (\cref{fig:modelTree}).
 
-A search function at the bottom gives you the opportunity to browse the model for certain components.
-Here you can search for \acp{Id} or names of components.
-The tree will be expanded and elements that do not match your filter criteria will be removed from the view.
+A search function at the bottom gives us the opportunity to browse the model for any of its components.
+Here we can search for \acp{Id} or names of components, for instance, all Michaelis constants ($K_M$ values) in the model.
+The tree will be expanded and elements that do not match our filter criteria will be removed from the view.
 When clicking at individual model components, the program displays detailed information about the selected element.
 \begin{figure}[t]
 \centering
@@ -284,16 +348,17 @@ The user can explore the model by clicking at elements within the tree.}
 \vspace{\wrapfigspace}
 \includegraphics[width=16px]{PRINT_64}
 \end{wrapfigure}
-If you like to save the current plot as an image, just select the tab \menu{Simulation}. You can then save the image of the results plot by clicking at \menu{File > Save as}.
-For users who prefer keystroke combinations, it is also possible to save the plot by hitting the keys \keys{\cmd + \shift + S} if you are working under \MacOSX, or \keys{\ctrlwin + \shift + S} for \Linux and \Windows.
-By clicking at the printer icon (displayed next to this text) you can print the current plot or save it as a \PDF.
+If we like to save the current plot as an image, just select the tab \menu{Simulation}.
+We can then save the image of the results plot by clicking at \menu{File > Save as}.
+For users who prefer keystroke combinations, it is also possible to save the plot by hitting the keys \keys{\cmd + \shift + S} if we are working under \MacOSX, or \keys{\ctrlwin + \shift + S} for \Linux and \Windows.
+By clicking at the printer icon (displayed next to this text) we can print the current plot or save it as a \PDF.
 The print function can also be used with the keystroke combination \keys{\cmd + P} (\MacOSX) or \keys{\ctrlwin + P} (\Windows and \Linux).
 
 \section{Save simulation data}
 \label{ch:savesim}
-You need to select the tab \menu{Computed data} (see \vref{fig:saveSimulationResults}).
-Then you can save the simulation data under \menu{File > Save as}.
-Just like for the plot data, you can also use keystroke combinations to save your simulation data. To this end, just select the tab \menu{Computed data} and hit the keys \keys{\cmd + \shift + S} if you are working under \MacOSX, or \keys{\ctrlwin + \shift + S} for \Linux and \Windows.
+We need to select the tab \menu{Computed data} (see \cref{fig:saveSimulationResults}).
+Then we can save the simulation data under \menu{File > Save as}.
+Just like for the plot data, we can also use keystroke combinations to save our simulation data. To this end, just select the tab \menu{Computed data} and hit the keys \keys{\cmd + \shift + S} if we are working under \MacOSX, or \keys{\ctrlwin + \shift + S} for \Linux and \Windows.
 \begin{figure}[h]
 \centering
 \shadowimage[width=\textwidth]{save_simulation_results}
@@ -304,21 +369,21 @@ They can be saved under \menu{File > Save as}.}
 \end{figure}
 
 \section{Save model}
-In order to save the model with the parameter, species and compartment values that you have modified, you first have to select the tab \menu{Model}.
-Then you can save the simulation data under \menu{File > Save as}.
-Again, also for this purpose you can use keystroke the combinations \keys{\cmd + \shift + S} (for \MacOSX) or \keys{\ctrlwin + \shift + S} (for \Linux and \Windows) when the \menu{Model} tab is selected.
+In order to save the model with the parameter, species and compartment values that we have modified, we first have to select the tab \menu{Model}.
+Then we can save the simulation data under \menu{File > Save as}.
+Again, also for this purpose we can use keystroke the combinations \keys{\cmd + \shift + S} (for \MacOSX) or \keys{\ctrlwin + \shift + S} (for \Linux and \Windows) when the \menu{Model} tab is selected.
 
 \section{Prepare experimental data}
 \label{ch:prepare}
 
-First of all, make sure that your experimental data is in one of the required file formats.
+First of all, make sure that our experimental data is in one of the required file formats.
 The application can read \CSV files, which are mostly tab-separated files with data.
-To use \Excel-data, you can simply open your \Excel spreadsheet, click \menu{File > Save as} and select ``Tab-separated text file''.
+To use \Excel-data, we can simply open our \Excel spreadsheet, click \menu{File > Save as} and select ``Tab-separated text file''.
 For all files, we require one column called ``Time'' that should contain for each row the time point it refers to.
 The other columns should be called with the \ac{Id} of the respective quantity in the model and should contain the measured values at the time points, or \ac{NaN} if the measurement for a time point is missing. 
 
 \subsection{Experimental data example}
-As described, you need a column with the time points and multiple columns that state the values (often concentrations) of each quantity at each time point.
+As described, we need a column with the time points and multiple columns that state the values (often concentrations) of each quantity at each time point.
 The following is an example how an input file may look like:
 \begin{lstlisting}[caption={Input file example for experimental data},label={lst:input:exp},numbers=none,captionpos=t,float=h]
 Time    s1          s2          s3
@@ -337,16 +402,16 @@ The ``CSV Options'' panel might be expanded to correct auto-detected input file 
 At the table in the lower half, the content of each column must be specified.}
 \label{fig:inputdialog}
 \end{figure}
-In general, all data must be processed expression data in tabular text files (see \vref{ch:prepare} for descriptions and examples of the input file formats).
+In general, all data must be processed expression data in tabular text files (see \cref{ch:prepare} for descriptions and examples of the input file formats).
 Then, there are many possibilities to open datasets in SBMLsimulator.
-For example, you can simply drag\&drop data into the application or select \menu{File > Open > Load experimental data} to open a file.
-Just like in the case of model files, you can also use the key stroke combination \keys{\cmd + O} or \keys{\ctrlwin + O} depending on your \OS.
-Please note that you cannot open experimental data before loading a model.
+For example, we can simply drag\&drop data into the application or select \menu{File > Open > Load experimental data} to open a file.
+Just like in the case of model files, we can also use the key stroke combination \keys{\cmd + O} or \keys{\ctrlwin + O} depending on our \OS.
+Please note that we cannot open experimental data before loading a model.
 This is because an \SBML file can contain various meta information about model components, whereas the simple \CSV format might not suffice to build the complex data structure for the display.
 
-The \vref{fig:inputdialog} shows an example of the file input dialog. Here we open the simulation data saved in \vref{ch:savesim}.
+The \cref{fig:inputdialog} shows an example of the file input dialog. Here we open the simulation data saved in \cref{ch:savesim}.
 This data have been restricted to the quantities that were experimentally measured for the parameter estimation in the respective publication by \citet{Bucher2011}.
-If the input file format has not been inferred automatically (which is not the case here), one may click on the black ``CSV Options'' label to specify further options (like ``column separator char'' or if the file contains headers---see \vref{fig:csvoptions}).
+If the input file format has not been inferred automatically (which is not the case here), one may click on the black ``CSV Options'' label to specify further options (like ``column separator char'' or if the file contains headers---see \cref{fig:csvoptions}).
 \begin{figure}[h]
 \centering
 \shadowimage[width=\textwidth]{expanded_csv_options}
@@ -358,7 +423,7 @@ These properties are auto-detected and only need to be changed if the auto-detec
 In the table at the lower half of this dialog, one must specify the content of each column.
 This can be done by clicking on the combo box below the captions. 
 
-After the experimental data are uploaded, the plot shows the respective data points as dots (see \vref{fig:simulationResultsWithData}).
+After the experimental data are uploaded, the plot shows the respective data points as dots (see \cref{fig:simulationResultsWithData}).
 \begin{figure}[t]
 \centering
 \shadowimage[width=\textwidth]{simulation_results_with_data}
@@ -380,11 +445,12 @@ To facilitate this complicated procedure, SBMLsimulator comes with the optimizat
 Schwefel1975}, genetic algorithms \citep{Holland1975}, differential evolution \citep{Storn96Usage}, or particle swarm optimization \citep{ClercKennedy02, Clerc2005}, as well as niche-based methods that have been found to be particularly useful for applications in systems biology \citep{Kron09NichingGCB}.
 
 Click on the estimation button (see the icon next to this text).
-Then a window appears, in which the quantities to estimate and their ranges can be selected (see  \vref{fig:quantitySelection}).
+Then a window appears, in which the quantities to estimate and their ranges can be selected (see  \cref{fig:quantitySelection}).
 This can be done manually or by uploading a \CSV file.
-In order to upload a file, click on \keys{Open}. You can also save your configuration by clicking on \keys{Save}.
+In order to upload a file, click on \keys{Open}.
+We can also save our configuration by clicking on \keys{Save}.
 
-\TODO{In a configuration file, you can set the minimum and maximum values for initialization of the estimated quantities at the beginning of the estimation (initial minimum/maximum) as well as the minimum and maximum value for each estimated quantity that is allowed during the whole estimation (minimum/maximum).} Here is an example how such a file might look like:
+\TODO{In a configuration file, we can set the minimum and maximum values for initialization of the estimated quantities at the beginning of the estimation (initial minimum/maximum) as well as the minimum and maximum value for each estimated quantity that is allowed during the whole estimation (minimum/maximum).} Here is an example how such a file might look like:
 \begin{lstlisting}[caption={Input file example for parameter estimation file},label={lst:input:estimation},numbers=none,captionpos=t,float=h]
 [Id]	[initialMinimum]	[initialMaximum]	[minimum]	[maximum]
 Import_ASLpOH_k	1E-7	0.1	1E-7	0.1	
@@ -393,11 +459,11 @@ Import_ASL_k	1E-7	1	1E-7	1
 ...     ...         ...         ...
 \end{lstlisting}
 
-After you are satisfied with your selected quantities, click on \keys{OK}.
-Then \EvA is started and the respective window (see \vref{fig:eva2}) lets you select the estimation method (``optimizer'') with specific settings  \TODO{(see \vref{fig:algorithmChoice})} and the termination criterion (``terminator'').
-When you click on \keys{Start}, the estimation begins. \TODO{Please note: If there are initial values (\ie values at time point 0) for some model quantities given in the data, SBMLsimulator takes these values as initial values for the simulations necessary during the estimation. In the case of multiple experimental datasets loaded, the medians of the initial values are taken. For the quantities without initial values given in the data, the initial values defined in the model are chosen.}
+After we are satisfied with our selected quantities, click on \keys{OK}.
+Then \EvA is started and the respective window (see \cref{fig:eva2}) lets us select the estimation method (``optimizer'') with specific settings  \TODO{(see \cref{fig:algorithmChoice})} and the termination criterion (``terminator'').
+When we click on \keys{Start}, the estimation begins. \TODO{Please note: If there are initial values (\ie values at time point 0) for some model quantities given in the data, SBMLsimulator takes these values as initial values for the simulations necessary during the estimation. In the case of multiple experimental datasets loaded, the medians of the initial values are taken. For the quantities without initial values given in the data, the initial values defined in the model are chosen.}
 
-The simulation result with the current best parameter values is always plotted during estimation and the current quality function value is displayed (\vref{fig:estimationResult}).
+The simulation result with the current best parameter values is always plotted during estimation and the current quality function value is displayed (\cref{fig:estimationResult}).
 
 \begin{figure}[h]
 \centering
@@ -405,9 +471,10 @@ The simulation result with the current best parameter values is always plotted d
 \caption[Selection of quantities to estimate]{Selection of quantities to estimate.
 The user can select the quantities to estimate and their ranges manually by modifying the displayed table or via uploading a \CSV file by clicking on \keys{Open}.
 The current configuration of quantities and their ranges \TODO{(for initialization as well as for the whole estimation process)} can be saved by clicking the \keys{Save} button.
-The search function at the bottom helps you to navigate through the names or identifiers that are potential optimization targets. When you type a name in the text field, the above table will be reduced to elements that contain this name you are typing.
+The search function at the bottom helps us to navigate through the names or identifiers that are potential optimization targets.
+When we type a name in the text field, the above table will be reduced to elements that contain this name we are typing.
 The buttons \keys{Select all} and \keys{Select none} are also helpful to choose all or none of the elements within one tab as optimization targets.
-Note that each tab has these buttons separately, so your choice in one tab does not affect others.
+Note that each tab has these buttons separately, so our choice in one tab does not affect others.
 }
 \label{fig:quantitySelection}
 \end{figure}
@@ -419,14 +486,14 @@ Note that each tab has these buttons separately, so your choice in one tab does 
 \caption[\EvA settings window]{\EvA settings window.
 \EvA lets the user choose the parameter estimation method and the specific settings:
 just click at the text field next to the label ``optimizer''.
-A separate dialog window will appear that offers a large number of optimization procedures \TODO{(\vref{fig:algorithmChoice})}.
+A separate dialog window will appear that offers a large number of optimization procedures \TODO{(\cref{fig:algorithmChoice})}.
 In the same way, an appropriate termination criterion can also be set by clicking at the text field that is labeled ``terminator''.
 After clicking on \keys{Start}, the estimation begins.
 During the optimization, a window will appear that displays the quality improvement of the solution, the so-called \emph{fitness}.
-This is the distance between your experimental data and the simulation result for the currently best parameter set.
+This is the distance between our experimental data and the simulation result for the currently best parameter set.
 If the optimization is successful, the fitness will decrease as time proceeds.
-You can interrupt the optimization at any time by hitting the \keys{Stop} button.
-When your selected termination criterion is reached, the optimization will stop and you can continue working with your optimized model in the main window of SBMLsimulator.}
+We can interrupt the optimization at any time by hitting the \keys{Stop} button.
+When our selected termination criterion is reached, the optimization will stop and we can continue working with our optimized model in the main window of SBMLsimulator.}
 \label{fig:eva2}
 \end{SCfigure}
 
@@ -452,6 +519,9 @@ The current value of the quality function is also shown.
 \label{fig:estimationResult}
 \end{figure}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 04_Embedding_a_Layout          %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Embedding a model layout in an SBML file and preparation of experimental data}
 
@@ -468,7 +538,7 @@ From these two, we pick \href{https://identifiers.org/bigg.model/iMM904}{iMM904}
 We can download the model in compressed \SBML format.
 At the bottom of the page, we can find a map of the central carbon metabolism.
 Let us download that map \JSON format.
-We can convert this map to \SBML with layout information using the software EscherConverter \citep{King2015a} that is available at \href{https://github.com/drager-lab/EscherConverter}{\faGithub/drager-lab/EscherConverter}.
+We can convert this map to \SBML with layout information using the software EscherConverter \citep{King2015a} that is available at \github{drager-lab/EscherConverter}.
 To this end, we download the executable \JAR file of EscherConverter, run it with a double click, drag the \JSON file into EscherConverter and click the disk symbol to safe it in \SBML format.
 
 The \SBML file we obtain from EscherConverter, however, only contains those parts of the model with relevance for the graphical display.
@@ -504,6 +574,9 @@ But we can expect that more models with embedded layouts will become available a
 We also discussed how to transform experimental data using \Excel.
 In the next chapter, we will import both generated files to SBMLsimulator and fully explore its visualization capabilities.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 05_Visualizing_Manual_Layouts  %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Visualization of manually created layouts}
 
@@ -546,21 +619,24 @@ Another exciting feature is the sliding camera animation that we can activate by
 To design such an animation, we need to create a \CSV file that contains in one line the zoom level followed by a tab-separated list of corner points.
 These are the x- and y-coordinates of the top-left corners that define the path of the visible sliding view-port window.
 In other words, these comma-separated coordinates define where the camera makes a turn on its way.
-Here we can see an example of such a file for the animation you just saw.
+Here we can see an example of such a file for the animation we just saw.
 To enable the camera animation, we go to settings, and navigate to the bottom of the tab \menu{Network dynamics}.
 Finally, we can export the animation that we just created to a movie file.
 This gives us first a warning because of the high resolution, so the export may take some time and consume some space on our hard drive.
 The export supports a wide range of common movie file types, including \AVI, \MOV, \MPG, and others.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 05_CMD-ARGS                    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Command-line arguments and preferences}
 \label{chap:CMD}
 
 It now follows a short overview about all possible command-line options of SBMLsimulator.
 All functions of the program are also available from the command line.
-This means that you can also run SBMLsimulator on a cluster and use it for large-scale model calibration.
-Furthermore, you can use the command-line options in combination with the \GUI.
-One possible use-case scenario would be to launch the program with your desired configuration with a customized start script, \eg to directly open a certain model file when launching the program.
+This means that we can also run SBMLsimulator on a cluster and use it for large-scale model calibration.
+Furthermore, we can use the command-line options in combination with the \GUI.
+One possible use-case scenario would be to launch the program with our desired configuration with a customized start script, \eg to directly open a certain model file when launching the program.
 
 
 \renewcommand{\descriptionlabel}[1]{\textcolor{blue}{\texttt{#1}}}
@@ -595,7 +671,7 @@ Select output files for the results of simulation and parameter estimation.
 
 \section{Simulation options}
 \subsection{Missing values}
-Decide how to treat the values of compartments, species, and parameters if no initial value has been defined in the model. A missing initial value is to be distinguished from invalid, \ie \ac{NaN}, values. Furthermore, the elements may have very diverse the units associated with them. Here it is only possible to define one numeric value for each element group, irrespective of any unit.
+Decide how to treat the values of compartments, species, and parameters if no initial value has been defined in the model. A missing initial value is to be distinguished from invalid, \ie \NaN, values. Furthermore, the elements may have very diverse the units associated with them. Here it is only possible to define one numeric value for each element group, irrespective of any unit.
 \begin{description}
 \item[--default-init-compartment-size{[} |={]}<Double>]
           If not specified the value corresponding to this argument will
@@ -604,7 +680,7 @@ Decide how to treat the values of compartments, species, and parameters if no in
           Default value: \texttt{1.0}
 \item[--default-init-species-value{[} |={]}<Double>]
           If not specified the value corresponding to this argument will
-          be used to initialize species depending on their \texttt{hasOnlySubstanceUnits}
+          be used to initialize species depending on their \hasOnlySubstanceUnits
           property as initial amount or initial concentration.
           Arguments must fit into the range (0.0, $9\cdot 10^9${]}.
           Default value: \texttt{1.0}
@@ -615,12 +691,12 @@ Decide how to treat the values of compartments, species, and parameters if no in
 \end{description}
 
 \subsection{Settings for the simulation}
-Here you can specify parameters for the simulation of the model.
+Here we can specify parameters for the simulation of the model.
 \begin{description}
 \item[--ode-solver{[} |={]}<Class>]
           This gives the class name of the default solver for \ODE
           systems. The associated class must
-          implement \texttt{AbstractDESSolver} and must have a constructor without
+          implement \AbstractDESSolver and must have a constructor without
           any parameters.
           All possible values for type \texttt{<Class>} are:
           \begin{itemize}
@@ -661,7 +737,7 @@ Here you can specify parameters for the simulation of the model.
 
 \section{Estimation Options}
 \subsection{Spline approximation}
-These options allow you to estimate parameters with respect to spline interpolation values between given measurement data and to configure how to calculate these splines.
+These options allow us to estimate parameters with respect to spline interpolation values between given measurement data and to configure how to calculate these splines.
 \begin{description}
 \item[--fit-to-splines]
           If this is selected, splines will be calculated from given experimental
@@ -675,7 +751,7 @@ These options allow you to estimate parameters with respect to spline interpolat
           Default value: \texttt{false}
 \item[--number-of-spline-samples{[} |={]}<Integer>]
           This defines the number of additional spline sampling points
-          between the measurement data. If you select zero, only the real
+          between the measurement data. If we select zero, only the real
           sampling points will be used.
           Default value: \texttt{50}
 \end{description}
@@ -704,7 +780,7 @@ Select the default optimization targets.
           Default value: \texttt{false}
 \item[--est-all-undefined-quantities]
           Estimates the values for all those quantities in the model whose
-          values are either undefined or set to \ac{NaN}.
+          values are either undefined or set to \NaN.
           Default value: \texttt{false}
 \end{description}
 
@@ -750,7 +826,7 @@ Select whether or not to apply a multiple shooting strategy.
 \end{description}
 
 \subsection{Quality function}
-Here you can specify how to evaluate the quality of a parameter set with respect to given experimental data.
+Here we can specify how to evaluate the quality of a parameter set with respect to given experimental data.
 \begin{description}
 \item[--quality-measure{[} |={]}<Class>]
           This specifies the class name of the default quality function
@@ -776,7 +852,7 @@ Here you can specify how to evaluate the quality of a parameter set with respect
 \item[--quality-n-metric-root{[} |={]}<Double>]
           The root parameter in the distance function for $n$-metrics: in
           case of the $n$-norm this is at the same time also the exponent.
-          For instance, the Eulidean distance has a root value of two,
+          For instance, the Euclidean distance has a root value of two,
           whereas the Manhattan norm has a root of one. In the \RSE, the
           default root is also two, but this value may be changed.
           Default value: \texttt{3.0}
@@ -789,7 +865,7 @@ Here you can specify how to evaluate the quality of a parameter set with respect
 \end{description}
 
 \section{Options for the graphical user interface}
-\subsection{Additional options}
+%\subsection{Additional options}
 \begin{description}
 \item[--check-for-updates{[} |={]}<Boolean>]
           Decide whether or not this program should search for updates
@@ -800,7 +876,7 @@ Here you can specify how to evaluate the quality of a parameter set with respect
           Default value: \texttt{false}
 \item[--log-level{[} |={]}<String>]
           Change the log-level of this application. This option will influence
-          how fine-grained error and other log messages will be that you
+          how fine-grained error and other log messages will be that we
           receive while executing this program.
           All possible values for type \texttt{<String>} are:
           \texttt{ALL}, \texttt{CONFIG},
@@ -849,12 +925,10 @@ Define the special characters in \CSV files that separate values or that quote s
 \begin{description}
 \item[--csv-files-separator-char{[} |={]}<Character>]
           The separator character that is written between the entries of
-          a character separated value file. Not that actually any \ac{UTF}-8
+          a character separated value file. Not that actually any \UTF
           character can be used as a separator, not only commas.
           All possible values for type \texttt{<Character>} are:
-          \tab, \textvisiblespace,
-          \texttt{,}, \texttt{/},
-          \texttt{;},  and \texttt{|}.
+          \tab, \textvisiblespace, \texttt{,}, \texttt{/}, \texttt{;}, and \texttt{|}.
           Default value: \texttt{,}
 \item[--csv-files-quote-char{[} |={]}<Character>]
           The character that is used to quote strings inside of \CSV
@@ -873,13 +947,17 @@ Settings for the communication with a \Garuda Core and hence access to other \Ga
 \end{description}
 \renewcommand{\descriptionlabel}[1]{\textcolor{black}{\textbf{#1}}}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 06_License                     %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \chapter{License}
 
 \begin{wrapfigure}{O}{1.5cm}
 \vspace{\wrapfigspace}
 \includegraphics[width=1.5cm]{lgplv3-147x51}
 \end{wrapfigure}
-SBMLsimulator is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version~3 of the License, or (at your option) any later version.
+SBMLsimulator is free software: You can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version~3 of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful, but \textbf{WITHOUT ANY WARRANTY}; without even the implied warranty of \textbf{MERCHANTABILITY} or \textbf{FITNESS FOR A PARTICULAR PURPOSE}. See the GNU General Public License for more details.
 
@@ -899,7 +977,10 @@ SBMLsimulator includes and redistributes the following software packages:
 \item \MacOSX support: Quaqua Look and Feel, license \ac{LGPL} Version~2.1, see \href{http://www.randelshofer.ch/quaqua/}{\url{http://www.randelshofer.ch/quaqua/}}.
 \end{itemize}
 
-% 03_Troubleshooting
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 06_Troubleshooting             %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \chapter{FAQ / Troubleshooting}
 \label{ch:faq}
 
@@ -912,28 +993,27 @@ Most elements in SBMLsimulator have tool-tips. If you do not understand an optio
 can get help in the first place by just pointing the mouse cursor over it and
 wait for the tool-tip to show up ($\sim$ 3 seconds).\newline
 
-\noindent \textbf{I'm getting a ``java.lang.OutOfMemoryError: Java heap space''}\newline
+\noindent \textbf{I'm getting the message \texttt{java.lang.OutOfMemoryError: Java heap space}}\newline
 Some operations need a lot of memory. If you simply start SBMLsimulator, without any
-JVM parameters, only 64\,MB of memory are available. Please append the argument
-\texttt{-Xmx1024M} to start the application with 1\,GB of main memory. See
-\vref{startingTheProgram} for a more detailed description of how to
-start the application with additional memory. If possible, you should give the
-application 2\,GB of main memory. A minimum of 1\,GB main memory should be
-available to the application.\newline
+\JVM parameters, only \SI{64}{\mega\byte} of memory are available.
+Please append the argument \texttt{-Xmx1024M} to start the application with \SI{1}{\giga\byte} of main memory.
+See \cref{startingTheProgram} for a more detailed description of how to start the application with additional memory.
+If possible, you should give the application \SI{2}{\giga\byte} of main memory.
+A minimum of \SI{1}{\giga\byte} main memory should be available to the application.\newline
 
 \noindent \textbf{Is an internet connection required to run SBMLsimulator?}\newline
 An internet connection is not required for simulations, but for some other operations,
 like the on-line-update feature.\newline
 
 \noindent \textbf{Where can I get the latest version?}\newline
-Go to \url{http://www.cogsys.cs.uni-tuebingen.de/software/SBMLsimulator/}.\newline
+Go to \github{draeger-lab/SBMLsimulator/}.\newline
 
 \noindent \textbf{Which \Java version must be installed on my computer to launch
-SBMLsimulator?}\newline SBMLsimulator requires at least \Java 1.6. Please see
-\url{http://www.java.com/de/download/} to download the latest \Java version.\newline
+SBMLsimulator?}\newline SBMLsimulator requires at least \Java~8.
+Please see \url{https://jdk.java.net} to download the latest \Java version.\newline
 
 \noindent \textbf{Why does SBMLsimulator not start on my Mac with \MacOSX prior to
-10.6 Update 3?}\newline If you try to launch SBMLsimulator, but the application does
+10.6 Update~3?}\newline If you try to launch SBMLsimulator, but the application does
 not start and you receive the following error message on the command-line or
 \Java console of your Mac, you need to update your \Java installation:
 \begin{verbatim}
@@ -944,13 +1024,11 @@ Exception in thread "AWT-EventQueue-0" java.lang.NoClassDefFoundError:
     ...
 \end{verbatim}
 The interface \texttt{com.apple.eawt.AboutHandler} was introduced to \Java for
-\MacOSX 10.6 Update 3. If you have an earlier version of \MacOSX or \Java,
+\MacOSX 10.6 Update~3. If you have an earlier version of \MacOSX or \Java,
 please update your \OS or \Java installation. Also see the \MacOSX documentation
 about the \texttt{AboutHandler} for more information. On a Mac, you can update
 your \Java installation through the Software Update menu item in the main Apple
 menu.\newline
 
 \noindent \textbf{How can I report bugs or get help?}\newline
-Just contact the mailing list using the following e-mail address: \ding{41} \href{mailto:sbmlsimulator@googlegroups.com}{\url{sbmlsimulator@googlegroups.com}}.
-
-
+The best way to get in touch is using the issue tracker at \github{draeger-lab/SBMLsimulator/issues}.
