@@ -1,3 +1,7 @@
+\usepackage[format=plain]{caption}
+\DeclareCaptionLabelSeparator{pipe}{ \textbar\ }
+\captionsetup{labelsep=pipe,margin=10pt,font=small,labelfont=bf,textfont=up,tableposition=above,figureposition=below}
+
 % Some helper macros, used later below:
 
 \newcommand{\eg}                    {e.g.,\xspace}
@@ -25,6 +29,14 @@
 \newcommand{\youtube}[1]{\href{https://youtu.be/#1}{\faYoutube\texttt{/#1}}}
 \newcommand{\watchAtYoutube}[1]{\begin{center}\textcolor{darkblue}{\ding{43} \textsf{Watch this example online at} \youtube{#1}\textsf{.}}\end{center}}
 
+\newcommand{\TReg}{\textsuperscript{\textregistered}\xspace}
+\newcommand{\TCop}{\textsuperscript{\textcopyright}\xspace}
+\newcommand{\TTra}{\texttrademark\xspace}
+
+
+%%%%%%%%%
+% INDEX %
+%%%%%%%%%
 
 % A
 \newcommand{\AbstractDESSolver}     {\texttt{AbstractDESSolver}\index{AbstractDESSolver}\xspace}
@@ -39,12 +51,16 @@
 \newcommand{\CellDesigner}          {Cell\-Designer\index{CellDesigner}\xspace}
 \newcommand{\CSV}                   {\ac{CSV}\index{\acfi{CSV}}\xspace}
 
+% D
+\newcommand{\DE}                    {\ac{DE}\index{\acfi{DE}}\xspace}
+
 % E
 \newcommand{\English}               {English\index{Language pack!English}\xspace}
 \newcommand{\EvA}                   {EvA2\index{EvA2}\xspace}
 \newcommand{\Excel}                 {Microsoft Excel\index{Excel}\xspace}
 
 % F
+\newcommand{\fitness}               {fitness\index{Fitness}\xspace}
 \newcommand{\FLV}                   {\acf{FLV}\index{\acfi{FLV}}\xspace}
 
 % G
@@ -57,8 +73,8 @@
 
 
 % J
-\newcommand{\Java}                  {Java\texttrademark\index{Java\texttrademark}\xspace}
-\newcommand{\JavaWebStart}          {\Java Web Start\index{Java\texttrademark{} Web Start}\xspace}
+\newcommand{\Java}                  {Java\TTra\index{Java\TTra}\xspace}
+\newcommand{\JavaWebStart}          {\Java Web Start\index{Java\TTra Web Start}\xspace}
 \newcommand{\JAR}                   {\ac{JAR} file\index{\acfi{JAR}}\xspace}
 \newcommand{\JDK}                   {\acf{JDK}\index{\acfi{JDK}}\xspace}
 \newcommand{\JVM}                   {\acf{JVM}\index{\acfi{JVM}}\xspace}
@@ -83,6 +99,7 @@
 % P
 \newcommand{\PDF}                   {\acf{PDF}\index{\acfi{PDF}}\xspace}
 \newcommand{\PNG}                   {\acf{PNG}\index{\acfi{PNG}}\xspace}
+\newcommand{\PSO}                   {\acf{PSO}\index{\acfi{PSO}}\xspace}
 
 % R
 \newcommand{\RAM}                   {\acf{RAM}\index{\acfi{RAM}}\xspace}

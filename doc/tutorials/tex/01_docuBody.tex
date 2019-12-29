@@ -123,7 +123,7 @@ Now that we got SBMLsimulator installed and running on our computer, we will exp
 % 03_Getting_Started             %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\chapter{How to get started}
+\chapter{Loading model files and running a simulation}%{How to get started}
 
 In this chapter, we will discuss selected features of the software SBMLsimulator.
 First, we will start by explaining where to find systems biology models, how to load them into the application, and how to run a simulation.
@@ -182,12 +182,13 @@ One possibility to open a model is to select \menu{File > Open > Open model}.}
 \centering
 \shadowimage[width=\textwidth]{opened_model}
 \caption[SBMLsimulator with a loaded model]{SBMLsimulator with a loaded model.
-The window lets the user choose the simulation settings (bottom), the parameter values (center left), and the quantities to plot (upper left).
+In this window we can choose the simulation settings (bottom), the parameter values (center left), and the quantities to plot (upper left).
 The plot section is on the right.}
 \label{fig:modelOpened}
 \end{figure}
 
 \subsection{Graphically exploring a model}
+\label{sec:ModelTree}
 
 Now, the model is loaded and the window's appearance changes as \cref{fig:modelOpened} shows:
 \begin{dinglist}{226}
@@ -203,42 +204,67 @@ In the \menu{Model} tab, we can explore the structure of the model in a tree vie
 The \menu{Graph} tab visually displays the model, which looks like this.
 In case of the example model by \citeauthor{Bucher2011}, the authors did not embed any layout information into their model and SBMLsimulator has hence to automatically generate a display following the \SBGN guidelines.
 
-\subsection{Simulate a model}
+\begin{wrapfigure}{O}{16px}
+%\vspace{-4ex}%\wrapfigspace}
+%\begin{minipage}[t][20px][c]{25px}
+%\parbox[r][20px][c]{20px}{
+\includegraphics[width=16px]{search_64}%}
+%\end{minipage}
+\end{wrapfigure}
+We can explore the tree structure of the model if we choose the tab \menu{Model}, where we see the \SBML document in a tree structure that we can explore (\cref{fig:modelTree}).
+A search function at the bottom gives us the opportunity to browse the model for any of its components.
+Here we can search for \acp{Id} or names of components, for instance, all Michaelis constants ($K_M$ values) in the model.
+The tree will be expanded and elements that do not match our filter criteria will be removed from the view.
+When clicking at individual model components, the program displays detailed information about the selected element.
+\begin{figure}[t]
+\centering
+\shadowimage[width=\textwidth]{model_tree}
+\caption[Display of model tree]{Display of model tree.
+The model tree is shown when clicking on the \menu{Model} tab.
+We can explore the model by clicking at elements within the tree.}
+\label{fig:modelTree}
+\end{figure}
+
+
+\section{Dynamic simulation of a model}
 \begin{wrapfigure}{O}{16px}
 \vspace{\wrapfigspace}
 \includegraphics[width=16px]{PLAY_64}
 \end{wrapfigure}
-Next, let us run a simulation.
-At the bottom is a control panel where we can adjust how the simulation should be performed, for instance with 300 steps.
+Next, let us run a dynamic simulation, \ie interpret the model in terms of an \ODE system.
+At the bottom is a control panel where we can adjust how the simulation should be performed, for instance, with 300 steps.
 We can also select the solver that calculates the result for us.
 SBMLsimulator offers a large variety of integration routines for this purpose.
-The default solver, ``Rosenbrock,'' is the most precise method and solves the broadest range of models, but in many cases.
+The default solver, ``Rosenbrock,'' is the most precise method and solves the broadest range of models.
 However, its high preciseness comes at the cost of a generally higher run time compared to the other solvers.
 \Cref{tab:solvers} lists all solvers that SBMLsimulator provides together with a short description and a reference for more information.
-By clicking the run button at the top (which is displayed next to this text), the calculation starts.
+When clicking the run button at the top, as \cref{fig:startSimulation} shows, the calculation starts.
 
 Once the computation has finished, we can see all selected model components in the plot area.
-If we like, we can change some parameters of the model in the panel to the left.
-On the left panel in the \menu{Simulation} tab, we can select which model components to plot, for instance, all reactive species.
-There we can now select the simulations results of which elements should be plotted by clicking at the individual check boxes for model components of interest.
+On the left panel in the \menu{Simulation} tab, we can select, for which model components the simulation results should be added to the plot diagram.
+To this end, we click at the individual check boxes for model components of interest.
 The buttons \keys{Select} and \keys{Deselect} give us the choice to visualize or remove an entire group of elements from the plot, such as all species or all fluxes.
-For instance, select to plot all species values (see \cref{fig:selectSpecies}).
-Selecting model components is necessary, because SBMLsimulator does not know which model components we like to display in the plot.
-Then we need to click on the simulation button (\cref{fig:startSimulation}).
-The simulation results can then be displayed in the plot section (\cref{fig:simulationResults}).
+In \cref{fig:selectSpecies}, for instance, we select to plot all species values.
+\Cref{fig:simulationResults} shows us the result for this model simulation.
+Selecting model components is necessary, because SBMLsimulator does not know which model components we like to display in the plot area.
 
-This view also gives us the opportunity to play with the initial values or parameters in the model.
+When finishing a simulation run, the tab \menu{Computed data} becomes active, where we can see the simulated time course from the plot in tabular format.
+
+With the availability of this data set, the graph view in the \menu{Graph} has now also updated and automatically maps the simulated data onto the generated network.
+We can play these data as a movie, zoom in, and pan the system around while it is running.
+The controls at the bottom adjust the properties of this animation.
+\Cref{chap:VisLayout} gives more details of this feature.
+
+The view in \menu{Simulation} also gives us the opportunity to play with the initial values or parameters in the model in the panel to the left.
 For instance, we might be interested in setting a new value for some Michaelis parameter ($K_M$ value), and see how the results of the simulation change after rerunning the model.
+If we have a time-course data set from laboratory experiments available, we can load it into SBMLsimulator and apply a plethora of heuristic optimization methods to automatically estimate optimal values of such model parameters.
+\Cref{chap:ParameterEstimation} explains this is a topic in detail.
 
-\begin{wrapfigure}{O}{16px}
-\vspace{\wrapfigspace}
-\includegraphics[width=16px]{STOP_64}
-\end{wrapfigure}
 \begin{figure}[t]
 \centering
 \shadowimage[width=\textwidth]{select_species}
 \caption[Selection of quantities for plotting]{Selection of quantities for plotting.
-The user can click on \menu{Select > Species} in order to choose all species for plotting.}
+We can, for instance, click on \menu{Select > Species} in order to choose all species for plotting.}
 \label{fig:selectSpecies}
 \end{figure}
 \begin{figure}[t]
@@ -255,95 +281,97 @@ By clicking on the simulation button, the simulation of the model is started.}
 The simulation results are plotted in the right part of the window.}
 \label{fig:simulationResults}
 \end{figure}
+\begin{wrapfigure}{O}{16px}
+\vspace{\wrapfigspace}
+\includegraphics[width=16px]{STOP_64}
+\end{wrapfigure}
 If in some cases a simulation run consumes too much time, we can always interrupt it by clicking at the stop button in the tool-bar (see image at the side of this text), which is activated whenever we launch a simulation.
 \rowcolors{2}{white}{lightsilver}
-\begin{longtable}{p{3cm}p{8.6cm}p{1.9cm}}
+\begin{longtable}{L{3.3cm}p{11cm}}
 \hiderowcolors
-\caption[Solvers provided by SBMLsimulator]{Solvers provided by SBMLsimulator}
+\caption[Available ODE solver implementations]{Available ODE solver implementations}
 \label{tab:solvers}\\
 \toprule
-Name & Description & Reference\\
+Solver & Description\\
 \midrule
 \endfirsthead
-\caption{Solvers provided by SBMLsimulator (continued)}\\
+\caption{Available ODE solver implementations (continued)}\\
 \toprule
-Name & Description & Reference\\
+Solver & Description\\
 \midrule
 \endhead
-\multicolumn{3}{c}{Continued on the next page\dots}
+\multicolumn{2}{c}{\small Continued on the next page\dots}
 \endfoot
 \bottomrule
 \endlastfoot
 \showrowcolors
-Adams-Bashforth&
+Adams-Bashforth
+\citet{ApacheCommonsMath2013}&
 This is an explicit multi-step integration method.
-The solver uses a step-size adaptation. It is faster than Rosenbrock, but not applicable for very stiff differential equation systems.
-This solver is provided by Apache Commons.&
-\citet{ApacheCommonsMath2013}\\
-Adams-Moulton&
+The solver uses a step-size adaptation.
+It is faster than Rosenbrock, but not applicable for very stiff differential equation systems.
+This solver is provided by Apache Commons.\\
+Adams-Moulton
+\citep{ApacheCommonsMath2013}&
 The method by Adams and Moulton is an implicit multi-step integration method, which uses a step-size adaptation.
-It is also faster than Rosenbrock, but not applicable for all models. This solver is provided by Apache Commons.&
-\citet{ApacheCommonsMath2013}\\
-Dormand-Prince 54&
-The Dormand Prince in an explicit integration method of order 5, which belongs to the family of Runge-Kutta methods. Step-size adaptation is included in the routine.
+It is also faster than Rosenbrock, but not applicable for all models.
+This solver is provided by Apache Commons.\\
+Dormand-Prince 54
+\citep{ApacheCommonsMath2013}&
+The Dormand Prince in an explicit integration method of order 5, which belongs to the family of Runge-Kutta methods.
+Step-size adaptation is included in the routine.
 This solver works for most models, but can have problems with extremely stiff differential equation systems.
-It is provided by Apache Commons.&
-\citet{ApacheCommonsMath2013}\\
-Dormand-Prince 853&
+It is provided by Apache Commons.\\
+Dormand-Prince 853
+\citep{ApacheCommonsMath2013}&
 This solver is similar to Dormand-Prince 54, but it is of order 8.
 It comprises more function evaluations than Dormand-Prince 54 and is therefore more precise, but also slower.
-It is provided by Apache Commons.&
-\citet{ApacheCommonsMath2013}\\
-Euler&
+It is provided by Apache Commons.\\
+Euler
+\citep{Press1992}&
 The explicit Euler method.
-This is a very fast and simple solver, that lacks a step-size adaptation and might therefore be imprecise.&
-\citet{Press1992}\\
-Gragg-Bulirsch-Stoer&
+This is a very fast and simple solver, that lacks a step-size adaptation and might, therefore, be imprecise.\\
+Gragg-Bulirsch-Stoer
+\citep{ApacheCommonsMath2013}&
 This method belongs to the most efficient and accurate methods with step-size adaptation for non-stiff differential equations.
 Its use is not recommended for stiff differential equations.
-This solver is provided by Apache Commons.&
-\citet{ApacheCommonsMath2013}\\
-Higham-Hall 54&
+This solver is provided by Apache Commons.\\
+Higham-Hall 54
+\citep{ApacheCommonsMath2013}&
 The method by Higham and Hall is a Runge-Kutta method of order 5 with step-size control.
 The solver is similar to the Dormand-Prince 54 solver.
-It is provided by Apache Commons.&
-\citet{ApacheCommonsMath2013}\\
-Rosenbrock&
+It is provided by Apache Commons.\\
+Rosenbrock
+\citep{Press1992}&
 This adapted solver comprises Rosenbrock's method, which includes an adaptation of step-size.
-This implementation is specifically dedicated to precise simulation of \SBML models and is applicable for very stiff differential equation systems. But it might be significantly slower for some models than the other solvers.&
-\citet{Press1992}\\
-Runge-Kutta&
+This implementation is specifically dedicated to precise simulation of \SBML models and is applicable for very stiff differential equation systems. But it might be significantly slower for some models than the other solvers.\\
+Runge-Kutta
+\citep{Press1992}&
 The classical fourth order Runge-Kutta method.
-It is fast, but imprecise for many models, as it does not contain a step-size adaptation.&
-\citet{Press1992}\\
+It is fast, but imprecise for many models, as it does not contain a step-size adaptation.
 \end{longtable}
 
 
-\section{Explore the tree structure of the model}
-\label{sec:ModelTree}
+\subsection{Save simulation data}
+\label{ch:savesim}
 \begin{wrapfigure}{O}{16px}
-%\vspace{-4ex}%\wrapfigspace}
-%\begin{minipage}[t][20px][c]{25px}
-%\parbox[r][20px][c]{20px}{
-\includegraphics[width=16px]{search_64}%}
-%\end{minipage}
+\vspace{\wrapfigspace}
+\includegraphics[width=16px]{save_64}
 \end{wrapfigure}
-Choose the tab \menu{Model} and we see the \SBML document in a tree structure that we can explore (\cref{fig:modelTree}).
-
-A search function at the bottom gives us the opportunity to browse the model for any of its components.
-Here we can search for \acp{Id} or names of components, for instance, all Michaelis constants ($K_M$ values) in the model.
-The tree will be expanded and elements that do not match our filter criteria will be removed from the view.
-When clicking at individual model components, the program displays detailed information about the selected element.
-\begin{figure}[t]
+We need to select the tab \menu{Computed data} (see \cref{fig:saveSimulationResults}).
+Then we can save the simulation data under \menu{File > Save as}.
+Just like for the plot data, we can also use keystroke combinations to save our simulation data. To this end, just select the tab \menu{Computed data} and hit the keys \keys{\cmd + \shift + S} if we are working under \MacOSX, or \keys{\ctrlwin + \shift + S} for \Linux and \Windows.
+\begin{figure}[h]
 \centering
-\shadowimage[width=\textwidth]{model_tree}
-\caption[Display of model tree]{Display of model tree.
-The model tree is shown when clicking on the \menu{Model} tab.
-The user can explore the model by clicking at elements within the tree.}
-\label{fig:modelTree}
+\shadowimage[width=\textwidth]{save_simulation_results}
+\caption[Table with simulation data]{Table with simulation data.
+Under the tab \menu{Computed data} we can see the simulation results in a table.
+They can be saved under \menu{File > Save as}.}
+\label{fig:saveSimulationResults}
 \end{figure}
 
-\section{Save plot image}
+
+\subsection{Save plot image}
 \begin{wrapfigure}{O}{16px}
 \vspace{\wrapfigspace}
 \includegraphics[width=16px]{PRINT_64}
@@ -354,143 +382,217 @@ For users who prefer keystroke combinations, it is also possible to save the plo
 By clicking at the printer icon (displayed next to this text) we can print the current plot or save it as a \PDF.
 The print function can also be used with the keystroke combination \keys{\cmd + P} (\MacOSX) or \keys{\ctrlwin + P} (\Windows and \Linux).
 
-\section{Save simulation data}
-\label{ch:savesim}
-We need to select the tab \menu{Computed data} (see \cref{fig:saveSimulationResults}).
-Then we can save the simulation data under \menu{File > Save as}.
-Just like for the plot data, we can also use keystroke combinations to save our simulation data. To this end, just select the tab \menu{Computed data} and hit the keys \keys{\cmd + \shift + S} if we are working under \MacOSX, or \keys{\ctrlwin + \shift + S} for \Linux and \Windows.
-\begin{figure}[h]
-\centering
-\shadowimage[width=\textwidth]{save_simulation_results}
-\caption[Table with simulation data]{Table with simulation data.
-Under the tab \menu{Computed data} the user can see the simulation results in a table.
-They can be saved under \menu{File > Save as}.}
-\label{fig:saveSimulationResults}
-\end{figure}
 
-\section{Save model}
-In order to save the model with the parameter, species and compartment values that we have modified, we first have to select the tab \menu{Model}.
-Then we can save the simulation data under \menu{File > Save as}.
-Again, also for this purpose we can use keystroke the combinations \keys{\cmd + \shift + S} (for \MacOSX) or \keys{\ctrlwin + \shift + S} (for \Linux and \Windows) when the \menu{Model} tab is selected.
+\section{Next steps}
 
-\section{Prepare experimental data}
+We have now walked through how to load a model and run a simulation using SBMLsimulator.
+In \Cref{chap:ParameterEstimation}, we will explore how to automatically estimate parameter values.
+In other words, this will explain how a model can be calibrated with respect to experimentally obtained time-course data.
+After discussing how to embed manually created network layouts in \SBML files in \Cref{chap:EmbeddingLayoutsInModels}, \cref{chap:VisLayout} will then focus on how to create dynamic videos of metabolic networks that you can use for visual analytics or embed within scientific presentations.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 04_Parameter_Estimation        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Parameter estimation}
+\label{chap:ParameterEstimation}
+
+In many cases, biological models contain quantities with uncertain values.
+These values must be estimated by calibrating the model with respect to given experimental data.
+To facilitate this complicated procedure, SBMLsimulator comes with the optimization toolbox \EvA that provides a large collection of nature inspired heuristic optimization procedures, \eg evolution strategies \citep{Rechenberg1973,
+Schwefel1975}, genetic algorithms \citep{Holland1975}, \DE \citep{Storn96Usage}, or \PSO \citep{ClercKennedy02, Clerc2005}, as well as niche-based methods that have been found to be particularly useful for applications in systems biology \citep{Kron09NichingGCB}.
+
+
+\section{Preparing and loading measured data}
 \label{ch:prepare}
 
-First of all, make sure that our experimental data is in one of the required file formats.
-The application can read \CSV files, which are mostly tab-separated files with data.
-To use \Excel-data, we can simply open our \Excel spreadsheet, click \menu{File > Save as} and select ``Tab-separated text file''.
-For all files, we require one column called ``Time'' that should contain for each row the time point it refers to.
-The other columns should be called with the \ac{Id} of the respective quantity in the model and should contain the measured values at the time points, or \ac{NaN} if the measurement for a time point is missing. 
+First of all, we will need to load a time-course data set into SBMLsimulator that we can use for calibrating our model of interest.
+The idea is that for every measured quantity from the data set the distance of the simulation results to the measured values should be minimized.
+To load the data into SBMLsimulator, we need to make sure that our experimentally measured data set conforms the required file format.
+The application reads \CSV files, which are mostly tab- or comma-separated files of data.
 
-\subsection{Experimental data example}
+\subsection{Exporting \CSV files from \Excel}
+\label{sec:CSVformat}
+
+To use \Excel-data, we can simply open our \Excel spreadsheet, click \menu{File > Save as} and select ``Tab-separated text file.''
+For all files, the application requires one column called \texttt{time} to be present.
+This column should contain for each row the time point it refers to.
+Note that the headline of the file must be indicated with a leading pound symbol (\texttt{\#}).
+The other columns should be called with the \ac{Id} of the respective quantity in the model and should contain the measured values at the time points, or \NaN if the measurement for a time point is missing. 
+
 As described, we need a column with the time points and multiple columns that state the values (often concentrations) of each quantity at each time point.
-The following is an example how an input file may look like:
-\begin{lstlisting}[caption={Input file example for experimental data},label={lst:input:exp},numbers=none,captionpos=t,float=h]
-Time    s1          s2          s3
+The corresponding \SBML file defines the units of these quantities, so that we do not have to make units explicit in our \CSV file.
+The \cref{lst:input:exp} displays an example how an input file may look like.
+\begin{lstlisting}[caption={Input file example for experimental data},label={lst:input:exp},numbers=left,captionpos=t,float=h]
+#time   s1          s2          s3
 0       32.456E-12  7.02        12E32
 4       5E-54       179.05E-14  0.005
 ...     ...         ...         ...
 \end{lstlisting}
 
-\section{Open experimental data}
+\subsection{Importing the measured data from a file}
 \label{sec:opendata}
+
+In general, all data must be processed time-course data in tabular text files (see \cref{sec:CSVformat} for descriptions and examples of the input file formats).
+Just like in the case of model files, we now have several different ways how to open one or more of these datasets in SBMLsimulator: We can
+\begin{itemize}
+  \item drag \& drop the data file(s) into the application.
+  \item select \menu{File > Open > Load experimental data} to open one or multiple files.
+  \item use the key stroke combination \keys{\cmd + O} or \keys{\ctrlwin + O} depending on our \OS.
+\end{itemize}
+Please note that we cannot open experimental data before loading a model.
+This is because an \SBML file can contain various meta-data about model components (such as units), whereas the simple \CSV format might not suffice to build the complex data structure for the display.
+If we open multiple data files, median values will be used for parameter estimation in each time point.
+
+\Cref{fig:inputdialog} shows an example of the file input dialog.
+Here, we open the simulation data saved in \cref{ch:savesim}.
+The displayed data set has been restricted to the quantities that \citeauthor{Bucher2011} experimentally measured for their parameter estimation.
+SBMLsimulator tries to automatically determine which column from our data file belongs to which model component based on the \acp{Id}.
+Only in case of \ac{Id} mismatches, we may need to specify the content of each column in the table at the bottom of the import dialog.
+In these cases, we have to click on the combo box below the captions.
 \begin{figure}[h]
 \centering
 \shadowimage[width=\textwidth]{import_dialog}
 \caption[Example of the data import dialog]{Example of the data import dialog.
-The ``CSV Options'' panel might be expanded to correct auto-detected input file properties.
-At the table in the lower half, the content of each column must be specified.}
+The ``CSV Options'' panel can be expanded to correct auto-detected input file properties.
+Where needed, the table at the bottom of the import dialog allows us to specify the matching of each column from the data file to a corresponding model component.}
 \label{fig:inputdialog}
 \end{figure}
-In general, all data must be processed expression data in tabular text files (see \cref{ch:prepare} for descriptions and examples of the input file formats).
-Then, there are many possibilities to open datasets in SBMLsimulator.
-For example, we can simply drag\&drop data into the application or select \menu{File > Open > Load experimental data} to open a file.
-Just like in the case of model files, we can also use the key stroke combination \keys{\cmd + O} or \keys{\ctrlwin + O} depending on our \OS.
-Please note that we cannot open experimental data before loading a model.
-This is because an \SBML file can contain various meta information about model components, whereas the simple \CSV format might not suffice to build the complex data structure for the display.
 
-The \cref{fig:inputdialog} shows an example of the file input dialog. Here we open the simulation data saved in \cref{ch:savesim}.
-This data have been restricted to the quantities that were experimentally measured for the parameter estimation in the respective publication by \citet{Bucher2011}.
-If the input file format has not been inferred automatically (which is not the case here), one may click on the black ``CSV Options'' label to specify further options (like ``column separator char'' or if the file contains headers---see \cref{fig:csvoptions}).
+SBMLsimulator also tries to automatically infer the format of the data file, \eg what character is used to separate the columns, the character encoding of the file, etc.
+If the input file format cannot be automatically inferred (which is not the case in our example here), we may click on the black ``CSV Options'' label to specify further options (like ``column separator char'' or, if the file contains headers, see \cref{fig:csvoptions}).
 \begin{figure}[h]
 \centering
 \shadowimage[width=\textwidth]{expanded_csv_options}
-\caption[Expanded ``CSV Options" allow to give details for the input file]{Expanded ``CSV Options" allow to give details for the input file.
+\caption[Expanded ``CSV Options" allow to give details for the input file]{Expanded ``CSV Options'' allow to give details for the input file.
 These properties are auto-detected and only need to be changed if the auto-detection failed to correctly infer those properties.}
 \label{fig:csvoptions}
 \end{figure}
 
-In the table at the lower half of this dialog, one must specify the content of each column.
-This can be done by clicking on the combo box below the captions. 
-
-After the experimental data are uploaded, the plot shows the respective data points as dots (see \cref{fig:simulationResultsWithData}).
+After the experimental data are imported, the plot shows the data points as dots (see \cref{fig:simulationResultsWithData}) or in form of box plots in the case we opened more than one data file (not shown).
 \begin{figure}[t]
 \centering
 \shadowimage[width=\textwidth]{simulation_results_with_data}
-\caption[SBMLsimulator after simulation and loading of experimental data]{SBMLsimulator after simulation and loading of experimental data.
-The plot shows the simulation results and the experimental data points as dots.
-}
+\caption[SBMLsimulator after simulation and loading of measured data]{SBMLsimulator after simulation and loading of measured data.
+The plot shows the simulation results and the experimentally measured data points as dots.}
 \label{fig:simulationResultsWithData}
 \end{figure}
 
+\section{Defining a quality function}
+\label{sec:QualityDefinition}
 
-\section{Parameter estimation}
+Before we can calibrate our model to our time-course data set(s), we need to briefly discuss how we define an optimal solution.
+The main idea is that when simulating a calibrated model, we should obtain curves that are as close as possible to experimentally observed values.
+In other words, the distance between the calculate behavior of every model component and corresponding data should be minimal.
+For instance, if we have measurement data available for the overall intracellular citric acid concentration, the model should yield very similar curves for this reactive species as well.
+
+Model calibration now means that we have to choose values for parameters or initial values for unknown model components such that this difference becomes minimal.
+Minimal here means that we have to minimize a distance function.
+SBMLsimulator brings with it a selection of distance functions to choose from, which are in analogy to biological evolution also called \emph{\fitness} functions:
+\begin{itemize}
+  \item (Relative) Euclidean distance
+  \item (Relative) Manhattan distance
+  \item (Relative) N-Metric
+  \item Pearson Correlation
+  \item \RSE
+\end{itemize}
+For first attempts or without prior knowledge about the structure of the solution space, it is recommendable to use either the \RSE.
+The \RSE has the advantage that higher concentrated substances in the cell do not dominate the quality of the solution because this formula weights the contributions of all model components based on their abundance.
+Care must be taken if some model component is known to take a value of zero at any time, because in this case, the \RSE would not be defined.
+To circumvent this problem, SBMLsimulator provides a sufficiently high default value, which we can adjust to our needs within the \menu{Preferences} menu.
+
+
+\section{Launching the heuristic optimization workbench \EvA}
+\label{sec:LaunchingEvA}
+
 \begin{wrapfigure}{O}{16px}
 \vspace{\wrapfigspace}
 \includegraphics[width=16px]{EvA2_icon}
 \end{wrapfigure}
-In many cases, biological models contain quantities with uncertain values.
-These values must be estimated by calibrating the model with respect to given experimental data.
-To facilitate this complicated procedure, SBMLsimulator comes with the optimization toolbox \EvA that provides a large collection of nature inspired heuristic optimization procedures, \eg evolution strategies \citep{Rechenberg1973,
-Schwefel1975}, genetic algorithms \citep{Holland1975}, differential evolution \citep{Storn96Usage}, or particle swarm optimization \citep{ClercKennedy02, Clerc2005}, as well as niche-based methods that have been found to be particularly useful for applications in systems biology \citep{Kron09NichingGCB}.
+Now that we have loaded a model and corresponding time-course data into SBMLsimulator, the estimation button becomes active in the tool-bar (see the icon next to this text), and does also the corresponding entry in the menu: \menu{Edit > Optimization}.
 
-Click on the estimation button (see the icon next to this text).
-Then a window appears, in which the quantities to estimate and their ranges can be selected (see  \cref{fig:quantitySelection}).
-This can be done manually or by uploading a \CSV file.
-In order to upload a file, click on \keys{Open}.
-We can also save our configuration by clicking on \keys{Save}.
-
-\TODO{In a configuration file, we can set the minimum and maximum values for initialization of the estimated quantities at the beginning of the estimation (initial minimum/maximum) as well as the minimum and maximum value for each estimated quantity that is allowed during the whole estimation (minimum/maximum).} Here is an example how such a file might look like:
-\begin{lstlisting}[caption={Input file example for parameter estimation file},label={lst:input:estimation},numbers=none,captionpos=t,float=h]
-[Id]	[initialMinimum]	[initialMaximum]	[minimum]	[maximum]
-Import_ASLpOH_k	1E-7	0.1	1E-7	0.1	
-Import_ASLoOH_k	1E-7	0.1	1E-7	0.1	
-Import_ASL_k	1E-7	1	1E-7	1	
-...     ...         ...         ...
-\end{lstlisting}
-
-After we are satisfied with our selected quantities, click on \keys{OK}.
-Then \EvA is started and the respective window (see \cref{fig:eva2}) lets us select the estimation method (``optimizer'') with specific settings  \TODO{(see \cref{fig:algorithmChoice})} and the termination criterion (``terminator'').
-When we click on \keys{Start}, the estimation begins. \TODO{Please note: If there are initial values (\ie values at time point 0) for some model quantities given in the data, SBMLsimulator takes these values as initial values for the simulations necessary during the estimation. In the case of multiple experimental datasets loaded, the medians of the initial values are taken. For the quantities without initial values given in the data, the initial values defined in the model are chosen.}
-
-The simulation result with the current best parameter values is always plotted during estimation and the current quality function value is displayed (\cref{fig:estimationResult}).
-
+After clicking either a window like the one shown in see \cref{fig:quantitySelection} appears, in which we can select which quantities from the model to estimate.
+Since computational models may contain large numbers of potential optimization targets, the dialog presents them in the four tabs \menu{Compartments}, \menu{Species}, \menu{Global Parameters}, and \menu{Local Parameters}.
+Each of these tabs has two buttons at the bottom that allow us to select all quantities within this tab or to deselect them all at once.
+If we like to just select a few variables as estimation targets, a search function at the bottom allows us to narrow down the content of the table.
+For every estimation target, we can also define their allowable ranges.
+Note that we here distinguish between a range for initialization and boundaries for the complete search space.
+This distinction can help to generate stable initial solutions and to find allowable values more efficiently.
 \begin{figure}[h]
 \centering
 \shadowimage[width=\textwidth]{select_quantities}
 \caption[Selection of quantities to estimate]{Selection of quantities to estimate.
-The user can select the quantities to estimate and their ranges manually by modifying the displayed table or via uploading a \CSV file by clicking on \keys{Open}.
-The current configuration of quantities and their ranges \TODO{(for initialization as well as for the whole estimation process)} can be saved by clicking the \keys{Save} button.
+We can manually select the quantities to be estimated together with their ranges by modifying the displayed tables.
+Alternatively, we my via open a \CSV file by clicking on the \keys{Open} button.
+The current configuration of quantities and their ranges (for initialization as well as for the entire estimation process) can be saved by clicking the \keys{Save} button.
 The search function at the bottom helps us to navigate through the names or identifiers that are potential optimization targets.
 When we type a name in the text field, the above table will be reduced to elements that contain this name we are typing.
 The buttons \keys{Select all} and \keys{Select none} are also helpful to choose all or none of the elements within one tab as optimization targets.
-Note that each tab has these buttons separately, so our choice in one tab does not affect others.
-}
+Note that each tab has these buttons separately, so our choice in one tab does not affect any other tabs.}
 \label{fig:quantitySelection}
 \end{figure}
+
+Typically, model calibration has to be repeatedly performed.
+Selecting optimization targets manually each time can be quite cumbersome.
+For this reason, SBMLsimulator allows us to save a selection to a configuration file in \CSV format and to also read in such a file within this dialog.
+To load a configuration from such a file, we click the \keys{Open} button.
+We can also save our configuration by clicking the \keys{Save} button.
+
+\Cref{lst:input:estimation} shows an example for such a configuration file.
+It is also possible to write such a file from scratch (or even algorithmically) and hence to skip the entire process of selecting any optimization targets from the dialog window.
+The configuration file has to be in \CSV format with exactly the following five columns:
+\begin{description}
+  \renewcommand{\makelabel}[1]{[\texttt{#1}]}
+  \item[Id] the unique identifier of the model component whose (initial) value is uncertain and needs to be estimated.
+  \item[initialMinimum] the minimal allowable value for the initialization of (more or less) random values for the quantity in this row.
+  This means that when the optimization algorithm makes its first guess about a possible value for this quantity, the value in this column must not be surpassed.
+  \item[initialMaximum]  the maximal allowable value for the initialization of (more or less) random values for the quantity in this row.
+  This means that when the optimization algorithm makes its first guess about a possible value for this quantity, the value in this column must not be exceeded.
+  \item[minimum] The value in this column must not be surpassed at any time during the optimization.
+  \item[maximum] This is the absolute maximum value that this variable can possibly take on.
+\end{description}
+It is recommended to pick a relatively narrow initialization range (possibly around plausible comparable values from other studies or from online databases) and a broad total range.
+As soon as we are satisfied with our selected quantities, we click the \keys{OK} button.
+\begin{lstlisting}[caption={Input file example for parameter estimation file},label={lst:input:estimation},numbers=left,captionpos=t,float=h]
+[Id]             [initialMinimum]  [initialMaximum]  [minimum]  [maximum]
+Import_ASLpOH_k  1E-7              0.1               1E-7       0.1	
+Import_ASLoOH_k  1E-7              0.1               1E-7       0.1	
+Import_ASL_k     1E-7              1                 1E-7       1	
+...              ...               ...               ...        ...
+\end{lstlisting}
+
+Now \EvA starts in a separate window as \cref{fig:eva2} shows.
+There we have the option to select the define the termination criterion for the optimization (``terminator'') and the estimation method (``optimizer''), each of which may have specific settings.
+\Cref{fig:algorithmChoice} shows the configuration of differential evolution \citep{Storn96Usage} as an example.
+For first attempts, the default settings should be already yield results of sufficient quality.
+In a large-scale comparative study \citet{Draeger2009a} investigated how to best tweak the settings of individual optimization methods.
+Their publication contains a table with recommended settings that we can apply to the optimization methods available in \EvA.
+
+When we click the \keys{Start} button, the estimation begins.
+Please note:
+\begin{itemize}
+  \item If there are initial values (\ie values at time point 0) for some model quantities given in the data, SBMLsimulator takes these values as initial values for the simulations necessary during the estimation.
+  \item In the case of multiple experimental datasets loaded, the medians of the initial values are taken.
+  \item For the quantities without initial values given in the data, the initial values defined in the model are chosen.
+\end{itemize}
+
+While the model calibration is running, \EvA continuously plots the current best solution with respect to the quality function we chose.
+It also outputs the current best set of estimated values.
+In each iteration, the main window of SBMLsimulator updates the plot and draws the simulation result for the current best solution as \cref{fig:estimationResult} shows.
 
 
 \begin{SCfigure}
 %\centering
 \shadowimage[width=0.5\columnwidth]{eva2}
 \caption[\EvA settings window]{\EvA settings window.
-\EvA lets the user choose the parameter estimation method and the specific settings:
-just click at the text field next to the label ``optimizer''.
-A separate dialog window will appear that offers a large number of optimization procedures \TODO{(\cref{fig:algorithmChoice})}.
-In the same way, an appropriate termination criterion can also be set by clicking at the text field that is labeled ``terminator''.
-After clicking on \keys{Start}, the estimation begins.
-During the optimization, a window will appear that displays the quality improvement of the solution, the so-called \emph{fitness}.
-This is the distance between our experimental data and the simulation result for the currently best parameter set.
+\EvA lets us choose the parameter estimation method and the specific settings:
+We just click at the text field next to the label ``optimizer.''
+A separate dialog window will appear that offers a large number of optimization procedures (\cref{fig:algorithmChoice} shows this dialog for the example of differential evolution).
+In the same way, an appropriate termination criterion can also be set by clicking at the text field that is labeled ``terminator.''
+After clicking the \keys{Start} button, the estimation begins.
+During the optimization, a window will appear that displays the quality improvement of the solution, the so-called \emph{\fitness}.
+This is the distance between our experimental data and the simulation result for the currently best parameter set that we defined in \cref{sec:QualityDefinition}.
 If the optimization is successful, the fitness will decrease as time proceeds.
 We can interrupt the optimization at any time by hitting the \keys{Stop} button.
 When our selected termination criterion is reached, the optimization will stop and we can continue working with our optimized model in the main window of SBMLsimulator.}
@@ -501,10 +603,10 @@ When our selected termination criterion is reached, the optimization will stop a
 \begin{SCfigure}
 %\centering
 \shadowimage[width=.5\columnwidth]{algorithm_choice}
-\caption[Changing the optimization procedure]{\TODO{Changing the optimization procedure.
-The user can change the optimization procedure in this window. 
-Apart from Differential Evolution, many other routines like Particle Swarm Optimization are provided.
-A parameter of a routine can be changed by clicking in the text field right of it and typing the new value or by clicking in the check box, respectively.}}
+\caption[Configuring the optimization procedure]{Configuring the optimization procedure.
+We can select an optimization procedure and define its specific settings in this window. 
+Apart from \DE \citep{Storn96Usage}, \EvA provides many other nature-inspired heuristic optimization routines, such as \PSO \citep{ClercKennedy02, Clerc2005}.
+The settings of the chosen routine can be changed by clicking in the text field right of it and typing the new value or by clicking in the check box, respectively.}
 \label{fig:algorithmChoice}
 \end{SCfigure}
 
@@ -514,16 +616,24 @@ A parameter of a routine can be changed by clicking in the text field right of i
 \shadowimage[width=\textwidth]{estimation_result}
 \caption[Intermediate estimation result]{Intermediate estimation result.
 After each generation of solutions by \EvA the simulation result with the current best parameter estimation is plotted.
-The current value of the quality function is also shown.
-}
+The current value of the quality function is also shown.}
 \label{fig:estimationResult}
 \end{figure}
+
+
+\section{Save the calibrated model}
+
+In order to save a modified model, for instance after calibration with \EvA, including the newly estimated values of all uncertain model components, such as parameters, species, or compartment, we first have to select the tab \menu{Model}.
+Then we can save the simulation data under \menu{File > Save as}.
+Again, also for this purpose we can use keystroke the combinations \keys{\cmd + \shift + S} (for \MacOSX) or \keys{\ctrlwin + \shift + S} (for \Linux and \Windows) when the \menu{Model} tab is selected.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 04_Embedding_a_Layout          %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Embedding a model layout in an SBML file and preparation of experimental data}
+\label{chap:EmbeddingLayoutsInModels}
 
 In the previous chapter, we explored how simulated data are calculated from a dynamic model and how these data are mapped to a graphical display of the model, which SBMLsimulator automatically generated for us.
 Next, we will explore how to embed a manually drawn map within an \SBML file.
@@ -579,6 +689,7 @@ In the next chapter, we will import both generated files to SBMLsimulator and fu
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Visualization of manually created layouts}
+\label{chap:VisLayout}
 
 In the previous example, we embedded a manually created metabolic map of the central carbon metabolism of baker's yeast in the \SBML file \href{https://identifiers.org/bigg.model/iMM904}{iMM904} \citep{Mo2009}.
 Next, we prepared a character-separated value file from the time-course data set that \citeauthor{Bergdahl2012} published in \citeyear{Bergdahl2012}.

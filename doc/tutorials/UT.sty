@@ -17,7 +17,6 @@
 
 \RequirePackage[automark]{scrpage2}
 \RequirePackage[paper=letterpaper, centering]{geometry}
-\RequirePackage{caption2}
 
 % Language definition
 \RequirePackage[english]{babel}
@@ -57,26 +56,19 @@
 \definecolor{lightblue}{rgb}{0.3137255, 0.6666667, 0.7843137}
 \definecolor{anthracite}{rgb}{0.2509804, 0.2509804, 0.2509804}
 
-% Style definitions
-
-\def\TReg{\textsuperscript{\textregistered}\,}
-\def\TCop{\textsuperscript{\textcopyright}\,}
-\def\TTra{\texttrademark\,}
-
-\selectlanguage{english}
 \addtokomafont{sectioning}{\color{caminered}}
 \setkomafont{descriptionlabel}{\normalfont\bfseries}
 \pagestyle{scrheadings}
 %\ifoot{\includegraphics[width=50pt]{logo/JSBML_shaddow.pdf}}
 
-% Sachen von mir
+% Additions
 \lstset{breaklines=true}
 \lstset{breakatwhitespace=true}
 \lstset{basicstyle=\small\ttfamily, stringstyle=\ttfamily, keywordstyle=\bf\ttfamily}
 
 \newcommand{\changefont}[3]{
-\fontfamily{#1} \fontseries{#2} \fontshape{#3} \selectfont} %Zum �ndern von Schriftarten  {\changefont{pcr}{m}{n}{}}
-\usepackage { nonf loat }
+\fontfamily{#1} \fontseries{#2} \fontshape{#3} \selectfont} % for changing fonts  {\changefont{pcr}{m}{n}{}}
+%\usepackage{nonf loat}
 
 %\newenvironment{packed_enum}{
 %\begin{enumerate}
@@ -96,9 +88,7 @@
 %  \setlength{\parskip}{0pt}
 %  \setlength{\parsep}{0pt}
 %}{\end{itemize}}
-\def\TReg{\textsuperscript{\tiny{\textregistered}}\,}
-\def\TCop{\textsuperscript{\textcopyright}\,}
-\def\TTra{\textsuperscript{\texttrademark}\,}
+% Style definitions
 
 \lstset{language=Java,
 captionpos=b,
@@ -153,10 +143,8 @@ listOfProducts, listOfParameters, listOfModifiers, modifierSpeciesReference,
   morestring=[b]"
 }
 
-%\publishers{\includegraphics[width=100pt]{logo/JSBML_shaddow.pdf}}
 
-
-\usepackage{tikz}
+\RequirePackage{tikz}
 \usetikzlibrary{shadows,calc}
 
 % code adapted from http://tex.stackexchange.com/a/11483/3954

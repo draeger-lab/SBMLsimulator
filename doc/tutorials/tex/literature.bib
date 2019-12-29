@@ -15,29 +15,27 @@
 }
 
 @Article{Bucher2011,
-  Title                    = {A systems biology approach to dynamic modeling and inter-subject variability of statin pharmacokinetics in human hepatocytes},
-  Author                   = {Bucher, Joachim and Riedmaier, Stephan and Schnabel, Anke and Marcus, Katrin and Vacun, Gabriele and Weiss, Thomas S and Thasler, Wolfgang E and N\"ussler, Andreas K. and Zanger, Ulrich M. and Reuss, Matthias},
-  Journal                  = {BMC Systems Biology},
-  Year                     = {2011},
-
-  Month                    = may,
-  Number                   = {1},
-  Pages                    = {66},
-  Volume                   = {5},
-
-  Abstract                 = {BACKGROUND:
+  author    = {Bucher, Joachim and Riedmaier, Stephan and Schnabel, Anke and Marcus, Katrin and Vacun, Gabriele and Weiss, Thomas S. and Thasler, Wolfgang E. and N\"ussler, Andreas K. and Zanger, Ulrich M. and Reuss, Matthias},
+  journal   = {BMC Systems Biology},
+  title     = {A systems biology approach to dynamic modeling and inter-subject variability of statin pharmacokinetics in human hepatocytes},
+  year      = {2011},
+  issn      = {1752-0509},
+  month     = may,
+  number    = {1},
+  pages     = {66},
+  volume    = {5},
+  abstract  = {BACKGROUND:
 The individual character of pharmacokinetics is of great importance in the risk assessment of new drug leads in pharmacological research. Amongst others, it is severely influenced by the properties and inter-individual variability of the enzymes and transporters of the drug detoxification system of the liver. Predicting individual drug biotransformation capacity requires quantitative and detailed models.
 RESULTS:
 In this contribution we present the de novo deterministic modeling of atorvastatin biotransformation based on comprehensive published knowledge on involved metabolic and transport pathways as well as physicochemical properties. The model was evaluated on primary human hepatocytes and parameter identifiability analysis was performed under multiple experimental constraints. Dynamic simulations of atorvastatin biotransformation considering the inter-individual variability of the two major involved enzymes CYP3A4 and UGT1A3 based on quantitative protein expression data in a large human liver bank (n = 150) highlighted the variability in the individual biotransformation profiles and therefore also points to the individuality of pharmacokinetics.
 CONCLUSIONS:
 A dynamic model for the biotransformation of atorvastatin has been developed using quantitative metabolite measurements in primary human hepatocytes. The model comprises kinetics for transport processes and metabolic enzymes as well as population liver expression data allowing us to assess the impact of inter-individual variability of concentrations of key proteins. Application of computational tools for parameter sensitivity analysis enabled us to considerably improve the validity of the model and to create a consistent framework for precise computer-aided simulations in toxicology.},
-  Doi                      = {10.1186/1752-0509-5-66},
-  File                     = {:B/Bucher2011.pdf:PDF},
-  ISSN                     = {1752-0509},
-  Owner                    = {draeger},
-  Publisher                = {Springer Science + Business Media},
-  Timestamp                = {2014.04.21},
-  Url                      = {http://dx.doi.org/10.1186/1752-0509-5-66}
+  doi       = {10.1186/1752-0509-5-66},
+  file      = {:B/Bucher2011.pdf:PDF},
+  owner     = {draeger},
+  publisher = {Springer Science + Business Media},
+  timestamp = {2014.04.21},
+  url       = {http://dx.doi.org/10.1186/1752-0509-5-66},
 }
 
 @Book{Clerc2005,
@@ -64,41 +62,37 @@ A dynamic model for the biotransformation of atorvastatin has been developed usi
 }
 
 @Article{Draeger2009a,
-  Title                    = {{Modeling metabolic networks in \emph{C.~glutamicum}: a comparison of rate laws in combination with various parameter optimization strategies}},
-  Author                   = {Dr{\"a}ger, Andreas and Kronfeld, Marcel and Ziller, Michael Johannes and Supper, Jochen and Planatscher, Hannes and Magnus, J{\o}rgen Barsett and Oldiges, Marco and Kohlbacher, Oliver and Zell, Andreas},
-  Journal                  = {BMC Syst Biol},
-  Year                     = {2009},
-
-  Month                    = {January},
-  Pages                    = {5},
-  Volume                   = {3},
-
-  Abstract                 = {Background: To understand the dynamic behavior of cellular systems, mathematical modeling is often necessary and comprises three steps: (1) experimental measurement of participating molecules, (2) assignment of rate laws to each reaction, and (3) parameter calibration with respect to the measurements. In each of these steps the modeler is confronted with a plethora of alternative approaches, e. g., the selection of approximative rate laws in step two as specific equations are often unknown, or the choice of an estimation procedure with its specific settings in step three. This overall process with its numerous choices and the mutual influence between them makes it hard to single out the best modeling approach for a given problem.
+  author   = {Dr{\"a}ger, Andreas and Kronfeld, Marcel and Ziller, Michael J. and Supper, Jochen and Planatscher, Hannes and Magnus, J{\o}rgen Barsett and Oldiges, Marco and Kohlbacher, Oliver and Zell, Andreas},
+  journal  = {BMC Syst Biol},
+  title    = {{Modeling metabolic networks in \emph{C.~glutamicum}: a comparison of rate laws in combination with various parameter optimization strategies}},
+  year     = {2009},
+  month    = {January},
+  pages    = {5},
+  volume   = {3},
+  abstract = {Background: To understand the dynamic behavior of cellular systems, mathematical modeling is often necessary and comprises three steps: (1) experimental measurement of participating molecules, (2) assignment of rate laws to each reaction, and (3) parameter calibration with respect to the measurements. In each of these steps the modeler is confronted with a plethora of alternative approaches, e. g., the selection of approximative rate laws in step two as specific equations are often unknown, or the choice of an estimation procedure with its specific settings in step three. This overall process with its numerous choices and the mutual influence between them makes it hard to single out the best modeling approach for a given problem.
 Results: We investigate the modeling process using multiple kinetic equations together with various parameter optimization methods for a well-characterized example network, the biosynthesis of valine and leucine in C. glutamicum. For this purpose, we derive seven dynamic models based on generalized mass action, Michaelis-Menten and convenience kinetics as well as the stochastic Langevin equation. In addition, we introduce two modeling approaches for feedback inhibition to the mass action kinetics. The parameters of each model are estimated using eight optimization strategies. To determine the most promising modeling approaches together with the best optimization algorithms, we carry out a two-step benchmark: (1) coarse-grained comparison of the algorithms on all models and (2) fine-grained tuning of the best optimization algorithms and models. To analyze the space of the best parameters found for each model, we apply clustering, variance, and correlation analysis.
 Conclusions: A mixed model based on the convenience rate law and the Michaelis-Menten equation, in which all reactions are assumed to be reversible, is the most suitable deterministic modeling approach followed by a reversible generalized mass action kinetics model. A Langevin model is advisable to take stochastic effects into account. To estimate the model parameters, three algorithms are particularly useful: For first attempts the settings-free Tribes algorithm yields valuable results. Particle swarm optimization and differential evolution provide significantly better results with appropriate settings.},
-  Doi                      = {10.1186/1752-0509-3-5},
-  Url                      = {http://www.biomedcentral.com/1752-0509/3/5}
+  doi      = {10.1186/1752-0509-3-5},
+  url      = {http://www.biomedcentral.com/1752-0509/3/5},
 }
 
 @Article{Draeger2011,
-  Title                    = {{JSBML: a flexible Java library for working with SBML}},
-  Author                   = {Dr\"ager, Andreas and Rodriguez, Nicolas and Dumousseau, Marine and Dörr, Alexander and Wrzodek, Clemens and {Le Nov\`{e}re}, Nicolas and Zell, Andreas and Hucka, Michael},
-  Journal                  = {Bioinformatics},
-  Year                     = {2011},
-
-  Month                    = aug,
-  Number                   = {15},
-  Pages                    = {2167--2168},
-  Volume                   = {27},
-
-  Abstract                 = {SUMMARY: The specifications of the Systems Biology Markup Language (SBML) define standards for storing and exchanging computer models of biological processes in text files. In order to perform model simulations, graphical visualizations and other software manipulations, an in-memory representation of SBML is required. We developed JSBML for this purpose. In contrast to prior implementations of SBML APIs, JSBML has been designed from the ground up for the Java programming language, and can therefore be used on all platforms supported by a Java Runtime Environment. This offers important benefits for Java users, including the ability to distribute software as Java Web Start applications. JSBML supports all SBML Levels and Versions through Level 3 Version 1, and we have strived to maintain the highest possible degree of compatibility with the popular library libSBML. JSBML also supports modules that can facilitate the development of plugins for end user applications, as well as ease migration from a libSBML-based backend. AVAILABILITY: Source code, binaries and documentation for JSBML can be freely obtained under the terms of the LGPL 2.1 from the website \url{http://sbml.org/Software/JSBML}.},
-  Doi                      = {10.1093/bioinformatics/btr361},
-  Keywords                 = {Computer Simulation; Database Management Systems; Information Storage and Retrieval, methods; Models, Biological; Programming Languages; Software; Systems Biology, methods},
-  Language                 = {eng},
-  Medline-pst              = {ppublish},
-  Pii                      = {btr361},
-  Pmid                     = {21697129},
-  Url                      = {http://dx.doi.org/10.1093/bioinformatics/btr361}
+  author      = {Dr\"ager, Andreas and Rodriguez, Nicolas and Dumousseau, Marine and D\"orr, Alexander and Wrzodek, Clemens and {Le Nov\`{e}re}, Nicolas and Zell, Andreas and Hucka, Michael},
+  journal     = {Bioinformatics},
+  title       = {{JSBML: a flexible Java library for working with SBML}},
+  year        = {2011},
+  month       = aug,
+  number      = {15},
+  pages       = {2167--2168},
+  volume      = {27},
+  abstract    = {SUMMARY: The specifications of the Systems Biology Markup Language (SBML) define standards for storing and exchanging computer models of biological processes in text files. In order to perform model simulations, graphical visualizations and other software manipulations, an in-memory representation of SBML is required. We developed JSBML for this purpose. In contrast to prior implementations of SBML APIs, JSBML has been designed from the ground up for the Java programming language, and can therefore be used on all platforms supported by a Java Runtime Environment. This offers important benefits for Java users, including the ability to distribute software as Java Web Start applications. JSBML supports all SBML Levels and Versions through Level 3 Version 1, and we have strived to maintain the highest possible degree of compatibility with the popular library libSBML. JSBML also supports modules that can facilitate the development of plugins for end user applications, as well as ease migration from a libSBML-based backend. AVAILABILITY: Source code, binaries and documentation for JSBML can be freely obtained under the terms of the LGPL 2.1 from the website \url{http://sbml.org/Software/JSBML}.},
+  doi         = {10.1093/bioinformatics/btr361},
+  keywords    = {Computer Simulation; Database Management Systems; Information Storage and Retrieval, methods; Models, Biological; Programming Languages; Software; Systems Biology, methods},
+  language    = {eng},
+  medline-pst = {ppublish},
+  pii         = {btr361},
+  pmid        = {21697129},
+  url         = {http://dx.doi.org/10.1093/bioinformatics/btr361},
 }
 
 @Article{Funahashi2003,
@@ -149,22 +143,20 @@ John H. Holland is Professor of Psychology and Professor of Electrical Engineeri
 }
 
 @Article{M.Hucka03012003,
-  Title                    = {{The systems biology markup language (SBML): a medium for representation and exchange of biochemical network models}},
-  Author                   = {Hucka, Michael and Finney, Andrew and Sauro, Herbert M. and Bolouri, Hamid and Doyle, John C. and Kitano, Hiroaki and Arkin, Adam P. and Bornstein, Benjamin J. and Bray, Dennis and Cornish-Bowden, Athel and Cuellar, Autumn A. and Dronov, Sergey and Gilles, Ernst Dieter and Ginkel, Martin and Gor, Victoria and Goryanin, Igor I. and Hedley, Warren J. and Hodgman, T. Charles and Hofmeyr, Jan-Hendrik S. and Hunter, Peter J. and Juty, Nick S. and Kasberger, Jay L. and Kremling, Andreas and Kummer, Ursula and {Le Nov\`{e}re}, Nicolas and Loew, Leslie M. and Lucio, Daniel and Mendes, Pedro and Minch, Eric and Mjolsness, Eric D. and Nakayama, Yoichi and Nelson, Melanie R. and Nielsen, Poul F. and Sakurada, Takeshi and Schaff, James C. and Shapiro, Bruce E. and Shimizu, Thomas Simon and Spence, Hugh D. and Stelling, J{\"o}rg and Takahashi, Koichi and Tomita, Masaru and Wagner, John M. and Wang, Jian and the rest of the SBML Forum},
-  Journal                  = {Bioinformatics},
-  Year                     = {2003},
-
-  Month                    = mar,
-  Number                   = {4},
-  Pages                    = {524--531},
-  Volume                   = {19},
-
-  Abstract                 = {Molecular biotechnology now makes it possible to build elaborate systems models, but the systems biology community needs information standards if models are to be shared, evaluated and developed cooperatively. Results: We summarize the Systems Biology Markup Language (SBML) Level 1, a free, open, XML-based format for representing biochemical reaction networks. SBML is a software-independent language for describing models common to research in many areas of computational biology, including cell signaling pathways, metabolic pathways, gene regulation, and others.
+  author   = {Hucka, Michael and Finney, Andrew and Sauro, Herbert M. and Bolouri, Hamid and Doyle, John C. and Kitano, Hiroaki and Arkin, Adam P. and Bornstein, Benjamin J. and Bray, Dennis and Cornish-Bowden, Athel and Cuellar, Autumn A. and Dronov, Sergey and Gilles, Ernst Dieter and Ginkel, Martin and Gor, Victoria and Goryanin, Igor I. and Hedley, Warren J. and Hodgman, T. Charles and Hofmeyr, Jan-Hendrik S. and Hunter, Peter J. and Juty, Nick S. and Kasberger, Jay L. and Kremling, Andreas and Kummer, Ursula and {Le Nov\`{e}re}, Nicolas and Loew, Leslie M. and Lucio, Daniel and Mendes, Pedro and Minch, Eric and Mjolsness, Eric D. and Nakayama, Yoichi and Nelson, Melanie R. and Nielsen, Poul F. and Sakurada, Takeshi and Schaff, James C. and Shapiro, Bruce E. and Shimizu, Thomas Simon and Spence, Hugh D. and Stelling, J\"org and Takahashi, Koichi and Tomita, Masaru and Wagner, John M. and Wang, Jian and the rest of the SBML Forum},
+  journal  = {Bioinformatics},
+  title    = {{The systems biology markup language (SBML): a medium for representation and exchange of biochemical network models}},
+  year     = {2003},
+  month    = mar,
+  number   = {4},
+  pages    = {524--531},
+  volume   = {19},
+  abstract = {Molecular biotechnology now makes it possible to build elaborate systems models, but the systems biology community needs information standards if models are to be shared, evaluated and developed cooperatively. Results: We summarize the Systems Biology Markup Language (SBML) Level 1, a free, open, XML-based format for representing biochemical reaction networks. SBML is a software-independent language for describing models common to research in many areas of computational biology, including cell signaling pathways, metabolic pathways, gene regulation, and others.
 The specification of SBML Level 1 is freely available from \url{http://www.sbml.org/}.},
-  Doi                      = {10.1093/bioinformatics/btg015},
-  Eprint                   = {http://bioinformatics.oxfordjournals.org/cgi/reprint/19/4/524.pdf},
-  Keywords                 = {Database Management Systems; Databases, Factual; Documentation; Gene Expression Regulation, physiology; Hypermedia; Information Storage and Retrieval, methods; Metabolism, physiology; Models, Biological; Models, Chemical; Programming Languages; Software; Software Design; Terminology as Topic; Vocabulary, Controlled},
-  Url                      = {http://bioinformatics.oxfordjournals.org/cgi/content/abstract/19/4/524}
+  doi      = {10.1093/bioinformatics/btg015},
+  eprint   = {http://bioinformatics.oxfordjournals.org/cgi/reprint/19/4/524.pdf},
+  keywords = {Database Management Systems; Databases, Factual; Documentation; Gene Expression Regulation, physiology; Hypermedia; Information Storage and Retrieval, methods; Metabolism, physiology; Models, Biological; Models, Chemical; Programming Languages; Software; Software Design; Terminology as Topic; Vocabulary, Controlled},
+  url      = {http://bioinformatics.oxfordjournals.org/cgi/content/abstract/19/4/524},
 }
 
 @Article{Keller2013,
@@ -181,83 +173,81 @@ Conclusions: The formal description of the mathematics behind the SBML format fa
 }
 
 @InProceedings{Kron09NichingGCB,
-  Title                    = {{On the Benefits of Multimodal Optimization for Metabolic Network Modeling}},
-  Author                   = {Kronfeld, Marcel and Dr\"ager, Andreas and Aschoff, Moritz and Zell, Andreas},
-  Booktitle                = {German Conference on Bioinformatics (GCB 2009)},
-  Year                     = {2009},
-
-  Address                  = {Halle (Saale), Germany},
-  Editor                   = {Grosse, Ivo and Neumann, Steffen and Posch, Stefan and Schreiber, Falk and Stadler, Peter},
-  Month                    = {September},
-  Number                   = {978-3-88579-251-2},
-  Pages                    = {191--200},
-  Publisher                = {German Informatics society},
-  Series                   = {Lecture Notes in Informatics},
-  Volume                   = {P-157},
-
-  Abstract                 = {The calibration of complex models of biological systems requires numerical simulation and optimization procedures to infer undetermined parameters and fit measured data. The optimization step typically employs heuristic global optimization algorithms, but due to measurement noise and the many degrees of freedom, it is not guaranteed that the identified single optimum is also the most meaningful parameter set. Multimodal optimization allows for identifying multiple optima in parallel. We consider high-dimensional benchmark functions and a realistic metabolic network model from systems biology to compare evolutionary and swarm-based multimodal methods. We show that an extended swarm based niching algorithm is able to find a considerable set of solutions in parallel, which have significantly more explanatory power. As an outline of the information gain, the variations in the set of high-quality solutions are contrasted to a state-of-the-art global sensitivity analysis.},
-  Url                      = {http://www.gcb2009.de/program.php}
+  author    = {Kronfeld, Marcel and Dr\"ager, Andreas and Aschoff, Moritz and Zell, Andreas},
+  booktitle = {German Conference on Bioinformatics (GCB 2009)},
+  title     = {{On the Benefits of Multimodal Optimization for Metabolic Network Modeling}},
+  year      = {2009},
+  address   = {Halle (Saale), Germany},
+  editor    = {Grosse, Ivo and Neumann, Steffen and Posch, Stefan and Schreiber, Falk and Stadler, Peter},
+  month     = {September},
+  pages     = {191--200},
+  publisher = {German Informatics society},
+  series    = {Lecture Notes in Informatics},
+  volume    = {P-157},
+  abstract  = {The calibration of complex models of biological systems requires numerical simulation and optimization procedures to infer undetermined parameters and fit measured data. The optimization step typically employs heuristic global optimization algorithms, but due to measurement noise and the many degrees of freedom, it is not guaranteed that the identified single optimum is also the most meaningful parameter set. Multimodal optimization allows for identifying multiple optima in parallel. We consider high-dimensional benchmark functions and a realistic metabolic network model from systems biology to compare evolutionary and swarm-based multimodal methods. We show that an extended swarm based niching algorithm is able to find a considerable set of solutions in parallel, which have significantly more explanatory power. As an outline of the information gain, the variations in the set of high-quality solutions are contrasted to a state-of-the-art global sensitivity analysis.},
+  isbn      = {978-3-88579-251-2},
+  url       = {http://www.gcb2009.de/program.php},
 }
 
-@Article{Kron10EvA2,
-  Title                    = {{The EvA2 Optimization Framework}},
-  Author                   = {Kronfeld, Marcel and Planatscher, Hannes and Zell, Andreas},
-  Year                     = {2010},
-
-  Month                    = jan,
-  Number                   = {6073},
-  Pages                    = {247-250},
-
-  Abstract                 = {We present {EvA2}, a comprehensive metaheuristic optimization framework with emphasis on Evolutionary Algorithms implemented in Java. It presents a modular structure of interfaces and abstract classes for the implementation of optimization problems. End users may choose among several layers of abstraction for an entrance point meeting their requirements on both ease of use and access to extensive functionality. The {EvA2} framework has been applied successfully in several academic as well as industrial cooperations and is extended continuously. It is freely available under an open source license ({LGPL}).},
-  Address                  = {Venice, Italy},
-  Booktitle                = {Learning and Intelligent Optimization Conference, Special Session on Software for Optimization (LION-SWOP)},
-  Editor                   = {Blum, Christian and Battiti, Roberto},
-  Publisher                = {Springer Verlag},
-  Series                   = {Lecture Notes in Computer Science, LNCS}
+@InCollection{Kron10EvA2,
+  author    = {Kronfeld, Marcel and Planatscher, Hannes and Zell, Andreas},
+  booktitle = {{Learning and Intelligent Optimization}},
+  publisher = {Springer, Berlin, Heidelberg},
+  title     = {{The EvA2 Optimization Framework}},
+  year      = {2010},
+  address   = {Venice, Italy},
+  edition   = {LION 2010},
+  editor    = {Blum, Christian and Battiti, Roberto},
+  isbn      = {978-3-642-13799-0},
+  month     = jan,
+  note      = {Special Session on Software for Optimization (LION-SWOP)},
+  pages     = {247-250},
+  series    = {Lecture Notes in Computer Science, LNCS},
+  volume    = {6073},
+  abstract  = {We present {EvA2}, a comprehensive metaheuristic optimization framework with emphasis on Evolutionary Algorithms implemented in Java. It presents a modular structure of interfaces and abstract classes for the implementation of optimization problems. End users may choose among several layers of abstraction for an entrance point meeting their requirements on both ease of use and access to extensive functionality. The {EvA2} framework has been applied successfully in several academic as well as industrial cooperations and is extended continuously. It is freely available under an open source license ({LGPL}).},
+  doi       = {10.1007/978-3-642-13800-3_27},
+  keywords  = {Extensive Functionality, Open Source License, Heuristic Operator, Industrial Cooperation, Multiobjective Optimization Method},
+  url       = {https://link.springer.com/chapter/10.1007/978-3-642-13800-3_27},
 }
 
 @Article{Novere2006a,
-  Title                    = {{BioModels Database: a free, centralized database of curated, published, quantitative kinetic models of biochemical and cellular systems}},
-  Author                   = {{Le Nov\`{e}re}, Nicolas and Bornstein, Benjamin J. and Broicher, Alexander and Courtot, M{\'e}lanie and Donizelli, Marco and Dharuri, Harish and Li, Lu and Sauro, Herbert and Schilstra, Maria and Shapiro, Bruce and Snoep, Jacky L. and Hucka, Michael},
-  Journal                  = {Nucleic Acids Res},
-  Year                     = {2006},
-  Pages                    = {D689--D691},
-  Volume                   = {34},
-
-  Abstract                 = {BioModels Database (http://www.ebi.ac.uk/biomodels/), part of the international initiative BioModels.net, provides access to published, peerreviewed, quantitative models of biochemical and cellular systems. Each model is carefully curated to verify that it corresponds to the reference publication and gives the proper numerical results. Curators also annotate the components of the models with terms from controlled vocabularies and links to other relevant data resources. This allows the users to search accurately for the models they need. The models can currently be retrieved in the SBML format, and import/export facilities are being developed to extend the spectrum of formats supported by the resource.},
-  Doi                      = {doi:10.1093/nar/gkj092},
-  Publisher                = {Oxford Univ Press},
-  Url                      = {http://nar.oxfordjournals.org/cgi/content/full/34/suppl_1/D689}
+  author    = {{Le Nov\`{e}re}, Nicolas and Bornstein, Benjamin J. and Broicher, Alexander and Courtot, M\'elanie and Donizelli, Marco and Dharuri, Harish and Li, Lu and Sauro, Herbert and Schilstra, Maria and Shapiro, Bruce and Snoep, Jacky L. and Hucka, Michael},
+  journal   = {Nucleic Acids Res},
+  title     = {{BioModels Database: a free, centralized database of curated, published, quantitative kinetic models of biochemical and cellular systems}},
+  year      = {2006},
+  pages     = {D689--D691},
+  volume    = {34},
+  abstract  = {BioModels Database (http://www.ebi.ac.uk/biomodels/), part of the international initiative BioModels.net, provides access to published, peerreviewed, quantitative models of biochemical and cellular systems. Each model is carefully curated to verify that it corresponds to the reference publication and gives the proper numerical results. Curators also annotate the components of the models with terms from controlled vocabularies and links to other relevant data resources. This allows the users to search accurately for the models they need. The models can currently be retrieved in the SBML format, and import/export facilities are being developed to extend the spectrum of formats supported by the resource.},
+  doi       = {doi:10.1093/nar/gkj092},
+  publisher = {Oxford Univ Press},
+  url       = {http://nar.oxfordjournals.org/cgi/content/full/34/suppl_1/D689},
 }
 
 @Book{Press1992,
-  Title                    = {{Numerical Recipes in Fortran: The Art of Scientific Computing}},
-  Author                   = {Press, William H. and Flannery, Brian P. and Teukolsky, Saul A. and Vetterling, William T.},
-  Publisher                = {Cambridge University Press},
-  Year                     = {1992},
-  Edition                  = {2},
-  Month                    = sep,
-
-  Abstract                 = {{This is the greatly revised and greatly expanded Second Edition of the hugely popular Numerical Recipes: The Art of Scientific Computing. The product of a unique collaboration among four leading scientists in academic research and industry Numerical Recipes is a complete text and reference book on scientific computing. In a self-contained manner it proceeds from mathematical and theoretical considerations to actual practical computer routines. With over 100 new routines bringing the total to well over 300, plus upgraded versions of the original routines, this new edition remains the most practical, comprehensive handbook of scientific computing available today. Highlights of the new material include: -A new chapter on integral equations and inverse methods -Multigrid and other methods for solving partial differential equations -Improved random number routines - Wavelet transforms -The statistical bootstrap method -A new chapter on "less-numerical" algorithms including compression coding and arbitrary precision arithmetic. The book retains the informal easy-to-read style that made the first edition so popular, while introducing some more advanced topics. It is an ideal textbook for scientists and engineers and an indispensable reference for anyone who works in scientific computing. The Second Edition is availabe in FORTRAN, the traditional language for numerical calculations and in the increasingly popular C language.}},
-  Citeulike-article-id     = {493765},
-  Citeulike-linkout-0      = {http://www.amazon.ca/exec/obidos/redirect?tag=citeulike09-20\&amp;path=ASIN/052143064X},
-  Citeulike-linkout-1      = {http://www.amazon.de/exec/obidos/redirect?tag=citeulike01-21\&amp;path=ASIN/052143064X},
-  Citeulike-linkout-2      = {http://www.amazon.fr/exec/obidos/redirect?tag=citeulike06-21\&amp;path=ASIN/052143064X},
-  Citeulike-linkout-3      = {http://www.amazon.jp/exec/obidos/ASIN/052143064X},
-  Citeulike-linkout-4      = {http://www.amazon.co.uk/exec/obidos/ASIN/052143064X/citeulike00-21},
-  Citeulike-linkout-5      = {http://www.amazon.com/exec/obidos/redirect?tag=citeulike07-20\&path=ASIN/052143064X},
-  Citeulike-linkout-6      = {http://www.worldcat.org/isbn/052143064X},
-  Citeulike-linkout-7      = {http://books.google.com/books?vid=ISBN052143064X},
-  Citeulike-linkout-8      = {http://www.amazon.com/gp/search?keywords=052143064X\&index=books\&linkCode=qs},
-  Citeulike-linkout-9      = {http://www.librarything.com/isbn/052143064X},
-  Day                      = {25},
-  HowPublished             = {Hardcover},
-  ISBN                     = {052143064X},
-  Owner                    = {keller},
-  Posted-at                = {2006-02-04 09:54:15},
-  Priority                 = {2},
-  Timestamp                = {2014.06.12},
-  Url                      = {http://www.amazon.com/exec/obidos/redirect?tag=citeulike07-20\&path=ASIN/052143064X}
+  author               = {Press, William H. and Flannery, Brian P. and Teukolsky, Saul A. and Vetterling, William T.},
+  publisher            = {Cambridge University Press},
+  title                = {{Numerical Recipes in Fortran: The Art of Scientific Computing}},
+  year                 = {1992},
+  edition              = {2},
+  isbn                 = {052143064X},
+  month                = sep,
+  abstract             = {{This is the greatly revised and greatly expanded Second Edition of the hugely popular Numerical Recipes: The Art of Scientific Computing. The product of a unique collaboration among four leading scientists in academic research and industry Numerical Recipes is a complete text and reference book on scientific computing. In a self-contained manner it proceeds from mathematical and theoretical considerations to actual practical computer routines. With over 100 new routines bringing the total to well over 300, plus upgraded versions of the original routines, this new edition remains the most practical, comprehensive handbook of scientific computing available today. Highlights of the new material include: -A new chapter on integral equations and inverse methods -Multigrid and other methods for solving partial differential equations -Improved random number routines - Wavelet transforms -The statistical bootstrap method -A new chapter on "less-numerical" algorithms including compression coding and arbitrary precision arithmetic. The book retains the informal easy-to-read style that made the first edition so popular, while introducing some more advanced topics. It is an ideal textbook for scientists and engineers and an indispensable reference for anyone who works in scientific computing. The Second Edition is availabe in FORTRAN, the traditional language for numerical calculations and in the increasingly popular C language.}},
+  citeulike-article-id = {493765},
+  citeulike-linkout-0  = {http://www.amazon.ca/exec/obidos/redirect?tag=citeulike09-20\&amp;path=ASIN/052143064X},
+  citeulike-linkout-1  = {http://www.amazon.de/exec/obidos/redirect?tag=citeulike01-21\&amp;path=ASIN/052143064X},
+  citeulike-linkout-2  = {http://www.amazon.fr/exec/obidos/redirect?tag=citeulike06-21\&amp;path=ASIN/052143064X},
+  citeulike-linkout-3  = {http://www.amazon.jp/exec/obidos/ASIN/052143064X},
+  citeulike-linkout-4  = {http://www.amazon.co.uk/exec/obidos/ASIN/052143064X/citeulike00-21},
+  citeulike-linkout-5  = {http://www.amazon.com/exec/obidos/redirect?tag=citeulike07-20\&path=ASIN/052143064X},
+  citeulike-linkout-6  = {http://www.worldcat.org/isbn/052143064X},
+  citeulike-linkout-7  = {http://books.google.com/books?vid=ISBN052143064X},
+  citeulike-linkout-8  = {http://www.amazon.com/gp/search?keywords=052143064X\&index=books\&linkCode=qs},
+  citeulike-linkout-9  = {http://www.librarything.com/isbn/052143064X},
+  day                  = {25},
+  howpublished         = {Hardcover},
+  posted-at            = {2006-02-04 09:54:15},
+  priority             = {2},
+  url                  = {https://smile.amazon.com/dp/052143064X},
 }
 
 @Book{Rechenberg1973,
@@ -347,7 +337,7 @@ Conclusions: The formal description of the mathematics behind the SBML format fa
     project website at \url{http://sbml.org/}.},
   doi      = {10.1515/jib-2019-0021},
   keywords = {Systems Biology Markup Language; Standards; Visualization; Representation},
-  pdf      = {https://www.degruyter.com/downloadpdf/j/jib.ahead-of-print/jib-2019-0021/jib-2019-0021.pdf},
+  pdf      = {https://www.degruyter.com/downloadpdf/j/jib.2019.16.issue-2/jib-2019-0021/jib-2019-0021.xml},
   url      = {https://www.degruyter.com/view/j/jib.ahead-of-print/jib-2019-0021/jib-2019-0021.xml},
 }
 
@@ -399,7 +389,7 @@ Conclusions: The formal description of the mathematics behind the SBML format fa
 }
 
 @Article{Gauges2015,
-  author   = {Gauges, Ralph and Rost, Ursula and Sahle, Sven and Wengler, Katja and Bergmann, Frank Thomas},
+  author   = {Gauges, Ralph and Rost, Ursula and Sahle, Sven and Wengler, Katja and Bergmann, Frank T.},
   journal  = {Journal of Integrative Bioinformatics},
   title    = {{The Systems Biology Markup Language (SBML) Level 3 Package: Layout, Version 1 Core}},
   year     = {2015},
@@ -536,7 +526,7 @@ In conclusion, this new visualization technique introduced in this article const
 }
 
 @Article{Norsigian2019,
-  author   = {Norsigian, Charles J. and Pusarla, Neha and McConn, John Luke and Yurkovich, James T. and Dr\"ager, Andreas and Palsson, Bernhard O. and King, Zachary},
+  author   = {Norsigian, Charles J. and Pusarla, Neha and McConn, John Luke and Yurkovich, James T. and Dr\"ager, Andreas and Palsson, Bernhard O. and King, Zachary A.},
   journal  = {Nucleic Acids Research},
   title    = {{BiGG Models 2020: multi-strain genome-scale models and expansion across the phylogenetic tree}},
   year     = {2019},
@@ -578,7 +568,7 @@ In conclusion, this new visualization technique introduced in this article const
 }
 
 @Article{Bergdahl2012,
-  author   = {Bergdahl, Basti and Heer, Dominik and Sauer, Uwe and Hahn-H{\"{a}}gerdal, B{\"{a}}rbel and {Van Niel}, Ed Wj},
+  author   = {Bergdahl, Basti and Heer, Dominik and Sauer, Uwe and Hahn-H\"agerdal, B\"arbel and {van Niel}, Ed Wj},
   journal  = {Biotechnology for Biofuels},
   title    = {{Dynamic metabolomics differentiates between carbon and energy starvation in recombinant saccharomyces cerevisiae fermenting xylose}},
   year     = {2012},
@@ -589,7 +579,7 @@ In conclusion, this new visualization technique introduced in this article const
 }
 
 @Article{King2015b,
-  author   = {King, Zachary A. and Lu, Justin S. and Dr\"ager, Andreas and Miller, Philip C. and Federowicz, Stephen and Lerman, Joshua A and Ebrahim, Ali and Palsson, Bernhard O. and Lewis, Nathan E.},
+  author   = {King, Zachary A. and Lu, Justin S. and Dr\"ager, Andreas and Miller, Philip C. and Federowicz, Stephen and Lerman, Joshua A. and Ebrahim, Ali and Palsson, Bernhard O. and Lewis, Nathan E.},
   journal  = {Nucleic Acids Research},
   title    = {{BiGG Models: A platform for integrating, standardizing, and sharing genome-scale models}},
   year     = {2015},
@@ -682,6 +672,11 @@ In conclusion, this new visualization technique introduced in this article const
   isbn          = {0018-9219},
   keywords      = {Biochemical simulation,Kinetic modeling,SBGN,SBML,Systems biology},
   pmid          = {25246403},
+}
+
+@Article{,
+  owner     = {draeger},
+  timestamp = {2019.12.29},
 }
 
 @Comment{jabref-meta: databaseType:bibtex;}

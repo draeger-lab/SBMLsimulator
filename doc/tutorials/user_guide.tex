@@ -1,3 +1,5 @@
+\PassOptionsToPackage{main=english}{babel}
+\PassOptionsToPackage{sort,round}{natbib}
 \documentclass[
   BCOR12mm,
   letterpaper,
@@ -15,9 +17,8 @@
 ]{scrreprt}
 
 \usepackage{UT}
-\PassOptionsToPackage{sort}{natbib}
-\newcommand*{\doi}[1]{\href{http://dx.doi.org/#1}{doi: #1}} % Fix to get clickable doi-references
-
+%\newcommand*{\doi}[1]{doi: \href{http://dx.doi.org/#1}{#1}} % Fix to get clickable doi-references
+\usepackage{doi}
 \usepackage{wrapfig}
 \usepackage[warn]{textcomp}
 \usepackage{cleveref}
@@ -28,6 +29,7 @@
 \usepackage{tocloft} % nice table of contents additions
 \usepackage{fontawesome}
 \usepackage[binary-units=true]{siunitx}
+\usepackage{enumitem}
 
 % booktabs is for toprule, bottomrule, etc. in tables.
 \usepackage{booktabs}
@@ -39,6 +41,8 @@
 \usepackage[printonlyused,withpage]{acronym}
 \usepackage{makeidx}
 
+\selectlanguage{english}
+
 \hypersetup{
               bookmarksopen={true},
               bookmarksopenlevel={0},
@@ -48,8 +52,8 @@
               pdfpagemode={UseOutlines},
               pdftitle={SBMLsimulator},
               pdfauthor= {Andreas Dr\"ager},
-              pdfsubject={User's Guide},
-              pdfkeywords={SBML} {simulator} {simulate} {systems} {biology}
+              pdfsubject={Users' Guide},
+              pdfkeywords={SBML} {simulator} {simulate} {systems biology}
               pdftex,
               pdffitwindow={true},
               pdfstartview={FitV},
@@ -67,6 +71,7 @@
 %HYPHENATION
 \hyphenation{
 J-SB-ML
+%SB-ML-simulator
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

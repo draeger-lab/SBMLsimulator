@@ -358,7 +358,7 @@ public class SBMLsimulator extends Launcher {
    */
   @Override
   public String getVersionNumber() {
-    return "2.0";
+    return "2.1";
   }
 
   /* (non-Javadoc)
@@ -366,7 +366,7 @@ public class SBMLsimulator extends Launcher {
    */
   @Override
   public short getYearOfProgramRelease() {
-    return (short) 2019;
+    return (short) 2020;
   }
 
   /* (non-Javadoc)
