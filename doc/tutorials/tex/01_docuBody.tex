@@ -67,9 +67,11 @@ To run SBMLsimulator, we need to have the \JVM installed on our computer, which 
 \section{Requirements}
 \subsection{Software}
 
-SBMLsimulator is entirely written in \Java and runs on any \OS
-where a suitable \JVM is installed (\JDK version 8 or newer).
-It has been successfully tested on \Windows~7 to \Windows~10, \Linux (Ubuntu 10.04 LTS and OpenSuSE Tumbleweed version \TODO{XXX}), and \MacOSX versions 10.6.8 (Snow Leopard) to 10.16.2 (Catalina).
+SBMLsimulator is entirely written in \Java and runs on any desktop \OS
+where a suitable \JVM is installed (\JDK version 8 or newer), including \Windows, \Linux, and \MacOSX.
+Version 2.0 of SBMLsimulator has been tested on \Windows~10, OpenSuSE Tumbleweed (version December 20191228), and
+%\Windows~7 to \Windows~10, \Linux (Ubuntu 10.04 LTS and OpenSuSE Tumbleweed version \TODO{XXX}), and 
+\MacOSX versions 10.14.6 (Mojave) and 10.15.2 (Catalina).
 See, for example, the \Java SE download
 page\footref{fn:jvmldl}.
 If you encounter any issues with your \OS, the \cref{ch:faq} might provide answers to you.
@@ -173,9 +175,11 @@ To open one of the ten previously loaded models, we can also use the keystroke c
 
 \begin{figure}[t]
 \centering
-\shadowimage[width=\textwidth]{open_model}
+\includegraphics[width=\textwidth, trim={0 .75cm 0 0}]{open_model}
 \caption[Loading of a model]{Loading of a model.
-One possibility to open a model is to select \menu{File > Open > Open model}.}
+One possibility to open a model is to select \menu{File > Open > Open model}.
+Depending on our \OS we can also use one of the following keystroke combinations \keys{\cmd + O} (\MacOSX) or \keys{\ctrlwin + O} (\Linux and \Windows).
+To open one of the ten recently opened models, we can select \menu{File > Recent files}.}
 \label{fig:openModel}
 \end{figure}
 \begin{figure}[t]
@@ -201,10 +205,18 @@ In the bottom part of the window we can determine simulation preferences like th
 The user interface of SBMLsimulator comprises several tabs.
 In the \menu{Model} tab, we can explore the structure of the model in a tree view, including all of its components, such as compartments, species, parameters, or reactions.
 \Cref{sec:ModelTree} discusses the content of this tab in detail.
-The \menu{Graph} tab visually displays the model, which looks like this.
+The \menu{Graph} tab visually displays the model, which may look like \cref{fig:AutomatedLayout}.
 In case of the example model by \citeauthor{Bucher2011}, the authors did not embed any layout information into their model and SBMLsimulator has hence to automatically generate a display following the \SBGN guidelines.
+\Cref{chap:VisLayout} discusses this feature in more detail.
+\begin{figure}[htb]
+  \shadowimage[width=\textwidth]{Automatic_Layout}
+  \caption[Example for an automatically generated layout of a metabolic network model]{Example for an automatically generated layout of a metabolic network model.
+  When loading an \SBML file without embedded layout information, SBMLsimulator tries to automatically generate a graph display in the style of an \SBGN process diagram.
+  This example shows one such layout generated from the model by \citeauthor{Bucher2011}.}
+  \label{fig:AutomatedLayout}
+\end{figure}
 
-\begin{wrapfigure}{O}{16px}
+\begin{wrapfigure}{o}{16px}
 %\vspace{-4ex}%\wrapfigspace}
 %\begin{minipage}[t][20px][c]{25px}
 %\parbox[r][20px][c]{20px}{
@@ -227,7 +239,7 @@ We can explore the model by clicking at elements within the tree.}
 
 
 \section{Dynamic simulation of a model}
-\begin{wrapfigure}{O}{16px}
+\begin{wrapfigure}{o}{16px}
 \vspace{\wrapfigspace}
 \includegraphics[width=16px]{PLAY_64}
 \end{wrapfigure}
@@ -239,6 +251,26 @@ The default solver, ``Rosenbrock,'' is the most precise method and solves the br
 However, its high preciseness comes at the cost of a generally higher run time compared to the other solvers.
 \Cref{tab:solvers} lists all solvers that SBMLsimulator provides together with a short description and a reference for more information.
 When clicking the run button at the top, as \cref{fig:startSimulation} shows, the calculation starts.
+\begin{figure}[t]
+\centering
+\shadowimage[width=\textwidth]{select_species}
+\caption[Selection of quantities for plotting]{Selection of quantities for plotting.
+We can, for instance, click on \menu{Select > Species} in order to choose all species for plotting.}
+\label{fig:selectSpecies}
+\end{figure}
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{start_simulation}
+\caption[Starting of a simulation in SBMLsimulator]{Starting of a simulation in SBMLsimulator.
+By clicking on the simulation button, the simulation of the model is started.}
+\label{fig:startSimulation}
+\end{figure}
+\begin{figure}[t]
+\centering
+\shadowimage[width=\textwidth]{simulation_results}
+\caption[Simulation results plotted in the right panel of the window]{Simulation results plotted in the right panel of the window}
+\label{fig:simulationResults}
+\end{figure}
 
 Once the computation has finished, we can see all selected model components in the plot area.
 On the left panel in the \menu{Simulation} tab, we can select, for which model components the simulation results should be added to the plot diagram.
@@ -260,34 +292,14 @@ For instance, we might be interested in setting a new value for some Michaelis p
 If we have a time-course data set from laboratory experiments available, we can load it into SBMLsimulator and apply a plethora of heuristic optimization methods to automatically estimate optimal values of such model parameters.
 \Cref{chap:ParameterEstimation} explains this is a topic in detail.
 
-\begin{figure}[t]
-\centering
-\shadowimage[width=\textwidth]{select_species}
-\caption[Selection of quantities for plotting]{Selection of quantities for plotting.
-We can, for instance, click on \menu{Select > Species} in order to choose all species for plotting.}
-\label{fig:selectSpecies}
-\end{figure}
-\begin{figure}[t]
-\centering
-\shadowimage[width=\textwidth]{start_simulation}
-\caption[Starting of a simulation in SBMLsimulator]{Starting of a simulation in SBMLsimulator.
-By clicking on the simulation button, the simulation of the model is started.}
-\label{fig:startSimulation}
-\end{figure}
-\begin{figure}[t]
-\centering
-\shadowimage[width=\textwidth]{simulation_results}
-\caption[Simulation results plotted in SBMLsimulator]{Simulation results plotted in SBMLsimulator.
-The simulation results are plotted in the right part of the window.}
-\label{fig:simulationResults}
-\end{figure}
-\begin{wrapfigure}{O}{16px}
+\begin{wrapfigure}{o}{16px}
 \vspace{\wrapfigspace}
 \includegraphics[width=16px]{STOP_64}
 \end{wrapfigure}
 If in some cases a simulation run consumes too much time, we can always interrupt it by clicking at the stop button in the tool-bar (see image at the side of this text), which is activated whenever we launch a simulation.
+
 \rowcolors{2}{white}{lightsilver}
-\begin{longtable}{L{3.3cm}p{11cm}}
+\begin{longtable}{C{3.3cm}p{11cm}}
 \hiderowcolors
 \caption[Available ODE solver implementations]{Available ODE solver implementations}
 \label{tab:solvers}\\
@@ -331,7 +343,7 @@ Euler
 \citep{Press1992}&
 The explicit Euler method.
 This is a very fast and simple solver, that lacks a step-size adaptation and might, therefore, be imprecise.\\
-Gragg-Bulirsch-Stoer
+Gragg-Bulirsch-Stoer\newline
 \citep{ApacheCommonsMath2013}&
 This method belongs to the most efficient and accurate methods with step-size adaptation for non-stiff differential equations.
 Its use is not recommended for stiff differential equations.
@@ -341,11 +353,11 @@ Higham-Hall 54
 The method by Higham and Hall is a Runge-Kutta method of order 5 with step-size control.
 The solver is similar to the Dormand-Prince 54 solver.
 It is provided by Apache Commons.\\
-Rosenbrock
+Rosenbrock\newline
 \citep{Press1992}&
 This adapted solver comprises Rosenbrock's method, which includes an adaptation of step-size.
 This implementation is specifically dedicated to precise simulation of \SBML models and is applicable for very stiff differential equation systems. But it might be significantly slower for some models than the other solvers.\\
-Runge-Kutta
+Runge-Kutta\newline
 \citep{Press1992}&
 The classical fourth order Runge-Kutta method.
 It is fast, but imprecise for many models, as it does not contain a step-size adaptation.
@@ -358,21 +370,22 @@ It is fast, but imprecise for many models, as it does not contain a step-size ad
 \vspace{\wrapfigspace}
 \includegraphics[width=16px]{save_64}
 \end{wrapfigure}
-We need to select the tab \menu{Computed data} (see \cref{fig:saveSimulationResults}).
+Saving information from the \GUI is context-sensitive in SBMLsimulator: Depending on which tab is selected, we can save different pieces of information.
+If we want to save computed data from a simulation, we need to select the tab \menu{Computed data} first (see \cref{fig:saveSimulationResults}).
 Then we can save the simulation data under \menu{File > Save as}.
 Just like for the plot data, we can also use keystroke combinations to save our simulation data. To this end, just select the tab \menu{Computed data} and hit the keys \keys{\cmd + \shift + S} if we are working under \MacOSX, or \keys{\ctrlwin + \shift + S} for \Linux and \Windows.
-\begin{figure}[h]
+\begin{figure}[b]
 \centering
 \shadowimage[width=\textwidth]{save_simulation_results}
 \caption[Table with simulation data]{Table with simulation data.
 Under the tab \menu{Computed data} we can see the simulation results in a table.
-They can be saved under \menu{File > Save as}.}
+They can be saved under \menu{File > Save as}, by clicking the floppy icon in the tool-bar, or by using an \OS-dependent keystroke combination.}
 \label{fig:saveSimulationResults}
 \end{figure}
 
-
+%\newpage
 \subsection{Save plot image}
-\begin{wrapfigure}{O}{16px}
+\begin{wrapfigure}{o}{16px}
 \vspace{\wrapfigspace}
 \includegraphics[width=16px]{PRINT_64}
 \end{wrapfigure}
@@ -400,8 +413,7 @@ After discussing how to embed manually created network layouts in \SBML files in
 
 In many cases, biological models contain quantities with uncertain values.
 These values must be estimated by calibrating the model with respect to given experimental data.
-To facilitate this complicated procedure, SBMLsimulator comes with the optimization toolbox \EvA that provides a large collection of nature inspired heuristic optimization procedures, \eg evolution strategies \citep{Rechenberg1973,
-Schwefel1975}, genetic algorithms \citep{Holland1975}, \DE \citep{Storn96Usage}, or \PSO \citep{ClercKennedy02, Clerc2005}, as well as niche-based methods that have been found to be particularly useful for applications in systems biology \citep{Kron09NichingGCB}.
+To facilitate this complicated procedure, SBMLsimulator comes with the optimization toolbox \EvA that provides a large collection of nature inspired heuristic optimization procedures, \eg \ES \citep{Rechenberg1973, Schwefel1975}, \GA \citep{Holland1975}, \DE \citep{Storn96Usage}, or \PSO \citep{ClercKennedy02, Clerc2005} and \Tribes \citep{Clerc2006}, as well as niche-based methods that have been found to be particularly useful for applications in systems biology \citep{Kron09NichingGCB}.
 
 
 \section{Preparing and loading measured data}
@@ -412,19 +424,25 @@ The idea is that for every measured quantity from the data set the distance of t
 To load the data into SBMLsimulator, we need to make sure that our experimentally measured data set conforms the required file format.
 The application reads \CSV files, which are mostly tab- or comma-separated files of data.
 
-\subsection{Exporting \CSV files from \Excel}
+\subsection{Exporting \CSV files from spreadsheet software}
 \label{sec:CSVformat}
 
-To use \Excel-data, we can simply open our \Excel spreadsheet, click \menu{File > Save as} and select ``Tab-separated text file.''
+Modern spreadsheet software, such as \Excel, \GoogleTables, \LibreCalc, \AppleNumbers, etc., supports exporting data to \CSV.
+We are here exemplarily walking through the process for the most widely used software, \Excel.
+In other tools, the procedure follows similar steps.
+
+To use data from \Excel, we can simply open our \Excel spreadsheet, click \menu{File > Save as} and select ``Tab-separated text file.''
 For all files, the application requires one column called \texttt{time} to be present.
 This column should contain for each row the time point it refers to.
 Note that the headline of the file must be indicated with a leading pound symbol (\texttt{\#}).
 The other columns should be called with the \ac{Id} of the respective quantity in the model and should contain the measured values at the time points, or \NaN if the measurement for a time point is missing. 
 
-As described, we need a column with the time points and multiple columns that state the values (often concentrations) of each quantity at each time point.
+Hence, we need a column with the time points and multiple columns that state the values
+%(often concentrations)
+of each quantity at each time point.
 The corresponding \SBML file defines the units of these quantities, so that we do not have to make units explicit in our \CSV file.
 The \cref{lst:input:exp} displays an example how an input file may look like.
-\begin{lstlisting}[caption={Input file example for experimental data},label={lst:input:exp},numbers=left,captionpos=t,float=h]
+\begin{lstlisting}[caption={Input file example for experimental data},label={lst:input:exp},numbers=left,captionpos=t,float=t]
 #time   s1          s2          s3
 0       32.456E-12  7.02        12E32
 4       5E-54       179.05E-14  0.005
@@ -451,25 +469,24 @@ The displayed data set has been restricted to the quantities that \citeauthor{Bu
 SBMLsimulator tries to automatically determine which column from our data file belongs to which model component based on the \acp{Id}.
 Only in case of \ac{Id} mismatches, we may need to specify the content of each column in the table at the bottom of the import dialog.
 In these cases, we have to click on the combo box below the captions.
-\begin{figure}[h]
-\centering
-\shadowimage[width=\textwidth]{import_dialog}
-\caption[Example of the data import dialog]{Example of the data import dialog.
+\begin{SCfigure}%\begin{figure}[h]
+%\centering
+\shadowimage[width=.625\textwidth]{import_dialog}
+\caption[Example for the data import dialog]{Example for the data import dialog.
 The ``CSV Options'' panel can be expanded to correct auto-detected input file properties.
 Where needed, the table at the bottom of the import dialog allows us to specify the matching of each column from the data file to a corresponding model component.}
 \label{fig:inputdialog}
-\end{figure}
+\end{SCfigure}
 
 SBMLsimulator also tries to automatically infer the format of the data file, \eg what character is used to separate the columns, the character encoding of the file, etc.
 If the input file format cannot be automatically inferred (which is not the case in our example here), we may click on the black ``CSV Options'' label to specify further options (like ``column separator char'' or, if the file contains headers, see \cref{fig:csvoptions}).
-\begin{figure}[h]
-\centering
-\shadowimage[width=\textwidth]{expanded_csv_options}
+\begin{SCfigure}%\begin{figure}[h]
+%\centering
+\shadowimage[width=.625\textwidth]{expanded_csv_options}
 \caption[Expanded ``CSV Options" allow to give details for the input file]{Expanded ``CSV Options'' allow to give details for the input file.
 These properties are auto-detected and only need to be changed if the auto-detection failed to correctly infer those properties.}
 \label{fig:csvoptions}
-\end{figure}
-
+\end{SCfigure}
 After the experimental data are imported, the plot shows the data points as dots (see \cref{fig:simulationResultsWithData}) or in form of box plots in the case we opened more than one data file (not shown).
 \begin{figure}[t]
 \centering
@@ -482,7 +499,7 @@ The plot shows the simulation results and the experimentally measured data point
 \section{Defining a quality function}
 \label{sec:QualityDefinition}
 
-Before we can calibrate our model to our time-course data set(s), we need to briefly discuss how we define an optimal solution.
+Before we can calibrate our model to our time-course data set(s), we need to briefly discuss what we consider an optimal solution.
 The main idea is that when simulating a calibrated model, we should obtain curves that are as close as possible to experimentally observed values.
 In other words, the distance between the calculate behavior of every model component and corresponding data should be minimal.
 For instance, if we have measurement data available for the overall intracellular citric acid concentration, the model should yield very similar curves for this reactive species as well.
@@ -490,23 +507,26 @@ For instance, if we have measurement data available for the overall intracellula
 Model calibration now means that we have to choose values for parameters or initial values for unknown model components such that this difference becomes minimal.
 Minimal here means that we have to minimize a distance function.
 SBMLsimulator brings with it a selection of distance functions to choose from, which are in analogy to biological evolution also called \emph{\fitness} functions:
-\begin{itemize}
-  \item (Relative) Euclidean distance
-  \item (Relative) Manhattan distance
-  \item (Relative) N-Metric
-  \item Pearson Correlation
-  \item \RSE
-\end{itemize}
+\begin{enumerate*}[label=(\roman*)]
+  \item (Relative) Euclidean distance,
+  \item (Relative) Manhattan distance,
+  \item (Relative) N-Metric,
+  \item Pearson Correlation, and
+  \item \RSE.
+\end{enumerate*}
 For first attempts or without prior knowledge about the structure of the solution space, it is recommendable to use either the \RSE.
 The \RSE has the advantage that higher concentrated substances in the cell do not dominate the quality of the solution because this formula weights the contributions of all model components based on their abundance.
-Care must be taken if some model component is known to take a value of zero at any time, because in this case, the \RSE would not be defined.
+Care must be taken if some model component is known to take a value of exactly zero at any time, because in this case, the \RSE would not be defined.
 To circumvent this problem, SBMLsimulator provides a sufficiently high default value, which we can adjust to our needs within the \menu{Preferences} menu.
+
+The panel at the bottom in the \menu{Simulation} tab contains a drop-down menu where we can select an appropriate \fitness function.
+The \RSE is selected by default.
 
 
 \section{Launching the heuristic optimization workbench \EvA}
 \label{sec:LaunchingEvA}
 
-\begin{wrapfigure}{O}{16px}
+\begin{wrapfigure}{o}{16px}
 \vspace{\wrapfigspace}
 \includegraphics[width=16px]{EvA2_icon}
 \end{wrapfigure}
@@ -519,7 +539,7 @@ If we like to just select a few variables as estimation targets, a search functi
 For every estimation target, we can also define their allowable ranges.
 Note that we here distinguish between a range for initialization and boundaries for the complete search space.
 This distinction can help to generate stable initial solutions and to find allowable values more efficiently.
-\begin{figure}[h]
+\begin{figure}[t]
 \centering
 \shadowimage[width=\textwidth]{select_quantities}
 \caption[Selection of quantities to estimate]{Selection of quantities to estimate.
@@ -529,7 +549,8 @@ The current configuration of quantities and their ranges (for initialization as 
 The search function at the bottom helps us to navigate through the names or identifiers that are potential optimization targets.
 When we type a name in the text field, the above table will be reduced to elements that contain this name we are typing.
 The buttons \keys{Select all} and \keys{Select none} are also helpful to choose all or none of the elements within one tab as optimization targets.
-Note that each tab has these buttons separately, so our choice in one tab does not affect any other tabs.}
+Note that each tab has these buttons separately, so our choice in one tab does not affect any other tabs.
+By default, SBMLsimulator assumes that all global and local parameters in the model are potential optimization targets.}
 \label{fig:quantitySelection}
 \end{figure}
 
@@ -578,13 +599,12 @@ Please note:
 \end{itemize}
 
 While the model calibration is running, \EvA continuously plots the current best solution with respect to the quality function we chose.
-It also outputs the current best set of estimated values.
+It also outputs the current best set of estimated values (\cref{fig:evaOptimizing}).
 In each iteration, the main window of SBMLsimulator updates the plot and draws the simulation result for the current best solution as \cref{fig:estimationResult} shows.
 
-
-\begin{SCfigure}
-%\centering
-\shadowimage[width=0.5\columnwidth]{eva2}
+\begin{figure}[htbp]
+\centering
+\shadowimage[width=\textwidth]{eva2}
 \caption[\EvA settings window]{\EvA settings window.
 \EvA lets us choose the parameter estimation method and the specific settings:
 We just click at the text field next to the label ``optimizer.''
@@ -597,20 +617,25 @@ If the optimization is successful, the fitness will decrease as time proceeds.
 We can interrupt the optimization at any time by hitting the \keys{Stop} button.
 When our selected termination criterion is reached, the optimization will stop and we can continue working with our optimized model in the main window of SBMLsimulator.}
 \label{fig:eva2}
-\end{SCfigure}
-
-
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\shadowimage[width=\textwidth]{EvAOptimizing}
+\caption[\EvA calibrating a model]{\EvA calibrating a model.
+During the calibration, \EvA displays the current best \fitness in an internal window as a function of the number of model evaluations.
+Another internal window displays details about the current set of possible solutions for the optimization problem.
+Whenever \EvA finds a new optimum, it forwards this solution to the \menu{Simulation} tab of SBMLsimulator, which then plots the new solution as depicted in \cref{fig:estimationResult}.}
+\label{fig:evaOptimizing}
+\end{figure}
 \begin{SCfigure}
 %\centering
-\shadowimage[width=.5\columnwidth]{algorithm_choice}
+\shadowimage[width=.45\columnwidth]{algorithm_choice}
 \caption[Configuring the optimization procedure]{Configuring the optimization procedure.
 We can select an optimization procedure and define its specific settings in this window. 
 Apart from \DE \citep{Storn96Usage}, \EvA provides many other nature-inspired heuristic optimization routines, such as \PSO \citep{ClercKennedy02, Clerc2005}.
 The settings of the chosen routine can be changed by clicking in the text field right of it and typing the new value or by clicking in the check box, respectively.}
 \label{fig:algorithmChoice}
 \end{SCfigure}
-
-
 \begin{figure}[h]
 \centering
 \shadowimage[width=\textwidth]{estimation_result}
@@ -621,11 +646,19 @@ The current value of the quality function is also shown.}
 \end{figure}
 
 
-\section{Save the calibrated model}
-
-In order to save a modified model, for instance after calibration with \EvA, including the newly estimated values of all uncertain model components, such as parameters, species, or compartment, we first have to select the tab \menu{Model}.
+\section{Save modifications of the model}
+\label{ch:savesim}
+\begin{wrapfigure}{O}{16px}
+\vspace{\wrapfigspace}
+\includegraphics[width=16px]{save_64}
+\end{wrapfigure}
+In order to save a model, for instance after manually changing the values of some model variables, such as parameters, species, or compartment, or after calibration with \EvA, we first have to select the tab \menu{Model}.
 Then we can save the simulation data under \menu{File > Save as}.
+This function will save the model in its current state to a file of choice, including all of our modifications, such as the newly estimated values of all uncertain model components.
+We can either save the model to a new file or overwrite an existing one.
 Again, also for this purpose we can use keystroke the combinations \keys{\cmd + \shift + S} (for \MacOSX) or \keys{\ctrlwin + \shift + S} (for \Linux and \Windows) when the \menu{Model} tab is selected.
+At any time, the program also accepts the \OS-dependent keystroke \keys{\cmd + S} or \keys{\ctrlwin + S} to overwrite the loaded model with the current modifications
+The same effect can be obtained by choosing \menu{File > Save} from the menu bar---we just need to make sure that the tab \menu{Model} is selected.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -635,7 +668,7 @@ Again, also for this purpose we can use keystroke the combinations \keys{\cmd + 
 \chapter{Embedding a model layout in an SBML file and preparation of experimental data}
 \label{chap:EmbeddingLayoutsInModels}
 
-In the previous chapter, we explored how simulated data are calculated from a dynamic model and how these data are mapped to a graphical display of the model, which SBMLsimulator automatically generated for us.
+Until now, we explored how simulated data is calculated from a dynamic model, how to estimate uncertain values of variables within the model, and briefly mentioned that simulated data can be mapped to a graphical display of the model, which SBMLsimulator automatically generated for us.
 Next, we will explore how to embed a manually drawn map within an \SBML file.
 We will then discuss how to prepare a published time-course data set for visual analysis with SBMLsimulator.
 \watchAtYoutube{CoeOh2sFFSQ}
@@ -643,20 +676,202 @@ We will then discuss how to prepare a published time-course data set for visual 
 \section{Embedding a graph layout within a constraints-based model}
 
 The \BiGG provides genome-scale metabolic models for various organisms.
-Let us search for a model of yeast, or \emph{Saccharomyces cerevisiae}, among them.
-From these two, we pick \href{https://identifiers.org/bigg.model/iMM904}{iMM904} that \citeauthor{Mo2009} created in \citeyear{Mo2009} for a publication in \emph{BMC Systems Biology}.
-We can download the model in compressed \SBML format.
+Let us search for a \GEM of yeast, or \emph{Saccharomyces cerevisiae}, among them.
+From the two yeast models currently in \BiGG, we pick \iMM that \citeauthor{Mo2009} created in \citeyear{Mo2009} for a publication in \emph{BMC Systems Biology} and download the model in compressed \SBML format.
 At the bottom of the page, we can find a map of the central carbon metabolism.
 Let us download that map \JSON format.
-We can convert this map to \SBML with layout information using the software EscherConverter \citep{King2015a} that is available at \github{drager-lab/EscherConverter}.
+We can convert this map to \SBML with layout information using the software EscherConverter \citep{King2015a} that is available at \github{draeger-lab/EscherConverter}.
 To this end, we download the executable \JAR file of EscherConverter, run it with a double click, drag the \JSON file into EscherConverter and click the disk symbol to safe it in \SBML format.
+The documentation of EscherConverter\footnote{\url{https://draeger-lab.github.io/EscherConverter/}} has more details about this conversion procedure.
 
-The \SBML file we obtain from EscherConverter, however, only contains those parts of the model with relevance for the graphical display.
+The \SBML file we obtain from EscherConverter, however, only contains those parts of the model with relevance for the graphical display (\cref{lst:ConvertedSBMLlayoutPart}).
+Information not relevant for the display of the map is lacking, such as further reactions and metabolites from \iMM that are not shown in the map as well as any \MIRIAM annotations \citep{Juty2012} from the \GEM.
 The reason is that the original Escher map does also not provide the full model.
-So, we need to merge the core model we downloaded from \BiGG with this \SBML layout model \citep{Gauges2015}.
+\begin{lstlisting}[language=SBML,numbers=left,captionpos=t,float=p,caption={Extract from the converted \SBML layout file for \iMM},label={lst:ConvertedSBMLlayoutPart}]
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!-- Created by EscherConverter version 1.2.0 on 2019-08-09 at 14:15:08 MESZ with JSBML version 1.4. -->
+<sbml xmlns="http://www.sbml.org/sbml/level3/version1/core" layout:required="false" level="3" version="1" xmlns:layout="http://www.sbml.org/sbml/level3/version1/layout/version1">
+  <model id="_78086bfdab8ac8a8150cf4cd5dada037" name="iMM904.Central carbon metabolism">
+      ...
+      <layout:textGlyph layout:id="tg_269" layout:text="TCA Cycle">
+        <layout:boundingBox>
+          <layout:position layout:x="1763.683654492188" layout:y="5946.125330570312" layout:z="0"/>
+          <layout:dimensions layout:depth="1" layout:height="50" layout:width="160"/>
+        </layout:boundingBox>
+      </layout:textGlyph>
+    </layout:listOfTextGlyphs>
+  </layout:layout>
+</layout:listOfLayouts>
+...
+  <species boundaryCondition="false" compartment="m" constant="false" hasOnlySubstanceUnits="true" id="ac_m" name="Acetate" sboTerm="SBO:0000247"/>
+  <species boundaryCondition="false" compartment="c" constant="false" hasOnlySubstanceUnits="true" id="ac_c" name="Acetate" sboTerm="SBO:0000247"/>
+  <species boundaryCondition="false" compartment="c" constant="false" hasOnlySubstanceUnits="true" id="g6p_c" name="D-Glucose 6-phosphate" sboTerm="SBO:0000247"/>
+  <species boundaryCondition="false" compartment="m" constant="false" hasOnlySubstanceUnits="true" id="fadh2_m" name="Flavin adenine dinucleotide reduced" sboTerm="SBO:0000247"/>
+</listOfSpecies>
+<listOfReactions>
+  <reaction compartment="e" fast="false" id="ACALDt" name="Acetaldehyde reversible transport" reversible="true" sboTerm="SBO:0000375">
+    <listOfReactants>
+      <speciesReference constant="true" id="ACALDt_reactant_1" sboTerm="SBO:0000010" species="acald_e" stoichiometry="1"/>
+    </listOfReactants>
+    <listOfProducts>
+      <speciesReference constant="true" id="ACALDt_product_1" species="acald_c" stoichiometry="1"/>
+    </listOfProducts>
+  </reaction>
+  <reaction compartment="m" fast="false" id="SUCD1m" name="Succinate dehydrogenase" reversible="true" sboTerm="SBO:0000375">
+    <listOfReactants>
+      ...
+\end{lstlisting}
+
+We hence need to merge the core model we downloaded from \BiGG with this \SBML layout model \citep{Gauges2015}.
 To this end, we need to update all references from the layout components to the so-called \SBML core components.
-For small models, we could do this manually, but for a model of this size, it can be conducive to write a little script that does it for us.
+For small models, we could do this manually, but for a model of this size, it can be conducive to write a script that does it for us.
+\Cref{lst:modelMerge} shows an example for such a script using \JSBML \citep{Rodriguez2015}.
 The result is an \SBML file of the full model with links to layout information.
+\begin{lstlisting}[language=Java,numbers=left,captionpos=t,caption={Example script for merging an SBML layout into a model},label={lst:modelMerge}]
+  /**
+   * This script takes care of differences in the ID naming conventions
+   * between Escher and BiGG by adding prefixes ({@code M_},{@code R_}, or
+   * {@code G_}) where needed and also correcting other cross references.
+   *
+   * @param args
+   *  This method requires as input the paths to three files:
+   *  1) The result from a conversion Escher JSON to SBML
+   *  2) The current implementation requires as 2nd argument a file
+   *     containing already the layout pasted into an annotated model that
+   *     previously didn't have a layout. In future version, it would be
+   *     better to take the layout from the Escher conversion and to create
+         a clone that is then added to the next file.
+   *  3) The output file where to write the merged SBML document.
+   * @throws IOException
+   * @throws XMLStreamException
+   */
+  public static void main(String[] args) throws XMLStreamException, IOException {
+    SBMLDocument layoutDoc = SBMLReader.read(new File(args[0]));
+    SBMLDocument doc = SBMLReader.read(new File(args[1]));
+    Model m = doc.getModel();
+    Layout l = ((LayoutModelPlugin) m.getPlugin("layout")).getListOfLayouts().get(0);
+    int count = 0;
+    for (SpeciesGlyph sg : l.getListOfSpeciesGlyphs()) {
+      String ref = sg.getSpecies();
+      char pref = 'M';
+      if (!ref.startsWith(pref + "_")) {
+        sg.setSpecies(createNewReference(ref, pref));
+        System.out.println(++count + ".\t" + ref + " -> " + sg.getSpecies());
+      }
+    }
+    count = 0;
+    for (TextGlyph tg : l.getListOfTextGlyphs()) {
+      if (tg.isSetOriginOfText()) {
+        if (tg.getOriginOfTextInstance() == null) {
+          String ref = tg.getOriginOfText();
+          char prefixes[] = {'M', 'R', 'G'};
+          for (char pref : prefixes) {
+            NamedSBase sbase = m.findNamedSBase(createNewReference(ref, pref));
+            if (sbase != null) {
+              tg.setOriginOfText(sbase.getId());
+              System.out.println(++count + ".\t" + ref + " -> " + sbase.getId());
+              break;
+            }
+          }
+        }
+      }
+    }
+    count = 0;
+    for (ReactionGlyph rg : l.getListOfReactionGlyphs()) {
+      if (rg.isSetReaction() && (rg.getReactionInstance() == null)) {
+        String ref = rg.getReaction();
+        NamedSBase sbase = m.findNamedSBase(createNewReference(ref, 'R'));
+        if (sbase != null) {
+          rg.setReaction(sbase.getId());
+          System.out.println(++count + ".\t" + ref + " -> " + sbase.getId());
+        }
+      }
+      if (rg.isSetListOfSpeciesReferenceGlyphs()) {
+        for (SpeciesReferenceGlyph srg : rg.getListOfSpeciesReferenceGlyphs()) {
+          if (srg.isSetSpeciesReference()) {
+            String ref = srg.getSpeciesReference();
+            NamedSBase sbase = m.findNamedSBase(ref);
+            if (sbase == null) {
+              Reaction r = (Reaction) rg.getReactionInstance();
+              NamedSBase other = layoutDoc.getModel().findNamedSBase(ref);
+              if ((other != null) && (other instanceof SpeciesReference)) {
+                SpeciesReference sr = (SpeciesReference) other;
+                if (sr.isSetSpecies()) {
+                  if (ref.contains("_reactant_")) {
+                    setId(r.getListOfReactants(), sr.getSpecies(), ref);
+                  } else if (ref.contains("_product_")) {
+                    setId(r.getListOfProducts(), sr.getSpecies(), ref);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    System.out.println(args[1]);
+    TidySBMLWriter.write(doc, new File(args[2]), ' ', (short) 2);
+  }
+
+  /**
+   *
+   * @param listOfParticipants
+   * @param species
+   * @param id
+   */
+  private static void setId(ListOf<SpeciesReference> listOfParticipants,
+    String species, String id) {
+    species = createNewReference(species, 'M');
+    for (SpeciesReference sr : listOfParticipants) {
+      if (sr.getSpecies().equals(species)) {
+        sr.setId(id);
+        System.out.println("Setting id to " + id + " for speciesReference to " + species);
+        break;
+      }
+    }
+  }
+
+  /**
+   *
+   * @param ref
+   * @param pref
+   * @return
+   */
+  private static String createNewReference(String ref, char pref) {
+    String newRef;
+    if (ref.charAt(0) == '_') {
+      newRef = pref + ref;
+    } else {
+      newRef = pref + "_" + ref;
+    }
+    return newRef;
+  }
+\end{lstlisting}
+
+\begin{lstlisting}[language=SBML,numbers=left,captionpos=t,float=t,caption={First reaction from the merged \SBML file with layout for \iMM},label={lst:MergedSBMLlayoutPart}]
+<listOfReactions>
+  <reaction fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="cobra_default_ub" id="R_13BGH" metaid="R_13BGH" name="Endo 1 3 beta glucan glucohydrase" reversible="false"
+      sboTerm="SBO:0000375">
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#R_13BGH"><bqbiol:is><rdf:Bag><rdf:li
+          rdf:resource="http://identifiers.org/bigg.reaction/13BGH"/><rdf:li
+          rdf:resource="http://identifiers.org/metanetx.reaction/MNXR94686"/>
+        </rdf:Bag></bqbiol:is></rdf:Description>
+      </rdf:RDF>
+    </annotation>
+    <fbc:geneProductAssociation xmlns:fbc="http://www.sbml.org/sbml/level3/version1/fbc/version2">
+      <fbc:geneProductRef fbc:geneProduct="G_YGR282C"/>
+    </fbc:geneProductAssociation>
+    <listOfReactants>
+      <speciesReference constant="true" sboTerm="SBO:0000010" species="M_13BDglcn_c" stoichiometry="1"/>
+      <speciesReference constant="true" sboTerm="SBO:0000010" species="M_h2o_c" stoichiometry="1"/>
+    </listOfReactants>
+    <listOfProducts>
+      <speciesReference constant="true" sboTerm="SBO:0000011" species="M_glc__D_c" stoichiometry="1"/>
+    </listOfProducts>
+  </reaction>
+\end{lstlisting}
 
 \section{Preparation of experimental data}
 
@@ -673,8 +888,17 @@ As the table head, we use the compound identifier from above but prefixed with \
 In this way, the ids fit those in the \SBML model and make it easier to map the data to our network graph.
 There is one compound in the data set for which the model does not have any counterpart.
 So, we can skip it in our new table, but SBMLsimulator would also automatically ignore a column without a corresponding model component.
-Since \SBML assumes initial time points to be 0, we also shift all times values in our data set by roughly 14 time-units.
-We now save this new table in a \CSV file, which is a file of character-separated values.
+Since \SBML assumes initial time points to be 0, we also shift all times values in our data set by 14\textonehalf{} time-units.
+We now save this new table in a \CSV file that matches the description of the expected format from \cref{lst:input:exp}.
+\Cref{lst:yeastexp} shows a part of the resulting yeast data set.
+\begin{lstlisting}[caption={Part of the example yeast data set in \CSV format},label={lst:yeastexp},numbers=left,captionpos=t]
+#time   M_g6p_c      M_r5p_c      M_f6p_c      M_glyc3p_c   ...
+0       2.665226007  0.126552935  0.499107017  0.574605606  ...
+1.5     1.613476335  0.102134032  0.362049424  0.321757941  ...
+3       1.425163287  0.184214787  0.281096754  0.312816984  ...
+...     ...          ...          ...          ...          ...
+24      0.452652433  0.073917444  0.162222695  0.143999990  ...
+\end{lstlisting}
 
 \section{Summary}
 
@@ -691,7 +915,7 @@ In the next chapter, we will import both generated files to SBMLsimulator and fu
 \chapter{Visualization of manually created layouts}
 \label{chap:VisLayout}
 
-In the previous example, we embedded a manually created metabolic map of the central carbon metabolism of baker's yeast in the \SBML file \href{https://identifiers.org/bigg.model/iMM904}{iMM904} \citep{Mo2009}.
+In the previous example, we embedded a manually created metabolic map of the central carbon metabolism of baker's yeast in the \SBML file \iMM \citep{Mo2009}.
 Next, we prepared a character-separated value file from the time-course data set that \citeauthor{Bergdahl2012} published in \citeyear{Bergdahl2012}.
 We can now visually analyze a model that comes with embedded layout information and explore a real data set from laboratory experiments in the context of this model.
 \watchAtYoutube{qv3qPyzofhI}
@@ -699,42 +923,99 @@ We can now visually analyze a model that comes with embedded layout information 
 \section{Opening a constraint-based model with a graph layout}
 
 Let us load this new model into SBMLsimulator.
-We now see a warning that many model components lack initial values.
+We now see the warning dialog depicted in \cref{fig:Warning_Undefined_InitVals} that many model components lack initial values.
 This only matters when running a dynamic simulation.
-Since we plan to use SBMLsimulator to create an animation of experimental data, we do not need to run a simulation and can safely ignore this warning.
+Since we plan to use SBMLsimulator to create an animation of experimentally measured data, we do not need to run an \ODE-based simulation and can safely ignore this warning.
+\begin{SCfigure}
+  \shadowimage[width=.5\textwidth]{Warning_Undefined_InitVals}
+  %\vspace{1.1cm}
+  \caption[Warning when loading a model with undefined initial values]{Warning when loading a model with undefined initial values.
+  Constraint-based models, such as \iMM can be simulated in a flux-balance framework that does not require initial amounts to be known for reactive species.
+  This warning indicate that the model cannot directly simulated in an \ODE framework.
+  SBMLsimulator automatically assigns the value 1 where missing.
+  It is also possible to estimate missing values using \EvA.}
+  \label{fig:Warning_Undefined_InitVals}
+\end{SCfigure}
+
 The \menu{Graph} tab now shows us the same neat display that we already saw on the \BiGG \citep{King2015b, Norsigian2019}.
 Now, let us find out how to create a dynamically animated network of yeast.
 
-\section{Preparation of experimental data}
+\section{Preparation of experimentally measured data}
 
-When we now drop our time-series data file into SBMLsimulator, it displays an import dialog asking us to confirm the matching of data columns to model components.
-Since we prepared everything already, there is nothing left to do. In case our model identifiers do not precisely match those in the \CSV file, we have here the option to adjust the mapping.
-Let us switch off the status bar and controls in the view menu because we do not need them anymore.
-The tab for \menu{Experimental Data} is now enabled where we can see the same table that we had prepared.
+When we now drop our time-series data file into SBMLsimulator as described in \cref{sec:opendata}, it displays an import dialog asking us to confirm the matching of data columns to model components (\cref{fig:csvoptions}).
+Since we prepared everything already, there is nothing left to do.
+In case our model identifiers do not precisely match those in the \CSV file, we have here the option to adjust the mapping.
+The tab for \menu{Experimental Data} is now enabled where we can see the same table that we had prepared (with a display similar to \cref{fig:saveSimulationResults}).
 
-\section{Interactive visualization of experimental data on a manually created map}
+\section{Interactive visualization of data on a network map}
+
+Let us switch off the status bar and controls in the view menu \menu{View > Show options} and \menu{View > Show Status Bar} because we do not need them for graph analysis.
+Now we will have more space for the display of the network diagram.
 
 The \menu{Graph} tab has automatically loaded the data set and mapped the values to the nodes. 
-We can select our favorite visualization of the data. Available are node sizes or colors in absolute values or relative to minimum and maximum in the data set.
-My personal favorite is displaying the relative fill level in combination with absolute color values.
-We can zoom in and use the slider at the bottom to move to time points during the animation that we are most interested in.
-By clicking this icon, we can create an image file of the current state of the graph in the vector format \SVG or in \PNG format that we can save to a file.
-This check-box allows us to create a repeated animation, and we can pan and zoom while it is running. And we can change the visualization style.
-This dropdown list allows us to adjust the speed of the animation in three different levels: normal, fast, or slow.
+We can select our favorite visualization of the data.
+Available are node sizes or colors in absolute values or relative to minimum and maximum in the data set.
+A recommendation is displaying the relative fill level in combination with absolute color values as \cref{fig:GraphAnimation} shows.
+\begin{figure}[htb]
+  \shadowimage[width=\textwidth]{Graph_Animation}
+  \caption[Graph animation]{Graph animation.
+  We can zoom in and use the slider at the bottom to move to time points during the animation that we are most interested in.
+  The check-box labeled ``Loopsimulation'' allows us to create a repeated animation.
+  While the animation is running, and we can pan and zoom with the graph or change its visualization style.
+  The drop-down list ``Choose play speed'' allows us to adjust how fast the animation should run in three different levels: normal, fast, or slow.
+If we want to display the exact values of metabolite concentrations and so forth, we just need to check the boxes to the right that are labeled ``Concentrations'' or ``Reaction rates''.}
+  \label{fig:GraphAnimation}
+\end{figure}
+
+\begin{wrapfigure}{o}{16px}
+\vspace{\wrapfigspace}
+\includegraphics[width=16px]{GPL_IMAGE_16}
+\end{wrapfigure}
+By clicking the icon next to this text, we can create an image file of the current state of the graph in the vector format \SVG or in \PNG format that we can save to a file.
 We can customize the color scheme and other visual attributes, such as the minimal and maximal node sizes, in the settings dialog.
-If we want to display the exact values of metabolite concentrations and so forth, we just need to check the boxes to the right.
-Since we can adjust all of this while the animation is still ongoing, this really is a seamless animation.
-When we click this button, we see a diagram of all variables within our dataset and a red vertical bar indicating the current position moving in sync with our animation.
+Since we can adjust many visual attributes while the animation is still ongoing, this really is a seamless animation.
+
+\begin{wrapfigure}{o}{16px}
+\vspace{\wrapfigspace}
+\includegraphics[width=16px]{GPL_CONCENTRATION}
+\end{wrapfigure}
+When we click the button with the icon shown next to this text, we see a diagram of all variables within our dataset and a red vertical bar indicating the current position moving in sync with our animation (\cref{fig:AnimatedPlot}).
 This view allows us to compare different visual representations and to directly observe the most active spots in the network.
-Another exciting feature is the sliding camera animation that we can activate by selecting a speed from this drop-down box.
+\begin{SCfigure}
+  \shadowimage[width=.5\textwidth]{Animated_Plot}
+  \caption[Animated plot]{Animated plot.
+  This view appears when clicking the diagram icon in the panel at the bottom of \cref{fig:GraphAnimation}.
+  It displays all variables in the network for which data are available in form of a conventional plot, here shown for the data set by \citeauthor{Bergdahl2012} applied to \iMM \citep{Mo2009}.
+  The red vertical bar is moving with the animation and indicates the current time point.}
+  \label{fig:AnimatedPlot}
+\end{SCfigure}
+
+Another exciting feature is the sliding camera animation (also known as \KenBurnsEffect) that we can activate by selecting a speed from this drop-down box.
 To design such an animation, we need to create a \CSV file that contains in one line the zoom level followed by a tab-separated list of corner points.
-These are the x- and y-coordinates of the top-left corners that define the path of the visible sliding view-port window.
+These are the $x$- and $y$-coordinates of the top-left corners that define the path of the visible sliding view-port window.
 In other words, these comma-separated coordinates define where the camera makes a turn on its way.
-Here we can see an example of such a file for the animation we just saw.
+\Cref{lst:KenBurnsDef} gives us an example of such a file for an animation using the \KenBurnsEffect.
 To enable the camera animation, we go to settings, and navigate to the bottom of the tab \menu{Network dynamics}.
-Finally, we can export the animation that we just created to a movie file.
-This gives us first a warning because of the high resolution, so the export may take some time and consume some space on our hard drive.
+\begin{lstlisting}[caption={Definition of a moving camara animation for a \KenBurnsEffect},label={lst:KenBurnsDef},numbers=none,captionpos=t]
+0.25    0,0     200,50  800,350 800,800 800,2600
+\end{lstlisting}
+
+\begin{wrapfigure}{o}{16px}
+\vspace{\wrapfigspace}
+\includegraphics[width=16px]{GPL_VIDEO_16}
+\end{wrapfigure}
+Finally, we can export the animation that we just created to a movie file by clicking the button with the icon shown next to this text.
+This gives us first a warning because of the high resolution and demanding computation.
+Hence, the export may take some time and consume some space on our hard drive.
 The export supports a wide range of common movie file types, including \AVI, \MOV, \MPG, and others.
+
+
+\section{Summary}
+
+In this tutorial, we visualized manually created layouts of experimental data.
+The examples demonstrated in this text are also available online at {\href{https://www.youtube.com/c/systemsbiology/}{\faYoutube\texttt{/systemsbiology/}}} together with videos that were created using these features.
+There you can also get insides into the analysis of actual biological data sets and explore other fascinating examples of dynamic metabolic networks.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 05_CMD-ARGS                    %
@@ -744,7 +1025,7 @@ The export supports a wide range of common movie file types, including \AVI, \MO
 \label{chap:CMD}
 
 It now follows a short overview about all possible command-line options of SBMLsimulator.
-All functions of the program are also available from the command line.
+All major functions of the program are also available from the command line.
 This means that we can also run SBMLsimulator on a cluster and use it for large-scale model calibration.
 Furthermore, we can use the command-line options in combination with the \GUI.
 One possible use-case scenario would be to launch the program with our desired configuration with a customized start script, \eg to directly open a certain model file when launching the program.
@@ -1078,14 +1359,14 @@ You should have received a copy of the GNU Lesser General Public License along w
 
 SBMLsimulator includes and redistributes the following software packages:
 \begin{itemize}
-\item \JSBML \citep{Draeger2011}, which is freely available under the terms of the \ac{LGPL} version~2.1, see \href{http://sbml.org/Software/JSBML}{\url{http://sbml.org/Software/JSBML}}.
-\item the \SBSCL \citep{Keller2013}, which is licensed under the \ac{LGPL} version 3.1, see \href{http://simulation-core.sourceforge.net}{\url{http://simulation-core.sourceforge.net}}.
-\item the nature-inspired heuristic optimization framework \EvA (\ac{LGPL} Version~3, \citealp{Kron10EvA2}), see \href{http://www.cogsys.cs.uni-tuebingen.de/software/EvA2}{\url{http://www.cogsys.cs.uni-tuebingen.de/software/EvA2}}.
+\item \JSBML \citep{Draeger2011, Rodriguez2015}, which is freely available under the terms of the \LGPL version~2.1, see \href{http://sbml.org/Software/JSBML}{\url{http://sbml.org/Software/JSBML}}.
+\item the \SBSCL \citep{Keller2013}, which is licensed under the \LGPL version~3.1, see \href{http://simulation-core.sourceforge.net}{\url{http://simulation-core.sourceforge.net}}.
+\item the nature-inspired heuristic optimization framework \EvA (\LGPL version~3, \citealp{Kron10EvA2}), see \href{http://www.cogsys.cs.uni-tuebingen.de/software/EvA2}{\url{http://www.cogsys.cs.uni-tuebingen.de/software/EvA2}}.
 \item Apache Commons-math under the terms of the Apache Software License, Version~2.0, see \href{http://commons.apache.org/math/}{\url{http://commons.apache.org/math/}}.
-\item JCommon, licensed under \ac{LGPL} Version~2.1, see \href{http://jfree.org/jcommon}{\url{http://jfree.org/jcommon}}.
-\item JFreeChart, licensed under \ac{LGPL} Version~3.1, see \href{http://www.jfree.org/jfreechart}{\url{http://www.jfree.org/jfreechart}}.
+\item JCommon, licensed under \LGPL version~2.1, see \href{http://jfree.org/jcommon}{\url{http://jfree.org/jcommon}}.
+\item JFreeChart, licensed under \LGPL Version~3.1, see \href{http://www.jfree.org/jfreechart}{\url{http://www.jfree.org/jfreechart}}.
 \item Icons: \href{http://www.pixel-mixer.com}{\url{www.pixel-mixer.com}}.
-\item \MacOSX support: Quaqua Look and Feel, license \ac{LGPL} Version~2.1, see \href{http://www.randelshofer.ch/quaqua/}{\url{http://www.randelshofer.ch/quaqua/}}.
+\item \MacOSX support: Quaqua Look and Feel, license \LGPL version~2.1, see \href{http://www.randelshofer.ch/quaqua/}{\url{http://www.randelshofer.ch/quaqua/}}.
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -29,7 +29,7 @@
 \usepackage{tocloft} % nice table of contents additions
 \usepackage{fontawesome}
 \usepackage[binary-units=true]{siunitx}
-\usepackage{enumitem}
+\usepackage[inline]{enumitem}
 
 % booktabs is for toprule, bottomrule, etc. in tables.
 \usepackage{booktabs}
@@ -65,7 +65,7 @@
               urlcolor={blue}
 }
 
-\graphicspath{{img/}{../../resources/org/sbml/simulator/gui/img/}{../logo/}}
+\graphicspath{{img/}{../logo/}{../../resources/org/sbml/simulator/gui/img/}{../../resources/org/sbml/simulator/gui/graph/}}
 \input{tex/macros}
 
 %HYPHENATION
@@ -81,10 +81,11 @@ J-SB-ML
 \titlehead{\centering\includegraphics[width=0.75\textwidth]{img/UT_WBMW_mathnat_4C}\\
 \noindent\makebox[\linewidth]{\color{gold}\rule{\textwidth}{1pt}}}
 \subject{Users' Guide}
-\title{%\centering
-\begin{tabular}{C{2.8cm}L{5cm}}
-\includegraphics[width=.15\columnwidth]{Logo.pdf}&SBMLsimulator \\
-\end{tabular}}
+\title{\begin{minipage}[t][2cm][c]{2.8cm}
+\includegraphics[width=2.5cm]{Logo.pdf}
+\end{minipage}\hspace{.5cm}\begin{minipage}[t][2cm][c]{5cm}
+SBMLsimulator
+\end{minipage}}
 \subtitle{A graphical user interface for efficiently simulating and visualizing computational models in biology}
 \author{Andreas Dr\"ager$^{1,2,3,}$\thanks{\centering Corresponding author: \href{mailto:draeger@informatik.uni-tuebingen.de}{draeger@informatik.uni-tuebingen.de}}}
 \date{\today}

@@ -39,16 +39,17 @@ A dynamic model for the biotransformation of atorvastatin has been developed usi
 }
 
 @Book{Clerc2005,
-  Title                    = {{Particle Swarm Optimization}},
-  Author                   = {Clerc, Maurice},
-  Publisher                = {ISTE Ltd},
-  Year                     = {2005},
-
-  Address                  = {London, UK},
-
-  Chapter                  = {TRIBES or Cooperation of Tribes},
-  Owner                    = {draeger},
-  Pages                    = {139--149}
+  author    = {Clerc, Maurice},
+  publisher = {ISTE Ltd},
+  title     = {{Particle Swarm Optimization}},
+  year      = {2006},
+  address   = {London, UK},
+  isbn      = {9781905209040},
+  month     = jan,
+  abstract  = {This is the first book devoted entirely to Particle Swarm Optimization (PSO), which is a non-specific algorithm, similar to evolutionary algorithms, such as taboo search and ant colonies.
+Since its original development in 1995, PSO has mainly been applied to continuous-discrete heterogeneous strongly non-linear numerical optimization and it is thus used almost everywhere in the world. Its convergence rate also makes it a preferred tool in dynamic optimization.},
+  doi       = {10.1002/9780470612163},
+  url       = {https://onlinelibrary.wiley.com/doi/book/10.1002/9780470612163},
 }
 
 @Article{ClercKennedy02,
@@ -59,21 +60,6 @@ A dynamic model for the biotransformation of atorvastatin has been developed usi
   Number                   = {1},
   Pages                    = {58--73},
   Volume                   = {6}
-}
-
-@Article{Draeger2009a,
-  author   = {Dr{\"a}ger, Andreas and Kronfeld, Marcel and Ziller, Michael J. and Supper, Jochen and Planatscher, Hannes and Magnus, J{\o}rgen Barsett and Oldiges, Marco and Kohlbacher, Oliver and Zell, Andreas},
-  journal  = {BMC Syst Biol},
-  title    = {{Modeling metabolic networks in \emph{C.~glutamicum}: a comparison of rate laws in combination with various parameter optimization strategies}},
-  year     = {2009},
-  month    = {January},
-  pages    = {5},
-  volume   = {3},
-  abstract = {Background: To understand the dynamic behavior of cellular systems, mathematical modeling is often necessary and comprises three steps: (1) experimental measurement of participating molecules, (2) assignment of rate laws to each reaction, and (3) parameter calibration with respect to the measurements. In each of these steps the modeler is confronted with a plethora of alternative approaches, e. g., the selection of approximative rate laws in step two as specific equations are often unknown, or the choice of an estimation procedure with its specific settings in step three. This overall process with its numerous choices and the mutual influence between them makes it hard to single out the best modeling approach for a given problem.
-Results: We investigate the modeling process using multiple kinetic equations together with various parameter optimization methods for a well-characterized example network, the biosynthesis of valine and leucine in C. glutamicum. For this purpose, we derive seven dynamic models based on generalized mass action, Michaelis-Menten and convenience kinetics as well as the stochastic Langevin equation. In addition, we introduce two modeling approaches for feedback inhibition to the mass action kinetics. The parameters of each model are estimated using eight optimization strategies. To determine the most promising modeling approaches together with the best optimization algorithms, we carry out a two-step benchmark: (1) coarse-grained comparison of the algorithms on all models and (2) fine-grained tuning of the best optimization algorithms and models. To analyze the space of the best parameters found for each model, we apply clustering, variance, and correlation analysis.
-Conclusions: A mixed model based on the convenience rate law and the Michaelis-Menten equation, in which all reactions are assumed to be reversible, is the most suitable deterministic modeling approach followed by a reversible generalized mass action kinetics model. A Langevin model is advisable to take stochastic effects into account. To estimate the model parameters, three algorithms are particularly useful: For first attempts the settings-free Tribes algorithm yields valuable results. Particle swarm optimization and differential evolution provide significantly better results with appropriate settings.},
-  doi      = {10.1186/1752-0509-3-5},
-  url      = {http://www.biomedcentral.com/1752-0509/3/5},
 }
 
 @Article{Draeger2011,
@@ -674,9 +660,104 @@ In conclusion, this new visualization technique introduced in this article const
   pmid          = {25246403},
 }
 
-@Article{,
-  owner     = {draeger},
-  timestamp = {2019.12.29},
+@Article{Draeger2009a,
+  author   = {Dr\"ager, Andreas and Kronfeld, Marcel and Ziller, Michael J. and Supper, Jochen and Planatscher, Hannes and Magnus, J{\o}rgen B. and Oldiges, Marco and Kohlbacher, Oliver and Zell, Andreas},
+  journal  = {BMC Systems Biology},
+  title    = {{Modeling metabolic networks in \emph{C.~glutamicum}: a comparison of rate laws in combination with various parameter optimization strategies}},
+  year     = {2009},
+  month    = jan,
+  number   = {5},
+  pages    = {5},
+  volume   = {3},
+  abstract = {Background:
+        To understand the dynamic behavior of cellular systems, mathematical
+        modeling is often necessary and comprises three steps: (1) experimental
+        measurement of participating molecules, (2) assignment of rate laws to each
+        reaction, and (3) parameter calibration with respect to the measurements.
+        In each of these steps the modeler is confronted with a plethora of
+        alternative approaches, e.g., the selection of approximative rate laws in
+        step two as specific equations are often unknown, or the choice of an
+        estimation procedure with its specific settings in step three. This overall
+        process with its numerous choices and the mutual influence between them
+        makes it hard to single out the best modeling approach for a given problem.
+        
+        Results: 
+        We investigate the modeling process using multiple kinetic equations
+        together with various parameter optimization methods for a
+        well-characterized example network, the biosynthesis of valine and leucine
+        in \emph{C.~glutamicum}. For this purpose, we derive seven dynamic models
+        based on generalized mass action, Michaelis-Menten and convenience kinetics
+        as well as the stochastic Langevin equation. In addition, we introduce two
+        modeling approaches for feedback inhibition to the mass action kinetics. The
+        parameters of each model are estimated using eight optimization strategies.
+        To determine the most promising modeling approaches together with
+        the best optimization algorithms, we carry out a two-step benchmark:
+        (1) coarse-grained comparison of the algorithms on all models and
+        (2) fine-grained tuning of the best optimization algorithms and models.
+        To analyze the space of the best parameters found for each model,
+        we apply clustering, variance, and correlation analysis.
+        
+        Conclusion:
+        A mixed model based on the convenience rate law and the Michaelis-Menten
+        equation, in which all reactions are assumed to be reversible, is
+        the most suitable deterministic modeling approach followed by a reversible
+        generalized mass action kinetics model. A Langevin model is advisable
+        to take stochastic effects into account. To estimate the model parameters,
+        three algorithms are particularly useful: For first attempts the
+        settings-free Tribes algorithm yields valuable results. Particle
+        swarm optimization and differential evolution provide significantly
+        better results with appropriate settings.},
+  doi      = {10.1186/1752-0509-3-5},
+  pdf      = {http://www.biomedcentral.com/content/pdf/1752-0509-3-5.pdf},
+  url      = {http://www.biomedcentral.com/1752-0509/3/5},
+}
+
+@InBook{Clerc2006,
+  author    = {Clerc, Maurice},
+  pages     = {139--149},
+  publisher = {ISTE Ltd},
+  title     = {{TRIBES or Cooperation of Tribes}},
+  year      = {2006},
+  month     = jan,
+  abstract  = {This chapter contains sections titled:
+Towards an ultimate program
+Description of TRIBES
+Results on the benchmark set
+Summary},
+  doi       = {10.1002/9780470612163.ch11},
+  url       = {https://onlinelibrary.wiley.com/doi/book/10.1002/9780470612163},
+}
+
+@Article{Juty2012,
+  author    = {Juty, Nick and Le Nov{\`e}re, Nicolas and Laibe, Camille},
+  journal   = {Nucleic acids research},
+  title     = {{Identifiers. org and MIRIAM Registry: community resources to provide persistent identification}},
+  year      = {2012},
+  month     = nov,
+  number    = {D1},
+  pages     = {D580--D586},
+  volume    = {40},
+  abstract  = {The Minimum Information Required in the Annotation of Models Registry
+        (http://www.ebi.ac.uk/miriam) provides unique, perennial and location-independent
+        identifiers for data used in the biomedical domain. At its core is
+        a shared catalogue of data collections, for each of which an individual
+        namespace is created, and extensive metadata recorded. This namespace
+        allows the generation of Uniform Resource Identifiers (URIs) to uniquely
+        identify any record in a collection. Moreover, various services are
+        provided to facilitate the creation and resolution of the identifiers.
+        Since its launch in 2005, the system has evolved in terms of the
+        structure of the identifiers provided, the software infrastructure,
+        the number of data collections recorded, as well as the scope of
+        the Registry itself. We describe here the new parallel identification
+        scheme and the updated supporting software infrastructure. We also
+        introduce the new Identifiers.org service (http://identifiers.org)
+        that is built upon the information stored in the Registry and which 
+        provides directly resolvable identifiers, in the form of Uniform
+        Resource Locators (URLs). The flexibility of the identification scheme
+        and resolving system allows its use in many different fields, where 
+        unambiguous and perennial identification of data entities are necessary.},
+  publisher = {Oxford Univ Press},
+  url       = {http://nar.oxfordjournals.org/content/40/D1/D580.short},
 }
 
 @Comment{jabref-meta: databaseType:bibtex;}

@@ -6,7 +6,7 @@
  * This file is part of SBMLsimulator, a Java-based simulator for models
  * of biochemical processes encoded in the modeling language SBML.
  *
- * Copyright (C) 2007-2016 by the University of Tuebingen, Germany.
+ * Copyright (C) 2007-2020 by the University of Tuebingen, Germany.
  *
  * This library is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -35,8 +35,8 @@
     </tstamp>
 
     <property name="Name" value="SBMLsimulator"/>
-    <property name="version" value="2.0"/>
-    <property name="api.version" value="2.0 alpha"/>
+    <property name="version" value="2.1"/>
+    <property name="api.version" value="2.1 alpha"/>
 
     <property name="year" value="${YEAR}"/>
 
@@ -266,7 +266,7 @@
       <property name="jsbml.name"     value="JSBML"/>
       <property name="jsbml.version"  value="1.5a"/>
       <property name="jar.excludes"   value="META-INF/**, **/package-info.class, **/package.html, **/*.java"/>
-      <property name="jar.includes"   value="**.txt, **/*.txt, **.xml, **/*.xml, **.properties, **/*.properties, **.cfg, **/*.cfg, **.obo, **/*.obo"/>
+      <property name="jar.includes"   value="**.txt, **/*.txt, **.xml, **/*.xml, **.properties, **/*.properties, **.cfg, **/*.cfg, **.obo, **/*.obo, **/*.json, **/*.py"/>
       
       <echo message="Determining the revision number of JSBML"/>
       <property name="jsbml.revision" value="2288"/>
@@ -353,7 +353,7 @@
            <attribute name="Bundle-Name"            value="${jsbml.name}"/>
            <attribute name="Bundle-Version"         value="${version}"/>
            <attribute name="Bundle-Vendor"          value="${vendor}"/>
-           <attribute name="Bundle-RequiredExecutionEnvironment" value="JavaSE-1.6"/>
+           <attribute name="Bundle-RequiredExecutionEnvironment" value="JavaSE-1.8"/>
            <attribute name="Created-By"             value="${vendor}"/>
            <section name="${jsbml.name}">
             <attribute name="Specification-Title"    value="${jsbml.name}"/>
@@ -402,6 +402,10 @@
         <zipfileset excludes="${jar.excludes}, readme.txt, LICENSE" src="${jsbml.dir}/core/lib/biojava-ontology-4.0.0.jar"/>
         <zipfileset excludes="${jar.excludes}" src="${jsbml.dir}/core/lib/jigsaw-dateParser.jar"/>
       	<zipfileset excludes="${jar.excludes}" src="${jsbml.dir}/core/lib/json-simple-1.1.1.jar"/>
+      	<zipfileset excludes="${jar.excludes}" src="${jsbml.dir}/core/lib/log4j-1.2-api-2.3.jar"/>
+      	<zipfileset excludes="${jar.excludes}" src="${jsbml.dir}/core/lib/log4j-api-2.3.jar"/>
+      	<zipfileset excludes="${jar.excludes}" src="${jsbml.dir}/core/lib/log4j-core-2.3.jar"/>
+      	<zipfileset excludes="${jar.excludes}" src="${jsbml.dir}/core/lib/log4j-slf4j-impl-2.3.jar"/>
         <zipfileset excludes="${jar.excludes}" src="${jsbml.dir}/core/lib/slf4j-api-1.7.21.jar"/>
         <zipfileset excludes="${jar.excludes}" src="${jsbml.dir}/core/lib/spi-full-0.2.4.jar"/>
         <zipfileset excludes="${jar.excludes}" src="${jsbml.dir}/core/lib/stax2-api-3.1.4.jar"/>
