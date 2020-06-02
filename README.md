@@ -4,7 +4,7 @@
 **An efficient Java™ solver implementation for SBML**
 
 [![License (GPL version 3)](https://img.shields.io/badge/license-LGPLv3.0-blue.svg?style=plastic)](http://opensource.org/licenses/LGPL-3.0)
-[![Latest version](https://img.shields.io/badge/Latest_version-1.2.1-brightgreen.svg?style=plastic)](https://github.com/draeger-lab/SBMLsimulator/releases/)
+[![Latest version](https://img.shields.io/badge/Latest_version-2.0-brightgreen.svg?style=plastic)](https://github.com/draeger-lab/SBMLsimulator/releases/)
 [![DOI](http://img.shields.io/badge/DOI-10.3390%20%2F%20computation2040246-blue.svg?style=plastic)](http://dx.doi.org/10.3390/computation2040246)
 
 *Authors:* [Andreas Dräger](https://github.com/draeger/), [Roland Keller](https://github.com/RolandKeller5), [Meike Aichele](https://github.com/MeikeAi), [Robin Fähnrich](https://github.com/robin-f/), Stephanie Hoffmann, [Fabian Schwarzkopf](https://github.com/fskpf/), [Alexander Dörr](https://github.com/a-doerr/), [Max Zwiessele](https://github.com/mzwiessele), Marcel Kronfeld, Philip Stevens, [Clemens Wrzodek](https://github.com/Clemens82/), [Fabian Becker](https://github.com/halfdan/), Stefan Fischer
